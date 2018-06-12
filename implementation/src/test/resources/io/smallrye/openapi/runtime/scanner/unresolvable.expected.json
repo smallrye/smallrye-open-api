@@ -1,0 +1,19 @@
+{
+  "components": {
+    "schemas": {
+      "test.io.smallrye.openapi.runtime.scanner.entities.Bar": {
+        "properties": {
+          "theQ": {
+            "type": "object"
+          },
+          "theT": {
+            "type": "object"
+          },
+          "ultimateTShouldBeQ": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.SpecialCaseTestContainer" : {
+        "type" : "array",
+        "items" : {
+          "type" : "object"
+        }
+      }
+    }
+  }
+}
