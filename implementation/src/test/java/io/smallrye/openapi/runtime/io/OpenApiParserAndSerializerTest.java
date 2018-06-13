@@ -113,7 +113,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testParseSimplest() throws IOException, ParseException, JSONException {
@@ -121,7 +121,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testParseSimplestYaml() throws IOException, ParseException, JSONException {
@@ -129,7 +129,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testParseInfo() throws IOException, ParseException, JSONException {
@@ -137,7 +137,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testParseInfoYaml() throws IOException, ParseException, JSONException {
@@ -145,7 +145,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testExternalDocs() throws IOException, ParseException, JSONException {
@@ -153,7 +153,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testExtensions() throws IOException, ParseException, JSONException {
@@ -161,7 +161,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSecurity() throws IOException, ParseException, JSONException {
@@ -169,7 +169,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testServers() throws IOException, ParseException, JSONException {
@@ -177,7 +177,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testServersYaml() throws IOException, ParseException, JSONException {
@@ -185,7 +185,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testTags() throws IOException, ParseException, JSONException {
@@ -193,7 +193,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Callbacks() throws IOException, ParseException, JSONException {
@@ -201,7 +201,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Empty() throws IOException, ParseException, JSONException {
@@ -209,7 +209,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Examples() throws IOException, ParseException, JSONException {
@@ -217,7 +217,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Headers() throws IOException, ParseException, JSONException {
@@ -225,7 +225,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Links() throws IOException, ParseException, JSONException {
@@ -233,7 +233,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Parameters() throws IOException, ParseException, JSONException {
@@ -241,7 +241,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_RequestBodies() throws IOException, ParseException, JSONException {
@@ -249,7 +249,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Responses() throws IOException, ParseException, JSONException {
@@ -257,7 +257,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_Schemas() throws IOException, ParseException, JSONException {
@@ -265,7 +265,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testComponents_SecuritySchemes() throws IOException, ParseException, JSONException {
@@ -273,7 +273,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_AllOperations() throws IOException, ParseException, JSONException {
@@ -281,7 +281,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_Empty() throws IOException, ParseException, JSONException {
@@ -289,7 +289,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetCallbacks() throws IOException, ParseException, JSONException {
@@ -297,7 +297,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetParameters() throws IOException, ParseException, JSONException {
@@ -305,7 +305,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetRequestBodyContent() throws IOException, ParseException, JSONException {
@@ -313,7 +313,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetRequestBodyExample() throws IOException, ParseException, JSONException {
@@ -321,7 +321,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetRequestBody() throws IOException, ParseException, JSONException {
@@ -329,7 +329,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetResponseContent() throws IOException, ParseException, JSONException {
@@ -337,7 +337,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetResponseHeaders() throws IOException, ParseException, JSONException {
@@ -345,7 +345,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetResponseLinks() throws IOException, ParseException, JSONException {
@@ -353,7 +353,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetResponses() throws IOException, ParseException, JSONException {
@@ -361,7 +361,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetSecurity() throws IOException, ParseException, JSONException {
@@ -369,7 +369,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_GetServers() throws IOException, ParseException, JSONException {
@@ -377,7 +377,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_Get() throws IOException, ParseException, JSONException {
@@ -385,7 +385,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_Parameters() throws IOException, ParseException, JSONException {
@@ -393,7 +393,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_Ref() throws IOException, ParseException, JSONException {
@@ -401,7 +401,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_Servers() throws IOException, ParseException, JSONException {
@@ -409,7 +409,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testPaths_Extensions() throws IOException, ParseException, JSONException {
@@ -417,7 +417,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_Discriminator() throws IOException, ParseException, JSONException {
@@ -425,7 +425,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_AdditionalProperties() throws IOException, ParseException, JSONException {
@@ -433,7 +433,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_AllOf() throws IOException, ParseException, JSONException {
@@ -441,7 +441,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_Composition() throws IOException, ParseException, JSONException {
@@ -449,7 +449,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_Example() throws IOException, ParseException, JSONException {
@@ -457,7 +457,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_ExternalDocs() throws IOException, ParseException, JSONException {
@@ -465,7 +465,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_MetaData() throws IOException, ParseException, JSONException {
@@ -473,7 +473,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testSchemas_XML() throws IOException, ParseException, JSONException {
@@ -481,7 +481,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testEverything() throws IOException, ParseException, JSONException {
@@ -489,7 +489,7 @@ public class OpenApiParserAndSerializerTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.io.OpenApiParser#parse(java.net.URL)}.
+     * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
     public void testEverythingYaml() throws IOException, ParseException, JSONException {

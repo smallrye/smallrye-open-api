@@ -57,7 +57,7 @@ public class FilterUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.FilterUtil#applyFilter(org.eclipse.microprofile.openapi.OASFilter, org.eclipse.microprofile.openapi.models.OpenAPI)}.
+     * Test method for {@link FilterUtil#applyFilter(org.eclipse.microprofile.openapi.OASFilter, org.eclipse.microprofile.openapi.models.OpenAPI)}.
      * @throws Exception
      */
     @Test

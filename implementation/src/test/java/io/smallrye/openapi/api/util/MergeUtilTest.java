@@ -82,7 +82,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Info() throws IOException, ParseException, JSONException {
@@ -90,7 +90,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Extensions() throws IOException, ParseException, JSONException {
@@ -98,7 +98,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Tags() throws IOException, ParseException, JSONException {
@@ -106,7 +106,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Servers() throws IOException, ParseException, JSONException {
@@ -114,7 +114,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_PathDocs() throws IOException, ParseException, JSONException {
@@ -122,7 +122,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_PathDefault() throws IOException, ParseException, JSONException {
@@ -130,7 +130,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Callbacks() throws IOException, ParseException, JSONException {
@@ -138,7 +138,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Security() throws IOException, ParseException, JSONException {
@@ -146,7 +146,7 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.api.util.MergeUtil#merge(org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl, org.wildfly.swarm.microprofile.openapi.api.models.OpenAPIImpl)}.
+     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_OperationTags() throws IOException, ParseException, JSONException {

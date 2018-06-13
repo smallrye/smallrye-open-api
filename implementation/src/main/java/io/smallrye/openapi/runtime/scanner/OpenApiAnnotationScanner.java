@@ -139,7 +139,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 @SuppressWarnings("rawtypes")
 public class OpenApiAnnotationScanner {
 
-//    private static Logger LOG = Logger.getLogger("org.wildfly.swarm.microprofile.openapi");
+//    private static Logger LOG = Logger.getLogger("io.smallrye.openapi");
 
     private final IndexView index;
 
@@ -172,8 +172,8 @@ public class OpenApiAnnotationScanner {
         }
 
         Indexer indexer = new Indexer();
-        index(indexer, "org/wildfly/swarm/microprofile/openapi/runtime/scanner/CollectionStandin.class");
-        index(indexer, "org/wildfly/swarm/microprofile/openapi/runtime/scanner/MapStandin.class");
+        index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
+        index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
         indexArchive(config, indexer, archive);
         return indexer.complete();
     }
