@@ -62,7 +62,7 @@ public class OASFactoryResolverImplTest {
 
     /**
      * Test method for
-     * {@link org.wildfly.swarm.microprofile.openapi.deployment.spi.OASFactoryResolverImpl#createObject(java.lang.Class)}.
+     * {@link OASFactoryResolverImpl#createObject(java.lang.Class)}.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
@@ -81,7 +81,7 @@ public class OASFactoryResolverImplTest {
 
     /**
      * Test method for
-     * {@link org.wildfly.swarm.microprofile.openapi.deployment.spi.OASFactoryResolverImpl#createObject(java.lang.Class)}.
+     * {@link OASFactoryResolverImpl#createObject(java.lang.Class)}.
      */
     @Test
     public void testCreateObject_License() {
@@ -94,7 +94,7 @@ public class OASFactoryResolverImplTest {
 
     /**
      * Test method for
-     * {@link org.wildfly.swarm.microprofile.openapi.deployment.spi.OASFactoryResolverImpl#createObject(java.lang.Class)}.
+     * {@link OASFactoryResolverImpl#createObject(java.lang.Class)}.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test

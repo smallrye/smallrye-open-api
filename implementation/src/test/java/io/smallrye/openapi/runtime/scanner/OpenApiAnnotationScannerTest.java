@@ -25,7 +25,7 @@ import org.junit.Test;
 public class OpenApiAnnotationScannerTest {
 
     /**
-     * Test method for {@link org.wildfly.swarm.microprofile.openapi.runtime.OpenApiAnnotationScanner#makePath(java.lang.String[])}.
+     * Test method for {@link OpenApiAnnotationScanner#makePath(java.lang.String[])}.
      */
     @Test
     public void testMakePath() {
