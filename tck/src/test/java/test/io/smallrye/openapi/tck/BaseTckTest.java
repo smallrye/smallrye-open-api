@@ -20,6 +20,7 @@ import static io.restassured.RestAssured.given;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 
 import org.eclipse.microprofile.openapi.tck.FilterTest;
@@ -43,7 +44,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
  */
 @SuppressWarnings("restriction")
 @RunWith(TckTestRunner.class)
-public abstract class BaseTckTest {
+public abstract class BaseTckTest<T extends Arquillian> {
 
     protected static final String APPLICATION_JSON = "application/json";
     protected static final String TEXT_PLAIN = "text/plain";
@@ -104,7 +105,16 @@ public abstract class BaseTckTest {
      * this so that the correct test delegate is created *and* its callEndpoint()
      * method can be properly overridden.
      */
-    public abstract Arquillian getDelegate();
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public T getDelegate() {
+        try {
+            ParameterizedType ptype = (ParameterizedType) this.getClass().getGenericSuperclass();
+            Class cc = (Class)ptype.getActualTypeArguments()[0];
+            return (T) cc.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Arguments to pass to each of the test methods in the TCK test.  This is
@@ -112,7 +122,7 @@ public abstract class BaseTckTest {
      * has arguments to its methods.
      */
     public Object[] getTestArguments() {
-        return null;
+        return new String[] { "JSON" };
     }
 
 }

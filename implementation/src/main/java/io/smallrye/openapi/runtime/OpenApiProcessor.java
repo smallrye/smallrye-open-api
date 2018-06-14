@@ -19,11 +19,13 @@ package io.smallrye.openapi.runtime;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.OASModelReader;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.Node;
+import org.jboss.shrinkwrap.api.classloader.ShrinkWrapClassLoader;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -37,7 +39,19 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
  */
 @SuppressWarnings("rawtypes")
 public class OpenApiProcessor {
-    
+
+    /**
+     * Creates a MP Config instance from the given ShrinkWrap archive.
+     * @param archive
+     */
+    public static OpenApiConfig configFromArchive(Archive<?> archive) {
+        try (ShrinkWrapClassLoader cl = new ShrinkWrapClassLoader(archive)) {
+            return new OpenApiConfig(ConfigProvider.getConfig(cl));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Find a static file located in the deployment and, if it exists, parse it and
      * return the resulting model.  If no static file is found, returns null.  If an

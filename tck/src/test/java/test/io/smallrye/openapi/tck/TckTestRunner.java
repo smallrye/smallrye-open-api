@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -29,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -43,8 +42,6 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import io.smallrye.config.PropertiesConfigSourceProvider;
-import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
@@ -80,18 +77,8 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         // The Archive (shrinkwrap deployment)
         Archive archive = archive();
         // MPConfig
-        SmallRyeConfigBuilder cfgBuilder = new SmallRyeConfigBuilder();
-        cfgBuilder.addDefaultSources();
-        TckTest anno = testClass.getAnnotation(TckTest.class);
-        if (anno.configProperties() != null && anno.configProperties().trim().length() > 0) {
-            List<ConfigSource> configSources = new PropertiesConfigSourceProvider(anno.configProperties(), true, tckTestClass.getClassLoader()).getConfigSources(tckTestClass.getClassLoader());
-            configSources.forEach(source -> {
-                cfgBuilder.withSources(source);
-            });
-        }
+        OpenApiConfig config = OpenApiProcessor.configFromArchive(archive);
 
-        Config mpConfig = cfgBuilder.build();
-        OpenApiConfig config = new OpenApiConfig(mpConfig);
         try {
             // Reset and then initialize the OpenApiDocument for this test.
             OpenApiDocument.INSTANCE.reset();
@@ -143,12 +130,11 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
      * Figures out what TCK test is being run.
      * @throws InitializationError
      */
+    @SuppressWarnings("unchecked")
     private Class<? extends Arquillian> determineTckTestClass(Class<?> testClass) throws InitializationError {
-        TckTest anno = testClass.getAnnotation(TckTest.class);
-        if (anno == null) {
-            throw new InitializationError("Missing annotation @TckTest");
-        }
-        return anno.test();
+        ParameterizedType ptype = (ParameterizedType) testClass.getGenericSuperclass();
+        Class cc = (Class)ptype.getActualTypeArguments()[0];
+        return cc;
     }
 
     /**

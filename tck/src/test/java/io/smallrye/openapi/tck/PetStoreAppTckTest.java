@@ -18,29 +18,13 @@ package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.PetStoreAppTest;
 
-import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=PetStoreAppTest.class, configProperties="")
-public class PetStoreAppTckTest extends BaseTckTest {
-
-    @Override
-    public PetStoreAppTest getDelegate() {
-        return new PetStoreAppTest() {
-            @Override
-            public ValidatableResponse callEndpoint(String format) {
-                return doCallEndpoint(format);
-            }
-        };
-    }
-
-    @Override
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
-    }
+@TckTest
+public class PetStoreAppTckTest extends BaseTckTest<PetStoreAppTest> {
 
 }

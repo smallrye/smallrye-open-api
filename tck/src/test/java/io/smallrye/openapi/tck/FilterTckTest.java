@@ -18,29 +18,13 @@ package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.FilterTest;
 
-import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=FilterTest.class, configProperties="microprofile-config-filter.properties")
-public class FilterTckTest extends BaseTckTest {
-
-    @Override
-    public FilterTest getDelegate() {
-        return new FilterTest() {
-            @Override
-            public ValidatableResponse callEndpoint(String format) {
-                return doCallEndpoint(format);
-            }
-        };
-    }
-
-    @Override
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
-    }
+@TckTest
+public class FilterTckTest extends BaseTckTest<FilterTest> {
 
 }

@@ -18,29 +18,13 @@ package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.OASConfigScanClassesTest;
 
-import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=OASConfigScanClassesTest.class, configProperties="classes-microprofile-config.properties")
-public class OASConfigScanClassesTckTest extends BaseTckTest {
-
-    @Override
-    public OASConfigScanClassesTest getDelegate() {
-        return new OASConfigScanClassesTest() {
-            @Override
-            public ValidatableResponse callEndpoint(String format) {
-                return doCallEndpoint(format);
-            }
-        };
-    }
-
-    @Override
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
-    }
+@TckTest
+public class OASConfigScanClassesTckTest extends BaseTckTest<OASConfigScanClassesTest> {
 
 }
