@@ -18,29 +18,13 @@ package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.OASConfigExcludePackageTest;
 
-import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=OASConfigExcludePackageTest.class, configProperties="exclude-package-microprofile-config.properties")
-public class OASConfigExcludePackageTckTest extends BaseTckTest {
-
-    @Override
-    public OASConfigExcludePackageTest getDelegate() {
-        return new OASConfigExcludePackageTest() {
-            @Override
-            public ValidatableResponse callEndpoint(String format) {
-                return doCallEndpoint(format);
-            }
-        };
-    }
-
-    @Override
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
-    }
+@TckTest
+public class OASConfigExcludePackageTckTest extends BaseTckTest<OASConfigExcludePackageTest> {
 
 }

@@ -22,8 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.jboss.arquillian.testng.Arquillian;
-
 /**
  * Use this annotation along with @TckTestRunner to indicate the specific Tck that is
  * under test.
@@ -33,9 +31,5 @@ import org.jboss.arquillian.testng.Arquillian;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface TckTest {
-
-    Class<? extends Arquillian> test();
-
-    String configProperties();
 
 }

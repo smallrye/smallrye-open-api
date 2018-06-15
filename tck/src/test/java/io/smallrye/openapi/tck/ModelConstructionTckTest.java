@@ -24,17 +24,15 @@ import test.io.smallrye.openapi.tck.TckTest;
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=ModelConstructionTest.class, configProperties="")
-public class ModelConstructionTckTest extends BaseTckTest {
-
-    @Override
-    public ModelConstructionTest getDelegate() {
-        return new ModelConstructionTest();
-    }
-
+@TckTest
+public class ModelConstructionTckTest extends BaseTckTest<ModelConstructionTest> {
+    
+    /**
+     * @see test.io.smallrye.openapi.tck.BaseTckTest#getTestArguments()
+     */
     @Override
     public Object[] getTestArguments() {
-        return new Object[] {};
+        return null;
     }
 
 }

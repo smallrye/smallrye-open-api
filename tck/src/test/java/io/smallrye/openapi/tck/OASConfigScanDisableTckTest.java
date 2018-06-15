@@ -18,29 +18,13 @@ package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.OASConfigScanDisableTest;
 
-import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=OASConfigScanDisableTest.class, configProperties="scan-disable-microprofile-config.properties")
-public class OASConfigScanDisableTckTest extends BaseTckTest {
-
-    @Override
-    public OASConfigScanDisableTest getDelegate() {
-        return new OASConfigScanDisableTest() {
-            @Override
-            public ValidatableResponse callEndpoint(String format) {
-                return doCallEndpoint(format);
-            }
-        };
-    }
-
-    @Override
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
-    }
+@TckTest
+public class OASConfigScanDisableTckTest extends BaseTckTest<OASConfigScanDisableTest> {
 
 }

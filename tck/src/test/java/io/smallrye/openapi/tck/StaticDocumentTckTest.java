@@ -18,29 +18,13 @@ package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.StaticDocumentTest;
 
-import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=StaticDocumentTest.class, configProperties="")
-public class StaticDocumentTckTest extends BaseTckTest {
-
-    @Override
-    public StaticDocumentTest getDelegate() {
-        return new StaticDocumentTest() {
-            @Override
-            public ValidatableResponse callEndpoint(String format) {
-                return doCallEndpoint(format);
-            }
-        };
-    }
-
-    @Override
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
-    }
+@TckTest
+public class StaticDocumentTckTest extends BaseTckTest<StaticDocumentTest> {
 
 }

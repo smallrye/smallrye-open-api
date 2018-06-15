@@ -24,17 +24,15 @@ import test.io.smallrye.openapi.tck.TckTest;
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest(test=OASFactoryErrorTest.class, configProperties="")
-public class OASFactoryErrorTckTest extends BaseTckTest {
-
-    @Override
-    public OASFactoryErrorTest getDelegate() {
-        return new OASFactoryErrorTest();
-    }
-
+@TckTest
+public class OASFactoryErrorTckTest extends BaseTckTest<OASFactoryErrorTest> {
+    
+    /**
+     * @see test.io.smallrye.openapi.tck.BaseTckTest#getTestArguments()
+     */
     @Override
     public Object[] getTestArguments() {
-        return new Object[] {};
+        return null;
     }
 
 }
