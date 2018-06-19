@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.jandex.IndexView;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -44,7 +45,9 @@ import org.junit.runners.model.Statement;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
+import io.smallrye.openapi.api.util.ArchiveUtil;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
+import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
@@ -77,14 +80,17 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         // The Archive (shrinkwrap deployment)
         Archive archive = archive();
         // MPConfig
-        OpenApiConfig config = OpenApiProcessor.configFromArchive(archive);
+        OpenApiConfig config = ArchiveUtil.archiveToConfig(archive);
 
         try {
+            IndexView index = ArchiveUtil.archiveToIndex(config, archive);
+            OpenApiStaticFile staticFile = ArchiveUtil.archiveToStaticFile(archive);
+            
             // Reset and then initialize the OpenApiDocument for this test.
             OpenApiDocument.INSTANCE.reset();
             OpenApiDocument.INSTANCE.config(config);
-            OpenApiDocument.INSTANCE.modelFromStaticFile(OpenApiProcessor.modelFromStaticFile(config, archive));
-            OpenApiDocument.INSTANCE.modelFromAnnotations(OpenApiProcessor.modelFromAnnotations(config, archive));
+            OpenApiDocument.INSTANCE.modelFromStaticFile(OpenApiProcessor.modelFromStaticFile(staticFile));
+            OpenApiDocument.INSTANCE.modelFromAnnotations(OpenApiProcessor.modelFromAnnotations(config, index));
             OpenApiDocument.INSTANCE.modelFromReader(OpenApiProcessor.modelFromReader(config, getContextClassLoader()));
             OpenApiDocument.INSTANCE.filter(OpenApiProcessor.getFilter(config, getContextClassLoader()));
             OpenApiDocument.INSTANCE.initialize();
