@@ -17,78 +17,35 @@
 package io.smallrye.openapi.runtime;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.OASModelReader;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.Node;
-import org.jboss.shrinkwrap.api.classloader.ShrinkWrapClassLoader;
+import org.jboss.jandex.IndexView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**
  * Provides some core archive processing functionality.
  * @author eric.wittmann@gmail.com
  */
-@SuppressWarnings("rawtypes")
 public class OpenApiProcessor {
 
     /**
-     * Creates a MP Config instance from the given ShrinkWrap archive.
-     * @param archive
+     * Parse the static file content and return the resulting model.  Note that this
+     * method does NOT close the resources in the static file.  The caller is
+     * responsible for that.
+     * @param staticFile
      */
-    public static OpenApiConfig configFromArchive(Archive<?> archive) {
-        try (ShrinkWrapClassLoader cl = new ShrinkWrapClassLoader(archive)) {
-            return new OpenApiConfig(ConfigProvider.getConfig(cl));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Find a static file located in the deployment and, if it exists, parse it and
-     * return the resulting model.  If no static file is found, returns null.  If an
-     * error is encountered while parsing the file then a runtime exception is
-     * thrown.
-     * @param config
-     * @param archive
-     */
-    public static OpenAPIImpl modelFromStaticFile(OpenApiConfig config, Archive archive) {
-        Format format = Format.YAML;
-
-        // Check for the file in both META-INF and WEB-INF/classes/META-INF
-        Node node = archive.get("/META-INF/openapi.yaml");
-        if (node == null) {
-            node = archive.get("/WEB-INF/classes/META-INF/openapi.yml");
-        }
-        if (node == null) {
-            node = archive.get("/META-INF/openapi.yml");
-        }
-        if (node == null) {
-            node = archive.get("/WEB-INF/classes/META-INF/openapi.yml");
-        }
-        if (node == null) {
-            node = archive.get("/META-INF/openapi.json");
-            format = Format.JSON;
-        }
-        if (node == null) {
-            node = archive.get("/WEB-INF/classes/META-INF/openapi.json");
-            format = Format.JSON;
-        }
-
-        if (node == null) {
+    public static OpenAPIImpl modelFromStaticFile(OpenApiStaticFile staticFile) {
+        if (staticFile == null) {
             return null;
         }
-
-        try (InputStream stream = node.getAsset().openStream()) {
-            return OpenApiParser.parse(stream, format);
+        try {
+            return OpenApiParser.parse(staticFile.getContent(), staticFile.getFormat());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -101,12 +58,12 @@ public class OpenApiProcessor {
      * @param config
      * @param archive
      */
-    public static OpenAPIImpl modelFromAnnotations(OpenApiConfig config, Archive archive) {
+    public static OpenAPIImpl modelFromAnnotations(OpenApiConfig config, IndexView index) {
         if (config.scanDisable()) {
             return null;
         }
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, archive);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
         return scanner.scan();
     }
 

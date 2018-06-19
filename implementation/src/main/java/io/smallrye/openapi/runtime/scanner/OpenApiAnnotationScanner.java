@@ -17,10 +17,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,16 +73,9 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
-import org.jboss.jandex.Indexer;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.ArchivePath;
-import org.jboss.shrinkwrap.api.Node;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.importer.ZipImporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConstants;
@@ -136,7 +125,6 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  *
  * @author eric.wittmann@gmail.com
  */
-@SuppressWarnings("rawtypes")
 public class OpenApiAnnotationScanner {
 
 //    private static Logger LOG = Logger.getLogger("io.smallrye.openapi");
@@ -157,135 +145,8 @@ public class OpenApiAnnotationScanner {
      * @param config
      * @param archive
      */
-    public OpenApiAnnotationScanner(OpenApiConfig config, Archive archive) {
-        this.index = archiveToIndex(config, archive);
-    }
-
-    /**
-     * Index the archive to produce a jandex index.
-     * @param config
-     * @param archive
-     */
-    protected static IndexView archiveToIndex(OpenApiConfig config, Archive archive) {
-        if (archive == null) {
-            throw new RuntimeException("Archive was null!");
-        }
-
-        Indexer indexer = new Indexer();
-        index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
-        indexArchive(config, indexer, archive);
-        return indexer.complete();
-    }
-
-    private static void index(Indexer indexer, String resName) {
-        ClassLoader cl = OpenApiAnnotationScanner.class.getClassLoader();
-        try (InputStream klazzStream = cl.getResourceAsStream(resName)) {
-            indexer.index(klazzStream);
-        } catch (IOException ioe) {
-            throw new UncheckedIOException(ioe);
-        }
-    }
-
-    /**
-     * Indexes the given archive.
-     * @param config
-     * @param indexer
-     * @param archive
-     */
-    @SuppressWarnings("unchecked")
-    private static void indexArchive(OpenApiConfig config, Indexer indexer, Archive archive) {
-        Map<ArchivePath, Node> c = archive.getContent();
-        try {
-            for (Map.Entry<ArchivePath, Node> each : c.entrySet()) {
-                ArchivePath archivePath = each.getKey();
-                if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX) && acceptClassForScanning(config, archivePath.get())) {
-                    try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        //LOG.debugv("Indexing asset: {0} from archive: {1}", archivePath.get(), archive.getName());
-                        indexer.index(contentStream);
-                    }
-                    continue;
-                }
-                if (archivePath.get().endsWith(OpenApiConstants.JAR_SUFFIX) && acceptJarForScanning(config, archivePath.get())) {
-                    try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        JavaArchive jarArchive = ShrinkWrap.create(JavaArchive.class, archivePath.get())
-                                .as(ZipImporter.class).importFrom(contentStream).as(JavaArchive.class);
-                        indexArchive(config, indexer, jarArchive);
-                    }
-                    continue;
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Returns true if the given JAR archive (dependency) should be cracked open and indexed
-     * along with the rest of the deployment's classes.
-     * @param config
-     * @param jarName
-     */
-    private static boolean acceptJarForScanning(OpenApiConfig config, String jarName) {
-        if (config.scanDependenciesDisable()) {
-            return false;
-        }
-        Set<String> scanDependenciesJars = config.scanDependenciesJars();
-        String nameOnly = new File(jarName).getName();
-        if (scanDependenciesJars.isEmpty() || scanDependenciesJars.contains(nameOnly)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Returns true if the class represented by the given archive path should be included in
-     * the annotation index.
-     * @param config
-     * @param archivePath
-     */
-    private static boolean acceptClassForScanning(OpenApiConfig config, String archivePath) {
-        if (archivePath == null) {
-            return false;
-        }
-
-        Set<String> scanClasses = config.scanClasses();
-        Set<String> scanPackages = config.scanPackages();
-        Set<String> scanExcludeClasses = config.scanExcludeClasses();
-        Set<String> scanExcludePackages = config.scanExcludePackages();
-        if (scanClasses.isEmpty() && scanPackages.isEmpty() && scanExcludeClasses.isEmpty() && scanExcludePackages.isEmpty()) {
-            return true;
-        }
-
-        if (archivePath.startsWith(OpenApiConstants.WEB_ARCHIVE_CLASS_PREFIX)) {
-            archivePath = archivePath.substring(OpenApiConstants.WEB_ARCHIVE_CLASS_PREFIX.length());
-        }
-        String fqcn = archivePath.replaceAll("/", ".").substring(0, archivePath.lastIndexOf(OpenApiConstants.CLASS_SUFFIX));
-        String packageName = "";
-        if (fqcn.contains(".")) {
-            int idx = fqcn.lastIndexOf(".");
-            packageName = fqcn.substring(0, idx);
-        }
-
-        boolean accept;
-        // Includes
-        if (scanClasses.isEmpty() && scanPackages.isEmpty()) {
-            accept = true;
-        } else if (!scanClasses.isEmpty() && scanPackages.isEmpty()) {
-            accept = scanClasses.contains(fqcn);
-        } else if (scanClasses.isEmpty() && !scanPackages.isEmpty()) {
-            accept = scanPackages.contains(packageName);
-        } else {
-            accept = scanClasses.contains(fqcn) || scanPackages.contains(packageName);
-        }
-        // Excludes override includes
-        if (!scanExcludeClasses.isEmpty() && scanExcludeClasses.contains(fqcn)) {
-            accept = false;
-        }
-        if (!scanExcludePackages.isEmpty() && scanExcludePackages.contains(packageName)) {
-            accept = false;
-        }
-        return accept;
+    public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
+        this.index = index;
     }
 
     /**

@@ -16,11 +16,7 @@
 
 package io.smallrye.openapi.api;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.openapi.OASConfig;
 
 /**
  * Accessor to OpenAPI configuration options.
@@ -29,129 +25,30 @@ import org.eclipse.microprofile.openapi.OASConfig;
  *
  * @author eric.wittmann@gmail.com
  */
-public class OpenApiConfig {
+public interface OpenApiConfig {
 
-    private Config config;
+    public String modelReader();
 
-    private String modelReader;
-    private String filter;
-    private Boolean scanDisable;
-    private Set<String> scanPackages;
-    private Set<String> scanClasses;
-    private Set<String> scanExcludePackages;
-    private Set<String> scanExcludeClasses;
-    private Set<String> servers;
-    private Boolean scanDependenciesDisable;
-    private Set<String> scanDependenciesJars;
+    public String filter();
 
-    public OpenApiConfig(Config config) {
-        this.config = config;
-    }
+    public boolean scanDisable();
 
-    /**
-     * @return the MP config instance
-     */
-    protected Config getConfig() {
-        // We cannot use ConfigProvider.getConfig() as the archive is not deployed yet - TCCL cannot be set
-        return config;
-    }
+    public Set<String> scanPackages();
 
-    public String modelReader() {
-        if (modelReader == null) {
-            modelReader = getConfig().getOptionalValue(OASConfig.MODEL_READER, String.class).orElse(null);
-        }
-        return modelReader;
-    }
+    public Set<String> scanClasses();
 
-    public String filter() {
-        if (filter == null) {
-            filter = getConfig().getOptionalValue(OASConfig.FILTER, String.class).orElse(null);
-        }
-        return filter;
-    }
+    public Set<String> scanExcludePackages();
 
-    public boolean scanDisable() {
-        if (scanDisable == null) {
-            scanDisable = getConfig().getOptionalValue(OASConfig.SCAN_DISABLE, Boolean.class).orElse(false);
-        }
-        return scanDisable;
-    }
+    public Set<String> scanExcludeClasses();
 
-    public Set<String> scanPackages() {
-        if (scanPackages == null) {
-            String packages = getConfig().getOptionalValue(OASConfig.SCAN_PACKAGES, String.class).orElse(null);
-            scanPackages = asCsvSet(packages);
-        }
-        return scanPackages;
-    }
+    public Set<String> servers();
 
-    public Set<String> scanClasses() {
-        if (scanClasses == null) {
-            String classes = getConfig().getOptionalValue(OASConfig.SCAN_CLASSES, String.class).orElse(null);
-            scanClasses = asCsvSet(classes);
-        }
-        return scanClasses;
-    }
+    public Set<String> pathServers(String path);
 
-    public Set<String> scanExcludePackages() {
-        if (scanExcludePackages == null) {
-            String packages = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_PACKAGES, String.class).orElse(null);
-            scanExcludePackages = asCsvSet(packages);
-        }
-        return scanExcludePackages;
-    }
+    public Set<String> operationServers(String operationId);
 
-    public Set<String> scanExcludeClasses() {
-        if (scanExcludeClasses == null) {
-            String classes = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_CLASSES, String.class).orElse(null);
-            scanExcludeClasses = asCsvSet(classes);
-        }
-        return scanExcludeClasses;
-    }
+    public boolean scanDependenciesDisable();
 
-    public Set<String> servers() {
-        if (servers == null) {
-            String theServers = getConfig().getOptionalValue(OASConfig.SERVERS, String.class).orElse(null);
-            servers = asCsvSet(theServers);
-        }
-        return servers;
-    }
-
-    public Set<String> pathServers(String path) {
-        String servers = getConfig().getOptionalValue(OASConfig.SERVERS_PATH_PREFIX + path, String.class).orElse(null);
-        return asCsvSet(servers);
-    }
-
-    public Set<String> operationServers(String operationId) {
-        String servers = getConfig().getOptionalValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class).orElse(null);
-        return asCsvSet(servers);
-    }
-
-    public boolean scanDependenciesDisable() {
-        if (scanDependenciesDisable == null) {
-            scanDependenciesDisable = getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class).orElse(false);
-        }
-        return scanDependenciesDisable;
-    }
-
-    public Set<String> scanDependenciesJars() {
-        if (scanDependenciesJars == null) {
-            String classes = getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS, String.class).orElse(null);
-            scanDependenciesJars = asCsvSet(classes);
-        }
-        return scanDependenciesJars;
-    }
-
-
-    private static Set<String> asCsvSet(String items) {
-        Set<String> rval = new HashSet<>();
-        if (items != null) {
-            String[] split = items.split(",");
-            for (String item : split) {
-                rval.add(item.trim());
-            }
-        }
-        return rval;
-    }
+    public Set<String> scanDependenciesJars();
 
 }
