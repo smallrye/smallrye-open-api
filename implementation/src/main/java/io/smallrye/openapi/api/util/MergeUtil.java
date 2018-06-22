@@ -60,8 +60,9 @@ public class MergeUtil {
 
     /**
      * Merges two documents and returns the result.
-     * @param document1
-     * @param document2
+     * @param document1 OpenAPIImpl instance
+     * @param document2 OpenAPIImpl instance
+     * @return Merged OpenAPIImpl instance
      */
     public static final OpenAPIImpl merge(OpenAPIImpl document1, OpenAPIImpl document2) {
         return mergeObjects(document1, document2);
@@ -69,8 +70,10 @@ public class MergeUtil {
 
     /**
      * Generic merge of two objects of the same type.
-     * @param object1
-     * @param object2
+     * @param object1 First object
+     * @param object2 Second object
+     * @param <T> Type parameter
+     * @return Merged object
      */
     @SuppressWarnings({ "rawtypes" })
     public static <T> T mergeObjects(T object1, T object2) {

@@ -90,6 +90,8 @@ public class OpenApiSerializer {
      * Serializes the given OpenAPI object into either JSON or YAML and returns it as a string.
      * @param oai the OpenAPI object
      * @param format the serialization format
+     * @return OpenAPI object as a String
+     * @throws IOException Errors in processing the JSON
      */
     public static final String serialize(OpenAPI oai, Format format) throws IOException {
         try {
@@ -116,7 +118,7 @@ public class OpenApiSerializer {
 
     /**
      * Constructor.
-     * @param oai
+     * @param oai OpenAPI model
      */
     public OpenApiSerializer(OpenAPI oai) {
         this.oai = oai;
@@ -255,8 +257,8 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Server} model to the given JS node.
-     * @param model
-     * @param node
+     * @param node ObjectNode
+     * @param model Server
      */
     protected void writeServerToNode(ObjectNode node, Server model) {
         JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL, model.getUrl());
@@ -267,7 +269,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link ServerVariables} model to the JSON tree.
-     * @param node
+     * @param serverNode
      * @param variables
      */
     private void writeServerVariables(ObjectNode serverNode, ServerVariables variables) {
@@ -1133,9 +1135,9 @@ public class OpenApiSerializer {
     }
 
     /**
-     * @param node
-     * @param key
-     * @param value
+     * @param node ObjectNode
+     * @param key String
+     * @param value Object
      */
     @SuppressWarnings("unchecked")
     protected void writeObject(ObjectNode node, String key, Object value) {

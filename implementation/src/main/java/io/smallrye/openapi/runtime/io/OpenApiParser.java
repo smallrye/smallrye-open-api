@@ -157,7 +157,10 @@ public class OpenApiParser {
      * Parses the resource found at the given URL.  This method accepts resources
      * either in JSON or YAML format.  It will parse the input and, assuming it is
      * valid, return an instance of {@link OpenAPI}.
-     * @param url
+     * @param url URL to OpenAPI document
+     * @return OpenAPIImpl parsed from URL
+     * @throws IOException URL parameter is not found
+     * @throws ParseException Failed to parse the document
      */
     public static final OpenAPIImpl parse(URL url) throws IOException, ParseException {
         try {
@@ -187,8 +190,10 @@ public class OpenApiParser {
     /**
      * Parses the resource found at the given stream.  The format of the stream must
      * be specified.
-     * @param stream
-     * @param format
+     * @param stream InputStream containing an OpenAPI document
+     * @param format Format of the stream
+     * @return OpenAPIImpl parsed from the stream
+     * @throws IOException Errors in reading the stream
      */
     public static final OpenAPIImpl parse(InputStream stream, Format format) throws IOException {
         ObjectMapper mapper;
@@ -207,7 +212,7 @@ public class OpenApiParser {
 
     /**
      * Constructor.
-     * @param tree
+     * @param tree JsonNode
      */
     public OpenApiParser(JsonNode tree) {
         this.tree = tree;

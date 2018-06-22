@@ -68,8 +68,9 @@ public class FilterUtil {
 
     /**
      * Apply the given filter to the given model.
-     * @param filter
-     * @param model
+     * @param filter OASFilter
+     * @param model OpenAPI model
+     * @return Filtered OpenAPI model
      */
     public static final OpenAPI applyFilter(OASFilter filter, OpenAPI model) {
         filterComponents(filter, model.getComponents());

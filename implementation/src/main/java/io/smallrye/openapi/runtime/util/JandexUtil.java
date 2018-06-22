@@ -61,8 +61,9 @@ public class JandexUtil {
     /**
      * Reads a string property named "ref" value from the given annotation and converts it
      * to a value appropriate for setting on a model's "$ref" property.
-     * @param annotation
-     * @param refType
+     * @param annotation AnnotationInstance
+     * @param refType RefType
+     * @return String value
      */
     public static String refValue(AnnotationInstance annotation, RefType refType) {
         AnnotationValue value = annotation.value(OpenApiConstants.PROP_REF);
@@ -112,8 +113,9 @@ public class JandexUtil {
     /**
      * Reads a String property value from the given annotation instance.  If no value is found
      * this will return null.
-     * @param annotation
-     * @param propertyName
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @return String value
      */
     public static String stringValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
@@ -127,8 +129,9 @@ public class JandexUtil {
     /**
      * Reads a Boolean property value from the given annotation instance.  If no value is found
      * this will return null.
-     * @param annotation
-     * @param propertyName
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @return Boolean value
      */
     public static Boolean booleanValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
@@ -147,8 +150,9 @@ public class JandexUtil {
     /**
      * Reads a Double property value from the given annotation instance.  If no value is found
      * this will return null.
-     * @param annotation
-     * @param propertyName
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @return BigDecimal value
      */
     public static BigDecimal bigDecimalValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
@@ -167,8 +171,9 @@ public class JandexUtil {
     /**
      * Reads a Integer property value from the given annotation instance.  If no value is found
      * this will return null.
-     * @param annotation
-     * @param propertyName
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @return Integer value
      */
     public static Integer intValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
@@ -182,9 +187,9 @@ public class JandexUtil {
     /**
      * Reads a String array property value from the given annotation instance.  If no value is found
      * this will return null.
-     * @param annotation
-     * @param propertyName
-     * @return
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @return List of Strings
      */
     public static List<String> stringListValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
@@ -198,8 +203,11 @@ public class JandexUtil {
     /**
      * Reads a String property value from the given annotation instance.  If no value is found
      * this will return null.
-     * @param annotation
-     * @param propertyName
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @param clazz Class type of the Enum
+     * @param <T> Type parameter
+     * @return Value of property
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Enum> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
@@ -225,7 +233,8 @@ public class JandexUtil {
     /**
      * Returns true if the given annotation instance is a "ref".  An annotation is a ref if it has
      * a non-null value for the "ref" property.
-     * @param annotation
+     * @param annotation AnnotationInstance
+     * @return Whether it's a "ref"
      */
     public static boolean isRef(AnnotationInstance annotation) {
         return annotation.value(OpenApiConstants.PROP_REF) != null;
@@ -234,7 +243,8 @@ public class JandexUtil {
     /**
      * Returns true if the given annotation is void of any values (and thus is "empty").  An example
      * of this would be if a jax-rs method were annotated with @Tag()
-     * @param annotation
+     * @param annotation AnnotationInstance
+     * @return Whether it's empty
      */
     public static boolean isEmpty(AnnotationInstance annotation) {
         return annotation.values() == null || annotation.values().isEmpty();
@@ -243,8 +253,9 @@ public class JandexUtil {
     /**
      * Gets a single class annotation from the given class.  Returns null if no matching annotation
      * is found.
-     * @param ct
-     * @param name
+     * @param ct ClassInfo
+     * @param name DotName
+     * @return AnnotationInstance
      */
     public static AnnotationInstance getClassAnnotation(ClassInfo ct, DotName name) {
         if (name == null) {
@@ -262,8 +273,8 @@ public class JandexUtil {
     /**
      * Use the jandex index to find all jax-rs resource classes.  This is done by searching for
      * all Class-level @Path annotations.
-     * @param pathAnnotations
-     * @param index
+     * @param index IndexView
+     * @return Collection of ClassInfo's
      */
     public static Collection<ClassInfo> getJaxRsResourceClasses(IndexView index) {
         Collection<ClassInfo> resourceClasses = new ArrayList<>();
@@ -279,8 +290,9 @@ public class JandexUtil {
 
     /**
      * Returns all annotations configured for a single parameter of a method.
-     * @param method
-     * @param paramPosition
+     * @param method MethodInfo
+     * @param paramPosition parameter position
+     * @return List of AnnotationInstance's
      */
     public static List<AnnotationInstance> getParameterAnnotations(MethodInfo method, short paramPosition) {
         List<AnnotationInstance> annotations = new ArrayList<>(method.annotations());
@@ -298,7 +310,8 @@ public class JandexUtil {
     /**
      * Gets the name of an item from its ref.  For example, the ref might be "#/components/parameters/departureDate"
      * which would result in a name of "departureDate".
-     * @param annotation
+     * @param annotation AnnotationInstance
+     * @return Name of item from ref
      */
     public static String nameFromRef(AnnotationInstance annotation) {
         String ref = annotation.value(OpenApiConstants.PROP_REF).asString();
@@ -309,9 +322,10 @@ public class JandexUtil {
      * Many OAI annotations can either be found singly or as a wrapped array.  This method will
      * look for both and return a list of all found.  Both the single and wrapper annotation names
      * must be provided.
-     * @param method
-     * @param singleAnnotationName
-     * @param repeatableAnnotationName
+     * @param method MethodInfo
+     * @param singleAnnotationName DotName
+     * @param repeatableAnnotationName DotName
+     * @return List of AnnotationInstance's
      */
     public static List<AnnotationInstance> getRepeatableAnnotation(MethodInfo method,
             DotName singleAnnotationName, DotName repeatableAnnotationName) {
@@ -338,9 +352,10 @@ public class JandexUtil {
      * Many OAI annotations can either be found singly or as a wrapped array.  This method will
      * look for both and return a list of all found.  Both the single and wrapper annotation names
      * must be provided.
-     * @param clazz
-     * @param singleAnnotationName
-     * @param repeatableAnnotationName
+     * @param clazz ClassInfo
+     * @param singleAnnotationName DotName
+     * @param repeatableAnnotationName DotName
+     * @return List of AnnotationInstance's
      */
     public static List<AnnotationInstance> getRepeatableAnnotation(ClassInfo clazz,
             DotName singleAnnotationName, DotName repeatableAnnotationName) {
@@ -362,8 +377,9 @@ public class JandexUtil {
 
     /**
      * Returns the class type of the method parameter at the given position.
-     * @param method
-     * @param position
+     * @param method MethodInfo
+     * @param position parameter position
+     * @return Type
      */
     public static Type getMethodParameterType(MethodInfo method, short position) {
         Type type = method.parameters().get(position);
@@ -373,7 +389,8 @@ public class JandexUtil {
     /**
      * Go through the method parameters looking for one that is not annotated with a jax-rs
      * annotation.  That will be the one that is the request body.
-     * @param method
+     * @param method MethodInfo
+     * @return Type
      */
     public static Type getRequestBodyParameterClassType(MethodInfo method) {
         List<Type> methodParams = method.parameters();
@@ -393,8 +410,9 @@ public class JandexUtil {
      * or does not refer to a jax-rs parameter (ie is not annoted with e.g. @PathParam) then
      * this will return null.  Otherwise it will return a {@link JaxRsParameterInfo} object
      * with the name and type of the param.
-     * @param method
-     * @param idx
+     * @param method MethodInfo
+     * @param idx index of parameter
+     * @return JaxRsParameterInfo
      */
     public static JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx) {
         AnnotationInstance jaxRsAnno = JandexUtil.getMethodParameterAnnotation(method, idx, OpenApiConstants.DOTNAME_PATH_PARAM);
@@ -454,7 +472,8 @@ public class JandexUtil {
     /**
      * Returns true if the given @Schema annotation is a simple class schema.  This means that
      * the annotation only has one field defined, and that field is "implementation".
-     * @param annotation
+     * @param annotation AnnotationInstance
+     * @return Is it a simple class @Schema
      */
     public static boolean isSimpleClassSchema(AnnotationInstance annotation) {
         List<AnnotationValue> values = annotation.values();
@@ -465,7 +484,8 @@ public class JandexUtil {
      * Returns true if the given @Schema annotation is a simple array schema.  This is defined
      * as a schema with only a "type" field and "implementation" field defined *and* the type must
      * be array.
-     * @param annotation
+     * @param annotation AnnotationInstance
+     * @return Is it a simple array @Schema
      */
     public static boolean isSimpleArraySchema(AnnotationInstance annotation) {
         List<AnnotationValue> values = annotation.values();

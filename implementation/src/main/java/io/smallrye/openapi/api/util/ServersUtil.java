@@ -62,9 +62,9 @@ public class ServersUtil {
 
     /**
      * Configures the servers for a PathItem.
-     * @param config
-     * @param pathName
-     * @param pathItem
+     * @param config OpenApiConfig
+     * @param pathName String representing the pathName
+     * @param pathItem String representing the pathItem
      */
     protected static void configureServers(OpenApiConfig config, String pathName, PathItem pathItem) {
         if (pathItem == null) {
@@ -93,8 +93,8 @@ public class ServersUtil {
 
     /**
      * Configures the servers for an Operation.
-     * @param config
-     * @param operation
+     * @param config OpenApiConfig
+     * @param operation Operation
      */
     protected static void configureServers(OpenApiConfig config, Operation operation) {
         if (operation == null) {
