@@ -142,8 +142,8 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
-     * @param config
-     * @param archive
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
         this.index = index;
@@ -152,6 +152,7 @@ public class OpenApiAnnotationScanner {
     /**
      * Scan the deployment for relevant annotations.  Returns an OpenAPI data model that was
      * built from those found annotations.
+     * @return OpenAPIImpl generated from scanning annotations
      */
     public OpenAPIImpl scan() {
         //LOG.debug("Scanning deployment for OpenAPI and JAX-RS Annotations.");
@@ -734,7 +735,7 @@ public class OpenApiAnnotationScanner {
     /**
      * Determines where an @Parameter can be found (examples include Query, Path,
      * Header, Cookie, etc).
-     * @param target
+     * @param paramInfo
      */
     private In parameterIn(MethodParameterInfo paramInfo) {
         MethodInfo method = paramInfo.method();
@@ -759,7 +760,8 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Make a path out of a number of path segments.
-     * @param segments
+     * @param segments String paths
+     * @return Path built from the segments
      */
     protected static String makePath(String... segments) {
         StringBuilder builder = new StringBuilder();
@@ -785,8 +787,8 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a OpenAPIDefinition annotation.
-     * @param openApi
-     * @param definitionAnno
+     * @param openApi OpenAPIImpl
+     * @param definitionAnno AnnotationInstance
      */
     protected void processDefinition(OpenAPIImpl openApi, AnnotationInstance definitionAnno) {
         //LOG.debug("Processing an @OpenAPIDefinition annotation.");

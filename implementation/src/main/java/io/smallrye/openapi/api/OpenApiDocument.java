@@ -70,7 +70,7 @@ public class OpenApiDocument {
     /**
      * Set the final OpenAPI document. This method should only be used for testing.
      *
-     * @param model
+     * @param model OpenAPI model instance
      */
     public void set(OpenAPI model) {
         synchronized (INSTANCE) {
@@ -90,7 +90,7 @@ public class OpenApiDocument {
     }
 
     /**
-     * @param {{@code true} if model initialized
+     * @return {@code true} if model initialized
      */
     public boolean isSet() {
         synchronized (INSTANCE) {

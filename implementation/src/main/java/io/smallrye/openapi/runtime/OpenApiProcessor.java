@@ -38,7 +38,8 @@ public class OpenApiProcessor {
      * Parse the static file content and return the resulting model.  Note that this
      * method does NOT close the resources in the static file.  The caller is
      * responsible for that.
-     * @param staticFile
+     * @param staticFile OpenApiStaticFile to be parsed
+     * @return OpenApiImpl
      */
     public static OpenAPIImpl modelFromStaticFile(OpenApiStaticFile staticFile) {
         if (staticFile == null) {
@@ -55,8 +56,9 @@ public class OpenApiProcessor {
      * Create an {@link OpenAPI} model by scanning the deployment for relevant JAX-RS and
      * OpenAPI annotations.  If scanning is disabled, this method returns null.  If scanning
      * is enabled but no relevant annotations are found, an empty OpenAPI model is returned.
-     * @param config
-     * @param archive
+     * @param config OpenApiConfig
+     * @param index IndexView of Archive
+     * @return OpenAPIImpl generated from annotations
      */
     public static OpenAPIImpl modelFromAnnotations(OpenApiConfig config, IndexView index) {
         if (config.scanDisable()) {
@@ -72,8 +74,9 @@ public class OpenApiProcessor {
      * Instantiate the configured {@link OASModelReader} and invoke it. If no reader is configured, 
      * then return null. If a class is configured but there is an error either instantiating or invoking
      * it, a {@link RuntimeException} is thrown.
-     * @param config
-     * @param loader
+     * @param config OpenApiConfig
+     * @param loader ClassLoader
+     * @return OpenApiImpl created from OASModelReader
      */
     public static OpenAPIImpl modelFromReader(OpenApiConfig config, ClassLoader loader) {
         String readerClassName = config.modelReader();
@@ -91,8 +94,9 @@ public class OpenApiProcessor {
 
     /**
      * Instantiate the {@link OASFilter} configured by the app.
-     * @param config
-     * @param loader
+     * @param config OpenApiConfig
+     * @param loader ClassLoader
+     * @return OASFilter instance retrieved from loader
      */
     public static OASFilter getFilter(OpenApiConfig config, ClassLoader loader) {
         String filterClassName = config.filter();

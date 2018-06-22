@@ -36,11 +36,6 @@ public class OpenApiStaticFile implements Closeable {
     public OpenApiStaticFile() {
     }
 
-    /**
-     * Constructor.
-     * @param content
-     * @param format
-     */
     public OpenApiStaticFile(InputStream content, Format format) {
         this.setContent(content);
         this.setFormat(format);

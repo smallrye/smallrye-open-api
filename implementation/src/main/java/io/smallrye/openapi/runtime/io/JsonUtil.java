@@ -47,8 +47,9 @@ public final class JsonUtil {
     /**
      * Extract a string property from the given json tree.  Returns null if no
      * property exists or is not a text node.
-     * @param node
-     * @param propertyName
+     * @param node JsonNode
+     * @param propertyName Property to extract
+     * @return String holding the value found for the property
      */
     public static String stringProperty(JsonNode node, String propertyName) {
         JsonNode propertyNode = node.get(propertyName);
@@ -61,9 +62,9 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node.  If the value is null,
      * then the property is not written.
-     * @param node
-     * @param propertyName
-     * @param propertyValue
+     * @param node ObjectNode
+     * @param propertyName Property to be set
+     * @param propertyValue Value to be set
      */
     public static void stringProperty(ObjectNode node, String propertyName, String propertyValue) {
         if (propertyValue == null) {
@@ -75,9 +76,10 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node.  If the value is null,
      * then the property is not written.
-     * @param node
-     * @param propertyName
-     * @param propertyValue
+     * @param node ObjectNode
+     * @param propertyName Property to be set
+     * @param propertyValue Value to be set
+     * @param <E> Type of the property value
      */
     public static <E extends Enum<E>> void enumProperty(ObjectNode node, String propertyName, E propertyValue) {
         if (propertyValue == null) {
@@ -89,8 +91,9 @@ public final class JsonUtil {
     /**
      * Extract a boolean property from the given json tree.  Returns null if no
      * property exists or is not a boolean node.
-     * @param node
-     * @param propertyName
+     * @param node JsonNode
+     * @param propertyName Property to extract
+     * @return Boolean containing the value extracted
      */
     public static Boolean booleanProperty(JsonNode node, String propertyName) {
         JsonNode propertyNode = node.get(propertyName);
@@ -103,9 +106,9 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node.  If the value is null,
      * then the property is not written.
-     * @param node
-     * @param propertyName
-     * @param propertyValue
+     * @param node ObjectNode
+     * @param propertyName Property to be set
+     * @param propertyValue Boolean value to be set
      */
     public static void booleanProperty(ObjectNode node, String propertyName, Boolean propertyValue) {
         if (propertyValue == null) {
@@ -117,8 +120,9 @@ public final class JsonUtil {
     /**
      * Extract a integer property from the given json tree.  Returns null if no
      * property exists or is not a boolean node.
-     * @param node
-     * @param propertyName
+     * @param node JsonNode
+     * @param propertyName Property to extract
+     * @return Integer containing the extracted value
      */
     public static Integer intProperty(JsonNode node, String propertyName) {
         JsonNode propertyNode = node.get(propertyName);
@@ -131,9 +135,9 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node.  If the value is null,
      * then the property is not written.
-     * @param node
-     * @param propertyName
-     * @param propertyValue
+     * @param node ObjectNode
+     * @param propertyName Property to be set
+     * @param propertyValue Integer value to be set
      */
     public static void intProperty(ObjectNode node, String propertyName, Integer propertyValue) {
         if (propertyValue == null) {
@@ -145,8 +149,9 @@ public final class JsonUtil {
     /**
      * Extract a BigDecimal property from the given json tree.  Returns null if no
      * property exists or is not a boolean node.
-     * @param node
-     * @param propertyName
+     * @param node JsonNode
+     * @param propertyName Property to extract
+     * @return BigDecimal containing the extracted value
      */
     public static BigDecimal bigDecimalProperty(JsonNode node, String propertyName) {
         JsonNode propertyNode = node.get(propertyName);
@@ -159,9 +164,9 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node.  If the value is null,
      * then the property is not written.
-     * @param node
-     * @param propertyName
-     * @param propertyValue
+     * @param node ObjectNode
+     * @param propertyName Property to be set
+     * @param propertyValue BigDecimal value to be set
      */
     public static void bigDecimalProperty(ObjectNode node, String propertyName, BigDecimal propertyValue) {
         if (propertyValue == null) {
