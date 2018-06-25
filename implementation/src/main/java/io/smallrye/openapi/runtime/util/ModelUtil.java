@@ -52,7 +52,8 @@ public class ModelUtil {
 
     /**
      * Gets the {@link Components} from the OAI model.  If it doesn't exist, creates it.
-     * @param openApi
+     * @param openApi OpenAPI
+     * @return Components
      */
     public static Components components(OpenAPI openApi) {
         if (openApi.getComponents() == null) {
@@ -63,7 +64,8 @@ public class ModelUtil {
 
     /**
      * Gets the {@link Paths} from the OAI model.  If it doesn't exist, creates it.
-     * @param openApi
+     * @param openApi OpenAPI
+     * @return Paths
      */
     public static Paths paths(OpenAPIImpl openApi) {
         if (openApi.getPaths() == null) {
@@ -75,7 +77,8 @@ public class ModelUtil {
     /**
      * Gets the {@link APIResponses} child model from the given operation.  If it's null
      * then it will be created and returned.
-     * @param operation
+     * @param operation Operation
+     * @return APIResponses
      */
     public static APIResponses responses(Operation operation) {
         if (operation.getResponses() == null) {
@@ -88,7 +91,8 @@ public class ModelUtil {
      * Returns true only if the given {@link Parameter} has a schema defined
      * for it.  A schema can be defined either via the parameter's "schema"
      * property, or any "content.*.schema" property.
-     * @param parameter
+     * @param parameter Parameter
+     * @return Whether the parameter has a schema
      */
     public static boolean parameterHasSchema(Parameter parameter) {
         if (parameter.getSchema() != null) {
@@ -113,8 +117,8 @@ public class ModelUtil {
      *
      * The OpenAPI specification requires that a parameter have *either* a schema
      * or a content, but not both.
-     * @param parameter
-     * @param schema
+     * @param parameter Parameter
+     * @param schema Schema
      */
     public static void setParameterSchema(Parameter parameter, Schema schema) {
         if (schema == null) {
@@ -144,7 +148,8 @@ public class ModelUtil {
      * Returns true only if the given {@link RequestBody} has a schema defined
      * for it.  A schema would be found within the request body's Content/MediaType
      * children.
-     * @param requestBody
+     * @param requestBody RequestBody
+     * @return Whether RequestBody has a schema
      */
     public static boolean requestBodyHasSchema(RequestBody requestBody) {
         if (requestBody.getContent() != null && !requestBody.getContent().isEmpty()) {
@@ -160,9 +165,9 @@ public class ModelUtil {
 
     /**
      * Sets the given {@link Schema} on the given {@link RequestBody}.
-     * @param requestBody
-     * @param schema
-     * @param mediaTypes
+     * @param requestBody RequestBody
+     * @param schema Schema
+     * @param mediaTypes String array
      */
     public static void setRequestBodySchema(RequestBody requestBody, Schema schema, String[] mediaTypes) {
         Content content = requestBody.getContent();
@@ -190,8 +195,9 @@ public class ModelUtil {
 
     /**
      * Returns true if the given operation has a parameter with the given name.
-     * @param operation
-     * @param name
+     * @param operation Operation
+     * @param name String
+     * @return Whether the operation has a parameter
      */
     public static boolean operationHasParameter(Operation operation, String name) {
         List<Parameter> parameters = operation.getParameters();
@@ -211,7 +217,8 @@ public class ModelUtil {
 
     /**
      * Returns the name component of the ref.
-     * @param ref
+     * @param ref String
+     * @return Name
      */
     public static String nameFromRef(String ref) {
         String[] split = ref.split("/");

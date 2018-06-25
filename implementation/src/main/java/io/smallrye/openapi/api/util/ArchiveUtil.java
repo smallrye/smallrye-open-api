@@ -55,7 +55,8 @@ public class ArchiveUtil {
     
     /**
      * Creates an {@link OpenApiConfig} instance from the given ShrinkWrap archive.
-     * @param archive
+     * @param archive Shrinkwrap Archive instance
+     * @return OpenApiConfig
      */
     public static OpenApiConfig archiveToConfig(Archive<?> archive) {
         try (ShrinkWrapClassLoader cl = new ShrinkWrapClassLoader(archive)) {
@@ -70,7 +71,8 @@ public class ArchiveUtil {
      * it as an {@link OpenApiStaticFile}.  If not found, returns null.  The static file
      * (when not null) contains an {@link InputStream} to the contents of the static file.
      * The caller is responsible for closing this stream.
-     * @param archive
+     * @param archive Shrinkwrap Archive instance
+     * @return OpenApiStaticFile
      */
     public static OpenApiStaticFile archiveToStaticFile(Archive<?> archive) {
         OpenApiStaticFile rval = new OpenApiStaticFile();
@@ -107,8 +109,9 @@ public class ArchiveUtil {
 
     /**
      * Index the ShrinkWrap archive to produce a jandex index.
-     * @param config
-     * @param archive
+     * @param config OpenApiConfig
+     * @param archive Shrinkwrap Archive
+     * @return indexed classes in Archive
      */
     public static IndexView archiveToIndex(OpenApiConfig config, Archive<?> archive) {
         if (archive == null) {

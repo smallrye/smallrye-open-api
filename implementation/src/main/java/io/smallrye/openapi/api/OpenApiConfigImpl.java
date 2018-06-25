@@ -45,7 +45,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
 
     /**
      * Constructor.
-     * @param config
+     * @param config MicroProfile Config instance
      */
     public OpenApiConfigImpl(Config config) {
         this.config = config;
