@@ -633,6 +633,20 @@ public class OpenApiAnnotationScanner {
             operation.addServer(server);
         }
 
+        // Process @Extension annotations
+        ///////////////////////////////////
+        List<AnnotationInstance> extensionAnnotations = JandexUtil.getRepeatableAnnotation(method,
+                OpenApiConstants.DOTNAME_EXTENSION, OpenApiConstants.DOTNAME_EXTENSIONS);
+        if (extensionAnnotations.isEmpty()) {
+            extensionAnnotations.addAll(JandexUtil.getRepeatableAnnotation(method.declaringClass(),
+                    OpenApiConstants.DOTNAME_EXTENSION, OpenApiConstants.DOTNAME_EXTENSIONS));
+        }
+        for (AnnotationInstance annotation : extensionAnnotations) {
+            String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
+            String value = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_VALUE);
+            operation.addExtension(name, value);
+        }
+        
         // Now set the operation on the PathItem as appropriate based on the Http method type
         ///////////////////////////////////////////
         switch (methodType) {

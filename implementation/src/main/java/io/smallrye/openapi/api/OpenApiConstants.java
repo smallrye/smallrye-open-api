@@ -40,6 +40,8 @@ import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.callbacks.Callback;
 import org.eclipse.microprofile.openapi.annotations.callbacks.Callbacks;
+import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
+import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
@@ -215,6 +217,8 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_REQUEST_BODY = DotName.createSimple(RequestBody.class.getName());
     public static final DotName DOTNAME_SERVER = DotName.createSimple(Server.class.getName());
     public static final DotName DOTNAME_SERVERS = DotName.createSimple(Servers.class.getName());
+    public static final DotName DOTNAME_EXTENSION = DotName.createSimple(Extension.class.getName());
+    public static final DotName DOTNAME_EXTENSIONS = DotName.createSimple(Extensions.class.getName());
 
     public static final DotName DOTNAME_APPLICATION = DotName.createSimple(Application.class.getName());
     public static final DotName DOTNAME_APPLICATION_PATH = DotName.createSimple(ApplicationPath.class.getName());
