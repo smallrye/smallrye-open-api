@@ -20,7 +20,6 @@ import java.util.Collection;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-@SuppressWarnings("unused")
 public abstract class CollectionStandin<E> implements Collection<E> {
     E value;
 }
