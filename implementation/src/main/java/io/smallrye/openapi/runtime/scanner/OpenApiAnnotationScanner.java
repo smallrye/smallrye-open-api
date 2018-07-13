@@ -1447,6 +1447,7 @@ public class OpenApiAnnotationScanner {
         //LOG.debug("Processing a single @Content annotation as a MediaType.");
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setExamples(readExamples(annotation.value(OpenApiConstants.PROP_EXAMPLES)));
+        mediaType.setExample(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_EXAMPLE));
         mediaType.setSchema(readSchema(annotation.value(OpenApiConstants.PROP_SCHEMA)));
         mediaType.setEncoding(readEncodings(annotation.value(OpenApiConstants.PROP_ENCODING)));
         return mediaType;
