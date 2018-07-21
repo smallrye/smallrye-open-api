@@ -15,17 +15,10 @@
  */
 package io.smallrye.openapi.runtime.util;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.validation.constraints.NotNull;
-
+import io.smallrye.openapi.api.OpenApiConstants;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
@@ -34,7 +27,15 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.WildcardType;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -214,7 +215,7 @@ public class TypeUtil {
         }
     }
 
-    public static Type resolveWildcard(WildcardType wildcardType) { // TODO move to typeutil?
+    public static Type resolveWildcard(WildcardType wildcardType) {
         return TypeUtil.getBound(wildcardType);
     }
 
@@ -223,6 +224,11 @@ public class TypeUtil {
             return type;
         }
         return TypeUtil.getBound(type.asWildcardType());
+    }
+
+
+    public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
+        return getAnnotation(annotationTarget, OpenApiConstants.DOTNAME_SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(ClassInfo field) {
@@ -235,6 +241,32 @@ public class TypeUtil {
 
     public static AnnotationInstance getSchemaAnnotation(Type type) {
         return getAnnotation(type, OpenApiConstants.DOTNAME_SCHEMA);
+    }
+
+    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
+        if (annotationTarget == null) {
+            return null;
+        }
+        return getAnnotations(annotationTarget).stream()
+                .filter(annotation -> annotation.name().equals(annotationName))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget type) {
+        switch (type.kind()) {
+            case CLASS:
+                return type.asClass().classAnnotations();
+            case FIELD:
+                return type.asField().annotations();
+            case METHOD:
+                return type.asMethod().annotations();
+            case METHOD_PARAMETER:
+                break;
+            case TYPE:
+                break;
+        }
+        return Collections.emptyList();
     }
 
     public static AnnotationInstance getAnnotation(Type type, DotName annotationName) {
