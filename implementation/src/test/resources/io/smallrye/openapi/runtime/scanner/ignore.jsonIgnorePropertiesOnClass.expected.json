@@ -1,0 +1,13 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer" : {
+        "properties" : {
+          "shouldBePresent" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

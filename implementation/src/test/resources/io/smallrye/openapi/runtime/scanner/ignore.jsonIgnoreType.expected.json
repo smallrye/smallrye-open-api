@@ -1,0 +1,14 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreTypeExample" : {
+        "properties" : {
+          "shouldBePresent" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      }
+    }
+  }
+}

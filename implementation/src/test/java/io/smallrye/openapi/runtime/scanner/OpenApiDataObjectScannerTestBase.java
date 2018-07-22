@@ -15,12 +15,9 @@
  */
 package io.smallrye.openapi.runtime.scanner;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-
+import io.smallrye.openapi.api.models.ComponentsImpl;
+import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassInfo;
@@ -32,9 +29,15 @@ import org.json.JSONException;
 import org.junit.BeforeClass;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import io.smallrye.openapi.api.models.ComponentsImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -45,7 +48,7 @@ public class OpenApiDataObjectScannerTestBase {
     protected static Index index;
 
     @BeforeClass
-    public static void createIndex() throws IOException {
+    public static void createIndex() {
         Indexer indexer = new Indexer();
 
         // Stand-in stuff
@@ -53,15 +56,7 @@ public class OpenApiDataObjectScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
 
         // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Foo.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Bar.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Bazzy.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Baz.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Ultimate.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/BuzzLinkedList.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Fuzz.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/BazEnum.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/KustomPair.class");
+        indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
 
         // Microprofile TCK classes
         index(indexer, "org/eclipse/microprofile/openapi/apps/airlines/model/Airline.class");
@@ -71,19 +66,33 @@ public class OpenApiDataObjectScannerTestBase {
         index(indexer, "org/eclipse/microprofile/openapi/apps/airlines/model/Airline.class");
 
         // Test containers
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/KitchenSink.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/EnumContainer.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/GenericTypeTestContainer.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/SpecialCaseTestContainer.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/GenericFieldTestContainer.class");
+        //indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
 
         index = indexer.complete();
     }
 
-    private static void index(Indexer indexer, String resName) throws IOException {
-        InputStream stream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(resName);
-        indexer.index(stream);
+    private static void indexDirectory(Indexer indexer, String baseDir) {
+        InputStream directoryStream = tcclGetResourceAsStream(baseDir);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(directoryStream));
+        reader.lines()
+                .filter(resName -> resName.endsWith(".class"))
+                .map(resName -> Paths.get(baseDir, resName)) // e.g. test/io/smallrye/openapi/runtime/scanner/entities/ + Bar.class
+                .forEach(path -> index(indexer, path.toString()));
+    }
+
+    private static InputStream tcclGetResourceAsStream(String path) {
+        return Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(path);
+    }
+
+    private static void index(Indexer indexer, String resName) {
+        try {
+            InputStream stream = tcclGetResourceAsStream(resName);
+            indexer.index(stream);
+        } catch (IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
     }
 
     public static void printToConsole(String entityName, Schema schema) throws IOException {
