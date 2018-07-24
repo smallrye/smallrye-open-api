@@ -236,8 +236,10 @@ public class OpenAPIImpl extends ExtensibleImpl implements OpenAPI, ModelImpl {
      * @param name
      */
     private boolean hasTag(String name) {
-        // TODO Auto-generated method stub
-        return false;
+        if (this.tags == null) {
+            return false;
+        }
+        return this.tags.stream().anyMatch(tag -> tag.getName().equals(name));
     }
 
     /**
