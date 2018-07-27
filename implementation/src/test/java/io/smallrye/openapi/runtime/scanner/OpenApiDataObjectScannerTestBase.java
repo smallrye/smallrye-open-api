@@ -25,6 +25,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
+import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.BeforeClass;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -44,7 +45,7 @@ import java.util.Map;
  */
 public class OpenApiDataObjectScannerTestBase {
 
-//    private static final Logger LOG = Logger.getLogger(OpenApiDataObjectScannerTestBase.class);
+    private static final Logger LOG = Logger.getLogger(OpenApiDataObjectScannerTestBase.class);
     protected static Index index;
 
     @BeforeClass
@@ -97,7 +98,7 @@ public class OpenApiDataObjectScannerTestBase {
 
     public static void printToConsole(String entityName, Schema schema) throws IOException {
         // Remember to set debug level logging.
-//        LOG.debug(schemaToString(entityName, schema));
+        LOG.debug(schemaToString(entityName, schema));
         System.out.println(schemaToString(entityName, schema));
     }
 

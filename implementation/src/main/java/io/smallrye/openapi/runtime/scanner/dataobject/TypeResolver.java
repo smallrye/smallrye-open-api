@@ -21,6 +21,7 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.TypeVariable;
+import org.jboss.logging.Logger;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 public class TypeResolver {
 
-//    private static final Logger LOG = Logger.getLogger(TypeResolver.class);
+    private static final Logger LOG = Logger.getLogger(TypeResolver.class);
 
     private Deque<Map<String, Type>> resolutionStack;
     private Type leaf;
@@ -110,8 +111,8 @@ public class TypeResolver {
         List<Type> arguments = parameterizedType.arguments();
 
         if (arguments.size() != typeVariables.size()) {
-//            LOG.errorv("Unanticipated mismatch between type arguments and type variables \n" +
-//                    "Args: {0}\n Vars:{1}", arguments, typeVariables);
+            LOG.errorv("Unanticipated mismatch between type arguments and type variables \n" +
+                    "Args: {0}\n Vars:{1}", arguments, typeVariables);
         }
 
         Map<String, Type> resolutionMap = new LinkedHashMap<>();

@@ -33,6 +33,7 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
+import org.jboss.logging.Logger;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -73,7 +74,7 @@ import java.util.Map;
  */
 public class OpenApiDataObjectScanner {
 
-//    private static final Logger LOG = Logger.getLogger(OpenApiDataObjectScanner.class);
+    private static final Logger LOG = Logger.getLogger(OpenApiDataObjectScanner.class);
     // Object
     public static final Type OBJECT_TYPE = Type.create(DotName.createSimple(java.lang.Object.class.getName()), Type.Kind.CLASS);
     // Collection (list-type things)
@@ -159,7 +160,7 @@ public class OpenApiDataObjectScanner {
      * @return the OAI schema
      */
     public Schema process() {
-        //LOG.debugv("Starting processing with root: {0}", rootClassType.name());
+        LOG.debugv("Starting processing with root: {0}", rootClassType.name());
 
         // If top level item is simple
         if (isTerminalType(rootClassType)) {
@@ -203,7 +204,7 @@ public class OpenApiDataObjectScanner {
             // First, handle class annotations.
             currentPathEntry.setSchema(readKlass(currentClass, currentSchema));
 
-            //LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
+            LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
 
             // Get all fields *including* inherited.
             Map<FieldInfo, TypeResolver> allFields = TypeResolver.getAllFields(index, currentType, currentClass);
@@ -214,7 +215,7 @@ public class OpenApiDataObjectScanner {
                 TypeResolver resolver = entry.getValue();
                 // Ignore static fields and fields annotated with ignore.
                 if (!Modifier.isStatic(field.flags()) && !ignoreResolver.isIgnore(field, currentPathEntry)) {
-                    //LOG.debugv("Iterating field {0}", field);
+                    LOG.debugv("Iterating field {0}", field);
                     AnnotationTargetProcessor.process(index, objectStack, resolver, currentPathEntry, field);
                 }
             }

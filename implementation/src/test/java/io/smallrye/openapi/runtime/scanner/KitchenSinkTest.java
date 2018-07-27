@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
+import org.jboss.logging.Logger;
 import org.junit.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
@@ -29,7 +30,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
  */
 public class KitchenSinkTest extends OpenApiDataObjectScannerTestBase {
 
-    //private static final Logger LOG = Logger.getLogger(KitchenSinkTest.class);
+    private static final Logger LOG = Logger.getLogger(KitchenSinkTest.class);
 
     /**
      * Test to ensure scanner doesn't choke on various declaration types and patterns.
@@ -45,7 +46,7 @@ public class KitchenSinkTest extends OpenApiDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
                 ClassType.create(kitchenSink, Type.Kind.CLASS));
 
-//        LOG.debugv("Scanning top-level entity: {0}", KitchenSink.class.getName());
+        LOG.debugv("Scanning top-level entity: {0}", KitchenSink.class.getName());
         printToConsole(kitchenSink.local(), scanner.process());
     }
 
@@ -59,7 +60,7 @@ public class KitchenSinkTest extends OpenApiDataObjectScannerTestBase {
         // Look up the kitchen sink and get the field named "simpleParameterizedType"
         Type pType = getFieldFromKlazz(KitchenSink.class.getName(), "simpleParameterizedType").type();
 
-//        LOG.debugv("Scanning top-level entity: {0}", pType);
+        LOG.debugv("Scanning top-level entity: {0}", pType);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
         printToConsole("KustomPair", scanner.process());
     }

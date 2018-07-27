@@ -44,7 +44,7 @@
         <version.org.jboss.arquillian>1.1.13.Final</version.org.jboss.arquillian>
         <version.org.jboss.arquillian.container.weld-embedded>2.0.0.Beta5</version.org.jboss.arquillian.container.weld-embedded>
         <version.org.jboss.jandex>2.0.5.Final</version.org.jboss.jandex>
-        <version.org.jboss.logging>2.0.1.Final</version.org.jboss.logging>
+        <version.org.jboss.logging>3.3.1.Final</version.org.jboss.logging>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.jboss.weld>2.3.SP2</version.org.jboss.weld>
         <version.org.jboss.weld.core.impl>2.3.5.Final</version.org.jboss.weld.core.impl>
@@ -153,6 +153,11 @@
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
                 <version>${version.javax.annotation-api}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>${version.org.jboss.logging}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>

@@ -25,6 +25,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
+import org.jboss.logging.Logger;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ import java.util.Map;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class AnnotationTargetProcessor {
-//    private static final Logger LOG = Logger.getLogger(AnnotationTargetProcessor.class);
+    private static final Logger LOG = Logger.getLogger(AnnotationTargetProcessor.class);
 
     private final AugmentedIndexView index;
     private final DataObjectDeque objectStack;
@@ -120,7 +121,7 @@ public class AnnotationTargetProcessor {
             throw new IllegalArgumentException("Annotation must not be null");
         }
 
-        //LOG.debugv("Processing @Schema annotation {0} on a field {1}", annotation, entityName);
+        LOG.debugv("Processing @Schema annotation {0} on a field {1}", annotation, entityName);
 
         // Schemas can be hidden. Skip if that's the case.
         Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
@@ -152,7 +153,7 @@ public class AnnotationTargetProcessor {
     }
 
     private void readUnannotatedField() {
-        //LOG.debugv("Processing unannotated field {0}", entityType);
+        LOG.debugv("Processing unannotated field {0}", entityType);
 
         TypeProcessor typeProcessor = new TypeProcessor(index, objectStack, parentPathEntry, typeResolver, entityType, fieldSchema, annotationTarget);
 

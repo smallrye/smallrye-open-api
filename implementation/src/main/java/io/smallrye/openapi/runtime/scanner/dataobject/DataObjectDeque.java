@@ -20,6 +20,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
+import org.jboss.logging.Logger;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayDeque;
@@ -33,7 +34,7 @@ import java.util.List;
  */
 public class DataObjectDeque {
 
-//    private final Logger LOG = Logger.getLogger(DataObjectDeque.class);
+    private final Logger LOG = Logger.getLogger(DataObjectDeque.class);
     private final Deque<PathEntry> path = new ArrayDeque<>();
     private final AugmentedIndexView index;
 
@@ -103,14 +104,14 @@ public class DataObjectDeque {
         ClassInfo klazzInfo = entry.getClazz();
         if (parentPathEntry.hasParent(entry)) {
             // Cycle detected, don't push path.
-            //LOG.debugv("Possible cycle was detected at: {0}. Will not search further.", klazzInfo);
-            //LOG.debugv("Path: {0}", entry.toStringWithGraph());
+            LOG.debugv("Possible cycle was detected at: {0}. Will not search further.", klazzInfo);
+            LOG.debugv("Path: {0}", entry.toStringWithGraph());
             if (schema.getDescription() == null) {
                 schema.description("Cyclic reference to " + klazzInfo.name());
             }
         } else {
             // Push path to be inspected later.
-            //LOG.debugv("Adding child node to path: {0}", klazzInfo);
+            LOG.debugv("Adding child node to path: {0}", klazzInfo);
             path.push(entry);
         }
     }
@@ -249,12 +250,12 @@ public class DataObjectDeque {
                     '}';
         }
 
-//        public String toStringWithGraph() {
-//            return "PathEntry{" +
-//                    "clazz=" + clazz +
-//                    ", schema=" + schema +
-//                    ", parent=" + (enclosing != null ? enclosing.toStringWithGraph() : "<root>") + "}";
-//        }
+        public String toStringWithGraph() {
+            return "PathEntry{" +
+                    "clazz=" + clazz +
+                    ", schema=" + schema +
+                    ", parent=" + (enclosing != null ? enclosing.toStringWithGraph() : "<root>") + "}";
+        }
 
     }
 }

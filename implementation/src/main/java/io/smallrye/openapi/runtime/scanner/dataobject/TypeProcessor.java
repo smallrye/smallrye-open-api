@@ -24,6 +24,7 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
+import org.jboss.logging.Logger;
 
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ARRAY_TYPE_OBJECT;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.COLLECTION_TYPE;
@@ -38,7 +39,7 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRIN
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class TypeProcessor {
-//    private static final Logger LOG = Logger.getLogger(TypeProcessor.class);
+    private static final Logger LOG = Logger.getLogger(TypeProcessor.class);
 
     private final Schema schema;
     private final AugmentedIndexView index;
@@ -80,7 +81,7 @@ public class TypeProcessor {
         }
 
         if (type.kind() == Type.Kind.ARRAY) {
-            //LOG.debugv("Processing an array {0}", type);
+            LOG.debugv("Processing an array {0}", type);
             ArrayType arrayType = type.asArrayType();
 
             // TODO handle multi-dimensional arrays.
@@ -103,7 +104,7 @@ public class TypeProcessor {
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
-            //LOG.debugv("Processing an enum {0}", type);
+            LOG.debugv("Processing an enum {0}", type);
             ClassInfo enumKlazz = index.getClass(type);
 
             for (FieldInfo enumField : enumKlazz.fields()) {
@@ -146,19 +147,18 @@ public class TypeProcessor {
         } else {
             // If the type is not in Jandex then we don't have easy access to it.
             // Future work could consider separate code to traverse classes reachable from this classloader.
-//            LOG.debugv("Encountered type not in Jandex index that is not well-known type. " +
-//                    "Will not traverse it: {0}", type);
+            LOG.debugv("Encountered type not in Jandex index that is not well-known type. Will not traverse it: {0}", type);
         }
 
         return type;
     }
 
     private Type readParameterizedType(ParameterizedType pType) {
-        //LOG.debugv("Processing parameterized type {0}", pType);
+        LOG.debugv("Processing parameterized type {0}", pType);
 
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE)) { // TODO maybe also Iterable?
-            //LOG.debugv("Processing Java Collection. Will treat as an array.");
+            LOG.debugv("Processing Java Collection. Will treat as an array.");
             SchemaImpl arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
             schema.items(arraySchema);
@@ -175,7 +175,7 @@ public class TypeProcessor {
             }
             return ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
-            //LOG.debugv("Processing Map. Will treat as an object.");
+            LOG.debugv("Processing Map. Will treat as an object.");
             schema.type(Schema.SchemaType.OBJECT);
 
             if (pType.arguments().size() == 2) {
@@ -217,19 +217,19 @@ public class TypeProcessor {
         // Type variable (e.g. A in Foo<A>)
         Type resolvedType = typeResolver.getResolvedType(fieldType);
 
-        //LOG.debugv("Resolved type {0} -> {1}", fieldType, resolvedType);
+        LOG.debugv("Resolved type {0} -> {1}", fieldType, resolvedType);
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
-            //LOG.debugv("Is a terminal type {0}", resolvedType);
+            LOG.debugv("Is a terminal type {0}", resolvedType);
             TypeUtil.TypeWithFormat replacement = TypeUtil.getTypeFormat(resolvedType);
             schema.setType(replacement.getSchemaType());
             schema.setFormat(replacement.getFormat().format());
         } else {
-            //LOG.debugv("Attempting to do TYPE_VARIABLE substitution: {0} -> {1}", fieldType, resolvedType);
+            LOG.debugv("Attempting to do TYPE_VARIABLE substitution: {0} -> {1}", fieldType, resolvedType);
             if (index.containsClass(resolvedType)) {
                 // Add resolved type to stack.
                 objectStack.push(annotationTarget, parentPathEntry, resolvedType, schema);
             } else {
-                //LOG.debugv("Class for type {0} not available", resolvedType);
+                LOG.debugv("Class for type {0} not available", resolvedType);
             }
         }
         return resolvedType;

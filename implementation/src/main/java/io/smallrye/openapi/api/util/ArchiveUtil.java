@@ -26,6 +26,7 @@ import java.util.Set;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
+import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ArchivePath;
 import org.jboss.shrinkwrap.api.Node;
@@ -46,7 +47,8 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
  * @author eric.wittmann@gmail.com
  */
 public class ArchiveUtil {
-    
+    private static final Logger LOG = Logger.getLogger(ArchiveUtil.class);
+
     /**
      * Constructor.
      */
@@ -148,7 +150,7 @@ public class ArchiveUtil {
                 ArchivePath archivePath = each.getKey();
                 if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX) && acceptClassForScanning(config, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        //LOG.debugv("Indexing asset: {0} from archive: {1}", archivePath.get(), archive.getName());
+                        LOG.debugv("Indexing asset: {0} from archive: {1}", archivePath.get(), archive.getName());
                         indexer.index(contentStream);
                     }
                     continue;
