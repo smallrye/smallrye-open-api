@@ -128,7 +128,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class OpenApiAnnotationScanner {
 
-    private static Logger LOG = Logger.getLogger("io.smallrye.openapi");
+    private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
 
     private final IndexView index;
 
