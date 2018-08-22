@@ -1124,7 +1124,7 @@ public class OpenApiAnnotationScanner {
                 continue;
             }
             try {
-                PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(pathItem, method.toUpperCase());
+                PropertyDescriptor descriptor = new PropertyDescriptor(method.toUpperCase(), pathItem.getClass());
                 Method mutator = PropertyUtils.getWriteMethod(descriptor);
                 mutator.invoke(pathItem, operation);
             } catch (Exception e) {

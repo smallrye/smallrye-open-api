@@ -16,6 +16,8 @@
 
 package io.smallrye.openapi.api.util;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.eclipse.microprofile.openapi.models.Constructible;
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.eclipse.microprofile.openapi.models.Reference;
@@ -35,6 +36,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import org.jboss.logging.Logger;
 
 /**
  * Used to merge two OAI data models into a single one.  The MP+OAI 1.0 spec
@@ -46,6 +48,7 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
  * @author eric.wittmann@gmail.com
  */
 public class MergeUtil {
+    private static final Logger LOG = Logger.getLogger(MergeUtil.class);
 
     private static final Set<String> EXCLUDED_PROPERTIES = new HashSet<>();
     static {
@@ -93,7 +96,13 @@ public class MergeUtil {
             return object2;
         }
 
-        PropertyDescriptor[] descriptors = PropertyUtils.getPropertyDescriptors(object1);
+        PropertyDescriptor[] descriptors = new PropertyDescriptor[0];
+        try {
+            descriptors = Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors();
+        } catch (IntrospectionException e) {
+            LOG.error("Failed to introspect BeanInfo for: " + object1.getClass(), e);
+        }
+
         for (PropertyDescriptor descriptor : descriptors) {
             if (EXCLUDED_PROPERTIES.contains(descriptor.getName())) {
                 continue;
