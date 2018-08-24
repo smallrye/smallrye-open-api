@@ -134,7 +134,6 @@ public class OpenApiAnnotationScanner {
 
     private OpenAPIImpl oai;
 
-    private String currentAppPath = "";
     private String currentResourcePath = "";
     private String[] currentConsumes;
     private String[] currentProduces;
@@ -203,18 +202,6 @@ public class OpenApiAnnotationScanner {
     private OpenAPIImpl jaxRsApplicationToOpenApi(ClassInfo applicationClass) {
         OpenAPIImpl oai = new OpenAPIImpl();
         oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
-
-        // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
-        ////////////////////////////////////////
-        AnnotationInstance appPathAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_APPLICATION_PATH);
-        if (appPathAnno == null) {
-            appPathAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_PATH);
-        }
-        if (appPathAnno != null) {
-            this.currentAppPath = appPathAnno.value().asString();
-        } else {
-            this.currentAppPath = "/";
-        }
 
         // Get the @OpenAPIDefinition annotation and process it.
         ////////////////////////////////////////
@@ -366,14 +353,14 @@ public class OpenApiAnnotationScanner {
 
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
-        // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
+        // Figure out the path for the operation.  This is a combination of Resource and Method @Path annotations
         String path;
         if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
             AnnotationInstance pathAnno = method.annotation(OpenApiConstants.DOTNAME_PATH);
             String methodPath = pathAnno.value().asString();
-            path = makePath(this.currentAppPath, this.currentResourcePath, methodPath);
+            path = makePath(this.currentResourcePath, methodPath);
         } else {
-            path = makePath(this.currentAppPath, this.currentResourcePath);
+            path = makePath(this.currentResourcePath);
         }
 
         // Get or create a PathItem to hold the operation

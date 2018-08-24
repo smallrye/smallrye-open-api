@@ -38,12 +38,6 @@ public class OpenApiAnnotationScannerTest {
         path = OpenApiAnnotationScanner.makePath("", "/bookings");
         Assert.assertEquals("/bookings", path);
 
-        path = OpenApiAnnotationScanner.makePath("/api", "/bookings");
-        Assert.assertEquals("/api/bookings", path);
-
-        path = OpenApiAnnotationScanner.makePath("api", "bookings");
-        Assert.assertEquals("/api/bookings", path);
-
         path = OpenApiAnnotationScanner.makePath("/", "/bookings", "{id}");
         Assert.assertEquals("/bookings/{id}", path);
     }
