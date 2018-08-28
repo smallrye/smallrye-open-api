@@ -194,7 +194,7 @@ public class ArchiveUtil {
      * @param archivePath
      */
     private static boolean acceptClassForScanning(OpenApiConfig config, String archivePath) {
-        if (archivePath == null) {
+        if (archivePath == null || archivePath.endsWith("module-info.class")) {
             return false;
         }
 
