@@ -77,7 +77,6 @@ public class OpenApiDocument {
     public void set(OpenAPI model) {
         synchronized (INSTANCE) {
             this.model = model;
-            LOGGER.infov("OpenAPI document set: {0}", model);
         }
     }
 
