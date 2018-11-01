@@ -706,16 +706,18 @@ public class OpenApiAnnotationScanner {
 
         if (returnType.kind() == Type.Kind.VOID) {
             String code = "204";
+            String description = "No Content";
             if (method.hasAnnotation(OpenApiConstants.DOTNAME_POST)) {
                 code = "201";
+                description = "Created";
             }
             responses = ModelUtil.responses(operation);
-            response = new APIResponseImpl();
+            response = new APIResponseImpl().description(description);
             responses.addApiResponse(code, response);
         } else {
             schema = typeToSchema(returnType);
             responses = ModelUtil.responses(operation);
-            response = new APIResponseImpl();
+            response = new APIResponseImpl().description("OK");
             content = new ContentImpl();
             String[] produces = this.currentProduces;
             if (produces == null || produces.length == 0) {
