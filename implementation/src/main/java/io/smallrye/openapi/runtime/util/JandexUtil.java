@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.runtime.util;
 
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -282,7 +283,16 @@ public class JandexUtil {
         for (AnnotationInstance pathAnno : pathAnnotations) {
             AnnotationTarget annotationTarget = pathAnno.target();
             if (annotationTarget.kind() == AnnotationTarget.Kind.CLASS) {
-                resourceClasses.add(annotationTarget.asClass());
+                ClassInfo classInfo = (ClassInfo) annotationTarget;
+                if (Modifier.isInterface(classInfo.flags())) {
+                    if (index.getAllKnownImplementors(classInfo.name())
+                            .stream()
+                            .anyMatch(info -> !Modifier.isAbstract(info.flags()))) {
+                        resourceClasses.add(annotationTarget.asClass());
+                    }
+                } else {
+                    resourceClasses.add(annotationTarget.asClass());
+                }
             }
         }
         return resourceClasses;
