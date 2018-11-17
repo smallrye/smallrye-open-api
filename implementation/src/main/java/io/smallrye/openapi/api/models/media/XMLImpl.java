@@ -24,7 +24,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link XML} OpenAPI model interface.
  */
-public class XMLImpl extends ExtensibleImpl implements XML, ModelImpl {
+public class XMLImpl extends ExtensibleImpl<XML> implements XML, ModelImpl {
 
     private String name;
     private String namespace;

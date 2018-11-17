@@ -17,6 +17,7 @@
 package io.smallrye.openapi.api.models;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 /**
  * An implementation of the {@link ExternalDocumentation} OpenAPI model interface.
  */
-public class OperationImpl extends ExtensibleImpl implements Operation, ModelImpl {
+public class OperationImpl extends ExtensibleImpl<Operation> implements Operation, ModelImpl {
 
     private List<String> tags;
     private String summary;
@@ -82,6 +83,16 @@ public class OperationImpl extends ExtensibleImpl implements Operation, ModelImp
         }
         this.tags.add(tag);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Operation#removeTag(String)
+     */
+    @Override
+    public void removeTag(String tag) {
+        if (this.tags != null) {
+            this.tags.remove(tag);
+        }
     }
 
     /**
@@ -222,6 +233,16 @@ public class OperationImpl extends ExtensibleImpl implements Operation, ModelImp
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Operation#removeParameter(org.eclipse.microprofile.openapi.models.parameters.Parameter)
+     */
+    @Override
+    public void removeParameter(Parameter parameter) {
+        if (this.parameters != null) {
+            this.parameters.remove(parameter);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Operation#getRequestBody()
      */
     @Override
@@ -297,6 +318,28 @@ public class OperationImpl extends ExtensibleImpl implements Operation, ModelImp
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Operation#addCallback(java.lang.String, org.eclipse.microprofile.openapi.models.callbacks.Callback)
+     */
+    @Override
+    public Operation addCallback(String key, Callback callback) {
+        if (this.callbacks == null) {
+            this.callbacks = new LinkedHashMap<>();
+        }
+        this.callbacks.put(key, callback);
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Operation#removeCallback(java.lang.String)
+     */
+    @Override
+    public void removeCallback(String key) {
+        if (this.callbacks == null) {
+            this.callbacks.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Operation#getDeprecated()
      */
     @Override
@@ -359,6 +402,16 @@ public class OperationImpl extends ExtensibleImpl implements Operation, ModelImp
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Operation#removeSecurityRequirement(org.eclipse.microprofile.openapi.models.security.SecurityRequirement)
+     */
+    @Override
+    public void removeSecurityRequirement(SecurityRequirement securityRequirement) {
+        if (this.security != null) {
+            this.security.remove(securityRequirement);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Operation#getServers()
      */
     @Override
@@ -393,6 +446,16 @@ public class OperationImpl extends ExtensibleImpl implements Operation, ModelImp
         }
         this.servers.add(server);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Operation#removeServer(org.eclipse.microprofile.openapi.models.servers.Server)
+     */
+    @Override
+    public void removeServer(Server server) {
+        if (this.servers != null) {
+            this.servers.remove(server);
+        }
     }
 
 }

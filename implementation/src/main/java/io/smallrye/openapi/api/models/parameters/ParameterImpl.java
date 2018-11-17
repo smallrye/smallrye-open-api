@@ -31,7 +31,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Parameter} OpenAPI model interface.
  */
-public class ParameterImpl extends ExtensibleImpl implements Parameter, ModelImpl {
+public class ParameterImpl extends ExtensibleImpl<Parameter> implements Parameter, ModelImpl {
 
     private String $ref;
     private String name;
@@ -336,6 +336,16 @@ public class ParameterImpl extends ExtensibleImpl implements Parameter, ModelImp
         }
         this.examples.put(key, example);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#removeExample(java.lang.String)
+     */
+    @Override
+    public void removeExample(String key) {
+        if (this.examples != null) {
+            this.examples.remove(key);
+        }
     }
 
     /**

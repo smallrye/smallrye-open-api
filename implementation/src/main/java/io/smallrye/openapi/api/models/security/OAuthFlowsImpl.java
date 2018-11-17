@@ -25,7 +25,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link OAuthFlows} OpenAPI model interface.
  */
-public class OAuthFlowsImpl extends ExtensibleImpl implements OAuthFlows, ModelImpl {
+public class OAuthFlowsImpl extends ExtensibleImpl<OAuthFlows> implements OAuthFlows, ModelImpl {
 
     private OAuthFlow implicit;
     private OAuthFlow password;

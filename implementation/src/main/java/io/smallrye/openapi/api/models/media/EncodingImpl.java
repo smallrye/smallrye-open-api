@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.media;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.headers.Header;
@@ -27,7 +28,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Encoding} OpenAPI model interface.
  */
-public class EncodingImpl extends ExtensibleImpl implements Encoding, ModelImpl {
+public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, ModelImpl {
 
     private String contentType;
     private Map<String, Header> headers;
@@ -58,6 +59,28 @@ public class EncodingImpl extends ExtensibleImpl implements Encoding, ModelImpl 
     @Override
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.media.Encoding#addHeader(java.lang.String, org.eclipse.microprofile.openapi.models.headers.Header)
+     */
+    @Override
+    public Encoding addHeader(String key, Header header) {
+        if (this.headers == null) {
+            this.headers = new LinkedHashMap<>();
+        }
+        this.headers.put(key, header);
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.media.Encoding#removeHeader(java.lang.String)
+     */
+    @Override
+    public void removeHeader(String key) {
+        if (this.headers != null) {
+            this.headers.remove(key);
+        }
     }
 
     /**

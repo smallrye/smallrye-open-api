@@ -44,11 +44,22 @@ public class ScopesImpl extends LinkedHashMap<String, String> implements Scopes,
      * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
      */
     @Override
-    public void addExtension(String name, Object value) {
+    public Scopes addExtension(String name, Object value) {
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
         this.extensions.put(name, value);
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
+     */
+    @Override
+    public void removeExtension(String name) {
+        if (this.extensions != null) {
+            this.extensions.remove(name);
+        }
     }
 
     /**
@@ -66,6 +77,31 @@ public class ScopesImpl extends LinkedHashMap<String, String> implements Scopes,
     public Scopes addScope(String scope, String description) {
         this.put(scope, description);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.security.Scopes#removeScope(java.lang.String)
+     */
+    @Override
+    public void removeScope(String scope) {
+        this.remove(scope);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.security.Scopes#getScopes()
+     */
+    @Override
+    public Map<String, String> getScopes() {
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.security.Scopes#setScopes(java.util.Map)
+     */
+    @Override
+    public void setScopes(Map<String, String> items) {
+        this.clear();
+        this.putAll(items);
     }
 
 }

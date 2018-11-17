@@ -35,7 +35,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Content} OpenAPI model interface.
  */
-public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
+public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelImpl {
 
     private String $ref;
     private String format;
@@ -213,6 +213,16 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
         }
         this.enumeration.add(enumeration);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#removeEnumeration(Object)
+     */
+    @Override
+    public void removeEnumeration(Object enumeration) {
+        if (this.enumeration != null) {
+            this.enumeration.remove(enumeration);
+        }
     }
 
     /**
@@ -578,6 +588,16 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#removeRequired(String)
+     */
+    @Override
+    public void removeRequired(String required) {
+        if (this.required != null) {
+            this.required.remove(required);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getType()
      */
     @Override
@@ -665,6 +685,16 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#removeProperty(java.lang.String)
+     */
+    @Override
+    public void removeProperty(String key) {
+        if (this.properties != null) {
+            this.properties.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getAdditionalProperties()
      */
     @Override
@@ -675,40 +705,50 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
             return this.additionalPropertiesBoolean;
         }
     }
+    
+    @Override
+    public Schema getAdditionalPropertiesSchema() {
+        return this.additionalPropertiesSchema;
+    }
+
+    @Override
+    public Boolean getAdditionalPropertiesBoolean() {
+        return this.additionalPropertiesBoolean;
+    }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#setAdditionalProperties(org.eclipse.microprofile.openapi.models.media.Schema)
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#setAdditionalPropertiesSchema(org.eclipse.microprofile.openapi.models.media.Schema)
      */
     @Override
-    public void setAdditionalProperties(Schema additionalProperties) {
+    public void setAdditionalPropertiesSchema(Schema additionalProperties) {
         this.additionalPropertiesBoolean = null;
         this.additionalPropertiesSchema = additionalProperties;
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#setAdditionalProperties(java.lang.Boolean)
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#setAdditionalPropertiesBoolean(java.lang.Boolean)
      */
     @Override
-    public void setAdditionalProperties(Boolean additionalProperties) {
+    public void setAdditionalPropertiesBoolean(Boolean additionalProperties) {
         this.additionalPropertiesSchema = null;
         this.additionalPropertiesBoolean = additionalProperties;
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#additionalProperties(org.eclipse.microprofile.openapi.models.media.Schema)
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#additionalPropertiesSchema(org.eclipse.microprofile.openapi.models.media.Schema)
      */
     @Override
-    public Schema additionalProperties(Schema additionalProperties) {
+    public Schema additionalPropertiesSchema(Schema additionalProperties) {
         this.additionalPropertiesBoolean = null;
         this.additionalPropertiesSchema = additionalProperties;
         return this;
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#additionalProperties(java.lang.Boolean)
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#additionalPropertiesBoolean(java.lang.Boolean)
      */
     @Override
-    public Schema additionalProperties(Boolean additionalProperties) {
+    public Schema additionalPropertiesBoolean(Boolean additionalProperties) {
         this.additionalPropertiesSchema = null;
         this.additionalPropertiesBoolean = additionalProperties;
         return this;
@@ -1002,6 +1042,16 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#removeAllOf(org.eclipse.microprofile.openapi.models.media.Schema)
+     */
+    @Override
+    public void removeAllOf(Schema allOf) {
+        if (this.allOf != null) {
+            this.allOf.remove(allOf);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getAnyOf()
      */
     @Override
@@ -1039,6 +1089,16 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#removeAnyOf(org.eclipse.microprofile.openapi.models.media.Schema)
+     */
+    @Override
+    public void removeAnyOf(Schema anyOf) {
+        if (this.anyOf != null) {
+            this.anyOf.remove(anyOf);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getOneOf()
      */
     @Override
@@ -1073,6 +1133,16 @@ public class SchemaImpl extends ExtensibleImpl implements Schema, ModelImpl {
         }
         this.oneOf.add(oneOf);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.media.Schema#removeOneOf(org.eclipse.microprofile.openapi.models.media.Schema)
+     */
+    @Override
+    public void removeOneOf(Schema oneOf) {
+        if (this.oneOf != null) {
+            this.oneOf.remove(oneOf);
+        }
     }
 
 }

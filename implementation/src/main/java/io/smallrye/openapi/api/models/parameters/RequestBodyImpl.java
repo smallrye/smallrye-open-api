@@ -26,7 +26,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link RequestBody} OpenAPI model interface.
  */
-public class RequestBodyImpl extends ExtensibleImpl implements RequestBody, ModelImpl {
+public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements RequestBody, ModelImpl {
 
     private String $ref;
     private String description;

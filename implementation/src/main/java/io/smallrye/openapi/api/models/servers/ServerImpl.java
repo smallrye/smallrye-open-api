@@ -25,7 +25,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Server} OpenAPI model interface.
  */
-public class ServerImpl extends ExtensibleImpl implements Server, ModelImpl {
+public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelImpl {
 
     private String url;
     private String description;

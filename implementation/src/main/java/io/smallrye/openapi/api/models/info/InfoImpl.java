@@ -26,7 +26,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Info} OpenAPI model interface.
  */
-public class InfoImpl extends ExtensibleImpl implements Info, ModelImpl {
+public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
 
     private String title;
     private String description;

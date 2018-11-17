@@ -32,7 +32,7 @@ import org.eclipse.microprofile.openapi.models.tags.Tag;
 /**
  * An implementation of the {@link OpenAPI} OpenAPI model interface.
  */
-public class OpenAPIImpl extends ExtensibleImpl implements OpenAPI, ModelImpl {
+public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, ModelImpl {
 
     private String openapi;
     private Info info;
@@ -156,6 +156,16 @@ public class OpenAPIImpl extends ExtensibleImpl implements OpenAPI, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.OpenAPI#removeServer(org.eclipse.microprofile.openapi.models.servers.Server)
+     */
+    @Override
+    public void removeServer(Server server) {
+        if (this.servers != null) {
+            this.servers.remove(server);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.OpenAPI#getSecurity()
      */
     @Override
@@ -190,6 +200,16 @@ public class OpenAPIImpl extends ExtensibleImpl implements OpenAPI, ModelImpl {
         }
         this.security.add(securityRequirement);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.OpenAPI#removeSecurityRequirement(org.eclipse.microprofile.openapi.models.security.SecurityRequirement)
+     */
+    @Override
+    public void removeSecurityRequirement(SecurityRequirement securityRequirement) {
+        if (this.security != null) {
+            this.security.remove(securityRequirement);
+        }
     }
 
     /**
@@ -229,6 +249,16 @@ public class OpenAPIImpl extends ExtensibleImpl implements OpenAPI, ModelImpl {
             this.tags.add(tag);
         }
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.OpenAPI#removeTag(org.eclipse.microprofile.openapi.models.tags.Tag)
+     */
+    @Override
+    public void removeTag(Tag tag) {
+        if (this.tags != null) {
+            this.tags.remove(tag);
+        }
     }
 
     /**
