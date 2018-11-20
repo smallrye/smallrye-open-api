@@ -471,9 +471,4 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
         }
     }
 
-    @Override
-    public String getPathString(String pathString) {
-        // TODO This method will be removed with https://github.com/eclipse/microprofile-open-api/pull/298
-        return null;
-    }
 }
