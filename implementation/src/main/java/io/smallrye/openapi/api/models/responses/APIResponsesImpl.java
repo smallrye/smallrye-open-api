@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.responses;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,7 +33,6 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
 
     private static final long serialVersionUID = 7767651877116575739L;
 
-    private APIResponse defaultValue;
     private Map<String, Object> extensions;
 
     /**
@@ -92,7 +92,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
 
     @Override
     public Map<String, APIResponse> getAPIResponses() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponse getDefaultValue() {
-        return this.defaultValue;
+        return getAPIResponse(DEFAULT);
     }
 
     /**
@@ -114,7 +114,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public void setDefaultValue(APIResponse defaultValue) {
-        this.defaultValue = defaultValue;
+        addAPIResponse(DEFAULT, defaultValue);
     }
 
     /**
@@ -122,7 +122,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponses defaultValue(APIResponse defaultValue) {
-        this.defaultValue = defaultValue;
+        addAPIResponse(DEFAULT, defaultValue);
         return this;
     }
 

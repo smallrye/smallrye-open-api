@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.security;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -92,7 +93,7 @@ public class ScopesImpl extends LinkedHashMap<String, String> implements Scopes,
      */
     @Override
     public Map<String, String> getScopes() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     /**

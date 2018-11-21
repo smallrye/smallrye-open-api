@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.servers;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -93,7 +94,7 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
      */
     @Override
     public Map<String, ServerVariable> getServerVariables() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     @Override

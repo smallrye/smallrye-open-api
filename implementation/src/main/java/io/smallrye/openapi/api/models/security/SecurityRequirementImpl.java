@@ -72,7 +72,7 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
      */
     @Override
     public Map<String, List<String>> getSchemes() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     /**

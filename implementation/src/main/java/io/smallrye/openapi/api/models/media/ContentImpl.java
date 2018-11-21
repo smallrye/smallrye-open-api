@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.media;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
      */
     @Override
     public Map<String, MediaType> getMediaTypes() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     /**

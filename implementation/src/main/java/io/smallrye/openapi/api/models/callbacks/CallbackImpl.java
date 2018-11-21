@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.callbacks;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -123,7 +124,7 @@ public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Cal
      */
     @Override
     public Map<String, PathItem> getPathItems() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     /**

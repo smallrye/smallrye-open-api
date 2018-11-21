@@ -334,7 +334,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void removeCallback(String key) {
-        if (this.callbacks == null) {
+        if (this.callbacks != null) {
             this.callbacks.remove(key);
         }
     }

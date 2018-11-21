@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -91,7 +92,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public Map<String, PathItem> getPathItems() {
-        return this;
+        return Collections.unmodifiableMap(this);
     }
 
     /**
