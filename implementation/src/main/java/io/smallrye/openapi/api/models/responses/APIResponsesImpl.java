@@ -83,7 +83,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#removeApiResponse(java.lang.String)
+     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#removeAPIResponse(java.lang.String)
      */
     @Override
     public void removeAPIResponse(String name) {

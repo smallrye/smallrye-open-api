@@ -51,7 +51,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
     }
 
     /**
-     * @see null#removeExtension(java.lang.String)
+     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
      */
     @Override
     public void removeExtension(String name) {
