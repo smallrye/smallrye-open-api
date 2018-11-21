@@ -41,7 +41,7 @@
         <version.javax.enterprise.cdi-api>1.2</version.javax.enterprise.cdi-api>
         <version.javax.annotation-api>1.2</version.javax.annotation-api>
         <version.junit>4.12</version.junit>
-        <version.org.jboss.arquillian>1.1.13.Final</version.org.jboss.arquillian>
+        <version.org.jboss.arquillian>1.4.1.Final</version.org.jboss.arquillian>
         <version.org.jboss.arquillian.container.weld-embedded>2.0.0.Final</version.org.jboss.arquillian.container.weld-embedded>
         <version.org.jboss.jandex>2.0.5.Final</version.org.jboss.jandex>
         <version.org.jboss.logging>3.3.1.Final</version.org.jboss.logging>
