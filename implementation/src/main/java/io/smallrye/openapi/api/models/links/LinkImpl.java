@@ -29,7 +29,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Link} OpenAPI model interface.
  */
-public class LinkImpl extends ExtensibleImpl implements Link, ModelImpl {
+public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
 
     private String $ref;
     private String operationRef;
@@ -202,6 +202,16 @@ public class LinkImpl extends ExtensibleImpl implements Link, ModelImpl {
         }
         this.parameters.put(name, parameter);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.links.Link#removeParameter(java.lang.String)
+     */
+    @Override
+    public void removeParameter(String name) {
+        if (this.parameters != null) {
+            this.parameters.remove(name);
+        }
     }
 
     /**

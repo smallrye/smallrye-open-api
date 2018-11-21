@@ -26,7 +26,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link SecurityScheme} OpenAPI model interface.
  */
-public class SecuritySchemeImpl extends ExtensibleImpl implements SecurityScheme, ModelImpl {
+public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implements SecurityScheme, ModelImpl {
 
     private String $ref;
     private Type type;

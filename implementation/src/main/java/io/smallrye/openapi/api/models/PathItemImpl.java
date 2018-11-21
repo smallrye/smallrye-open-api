@@ -29,7 +29,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 /**
  * An implementation of the {@link PathItem} OpenAPI model interface.
  */
-public class PathItemImpl extends ExtensibleImpl implements PathItem, ModelImpl {
+public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, ModelImpl {
 
     private String $ref;
     private String summary;
@@ -338,10 +338,10 @@ public class PathItemImpl extends ExtensibleImpl implements PathItem, ModelImpl 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#readOperationsMap()
+     * @see org.eclipse.microprofile.openapi.models.PathItem#getOperations()
      */
     @Override
-    public Map<HttpMethod, Operation> readOperationsMap() {
+    public Map<HttpMethod, Operation> getOperations() {
         Map<HttpMethod, Operation> ops = new LinkedHashMap<>();
         addOperationToMap(HttpMethod.GET, this.get, ops);
         addOperationToMap(HttpMethod.PUT, this.put, ops);
@@ -392,6 +392,16 @@ public class PathItemImpl extends ExtensibleImpl implements PathItem, ModelImpl 
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.PathItem#removeServer(org.eclipse.microprofile.openapi.models.servers.Server)
+     */
+    @Override
+    public void removeServer(Server server) {
+        if (this.servers != null) {
+            this.servers.remove(server);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getParameters()
      */
     @Override
@@ -426,6 +436,16 @@ public class PathItemImpl extends ExtensibleImpl implements PathItem, ModelImpl 
         }
         this.parameters.add(parameter);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.PathItem#removeParameter(org.eclipse.microprofile.openapi.models.parameters.Parameter)
+     */
+    @Override
+    public void removeParameter(Parameter parameter) {
+        if (this.parameters != null) {
+            this.parameters.remove(parameter);
+        }
     }
 
     /**

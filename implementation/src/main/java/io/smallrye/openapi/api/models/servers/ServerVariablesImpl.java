@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.servers;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -45,11 +46,22 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
      * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
      */
     @Override
-    public void addExtension(String name, Object value) {
+    public ServerVariables addExtension(String name, Object value) {
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
         this.extensions.put(name, value);
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
+     */
+    @Override
+    public void removeExtension(String name) {
+        if (this.extensions != null) {
+            this.extensions.remove(name);
+        }
     }
 
     /**
@@ -67,6 +79,28 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
     public ServerVariables addServerVariable(String name, ServerVariable serverVariable) {
         this.put(name, serverVariable);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariables#removeServerVariable(java.lang.String)
+     */
+    @Override
+    public void removeServerVariable(String name) {
+        this.remove(name);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariables#getServerVariables()
+     */
+    @Override
+    public Map<String, ServerVariable> getServerVariables() {
+        return Collections.unmodifiableMap(this);
+    }
+
+    @Override
+    public void setServerVariables(Map<String, ServerVariable> items) {
+        this.clear();
+        this.putAll(items);
     }
 
 }

@@ -27,7 +27,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link ServerVariable} OpenAPI model interface.
  */
-public class ServerVariableImpl extends ExtensibleImpl implements ServerVariable, ModelImpl {
+public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implements ServerVariable, ModelImpl {
 
     private List<String> enumeration;
     private String defaultValue;
@@ -68,6 +68,16 @@ public class ServerVariableImpl extends ExtensibleImpl implements ServerVariable
         }
         this.enumeration.add(enumeration);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#removeEnumeration(String)
+     */
+    @Override
+    public void removeEnumeration(String enumeration) {
+        if (this.enumeration != null) {
+            this.enumeration.remove(enumeration);
+        }
     }
 
     /**
