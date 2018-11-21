@@ -26,7 +26,7 @@ import org.eclipse.microprofile.openapi.models.Extensible;
  * OpenAPI models.
  * @author eric.wittmann@gmail.com
  */
-public abstract class ExtensibleImpl implements Extensible, ModelImpl {
+public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensible<T>, ModelImpl {
 
     private Map<String, Object> extensions;
 
@@ -42,11 +42,22 @@ public abstract class ExtensibleImpl implements Extensible, ModelImpl {
      * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
      */
     @Override
-    public void addExtension(String name, Object value) {
+    public T addExtension(String name, Object value) {
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
         this.extensions.put(name, value);
+        return (T) this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
+     */
+    @Override
+    public void removeExtension(String name) {
+        if (this.extensions != null) {
+            this.extensions.remove(name);
+        }
     }
 
     /**

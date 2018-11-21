@@ -25,7 +25,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Example} OpenAPI model interface.
  */
-public class ExampleImpl extends ExtensibleImpl implements Example, ModelImpl {
+public class ExampleImpl extends ExtensibleImpl<Example> implements Example, ModelImpl {
 
     private String $ref;
     private String summary;

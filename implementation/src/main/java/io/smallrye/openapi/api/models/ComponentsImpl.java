@@ -33,7 +33,7 @@ import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 /**
  * An implementation of the {@link Components} OpenAPI model interface.
  */
-public class ComponentsImpl extends ExtensibleImpl implements Components, ModelImpl {
+public class ComponentsImpl extends ExtensibleImpl<Components> implements Components, ModelImpl {
 
     private Map<String, Schema> schemas;
     private Map<String, APIResponse> responses;
@@ -83,6 +83,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeSchema(java.lang.String)
+     */
+    @Override
+    public void removeSchema(String key) {
+        if (this.schemas != null) {
+            this.schemas.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Components#getResponses()
      */
     @Override
@@ -117,6 +127,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
         }
         this.responses.put(key, response);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeResponse(java.lang.String)
+     */
+    @Override
+    public void removeResponse(String key) {
+        if (this.responses != null) {
+            this.responses.remove(key);
+        }
     }
 
     /**
@@ -157,6 +177,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeParameter(java.lang.String)
+     */
+    @Override
+    public void removeParameter(String key) {
+        if (this.parameters != null) {
+            this.parameters.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Components#getExamples()
      */
     @Override
@@ -191,6 +221,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
         }
         this.examples.put(key, example);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeExample(java.lang.String)
+     */
+    @Override
+    public void removeExample(String key) {
+        if (this.examples != null) {
+            this.examples.remove(key);
+        }
     }
 
     /**
@@ -231,6 +271,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeRequestBody(java.lang.String)
+     */
+    @Override
+    public void removeRequestBody(String key) {
+        if (this.requestBodies != null) {
+            this.requestBodies.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Components#getHeaders()
      */
     @Override
@@ -265,6 +315,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
         }
         this.headers.put(key, header);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeHeader(java.lang.String)
+     */
+    @Override
+    public void removeHeader(String key) {
+        if (this.headers != null) {
+            this.headers.remove(key);
+        }
     }
 
     /**
@@ -305,6 +365,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeSecurityScheme(java.lang.String)
+     */
+    @Override
+    public void removeSecurityScheme(String key) {
+        if (this.securitySchemes != null) {
+            this.securitySchemes.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Components#getLinks()
      */
     @Override
@@ -342,6 +412,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeLink(java.lang.String)
+     */
+    @Override
+    public void removeLink(String key) {
+        if (this.links != null) {
+            this.links.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Components#getCallbacks()
      */
     @Override
@@ -376,6 +456,16 @@ public class ComponentsImpl extends ExtensibleImpl implements Components, ModelI
         }
         this.callbacks.put(key, callback);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Components#removeCallback(java.lang.String)
+     */
+    @Override
+    public void removeCallback(String key) {
+        if (this.callbacks != null) {
+            this.callbacks.remove(key);
+        }
     }
 
 }
