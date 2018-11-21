@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 
@@ -78,7 +77,11 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponses addAPIResponse(String name, APIResponse apiResponse) {
-        this.put(name, apiResponse);
+        if (apiResponse == null) {
+            this.removeAPIResponse(name);
+        } else {
+            this.put(name, apiResponse);
+        }
         return this;
     }
 
