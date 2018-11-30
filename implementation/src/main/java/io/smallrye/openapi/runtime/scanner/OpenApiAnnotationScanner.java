@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletionStage;
 
 import javax.ws.rs.core.Application;
 
@@ -75,6 +77,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
+import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
@@ -128,6 +131,8 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class OpenApiAnnotationScanner {
 
+    private static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
+
     private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
 
     private final IndexView index;
@@ -141,13 +146,26 @@ public class OpenApiAnnotationScanner {
 
     private SchemaRegistry schemaRegistry = new SchemaRegistry();
 
+    private List<AnnotationScannerExtension> extensions;
+
     /**
      * Constructor.
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
+        this(config, index, Collections.emptyList());
+    }
+
+    /**
+     * Constructor.
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
+     * @param extensions A set of extensions to scanning
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions) {
         this.index = index;
+        this.extensions = extensions;
     }
 
     /**
@@ -521,6 +539,14 @@ public class OpenApiAnnotationScanner {
         List<Type> parameters = method.parameters();
         for (int idx = 0; idx < parameters.size(); idx++) {
             JaxRsParameterInfo paramInfo = JandexUtil.getMethodParameterJaxRsInfo(method, idx);
+            // Try extensions
+            if (paramInfo == null) {
+                for (AnnotationScannerExtension extension : extensions) {
+                    paramInfo = extension.getMethodParameterJaxRsInfo(method, idx);
+                    if (paramInfo != null)
+                        break;
+                }
+            }
             if (paramInfo != null && !ModelUtil.operationHasParameter(operation, paramInfo.name)) {
                 Type paramType = parameters.get(idx);
                 Parameter parameter = new ParameterImpl();
@@ -748,9 +774,25 @@ public class OpenApiAnnotationScanner {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = OpenApiDataObjectScanner.process(index, type);
+            Type asyncType = resolveAsyncType(type);
+            schema = OpenApiDataObjectScanner.process(index, asyncType);
         }
         return schema;
+    }
+
+    private Type resolveAsyncType(Type type) {
+        if(type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+            ParameterizedType pType = type.asParameterizedType();
+            if(pType.name().equals(COMPLETION_STAGE_NAME)
+                    && pType.arguments().size() == 1)
+                return pType.arguments().get(0);
+        }
+        for (AnnotationScannerExtension extension : extensions) {
+            Type asyncType = extension.resolveAsyncType(type);
+            if(asyncType != null)
+                return asyncType;
+        }
+        return type;
     }
 
     /**
@@ -775,6 +817,12 @@ public class OpenApiAnnotationScanner {
             if (annotation.name().equals(OpenApiConstants.DOTNAME_COOKIE_PARAM)) {
                 return In.COOKIE;
             }
+        }
+        // Try extensions
+        for (AnnotationScannerExtension extension : extensions) {
+            In ret = extension.parameterIn(paramInfo);
+            if (ret != null)
+                return ret;
         }
         return null;
     }
