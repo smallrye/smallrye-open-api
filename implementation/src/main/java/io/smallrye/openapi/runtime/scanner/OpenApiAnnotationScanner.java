@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.CompletionStage;
 
 import javax.ws.rs.core.Application;
 
@@ -130,8 +129,6 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiAnnotationScanner {
-
-    private static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 
     private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
 
@@ -783,7 +780,7 @@ public class OpenApiAnnotationScanner {
     private Type resolveAsyncType(Type type) {
         if(type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
-            if(pType.name().equals(COMPLETION_STAGE_NAME)
+            if(pType.name().equals(OpenApiConstants.COMPLETION_STAGE_NAME)
                     && pType.arguments().size() == 1)
                 return pType.arguments().get(0);
         }
