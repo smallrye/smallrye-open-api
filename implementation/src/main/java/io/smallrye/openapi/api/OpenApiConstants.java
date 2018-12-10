@@ -27,6 +27,7 @@ import javax.ws.rs.HEAD;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.MatrixParam;
 import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -239,6 +240,7 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_DELETE = DotName.createSimple(DELETE.class.getName());
     public static final DotName DOTNAME_HEAD = DotName.createSimple(HEAD.class.getName());
     public static final DotName DOTNAME_OPTIONS = DotName.createSimple(OPTIONS.class.getName());
+    public static final DotName DOTNAME_PATCH = DotName.createSimple(PATCH.class.getName());
 
     public static final DotName DOTNAME_RESPONSE = DotName.createSimple(Response.class.getName());
 
