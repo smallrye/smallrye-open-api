@@ -33,8 +33,8 @@
 
     <properties>
         <version.asciidoctor.plugin>1.5.7.1</version.asciidoctor.plugin>
-        <version.com.fasterxml.jackson>2.9.5</version.com.fasterxml.jackson>
-        <version.com.fasterxml.jackson.dataformat>2.9.5</version.com.fasterxml.jackson.dataformat>
+        <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson.dataformat>2.9.8</version.com.fasterxml.jackson.dataformat>
         <version.eclipse.microprofile.config>1.3</version.eclipse.microprofile.config>
         <version.eclipse.microprofile.openapi>1.0.1</version.eclipse.microprofile.openapi>
         <version.javax.javaee-api>7.0</version.javax.javaee-api>
@@ -44,7 +44,7 @@
         <version.org.jboss.arquillian>1.1.13.Final</version.org.jboss.arquillian>
         <version.org.jboss.arquillian.container.weld-embedded>2.0.0.Final</version.org.jboss.arquillian.container.weld-embedded>
         <version.org.jboss.jandex>2.0.5.Final</version.org.jboss.jandex>
-        <version.org.jboss.logging>3.3.1.Final</version.org.jboss.logging>
+        <version.org.jboss.logging>3.3.2.Final</version.org.jboss.logging>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.jboss.weld>2.3.SP2</version.org.jboss.weld>
         <version.org.jboss.weld.core.impl>2.3.5.Final</version.org.jboss.weld.core.impl>
