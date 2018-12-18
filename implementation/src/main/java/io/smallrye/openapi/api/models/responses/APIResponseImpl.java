@@ -31,7 +31,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link APIResponse} OpenAPI model interface.
  */
-public class APIResponseImpl extends ExtensibleImpl implements APIResponse, ModelImpl {
+public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIResponse, ModelImpl {
 
     private String $ref;
     private String description;
@@ -130,6 +130,16 @@ public class APIResponseImpl extends ExtensibleImpl implements APIResponse, Mode
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#removeHeader(java.lang.String)
+     */
+    @Override
+    public void removeHeader(String name) {
+        if (this.headers != null) {
+            this.headers.remove(name);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#getContent()
      */
     @Override
@@ -189,6 +199,16 @@ public class APIResponseImpl extends ExtensibleImpl implements APIResponse, Mode
         }
         this.links.put(name, link);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#removeLink(java.lang.String)
+     */
+    @Override
+    public void removeLink(String name) {
+        if (this.links != null) {
+            this.links.remove(name);
+        }
     }
 
 }

@@ -31,7 +31,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Discriminator} MediaType model interface.
  */
-public class MediaTypeImpl extends ExtensibleImpl implements MediaType, ModelImpl {
+public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaType, ModelImpl {
 
     private Schema schema;
     private Object example;
@@ -101,6 +101,16 @@ public class MediaTypeImpl extends ExtensibleImpl implements MediaType, ModelImp
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.MediaType#removeExample(java.lang.String)
+     */
+    @Override
+    public void removeExample(String key) {
+        if (this.examples != null) {
+            this.examples.remove(key);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.MediaType#getExample()
      */
     @Override
@@ -160,6 +170,16 @@ public class MediaTypeImpl extends ExtensibleImpl implements MediaType, ModelImp
         }
         this.encoding.put(key, encodingItem);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.media.MediaType#removeEncoding(java.lang.String)
+     */
+    @Override
+    public void removeEncoding(String key) {
+        if (this.encoding != null) {
+            this.encoding.remove(key);
+        }
     }
 
 }

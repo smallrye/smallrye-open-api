@@ -24,7 +24,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link License} OpenAPI model interface.
  */
-public class LicenseImpl extends ExtensibleImpl implements License, ModelImpl {
+public class LicenseImpl extends ExtensibleImpl<License> implements License, ModelImpl {
 
     private String name;
     private String url;

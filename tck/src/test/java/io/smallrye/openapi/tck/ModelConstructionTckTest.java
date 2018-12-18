@@ -17,22 +17,13 @@
 package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.ModelConstructionTest;
+import org.junit.runner.RunWith;
 
-import test.io.smallrye.openapi.tck.BaseTckTest;
-import test.io.smallrye.openapi.tck.TckTest;
+import test.io.smallrye.openapi.tck.TestNgRunner;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-@TckTest
-public class ModelConstructionTckTest extends BaseTckTest<ModelConstructionTest> {
-    
-    /**
-     * @see test.io.smallrye.openapi.tck.BaseTckTest#getTestArguments()
-     */
-    @Override
-    public Object[] getTestArguments() {
-        return null;
-    }
-
+@RunWith(TestNgRunner.class)
+public class ModelConstructionTckTest extends ModelConstructionTest {
 }

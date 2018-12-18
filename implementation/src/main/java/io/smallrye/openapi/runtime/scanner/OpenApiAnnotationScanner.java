@@ -349,6 +349,10 @@ public class OpenApiAnnotationScanner {
             if (options != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
             }
+	    AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
+            if (patch != null) {
+                processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
+            }
         }
     }
 

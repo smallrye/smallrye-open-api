@@ -23,7 +23,6 @@ import java.util.List;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-@SuppressWarnings("unused")
 public class SpecialCaseTestContainer {
 
     // Collection with concrete generic type.

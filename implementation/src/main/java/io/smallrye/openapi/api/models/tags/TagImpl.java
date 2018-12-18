@@ -25,7 +25,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Tag} OpenAPI model interface.
  */
-public class TagImpl extends ExtensibleImpl implements Tag, ModelImpl {
+public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
 
     private String name;
     private String description;

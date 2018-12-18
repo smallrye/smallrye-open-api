@@ -69,6 +69,16 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#removeMapping(java.lang.String)
+     */
+    @Override
+    public void removeMapping(String name) {
+        if (this.mapping != null) {
+            this.mapping.remove(name);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.Discriminator#mapping(java.util.Map)
      */
     @Override

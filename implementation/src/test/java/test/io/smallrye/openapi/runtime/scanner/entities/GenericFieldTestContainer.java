@@ -22,7 +22,6 @@ import java.util.Map;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-@SuppressWarnings("unused")
 public class GenericFieldTestContainer<K, V> {
     // Plain field K
     V genericFieldK;
