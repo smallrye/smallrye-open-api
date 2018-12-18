@@ -17,12 +17,12 @@
 package io.smallrye.openapi.api.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.info.Info;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
@@ -123,7 +123,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public List<Server> getServers() {
-        return this.servers;
+        return (this.servers == null) ? null : Collections.unmodifiableList(this.servers);
     }
 
     /**
@@ -131,7 +131,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = servers;
+        this.servers = (servers == null) ? null : new ArrayList<>(servers);
     }
 
     /**
@@ -139,7 +139,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI servers(List<Server> servers) {
-        this.servers = servers;
+        this.servers = (servers == null) ? null : new ArrayList<>(servers);
         return this;
     }
 
@@ -170,7 +170,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public List<SecurityRequirement> getSecurity() {
-        return this.security;
+        return (this.security == null) ? null : Collections.unmodifiableList(this.security);
     }
 
     /**
@@ -178,7 +178,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setSecurity(List<SecurityRequirement> security) {
-        this.security = security;
+        this.security = (security == null) ? null : new ArrayList<>(security);
     }
 
     /**
@@ -186,7 +186,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI security(List<SecurityRequirement> security) {
-        this.security = security;
+        this.security = (security == null) ? null : new ArrayList<>(security);
         return this;
     }
 
@@ -217,7 +217,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public List<Tag> getTags() {
-        return this.tags;
+        return (this.tags == null) ? null : Collections.unmodifiableList(this.tags);
     }
 
     /**
@@ -225,7 +225,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setTags(List<Tag> tags) {
-        this.tags = tags;
+        this.tags = (tags == null) ? null : new ArrayList<>(tags);
     }
 
     /**
@@ -233,7 +233,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI tags(List<Tag> tags) {
-        this.tags = tags;
+        this.tags = (tags == null) ? null : new ArrayList<>(tags);
         return this;
     }
 
@@ -294,18 +294,6 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     @Override
     public OpenAPI paths(Paths paths) {
         this.paths = paths;
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.OpenAPI#path(java.lang.String, org.eclipse.microprofile.openapi.models.PathItem)
-     */
-    @Override
-    public OpenAPI path(String name, PathItem path) {
-        if (this.paths == null) {
-            this.paths = new PathsImpl();
-        }
-        this.paths.addPathItem(name, path);
         return this;
     }
 

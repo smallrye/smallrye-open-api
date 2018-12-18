@@ -34,9 +34,9 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
+import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
-import org.jboss.logging.Logger;
 
 /**
  * Used to merge two OAI data models into a single one.  The MP+OAI 1.0 spec
@@ -204,7 +204,7 @@ public class MergeUtil {
             if (values1 instanceof APIResponses) {
                 APIResponses responses1 = (APIResponses) values1;
                 APIResponses responses2 = (APIResponses) values2;
-                responses1.defaultValue(mergeObjects(responses1.getDefault(), responses2.getDefault()));
+                responses1.defaultValue(mergeObjects(responses1.getDefaultValue(), responses2.getDefaultValue()));
             }
         }
 

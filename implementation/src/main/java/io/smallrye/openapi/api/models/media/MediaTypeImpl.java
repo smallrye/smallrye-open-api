@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.media;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -68,7 +69,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return (this.examples == null) ? null : Collections.unmodifiableMap(this.examples);
     }
 
     /**
@@ -76,7 +77,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
     }
 
     /**
@@ -84,7 +85,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType examples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
         return this;
     }
 
@@ -140,7 +141,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public Map<String, Encoding> getEncoding() {
-        return this.encoding;
+        return (this.encoding == null) ? null : Collections.unmodifiableMap(this.encoding);
     }
 
     /**
@@ -148,7 +149,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void setEncoding(Map<String, Encoding> encoding) {
-        this.encoding = encoding;
+        this.encoding = (encoding == null) ? null : new LinkedHashMap<>(encoding);
     }
 
     /**
@@ -156,7 +157,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType encoding(Map<String, Encoding> encoding) {
-        this.encoding = encoding;
+        this.encoding = (encoding == null) ? null : new LinkedHashMap<>(encoding);
         return this;
     }
 

@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.responses;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -97,7 +98,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public Map<String, Header> getHeaders() {
-        return this.headers;
+        return (this.headers == null) ? null : Collections.unmodifiableMap(this.headers);
     }
 
     /**
@@ -105,7 +106,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = headers;
+        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
     }
 
     /**
@@ -113,7 +114,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse headers(Map<String, Header> headers) {
-        this.headers = headers;
+        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
         return this;
     }
 
@@ -169,7 +170,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public Map<String, Link> getLinks() {
-        return this.links;
+        return (this.links == null) ? null : Collections.unmodifiableMap(this.links);
     }
 
     /**
@@ -177,7 +178,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void setLinks(Map<String, Link> links) {
-        this.links = links;
+        this.links = (links == null) ? null : new LinkedHashMap<>(links);
     }
 
     /**
@@ -185,7 +186,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse links(Map<String, Link> links) {
-        this.links = links;
+        this.links = (links == null) ? null : new LinkedHashMap<>(links);
         return this;
     }
 

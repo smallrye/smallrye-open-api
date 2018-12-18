@@ -136,13 +136,13 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getPathItems().keySet());
         for (String key : keys) {
-            PathItem childModel = model.get(key);
+            PathItem childModel = model.getPathItem(key);
             filterPathItem(filter, childModel);
 
             if (filter.filterPathItem(childModel) == null) {
-                model.remove(key);
+                model.removePathItem(key);
             }
         }
         filterExtensions(filter, model.getExtensions());
@@ -231,7 +231,7 @@ public class FilterUtil {
         if (model.getRequestBody() != null && filter.filterRequestBody(model.getRequestBody()) == null) {
             model.setRequestBody(null);
         }
-        filterAPIResponses(filter, model.getResponses());
+        filterAPIResponses(filter, model.getResponses().getAPIResponses());
         filterSecurity(filter, model.getSecurity());
         filterServers(filter, model.getServers());
     }
@@ -311,9 +311,9 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getMediaTypes().keySet());
         for (String key : keys) {
-            MediaType childModel = model.get(key);
+            MediaType childModel = model.getMediaType(key);
             filterMediaType(filter, childModel);
         }
     }
@@ -536,11 +536,11 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Object ap = model.getAdditionalProperties();
-        if (ap != null && ap instanceof Schema) {
-            filterSchema(filter, (Schema) ap);
-            if (filter.filterSchema((Schema) ap) == null) {
-                model.setAdditionalProperties((Schema) null);
+        Schema ap = model.getAdditionalPropertiesSchema();
+        if (ap != null) {
+            filterSchema(filter, ap);
+            if (filter.filterSchema(ap) == null) {
+                model.setAdditionalPropertiesSchema(null);
             }
         }
         filterSchemaList(filter, model.getAllOf());
@@ -746,13 +746,13 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getPathItems().keySet());
         for (String key : keys) {
-            PathItem childModel = model.get(key);
+            PathItem childModel = model.getPathItem(key);
             filterPathItem(filter, childModel);
 
             if (filter.filterPathItem(childModel) == null) {
-                model.remove(key);
+                model.removePathItem(key);
             }
         }
         filterExtensions(filter, model.getExtensions());
@@ -828,9 +828,9 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getServerVariables().keySet());
         for (String key : keys) {
-            ServerVariable childModel = model.get(key);
+            ServerVariable childModel = model.getServerVariable(key);
             filterServerVariable(filter, childModel);
         }
         filterExtensions(filter, model.getExtensions());

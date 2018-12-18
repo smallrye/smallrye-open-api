@@ -17,6 +17,7 @@
 package io.smallrye.openapi.api.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public List<String> getTags() {
-        return this.tags;
+        return (this.tags == null) ? null : Collections.unmodifiableList(this.tags);
     }
 
     /**
@@ -61,7 +62,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setTags(List<String> tags) {
-        this.tags = tags;
+        this.tags = (tags == null) ? null : new ArrayList<>(tags);
     }
 
     /**
@@ -69,7 +70,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation tags(List<String> tags) {
-        this.tags = tags;
+        this.tags = (tags == null) ? null : new ArrayList<>(tags);
         return this;
     }
 
@@ -200,7 +201,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public List<Parameter> getParameters() {
-        return this.parameters;
+        return (this.parameters == null) ? null : Collections.unmodifiableList(this.parameters);
     }
 
     /**
@@ -208,7 +209,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new ArrayList<>(parameters);
     }
 
     /**
@@ -216,7 +217,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation parameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new ArrayList<>(parameters);
         return this;
     }
 
@@ -297,7 +298,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Map<String, Callback> getCallbacks() {
-        return this.callbacks;
+        return (this.callbacks == null) ? null : Collections.unmodifiableMap(this.callbacks);
     }
 
     /**
@@ -305,7 +306,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setCallbacks(Map<String, Callback> callbacks) {
-        this.callbacks = callbacks;
+        this.callbacks = (callbacks == null) ? null : new LinkedHashMap<>(callbacks);
     }
 
     /**
@@ -313,7 +314,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation callbacks(Map<String, Callback> callbacks) {
-        this.callbacks = callbacks;
+        this.callbacks = (callbacks == null) ? null : new LinkedHashMap<>(callbacks);
         return this;
     }
 
@@ -369,7 +370,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public List<SecurityRequirement> getSecurity() {
-        return this.security;
+        return (this.security == null) ? null : Collections.unmodifiableList(this.security);
     }
 
     /**
@@ -377,7 +378,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setSecurity(List<SecurityRequirement> security) {
-        this.security = security;
+        this.security = (security == null) ? null : new ArrayList<>(security);
     }
 
     /**
@@ -385,7 +386,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation security(List<SecurityRequirement> security) {
-        this.security = security;
+        this.security = (security == null) ? null : new ArrayList<>(security);
         return this;
     }
 
@@ -416,7 +417,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public List<Server> getServers() {
-        return this.servers;
+        return (this.servers == null) ? null : Collections.unmodifiableList(this.servers);
     }
 
     /**
@@ -424,7 +425,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = servers;
+        this.servers = (servers == null) ? null : new ArrayList<>(servers);
     }
 
     /**
@@ -432,7 +433,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation servers(List<Server> servers) {
-        this.servers = servers;
+        this.servers = (servers == null) ? null : new ArrayList<>(servers);
         return this;
     }
 

@@ -495,9 +495,9 @@ public class OpenApiParser {
         model.setAllOf(readSchemaArray(node.get(OpenApiConstants.PROP_ALL_OF)));
         model.setProperties(readSchemas(node.get(OpenApiConstants.PROP_PROPERTIES)));
         if (node.has(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES) && node.get(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES).isObject()) {
-            model.setAdditionalProperties(readSchema(node.get(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES)));
+            model.setAdditionalPropertiesSchema(readSchema(node.get(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES)));
         } else {
-            model.setAdditionalProperties(JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES));
+            model.setAdditionalPropertiesBoolean(JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES));
         }
         model.setReadOnly(JsonUtil.booleanProperty(node, OpenApiConstants.PROP_READ_ONLY));
         model.setXml(readXML(node.get(OpenApiConstants.PROP_XML)));
@@ -1150,7 +1150,7 @@ public class OpenApiParser {
             if (OpenApiConstants.PROP_DEFAULT.equals(fieldName)) {
                 continue;
             }
-            model.addApiResponse(fieldName, readAPIResponse(node.get(fieldName)));
+            model.addAPIResponse(fieldName, readAPIResponse(node.get(fieldName)));
         }
         return model;
     }

@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.media;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -83,7 +84,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public Discriminator mapping(Map<String, String> mapping) {
-        this.mapping = mapping;
+        this.mapping = (mapping == null) ? null : new LinkedHashMap<>(mapping);
         return this;
     }
 
@@ -92,7 +93,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public Map<String, String> getMapping() {
-        return this.mapping;
+        return (this.mapping == null) ? null : Collections.unmodifiableMap(this.mapping);
     }
 
     /**
@@ -100,7 +101,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public void setMapping(Map<String, String> mapping) {
-        this.mapping = mapping;
+        this.mapping = (mapping == null) ? null : new LinkedHashMap<>(mapping);
     }
 
 }
