@@ -35,6 +35,7 @@
 
     <properties>
         <version.asciidoctor.plugin>1.5.7.1</version.asciidoctor.plugin>
+        <version.buildhelper.plugin>3.0.0</version.buildhelper.plugin>
         <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
         <version.com.fasterxml.jackson.dataformat>2.9.8</version.com.fasterxml.jackson.dataformat>
         <version.commons-io>2.6</version.commons-io>
@@ -283,6 +284,11 @@
                             <organization>${project.organization.name}</organization>
                         </attributes>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>{version.buildhelper.plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
