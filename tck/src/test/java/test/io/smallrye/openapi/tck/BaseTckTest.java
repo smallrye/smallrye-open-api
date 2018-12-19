@@ -33,6 +33,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
@@ -50,12 +51,22 @@ public abstract class BaseTckTest<T extends Arquillian> {
     protected static final String TEXT_PLAIN = "text/plain";
 
     private static HttpServer server;
+    private static int HTTP_PORT;
 
     @BeforeClass
     public static final void setUp() throws Exception {
+        String portEnv = System.getProperty("smallrye.openapi.server.port");
+        if (portEnv == null || portEnv.isEmpty()) {
+            portEnv = "8082";
+        }
+        HTTP_PORT = Integer.valueOf(portEnv);
+        // Set RestAssured default port directly. A bit nasty, but we have no easy way to change
+        // AppTestBase#callEndpoint in the upstream. They also seem to do it this way, so it's no worse
+        // than what's there.
+        RestAssured.port = HTTP_PORT;
         // Set up a little HTTP server so that Rest assured has something to pull /openapi from
-        System.out.println("Starting TCK test server on port 8080.");
-        server = HttpServer.create(new InetSocketAddress(8080), 0);
+        System.out.println("Starting TCK test server on port " + HTTP_PORT);
+        server = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
         server.createContext("/openapi", new MyHandler());
         server.setExecutor(null);
         server.start();

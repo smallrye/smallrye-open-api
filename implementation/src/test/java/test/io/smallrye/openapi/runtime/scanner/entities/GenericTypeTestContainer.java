@@ -21,7 +21,6 @@ import java.util.Date;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-@SuppressWarnings("unused")
 public class GenericTypeTestContainer {
     // Nesting generics.
     KustomPair<KustomPair<String, String>, Integer> nesting;

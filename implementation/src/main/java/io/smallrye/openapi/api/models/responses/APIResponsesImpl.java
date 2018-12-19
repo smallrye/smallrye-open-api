@@ -16,7 +16,9 @@
 
 package io.smallrye.openapi.api.models.responses;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
@@ -30,23 +32,84 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
 
     private static final long serialVersionUID = 7767651877116575739L;
 
-    private APIResponse defaultValue;
+    private Map<String, Object> extensions;
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#addApiResponse(java.lang.String, org.eclipse.microprofile.openapi.models.responses.APIResponse)
+     * @see org.eclipse.microprofile.openapi.models.Extensible#getExtensions()
      */
     @Override
-    public APIResponses addApiResponse(String name, APIResponse apiResponse) {
-        this.put(name, apiResponse);
+    public Map<String, Object> getExtensions() {
+        return this.extensions;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public APIResponses addExtension(String name, Object value) {
+        if (extensions == null) {
+            this.extensions = new LinkedHashMap<>();
+        }
+        this.extensions.put(name, value);
         return this;
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#getDefault()
+     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
      */
     @Override
-    public APIResponse getDefault() {
-        return this.defaultValue;
+    public void removeExtension(String name) {
+        if (this.extensions != null) {
+            this.extensions.remove(name);
+        }
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Extensible#setExtensions(java.util.Map)
+     */
+    @Override
+    public void setExtensions(Map<String, Object> extensions) {
+        this.extensions = extensions;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#addAPIResponse(java.lang.String, org.eclipse.microprofile.openapi.models.responses.APIResponse)
+     */
+    @Override
+    public APIResponses addAPIResponse(String name, APIResponse apiResponse) {
+        if (apiResponse == null) {
+            this.removeAPIResponse(name);
+        } else {
+            this.put(name, apiResponse);
+        }
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#removeAPIResponse(java.lang.String)
+     */
+    @Override
+    public void removeAPIResponse(String name) {
+        this.remove(name);
+    }
+
+    @Override
+    public Map<String, APIResponse> getAPIResponses() {
+        return Collections.unmodifiableMap(this);
+    }
+
+    @Override
+    public void setAPIResponses(Map<String, APIResponse> items) {
+        this.clear();
+        this.putAll(items);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#getDefaultValue()
+     */
+    @Override
+    public APIResponse getDefaultValue() {
+        return getAPIResponse(DEFAULT);
     }
 
     /**
@@ -54,7 +117,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public void setDefaultValue(APIResponse defaultValue) {
-        this.defaultValue = defaultValue;
+        addAPIResponse(DEFAULT, defaultValue);
     }
 
     /**
@@ -62,7 +125,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponses defaultValue(APIResponse defaultValue) {
-        this.defaultValue = defaultValue;
+        addAPIResponse(DEFAULT, defaultValue);
         return this;
     }
 

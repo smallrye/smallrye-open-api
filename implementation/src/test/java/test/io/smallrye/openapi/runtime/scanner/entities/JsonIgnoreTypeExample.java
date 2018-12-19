@@ -15,4 +15,11 @@ public class JsonIgnoreTypeExample {
     private static final class IgnoreThisType {
         int foo;
     }
+
+    // This is here so that IDEs see that the "foo" variable is used somewhere.
+    public static final void main(String [] args) {
+        IgnoreThisType type = new IgnoreThisType();
+        type.foo = 17;
+        System.out.println(type.foo);
+    }
 }

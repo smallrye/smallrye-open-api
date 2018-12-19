@@ -31,7 +31,7 @@ import java.util.TimerTask;
 @Schema(description = "This is the kitchen sink description!",
         example = "This is the KitchenSink example field in Schema",
         deprecated = true)
-@SuppressWarnings({"unused", "rawtypes"})
+@SuppressWarnings("rawtypes")
 public class KitchenSink {
 
     // Arrays

@@ -24,7 +24,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Contact} OpenAPI model interface.
  */
-public class ContactImpl extends ExtensibleImpl implements Contact, ModelImpl {
+public class ContactImpl extends ExtensibleImpl<Contact> implements Contact, ModelImpl {
 
     private String name;
     private String url;

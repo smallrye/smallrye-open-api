@@ -31,7 +31,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Header} OpenAPI model interface.
  */
-public class HeaderImpl extends ExtensibleImpl implements Header, ModelImpl {
+public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelImpl {
 
     private String $ref;
     private String description;
@@ -283,6 +283,16 @@ public class HeaderImpl extends ExtensibleImpl implements Header, ModelImpl {
         }
         this.examples.put(key, example);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.headers.Header#removeExample(java.lang.String)
+     */
+    @Override
+    public void removeExample(String key) {
+        if (this.examples != null) {
+            this.examples.remove(key);
+        }
     }
 
     /**

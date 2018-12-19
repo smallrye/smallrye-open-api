@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,11 +44,22 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
      */
     @Override
-    public void addExtension(String name, Object value) {
+    public Paths addExtension(String name, Object value) {
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
         this.extensions.put(name, value);
+        return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
+     */
+    @Override
+    public void removeExtension(String name) {
+        if (this.extensions != null) {
+            this.extensions.remove(name);
+        }
     }
 
     /**
@@ -65,6 +77,31 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
     public Paths addPathItem(String name, PathItem item) {
         this.put(name, item);
         return this;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Paths#removePathItem(java.lang.String)
+     */
+    @Override
+    public void removePathItem(String name) {
+        this.remove(name);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Paths#getPathItems()
+     */
+    @Override
+    public Map<String, PathItem> getPathItems() {
+        return Collections.unmodifiableMap(this);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.Paths#setPathItems(java.util.Map)
+     */
+    @Override
+    public void setPathItems(Map<String, PathItem> items) {
+        this.clear();
+        this.putAll(items);
     }
 
 }
