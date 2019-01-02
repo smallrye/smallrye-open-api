@@ -45,7 +45,7 @@
         <version.eclipse.microprofile.config>1.3</version.eclipse.microprofile.config>
         <version.eclipse.microprofile.openapi>1.1-RC1</version.eclipse.microprofile.openapi>
         <version.io.rest-assured>3.2.0</version.io.rest-assured>
-        <version.io.smallrye.smallrye-config>1.3.4</version.io.smallrye.smallrye-config>
+        <version.io.smallrye.smallrye-config>1.3.5</version.io.smallrye.smallrye-config>
         <version.javax.annotation-api>1.3.2</version.javax.annotation-api>
         <version.javax.javaee-api>7.0</version.javax.javaee-api>
         <version.javax.enterprise.cdi-api>2.0</version.javax.enterprise.cdi-api>
