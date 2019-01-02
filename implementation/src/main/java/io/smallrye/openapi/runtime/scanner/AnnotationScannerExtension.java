@@ -1,6 +1,9 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.util.Collection;
+
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
@@ -50,6 +53,14 @@ public class AnnotationScannerExtension {
      */
     public Type resolveAsyncType(Type type) {
         return null;
+    }
+
+    /**
+     * Gives a chance to extensions to process the set of jax-rs application classes.
+     * @param scanner the scanner used for application scanning
+     * @param applications the set of jax-rs application classes
+     */
+    public void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications) {
     }
 
 }

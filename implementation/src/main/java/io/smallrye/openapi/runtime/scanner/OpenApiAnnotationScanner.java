@@ -182,6 +182,10 @@ public class OpenApiAnnotationScanner {
         for (ClassInfo classInfo : applications) {
             oai = MergeUtil.merge(oai, jaxRsApplicationToOpenApi(classInfo));
         }
+        // this can be a useful extension point to set/override the application path
+        for (AnnotationScannerExtension extension : extensions) {
+            extension.processJaxRsApplications(this, applications);
+        }
 
         // TODO find all OpenAPIDefinition annotations at the package level
 
@@ -2005,6 +2009,10 @@ public class OpenApiAnnotationScanner {
         public boolean has(ClassType instanceClass) {
             return registry.containsKey(instanceClass.name());
         }
+    }
+
+    public void setCurrentAppPath(String path) {
+        this.currentAppPath = path;
     }
 
 }
