@@ -11,11 +11,9 @@ import org.jboss.jandex.Type;
 import io.smallrye.openapi.runtime.util.JandexUtil.JaxRsParameterInfo;
 
 /**
- * Extension point for supporting extensions to JAX-RS. Implement this directly or extend {@link DefaultAnnotationScannerExtension}.
- * 
- * @see DefaultAnnotationScannerExtension
+ * Default extension point for supporting extensions to JAX-RS.
  */
-public interface AnnotationScannerExtension {
+public class DefaultAnnotationScannerExtension implements AnnotationScannerExtension {
 
     /**
      * Determines where an @Parameter can be found (examples include Query,
@@ -24,7 +22,9 @@ public interface AnnotationScannerExtension {
      * @param paramInfo
      * @return the parameter location, or null if unknown
      */
-    public In parameterIn(MethodParameterInfo paramInfo);
+    public In parameterIn(MethodParameterInfo paramInfo) {
+        return null;
+    }
 
     /**
      * Returns jax-rs info about the parameter at the given index. If the index
@@ -38,7 +38,9 @@ public interface AnnotationScannerExtension {
      *            index of parameter
      * @return JaxRsParameterInfo or null if unknown.
      */
-    public JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx);
+    public JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx) {
+        return null;
+    }
 
     /**
      * Unwraps an asynchronous type such as
@@ -49,13 +51,16 @@ public interface AnnotationScannerExtension {
      *            the type to unwrap if it is a supported async type
      * @return the resolved type or null if not supported
      */
-    public Type resolveAsyncType(Type type);
+    public Type resolveAsyncType(Type type) {
+        return null;
+    }
 
     /**
      * Gives a chance to extensions to process the set of jax-rs application classes.
      * @param scanner the scanner used for application scanning
      * @param applications the set of jax-rs application classes
      */
-    public void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications);
+    public void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications) {
+    }
 
 }
