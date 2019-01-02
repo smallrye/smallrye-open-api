@@ -13,7 +13,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil.JaxRsParameterInfo;
 /**
  * Extension point for supporting extensions to JAX-RS.
  */
-public class AnnotationScannerExtension {
+public interface AnnotationScannerExtension {
 
     /**
      * Determines where an @Parameter can be found (examples include Query,
@@ -22,7 +22,7 @@ public class AnnotationScannerExtension {
      * @param paramInfo
      * @return the parameter location, or null if unknown
      */
-    public In parameterIn(MethodParameterInfo paramInfo) {
+    public default In parameterIn(MethodParameterInfo paramInfo) {
         return null;
     }
 
@@ -38,7 +38,7 @@ public class AnnotationScannerExtension {
      *            index of parameter
      * @return JaxRsParameterInfo or null if unknown.
      */
-    public JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx) {
+    public default JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx) {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class AnnotationScannerExtension {
      *            the type to unwrap if it is a supported async type
      * @return the resolved type or null if not supported
      */
-    public Type resolveAsyncType(Type type) {
+    public default Type resolveAsyncType(Type type) {
         return null;
     }
 
@@ -60,7 +60,7 @@ public class AnnotationScannerExtension {
      * @param scanner the scanner used for application scanning
      * @param applications the set of jax-rs application classes
      */
-    public void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications) {
+    public default void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications) {
     }
 
 }
