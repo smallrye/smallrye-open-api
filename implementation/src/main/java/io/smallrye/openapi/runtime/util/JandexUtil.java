@@ -467,7 +467,7 @@ public class JandexUtil {
      * @param parameterIndex
      * @param annotationName
      */
-    private static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
+    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {
         for (AnnotationInstance annotation : method.annotations()) {
             if (annotation.target().kind() == Kind.METHOD_PARAMETER &&

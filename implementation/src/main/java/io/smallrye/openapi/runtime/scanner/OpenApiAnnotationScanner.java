@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -75,6 +76,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
+import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
@@ -141,13 +143,26 @@ public class OpenApiAnnotationScanner {
 
     private SchemaRegistry schemaRegistry = new SchemaRegistry();
 
+    private List<AnnotationScannerExtension> extensions;
+
     /**
      * Constructor.
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
+        this(config, index, Collections.emptyList());
+    }
+
+    /**
+     * Constructor.
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
+     * @param extensions A set of extensions to scanning
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions) {
         this.index = index;
+        this.extensions = extensions;
     }
 
     /**
@@ -166,6 +181,10 @@ public class OpenApiAnnotationScanner {
         Collection<ClassInfo> applications = this.index.getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
         for (ClassInfo classInfo : applications) {
             oai = MergeUtil.merge(oai, jaxRsApplicationToOpenApi(classInfo));
+        }
+        // this can be a useful extension point to set/override the application path
+        for (AnnotationScannerExtension extension : extensions) {
+            extension.processJaxRsApplications(this, applications);
         }
 
         // TODO find all OpenAPIDefinition annotations at the package level
@@ -521,6 +540,14 @@ public class OpenApiAnnotationScanner {
         List<Type> parameters = method.parameters();
         for (int idx = 0; idx < parameters.size(); idx++) {
             JaxRsParameterInfo paramInfo = JandexUtil.getMethodParameterJaxRsInfo(method, idx);
+            // Try extensions
+            if (paramInfo == null) {
+                for (AnnotationScannerExtension extension : extensions) {
+                    paramInfo = extension.getMethodParameterJaxRsInfo(method, idx);
+                    if (paramInfo != null)
+                        break;
+                }
+            }
             if (paramInfo != null && !ModelUtil.operationHasParameter(operation, paramInfo.name)) {
                 Type paramType = parameters.get(idx);
                 Parameter parameter = new ParameterImpl();
@@ -748,9 +775,25 @@ public class OpenApiAnnotationScanner {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = OpenApiDataObjectScanner.process(index, type);
+            Type asyncType = resolveAsyncType(type);
+            schema = OpenApiDataObjectScanner.process(index, asyncType);
         }
         return schema;
+    }
+
+    private Type resolveAsyncType(Type type) {
+        if(type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+            ParameterizedType pType = type.asParameterizedType();
+            if(pType.name().equals(OpenApiConstants.COMPLETION_STAGE_NAME)
+                    && pType.arguments().size() == 1)
+                return pType.arguments().get(0);
+        }
+        for (AnnotationScannerExtension extension : extensions) {
+            Type asyncType = extension.resolveAsyncType(type);
+            if(asyncType != null)
+                return asyncType;
+        }
+        return type;
     }
 
     /**
@@ -775,6 +818,12 @@ public class OpenApiAnnotationScanner {
             if (annotation.name().equals(OpenApiConstants.DOTNAME_COOKIE_PARAM)) {
                 return In.COOKIE;
             }
+        }
+        // Try extensions
+        for (AnnotationScannerExtension extension : extensions) {
+            In ret = extension.parameterIn(paramInfo);
+            if (ret != null)
+                return ret;
         }
         return null;
     }
@@ -1960,6 +2009,10 @@ public class OpenApiAnnotationScanner {
         public boolean has(ClassType instanceClass) {
             return registry.containsKey(instanceClass.name());
         }
+    }
+
+    public void setCurrentAppPath(String path) {
+        this.currentAppPath = path;
     }
 
 }
