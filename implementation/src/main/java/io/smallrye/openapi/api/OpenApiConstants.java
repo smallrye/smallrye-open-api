@@ -16,6 +16,8 @@
 
 package io.smallrye.openapi.api;
 
+import java.util.concurrent.CompletionStage;
+
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
@@ -243,6 +245,8 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_PATCH = DotName.createSimple(PATCH.class.getName());
 
     public static final DotName DOTNAME_RESPONSE = DotName.createSimple(Response.class.getName());
+
+    public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 
     public static final String[] DEFAULT_CONSUMES = new String[] {MIME_ANY};
     public static final String[] DEFAULT_PRODUCES = new String[] {MIME_ANY};
