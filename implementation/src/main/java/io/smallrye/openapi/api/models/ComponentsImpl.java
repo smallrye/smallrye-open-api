@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Schema> getSchemas() {
-        return this.schemas;
+        return (this.schemas == null) ? null : Collections.unmodifiableMap(this.schemas);
     }
 
     /**
@@ -58,7 +59,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setSchemas(Map<String, Schema> schemas) {
-        this.schemas = schemas;
+        this.schemas = (schemas == null) ? null : new LinkedHashMap<>(schemas);
     }
 
     /**
@@ -66,7 +67,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components schemas(Map<String, Schema> schemas) {
-        this.schemas = schemas;
+        this.schemas = (schemas == null) ? null : new LinkedHashMap<>(schemas);
         return this;
     }
 
@@ -101,7 +102,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, APIResponse> getResponses() {
-        return this.responses;
+        return (this.responses == null) ? null : Collections.unmodifiableMap(this.responses);
     }
 
     /**
@@ -109,7 +110,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setResponses(Map<String, APIResponse> responses) {
-        this.responses = responses;
+        this.responses = (responses == null) ? null : new LinkedHashMap<>(responses);
     }
 
     /**
@@ -117,7 +118,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components responses(Map<String, APIResponse> responses) {
-        this.responses = responses;
+        this.responses = (responses == null) ? null : new LinkedHashMap<>(responses);
         return this;
     }
 
@@ -152,7 +153,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Parameter> getParameters() {
-        return this.parameters;
+        return (this.parameters == null) ? null : Collections.unmodifiableMap(this.parameters);
     }
 
     /**
@@ -160,7 +161,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setParameters(Map<String, Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new LinkedHashMap<>(parameters);
     }
 
     /**
@@ -168,7 +169,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components parameters(Map<String, Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new LinkedHashMap<>(parameters);
         return this;
     }
 
@@ -203,7 +204,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return (this.examples == null) ? null : Collections.unmodifiableMap(this.examples);
     }
 
     /**
@@ -211,7 +212,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
     }
 
     /**
@@ -219,7 +220,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components examples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
         return this;
     }
 
@@ -254,7 +255,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, RequestBody> getRequestBodies() {
-        return this.requestBodies;
+        return (this.requestBodies == null) ? null : Collections.unmodifiableMap(this.requestBodies);
     }
 
     /**
@@ -262,7 +263,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setRequestBodies(Map<String, RequestBody> requestBodies) {
-        this.requestBodies = requestBodies;
+        this.requestBodies = (requestBodies == null) ? null : new LinkedHashMap<>(requestBodies);
     }
 
     /**
@@ -270,7 +271,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components requestBodies(Map<String, RequestBody> requestBodies) {
-        this.requestBodies = requestBodies;
+        this.requestBodies = (requestBodies == null) ? null : new LinkedHashMap<>(requestBodies);
         return this;
     }
 
@@ -305,7 +306,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Header> getHeaders() {
-        return this.headers;
+        return (this.headers == null) ? null : Collections.unmodifiableMap(this.headers);
     }
 
     /**
@@ -313,7 +314,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = headers;
+        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
     }
 
     /**
@@ -321,7 +322,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components headers(Map<String, Header> headers) {
-        this.headers = headers;
+        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
         return this;
     }
 
@@ -356,7 +357,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, SecurityScheme> getSecuritySchemes() {
-        return this.securitySchemes;
+        return (this.securitySchemes == null) ? null : Collections.unmodifiableMap(this.securitySchemes);
     }
 
     /**
@@ -364,7 +365,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setSecuritySchemes(Map<String, SecurityScheme> securitySchemes) {
-        this.securitySchemes = securitySchemes;
+        this.securitySchemes = (securitySchemes == null) ? null : new LinkedHashMap<>(securitySchemes);
     }
 
     /**
@@ -372,7 +373,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components securitySchemes(Map<String, SecurityScheme> securitySchemes) {
-        this.securitySchemes = securitySchemes;
+        this.securitySchemes = (securitySchemes == null) ? null : new LinkedHashMap<>(securitySchemes);
         return this;
     }
 
@@ -407,7 +408,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Link> getLinks() {
-        return this.links;
+        return (this.links == null) ? null : Collections.unmodifiableMap(this.links);
     }
 
     /**
@@ -415,7 +416,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setLinks(Map<String, Link> links) {
-        this.links = links;
+        this.links = (links == null) ? null : new LinkedHashMap<>(links);
     }
 
     /**
@@ -423,7 +424,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components links(Map<String, Link> links) {
-        this.links = links;
+        this.links = (links == null) ? null : new LinkedHashMap<>(links);
         return this;
     }
 
@@ -458,7 +459,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Callback> getCallbacks() {
-        return this.callbacks;
+        return (this.callbacks == null) ? null : Collections.unmodifiableMap(this.callbacks);
     }
 
     /**
@@ -466,7 +467,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setCallbacks(Map<String, Callback> callbacks) {
-        this.callbacks = callbacks;
+        this.callbacks = (callbacks == null) ? null : new LinkedHashMap<>(callbacks);
     }
 
     /**
@@ -474,7 +475,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components callbacks(Map<String, Callback> callbacks) {
-        this.callbacks = callbacks;
+        this.callbacks = (callbacks == null) ? null : new LinkedHashMap<>(callbacks);
         return this;
     }
 

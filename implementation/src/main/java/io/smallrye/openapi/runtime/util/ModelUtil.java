@@ -136,8 +136,8 @@ public class ModelUtil {
         if (parameter.getSchema() != null) {
             return true;
         }
-        if (parameter.getContent() != null && !parameter.getContent().isEmpty()) {
-            Collection<MediaType> mediaTypes = parameter.getContent().values();
+        if (parameter.getContent() != null && !parameter.getContent().getMediaTypes().isEmpty()) {
+            Collection<MediaType> mediaTypes = parameter.getContent().getMediaTypes().values();
             for (MediaType mediaType : mediaTypes) {
                 if (mediaType.getSchema() != null) {
                     return true;
@@ -159,8 +159,8 @@ public class ModelUtil {
         if (parameter.getSchema() != null) {
             return Arrays.asList(parameter.getSchema());
         }
-        if (parameter.getContent() != null && !parameter.getContent().isEmpty()) {
-            Collection<MediaType> mediaTypes = parameter.getContent().values();
+        if (parameter.getContent() != null && !parameter.getContent().getMediaTypes().isEmpty()) {
+            Collection<MediaType> mediaTypes = parameter.getContent().getMediaTypes().values();
             List<Schema> schemas = new ArrayList<>(mediaTypes.size());
 
             for (MediaType mediaType : mediaTypes) {
@@ -193,7 +193,7 @@ public class ModelUtil {
             return;
         }
         Content content = parameter.getContent();
-        if (content.isEmpty()) {
+        if (content.getMediaTypes().isEmpty()) {
             String[] defMediaTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             for (String mediaTypeName : defMediaTypes) {
                 MediaType mediaType = new MediaTypeImpl();
@@ -202,7 +202,7 @@ public class ModelUtil {
             }
             return;
         }
-        for (String mediaTypeName : content.keySet()) {
+        for (String mediaTypeName : content.getMediaTypes().keySet()) {
             MediaType mediaType = content.getMediaType(mediaTypeName);
             mediaType.setSchema(schema);
         }
@@ -217,8 +217,8 @@ public class ModelUtil {
      * @return Whether RequestBody has a schema
      */
     public static boolean requestBodyHasSchema(RequestBody requestBody) {
-        if (requestBody.getContent() != null && !requestBody.getContent().isEmpty()) {
-            Collection<MediaType> mediaTypes = requestBody.getContent().values();
+        if (requestBody.getContent() != null && !requestBody.getContent().getMediaTypes().isEmpty()) {
+            Collection<MediaType> mediaTypes = requestBody.getContent().getMediaTypes().values();
             for (MediaType mediaType : mediaTypes) {
                 if (mediaType.getSchema() != null) {
                     return true;
@@ -241,7 +241,7 @@ public class ModelUtil {
             content = new ContentImpl();
             requestBody.setContent(content);
         }
-        if (content.isEmpty()) {
+        if (content.getMediaTypes().isEmpty()) {
             String[] requestBodyTypes;
             if (mediaTypes != null && mediaTypes.length > 0) {
                 requestBodyTypes = mediaTypes;
@@ -255,7 +255,7 @@ public class ModelUtil {
             }
             return;
         }
-        for (String mediaTypeName : content.keySet()) {
+        for (String mediaTypeName : content.getMediaTypes().keySet()) {
             MediaType mediaType = content.getMediaType(mediaTypeName);
             mediaType.setSchema(schema);
         }

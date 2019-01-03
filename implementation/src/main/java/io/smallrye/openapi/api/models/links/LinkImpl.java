@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.links;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -172,7 +173,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public Map<String, Object> getParameters() {
-        return this.parameters;
+        return (this.parameters == null) ? null : Collections.unmodifiableMap(this.parameters);
     }
 
     /**
@@ -180,7 +181,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public void setParameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new LinkedHashMap<>(parameters);
     }
 
     /**
@@ -188,7 +189,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public Link parameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new LinkedHashMap<>(parameters);
         return this;
     }
 

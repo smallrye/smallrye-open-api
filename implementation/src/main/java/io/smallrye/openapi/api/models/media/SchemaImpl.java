@@ -18,6 +18,7 @@ package io.smallrye.openapi.api.models.media;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,7 +193,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<Object> getEnumeration() {
-        return this.enumeration;
+        return (this.enumeration == null) ? null : Collections.unmodifiableList(this.enumeration);
     }
 
     /**
@@ -200,7 +201,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setEnumeration(List<Object> enumeration) {
-        this.enumeration = enumeration;
+        this.enumeration = (enumeration == null) ? null : new ArrayList<>(enumeration);
     }
 
     /**
@@ -208,7 +209,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema enumeration(List<Object> enumeration) {
-        this.enumeration = enumeration;
+        this.enumeration = (enumeration == null) ? null : new ArrayList<>(enumeration);
         return this;
     }
 
@@ -567,7 +568,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<String> getRequired() {
-        return this.required;
+        return (this.required == null) ? null : Collections.unmodifiableList(this.required);
     }
 
     /**
@@ -575,7 +576,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setRequired(List<String> required) {
-        this.required = required;
+        this.required = (required == null) ? null : new ArrayList<>(required);
     }
 
     /**
@@ -583,7 +584,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema required(List<String> required) {
-        this.required = required;
+        this.required = (required == null) ? null : new ArrayList<>(required);
         return this;
     }
 
@@ -667,7 +668,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Map<String, Schema> getProperties() {
-        return this.properties;
+        return (this.properties == null) ? null : Collections.unmodifiableMap(this.properties);
     }
 
     /**
@@ -675,7 +676,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setProperties(Map<String, Schema> properties) {
-        this.properties = properties;
+        this.properties = (properties == null) ? null : new LinkedHashMap<>(properties);
     }
 
     /**
@@ -683,7 +684,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema properties(Map<String, Schema> properties) {
-        this.properties = properties;
+        this.properties = (properties == null) ? null : new LinkedHashMap<>(properties);
         return this;
     }
 
@@ -710,18 +711,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     public void removeProperty(String key) {
         if (this.properties != null) {
             this.properties.remove(key);
-        }
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#getAdditionalProperties()
-     */
-    @Override
-    public Object getAdditionalProperties() {
-        if (this.additionalPropertiesSchema != null) {
-            return this.additionalPropertiesSchema;
-        } else {
-            return this.additionalPropertiesBoolean;
         }
     }
 
@@ -1028,7 +1017,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<Schema> getAllOf() {
-        return this.allOf;
+        return (this.allOf == null) ? null : Collections.unmodifiableList(this.allOf);
     }
 
     /**
@@ -1036,7 +1025,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAllOf(List<Schema> allOf) {
-        this.allOf = allOf;
+        this.allOf = (allOf == null) ? null : new ArrayList<>(allOf);
     }
 
     /**
@@ -1044,7 +1033,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema allOf(List<Schema> allOf) {
-        this.allOf = allOf;
+        this.allOf = (allOf == null) ? null : new ArrayList<>(allOf);
         return this;
     }
 
@@ -1078,7 +1067,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<Schema> getAnyOf() {
-        return this.anyOf;
+        return (this.anyOf == null) ? null : Collections.unmodifiableList(this.anyOf);
     }
 
     /**
@@ -1086,7 +1075,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAnyOf(List<Schema> anyOf) {
-        this.anyOf = anyOf;
+        this.anyOf = (anyOf == null) ? null : new ArrayList<>(anyOf);
     }
 
     /**
@@ -1094,7 +1083,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema anyOf(List<Schema> anyOf) {
-        this.anyOf = anyOf;
+        this.anyOf = (anyOf == null) ? null : new ArrayList<>(anyOf);
         return this;
     }
 
@@ -1128,7 +1117,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<Schema> getOneOf() {
-        return this.oneOf;
+        return (this.oneOf == null) ? null : Collections.unmodifiableList(this.oneOf);
     }
 
     /**
@@ -1136,7 +1125,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setOneOf(List<Schema> oneOf) {
-        this.oneOf = oneOf;
+        this.oneOf = (oneOf == null) ? null : new ArrayList<>(oneOf);
     }
 
     /**
@@ -1144,7 +1133,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema oneOf(List<Schema> oneOf) {
-        this.oneOf = oneOf;
+        this.oneOf = (oneOf == null) ? null : new ArrayList<>(oneOf);
         return this;
     }
 

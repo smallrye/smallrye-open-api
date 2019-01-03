@@ -17,6 +17,7 @@
 package io.smallrye.openapi.api.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -321,23 +322,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#readOperations()
-     */
-    @Override
-    public List<Operation> readOperations() {
-        List<Operation> ops = new ArrayList<>();
-        addOperationToList(this.get, ops);
-        addOperationToList(this.put, ops);
-        addOperationToList(this.post, ops);
-        addOperationToList(this.delete, ops);
-        addOperationToList(this.options, ops);
-        addOperationToList(this.head, ops);
-        addOperationToList(this.patch, ops);
-        addOperationToList(this.trace, ops);
-        return ops;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getOperations()
      */
     @Override
@@ -359,7 +343,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public List<Server> getServers() {
-        return this.servers;
+        return (this.servers == null) ? null : Collections.unmodifiableList(this.servers);
     }
 
     /**
@@ -367,7 +351,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = servers;
+        this.servers = (servers == null) ? null : new ArrayList<>(servers);
     }
 
     /**
@@ -375,7 +359,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public PathItem servers(List<Server> servers) {
-        this.servers = servers;
+        this.servers = (servers == null) ? null : new ArrayList<>(servers);
         return this;
     }
 
@@ -406,7 +390,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public List<Parameter> getParameters() {
-        return this.parameters;
+        return (this.parameters == null) ? null : Collections.unmodifiableList(this.parameters);
     }
 
     /**
@@ -414,7 +398,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new ArrayList<>(parameters);
     }
 
     /**
@@ -422,7 +406,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public PathItem parameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = (parameters == null) ? null : new ArrayList<>(parameters);
         return this;
     }
 
@@ -445,18 +429,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     public void removeParameter(Parameter parameter) {
         if (this.parameters != null) {
             this.parameters.remove(parameter);
-        }
-    }
-
-    /**
-     * Adds the given operation to the given list only if the operation is not null.
-     * 
-     * @param operation
-     * @param operationList
-     */
-    private static void addOperationToList(Operation operation, List<Operation> operationList) {
-        if (operation != null) {
-            operationList.add(operation);
         }
     }
 

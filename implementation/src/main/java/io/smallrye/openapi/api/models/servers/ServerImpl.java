@@ -16,10 +16,7 @@
 
 package io.smallrye.openapi.api.models.servers;
 
-import java.util.Map;
-
 import org.eclipse.microprofile.openapi.models.servers.Server;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
@@ -82,16 +79,6 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
     public Server description(String description) {
         this.description = description;
         return this;
-    }
-
-    @Override
-    public void setVariables(Map<String, ServerVariable> variables) {
-        if (variables == null) {
-            this.variables = null;
-        } else {
-            this.variables = new ServerVariablesImpl();
-            ((Map<String, ServerVariable>) this.variables).putAll(variables);
-        }
     }
 
     /**

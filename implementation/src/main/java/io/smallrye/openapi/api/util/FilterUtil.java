@@ -140,7 +140,7 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getPathItems().keySet());
         for (String key : keys) {
             PathItem childModel = model.getPathItem(key);
             filterPathItem(filter, childModel);
@@ -238,7 +238,7 @@ public class FilterUtil {
         if (model.getRequestBody() != null && filter.filterRequestBody(model.getRequestBody()) == null) {
             model.setRequestBody(null);
         }
-        filterAPIResponses(filter, model.getResponses());
+        filterAPIResponses(filter, model.getResponses().getAPIResponses());
         filterSecurity(filter, model.getSecurity());
         filterServers(filter, model.getServers());
     }
@@ -323,7 +323,7 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getMediaTypes().keySet());
         for (String key : keys) {
             MediaType childModel = model.getMediaType(key);
             filterMediaType(filter, childModel);
@@ -784,7 +784,7 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getPathItems().keySet());
         for (String key : keys) {
             PathItem childModel = model.getPathItem(key);
             filterPathItem(filter, childModel);
@@ -871,7 +871,7 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.keySet());
+        Collection<String> keys = new ArrayList<>(model.getServerVariables().keySet());
         for (String key : keys) {
             ServerVariable childModel = model.getServerVariable(key);
             filterServerVariable(filter, childModel);

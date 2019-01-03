@@ -235,7 +235,7 @@ public class OpenApiAnnotationScanner {
             Paths paths = oai.getPaths();
             if (paths != null) {
                 Paths sortedPaths = new PathsImpl();
-                TreeSet<String> sortedKeys = new TreeSet<>(paths.keySet());
+                TreeSet<String> sortedKeys = new TreeSet<>(paths.getPathItems().keySet());
                 for (String pathKey : sortedKeys) {
                     PathItem pathItem = paths.getPathItem(pathKey);
                     sortedPaths.addPathItem(pathKey, pathItem);
@@ -659,7 +659,7 @@ public class OpenApiAnnotationScanner {
 
             if (formBodyContent != null) {
                 // If form parameters were present, overlay RequestBody onto the generated form content
-                requestBody.setContent((Content) MergeUtil.mergeMaps(formBodyContent, requestBody.getContent()));
+                requestBody.setContent((Content) MergeUtil.mergeObjects(formBodyContent, requestBody.getContent()));
             }
 
             // TODO if the method argument type is Request, don't generate a Schema!

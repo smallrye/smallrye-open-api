@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
      */
     @Override
     public Map<String, Object> getExtensions() {
-        return this.extensions;
+        return (this.extensions == null) ? null : Collections.unmodifiableMap(this.extensions);
     }
 
     /**
@@ -70,7 +71,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
      */
     @Override
     public void setExtensions(Map<String, Object> extensions) {
-        this.extensions = extensions;
+    	this.extensions = (extensions == null) ? null : new LinkedHashMap<>(extensions);
     }
 
 }

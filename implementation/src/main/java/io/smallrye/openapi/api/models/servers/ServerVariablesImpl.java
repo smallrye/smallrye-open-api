@@ -39,7 +39,7 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
      */
     @Override
     public Map<String, Object> getExtensions() {
-        return this.extensions;
+        return (this.extensions == null) ? null : Collections.unmodifiableMap(this.extensions);
     }
 
     /**
@@ -72,7 +72,7 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
      */
     @Override
     public void setExtensions(Map<String, Object> extensions) {
-        this.extensions = extensions;
+        this.extensions = (extensions == null) ? null : new LinkedHashMap<>(extensions);
     }
 
     /**

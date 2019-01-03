@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.parameters;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -307,7 +308,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return (this.examples == null) ? null : Collections.unmodifiableMap(this.examples);
     }
 
     /**
@@ -315,7 +316,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
     }
 
     /**
@@ -323,7 +324,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public Parameter examples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
         return this;
     }
 

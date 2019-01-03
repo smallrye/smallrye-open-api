@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.headers;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -253,7 +254,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return (this.examples == null) ? null : Collections.unmodifiableMap(this.examples);
     }
 
     /**
@@ -261,7 +262,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
     }
 
     /**
@@ -269,7 +270,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public Header examples(Map<String, Example> examples) {
-        this.examples = examples;
+        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
         return this;
     }
 

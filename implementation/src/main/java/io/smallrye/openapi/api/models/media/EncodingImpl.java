@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api.models.media;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -92,7 +93,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public Encoding headers(Map<String, Header> headers) {
-        this.headers = headers;
+        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
         return this;
     }
 
@@ -101,7 +102,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public Map<String, Header> getHeaders() {
-        return this.headers;
+        return (this.headers == null) ? null : Collections.unmodifiableMap(this.headers);
     }
 
     /**
@@ -109,7 +110,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = headers;
+        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
     }
 
     /**
