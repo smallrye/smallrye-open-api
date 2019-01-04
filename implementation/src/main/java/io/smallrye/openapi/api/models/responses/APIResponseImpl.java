@@ -122,6 +122,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse addHeader(String name, Header header) {
+    	if (header == null) { return this; }
         if (this.headers == null) {
             this.headers = new LinkedHashMap<>();
         }
@@ -194,6 +195,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse addLink(String name, Link link) {
+    	if (link == null) { return this; }
         if (this.links == null) {
             this.links = new LinkedHashMap<>();
         }

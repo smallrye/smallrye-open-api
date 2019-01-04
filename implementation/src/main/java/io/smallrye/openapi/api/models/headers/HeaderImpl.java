@@ -278,6 +278,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public Header addExample(String key, Example example) {
+    	if (example == null) { return this; }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }

@@ -45,6 +45,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public Paths addExtension(String name, Object value) {
+    	if (value == null) { return this; }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -75,6 +76,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public Paths addPathItem(String name, PathItem item) {
+    	if (item == null) { return this; }
         this.put(name, item);
         return this;
     }

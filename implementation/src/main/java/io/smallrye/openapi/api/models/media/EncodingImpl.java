@@ -66,6 +66,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public Encoding addHeader(String key, Header header) {
+    	if (header == null) { return this; }
         if (this.headers == null) {
             this.headers = new LinkedHashMap<>();
         }

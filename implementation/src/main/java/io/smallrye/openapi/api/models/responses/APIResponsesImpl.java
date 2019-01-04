@@ -47,6 +47,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponses addExtension(String name, Object value) {
+    	if (value == null) { return this; }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -77,11 +78,8 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponses addAPIResponse(String name, APIResponse apiResponse) {
-        if (apiResponse == null) {
-            this.removeAPIResponse(name);
-        } else {
-            this.put(name, apiResponse);
-        }
+    	if (apiResponse == null) { return this; }
+        this.put(name, apiResponse);
         return this;
     }
 
@@ -117,7 +115,11 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public void setDefaultValue(APIResponse defaultValue) {
-        addAPIResponse(DEFAULT, defaultValue);
+    	if (defaultValue == null) {
+    		this.removeAPIResponse(DEFAULT);
+    	} else {
+            addAPIResponse(DEFAULT, defaultValue);
+    	}
     }
 
     /**
@@ -125,7 +127,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public APIResponses defaultValue(APIResponse defaultValue) {
-        addAPIResponse(DEFAULT, defaultValue);
+        setDefaultValue(defaultValue);
         return this;
     }
 

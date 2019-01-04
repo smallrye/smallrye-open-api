@@ -46,6 +46,7 @@ public class ScopesImpl extends LinkedHashMap<String, String> implements Scopes,
      */
     @Override
     public Scopes addExtension(String name, Object value) {
+    	if (value == null) { return this; }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -76,6 +77,7 @@ public class ScopesImpl extends LinkedHashMap<String, String> implements Scopes,
      */
     @Override
     public Scopes addScope(String scope, String description) {
+    	if (scope == null) { return this; }
         this.put(scope, description);
         return this;
     }
