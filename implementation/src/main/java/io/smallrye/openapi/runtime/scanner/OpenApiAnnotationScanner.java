@@ -202,7 +202,7 @@ public class OpenApiAnnotationScanner {
                 Paths sortedPaths = new PathsImpl();
                 TreeSet<String> sortedKeys = new TreeSet<>(paths.keySet());
                 for (String pathKey : sortedKeys) {
-                    PathItem pathItem = paths.get(pathKey);
+                    PathItem pathItem = paths.getPathItem(pathKey);
                     sortedPaths.addPathItem(pathKey, pathItem);
                 }
                 sortedPaths.setExtensions(paths.getExtensions());
@@ -400,7 +400,7 @@ public class OpenApiAnnotationScanner {
         }
 
         // Get or create a PathItem to hold the operation
-        PathItem pathItem = ModelUtil.paths(openApi).get(path);
+        PathItem pathItem = ModelUtil.paths(openApi).getPathItem(path);
         if (pathItem == null) {
             pathItem = new PathItemImpl();
             ModelUtil.paths(openApi).addPathItem(path, pathItem);
@@ -612,7 +612,7 @@ public class OpenApiAnnotationScanner {
             }
             APIResponse response = readResponse(annotation);
             APIResponses responses = ModelUtil.responses(operation);
-            responses.addApiResponse(responseCode, response);
+            responses.addAPIResponse(responseCode, response);
         }
         // If there are no responses from annotations, try to create a response from the method return value.
         if (operation.getResponses() == null || operation.getResponses().isEmpty()) {
@@ -744,7 +744,7 @@ public class OpenApiAnnotationScanner {
             }
             responses = ModelUtil.responses(operation);
             response = new APIResponseImpl().description(description);
-            responses.addApiResponse(code, response);
+            responses.addAPIResponse(code, response);
         } else {
             schema = typeToSchema(returnType);
             responses = ModelUtil.responses(operation);
@@ -760,7 +760,7 @@ public class OpenApiAnnotationScanner {
                 content.addMediaType(producesType, mt);
             }
             response.setContent(content);
-            responses.addApiResponse("200", response);
+            responses.addAPIResponse("200", response);
         }
     }
 
@@ -1156,7 +1156,7 @@ public class OpenApiAnnotationScanner {
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, RefType.Callback));
         String expression = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_CALLBACK_URL_EXPRESSION);
-        callback.put(expression, readCallbackOperations(annotation.value(OpenApiConstants.PROP_OPERATIONS)));
+        callback.addPathItem(expression, readCallbackOperations(annotation.value(OpenApiConstants.PROP_OPERATIONS)));
         return callback;
     }
 
@@ -1242,7 +1242,7 @@ public class OpenApiAnnotationScanner {
         for (AnnotationInstance nested : nestedArray) {
             String responseCode = JandexUtil.stringValue(nested, OpenApiConstants.PROP_RESPONSE_CODE);
             if (responseCode != null) {
-                responses.put(responseCode, readResponse(nested));
+                responses.addAPIResponse(responseCode, readResponse(nested));
             }
         }
         return responses;

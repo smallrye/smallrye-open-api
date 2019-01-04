@@ -41,7 +41,8 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
     /**
      * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public T addExtension(String name, Object value) {
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
