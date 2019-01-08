@@ -115,11 +115,11 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
      */
     @Override
     public void setDefaultValue(APIResponse defaultValue) {
-    	if (defaultValue == null) {
-    		this.removeAPIResponse(DEFAULT);
-    	} else {
+        if (defaultValue == null) {
+            removeAPIResponse(DEFAULT);
+        } else {
             addAPIResponse(DEFAULT, defaultValue);
-    	}
+        }
     }
 
     /**
