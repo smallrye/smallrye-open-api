@@ -371,7 +371,7 @@ public class OpenApiAnnotationScanner {
             if (options != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
             }
-	    AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
+        AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
             if (patch != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
             }
@@ -682,7 +682,7 @@ public class OpenApiAnnotationScanner {
             boolean parseValue = JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_PARSE_VALUE);
             Object parsedValue = value;
             if (parseValue) {
-            	parsedValue = parseExtensionValue(value);
+                parsedValue = parseExtensionValue(value);
             }
             operation.addExtension(name, parsedValue);
         }
@@ -1977,35 +1977,35 @@ public class OpenApiAnnotationScanner {
      * @param value
      */
     private Object parseExtensionValue(String value) {
-    	if (value == null) {
-    		return null;
-    	}
-    	if ("true".equals(value)) {
-    		return Boolean.TRUE;
-    	}
-    	if ("false".equals(value)) {
-    		return Boolean.FALSE;
-    	}
-    	if (value.trim().startsWith("{")) {
-    		try {
-        		return MAPPER.readTree(value.trim());
-    		} catch (Exception e) {
-    			// TODO log the error
-    		}
-    	}
-    	if (value.trim().startsWith("[")) {
-    		try {
-        		return MAPPER.readTree(value.trim());
-    		} catch (Exception e) {
-    			// TODO log the error
-    		}
-    	}
-    	if (Character.isDigit(value.charAt(0)) || value.charAt(0) == '-' || value.charAt(0) == '+') {
-    		try { return Integer.parseInt(value); } catch (Exception e) {}
-    		try { return Float.parseFloat(value); } catch (Exception e) {}
-    		try { return Double.parseDouble(value); } catch (Exception e) {}
-    	}
-    	return value;
+        if (value == null) {
+            return null;
+        }
+        if ("true".equals(value)) {
+            return Boolean.TRUE;
+        }
+        if ("false".equals(value)) {
+            return Boolean.FALSE;
+        }
+        if (value.trim().startsWith("{")) {
+            try {
+                return MAPPER.readTree(value.trim());
+            } catch (Exception e) {
+                // TODO log the error
+            }
+        }
+        if (value.trim().startsWith("[")) {
+            try {
+                return MAPPER.readTree(value.trim());
+            } catch (Exception e) {
+                // TODO log the error
+            }
+        }
+        if (Character.isDigit(value.charAt(0)) || value.charAt(0) == '-' || value.charAt(0) == '+') {
+            try { return Integer.parseInt(value); } catch (Exception e) {}
+            try { return Float.parseFloat(value); } catch (Exception e) {}
+            try { return Double.parseDouble(value); } catch (Exception e) {}
+        }
+        return value;
     }
 
     /**

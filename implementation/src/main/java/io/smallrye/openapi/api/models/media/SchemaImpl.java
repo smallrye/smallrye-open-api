@@ -208,7 +208,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addEnumeration(Object enumeration) {
-    	if (enumeration == null) { return this; }
+        if (enumeration == null) { return this; }
         if (this.enumeration == null) {
             this.enumeration = new ArrayList<>();
         }
@@ -581,7 +581,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addRequired(String required) {
-    	if (required == null) { return this; }
+        if (required == null) { return this; }
         if (this.required == null) {
             this.required = new ArrayList<>();
         }
@@ -679,7 +679,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addProperty(String key, Schema propertySchema) {
-    	if (propertySchema == null) { return this; }
+        if (propertySchema == null) { return this; }
         if (this.properties == null) {
             this.properties = new LinkedHashMap<>();
         }
@@ -1037,7 +1037,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addAllOf(Schema allOf) {
-    	if (allOf == null) { return this; }
+        if (allOf == null) { return this; }
         if (this.allOf == null) {
             this.allOf = new ArrayList<>();
         }
@@ -1085,7 +1085,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addAnyOf(Schema anyOf) {
-    	if (anyOf == null) { return this; }
+        if (anyOf == null) { return this; }
         if (this.anyOf == null) {
             this.anyOf = new ArrayList<>();
         }
@@ -1133,7 +1133,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addOneOf(Schema oneOf) {
-    	if (oneOf == null) { return this; }
+        if (oneOf == null) { return this; }
         if (this.oneOf == null) {
             this.oneOf = new ArrayList<>();
         }

@@ -37,11 +37,11 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
      */
     @Override
     public SecurityRequirement addScheme(String securitySchemeName, String scope) {
-    	if (scope == null) {
+        if (scope == null) {
             this.put(securitySchemeName, Collections.emptyList());
-    	} else {
+        } else {
             this.put(securitySchemeName, Collections.singletonList(scope));
-    	}
+        }
         return this;
     }
 
@@ -50,9 +50,9 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
      */
     @Override
     public SecurityRequirement addScheme(String securitySchemeName, List<String> scopes) {
-    	if (scopes == null) {
-    		scopes = Collections.emptyList();
-    	}
+        if (scopes == null) {
+            scopes = Collections.emptyList();
+        }
         this.put(securitySchemeName, scopes);
         return this;
     }

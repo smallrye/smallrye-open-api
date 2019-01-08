@@ -111,45 +111,45 @@ public class MergeUtil {
             Class ptype = descriptor.getPropertyType();
             Method writeMethod = descriptor.getWriteMethod();
             if (writeMethod != null) {
-				if (Map.class.isAssignableFrom(ptype)) {
-	                try {
-	                    Map values1 = (Map) descriptor.getReadMethod().invoke(object1);
-	                    Map values2 = (Map) descriptor.getReadMethod().invoke(object2);
-	                    Map newValues = mergeMaps(values1, values2);
-	                    writeMethod.invoke(object1, newValues);
-	                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-	                    throw new RuntimeException(e);
-	                }
-	            } else if (List.class.isAssignableFrom(ptype)) {
-	                try {
-	                    List values1 = (List) descriptor.getReadMethod().invoke(object1);
-	                    List values2 = (List) descriptor.getReadMethod().invoke(object2);
-	                    List newValues = mergeLists(values1, values2);
-	                    writeMethod.invoke(object1, newValues);
-	                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-	                    throw new RuntimeException(e);
-	                }
-	            } else if (Constructible.class.isAssignableFrom(ptype)) {
-	                try {
-	                    Object val1 = descriptor.getReadMethod().invoke(object1);
-	                    Object val2 = descriptor.getReadMethod().invoke(object2);
-	                    Object newValue = mergeObjects(val1, val2);
-	                    if (newValue != null) {
-	                        writeMethod.invoke(object1, newValue);
-	                    }
-	                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-	                    throw new RuntimeException(e);
-	                }
-	            } else {
-	                try {
-	                    Object newValue = descriptor.getReadMethod().invoke(object2);
-	                    if (newValue != null) {
-	                        writeMethod.invoke(object1, newValue);
-	                    }
-	                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-	                    throw new RuntimeException(e);
-	                }
-	            }
+                if (Map.class.isAssignableFrom(ptype)) {
+                    try {
+                        Map values1 = (Map) descriptor.getReadMethod().invoke(object1);
+                        Map values2 = (Map) descriptor.getReadMethod().invoke(object2);
+                        Map newValues = mergeMaps(values1, values2);
+                        writeMethod.invoke(object1, newValues);
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (List.class.isAssignableFrom(ptype)) {
+                    try {
+                        List values1 = (List) descriptor.getReadMethod().invoke(object1);
+                        List values2 = (List) descriptor.getReadMethod().invoke(object2);
+                        List newValues = mergeLists(values1, values2);
+                        writeMethod.invoke(object1, newValues);
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (Constructible.class.isAssignableFrom(ptype)) {
+                    try {
+                        Object val1 = descriptor.getReadMethod().invoke(object1);
+                        Object val2 = descriptor.getReadMethod().invoke(object2);
+                        Object newValue = mergeObjects(val1, val2);
+                        if (newValue != null) {
+                            writeMethod.invoke(object1, newValue);
+                        }
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    try {
+                        Object newValue = descriptor.getReadMethod().invoke(object2);
+                        if (newValue != null) {
+                            writeMethod.invoke(object1, newValue);
+                        }
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
         return object1;

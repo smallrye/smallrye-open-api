@@ -86,12 +86,12 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
     
     @Override
     public void setVariables(Map<String, ServerVariable> variables) {
-    	if (variables == null) {
-    		this.variables = null;
-    	} else {
-	    	this.variables = new ServerVariablesImpl();
-	    	((Map<String, ServerVariable>) this.variables).putAll(variables);
-    	}
+        if (variables == null) {
+            this.variables = null;
+        } else {
+            this.variables = new ServerVariablesImpl();
+            ((Map<String, ServerVariable>) this.variables).putAll(variables);
+        }
     }
 
     /**

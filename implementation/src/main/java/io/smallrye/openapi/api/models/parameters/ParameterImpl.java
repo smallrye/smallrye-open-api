@@ -331,7 +331,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public Parameter addExample(String key, Example example) {
-    	if (example == null) { return this; }
+        if (example == null) { return this; }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }

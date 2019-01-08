@@ -75,7 +75,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addSchema(String key, Schema schema) {
-    	if (schema == null) { return this; }
+        if (schema == null) { return this; }
         if (this.schemas == null) {
             this.schemas = new LinkedHashMap<>();
         }
@@ -123,7 +123,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addResponse(String key, APIResponse response) {
-    	if (response == null) { return this; }
+        if (response == null) { return this; }
         if (this.responses == null) {
             this.responses = new LinkedHashMap<>();
         }
@@ -171,7 +171,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addParameter(String key, Parameter parameter) {
-    	if (parameter == null) { return this; }
+        if (parameter == null) { return this; }
         if (this.parameters == null) {
             this.parameters = new LinkedHashMap<>();
         }
@@ -219,7 +219,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addExample(String key, Example example) {
-    	if (example == null) { return this; }
+        if (example == null) { return this; }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }
@@ -267,7 +267,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addRequestBody(String key, RequestBody requestBody) {
-    	if (requestBody == null) { return this; }
+        if (requestBody == null) { return this; }
         if (this.requestBodies == null) {
             this.requestBodies = new LinkedHashMap<>();
         }
@@ -315,7 +315,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addHeader(String key, Header header) {
-    	if (header == null) { return this; }
+        if (header == null) { return this; }
         if (this.headers == null) {
             this.headers = new LinkedHashMap<>();
         }
@@ -363,7 +363,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addSecurityScheme(String key, SecurityScheme securityScheme) {
-    	if (securityScheme == null) { return this; }
+        if (securityScheme == null) { return this; }
         if (this.securitySchemes == null) {
             this.securitySchemes = new LinkedHashMap<>();
         }
@@ -411,7 +411,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addLink(String key, Link link) {
-    	if (link == null) { return this; }
+        if (link == null) { return this; }
         if (this.links == null) {
             this.links = new LinkedHashMap<>();
         }
@@ -459,7 +459,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addCallback(String key, Callback callback) {
-    	if (callback == null) { return this; }
+        if (callback == null) { return this; }
         if (this.callbacks == null) {
             this.callbacks = new LinkedHashMap<>();
         }

@@ -78,7 +78,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addTag(String tag) {
-    	if (tag == null) { return this; }
+        if (tag == null) { return this; }
         if (this.tags == null) {
             this.tags = new ArrayList<>();
         }
@@ -226,7 +226,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addParameter(Parameter parameter) {
-    	if (parameter == null) { return this; }
+        if (parameter == null) { return this; }
         if (this.parameters == null) {
             this.parameters = new ArrayList<>();
         }
@@ -324,7 +324,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addCallback(String key, Callback callback) {
-    	if (callback == null) { return this; }
+        if (callback == null) { return this; }
         if (this.callbacks == null) {
             this.callbacks = new LinkedHashMap<>();
         }
@@ -397,7 +397,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addSecurityRequirement(SecurityRequirement securityRequirement) {
-    	if (securityRequirement == null) { return this; }
+        if (securityRequirement == null) { return this; }
         if (this.security == null) {
             this.security = new ArrayList<>();
         }
@@ -445,7 +445,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addServer(Server server) {
-    	if (server == null) { return this; }
+        if (server == null) { return this; }
         if (this.servers == null) {
             this.servers = new ArrayList<>();
         }

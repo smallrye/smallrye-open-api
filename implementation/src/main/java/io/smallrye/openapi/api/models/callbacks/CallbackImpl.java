@@ -49,7 +49,7 @@ public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Cal
      */
     @Override
     public Callback addExtension(String name, Object value) {
-    	if (value == null) { return this; }
+        if (value == null) { return this; }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -108,7 +108,7 @@ public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Cal
      */
     @Override
     public Callback addPathItem(String name, PathItem item) {
-    	if (item == null) { return this; }
+        if (item == null) { return this; }
         this.put(name, item);
         return this;
     }
