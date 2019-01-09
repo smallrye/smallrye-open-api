@@ -80,6 +80,8 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
@@ -131,6 +133,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 public class OpenApiAnnotationScanner {
 
     private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
+    private static ObjectMapper MAPPER = new ObjectMapper();
 
     private final IndexView index;
 
@@ -202,7 +205,7 @@ public class OpenApiAnnotationScanner {
                 Paths sortedPaths = new PathsImpl();
                 TreeSet<String> sortedKeys = new TreeSet<>(paths.keySet());
                 for (String pathKey : sortedKeys) {
-                    PathItem pathItem = paths.get(pathKey);
+                    PathItem pathItem = paths.getPathItem(pathKey);
                     sortedPaths.addPathItem(pathKey, pathItem);
                 }
                 sortedPaths.setExtensions(paths.getExtensions());
@@ -368,7 +371,7 @@ public class OpenApiAnnotationScanner {
             if (options != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
             }
-	    AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
+        AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
             if (patch != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
             }
@@ -400,7 +403,7 @@ public class OpenApiAnnotationScanner {
         }
 
         // Get or create a PathItem to hold the operation
-        PathItem pathItem = ModelUtil.paths(openApi).get(path);
+        PathItem pathItem = ModelUtil.paths(openApi).getPathItem(path);
         if (pathItem == null) {
             pathItem = new PathItemImpl();
             ModelUtil.paths(openApi).addPathItem(path, pathItem);
@@ -612,7 +615,7 @@ public class OpenApiAnnotationScanner {
             }
             APIResponse response = readResponse(annotation);
             APIResponses responses = ModelUtil.responses(operation);
-            responses.addApiResponse(responseCode, response);
+            responses.addAPIResponse(responseCode, response);
         }
         // If there are no responses from annotations, try to create a response from the method return value.
         if (operation.getResponses() == null || operation.getResponses().isEmpty()) {
@@ -676,7 +679,12 @@ public class OpenApiAnnotationScanner {
         for (AnnotationInstance annotation : extensionAnnotations) {
             String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
             String value = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_VALUE);
-            operation.addExtension(name, value);
+            boolean parseValue = JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_PARSE_VALUE);
+            Object parsedValue = value;
+            if (parseValue) {
+                parsedValue = parseExtensionValue(value);
+            }
+            operation.addExtension(name, parsedValue);
         }
         
         // Now set the operation on the PathItem as appropriate based on the Http method type
@@ -744,7 +752,7 @@ public class OpenApiAnnotationScanner {
             }
             responses = ModelUtil.responses(operation);
             response = new APIResponseImpl().description(description);
-            responses.addApiResponse(code, response);
+            responses.addAPIResponse(code, response);
         } else {
             schema = typeToSchema(returnType);
             responses = ModelUtil.responses(operation);
@@ -760,7 +768,7 @@ public class OpenApiAnnotationScanner {
                 content.addMediaType(producesType, mt);
             }
             response.setContent(content);
-            responses.addApiResponse("200", response);
+            responses.addAPIResponse("200", response);
         }
     }
 
@@ -1156,7 +1164,7 @@ public class OpenApiAnnotationScanner {
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, RefType.Callback));
         String expression = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_CALLBACK_URL_EXPRESSION);
-        callback.put(expression, readCallbackOperations(annotation.value(OpenApiConstants.PROP_OPERATIONS)));
+        callback.addPathItem(expression, readCallbackOperations(annotation.value(OpenApiConstants.PROP_OPERATIONS)));
         return callback;
     }
 
@@ -1242,7 +1250,7 @@ public class OpenApiAnnotationScanner {
         for (AnnotationInstance nested : nestedArray) {
             String responseCode = JandexUtil.stringValue(nested, OpenApiConstants.PROP_RESPONSE_CODE);
             if (responseCode != null) {
-                responses.put(responseCode, readResponse(nested));
+                responses.addAPIResponse(responseCode, readResponse(nested));
             }
         }
         return responses;
@@ -1955,6 +1963,49 @@ public class OpenApiAnnotationScanner {
             extensions.put(extName, extValue);
         }
         return extensions;
+    }
+
+    /**
+     * Parses an extension value.  The value may be:
+     * 
+     *   - JSON object - starts with {
+     *   - JSON array - starts with [
+     *   - number
+     *   - boolean
+     *   - string
+     * 
+     * @param value
+     */
+    private Object parseExtensionValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        if ("true".equals(value)) {
+            return Boolean.TRUE;
+        }
+        if ("false".equals(value)) {
+            return Boolean.FALSE;
+        }
+        if (value.trim().startsWith("{")) {
+            try {
+                return MAPPER.readTree(value.trim());
+            } catch (Exception e) {
+                // TODO log the error
+            }
+        }
+        if (value.trim().startsWith("[")) {
+            try {
+                return MAPPER.readTree(value.trim());
+            } catch (Exception e) {
+                // TODO log the error
+            }
+        }
+        if (Character.isDigit(value.charAt(0)) || value.charAt(0) == '-' || value.charAt(0) == '+') {
+            try { return Integer.parseInt(value); } catch (Exception e) {}
+            try { return Float.parseFloat(value); } catch (Exception e) {}
+            try { return Double.parseDouble(value); } catch (Exception e) {}
+        }
+        return value;
     }
 
     /**

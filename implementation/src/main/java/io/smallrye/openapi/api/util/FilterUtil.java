@@ -138,11 +138,11 @@ public class FilterUtil {
         }
         Collection<String> keys = new ArrayList<>(model.keySet());
         for (String key : keys) {
-            PathItem childModel = model.get(key);
+            PathItem childModel = model.getPathItem(key);
             filterPathItem(filter, childModel);
 
             if (filter.filterPathItem(childModel) == null) {
-                model.remove(key);
+                model.removePathItem(key);
             }
         }
         filterExtensions(filter, model.getExtensions());
@@ -313,7 +313,7 @@ public class FilterUtil {
         }
         Collection<String> keys = new ArrayList<>(model.keySet());
         for (String key : keys) {
-            MediaType childModel = model.get(key);
+            MediaType childModel = model.getMediaType(key);
             filterMediaType(filter, childModel);
         }
     }
@@ -536,11 +536,11 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        Object ap = model.getAdditionalProperties();
-        if (ap != null && ap instanceof Schema) {
+        Schema ap = model.getAdditionalPropertiesSchema();
+        if (ap != null) {
             filterSchema(filter, (Schema) ap);
             if (filter.filterSchema((Schema) ap) == null) {
-                model.setAdditionalProperties((Schema) null);
+                model.setAdditionalPropertiesSchema((Schema) null);
             }
         }
         filterSchemaList(filter, model.getAllOf());
@@ -748,11 +748,11 @@ public class FilterUtil {
         }
         Collection<String> keys = new ArrayList<>(model.keySet());
         for (String key : keys) {
-            PathItem childModel = model.get(key);
+            PathItem childModel = model.getPathItem(key);
             filterPathItem(filter, childModel);
 
             if (filter.filterPathItem(childModel) == null) {
-                model.remove(key);
+                model.removePathItem(key);
             }
         }
         filterExtensions(filter, model.getExtensions());
@@ -830,7 +830,7 @@ public class FilterUtil {
         }
         Collection<String> keys = new ArrayList<>(model.keySet());
         for (String key : keys) {
-            ServerVariable childModel = model.get(key);
+            ServerVariable childModel = model.getServerVariable(key);
             filterServerVariable(filter, childModel);
         }
         filterExtensions(filter, model.getExtensions());

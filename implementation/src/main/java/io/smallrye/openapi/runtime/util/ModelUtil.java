@@ -139,7 +139,7 @@ public class ModelUtil {
             return;
         }
         for (String mediaTypeName : content.keySet()) {
-            MediaType mediaType = content.get(mediaTypeName);
+            MediaType mediaType = content.getMediaType(mediaTypeName);
             mediaType.setSchema(schema);
         }
     }
@@ -188,7 +188,7 @@ public class ModelUtil {
             return;
         }
         for (String mediaTypeName : content.keySet()) {
-            MediaType mediaType = content.get(mediaTypeName);
+            MediaType mediaType = content.getMediaType(mediaTypeName);
             mediaType.setSchema(schema);
         }
     }

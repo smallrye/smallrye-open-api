@@ -61,6 +61,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public Discriminator addMapping(String name, String value) {
+        if (value == null) { return this; }
         if (this.mapping == null) {
             this.mapping = new LinkedHashMap<>();
         }
