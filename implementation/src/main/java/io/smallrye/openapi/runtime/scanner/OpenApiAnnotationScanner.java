@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -75,8 +76,11 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
+import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConstants;
@@ -129,6 +133,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 public class OpenApiAnnotationScanner {
 
     private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
+    private static ObjectMapper MAPPER = new ObjectMapper();
 
     private final IndexView index;
 
@@ -141,13 +146,26 @@ public class OpenApiAnnotationScanner {
 
     private SchemaRegistry schemaRegistry = new SchemaRegistry();
 
+    private List<AnnotationScannerExtension> extensions;
+
     /**
      * Constructor.
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
+        this(config, index, Collections.emptyList());
+    }
+
+    /**
+     * Constructor.
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
+     * @param extensions A set of extensions to scanning
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions) {
         this.index = index;
+        this.extensions = extensions;
     }
 
     /**
@@ -167,6 +185,10 @@ public class OpenApiAnnotationScanner {
         for (ClassInfo classInfo : applications) {
             oai = MergeUtil.merge(oai, jaxRsApplicationToOpenApi(classInfo));
         }
+        // this can be a useful extension point to set/override the application path
+        for (AnnotationScannerExtension extension : extensions) {
+            extension.processJaxRsApplications(this, applications);
+        }
 
         // TODO find all OpenAPIDefinition annotations at the package level
 
@@ -183,7 +205,7 @@ public class OpenApiAnnotationScanner {
                 Paths sortedPaths = new PathsImpl();
                 TreeSet<String> sortedKeys = new TreeSet<>(paths.keySet());
                 for (String pathKey : sortedKeys) {
-                    PathItem pathItem = paths.get(pathKey);
+                    PathItem pathItem = paths.getPathItem(pathKey);
                     sortedPaths.addPathItem(pathKey, pathItem);
                 }
                 sortedPaths.setExtensions(paths.getExtensions());
@@ -349,7 +371,7 @@ public class OpenApiAnnotationScanner {
             if (options != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
             }
-	    AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
+        AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
             if (patch != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
             }
@@ -381,7 +403,7 @@ public class OpenApiAnnotationScanner {
         }
 
         // Get or create a PathItem to hold the operation
-        PathItem pathItem = ModelUtil.paths(openApi).get(path);
+        PathItem pathItem = ModelUtil.paths(openApi).getPathItem(path);
         if (pathItem == null) {
             pathItem = new PathItemImpl();
             ModelUtil.paths(openApi).addPathItem(path, pathItem);
@@ -521,6 +543,14 @@ public class OpenApiAnnotationScanner {
         List<Type> parameters = method.parameters();
         for (int idx = 0; idx < parameters.size(); idx++) {
             JaxRsParameterInfo paramInfo = JandexUtil.getMethodParameterJaxRsInfo(method, idx);
+            // Try extensions
+            if (paramInfo == null) {
+                for (AnnotationScannerExtension extension : extensions) {
+                    paramInfo = extension.getMethodParameterJaxRsInfo(method, idx);
+                    if (paramInfo != null)
+                        break;
+                }
+            }
             if (paramInfo != null && !ModelUtil.operationHasParameter(operation, paramInfo.name)) {
                 Type paramType = parameters.get(idx);
                 Parameter parameter = new ParameterImpl();
@@ -585,7 +615,7 @@ public class OpenApiAnnotationScanner {
             }
             APIResponse response = readResponse(annotation);
             APIResponses responses = ModelUtil.responses(operation);
-            responses.addApiResponse(responseCode, response);
+            responses.addAPIResponse(responseCode, response);
         }
         // If there are no responses from annotations, try to create a response from the method return value.
         if (operation.getResponses() == null || operation.getResponses().isEmpty()) {
@@ -649,7 +679,12 @@ public class OpenApiAnnotationScanner {
         for (AnnotationInstance annotation : extensionAnnotations) {
             String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
             String value = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_VALUE);
-            operation.addExtension(name, value);
+            boolean parseValue = JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_PARSE_VALUE);
+            Object parsedValue = value;
+            if (parseValue) {
+                parsedValue = parseExtensionValue(value);
+            }
+            operation.addExtension(name, parsedValue);
         }
         
         // Now set the operation on the PathItem as appropriate based on the Http method type
@@ -717,7 +752,7 @@ public class OpenApiAnnotationScanner {
             }
             responses = ModelUtil.responses(operation);
             response = new APIResponseImpl().description(description);
-            responses.addApiResponse(code, response);
+            responses.addAPIResponse(code, response);
         } else {
             schema = typeToSchema(returnType);
             responses = ModelUtil.responses(operation);
@@ -733,7 +768,7 @@ public class OpenApiAnnotationScanner {
                 content.addMediaType(producesType, mt);
             }
             response.setContent(content);
-            responses.addApiResponse("200", response);
+            responses.addAPIResponse("200", response);
         }
     }
 
@@ -748,9 +783,25 @@ public class OpenApiAnnotationScanner {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = OpenApiDataObjectScanner.process(index, type);
+            Type asyncType = resolveAsyncType(type);
+            schema = OpenApiDataObjectScanner.process(index, asyncType);
         }
         return schema;
+    }
+
+    private Type resolveAsyncType(Type type) {
+        if(type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+            ParameterizedType pType = type.asParameterizedType();
+            if(pType.name().equals(OpenApiConstants.COMPLETION_STAGE_NAME)
+                    && pType.arguments().size() == 1)
+                return pType.arguments().get(0);
+        }
+        for (AnnotationScannerExtension extension : extensions) {
+            Type asyncType = extension.resolveAsyncType(type);
+            if(asyncType != null)
+                return asyncType;
+        }
+        return type;
     }
 
     /**
@@ -775,6 +826,12 @@ public class OpenApiAnnotationScanner {
             if (annotation.name().equals(OpenApiConstants.DOTNAME_COOKIE_PARAM)) {
                 return In.COOKIE;
             }
+        }
+        // Try extensions
+        for (AnnotationScannerExtension extension : extensions) {
+            In ret = extension.parameterIn(paramInfo);
+            if (ret != null)
+                return ret;
         }
         return null;
     }
@@ -1107,7 +1164,7 @@ public class OpenApiAnnotationScanner {
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, RefType.Callback));
         String expression = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_CALLBACK_URL_EXPRESSION);
-        callback.put(expression, readCallbackOperations(annotation.value(OpenApiConstants.PROP_OPERATIONS)));
+        callback.addPathItem(expression, readCallbackOperations(annotation.value(OpenApiConstants.PROP_OPERATIONS)));
         return callback;
     }
 
@@ -1193,7 +1250,7 @@ public class OpenApiAnnotationScanner {
         for (AnnotationInstance nested : nestedArray) {
             String responseCode = JandexUtil.stringValue(nested, OpenApiConstants.PROP_RESPONSE_CODE);
             if (responseCode != null) {
-                responses.put(responseCode, readResponse(nested));
+                responses.addAPIResponse(responseCode, readResponse(nested));
             }
         }
         return responses;
@@ -1909,6 +1966,49 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
+     * Parses an extension value.  The value may be:
+     * 
+     *   - JSON object - starts with {
+     *   - JSON array - starts with [
+     *   - number
+     *   - boolean
+     *   - string
+     * 
+     * @param value
+     */
+    private Object parseExtensionValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        if ("true".equals(value)) {
+            return Boolean.TRUE;
+        }
+        if ("false".equals(value)) {
+            return Boolean.FALSE;
+        }
+        if (value.trim().startsWith("{")) {
+            try {
+                return MAPPER.readTree(value.trim());
+            } catch (Exception e) {
+                // TODO log the error
+            }
+        }
+        if (value.trim().startsWith("[")) {
+            try {
+                return MAPPER.readTree(value.trim());
+            } catch (Exception e) {
+                // TODO log the error
+            }
+        }
+        if (Character.isDigit(value.charAt(0)) || value.charAt(0) == '-' || value.charAt(0) == '+') {
+            try { return Integer.parseInt(value); } catch (Exception e) {}
+            try { return Float.parseFloat(value); } catch (Exception e) {}
+            try { return Double.parseDouble(value); } catch (Exception e) {}
+        }
+        return value;
+    }
+
+    /**
      * Simple enum to indicate whether an @Content annotation being processed is
      * an input or an output.
      * @author eric.wittmann@gmail.com
@@ -1960,6 +2060,10 @@ public class OpenApiAnnotationScanner {
         public boolean has(ClassType instanceClass) {
             return registry.containsKey(instanceClass.name());
         }
+    }
+
+    public void setCurrentAppPath(String path) {
+        this.currentAppPath = path;
     }
 
 }

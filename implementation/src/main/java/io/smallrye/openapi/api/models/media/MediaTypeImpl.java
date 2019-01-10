@@ -93,6 +93,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType addExample(String key, Example example) {
+        if (example == null) { return this; }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }
@@ -165,6 +166,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType addEncoding(String key, Encoding encodingItem) {
+        if (encodingItem == null) { return this; }
         if (this.encoding == null) {
             this.encoding = new LinkedHashMap<>();
         }

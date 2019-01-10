@@ -278,7 +278,7 @@ public class OpenApiSerializer {
         }
         ObjectNode variablesNode = serverNode.putObject(OpenApiConstants.PROP_VARIABLES);
         for (String varName : variables.keySet()) {
-            writeServerVariable(variablesNode, varName, variables.get(varName));
+            writeServerVariable(variablesNode, varName, variables.getServerVariable(varName));
         }
         writeExtensions(variablesNode, variables);
     }
@@ -319,7 +319,7 @@ public class OpenApiSerializer {
         for (SecurityRequirement securityRequirement : security) {
             ObjectNode srNode = array.addObject();
             for (String fieldName : securityRequirement.keySet()) {
-                List<String> values = securityRequirement.get(fieldName);
+                List<String> values = securityRequirement.getScheme(fieldName);
                 ArrayNode valuesNode = srNode.putArray(fieldName);
                 if (values != null) {
                     for (String value : values) {
@@ -341,7 +341,7 @@ public class OpenApiSerializer {
         }
         ObjectNode pathsNode = parent.putObject(OpenApiConstants.PROP_PATHS);
         for (String pathName : paths.keySet()) {
-            writePathItem(pathsNode, paths.get(pathName), pathName);
+            writePathItem(pathsNode, paths.getPathItem(pathName), pathName);
         }
         writeExtensions(pathsNode, paths);
     }
@@ -427,7 +427,7 @@ public class OpenApiSerializer {
         }
         ObjectNode node = parent.putObject(OpenApiConstants.PROP_CONTENT);
         for (String name : model.keySet()) {
-            writeMediaType(node, model.get(name), name);
+            writeMediaType(node, model.getMediaType(name), name);
         }
     }
 
@@ -493,10 +493,10 @@ public class OpenApiSerializer {
         writeSchema(node, model.getItems(), OpenApiConstants.PROP_ITEMS);
         writeSchemaList(node, model.getAllOf(), OpenApiConstants.PROP_ALL_OF);
         writeSchemas(node, model.getProperties(), OpenApiConstants.PROP_PROPERTIES);
-        if (model.getAdditionalProperties() instanceof Boolean) {
-            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES, (Boolean) model.getAdditionalProperties());
+        if (model.getAdditionalPropertiesBoolean() != null) {
+            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES, (Boolean) model.getAdditionalPropertiesBoolean());
         } else {
-            writeSchema(node, (Schema) model.getAdditionalProperties(), OpenApiConstants.PROP_ADDITIONAL_PROPERTIES);
+            writeSchema(node, (Schema) model.getAdditionalPropertiesSchema(), OpenApiConstants.PROP_ADDITIONAL_PROPERTIES);
         }
         JsonUtil.booleanProperty(node, OpenApiConstants.PROP_READ_ONLY, model.getReadOnly());
         writeXML(node, model.getXml());
@@ -589,9 +589,9 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(OpenApiConstants.PROP_RESPONSES);
-        writeAPIResponse(node, model.getDefault(), OpenApiConstants.PROP_DEFAULT);
+        writeAPIResponse(node, model.getDefaultValue(), OpenApiConstants.PROP_DEFAULT);
         for (String name : model.keySet()) {
-            writeAPIResponse(node, model.get(name), name);
+            writeAPIResponse(node, model.getAPIResponse(name), name);
         }
     }
 
@@ -640,7 +640,7 @@ public class OpenApiSerializer {
             return;
         }
         for (String name : model.keySet()) {
-            List<String> scopes = model.get(name);
+            List<String> scopes = model.getScheme(name);
             writeStringArray(node, scopes, name);
         }
     }
@@ -1063,7 +1063,7 @@ public class OpenApiSerializer {
         ObjectNode node = parent.putObject(name);
         JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
         for (String pathItemName : model.keySet()) {
-            writePathItem(node, model.get(pathItemName), pathItemName);
+            writePathItem(node, model.getPathItem(pathItemName), pathItemName);
         }
         writeExtensions(node, model);
     }
@@ -1073,7 +1073,7 @@ public class OpenApiSerializer {
      * @param node
      * @param model
      */
-    private void writeExtensions(ObjectNode node, Extensible model) {
+    private void writeExtensions(ObjectNode node, Extensible<?> model) {
         Map<String, Object> extensions = model.getExtensions();
         if (extensions == null || extensions.isEmpty()) {
             return;

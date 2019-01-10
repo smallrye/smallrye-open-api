@@ -143,6 +143,13 @@ public class JandexUtil {
         }
     }
 
+    /**
+     * Reads a Boolean property from the given annotation instance.  If no value is found
+     * this will return false.
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @return Boolean value
+     */
     public static Boolean booleanValueWithDefault(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
         return value != null && value.asBoolean();
@@ -467,7 +474,7 @@ public class JandexUtil {
      * @param parameterIndex
      * @param annotationName
      */
-    private static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
+    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {
         for (AnnotationInstance annotation : method.annotations()) {
             if (annotation.target().kind() == Kind.METHOD_PARAMETER &&

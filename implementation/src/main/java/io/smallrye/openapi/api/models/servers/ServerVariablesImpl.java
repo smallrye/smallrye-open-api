@@ -47,6 +47,7 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
      */
     @Override
     public ServerVariables addExtension(String name, Object value) {
+        if (value == null) { return this; }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -77,6 +78,7 @@ public class ServerVariablesImpl extends LinkedHashMap<String, ServerVariable> i
      */
     @Override
     public ServerVariables addServerVariable(String name, ServerVariable serverVariable) {
+        if (serverVariable == null) { return this; }
         this.put(name, serverVariable);
         return this;
     }

@@ -55,7 +55,7 @@ public class ServersUtil {
         // Now the PathItem and Operation servers
         Set<String> pathNames = oai.getPaths().keySet();
         for (String pathName : pathNames) {
-            PathItem pathItem = oai.getPaths().get(pathName);
+            PathItem pathItem = oai.getPaths().getPathItem(pathName);
             configureServers(config, pathName, pathItem);
         }
     }

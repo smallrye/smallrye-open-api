@@ -189,7 +189,7 @@ public class TypeProcessor {
                     resolveParameterizedType(valueType, propsSchema);
                 }
                 // Add properties schema to field schema.
-                schema.additionalProperties(propsSchema);
+                schema.additionalPropertiesSchema(propsSchema);
             }
             return OBJECT_TYPE;
         } else {

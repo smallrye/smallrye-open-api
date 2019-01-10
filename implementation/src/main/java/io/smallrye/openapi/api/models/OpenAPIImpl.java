@@ -148,6 +148,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addServer(Server server) {
+        if (server == null) { return this; }
         if (this.servers == null) {
             this.servers = new ArrayList<>();
         }
@@ -195,6 +196,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addSecurityRequirement(SecurityRequirement securityRequirement) {
+        if (securityRequirement == null) { return this; }
         if (this.security == null) {
             this.security = new ArrayList<>();
         }
@@ -242,6 +244,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addTag(Tag tag) {
+        if (tag == null) { return this; }
         if (this.tags == null) {
             this.tags = new ArrayList<>();
         }
