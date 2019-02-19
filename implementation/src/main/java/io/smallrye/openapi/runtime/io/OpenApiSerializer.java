@@ -256,7 +256,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a {@link Server} model to the given JS node.
+     * Writes a {@link Server} model to the given JSON node.
      * @param node ObjectNode
      * @param model Server
      */
@@ -747,7 +747,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link APIResponse} to the JSON tree.
      * @param parent
      * @param responses
      */
@@ -762,7 +762,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link Parameter} to the JSON tree.
      * @param parent
      * @param parameters
      */
@@ -791,7 +791,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link Example} to the JSON tree.
      * @param parent
      * @param examples
      */
@@ -825,7 +825,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link RequestBody} to the JSON tree.
      * @param parent
      * @param requestBodies
      */
@@ -858,7 +858,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link Header} to the JSON tree.
      * @param parent
      * @param headers
      */
@@ -899,7 +899,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link SecurityScheme} to the JSON tree.
      * @param parent
      * @param securitySchemes
      */
@@ -972,7 +972,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link Link} to the JSON tree.
      * @param parent
      * @param links
      */
@@ -1036,7 +1036,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a map of {@link Schema} to the JSON tree.
+     * Writes a map of {@link Callback} to the JSON tree.
      * @param parent
      * @param callbacks
      */
