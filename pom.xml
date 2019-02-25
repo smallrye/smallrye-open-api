@@ -52,13 +52,13 @@
         <version.org.hamcrest>1.3</version.org.hamcrest>
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.jboss.arquillian>1.4.1.Final</version.org.jboss.arquillian>
-        <version.org.jboss.arquillian.container.weld-embedded>2.0.0.Final</version.org.jboss.arquillian.container.weld-embedded>
-        <version.org.jboss.jandex>2.1.0.Final</version.org.jboss.jandex>
+        <version.org.jboss.arquillian.container.weld-embedded>2.0.1.Final</version.org.jboss.arquillian.container.weld-embedded>
+        <version.org.jboss.jandex>2.1.1.Final</version.org.jboss.jandex>
         <version.org.jboss.logging>3.3.2.Final</version.org.jboss.logging>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.1_spec>1.0.2.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.1_spec>
-        <version.org.jboss.weld>3.0.Final</version.org.jboss.weld>
-        <version.org.jboss.weld.core.impl>3.0.5.Final</version.org.jboss.weld.core.impl>
+        <version.org.jboss.weld>3.1.Final</version.org.jboss.weld>
+        <version.org.jboss.weld.core.impl>3.1.0.Final</version.org.jboss.weld.core.impl>
         <version.org.skyscreamer>1.5.0</version.org.skyscreamer>
         <version.org.testng>6.14.3</version.org.testng>
     </properties>
