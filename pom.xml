@@ -32,7 +32,7 @@
     <name>SmallRye: MicroProfile OpenAPI Parent</name>
 
     <properties>
-        <version.asciidoctor.plugin>1.5.7.1</version.asciidoctor.plugin>
+        <version.asciidoctor.plugin>1.5.8</version.asciidoctor.plugin>
         <version.buildhelper.plugin>3.0.0</version.buildhelper.plugin>
         <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
         <version.com.fasterxml.jackson.dataformat>2.9.8</version.com.fasterxml.jackson.dataformat>
