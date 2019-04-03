@@ -25,8 +25,6 @@ import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.api.util.ServersUtil;
 
-import org.jboss.logging.Logger;
-
 /**
  * Holds the final OpenAPI document produced during the startup of the app.
  *
@@ -39,8 +37,6 @@ import org.jboss.logging.Logger;
 public class OpenApiDocument {
 
     public static final OpenApiDocument INSTANCE = new OpenApiDocument();
-
-    private static final Logger LOGGER = Logger.getLogger(OpenApiDocument.class);
 
     // These are used during init only
     private transient OpenApiConfig config;
@@ -169,7 +165,6 @@ public class OpenApiDocument {
             ServersUtil.configureServers(config, merged);
 
             model = merged;
-            LOGGER.info("OpenAPI document initialized: " + model);
             clear();
         }
     }
@@ -183,7 +178,6 @@ public class OpenApiDocument {
         if (model == null || filter == null) {
             return model;
         }
-        LOGGER.info("Filtering OpenAPI model using: " + filter);
         return FilterUtil.applyFilter(filter, model);
     }
 
