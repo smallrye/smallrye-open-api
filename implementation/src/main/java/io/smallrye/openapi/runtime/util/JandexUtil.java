@@ -23,8 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
+import io.smallrye.openapi.api.OpenApiConstants;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
 import org.jboss.jandex.AnnotationInstance;
@@ -37,7 +36,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -312,16 +311,14 @@ public class JandexUtil {
      * @return List of AnnotationInstance's
      */
     public static List<AnnotationInstance> getParameterAnnotations(MethodInfo method, short paramPosition) {
-        List<AnnotationInstance> annotations = new ArrayList<>(method.annotations());
-        CollectionUtils.filter(annotations, new Predicate() {
-            @Override
-            public boolean evaluate(Object object) {
-                AnnotationInstance annotation = (AnnotationInstance) object;
-                AnnotationTarget target = annotation.target();
-                return target != null && target.kind() == Kind.METHOD_PARAMETER && target.asMethodParameter().position() == paramPosition;
-            }
-        });
-        return annotations;
+        return method.annotations()
+                .stream()
+                .filter(annotation -> {
+                    AnnotationTarget target = annotation.target();
+                    return target != null && target.kind() == Kind.METHOD_PARAMETER
+                            && target.asMethodParameter().position() == paramPosition;
+                })
+                .collect(toList());
     }
 
     /**
@@ -346,14 +343,9 @@ public class JandexUtil {
      */
     public static List<AnnotationInstance> getRepeatableAnnotation(MethodInfo method,
             DotName singleAnnotationName, DotName repeatableAnnotationName) {
-        List<AnnotationInstance> annotations = new ArrayList<>(method.annotations());
-        CollectionUtils.filter(annotations, new Predicate() {
-            @Override
-            public boolean evaluate(Object object) {
-                AnnotationInstance annotation = (AnnotationInstance) object;
-                return annotation.name().equals(singleAnnotationName);
-            }
-        });
+        List<AnnotationInstance> annotations = method.annotations()
+                .stream().filter(annotation -> annotation.name().equals(singleAnnotationName))
+                .collect(toList());
         if (repeatableAnnotationName != null && method.hasAnnotation(repeatableAnnotationName)) {
             AnnotationInstance annotation = method.annotation(repeatableAnnotationName);
             AnnotationValue annotationValue = annotation.value();
