@@ -52,7 +52,7 @@
         <version.org.jboss.arquillian>1.4.1.Final</version.org.jboss.arquillian>
         <version.org.jboss.arquillian.container.weld-embedded>2.0.1.Final</version.org.jboss.arquillian.container.weld-embedded>
         <version.org.jboss.jandex>2.1.1.Final</version.org.jboss.jandex>
-        <version.org.jboss.logging>3.3.2.Final</version.org.jboss.logging>
+        <version.org.jboss.logging>3.4.0.Final</version.org.jboss.logging>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.1_spec>1.0.2.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.1_spec>
         <version.org.jboss.weld>3.1.Final</version.org.jboss.weld>
