@@ -15,10 +15,15 @@
  */
 package io.smallrye.openapi.runtime.scanner;
 
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -37,8 +42,10 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -72,7 +79,7 @@ public class OpenApiDataObjectScannerTestBase {
         index = indexer.complete();
     }
 
-    private static void indexDirectory(Indexer indexer, String baseDir) {
+    static void indexDirectory(Indexer indexer, String baseDir) {
         InputStream directoryStream = tcclGetResourceAsStream(baseDir);
         BufferedReader reader = new BufferedReader(new InputStreamReader(directoryStream));
         reader.lines()
@@ -87,7 +94,7 @@ public class OpenApiDataObjectScannerTestBase {
                 .getResourceAsStream(path);
     }
 
-    private static void index(Indexer indexer, String resName) {
+    static void index(Indexer indexer, String resName) {
         try {
             InputStream stream = tcclGetResourceAsStream(resName);
             indexer.index(stream);
@@ -100,6 +107,12 @@ public class OpenApiDataObjectScannerTestBase {
         // Remember to set debug level logging.
         LOG.debug(schemaToString(entityName, schema));
         System.out.println(schemaToString(entityName, schema));
+    }
+
+    public static void printToConsole(String entityName, OpenAPI oai) throws IOException {
+        // Remember to set debug level logging.
+        LOG.debug(OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON));
+        System.out.println(OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON));
     }
 
     public static String schemaToString(String entityName, Schema schema) throws IOException {
@@ -117,6 +130,11 @@ public class OpenApiDataObjectScannerTestBase {
         JSONAssert.assertEquals(loadResource(resourceUrl), schemaToString(entityName, actual),  true);
     }
 
+    public static void assertJsonEquals(String entityName, String expectedResource, OpenAPI actual) throws JSONException, IOException {
+        URL resourceUrl = OpenApiDataObjectScannerTestBase.class.getResource(expectedResource);
+        JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, OpenApiSerializer.Format.JSON),  true);
+    }
+
     public static String loadResource(URL testResource) throws IOException {
         return IOUtils.toString(testResource, "UTF-8");
     }
@@ -126,4 +144,28 @@ public class OpenApiDataObjectScannerTestBase {
         return container.field(fieldName);
     }
 
+    public static OpenApiConfig emptyConfig() {
+        return new OpenApiConfigImpl(new Config() {
+
+            @Override
+            public <T> T getValue(String propertyName, Class<T> propertyType) {
+                return null;
+            }
+
+            @Override
+            public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Iterable<String> getPropertyNames() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public Iterable<ConfigSource> getConfigSources() {
+                return Collections.emptyList();
+            }
+        });
+    }
 }

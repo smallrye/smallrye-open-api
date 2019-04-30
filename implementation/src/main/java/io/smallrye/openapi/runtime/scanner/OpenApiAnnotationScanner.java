@@ -392,6 +392,27 @@ public class OpenApiAnnotationScanner {
 
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
+        final Operation operation;
+
+        // Process any @Operation annotation
+        /////////////////////////////////////////
+        if (method.hasAnnotation(OpenApiConstants.DOTNAME_OPERATION)) {
+            AnnotationInstance operationAnno = method.annotation(OpenApiConstants.DOTNAME_OPERATION);
+            // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
+            if (operationAnno.value(OpenApiConstants.PROP_HIDDEN) != null && operationAnno.value(OpenApiConstants.PROP_HIDDEN).asBoolean()) {
+                return;
+            }
+
+            operation = new OperationImpl();
+            // Otherwise, set various bits of meta-data from the values in the @Operation annotation
+            operation.setSummary(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_SUMMARY));
+            operation.setDescription(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_DESCRIPTION));
+            operation.setOperationId(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_OPERATION_ID));
+            operation.setDeprecated(JandexUtil.booleanValue(operationAnno, OpenApiConstants.PROP_DEPRECATED));
+        } else {
+            operation = new OperationImpl();
+        }
+
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
         String path;
         if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
@@ -436,23 +457,6 @@ public class OpenApiAnnotationScanner {
             } else {
                 currentProduces = OpenApiConstants.DEFAULT_PRODUCES;
             }
-        }
-
-        Operation operation = new OperationImpl();
-
-        // Process any @Operation annotation
-        /////////////////////////////////////////
-        if (method.hasAnnotation(OpenApiConstants.DOTNAME_OPERATION)) {
-            AnnotationInstance operationAnno = method.annotation(OpenApiConstants.DOTNAME_OPERATION);
-            // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
-            if (operationAnno.value(OpenApiConstants.PROP_HIDDEN) != null && operationAnno.value(OpenApiConstants.PROP_HIDDEN).asBoolean()) {
-                return;
-            }
-            // Otherwise, set various bits of meta-data from the values in the @Operation annotation
-            operation.setSummary(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_SUMMARY));
-            operation.setDescription(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_DESCRIPTION));
-            operation.setOperationId(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_OPERATION_ID));
-            operation.setDeprecated(JandexUtil.booleanValue(operationAnno, OpenApiConstants.PROP_DEPRECATED));
         }
 
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
