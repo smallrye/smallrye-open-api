@@ -16,13 +16,18 @@
 
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.IOException;
+
+import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.jandex.Indexer;
+import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-public class OpenApiAnnotationScannerTest {
+public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBase {
 
     /**
      * Test method for {@link OpenApiAnnotationScanner#makePath(java.lang.String[])}.
@@ -48,4 +53,35 @@ public class OpenApiAnnotationScannerTest {
         Assert.assertEquals("/bookings/{id}", path);
     }
 
+    @Test
+    public void testHiddenOperationNotPresent() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+
+        // Test samples
+        indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/");
+
+        String name = "testHiddenOperationNotPresent";
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(name, result);
+        assertJsonEquals(name, "resource.testHiddenOperationNotPresent.json", result);
+    }
+
+    @Test
+    public void testHiddenOperationPathNotPresent() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+
+        // Test samples
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/HiddenOperationResource.class");
+
+        String name = "testHiddenOperationPathNotPresent";
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(name, result);
+        assertJsonEquals(name, "resource.testHiddenOperationPathNotPresent.json", result);
+    }
 }
