@@ -35,13 +35,13 @@
             <groupId>org.eclipse.microprofile.openapi</groupId>
             <artifactId>microprofile-openapi-api</artifactId>
         </dependency>
-        
+
         <!-- MP Config Spec -->
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
             <artifactId>microprofile-config-api</artifactId>
         </dependency>
-        
+
         <!-- Third Party Libraries -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -83,7 +83,7 @@
             <artifactId>validation-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <!-- Test Only Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -93,6 +93,11 @@
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.json.bind</groupId>
+            <artifactId>javax.json.bind-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

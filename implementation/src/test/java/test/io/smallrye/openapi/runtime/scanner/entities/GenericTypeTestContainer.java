@@ -36,4 +36,7 @@ public class GenericTypeTestContainer {
 
     // Type containing a variety of collections and maps.
     GenericFieldTestContainer<String, LocalDateTime> genericContainer;
+
+    // Type containing fields with overridden names.
+    FieldNameOverride overriddenNames;
 }

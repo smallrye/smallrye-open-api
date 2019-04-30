@@ -135,4 +135,15 @@ public class ExpectationTests extends OpenApiDataObjectScannerTestBase {
         assertJsonEquals(name, "generic.fields.expected.json", result);
     }
 
+    @Test
+    public void fieldNameOverrideTest() throws IOException, JSONException {
+        String name = GenericTypeTestContainer.class.getName();
+        Type pType = getFieldFromKlazz(name, "overriddenNames").type();
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+
+        Schema result = scanner.process();
+
+        printToConsole(name, result);
+        assertJsonEquals(name, "generic.fields.overriddenNames.expected.json", result);
+    }
 }

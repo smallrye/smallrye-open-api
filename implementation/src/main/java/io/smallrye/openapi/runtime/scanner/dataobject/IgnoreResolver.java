@@ -18,7 +18,12 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
@@ -46,6 +51,8 @@ public class IgnoreResolver {
 
     {
         IgnoreAnnotationHandler[] ignoreHandlers = {
+                new SchemaHiddenHandler(),
+                new JsonbTransientHandler(),
                 new JsonIgnorePropertiesHandler(),
                 new JsonIgnoreHandler(),
                 new JsonIgnoreTypeHandler()
@@ -68,6 +75,52 @@ public class IgnoreResolver {
             }
         }
         return false;
+    }
+
+    /**
+     * Handler for OAS hidden @{@link Schema}
+     */
+    private final class SchemaHiddenHandler implements IgnoreAnnotationHandler {
+        @Override
+        public boolean shouldIgnore(AnnotationTarget target, PathEntry parentPathEntry) {
+            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
+
+            if (annotationInstance != null) {
+                Boolean isHidden = JandexUtil.booleanValue(annotationInstance,
+                                                           OpenApiConstants.PROP_HIDDEN);
+
+                if (isHidden != null) {
+                    return isHidden;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public DotName getName() {
+            return OpenApiConstants.DOTNAME_SCHEMA;
+        }
+    }
+
+    /**
+     * Handler for JSON-B's @{@link javax.json.bind.annotation.JsonbTransient}
+     */
+    private final class JsonbTransientHandler implements IgnoreAnnotationHandler {
+
+        @Override
+        public boolean shouldIgnore(AnnotationTarget target, DataObjectDeque.PathEntry parentPathEntry) {
+            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
+            if (annotationInstance != null) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public DotName getName() {
+            return OpenApiConstants.DOTNAME_JSONB_TRANSIENT;
+        }
     }
 
     /**
