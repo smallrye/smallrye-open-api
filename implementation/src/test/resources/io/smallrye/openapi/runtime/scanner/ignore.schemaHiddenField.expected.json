@@ -1,0 +1,21 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.IgnoreSchemaOnFieldExample" : {
+        "properties" : {
+          "serializedField1" : {
+            "type" : "string",
+            "description" : "This field is not hidden"
+          },
+          "serializedField2" : {
+            "type" : "string",
+            "description" : "This field is not hidden either"
+          },
+          "serializedField3" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -249,6 +249,9 @@ public final class OpenApiConstants {
 
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 
+    public static final DotName DOTNAME_JSONB_PROPERTY = DotName.createSimple("javax.json.bind.annotation.JsonbProperty");
+    public static final DotName DOTNAME_JSONB_TRANSIENT = DotName.createSimple("javax.json.bind.annotation.JsonbTransient");
+
     public static final String[] DEFAULT_CONSUMES = new String[] {MIME_ANY};
     public static final String[] DEFAULT_PRODUCES = new String[] {MIME_ANY};
 

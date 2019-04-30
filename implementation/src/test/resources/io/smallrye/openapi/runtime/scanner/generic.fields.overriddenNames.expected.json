@@ -1,0 +1,31 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContainer" : {
+        "required" : [
+          "dasherized-name-required"
+        ],
+        "properties" : {
+          "dasherized-name" : {
+            "type" : "string"
+          },
+          "dasherized-name-required" : {
+            "type" : "string"
+          },
+          "snake_case_name" : {
+            "type" : "string"
+          },
+          "camelCaseNameCustom" : {
+            "type" : "string"
+          },
+          "camelCaseNameDefault1" : {
+            "type" : "string"
+          },
+          "camelCaseNameDefault2" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

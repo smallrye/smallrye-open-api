@@ -22,9 +22,12 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.Test;
+
+import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreSchemaOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreTypeExample;
+import test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample;
 
 import java.io.IOException;
 
@@ -83,6 +86,32 @@ public class IgnoreTests extends OpenApiDataObjectScannerTestBase {
 
         printToConsole(name.local(), result);
         assertJsonEquals(name.local(), "ignore.jsonIgnoreType.expected.json", result);
+    }
+
+    // Entirely ignore a single field once using JSON-B.
+    @Test
+    public void testIgnore_jsonbTransientField() throws IOException, JSONException {
+        DotName name = DotName.createSimple(JsonbTransientOnFieldExample.class.getName());
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+                ClassType.create(name, Type.Kind.CLASS));
+
+        Schema result = scanner.process();
+
+        printToConsole(name.local(), result);
+        assertJsonEquals(name.local(), "ignore.jsonbTransientField.expected.json", result);
+    }
+
+    // Entirely ignore a single field once using hidden attribute of Schema.
+    @Test
+    public void testIgnore_schemaHiddenField() throws IOException, JSONException {
+        DotName name = DotName.createSimple(IgnoreSchemaOnFieldExample.class.getName());
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+                ClassType.create(name, Type.Kind.CLASS));
+
+        Schema result = scanner.process();
+
+        printToConsole(name.local(), result);
+        assertJsonEquals(name.local(), "ignore.schemaHiddenField.expected.json", result);
     }
 
 }

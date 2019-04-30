@@ -105,34 +105,48 @@ public class AnnotationTargetProcessor {
     public Schema processField() {
         AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
 
+        final String propertyKey = readPropertyKey();
+
         if (schemaAnnotation == null && shouldInferUnannotatedFields()) {
             // Handle unannotated field and just do simple inference.
             readUnannotatedField();
         } else {
             // Handle field annotated with @Schema.
-            readSchemaAnnotatedField(schemaAnnotation);
+            readSchemaAnnotatedField(propertyKey, schemaAnnotation);
         }
-        parentPathEntry.getSchema().addProperty(entityName, fieldSchema);
+        parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
     }
 
-    private void readSchemaAnnotatedField(@NotNull AnnotationInstance annotation) {
+    private String readPropertyKey() {
+        AnnotationInstance jsonbAnnotation = TypeUtil.getAnnotation(annotationTarget,
+                                                                    OpenApiConstants.DOTNAME_JSONB_PROPERTY);
+        String key;
+
+        if (jsonbAnnotation != null) {
+            key = JandexUtil.stringValue(jsonbAnnotation, OpenApiConstants.PROP_VALUE);
+
+            if (key == null) {
+                key = entityName;
+            }
+        } else {
+            key = entityName;
+        }
+
+        return key;
+    }
+
+    private void readSchemaAnnotatedField(String propertyKey, @NotNull AnnotationInstance annotation) {
         if (annotation == null) {
             throw new IllegalArgumentException("Annotation must not be null");
         }
 
-        LOG.debugv("Processing @Schema annotation {0} on a field {1}", annotation, entityName);
-
-        // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
-        if (isHidden != null && isHidden == Boolean.TRUE) {
-            return;
-        }
+        LOG.debugv("Processing @Schema annotation {0} on a field {1}", annotation, propertyKey);
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
         if (JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_REQUIRED)) {
-            parentPathEntry.getSchema().addRequired(entityName);
+            parentPathEntry.getSchema().addRequired(propertyKey);
         }
 
         // Type could be replaced (e.g. generics).
