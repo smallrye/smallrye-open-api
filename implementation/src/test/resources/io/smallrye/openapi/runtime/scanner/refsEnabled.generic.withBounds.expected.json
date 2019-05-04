@@ -1,11 +1,16 @@
 {
   "components" : {
     "schemas" : {
-      "test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreTypeExample" : {
+      "KustomPair" : {
         "type": "object",
+        "required" : [ "bar", "foo" ],
         "properties" : {
-          "shouldBePresent" : {
+          "bar" : {
+            "type" : "object"
+          },
+          "foo" : {
             "format" : "int32",
+            "maxLength" : 123456,
             "type" : "integer"
           }
         }

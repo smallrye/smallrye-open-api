@@ -2,6 +2,7 @@
   "components" : {
     "schemas" : {
       "test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContainer" : {
+        "type": "object",
         "properties" : {
           "theQ" : {
             "type" : "string"

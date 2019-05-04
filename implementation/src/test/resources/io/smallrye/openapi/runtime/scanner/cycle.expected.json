@@ -2,6 +2,7 @@
   "components" : {
     "schemas" : {
       "test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList" : {
+        "type": "object",
         "properties" : {
           "next" : {
             "description" : "Cyclic reference to test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList",

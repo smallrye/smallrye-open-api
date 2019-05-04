@@ -1,0 +1,78 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/nested": {
+      "post": {
+        "parameters": [
+          {
+            "name": "arg",
+            "schema": {
+              "$ref": "#/components/schemas/NestedParameterTestParent"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NestedParameterTestParent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NestedParameterTestParent": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "nested"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nested": {
+            "$ref": "#/components/schemas/NestedParameterTestChild"
+          },
+          "childList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NestedParameterTestChild"
+            }
+          },
+          "childMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NestedParameterTestChild"
+            }
+          }
+        }
+      },
+      "NestedParameterTestChild": {
+        "type": "object",
+        "description": "The description of the child",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

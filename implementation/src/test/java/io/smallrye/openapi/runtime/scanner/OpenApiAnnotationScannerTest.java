@@ -58,15 +58,15 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         Indexer indexer = new Indexer();
 
         // Test samples
-        indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/HiddenOperationResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/VisibleOperationResource.class");
 
-        String name = "testHiddenOperationNotPresent";
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
 
         OpenAPI result = scanner.scan();
 
-        printToConsole(name, result);
-        assertJsonEquals(name, "resource.testHiddenOperationNotPresent.json", result);
+        printToConsole(result);
+        assertJsonEquals("resource.testHiddenOperationNotPresent.json", result);
     }
 
     @Test
@@ -76,12 +76,11 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         // Test samples
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/HiddenOperationResource.class");
 
-        String name = "testHiddenOperationPathNotPresent";
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
 
         OpenAPI result = scanner.scan();
 
-        printToConsole(name, result);
-        assertJsonEquals(name, "resource.testHiddenOperationPathNotPresent.json", result);
+        printToConsole(result);
+        assertJsonEquals("resource.testHiddenOperationPathNotPresent.json", result);
     }
 }

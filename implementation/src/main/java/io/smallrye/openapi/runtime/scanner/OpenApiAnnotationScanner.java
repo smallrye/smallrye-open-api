@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -135,6 +134,7 @@ public class OpenApiAnnotationScanner {
     private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
     private static ObjectMapper MAPPER = new ObjectMapper();
 
+    private final OpenApiConfig config;
     private final IndexView index;
 
     private OpenAPIImpl oai;
@@ -144,7 +144,7 @@ public class OpenApiAnnotationScanner {
     private String[] currentConsumes;
     private String[] currentProduces;
 
-    private SchemaRegistry schemaRegistry = new SchemaRegistry();
+    private SchemaRegistry schemaRegistry;
 
     private List<AnnotationScannerExtension> extensions;
 
@@ -164,6 +164,7 @@ public class OpenApiAnnotationScanner {
      * @param extensions A set of extensions to scanning
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions) {
+        this.config = config;
         this.index = index;
         this.extensions = extensions;
     }
@@ -179,6 +180,7 @@ public class OpenApiAnnotationScanner {
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
         oai = new OpenAPIImpl();
         oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        schemaRegistry = SchemaRegistry.newInstance(config, oai);
 
         // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
         Collection<ClassInfo> applications = this.index.getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
@@ -1813,18 +1815,11 @@ public class OpenApiAnnotationScanner {
             return null;
         }
         if (schemaReferenceSupported && this.schemaRegistry.has(ctype)) {
-            GeneratedSchemaInfo schemaInfo = this.schemaRegistry.lookup(ctype);
-            Schema rval = new SchemaImpl();
-            rval.setRef(schemaInfo.$ref);
-            return rval;
+            return this.schemaRegistry.lookupRef(ctype);
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, ctype);
             if (schemaReferenceSupported && schema != null && this.index.getClassByName(ctype.name()) != null) {
-                GeneratedSchemaInfo schemaInfo = this.schemaRegistry.register(ctype, schema);
-                ModelUtil.components(oai).addSchema(schemaInfo.name, schema);
-                Schema rval = new SchemaImpl();
-                rval.setRef(schemaInfo.$ref);
-                return rval;
+                return this.schemaRegistry.register(ctype, schema);
             } else {
                 return schema;
             }
@@ -2019,51 +2014,6 @@ public class OpenApiAnnotationScanner {
      */
     private static enum ContentDirection {
         Input, Output, Parameter
-    }
-
-    /**
-     * Information about a single generated schema.
-     * @author eric.wittmann@gmail.com
-     */
-    protected static class GeneratedSchemaInfo {
-        public String name;
-        public Schema schema;
-        public String $ref;
-    }
-
-    /**
-     * A simple registry used to track schemas that have been generated and inserted
-     * into the #/components section of the
-     * @author eric.wittmann@gmail.com
-     */
-    protected static class SchemaRegistry {
-        private Map<DotName, GeneratedSchemaInfo> registry = new HashMap<>();
-        private Set<String> names = new HashSet<>();
-
-        public GeneratedSchemaInfo register(ClassType instanceClass, Schema schema) {
-            String name = instanceClass.name().local();
-            int idx = 1;
-            while (this.names.contains(name)) {
-                name = instanceClass.name().local() + idx++;
-            }
-            GeneratedSchemaInfo info = new GeneratedSchemaInfo();
-            info.schema = schema;
-            info.name = name;
-            info.$ref = "#/components/schemas/" + name;
-
-            registry.put(instanceClass.name(), info);
-            names.add(name);
-
-            return info;
-        }
-
-        public GeneratedSchemaInfo lookup(ClassType instanceClass) {
-            return registry.get(instanceClass.name());
-        }
-
-        public boolean has(ClassType instanceClass) {
-            return registry.containsKey(instanceClass.name());
-        }
     }
 
     public void setCurrentAppPath(String path) {

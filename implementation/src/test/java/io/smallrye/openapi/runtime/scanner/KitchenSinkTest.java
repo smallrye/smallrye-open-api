@@ -17,12 +17,15 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
+import org.json.JSONException;
 import org.junit.Test;
 
+import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
 
 /**
@@ -65,4 +68,18 @@ public class KitchenSinkTest extends OpenApiDataObjectScannerTestBase {
         printToConsole("KustomPair", scanner.process());
     }
 
+    @Test
+    public void testKitchenSinkWithRefs() throws IOException, JSONException {
+        DotName name = componentize(KitchenSink.class.getName());
+        Type type = ClassType.create(name, Type.Kind.CLASS);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, type);
+        OpenAPIImpl oai = new OpenAPIImpl();
+        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai);
+
+        Schema result = scanner.process();
+        registry.register(type, result);
+
+        printToConsole(oai);
+        assertJsonEquals("refsEnabled.kitchenSink.expected.json", oai);
+    }
 }

@@ -17,6 +17,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -102,7 +103,7 @@ public class AnnotationTargetProcessor {
         return fp.processField();
     }
 
-    public Schema processField() {
+    Schema processField() {
         AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
 
         final String propertyKey = readPropertyKey();
@@ -114,6 +115,8 @@ public class AnnotationTargetProcessor {
             // Handle field annotated with @Schema.
             readSchemaAnnotatedField(propertyKey, schemaAnnotation);
         }
+
+        fieldSchema = SchemaRegistry.checkRegistration(index, entityType, typeResolver, fieldSchema);
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
     }
