@@ -70,6 +70,10 @@ public class SchemaRegistry {
         return current.get();
     }
 
+    public static void remove() {
+        current.remove();
+    }
+
     /**
      * Check if the entityType is eligible for registration using the
      * typeResolver. The eligible kinds of types are

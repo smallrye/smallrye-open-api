@@ -1,0 +1,209 @@
+{
+  "openapi": "3.0.1",
+  "tags": [
+    {
+      "name": "Test",
+      "description": "Testing the container"
+    }
+  ],
+  "paths": {
+    "/bv/test-container": {
+      "post": {
+        "tags": [
+          "Test"
+        ],
+        "requestBody": {
+           "content": {
+           "application/json": {
+           "schema": {
+             "$ref": "#/components/schemas/BVTestResourceEntity"
+           }
+           }
+           }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BVTestContainer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BVTestResourceEntity": {
+        "type": "object",
+        "properties": {
+          "string_no_bean_constraints": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 101,
+            "nullable": true
+          },
+          "big_int_no_bean_constraints": {
+            "type": "integer",
+            "minimum": 101,
+            "maximum": 101.999,
+            "nullable": true,
+            "pattern": "^\\d{1,3}([.]\\d{1,3})?$"
+          },
+          "list_no_bean_constraints": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 100,
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "map_no_bean_constraints": {
+            "type": "object",
+            "minProperties": 0,
+            "maxProperties": 100,
+            "nullable": true,
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BVTestContainer": {
+        "type": "object",
+        "properties": {
+          "arrayListNotNullAndNotEmptyAndMaxItems": {
+            "type": "array",
+            "nullable": false,
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string"
+            }
+          },
+          "arrayListNullableAndMinItemsAndMaxItems": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 20,
+            "items": {
+              "type": "string"
+            }
+          },
+          "booleanNotNull": {
+            "type": "boolean",
+            "nullable": false
+          },
+          "decimalMaxBigDecimalExclusiveDigits": {
+            "type": "number",
+            "maximum": 201.0,
+            "exclusiveMaximum": true,
+            "pattern": "^\\d{1,3}([.]\\d)?$"
+          },
+          "decimalMaxBigDecimalInclusive": {
+            "type": "number",
+            "maximum": 201.0
+          },
+          "decimalMaxBigDecimalInvalidValue": {
+            "type": "number"
+          },
+          "decimalMaxBigDecimalNoConstraint": {
+            "type": "number"
+          },
+          "decimalMaxBigDecimalPrimaryDigits": {
+            "type": "number",
+            "maximum": 200.0,
+            "pattern": "^\\d{1,3}([.]\\d{1,2})?$"
+          },
+          "decimalMinBigDecimalExclusiveDigits": {
+            "type": "number",
+            "minimum": 9,
+            "exclusiveMinimum": true,
+            "pattern": "^\\d([.]\\d{1,2})?$"
+          },
+          "decimalMinBigDecimalInclusive": {
+            "type": "number",
+            "minimum": 9
+          },
+          "decimalMinBigDecimalInvalidValue": {
+            "type": "number"
+          },
+          "decimalMinBigDecimalNoConstraint": {
+            "type": "number"
+          },
+          "decimalMinBigDecimalPrimary": {
+            "type": "number",
+            "minimum": 10
+          },
+          "integerNegativeNotZeroMinValue": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": -1,
+            "minimum": -1000000
+          },
+          "integerNegativeOrZeroMinValue": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 0,
+            "minimum": -999
+          },
+          "integerPositiveNotZeroMaxValue": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 1000,
+            "minimum": 1
+          },
+          "integerPositiveOrZeroMaxValue": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 999,
+            "minimum": 0
+          },
+          "mapObjectNotNullAndNotEmptyAndMaxProperties": {
+            "type": "object",
+            "nullable": false,
+            "minProperties": 1,
+            "maxProperties": 20,
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "mapObjectNullableAndMinPropertiesAndMaxProperties": {
+            "type": "object",
+            "minProperties": 5,
+            "maxProperties": 20,
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "stringNotBlankDigits": {
+            "type": "string",
+            "nullable": false,
+            "pattern": "^\\d{1,8}([.]\\d{1,10})?$"
+          },
+          "stringNotBlankNotNull": {
+            "type": "string",
+            "nullable": false,
+            "pattern": "\\S"
+          },
+          "stringNotEmptyMaxSize": {
+            "type": "string",
+            "nullable": false,
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "stringNotEmptySizeRange": {
+            "type": "string",
+            "nullable": false,
+            "minLength": 100,
+            "maxLength": 2000
+          }
+        }
+      }
+    }
+  }
+}
