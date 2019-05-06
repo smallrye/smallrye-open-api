@@ -44,6 +44,8 @@ import static java.util.stream.Collectors.toList;
  */
 public class JandexUtil {
 
+    private static final String JAXRS_PACKAGE = "javax.ws.rs";
+
     /**
      * Simple enum to indicate the type of a $ref being read/written.
      * @author eric.wittmann@gmail.com
@@ -407,11 +409,21 @@ public class JandexUtil {
             return null;
         }
         for (short i = 0; i < methodParams.size(); i++) {
-            if (JandexUtil.getParameterAnnotations(method, i).isEmpty()) {
+            List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
+            if (parameterAnnotations.isEmpty() || !containsJaxRsAnnotations(parameterAnnotations)) {
                 return methodParams.get(i);
             }
         }
         return null;
+    }
+
+    private static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances) {
+        for (AnnotationInstance instance : instances) {
+            if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
