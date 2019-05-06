@@ -1,0 +1,14 @@
+{
+  "components" : {
+    "schemas" : {
+      "BuzzLinkedList" : {
+        "type": "object",
+        "properties" : {
+          "next" : {
+            "$ref" : "#/components/schemas/BuzzLinkedList"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "components" : {
     "schemas" : {
-      "test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContainer" : {
+      "FieldNameOverride" : {
         "type": "object",
         "required" : [
           "dasherized-name-required"

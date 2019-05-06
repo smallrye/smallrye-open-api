@@ -1,0 +1,22 @@
+{
+  "components": {
+    "schemas": {
+      "BazEnum": {
+        "type": "string",
+        "enum": [
+          "Gold",
+          "Green",
+          "Orange"
+        ]
+      },
+      "EnumContainer": {
+        "type": "object",
+        "properties": {
+          "bazEnum": {
+            "$ref": "#/components/schemas/BazEnum"
+          }
+        }
+      }
+    }
+  }
+}

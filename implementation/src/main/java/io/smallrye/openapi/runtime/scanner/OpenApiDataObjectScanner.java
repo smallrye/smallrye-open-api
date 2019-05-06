@@ -23,6 +23,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
 import io.smallrye.openapi.runtime.util.TypeUtil;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -118,7 +119,7 @@ public class OpenApiDataObjectScanner {
         this.rootClassInfo = initialType(classType);
     }
 
-    public OpenApiDataObjectScanner(IndexView _index, AnnotationTarget annotationTarget, Type classType) {
+    OpenApiDataObjectScanner(IndexView _index, AnnotationTarget annotationTarget, Type classType) {
         this.index = new AugmentedIndexView(_index);
         this.objectStack = new DataObjectDeque(index);
         this.ignoreResolver = new IgnoreResolver(index);
@@ -159,7 +160,7 @@ public class OpenApiDataObjectScanner {
      *
      * @return the OAI schema
      */
-    public Schema process() {
+    Schema process() {
         LOG.debugv("Starting processing with root: {0}", rootClassType.name());
 
         // If top level item is simple
@@ -203,6 +204,11 @@ public class OpenApiDataObjectScanner {
 
             // First, handle class annotations.
             currentPathEntry.setSchema(readKlass(currentClass, currentSchema));
+
+            if (currentSchema.getType() == null) {
+                // If not schema has yet been set, consider this an "object"
+                currentSchema.setType(Schema.SchemaType.OBJECT);
+            }
 
             LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
 

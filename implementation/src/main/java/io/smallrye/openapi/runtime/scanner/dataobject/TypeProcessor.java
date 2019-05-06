@@ -16,6 +16,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
@@ -87,9 +88,8 @@ public class TypeProcessor {
             // TODO handle multi-dimensional arrays.
 
             // Array-type schema
-            SchemaImpl arrSchema = new SchemaImpl();
+            Schema arrSchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
-            schema.items(arrSchema);
 
             // Only use component (excludes the special name formatting for arrays).
             TypeUtil.TypeWithFormat typeFormat = TypeUtil.getTypeFormat(arrayType.component());
@@ -100,6 +100,11 @@ public class TypeProcessor {
             if (!isTerminalType(arrayType.component()) && index.containsClass(type)) {
                 pushToStack(type, arrSchema);
             }
+
+            arrSchema = SchemaRegistry.checkRegistration(index, arrayType.component(), typeResolver, arrSchema);
+
+            schema.items(arrSchema);
+
             return arrayType;
         }
 
@@ -159,9 +164,8 @@ public class TypeProcessor {
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE)) { // TODO maybe also Iterable?
             LOG.debugv("Processing Java Collection. Will treat as an array.");
-            SchemaImpl arraySchema = new SchemaImpl();
+            Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
-            schema.items(arraySchema);
 
             // Should only have one arg for collection.
             Type arg = pType.arguments().get(0);
@@ -171,8 +175,11 @@ public class TypeProcessor {
                 arraySchema.type(terminalType.getSchemaType());
                 arraySchema.format(terminalType.getFormat().format());
             } else {
-                resolveParameterizedType(arg, arraySchema);
+                arraySchema = resolveParameterizedType(arg, arraySchema);
             }
+
+            schema.items(arraySchema);
+
             return ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
             LOG.debugv("Processing Map. Will treat as an object.");
@@ -180,13 +187,13 @@ public class TypeProcessor {
 
             if (pType.arguments().size() == 2) {
                 Type valueType = pType.arguments().get(1);
-                SchemaImpl propsSchema = new SchemaImpl();
+                Schema propsSchema = new SchemaImpl();
                 if (isTerminalType(valueType)) {
                     TypeUtil.TypeWithFormat tf = TypeUtil.getTypeFormat(valueType);
                     propsSchema.setType(tf.getSchemaType());
                     propsSchema.setFormat(tf.getFormat().format());
                 } else {
-                    resolveParameterizedType(valueType, propsSchema);
+                    propsSchema = resolveParameterizedType(valueType, propsSchema);
                 }
                 // Add properties schema to field schema.
                 schema.additionalPropertiesSchema(propsSchema);
@@ -199,18 +206,22 @@ public class TypeProcessor {
         }
     }
 
-    private void resolveParameterizedType(Type valueType, SchemaImpl propsSchema) {
+    private Schema resolveParameterizedType(Type valueType, Schema propsSchema) {
         if (valueType.kind() == Type.Kind.TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.WILDCARD_TYPE) {
             Type resolved = resolveTypeVariable(propsSchema, valueType);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
+                propsSchema = SchemaRegistry.checkRegistration(index, valueType, typeResolver, propsSchema);
             }
         } else if (index.containsClass(valueType)) {
             propsSchema.type(Schema.SchemaType.OBJECT);
             pushToStack(valueType, propsSchema);
+            propsSchema = SchemaRegistry.checkRegistration(index, valueType, typeResolver, propsSchema);
         }
+
+        return propsSchema;
     }
 
     private Type resolveTypeVariable(Schema schema, Type fieldType) {

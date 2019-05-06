@@ -1,0 +1,40 @@
+{
+  "components" : {
+    "schemas" : {
+      "NestedSchemaParent" : {
+        "type": "object",
+        "properties" : {
+          "child1" : {
+            "$ref": "#/components/schemas/NestedSchemaSiblingA"
+          },
+          "child2" : {
+            "$ref": "#/components/schemas/NestedSchemaSiblingB"
+          }
+        }
+      },
+      "NestedSchemaSiblingA" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type": "string"
+          },
+          "title" : {
+            "type": "string"
+          }
+        }
+      },
+      "NestedSchemaSiblingB" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type": "string"
+          },
+          "favoriteNumber" : {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    }
+  }
+}

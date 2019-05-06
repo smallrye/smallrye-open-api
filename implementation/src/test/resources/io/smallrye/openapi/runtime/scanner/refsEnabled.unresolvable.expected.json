@@ -1,0 +1,29 @@
+{
+  "components": {
+    "schemas": {
+      "Baz": {
+        "type": "object",
+        "properties": {
+          "an_integer_value": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "Bar": {
+        "type": "object",
+        "properties": {
+          "theQ": {
+            "type": "object"
+          },
+          "theT": {
+            "$ref": "#/components/schemas/Baz"
+          },
+          "ultimateTShouldBeQ": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@
   "components" : {
     "schemas" : {
       "test.io.smallrye.openapi.runtime.scanner.entities.IgnoreSchemaOnFieldExample" : {
+        "type": "object",
         "properties" : {
           "serializedField1" : {
             "type" : "string",

@@ -1,0 +1,32 @@
+{
+  "components": {
+    "schemas": {
+      "Bazzy": {
+        "type": "object",
+        "properties": {
+          "hellofrombazzy": {
+            "type": "string"
+          },
+          "an_integer_value": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "Foo": {
+        "type": "object",
+        "properties": {
+          "theQ": {
+            "type": "string"
+          },
+          "theT": {
+            "$ref": "#/components/schemas/Bazzy"
+          },
+          "ultimateTShouldBeQ": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

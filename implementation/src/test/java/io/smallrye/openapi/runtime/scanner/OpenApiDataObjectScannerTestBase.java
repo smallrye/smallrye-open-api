@@ -17,9 +17,11 @@ package io.smallrye.openapi.runtime.scanner;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
+import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -42,6 +44,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,6 +82,14 @@ public class OpenApiDataObjectScannerTestBase {
         index = indexer.complete();
     }
 
+    static DotName componentize(String className) {
+        DotName prefix = null;
+        for (String localName : className.split("\\.")) {
+            prefix = DotName.createComponentized(prefix, localName);
+        }
+        return prefix;
+    }
+
     static void indexDirectory(Indexer indexer, String baseDir) {
         InputStream directoryStream = tcclGetResourceAsStream(baseDir);
         BufferedReader reader = new BufferedReader(new InputStreamReader(directoryStream));
@@ -109,7 +120,7 @@ public class OpenApiDataObjectScannerTestBase {
         System.out.println(schemaToString(entityName, schema));
     }
 
-    public static void printToConsole(String entityName, OpenAPI oai) throws IOException {
+    public static void printToConsole(OpenAPI oai) throws IOException {
         // Remember to set debug level logging.
         LOG.debug(OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON));
         System.out.println(OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON));
@@ -130,7 +141,7 @@ public class OpenApiDataObjectScannerTestBase {
         JSONAssert.assertEquals(loadResource(resourceUrl), schemaToString(entityName, actual),  true);
     }
 
-    public static void assertJsonEquals(String entityName, String expectedResource, OpenAPI actual) throws JSONException, IOException {
+    public static void assertJsonEquals(String expectedResource, OpenAPI actual) throws JSONException, IOException {
         URL resourceUrl = OpenApiDataObjectScannerTestBase.class.getResource(expectedResource);
         JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, OpenApiSerializer.Format.JSON),  true);
     }
@@ -164,6 +175,38 @@ public class OpenApiDataObjectScannerTestBase {
 
             @Override
             public Iterable<ConfigSource> getConfigSources() {
+                return Collections.emptyList();
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static OpenApiConfig nestingSupportConfig() {
+        return new OpenApiConfigImpl(new Config() {
+            @Override
+            public <T> T getValue(String propertyName, Class<T> propertyType) {
+                if (OpenApiConstants.SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
+                    return (T) Boolean.TRUE;
+                }
+                return null;
+            }
+
+            @Override
+            public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
+                if (OpenApiConstants.SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
+                    return (Optional<T>) Optional.of(Boolean.TRUE);
+                }
+                return Optional.empty();
+            }
+
+            @Override
+            public Iterable<String> getPropertyNames() {
+                return Arrays.asList(OpenApiConstants.SCHEMA_REFERENCES_ENABLE);
+            }
+
+            @Override
+            public Iterable<ConfigSource> getConfigSources() {
+                // Not needed for this test case
                 return Collections.emptyList();
             }
         });

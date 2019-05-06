@@ -2,6 +2,7 @@
   "components" : {
     "schemas" : {
       "test.io.smallrye.openapi.runtime.scanner.entities.Bar" : {
+        "type": "object",
         "properties" : {
           "theQ" : {
             "type" : "object"

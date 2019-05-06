@@ -2,6 +2,7 @@
   "components" : {
     "schemas" : {
       "test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer" : {
+        "type": "object",
         "properties" : {
           "shouldBePresent" : {
             "type" : "string"

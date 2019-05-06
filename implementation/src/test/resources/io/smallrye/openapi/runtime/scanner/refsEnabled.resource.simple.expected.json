@@ -1,0 +1,44 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/foo": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Foo"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Foo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "bar": {
+            "$ref": "#/components/schemas/Bar"
+          }
+        }
+      },
+      "Bar": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

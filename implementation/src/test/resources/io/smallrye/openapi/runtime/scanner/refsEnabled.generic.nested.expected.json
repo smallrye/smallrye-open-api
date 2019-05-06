@@ -1,0 +1,39 @@
+{
+  "components": {
+    "schemas": {
+      "KustomPair": {
+        "maxLength": 123456,
+        "required": [
+          "bar",
+          "foo"
+        ],
+        "type": "object",
+        "properties": {
+          "bar": {
+            "type": "string"
+          },
+          "foo": {
+            "maxLength": 123456,
+            "type": "string"
+          }
+        }
+      },
+      "KustomPair1": {
+        "type": "object",
+        "required": [
+          "bar",
+          "foo"
+        ],
+        "properties": {
+          "bar": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "foo": {
+            "$ref": "#/components/schemas/KustomPair"
+          }
+        }
+      }
+    }
+  }
+}

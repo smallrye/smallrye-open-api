@@ -1,0 +1,61 @@
+{
+  "components": {
+    "schemas": {
+      "Bazzy": {
+        "type": "object",
+        "properties": {
+          "hellofrombazzy": {
+            "type": "string"
+          },
+          "an_integer_value": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "Foo": {
+        "type": "object",
+        "properties": {
+          "theQ": {
+            "type": "string"
+          },
+          "theT": {
+            "$ref": "#/components/schemas/Bazzy"
+          },
+          "ultimateTShouldBeQ": {
+            "type": "string"
+          }
+        }
+      },
+      "GenericFieldTestContainer": {
+        "type": "object",
+        "properties": {
+          "arrayListOfV": {
+            "type": "array",
+            "items": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          "genericFieldK": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "mapOfKToFoo": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Foo"
+            }
+          },
+          "mapOfKV": {
+            "type": "object",
+            "additionalProperties": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
