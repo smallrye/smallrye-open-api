@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-parent</artifactId>
-        <version>1.1.3</version>
+        <version>1.1.4-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-open-api-tck</artifactId>
     <name>SmallRye: MicroProfile OpenAPI TCK</name>
