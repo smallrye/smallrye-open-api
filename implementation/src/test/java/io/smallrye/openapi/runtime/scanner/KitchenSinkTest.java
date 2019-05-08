@@ -74,7 +74,7 @@ public class KitchenSinkTest extends OpenApiDataObjectScannerTestBase {
         Type type = ClassType.create(name, Type.Kind.CLASS);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, type);
         OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai);
+        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
 
         Schema result = scanner.process();
         registry.register(type, result);

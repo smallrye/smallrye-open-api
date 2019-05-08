@@ -39,6 +39,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
 
     private String $ref;
     private String format;
+    private String name;
     private String title;
     private String description;
     private Object defaultValue;
@@ -126,6 +127,14 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     public Schema discriminator(Discriminator discriminator) {
         this.discriminator = discriminator;
         return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

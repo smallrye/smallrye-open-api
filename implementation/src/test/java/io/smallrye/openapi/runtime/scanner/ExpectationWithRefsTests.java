@@ -42,7 +42,7 @@ public class ExpectationWithRefsTests extends OpenApiDataObjectScannerTestBase {
     @Before
     public void setupRegistry() {
         oai = new OpenAPIImpl();
-        registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai);
+        registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
     }
 
     private void testAssertion(Class<?> target, String expectedResourceName) throws IOException, JSONException {
