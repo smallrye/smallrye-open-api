@@ -2,8 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-open-api-parent</artifactId>
-        <version>1.1.4-SNAPSHOT</version>
+        <artifactId>smallrye-open-api-parent-1.1</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-open-api-tck</artifactId>
     <name>SmallRye: MicroProfile OpenAPI TCK</name>
@@ -12,7 +12,7 @@
         <!-- Project Dependencies -->
         <dependency>
             <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-open-api</artifactId>
+            <artifactId>smallrye-open-api-1.1</artifactId>
         </dependency>
 
         <!-- SmallRye Config -->

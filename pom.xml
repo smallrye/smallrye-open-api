@@ -25,8 +25,8 @@
         <version>6</version>
     </parent>
 
-    <artifactId>smallrye-open-api-parent</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <artifactId>smallrye-open-api-parent-1.1</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <name>SmallRye: MicroProfile OpenAPI Parent</name>
@@ -45,6 +45,9 @@
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.skyscreamer>1.5.0</version.org.skyscreamer>
+
+        <!-- Used by release plugin to define git tag -->
+        <tagNameFormat>smallrye-open-api-1.1-@{project.version}</tagNameFormat>
     </properties>
 
     <scm>
@@ -152,7 +155,7 @@
             <!-- Dependencies provided by the project -->
             <dependency>
                 <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-open-api</artifactId>
+                <artifactId>smallrye-open-api-1.1</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -187,4 +190,18 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>!release.maven.bug.always.be.active</name>
+                </property>
+            </activation>
+            <modules>
+                <module>release</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
