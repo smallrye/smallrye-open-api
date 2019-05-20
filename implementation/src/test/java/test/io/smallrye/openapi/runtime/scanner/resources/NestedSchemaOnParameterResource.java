@@ -3,6 +3,8 @@ package test.io.smallrye.openapi.runtime.scanner.resources;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.context.Dependent;
+import javax.json.bind.annotation.JsonbProperty;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -27,6 +29,10 @@ public class NestedSchemaOnParameterResource {
         @Schema(required = true)
         NestedParameterTestChild nested;
 
+        @JsonbProperty("will_not_be_used")
+        @Schema(name = "another_child", description = "This schema and description will be replaced with a $ref to 'another_nested', but the name will be used for the property")
+        AnotherNestedChildWithSchemaName another;
+
         List<NestedParameterTestChild> childList;
 
         Map<String, NestedParameterTestChild> childMap;
@@ -36,6 +42,15 @@ public class NestedSchemaOnParameterResource {
     public static class NestedParameterTestChild {
         @Schema(required = true)
         String id;
+        String name;
+    }
+
+    @Dependent
+    @Schema(name = "another_nested", description = "The name of this child is not 'AnotherNestedChildWithSchemaName'")
+    public static class AnotherNestedChildWithSchemaName {
+        @Schema(required = true)
+        String id;
+        @Schema(name = "name_", title = "This property's 'name' has been overridden using the @Schema")
         String name;
     }
 

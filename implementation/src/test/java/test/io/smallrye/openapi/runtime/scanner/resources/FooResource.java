@@ -3,6 +3,7 @@ package test.io.smallrye.openapi.runtime.scanner.resources;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
+@SuppressWarnings("unused")
 @Path("foo")
 public class FooResource {
 

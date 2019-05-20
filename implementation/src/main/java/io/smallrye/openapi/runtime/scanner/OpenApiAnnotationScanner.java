@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -119,6 +120,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.JandexUtil.JaxRsParameterInfo;
 import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.SchemaFactory;
 
 /**
  * Scans a deployment (using the archive and jandex annotation index) for JAX-RS and
@@ -143,8 +145,6 @@ public class OpenApiAnnotationScanner {
     private String currentResourcePath = "";
     private String[] currentConsumes;
     private String[] currentProduces;
-
-    private SchemaRegistry schemaRegistry;
 
     private List<AnnotationScannerExtension> extensions;
 
@@ -180,7 +180,10 @@ public class OpenApiAnnotationScanner {
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
         oai = new OpenAPIImpl();
         oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
-        schemaRegistry = SchemaRegistry.newInstance(config, oai);
+
+        @SuppressWarnings("unused")
+        // Creating a new instance of a registry which will be set on the thread context.
+        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(config, oai, index);
 
         // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
         Collection<ClassInfo> applications = this.index.getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
@@ -516,7 +519,12 @@ public class OpenApiAnnotationScanner {
         // Process @Parameter annotations
         /////////////////////////////////////////
         List<AnnotationInstance> parameterAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                OpenApiConstants.DOTNAME_PARAMETER, OpenApiConstants.DOTNAME_PARAMETERS);
+                                                                                           OpenApiConstants.DOTNAME_PARAMETER,
+                                                                                           OpenApiConstants.DOTNAME_PARAMETERS);
+
+        // Cross reference from the JAX-RS *Param name to the name specified by the Schema
+        Map<String, String> parameterNameOverrides = new HashMap<>();
+
         for (AnnotationInstance annotation : parameterAnnotations) {
             Parameter parameter = readParameter(annotation);
             if (parameter == null) {
@@ -529,13 +537,29 @@ public class OpenApiAnnotationScanner {
             // If the target is METHOD, then the @Parameter is on the method itself
             // If the target is METHOD_PARAMETER, then the @Parameter is on one of the method's arguments (THIS ONE WE CARE ABOUT)
             if (target != null && target.kind() == Kind.METHOD_PARAMETER) {
-                In in = parameterIn(target.asMethodParameter());
-                parameter.setIn(in);
+                MethodParameterInfo paramInfo = target.asMethodParameter();
+                JaxRsParameterInfo jaxRsParamInfo = JandexUtil.getMethodParameterJaxRsInfo(method, paramInfo.position());
+
+                if (jaxRsParamInfo != null) {
+                    parameter.setIn(jaxRsParamInfo.in);
+
+                    if (parameter.getName() == null) {
+                        parameter.setName(jaxRsParamInfo.name);
+                    } else {
+                        parameterNameOverrides.put(jaxRsParamInfo.name, parameter.getName());
+                    }
+                } else {
+                    parameter.setIn(parameterIn(target.asMethodParameter()));
+                }
+
+                if (parameter.getIn() == In.PATH) {
+                    parameter.setRequired(true);
+                }
 
                 // if the Parameter model we read does *NOT* have a Schema at this point, then create one from the method argument's type
                 if (!ModelUtil.parameterHasSchema(parameter)) {
-                    Type paramType = JandexUtil.getMethodParameterType(method, target.asMethodParameter().position());
-                    Schema schema = typeToSchema(paramType);
+                    Type paramType = JandexUtil.getMethodParameterType(method, paramInfo.position());
+                    Schema schema = SchemaFactory.typeToSchema(index, paramType, extensions);
                     ModelUtil.setParameterSchema(parameter, schema);
                 }
             } else {
@@ -557,13 +581,17 @@ public class OpenApiAnnotationScanner {
                         break;
                 }
             }
-            if (paramInfo != null && !ModelUtil.operationHasParameter(operation, paramInfo.name)) {
+            if (paramInfo != null && !ModelUtil.operationHasParameter(operation, parameterNameOverrides.getOrDefault(paramInfo.name, paramInfo.name))) {
                 Type paramType = parameters.get(idx);
                 Parameter parameter = new ParameterImpl();
                 parameter.setName(paramInfo.name);
                 parameter.setIn(paramInfo.in);
-                parameter.setRequired(true);
-                Schema schema = typeToSchema(paramType);
+
+                if (paramInfo.in == In.PATH) {
+                    parameter.setRequired(true);
+                }
+
+                Schema schema = SchemaFactory.typeToSchema(index, paramType, extensions);
                 parameter.setSchema(schema);
                 operation.addParameter(parameter);
             }
@@ -589,7 +617,7 @@ public class OpenApiAnnotationScanner {
                     requestBodyType = JandexUtil.getRequestBodyParameterClassType(method);
                 }
                 if (requestBodyType != null) {
-                    Schema schema = typeToSchema(requestBodyType);
+                    Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
                     ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
                 }
             }
@@ -600,7 +628,7 @@ public class OpenApiAnnotationScanner {
         if (operation.getRequestBody() == null && currentConsumes != null) {
             Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method);
             if (requestBodyType != null) {
-                Schema schema = typeToSchema(requestBodyType);
+                Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
                 if (schema != null) {
                     RequestBody requestBody = new RequestBodyImpl();
                     ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
@@ -692,7 +720,7 @@ public class OpenApiAnnotationScanner {
             }
             operation.addExtension(name, parsedValue);
         }
-        
+
         // Now set the operation on the PathItem as appropriate based on the Http method type
         ///////////////////////////////////////////
         switch (methodType) {
@@ -760,7 +788,7 @@ public class OpenApiAnnotationScanner {
             response = new APIResponseImpl().description(description);
             responses.addAPIResponse(code, response);
         } else {
-            schema = typeToSchema(returnType);
+            schema = SchemaFactory.typeToSchema(index, returnType, extensions);
             responses = ModelUtil.responses(operation);
             response = new APIResponseImpl().description("OK");
             content = new ContentImpl();
@@ -776,38 +804,6 @@ public class OpenApiAnnotationScanner {
             response.setContent(content);
             responses.addAPIResponse("200", response);
         }
-    }
-
-    /**
-     * Converts a jandex type to a {@link Schema} model.
-     * @param type
-     */
-    private Schema typeToSchema(Type type) {
-        Schema schema = null;
-        if (type.kind() == Type.Kind.CLASS) {
-            schema = introspectClassToSchema(type.asClassType(), true);
-        } else if (type.kind() == Type.Kind.PRIMITIVE) {
-            schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
-        } else {
-            Type asyncType = resolveAsyncType(type);
-            schema = OpenApiDataObjectScanner.process(index, asyncType);
-        }
-        return schema;
-    }
-
-    private Type resolveAsyncType(Type type) {
-        if(type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
-            ParameterizedType pType = type.asParameterizedType();
-            if(pType.name().equals(OpenApiConstants.COMPLETION_STAGE_NAME)
-                    && pType.arguments().size() == 1)
-                return pType.arguments().get(0);
-        }
-        for (AnnotationScannerExtension extension : extensions) {
-            Type asyncType = extension.resolveAsyncType(type);
-            if(asyncType != null)
-                return asyncType;
-        }
-        return type;
     }
 
     /**
@@ -1337,7 +1333,7 @@ public class OpenApiAnnotationScanner {
         LOG.debug("Processing a single @Header annotation.");
         Header header = new HeaderImpl();
         header.setDescription(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DESCRIPTION));
-        header.setSchema(readSchema(annotation.value(OpenApiConstants.PROP_SCHEMA)));
+        header.setSchema(SchemaFactory.readSchema(index, annotation.value(OpenApiConstants.PROP_SCHEMA)));
         header.setRequired(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_REQUIRED));
         header.setDeprecated(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED));
         header.setAllowEmptyValue(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_ALLOW_EMPTY_VALUE));
@@ -1460,7 +1456,7 @@ public class OpenApiAnnotationScanner {
         parameter.setStyle(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_STYLE, org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
         parameter.setExplode(readExplode(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_EXPLODE, org.eclipse.microprofile.openapi.annotations.enums.Explode.class)));
         parameter.setAllowReserved(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_ALLOW_RESERVED));
-        parameter.setSchema(readSchema(annotation.value(OpenApiConstants.PROP_SCHEMA)));
+        parameter.setSchema(SchemaFactory.readSchema(index, annotation.value(OpenApiConstants.PROP_SCHEMA)));
         parameter.setContent(readContent(annotation.value(OpenApiConstants.PROP_CONTENT), ContentDirection.Parameter));
         parameter.setExamples(readExamples(annotation.value(OpenApiConstants.PROP_EXAMPLES)));
         parameter.setExample(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_EXAMPLE));
@@ -1532,7 +1528,7 @@ public class OpenApiAnnotationScanner {
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setExamples(readExamples(annotation.value(OpenApiConstants.PROP_EXAMPLES)));
         mediaType.setExample(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_EXAMPLE));
-        mediaType.setSchema(readSchema(annotation.value(OpenApiConstants.PROP_SCHEMA)));
+        mediaType.setSchema(SchemaFactory.readSchema(index, annotation.value(OpenApiConstants.PROP_SCHEMA)));
         mediaType.setEncoding(readEncodings(annotation.value(OpenApiConstants.PROP_ENCODING)));
         return mediaType;
     }
@@ -1680,167 +1676,34 @@ public class OpenApiAnnotationScanner {
         AnnotationInstance[] nestedArray = value.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
             String name = JandexUtil.stringValue(nested, OpenApiConstants.PROP_NAME);
+
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
+
+            /*
+             * The name is REQUIRED when the schema is defined within
+             * {@link org.eclipse.microprofile.openapi.annotations.Components}.
+             * */
             if (name != null) {
-                map.put(name, readSchema(nested));
-            }
+                map.put(name, SchemaFactory.readSchema(index, nested));
+            } /*-
+            //For consideration - be more lenient and attempt to use the name from the implementation's @Schema?
+            else {
+                if (JandexUtil.isSimpleClassSchema(nested)) {
+                    Schema schema = SchemaFactory.readClassSchema(index, nested.value(OpenApiConstants.PROP_IMPLEMENTATION), false);
+
+                    if (schema instanceof SchemaImpl) {
+                        name = ((SchemaImpl) schema).getName();
+
+                        if (name != null) {
+                            map.put(name, schema);
+                        }
+                    }
+                }
+            }*/
         }
         return map;
-    }
-
-    /**
-     * Reads a Schema annotation into a model.
-     * @param annotation
-     */
-    private Schema readSchema(AnnotationValue value) {
-        if (value == null) {
-            return null;
-        }
-        return readSchema(value.asNested());
-    }
-
-    /**
-     * Reads a Schema annotation into a model.
-     * @param annotation
-     */
-    @SuppressWarnings("unchecked")
-    private Schema readSchema(AnnotationInstance annotation) {
-        if (annotation == null) {
-            return null;
-        }
-        LOG.debug("Processing a single @Schema annotation.");
-
-        // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
-        if (isHidden != null && isHidden == Boolean.TRUE) {
-            return null;
-        }
-
-        Schema schema = new SchemaImpl();
-
-        schema.setNot(readClassSchema(annotation.value(OpenApiConstants.PROP_NOT), true));
-        schema.setOneOf(readClassSchemas(annotation.value(OpenApiConstants.PROP_ONE_OF)));
-        schema.setAnyOf(readClassSchemas(annotation.value(OpenApiConstants.PROP_ANY_OF)));
-        schema.setAllOf(readClassSchemas(annotation.value(OpenApiConstants.PROP_ALL_OF)));
-        schema.setTitle(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_TITLE));
-        schema.setMultipleOf(JandexUtil.bigDecimalValue(annotation, OpenApiConstants.PROP_MULTIPLE_OF));
-        schema.setMaximum(JandexUtil.bigDecimalValue(annotation, OpenApiConstants.PROP_MAXIMUM));
-        schema.setExclusiveMaximum(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_EXCLUSIVE_MAXIMUM));
-        schema.setMinimum(JandexUtil.bigDecimalValue(annotation, OpenApiConstants.PROP_MINIMUM));
-        schema.setExclusiveMinimum(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_EXCLUSIVE_MINIMUM));
-        schema.setMaxLength(JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_LENGTH));
-        schema.setMinLength(JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_LENGTH));
-        schema.setPattern(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_PATTERN));
-        schema.setMaxProperties(JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_PROPERTIES));
-        schema.setMinProperties(JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_PROPERTIES));
-        schema.setRequired(JandexUtil.stringListValue(annotation, OpenApiConstants.PROP_REQUIRED_PROPERTIES));
-        schema.setDescription(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DESCRIPTION));
-        schema.setFormat(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_FORMAT));
-        schema.setRef(JandexUtil.refValue(annotation, RefType.Schema));
-        schema.setNullable(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_NULLABLE));
-        schema.setReadOnly(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_READ_ONLY));
-        schema.setWriteOnly(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_WRITE_ONLY));
-        schema.setExample(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_EXAMPLE));
-        schema.setExternalDocs(readExternalDocs(annotation.value(OpenApiConstants.PROP_EXTERNAL_DOCS)));
-        schema.setDeprecated(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED));
-        schema.setType(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class));
-        schema.setEnumeration((List<Object>) (Object) JandexUtil.stringListValue(annotation, OpenApiConstants.PROP_ENUMERATION));
-        schema.setDefaultValue(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DEFAULT_VALUE));
-        schema.setDiscriminator(readDiscriminatorMappings(annotation.value(OpenApiConstants.PROP_DISCRIMINATOR_MAPPING)));
-        schema.setMaxItems(JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_ITEMS));
-        schema.setMinItems(JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_ITEMS));
-        schema.setUniqueItems(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_UNIQUE_ITEMS));
-
-        if (JandexUtil.isSimpleClassSchema(annotation)) {
-            Schema implSchema = readClassSchema(annotation.value(OpenApiConstants.PROP_IMPLEMENTATION), true);
-            schema = MergeUtil.mergeObjects(implSchema, schema);
-        } else if (JandexUtil.isSimpleArraySchema(annotation)) {
-            Schema implSchema = readClassSchema(annotation.value(OpenApiConstants.PROP_IMPLEMENTATION), true);
-            // If the @Schema annotation indicates an array type, then use the Schema
-            // generated from the implementation Class as the "items" for the array.
-            schema.setItems(implSchema);
-        } else {
-            Schema implSchema = readClassSchema(annotation.value(OpenApiConstants.PROP_IMPLEMENTATION), false);
-            // If there is an impl class - merge the @Schema properties *onto* the schema
-            // generated from the Class so that the annotation properties override the class
-            // properties (as required by the MP+OAI spec).
-            schema = MergeUtil.mergeObjects(implSchema, schema);
-        }
-
-        return schema;
-    }
-
-    /**
-     * Reads an array of Class annotations to produce a list of {@link Schema} models.
-     * @param value
-     */
-    private List<Schema> readClassSchemas(AnnotationValue value) {
-        if (value == null) {
-            return null;
-        }
-        LOG.debug("Processing a list of schema Class annotations.");
-        Type[] classArray = value.asClassArray();
-        List<Schema> schemas = new ArrayList<>(classArray.length);
-        for (Type type : classArray) {
-            ClassType ctype = (ClassType) type;
-            Schema schema = introspectClassToSchema(ctype, true);
-            schemas.add(schema);
-        }
-        return schemas;
-    }
-
-    /**
-     * Introspect into the given Class to generate a Schema model.
-     * @param value
-     */
-    private Schema readClassSchema(AnnotationValue value, boolean schemaReferenceSupported) {
-        if (value == null) {
-            return null;
-        }
-        ClassType ctype = (ClassType) value.asClass();
-        Schema schema = introspectClassToSchema(ctype, schemaReferenceSupported);
-        return schema;
-    }
-
-    /**
-     * Introspects the given class type to generate a Schema model.  The boolean indicates
-     * whether this class type should be turned into a reference.
-     * @param ctype
-     * @param schemaReferenceSupported
-     */
-    private Schema introspectClassToSchema(ClassType ctype, boolean schemaReferenceSupported) {
-        if (ctype.name().equals(OpenApiConstants.DOTNAME_RESPONSE)) {
-            return null;
-        }
-        if (schemaReferenceSupported && this.schemaRegistry.has(ctype)) {
-            return this.schemaRegistry.lookupRef(ctype);
-        } else {
-            Schema schema = OpenApiDataObjectScanner.process(index, ctype);
-            if (schemaReferenceSupported && schema != null && this.index.getClassByName(ctype.name()) != null) {
-                return this.schemaRegistry.register(ctype, schema);
-            } else {
-                return schema;
-            }
-        }
-    }
-
-    /**
-     * Reads an array of DiscriminatorMapping annotations into a {@link Discriminator} model.
-     * @param value
-     */
-    private Discriminator readDiscriminatorMappings(AnnotationValue value) {
-        if (value == null) {
-            return null;
-        }
-        LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
-        Discriminator discriminator = new DiscriminatorImpl();
-        AnnotationInstance[] nestedArray = value.asNestedArray();
-        for (@SuppressWarnings("unused") AnnotationInstance nested : nestedArray) {
-            // TODO iterate the discriminator mappings and do something sensible with them! :(
-        }
-        return discriminator;
     }
 
     /**
@@ -1966,13 +1829,13 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Parses an extension value.  The value may be:
-     * 
+     *
      *   - JSON object - starts with {
      *   - JSON array - starts with [
      *   - number
      *   - boolean
      *   - string
-     * 
+     *
      * @param value
      */
     private Object parseExtensionValue(String value) {

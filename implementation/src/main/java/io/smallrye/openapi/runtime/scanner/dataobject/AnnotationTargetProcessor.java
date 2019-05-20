@@ -106,7 +106,7 @@ public class AnnotationTargetProcessor {
     Schema processField() {
         AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
 
-        final String propertyKey = readPropertyKey();
+        final String propertyKey = readPropertyKey(schemaAnnotation);
 
         if (schemaAnnotation == null && shouldInferUnannotatedFields()) {
             // Handle unannotated field and just do simple inference.
@@ -116,24 +116,30 @@ public class AnnotationTargetProcessor {
             readSchemaAnnotatedField(propertyKey, schemaAnnotation);
         }
 
-        fieldSchema = SchemaRegistry.checkRegistration(index, entityType, typeResolver, fieldSchema);
+        fieldSchema = SchemaRegistry.checkRegistration(entityType, typeResolver, fieldSchema);
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
     }
 
-    private String readPropertyKey() {
-        AnnotationInstance jsonbAnnotation = TypeUtil.getAnnotation(annotationTarget,
-                                                                    OpenApiConstants.DOTNAME_JSONB_PROPERTY);
-        String key;
+    private String readPropertyKey(AnnotationInstance schemaAnnotation) {
+        String key = null;
 
-        if (jsonbAnnotation != null) {
-            key = JandexUtil.stringValue(jsonbAnnotation, OpenApiConstants.PROP_VALUE);
+        if (schemaAnnotation != null) {
+            key = JandexUtil.stringValue(schemaAnnotation, OpenApiConstants.PROP_NAME);
+        }
 
-            if (key == null) {
+        if (key == null) {
+            AnnotationInstance jsonbAnnotation = TypeUtil.getAnnotation(annotationTarget,
+                                                                        OpenApiConstants.DOTNAME_JSONB_PROPERTY);
+            if (jsonbAnnotation != null) {
+                key = JandexUtil.stringValue(jsonbAnnotation, OpenApiConstants.PROP_VALUE);
+
+                if (key == null) {
+                    key = entityName;
+                }
+            } else {
                 key = entityName;
             }
-        } else {
-            key = entityName;
         }
 
         return key;

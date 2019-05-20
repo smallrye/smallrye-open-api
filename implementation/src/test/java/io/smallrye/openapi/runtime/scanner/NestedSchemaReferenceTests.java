@@ -39,7 +39,7 @@ public class NestedSchemaReferenceTests extends OpenApiDataObjectScannerTestBase
         DotName parentName = componentize(NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
         OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai);
+        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
 
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, parentType);
 
@@ -58,6 +58,7 @@ public class NestedSchemaReferenceTests extends OpenApiDataObjectScannerTestBase
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestParent.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestChild.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$AnotherNestedChildWithSchemaName.class");
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), indexer.complete());
 

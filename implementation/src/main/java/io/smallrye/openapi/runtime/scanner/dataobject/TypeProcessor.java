@@ -101,7 +101,7 @@ public class TypeProcessor {
                 pushToStack(type, arrSchema);
             }
 
-            arrSchema = SchemaRegistry.checkRegistration(index, arrayType.component(), typeResolver, arrSchema);
+            arrSchema = SchemaRegistry.checkRegistration(arrayType.component(), typeResolver, arrSchema);
 
             schema.items(arrSchema);
 
@@ -213,12 +213,12 @@ public class TypeProcessor {
             Type resolved = resolveTypeVariable(propsSchema, valueType);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
-                propsSchema = SchemaRegistry.checkRegistration(index, valueType, typeResolver, propsSchema);
+                propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
             }
         } else if (index.containsClass(valueType)) {
             propsSchema.type(Schema.SchemaType.OBJECT);
             pushToStack(valueType, propsSchema);
-            propsSchema = SchemaRegistry.checkRegistration(index, valueType, typeResolver, propsSchema);
+            propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
         }
 
         return propsSchema;

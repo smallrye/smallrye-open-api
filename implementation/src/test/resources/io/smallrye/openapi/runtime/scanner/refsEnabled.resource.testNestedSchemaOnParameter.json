@@ -44,6 +44,9 @@
           "nested": {
             "$ref": "#/components/schemas/NestedParameterTestChild"
           },
+          "another_child": {
+            "$ref": "#/components/schemas/another_nested"
+          },
           "childList": {
             "type": "array",
             "items": {
@@ -70,6 +73,22 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "another_nested": {
+        "type": "object",
+        "description": "The name of this child is not 'AnotherNestedChildWithSchemaName'",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name_": {
+            "type": "string",
+            "title": "This property's 'name' has been overridden using the @Schema"
           }
         }
       }
