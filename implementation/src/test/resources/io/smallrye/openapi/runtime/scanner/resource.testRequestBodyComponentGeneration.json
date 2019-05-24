@@ -1,0 +1,64 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Test Request Body",
+    "version": "1.0"
+  },
+  "paths": {
+    "/requestbodies/impl": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DifferentObject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/requestbodies/ref": {
+      "post": {
+        "requestBody": {
+          "$ref": "#/components/requestBodies/test"
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DifferentObject": {
+        "type": "object",
+        "properties": {
+          "differentName": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "test": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DifferentObject"
+            }
+          }
+        },
+        "required": true
+      }
+    }
+  }
+}

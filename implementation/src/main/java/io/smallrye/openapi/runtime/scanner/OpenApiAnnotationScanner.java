@@ -609,7 +609,9 @@ public class OpenApiAnnotationScanner {
         for (AnnotationInstance annotation : requestBodyAnnotations) {
             RequestBody requestBody = readRequestBody(annotation);
             // TODO if the method argument type is Request, don't generate a Schema!
-            if (!ModelUtil.requestBodyHasSchema(requestBody)) {
+
+            // Only generate the request body schema is the @RequestBody is not a reference and no schema is yet specified
+            if (requestBody.getRef() == null && !ModelUtil.requestBodyHasSchema(requestBody)) {
                 Type requestBodyType = null;
                 if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
                     requestBodyType = JandexUtil.getMethodParameterType(method, annotation.target().asMethodParameter().position());

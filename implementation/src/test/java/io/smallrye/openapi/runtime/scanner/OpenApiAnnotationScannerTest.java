@@ -83,4 +83,22 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         printToConsole(result);
         assertJsonEquals("resource.testHiddenOperationPathNotPresent.json", result);
     }
+
+    @Test
+    public void testRequestBodyComponentGeneration() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+
+        // Test samples
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$SomeObject.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$DifferentObject.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$RequestBodyResource.class");
+
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testRequestBodyComponentGeneration.json", result);
+    }
 }
