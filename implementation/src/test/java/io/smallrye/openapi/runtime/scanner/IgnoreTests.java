@@ -28,6 +28,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreTypeExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample;
+import test.io.smallrye.openapi.runtime.scanner.entities.TransientFieldExample;
 
 import java.io.IOException;
 
@@ -114,4 +115,15 @@ public class IgnoreTests extends OpenApiDataObjectScannerTestBase {
         assertJsonEquals(name.local(), "ignore.schemaHiddenField.expected.json", result);
     }
 
+    @Test
+    public void testIgnore_transientField() throws IOException, JSONException {
+        DotName name = DotName.createSimple(TransientFieldExample.class.getName());
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+                ClassType.create(name, Type.Kind.CLASS));
+
+        Schema result = scanner.process();
+
+        printToConsole(name.local(), result);
+        assertJsonEquals(name.local(), "ignore.transientField.expected.json", result);
+    }
 }
