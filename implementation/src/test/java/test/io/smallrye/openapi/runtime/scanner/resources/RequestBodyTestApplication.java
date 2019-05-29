@@ -1,5 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner.resources;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Application;
@@ -56,6 +57,13 @@ public class RequestBodyTestApplication extends Application {
         @POST
         @Path("ref")
         public void testRef(@RequestBody(ref = "test") SomeObject body) {
+            return;
+        }
+
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Path("defaults")
+        public void testDefaults(@RequestBody(required = true) SomeObject body) {
             return;
         }
     }

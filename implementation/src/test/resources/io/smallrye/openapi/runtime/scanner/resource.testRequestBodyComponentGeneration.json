@@ -35,6 +35,25 @@
           }
         }
       }
+    },
+    "/requestbodies/defaults": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SomeObject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -43,6 +62,14 @@
         "type": "object",
         "properties": {
           "differentName": {
+            "type": "string"
+          }
+        }
+      },
+      "SomeObject": {
+        "type": "object",
+        "properties": {
+          "someName": {
             "type": "string"
           }
         }
