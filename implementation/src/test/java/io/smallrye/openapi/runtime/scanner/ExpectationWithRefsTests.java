@@ -29,6 +29,7 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.Bar;
 import test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList;
 import test.io.smallrye.openapi.runtime.scanner.entities.EnumContainer;
+import test.io.smallrye.openapi.runtime.scanner.entities.EnumRequiredContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContainer;
 
 /**
@@ -92,6 +93,11 @@ public class ExpectationWithRefsTests extends OpenApiDataObjectScannerTestBase {
     @Test
     public void testBareEnumWithRef() throws IOException, JSONException {
         testAssertion(EnumContainer.class, "refsEnabled.enum.expected.json");
+    }
+
+    @Test
+    public void testRequiredEnumWithRef() throws IOException, JSONException {
+        testAssertion(EnumRequiredContainer.class, "refsEnabled.enumRequired.expected.json");
     }
 
     @Test
