@@ -24,6 +24,7 @@ import org.junit.Test;
 import test.io.smallrye.openapi.runtime.scanner.entities.Bar;
 import test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList;
 import test.io.smallrye.openapi.runtime.scanner.entities.EnumContainer;
+import test.io.smallrye.openapi.runtime.scanner.entities.EnumRequiredContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContainer;
 
 import java.io.IOException;
@@ -72,6 +73,17 @@ public class ExpectationTests extends OpenApiDataObjectScannerTestBase {
 
         printToConsole(baz.local(), result);
         assertJsonEquals(baz.local(), "enum.expected.json", result);
+    }
+
+    @Test
+    public void testRequiredEnum() throws IOException, JSONException {
+        DotName baz = createSimple(EnumRequiredContainer.class.getName());
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, ClassType.create(baz, Type.Kind.CLASS));
+
+        Schema result = scanner.process();
+
+        printToConsole(baz.local(), result);
+        assertJsonEquals(baz.local(), "enumRequired.expected.json", result);
     }
 
     @Test

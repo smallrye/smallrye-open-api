@@ -111,12 +111,16 @@ public class SchemaFactory {
         schema.setExternalDocs(readExternalDocs(annotation.value(OpenApiConstants.PROP_EXTERNAL_DOCS)));
         schema.setDeprecated((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_DEPRECATED, JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED)));
         schema.setType((Schema.SchemaType) overrides.getOrDefault(OpenApiConstants.PROP_TYPE, JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE, Schema.SchemaType.class)));
-        schema.setEnumeration((List<Object>) overrides.getOrDefault(OpenApiConstants.PROP_ENUMERATION, JandexUtil.stringListValue(annotation, OpenApiConstants.PROP_ENUMERATION)));
         schema.setDefaultValue(overrides.getOrDefault(OpenApiConstants.PROP_DEFAULT_VALUE, JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DEFAULT_VALUE)));
         schema.setDiscriminator(readDiscriminatorMappings(annotation.value(OpenApiConstants.PROP_DISCRIMINATOR_MAPPING)));
         schema.setMaxItems((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MAX_ITEMS, JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_ITEMS)));
         schema.setMinItems((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MIN_ITEMS, JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_ITEMS)));
         schema.setUniqueItems((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_UNIQUE_ITEMS, JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_UNIQUE_ITEMS)));
+
+        List<Object> enumeration = (List<Object>) overrides.getOrDefault(OpenApiConstants.PROP_ENUMERATION, JandexUtil.stringListValue(annotation, OpenApiConstants.PROP_ENUMERATION));
+        if (enumeration != null && !enumeration.isEmpty()) {
+            schema.setEnumeration(enumeration);
+        }
 
         if (schema instanceof SchemaImpl) {
             ((SchemaImpl) schema).setName((String) overrides.getOrDefault(OpenApiConstants.PROP_NAME, JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME)));

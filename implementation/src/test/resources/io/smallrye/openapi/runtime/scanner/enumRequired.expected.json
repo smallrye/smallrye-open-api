@@ -1,0 +1,16 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.EnumRequiredContainer" : {
+        "required": [ "bazEnum" ],
+        "type": "object",
+        "properties" : {
+          "bazEnum" : {
+            "enum" : [ "Gold", "Green", "Orange" ],
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}
