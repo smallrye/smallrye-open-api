@@ -109,17 +109,7 @@ public class TypeProcessor {
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
-            LOG.debugv("Processing an enum {0}", type);
-            ClassInfo enumKlazz = index.getClass(type);
-
-            for (FieldInfo enumField : enumKlazz.fields()) {
-                // Ignore the hidden enum array as it's not accessible. Add fields that look like enums (of type enumKlazz)
-                // NB: Eclipse compiler and OpenJDK compiler have different names for this field.
-                if (!enumField.name().endsWith("$VALUES") && TypeUtil.getName(enumField.type()).equals(enumKlazz.name())) {
-                    // Enum's value fields.
-                    schema.addEnumeration(enumField.name());
-                }
-            }
+            readEnumeration(type, schema);
             return STRING_TYPE;
         }
 
@@ -216,12 +206,33 @@ public class TypeProcessor {
                 propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
             }
         } else if (index.containsClass(valueType)) {
-            propsSchema.type(Schema.SchemaType.OBJECT);
+            if (isA(valueType, ENUM_TYPE)) {
+                LOG.debugv("Processing an enum {0}", valueType);
+                propsSchema.type(Schema.SchemaType.STRING);
+                readEnumeration(valueType, propsSchema);
+            } else {
+                propsSchema.type(Schema.SchemaType.OBJECT);
+            }
+
             pushToStack(valueType, propsSchema);
             propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
         }
 
         return propsSchema;
+    }
+
+    private void readEnumeration(Type enumType, Schema enumSchema) {
+        LOG.debugv("Processing an enum {0}", enumType);
+        ClassInfo enumKlazz = index.getClass(enumType);
+
+        for (FieldInfo enumField : enumKlazz.fields()) {
+            // Ignore the hidden enum array as it's not accessible. Add fields that look like enums (of type enumKlazz)
+            // NB: Eclipse compiler and OpenJDK compiler have different names for this field.
+            if (!enumField.name().endsWith("$VALUES") && TypeUtil.getName(enumField.type()).equals(enumKlazz.name())) {
+                // Enum's value fields.
+                enumSchema.addEnumeration(enumField.name());
+            }
+        }
     }
 
     private Type resolveTypeVariable(Schema schema, Type fieldType) {

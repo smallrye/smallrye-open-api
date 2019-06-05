@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
@@ -232,7 +233,7 @@ public class SchemaRegistry {
             schemaName = JandexUtil.stringValue(schemaAnnotation, OpenApiConstants.PROP_NAME);
         }
 
-        String nameBase = schemaName != null ? schemaName : key.type.name().local();
+        String nameBase = schemaName != null ? schemaName : key.defaultName();
         String name = nameBase;
         int idx = 1;
         while (this.names.contains(name)) {
@@ -299,6 +300,45 @@ public class SchemaRegistry {
 
         TypeKey(Type type) {
             this.type = type;
+        }
+
+        public String defaultName() {
+            StringBuilder name = new StringBuilder(type.name().local());
+
+            switch (type.kind()) {
+            case PARAMETERIZED_TYPE:
+                for (Type param : type.asParameterizedType().arguments()) {
+                    if (param.kind() == Type.Kind.WILDCARD_TYPE) {
+                        name.append(wildcardName(param.asWildcardType()));
+                    } else {
+                        name.append(param.name().local());
+                    }
+                }
+                break;
+            case WILDCARD_TYPE:
+                name.append(wildcardName(type.asWildcardType()));
+                break;
+            default:
+                break;
+            }
+
+            return name.toString();
+        }
+
+        static String wildcardName(WildcardType type) {
+            Type superBound = type.superBound();
+
+            if (superBound != null) {
+                return "Super" + superBound.name().local();
+            } else {
+                Type extendsBound = type.extendsBound();
+
+                if (!DotName.createSimple("java.lang.Object").equals(extendsBound.name())) {
+                    return "Extends" + extendsBound.name().local();
+                }
+
+                return extendsBound.name().local();
+            }
         }
 
         /**

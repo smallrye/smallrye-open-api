@@ -1,7 +1,7 @@
 {
   "components": {
     "schemas": {
-      "KustomPair": {
+      "KustomPairFuzzObject": {
         "required": [
           "bar",
           "foo"
@@ -12,11 +12,11 @@
             "type": "object"
           },
           "foo": {
-            "$ref": "#/components/schemas/Fuzz"
+            "$ref": "#/components/schemas/FuzzStringDate"
           }
         }
       },
-      "Fuzz": {
+      "FuzzStringDate": {
         "maxLength": 123456,
         "type": "object",
         "properties": {
@@ -44,7 +44,7 @@
           }
         }
       },
-      "Fuzz1": {
+      "FuzzKustomPairDouble": {
         "type": "object",
         "properties": {
           "qAgain": {
@@ -61,13 +61,13 @@
             "type": "number"
           },
           "tAgain2": {
-            "$ref": "#/components/schemas/KustomPair"
+            "$ref": "#/components/schemas/KustomPairFuzzObject"
           },
           "tAgain4": {
-            "$ref": "#/components/schemas/KustomPair"
+            "$ref": "#/components/schemas/KustomPairFuzzObject"
           },
           "tValue": {
-            "$ref": "#/components/schemas/KustomPair"
+            "$ref": "#/components/schemas/KustomPairFuzzObject"
           }
         }
       }
