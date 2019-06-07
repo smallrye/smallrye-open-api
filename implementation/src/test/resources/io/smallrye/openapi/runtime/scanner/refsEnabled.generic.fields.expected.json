@@ -27,7 +27,7 @@
           }
         }
       },
-      "GenericFieldTestContainer": {
+      "GenericFieldTestContainerStringLocalDateTime": {
         "type": "object",
         "properties": {
           "arrayListOfV": {

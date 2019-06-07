@@ -1,7 +1,7 @@
 {
   "components" : {
     "schemas" : {
-      "KustomPair" : {
+      "KustomPairExtendsIntegerSuperInteger" : {
         "type": "object",
         "required" : [ "bar", "foo" ],
         "properties" : {
