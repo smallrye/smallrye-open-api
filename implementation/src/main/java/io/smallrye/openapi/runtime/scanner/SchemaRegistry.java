@@ -124,14 +124,12 @@ public class SchemaRegistry {
             return schema;
         }
 
-        if (registry.index.getClassByName(resolvedType.name()) == null) {
-            return schema;
-        }
-
         TypeKey key = new TypeKey(resolvedType);
 
         if (registry.has(key)) {
             schema = registry.lookupRef(key);
+        } else if (registry.index.getClassByName(resolvedType.name()) == null) {
+            return schema;            
         } else {
             schema = registry.register(key, schema);
         }

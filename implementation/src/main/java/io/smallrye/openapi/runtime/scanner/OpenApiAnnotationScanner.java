@@ -184,6 +184,9 @@ public class OpenApiAnnotationScanner {
         @SuppressWarnings("unused")
         // Creating a new instance of a registry which will be set on the thread context.
         SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(config, oai, index);
+       
+        // Register custom schemas if available
+        getCustomSchemaRegistry().registerCustomSchemas(schemaRegistry);
 
         // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
         Collection<ClassInfo> applications = this.index.getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
@@ -1872,6 +1875,21 @@ public class OpenApiAnnotationScanner {
         return value;
     }
 
+    
+    private CustomSchemaRegistry getCustomSchemaRegistry() {
+        if (config == null || config.customSchemaRegistryClass() == null) {
+            // Provide default implementation that does nothing
+            return (type) -> {};
+        } else {
+            try {
+                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass()).newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+                throw new RuntimeException("Failed to create instance of custom schema registry: " 
+                        + config.customSchemaRegistryClass(), ex);
+            }
+        }        
+    }
+    
     /**
      * Simple enum to indicate whether an @Content annotation being processed is
      * an input or an output.
