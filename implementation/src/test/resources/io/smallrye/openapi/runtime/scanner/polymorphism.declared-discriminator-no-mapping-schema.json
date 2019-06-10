@@ -1,0 +1,90 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/pets/{id}": {
+      "get": {
+        "summary": "Returns an AbstractPet with a discriminator declared in the response, no mapping due to undeclared mapping schema",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Cat"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Dog"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Lizard"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "pet_type"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Cat": {
+        "type": "object",
+        "required": [
+          "pet_type"
+        ],
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Dog": {
+        "type": "object",
+        "required": [
+          "pet_type"
+        ],
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          },
+          "bark": {
+            "type": "string"
+          }
+        }
+      },
+      "Lizard": {
+        "type": "object",
+        "required": [
+          "pet_type"
+        ],
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          },
+          "lovesRocks": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

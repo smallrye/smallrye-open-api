@@ -112,7 +112,7 @@ public class SchemaFactory {
         schema.setDeprecated((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_DEPRECATED, JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED)));
         schema.setType((Schema.SchemaType) overrides.getOrDefault(OpenApiConstants.PROP_TYPE, JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE, Schema.SchemaType.class)));
         schema.setDefaultValue(overrides.getOrDefault(OpenApiConstants.PROP_DEFAULT_VALUE, JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DEFAULT_VALUE)));
-        schema.setDiscriminator(readDiscriminatorMappings(annotation.value(OpenApiConstants.PROP_DISCRIMINATOR_MAPPING)));
+        schema.setDiscriminator(readDiscriminator(index, JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DISCRIMINATOR_PROPERTY), annotation.value(OpenApiConstants.PROP_DISCRIMINATOR_MAPPING)));
         schema.setMaxItems((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MAX_ITEMS, JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_ITEMS)));
         schema.setMinItems((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MIN_ITEMS, JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_ITEMS)));
         schema.setUniqueItems((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_UNIQUE_ITEMS, JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_UNIQUE_ITEMS)));
@@ -250,19 +250,62 @@ public class SchemaFactory {
     }
 
     /**
-     * Reads an array of DiscriminatorMapping annotations into a {@link Discriminator} model.
-     * @param value
+     * Reads a discriminator property name and an optional array of
+     * {@link org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping @DiscriminatorMapping}
+     * annotations into a {@link Discriminator} model.
+     *
+     * @param index set of scanned classes to be used for further introspection
+     * @param propertyName the OAS required value specified by the
+     *        {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorProperty() discriminatorProperty}
+     *        attribute.
+     * @param annotation reference to the array of {@link org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping @DiscriminatorMapping} annotations
+     *        given by {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorMapping() discriminatorMapping}
      */
-    private static Discriminator readDiscriminatorMappings(AnnotationValue value) {
-        if (value == null) {
+    private static Discriminator readDiscriminator(IndexView index,
+                                                   String propertyName,
+                                                   AnnotationValue annotation) {
+
+        if (propertyName == null && annotation == null) {
             return null;
         }
-        LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
+
         Discriminator discriminator = new DiscriminatorImpl();
-        AnnotationInstance[] nestedArray = value.asNestedArray();
-        for (@SuppressWarnings("unused") AnnotationInstance nested : nestedArray) {
-            // TODO iterate the discriminator mappings and do something sensible with them! :(
+
+        /*
+         * The name is required by OAS, however MP OpenAPI allows for a default
+         * (blank) name. This results in an invalid OpenAPI document if
+         * considering annotation scanning in isolation.
+         */
+        if (propertyName != null) {
+            discriminator.setPropertyName(propertyName);
         }
+
+        if (annotation != null) {
+            LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
+
+            for (AnnotationInstance nested : annotation.asNestedArray()) {
+                String propertyValue = JandexUtil.stringValue(nested, OpenApiConstants.PROP_VALUE);
+
+                AnnotationValue schemaValue = nested.value(OpenApiConstants.PROP_SCHEMA);
+                String schemaRef;
+
+                if (schemaValue != null) {
+                    ClassType schemaType = schemaValue.asClass().asClassType();
+                    Schema schema = introspectClassToSchema(index, schemaType, true);
+                    schemaRef = schema.getRef();
+                } else {
+                    schemaRef = null;
+                }
+
+                if (propertyValue == null && schemaRef != null) {
+                    // No mapping key provided, use the implied value.
+                    propertyValue = ModelUtil.nameFromRef(schemaRef);
+                }
+
+                discriminator.addMapping(propertyValue, schemaRef);
+            }
+        }
+
         return discriminator;
     }
 
