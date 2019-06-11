@@ -18,6 +18,8 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1882,12 +1884,19 @@ public class OpenApiAnnotationScanner {
             return (type) -> {};
         } else {
             try {
-                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass()).newInstance();
+                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader()).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
                 throw new RuntimeException("Failed to create instance of custom schema registry: " 
                         + config.customSchemaRegistryClass(), ex);
             }
         }        
+    }
+    
+    private static ClassLoader getContextClassLoader() {
+        if (System.getSecurityManager() == null) {
+            return Thread.currentThread().getContextClassLoader();
+        }
+        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
     }
     
     /**
