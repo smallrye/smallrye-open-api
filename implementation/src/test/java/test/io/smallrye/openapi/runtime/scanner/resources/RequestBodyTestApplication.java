@@ -1,5 +1,7 @@
 package test.io.smallrye.openapi.runtime.scanner.resources;
 
+import java.util.UUID;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -38,6 +40,7 @@ public class RequestBodyTestApplication extends Application {
 
     public static class DifferentObject {
         public String differentName;
+        public UUID myId;
     }
 
     @SuppressWarnings("unused")

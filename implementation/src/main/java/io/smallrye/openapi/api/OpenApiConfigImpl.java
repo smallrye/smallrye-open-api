@@ -43,6 +43,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Boolean scanDependenciesDisable;
     private Set<String> scanDependenciesJars;
     private Boolean schemaReferencesEnable;
+    private String customSchemaRegistryClass;
 
     /**
      * Constructor.
@@ -200,6 +201,14 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             schemaReferencesEnable = getConfig().getOptionalValue(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.class).orElse(false);
         }
         return schemaReferencesEnable;
+    }
+
+    @Override
+    public String customSchemaRegistryClass() {
+        if (customSchemaRegistryClass == null) {
+            customSchemaRegistryClass = getConfig().getOptionalValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class).orElse(null);
+        }
+        return customSchemaRegistryClass;
     }
 
     private static Set<String> asCsvSet(String items) {

@@ -52,4 +52,7 @@ public interface OpenApiConfig {
     public Set<String> scanDependenciesJars();
 
     public boolean schemaReferencesEnable();
+    
+    public String customSchemaRegistryClass();
+    
 }

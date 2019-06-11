@@ -18,6 +18,8 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -184,6 +186,9 @@ public class OpenApiAnnotationScanner {
         @SuppressWarnings("unused")
         // Creating a new instance of a registry which will be set on the thread context.
         SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(config, oai, index);
+       
+        // Register custom schemas if available
+        getCustomSchemaRegistry().registerCustomSchemas(schemaRegistry);
 
         // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
         Collection<ClassInfo> applications = this.index.getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
@@ -1872,6 +1877,28 @@ public class OpenApiAnnotationScanner {
         return value;
     }
 
+    
+    private CustomSchemaRegistry getCustomSchemaRegistry() {
+        if (config == null || config.customSchemaRegistryClass() == null) {
+            // Provide default implementation that does nothing
+            return (type) -> {};
+        } else {
+            try {
+                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader()).newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+                throw new RuntimeException("Failed to create instance of custom schema registry: " 
+                        + config.customSchemaRegistryClass(), ex);
+            }
+        }        
+    }
+    
+    private static ClassLoader getContextClassLoader() {
+        if (System.getSecurityManager() == null) {
+            return Thread.currentThread().getContextClassLoader();
+        }
+        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
+    }
+    
     /**
      * Simple enum to indicate whether an @Content annotation being processed is
      * an input or an output.
