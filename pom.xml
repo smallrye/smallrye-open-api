@@ -60,7 +60,6 @@
     <modules>
         <module>implementation</module>
         <module>tck</module>
-        <module>docs</module>
     </modules>
 
     <dependencyManagement>
