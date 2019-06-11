@@ -12,6 +12,6 @@ public interface CustomSchemaRegistry {
      * 
      * @param registry Schema registry to add the custom type/schema combinations to.
      */
-    public void registerCustomSchemas(SchemaRegistry schemaRegistry);
+    public void registerCustomSchemas(SchemaRegistry registry);
 
 }
