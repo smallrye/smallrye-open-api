@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.logging.Logger;
 import org.json.JSONException;
@@ -41,6 +41,10 @@ public class IndexScannerTestBase {
         SchemaRegistry.remove();
     }
 
+    protected static String pathOf(Class<?> clazz) {
+        return clazz.getName().replace('.', '/').concat(".class");
+    }
+
     protected static void indexDirectory(Indexer indexer, String baseDir) {
         InputStream directoryStream = tcclGetResourceAsStream(baseDir);
         BufferedReader reader = new BufferedReader(new InputStreamReader(directoryStream));
@@ -54,6 +58,16 @@ public class IndexScannerTestBase {
         return Thread.currentThread()
                 .getContextClassLoader()
                 .getResourceAsStream(path);
+    }
+
+    protected static Index indexOf(Class<?>... classes) {
+        Indexer indexer = new Indexer();
+
+        for (Class<?> klazz : classes) {
+            index(indexer, pathOf(klazz));
+        }
+
+        return indexer.complete();
     }
 
     protected static void index(Indexer indexer, String resName) {
@@ -144,28 +158,28 @@ public class IndexScannerTestBase {
         });
     }
 
-    @SuppressWarnings("unchecked")
     public static OpenApiConfig nestingSupportConfig() {
+        Map<String, Object> config = new HashMap<>(2);
+        config.put(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.TRUE);
+        return dynamicConfig(config);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static OpenApiConfig dynamicConfig(Map<String, Object> properties) {
         return new OpenApiConfigImpl(new Config() {
             @Override
             public <T> T getValue(String propertyName, Class<T> propertyType) {
-                if (OpenApiConstants.SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
-                    return (T) Boolean.TRUE;
-                }
-                return null;
+                return (T) properties.get(propertyName);
             }
 
             @Override
             public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-                if (OpenApiConstants.SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
-                    return (Optional<T>) Optional.of(Boolean.TRUE);
-                }
-                return Optional.empty();
+                return (Optional<T>) Optional.ofNullable(properties.getOrDefault(propertyName, null));
             }
 
             @Override
             public Iterable<String> getPropertyNames() {
-                return Arrays.asList(OpenApiConstants.SCHEMA_REFERENCES_ENABLE);
+                return properties.keySet();
             }
 
             @Override

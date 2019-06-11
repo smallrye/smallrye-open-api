@@ -197,6 +197,7 @@ public final class OpenApiConstants {
     public static final String PROP_MEDIA_TYPE = "mediaType";
     public static final String PROP_REQUIRED_PROPERTIES = "requiredProperties";
     public static final String PROP_DEFAULT_VALUE = "defaultValue";
+    public static final String PROP_DISCRIMINATOR_PROPERTY = "discriminatorProperty";
     public static final String PROP_DISCRIMINATOR_MAPPING = "discriminatorMapping";
     public static final String PROP_SECURITY_SCHEME_NAME = "securitySchemeName";
     public static final String PROP_API_KEY_NAME = "apiKeyName";
