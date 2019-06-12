@@ -116,7 +116,7 @@ public class AnnotationTargetProcessor {
             readSchemaAnnotatedField(propertyKey, schemaAnnotation);
         }
 
-        BeanValidationScanner.applyConstraints(annotationTarget, fieldSchema);
+        BeanValidationScanner.applyConstraints(annotationTarget, fieldSchema, parentPathEntry.getSchema(), propertyKey);
         fieldSchema = SchemaRegistry.checkRegistration(entityType, typeResolver, fieldSchema);
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
