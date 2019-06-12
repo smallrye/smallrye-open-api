@@ -76,6 +76,12 @@
       },
       "BVTestContainer": {
         "type": "object",
+        "required": [
+            "arrayListNotNullAndNotEmptyAndMaxItems",
+            "booleanNotNull",
+            "mapObjectNotNullAndNotEmptyAndMaxProperties",
+            "stringNotBlankNotNull"
+        ],
         "properties": {
           "arrayListNotNullAndNotEmptyAndMaxItems": {
             "type": "array",

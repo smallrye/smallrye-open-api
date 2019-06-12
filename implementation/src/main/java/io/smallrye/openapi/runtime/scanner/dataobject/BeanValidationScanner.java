@@ -4,9 +4,11 @@ import static io.smallrye.openapi.runtime.util.JandexUtil.booleanValue;
 import static io.smallrye.openapi.runtime.util.JandexUtil.intValue;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 import static io.smallrye.openapi.runtime.util.TypeUtil.getAnnotation;
+import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
 import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.validation.groups.Default;
 
@@ -18,6 +20,8 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
+
+import io.smallrye.openapi.api.OpenApiConstants;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -71,15 +75,24 @@ public class BeanValidationScanner {
      * contains a reference, this method will not apply any changes to the
      * schema.
      *
-     * Each of the constraints (defined in javax.validation.constraints)
-     * will apply to the schema based on the schema's type.
+     * Each of the constraints (defined in javax.validation.constraints) will
+     * apply to the schema based on the schema's type.
      *
      * @param target
      *            the object from which to retrieve the constraint annotations
      * @param schema
      *            the schema to which the constraints will be applied
+     * @param parentSchema
+     *            the schema which contains the schema parameter as a property
+     * @param propertyKey
+     *            the name of the property in parentSchema that refers to the
+     *            schema
      */
-    public static void applyConstraints(AnnotationTarget target, Schema schema) {
+    public static void applyConstraints(AnnotationTarget target,
+                                        Schema schema,
+                                        Schema parentSchema,
+                                        String propertyKey) {
+
         SchemaType schemaType = schema.getType();
 
         /*
@@ -92,12 +105,12 @@ public class BeanValidationScanner {
 
         switch (schemaType) {
         case ARRAY:
-            INSTANCE.notNull(target, schema);
+            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
             INSTANCE.sizeArray(target, schema);
             INSTANCE.notEmptyArray(target, schema);
             break;
         case BOOLEAN:
-            INSTANCE.notNull(target, schema);
+            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
             break;
         case INTEGER:
             INSTANCE.decimalMax(target, schema);
@@ -107,7 +120,7 @@ public class BeanValidationScanner {
             INSTANCE.min(target, schema);
             INSTANCE.negative(target, schema);
             INSTANCE.negativeOrZero(target, schema);
-            INSTANCE.notNull(target, schema);
+            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
             INSTANCE.positive(target, schema);
             INSTANCE.positiveOrZero(target, schema);
             break;
@@ -119,12 +132,12 @@ public class BeanValidationScanner {
             INSTANCE.min(target, schema);
             INSTANCE.negative(target, schema);
             INSTANCE.negativeOrZero(target, schema);
-            INSTANCE.notNull(target, schema);
+            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
             INSTANCE.positive(target, schema);
             INSTANCE.positiveOrZero(target, schema);
             break;
         case OBJECT:
-            INSTANCE.notNull(target, schema);
+            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
             INSTANCE.sizeObject(target, schema);
             INSTANCE.notEmptyObject(target, schema);
             break;
@@ -133,7 +146,7 @@ public class BeanValidationScanner {
             INSTANCE.decimalMin(target, schema);
             INSTANCE.digits(target, schema);
             INSTANCE.notBlank(target, schema);
-            INSTANCE.notNull(target, schema);
+            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
             INSTANCE.sizeString(target, schema);
             INSTANCE.notEmptyString(target, schema);
             break;
@@ -311,11 +324,34 @@ public class BeanValidationScanner {
         }
     }
 
-    void notNull(AnnotationTarget target, Schema schema) {
+    void notNull(AnnotationTarget target, Schema schema, Schema parentSchema, String propertyKey) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_NULL);
 
-        if (constraint != null && schema.getNullable() == null) {
-            schema.setNullable(Boolean.FALSE);
+        if (constraint != null) {
+            if (schema.getNullable() == null) {
+                schema.setNullable(Boolean.FALSE);
+            }
+
+            if (parentSchema != null && propertyKey != null) {
+                notNullRequired(target, parentSchema, propertyKey);
+            }
+        }
+    }
+
+    void notNullRequired(AnnotationTarget target, Schema parentSchema, String propertyKey) {
+        List<String> requiredProperties = parentSchema.getRequired();
+
+        if (requiredProperties == null || !requiredProperties.contains(propertyKey)) {
+            AnnotationInstance schemaAnnotation = getSchemaAnnotation(target);
+
+            if (schemaAnnotation == null ||
+                    schemaAnnotation.value(OpenApiConstants.PROP_REQUIRED) == null) {
+                /*
+                 * Only mark the schema as required in the parent schema if it has not
+                 * already been specified.
+                 */
+                parentSchema.addRequired(propertyKey);
+            }
         }
     }
 

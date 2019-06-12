@@ -2,11 +2,13 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +66,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         targetClass = index.getClassByName(componentize(BVTestContainer.class.getName()));
     }
 
-    Schema proxySchema() {
+    Schema proxySchema(Schema schema, Set<String> methodsInvoked) {
         Schema schemaProxy = (Schema) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                                                       new Class<?>[] { Schema.class },
                                                       new InvocationHandler() {
@@ -82,7 +84,10 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
 
     @Test
     public void testNullSchemaIgnored() {
-        BeanValidationScanner.applyConstraints(targetClass, proxySchema());
+        BeanValidationScanner.applyConstraints(targetClass,
+                                               proxySchema(schema, methodsInvoked),
+                                               null,
+                                               null);
 
         assertArrayEquals("Unexpected methods were invoked",
                           new String[] { "getType" },
@@ -93,7 +98,10 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     public void testRefSchemaIgnored() {
         schema.setType(SchemaType.OBJECT);
         schema.setRef("#/components/schemas/Anything");
-        BeanValidationScanner.applyConstraints(targetClass, proxySchema());
+        BeanValidationScanner.applyConstraints(targetClass,
+                                               proxySchema(schema, methodsInvoked),
+                                               null,
+                                               null);
 
         assertArrayEquals("Unexpected methods were invoked",
                           new String[] { "getType", "getRef" },
@@ -105,26 +113,33 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     @Test
     public void testArrayListNotNullAndNotEmptyAndMaxItems() {
         FieldInfo targetField = targetClass.field("arrayListNotNullAndNotEmptyAndMaxItems");
+        Schema parentSchema = new SchemaImpl();
+        String propertyKey = "TESTKEY";
 
-        testTarget.notNull(targetField, schema);
+        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema);
 
         assertEquals(Boolean.FALSE, schema.getNullable());
         assertEquals(Integer.valueOf(1), schema.getMinItems());
         assertEquals(Integer.valueOf(20), schema.getMaxItems());
+        assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 
     @Test
     public void testArrayListNullableAndMinItemsAndMaxItems() {
         FieldInfo targetField = targetClass.field("arrayListNullableAndMinItemsAndMaxItems");
-        testTarget.notNull(targetField, schema);
+        Schema parentSchema = new SchemaImpl();
+        String propertyKey = "TESTKEY";
+
+        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema);
 
         assertEquals(null, schema.getNullable());
         assertEquals(Integer.valueOf(5), schema.getMinItems());
         assertEquals(Integer.valueOf(20), schema.getMaxItems());
+        assertNull(parentSchema.getRequired());
     }
 
     /**********************************************************************/
@@ -134,13 +149,17 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
 
         FieldInfo targetField = targetClass.field("mapObjectNotNullAndNotEmptyAndMaxProperties");
-        testTarget.notNull(targetField, schema);
+        Schema parentSchema = new SchemaImpl();
+        String propertyKey = "TESTKEY";
+
+        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema);
 
         assertEquals(Boolean.FALSE, schema.getNullable());
         assertEquals(Integer.valueOf(1), schema.getMinProperties());
         assertEquals(Integer.valueOf(20), schema.getMaxProperties());
+        assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 
     @Test
@@ -148,25 +167,33 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
 
         FieldInfo targetField = targetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
-        testTarget.notNull(targetField, schema);
+        Schema parentSchema = new SchemaImpl();
+        String propertyKey = "TESTKEY";
+
+        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema);
 
         assertEquals(null, schema.getNullable());
         assertEquals(Integer.valueOf(5), schema.getMinProperties());
         assertEquals(Integer.valueOf(20), schema.getMaxProperties());
+        assertNull(parentSchema.getRequired());
     }
 
     @Test
     public void testMapObjectNullableNoAdditionalProperties() {
         FieldInfo targetField = targetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
-        testTarget.notNull(targetField, schema);
+        Schema parentSchema = new SchemaImpl();
+        String propertyKey = "TESTKEY";
+
+        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema);
 
         assertEquals(null, schema.getNullable());
         assertEquals(null, schema.getMinProperties());
         assertEquals(null, schema.getMaxProperties());
+        assertNull(parentSchema.getRequired());
     }
 
     /**********************************************************************/
@@ -371,12 +398,15 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     @Test
     public void testStringNotBlankNotNull() {
         FieldInfo targetField = targetClass.field("stringNotBlankNotNull");
+        Schema parentSchema = new SchemaImpl();
+        String propertyKey = "TESTKEY";
 
         testTarget.notBlank(targetField, schema);
-        testTarget.notNull(targetField, schema);
+        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
 
         assertEquals("\\S", schema.getPattern());
         assertEquals(Boolean.FALSE, schema.getNullable());
+        assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 
     @Test
