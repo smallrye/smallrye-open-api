@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import io.smallrye.openapi.api.OpenApiConstants;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -45,13 +46,28 @@ import static java.util.stream.Collectors.toList;
 public class JandexUtil {
 
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
+    private static final Pattern componentKeyPattern = Pattern.compile("^[a-zA-Z0-9\\.\\-_]+$");
 
     /**
      * Simple enum to indicate the type of a $ref being read/written.
      * @author eric.wittmann@gmail.com
      */
     public enum RefType {
-        Header, Schema, SecurityScheme, Callback, Link, Response, Parameter, Example, RequestBody
+        Header("headers"),
+        Schema("schemas"),
+        SecurityScheme("securitySchemes"),
+        Callback("callbacks"),
+        Link("links"),
+        Response("responses"),
+        Parameter("parameters"),
+        Example("examples"),
+        RequestBody("requestBodies");
+
+        String componentPath;
+
+        RefType(String componentPath) {
+            this.componentPath = componentPath;
+        }
     }
 
     /**
@@ -74,41 +90,17 @@ public class JandexUtil {
         }
 
         String $ref = value.asString();
-        if ($ref.startsWith("#/")) {
+
+        if (!componentKeyPattern.matcher($ref).matches()) {
             return $ref;
         }
 
-        switch (refType) {
-            case Callback:
-                $ref = "#/components/callbacks/" + $ref;
-                break;
-            case Example:
-                $ref = "#/components/examples/" + $ref;
-                break;
-            case Header:
-                $ref = "#/components/headers/" + $ref;
-                break;
-            case Link:
-                $ref = "#/components/links/" + $ref;
-                break;
-            case Parameter:
-                $ref = "#/components/parameters/" + $ref;
-                break;
-            case RequestBody:
-                $ref = "#/components/requestBodies/" + $ref;
-                break;
-            case Response:
-                $ref = "#/components/responses/" + $ref;
-                break;
-            case Schema:
-                $ref = "#/components/schemas/" + $ref;
-                break;
-            case SecurityScheme:
-                $ref = "#/components/securitySchemes/" + $ref;
-                break;
-            default:
-                throw new IllegalStateException("Unexpected Jandex RefType " + refType);
+        if (refType != null) {
+            $ref = "#/components/" + refType.componentPath + "/" + $ref;
+        } else {
+            throw new NullPointerException("RefType must not be null");
         }
+
         return $ref;
     }
 
