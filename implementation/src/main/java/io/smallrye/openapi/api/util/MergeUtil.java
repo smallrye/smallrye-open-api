@@ -31,6 +31,7 @@ import java.util.Set;
 import org.eclipse.microprofile.openapi.models.Constructible;
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.eclipse.microprofile.openapi.models.Reference;
+import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
@@ -249,6 +250,10 @@ public class MergeUtil {
             return mergeSecurityRequirementLists(values1, values2);
         }
 
+        if (values1.get(0) instanceof Parameter) {
+            return mergeParameterLists(values1, values2);
+        }
+
         values1.addAll(values2);
         return values1;
     }
@@ -333,4 +338,32 @@ public class MergeUtil {
         return values1;
     }
 
+    /**
+     * Merge two lists of Parameters.  Parameters are a special case because they must be unique
+     * by the name in 'in' each have
+     * @param values1
+     * @param values2
+     */
+    private static List<Parameter> mergeParameterLists(List<Parameter> values1, List<Parameter> values2) {
+        for (Parameter value2 : values2) {
+            Parameter match = null;
+            for (Parameter value1 : values1) {
+                if (value1.getName() == null || !value1.getName().equals(value2.getName())) {
+                    continue;
+                }
+                if (value1.getIn() == null || !value1.getIn().equals(value2.getIn())) {
+                    continue;
+                }
+
+                match = value1;
+                break;
+            }
+            if (match == null) {
+                values1.add(value2);
+            } else {
+                mergeObjects(match, value2);
+            }
+        }
+        return values1;
+    }
 }

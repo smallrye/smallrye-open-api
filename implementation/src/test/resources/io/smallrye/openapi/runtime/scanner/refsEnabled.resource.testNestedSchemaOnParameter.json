@@ -6,6 +6,7 @@
         "parameters": [
           {
             "name": "arg",
+            "in": "cookie",
             "schema": {
               "$ref": "#/components/schemas/NestedParameterTestParent"
             }

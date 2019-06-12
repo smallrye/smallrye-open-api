@@ -23,14 +23,12 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
 import javax.ws.rs.core.Application;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -50,12 +48,10 @@ import org.eclipse.microprofile.openapi.models.info.Info;
 import org.eclipse.microprofile.openapi.models.info.License;
 import org.eclipse.microprofile.openapi.models.links.Link;
 import org.eclipse.microprofile.openapi.models.media.Content;
-import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
-import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
@@ -70,15 +66,11 @@ import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
-import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
-import org.jboss.jandex.MethodParameterInfo;
-import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
@@ -100,10 +92,8 @@ import io.smallrye.openapi.api.models.info.InfoImpl;
 import io.smallrye.openapi.api.models.info.LicenseImpl;
 import io.smallrye.openapi.api.models.links.LinkImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
@@ -118,8 +108,8 @@ import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
 import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.scanner.ParameterProcessor.ResourceParameters;
 import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.JandexUtil.JaxRsParameterInfo;
 import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
@@ -144,7 +134,6 @@ public class OpenApiAnnotationScanner {
     private OpenAPIImpl oai;
 
     private String currentAppPath = "";
-    private String currentResourcePath = "";
     private String[] currentConsumes;
     private String[] currentProduces;
 
@@ -183,10 +172,9 @@ public class OpenApiAnnotationScanner {
         oai = new OpenAPIImpl();
         oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
-        @SuppressWarnings("unused")
         // Creating a new instance of a registry which will be set on the thread context.
         SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(config, oai, index);
-       
+
         // Register custom schemas if available
         getCustomSchemaRegistry().registerCustomSchemas(schemaRegistry);
 
@@ -242,6 +230,7 @@ public class OpenApiAnnotationScanner {
         if (appPathAnno == null) {
             appPathAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_PATH);
         }
+        // TODO: Add support for Application selection when there are more than one
         if (appPathAnno != null) {
             this.currentAppPath = appPathAnno.value().asString();
         } else {
@@ -290,10 +279,6 @@ public class OpenApiAnnotationScanner {
      */
     private void processJaxRsResourceClass(OpenAPIImpl openApi, ClassInfo resourceClass) {
         LOG.debug("Processing a JAX-RS resource class: " + resourceClass.simpleName());
-
-        // Set the current resource path.
-        AnnotationInstance pathAnno = JandexUtil.getClassAnnotation(resourceClass, OpenApiConstants.DOTNAME_PATH);
-        this.currentResourcePath = pathAnno.value().asString();
 
         // TODO handle the use-case where the resource class extends a base class, and the base class has jax-rs relevant methods and annotations
 
@@ -381,7 +366,7 @@ public class OpenApiAnnotationScanner {
             if (options != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
             }
-        AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
+            AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
             if (patch != null) {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
             }
@@ -423,22 +408,7 @@ public class OpenApiAnnotationScanner {
             operation = new OperationImpl();
         }
 
-        // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path;
-        if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
-            AnnotationInstance pathAnno = method.annotation(OpenApiConstants.DOTNAME_PATH);
-            String methodPath = pathAnno.value().asString();
-            path = makePath(this.currentAppPath, this.currentResourcePath, methodPath);
-        } else {
-            path = makePath(this.currentAppPath, this.currentResourcePath);
-        }
-
-        // Get or create a PathItem to hold the operation
-        PathItem pathItem = ModelUtil.paths(openApi).getPathItem(path);
-        if (pathItem == null) {
-            pathItem = new PathItemImpl();
-            ModelUtil.paths(openApi).addPathItem(path, pathItem);
-        }
+        PathItem pathItem = new PathItemImpl();
 
         // Figure out the current @Produces and @Consumes (if any)
         currentConsumes = null;
@@ -523,89 +493,10 @@ public class OpenApiAnnotationScanner {
 
         // Process @Parameter annotations
         /////////////////////////////////////////
-        List<AnnotationInstance> parameterAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                                                                                           OpenApiConstants.DOTNAME_PARAMETER,
-                                                                                           OpenApiConstants.DOTNAME_PARAMETERS);
+        ResourceParameters params = ParameterProcessor.process(index, resource, method, this::readParameter, extensions);
 
-        // Cross reference from the JAX-RS *Param name to the name specified by the Schema
-        Map<String, String> parameterNameOverrides = new HashMap<>();
-
-        for (AnnotationInstance annotation : parameterAnnotations) {
-            Parameter parameter = readParameter(annotation);
-            if (parameter == null) {
-                // Param was hidden
-                continue;
-            }
-
-            AnnotationTarget target = annotation.target();
-            // If target is null, then the @Parameter was found wrapped in a @Parameters
-            // If the target is METHOD, then the @Parameter is on the method itself
-            // If the target is METHOD_PARAMETER, then the @Parameter is on one of the method's arguments (THIS ONE WE CARE ABOUT)
-            if (target != null && target.kind() == Kind.METHOD_PARAMETER) {
-                MethodParameterInfo paramInfo = target.asMethodParameter();
-                JaxRsParameterInfo jaxRsParamInfo = JandexUtil.getMethodParameterJaxRsInfo(method, paramInfo.position());
-
-                if (jaxRsParamInfo != null) {
-                    parameter.setIn(jaxRsParamInfo.in);
-
-                    if (parameter.getName() == null) {
-                        parameter.setName(jaxRsParamInfo.name);
-                    } else {
-                        parameterNameOverrides.put(jaxRsParamInfo.name, parameter.getName());
-                    }
-                } else {
-                    parameter.setIn(parameterIn(target.asMethodParameter()));
-                }
-
-                if (parameter.getIn() == In.PATH) {
-                    parameter.setRequired(true);
-                }
-
-                // if the Parameter model we read does *NOT* have a Schema at this point, then create one from the method argument's type
-                if (!ModelUtil.parameterHasSchema(parameter)) {
-                    Type paramType = JandexUtil.getMethodParameterType(method, paramInfo.position());
-                    Schema schema = SchemaFactory.typeToSchema(index, paramType, extensions);
-                    ModelUtil.setParameterSchema(parameter, schema);
-                }
-            } else {
-                // TODO if the @Parameter is on the method, we could perhaps find the one it refers to by name
-                // and use its type to create a Schema (if missing)
-            }
-
-            operation.addParameter(parameter);
-        }
-        // Now process any jax-rs parameters that were NOT annotated with @Parameter (do not yet exist in the model)
-        List<Type> parameters = method.parameters();
-        for (int idx = 0; idx < parameters.size(); idx++) {
-            JaxRsParameterInfo paramInfo = JandexUtil.getMethodParameterJaxRsInfo(method, idx);
-            // Try extensions
-            if (paramInfo == null) {
-                for (AnnotationScannerExtension extension : extensions) {
-                    paramInfo = extension.getMethodParameterJaxRsInfo(method, idx);
-                    if (paramInfo != null)
-                        break;
-                }
-            }
-            if (paramInfo != null && !ModelUtil.operationHasParameter(operation, parameterNameOverrides.getOrDefault(paramInfo.name, paramInfo.name))) {
-                Type paramType = parameters.get(idx);
-                Parameter parameter = new ParameterImpl();
-                parameter.setName(paramInfo.name);
-                parameter.setIn(paramInfo.in);
-
-                if (paramInfo.in == In.PATH) {
-                    parameter.setRequired(true);
-                }
-
-                Schema schema = SchemaFactory.typeToSchema(index, paramType, extensions);
-                parameter.setSchema(schema);
-                operation.addParameter(parameter);
-            }
-
-        }
-
-        // TODO @Parameter can be located on a field - what does that mean?
-        // TODO need to handle the case where we have @BeanParam annotations
-
+        operation.setParameters(params.getOperationParameters());
+        pathItem.setParameters(params.getPathItemParameters());
 
         // Process any @RequestBody annotation
         /////////////////////////////////////////
@@ -630,20 +521,29 @@ public class OpenApiAnnotationScanner {
             }
             operation.setRequestBody(requestBody);
         }
+
         // If the request body is null, figure it out from the parameters.  Only if the
         // method declares that it @Consumes data
         if (operation.getRequestBody() == null && currentConsumes != null) {
-            Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
-            if (requestBodyType != null) {
-                Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
-                if (schema != null) {
-                    RequestBody requestBody = new RequestBodyImpl();
-                    ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
-                    operation.setRequestBody(requestBody);
+            if (params.getFormBodySchema() != null) {
+                // TODO: Merge @FormParam data with @Parameter given by user?
+                RequestBody requestBody = new RequestBodyImpl();
+                Schema schema = params.getFormBodySchema();
+                ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
+                operation.setRequestBody(requestBody);
+            } else {
+                Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
+
+                if (requestBodyType != null) {
+                    Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
+                    if (schema != null) {
+                        RequestBody requestBody = new RequestBodyImpl();
+                        ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
+                        operation.setRequestBody(requestBody);
+                    }
                 }
             }
         }
-
 
         // Process @APIResponse annotations
         /////////////////////////////////////////
@@ -758,6 +658,27 @@ public class OpenApiAnnotationScanner {
             default:
                 break;
         }
+
+        // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
+        String path = makePath(this.currentAppPath, params.getOperationPath());
+
+        /*if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
+            AnnotationInstance pathAnno = method.annotation(OpenApiConstants.DOTNAME_PATH);
+            String methodPath = pathAnno.value().asString();
+            path = makePath(this.currentAppPath, this.currentResourcePath, methodPath);
+        } else {
+            path = makePath(this.currentAppPath, this.currentResourcePath);
+        }*/
+
+        // Get or create a PathItem to hold the operation
+        PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
+
+        if (existingPath == null) {
+            ModelUtil.paths(openApi).addPathItem(path, pathItem);
+        } else {
+            // Changes applied to 'existingPath', no need to re-assign or add to OAI.
+            MergeUtil.mergeObjects(existingPath, pathItem);
+        }
     }
 
     /**
@@ -811,38 +732,6 @@ public class OpenApiAnnotationScanner {
             response.setContent(content);
             responses.addAPIResponse("200", response);
         }
-    }
-
-    /**
-     * Determines where an @Parameter can be found (examples include Query, Path,
-     * Header, Cookie, etc).
-     * @param paramInfo
-     */
-    private In parameterIn(MethodParameterInfo paramInfo) {
-        MethodInfo method = paramInfo.method();
-        short paramPosition = paramInfo.position();
-        List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(method, paramPosition);
-        for (AnnotationInstance annotation : annotations) {
-            if (annotation.name().equals(OpenApiConstants.DOTNAME_QUERY_PARAM)) {
-                return In.QUERY;
-            }
-            if (annotation.name().equals(OpenApiConstants.DOTNAME_PATH_PARAM)) {
-                return In.PATH;
-            }
-            if (annotation.name().equals(OpenApiConstants.DOTNAME_HEADER_PARAM)) {
-                return In.HEADER;
-            }
-            if (annotation.name().equals(OpenApiConstants.DOTNAME_COOKIE_PARAM)) {
-                return In.COOKIE;
-            }
-        }
-        // Try extensions
-        for (AnnotationScannerExtension extension : extensions) {
-            In ret = extension.parameterIn(paramInfo);
-            if (ret != null)
-                return ret;
-        }
-        return null;
     }
 
     /**
@@ -1240,7 +1129,10 @@ public class OpenApiAnnotationScanner {
         List<Parameter> parameters = new ArrayList<>();
         AnnotationInstance[] nestedArray = value.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            parameters.add(readParameter(nested));
+            ParameterImpl parameter = readParameter(nested);
+            if (parameter != null && !parameter.isHidden()) {
+                parameters.add(parameter);
+            }
         }
         return parameters;
     }
@@ -1428,8 +1320,8 @@ public class OpenApiAnnotationScanner {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                Parameter parameter = readParameter(nested);
-                if (parameter != null) {
+                ParameterImpl parameter = readParameter(nested);
+                if (parameter != null && !parameter.isHidden()) {
                     map.put(name, parameter);
                 }
             }
@@ -1441,21 +1333,24 @@ public class OpenApiAnnotationScanner {
      * Reads a Parameter annotation into a model.
      * @param annotation
      */
-    private Parameter readParameter(AnnotationInstance annotation) {
+    private ParameterImpl readParameter(AnnotationInstance annotation) {
         if (annotation == null) {
             return null;
         }
         LOG.debug("Processing a single @Link annotation.");
 
-        // Params can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
-        if (isHidden != null && isHidden == Boolean.TRUE) {
-            return null;
-        }
-
-        Parameter parameter = new ParameterImpl();
+        ParameterImpl parameter = new ParameterImpl();
         parameter.setName(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME));
         parameter.setIn(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_IN, org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
+
+        // Params can be hidden. Skip if that's the case.
+        Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
+
+        if (Boolean.TRUE.equals(isHidden)) {
+            parameter.setHidden(true);
+            return parameter;
+        }
+
         parameter.setDescription(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DESCRIPTION));
         parameter.setRequired(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_REQUIRED));
         parameter.setDeprecated(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED));
@@ -1877,7 +1772,7 @@ public class OpenApiAnnotationScanner {
         return value;
     }
 
-    
+
     private CustomSchemaRegistry getCustomSchemaRegistry() {
         if (config == null || config.customSchemaRegistryClass() == null) {
             // Provide default implementation that does nothing
@@ -1886,19 +1781,19 @@ public class OpenApiAnnotationScanner {
             try {
                 return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader()).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
-                throw new RuntimeException("Failed to create instance of custom schema registry: " 
+                throw new RuntimeException("Failed to create instance of custom schema registry: "
                         + config.customSchemaRegistryClass(), ex);
             }
-        }        
+        }
     }
-    
+
     private static ClassLoader getContextClassLoader() {
         if (System.getSecurityManager() == null) {
             return Thread.currentThread().getContextClassLoader();
         }
         return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
     }
-    
+
     /**
      * Simple enum to indicate whether an @Content annotation being processed is
      * an input or an output.

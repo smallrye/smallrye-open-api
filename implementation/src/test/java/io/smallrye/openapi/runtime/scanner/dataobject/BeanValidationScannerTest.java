@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -116,7 +117,9 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
-        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
+        testTarget.notNull(targetField, schema, propertyKey, (target, name) -> {
+            parentSchema.addRequired(name);
+        });
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema);
 
@@ -132,7 +135,9 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
-        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
+        testTarget.notNull(targetField, schema, propertyKey, (target, name) -> {
+            fail("Unexpected call to handler");
+        });
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema);
 
@@ -152,7 +157,9 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
-        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
+        testTarget.notNull(targetField, schema, propertyKey, (target, name) -> {
+            parentSchema.addRequired(name);
+        });
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema);
 
@@ -170,7 +177,9 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
-        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
+        testTarget.notNull(targetField, schema, propertyKey, (target, name) -> {
+            fail("Unexpected call to handler");
+        });
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema);
 
@@ -186,7 +195,9 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
-        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
+        testTarget.notNull(targetField, schema, propertyKey, (target, name) -> {
+            fail("Unexpected call to handler");
+        });
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema);
 
@@ -402,7 +413,9 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         String propertyKey = "TESTKEY";
 
         testTarget.notBlank(targetField, schema);
-        testTarget.notNull(targetField, schema, parentSchema, propertyKey);
+        testTarget.notNull(targetField, schema, propertyKey, (target, name) -> {
+            parentSchema.addRequired(name);
+        });
 
         assertEquals("\\S", schema.getPattern());
         assertEquals(Boolean.FALSE, schema.getNullable());

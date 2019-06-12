@@ -4,11 +4,9 @@ import static io.smallrye.openapi.runtime.util.JandexUtil.booleanValue;
 import static io.smallrye.openapi.runtime.util.JandexUtil.intValue;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 import static io.smallrye.openapi.runtime.util.TypeUtil.getAnnotation;
-import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
 import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import javax.validation.groups.Default;
 
@@ -21,12 +19,14 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
-
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 public class BeanValidationScanner {
+
+    public interface RequirementHandler {
+        void setRequired(AnnotationTarget target, String propertyKey);
+    }
 
     static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
 
@@ -78,20 +78,29 @@ public class BeanValidationScanner {
      * Each of the constraints (defined in javax.validation.constraints) will
      * apply to the schema based on the schema's type.
      *
+     * When a {@link javax.validation.constraints.NotNull @NotNull} constraint
+     * applies to the schema, the provided {@link RequirementHandler} will be
+     * called in order for the component calling this method to determine if and
+     * how to apply the requirement. E.g. a required Schema is communicated
+     * differently for a parent schema and for a parameter described by the
+     * schema.
+     *
      * @param target
      *            the object from which to retrieve the constraint annotations
      * @param schema
      *            the schema to which the constraints will be applied
-     * @param parentSchema
-     *            the schema which contains the schema parameter as a property
      * @param propertyKey
      *            the name of the property in parentSchema that refers to the
      *            schema
+     * @param handler
+     *            the handler to be called when a
+     *            {@link javax.validation.constraints.NotNull @NotNull}
+     *            constraint is encountered.
      */
     public static void applyConstraints(AnnotationTarget target,
                                         Schema schema,
-                                        Schema parentSchema,
-                                        String propertyKey) {
+                                        String propertyKey,
+                                        RequirementHandler handler) {
 
         SchemaType schemaType = schema.getType();
 
@@ -105,12 +114,12 @@ public class BeanValidationScanner {
 
         switch (schemaType) {
         case ARRAY:
-            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
+            INSTANCE.notNull(target, schema, propertyKey, handler);
             INSTANCE.sizeArray(target, schema);
             INSTANCE.notEmptyArray(target, schema);
             break;
         case BOOLEAN:
-            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
+            INSTANCE.notNull(target, schema, propertyKey, handler);
             break;
         case INTEGER:
             INSTANCE.decimalMax(target, schema);
@@ -120,7 +129,7 @@ public class BeanValidationScanner {
             INSTANCE.min(target, schema);
             INSTANCE.negative(target, schema);
             INSTANCE.negativeOrZero(target, schema);
-            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
+            INSTANCE.notNull(target, schema, propertyKey, handler);
             INSTANCE.positive(target, schema);
             INSTANCE.positiveOrZero(target, schema);
             break;
@@ -132,12 +141,12 @@ public class BeanValidationScanner {
             INSTANCE.min(target, schema);
             INSTANCE.negative(target, schema);
             INSTANCE.negativeOrZero(target, schema);
-            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
+            INSTANCE.notNull(target, schema, propertyKey, handler);
             INSTANCE.positive(target, schema);
             INSTANCE.positiveOrZero(target, schema);
             break;
         case OBJECT:
-            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
+            INSTANCE.notNull(target, schema, propertyKey, handler);
             INSTANCE.sizeObject(target, schema);
             INSTANCE.notEmptyObject(target, schema);
             break;
@@ -146,7 +155,7 @@ public class BeanValidationScanner {
             INSTANCE.decimalMin(target, schema);
             INSTANCE.digits(target, schema);
             INSTANCE.notBlank(target, schema);
-            INSTANCE.notNull(target, schema, parentSchema, propertyKey);
+            INSTANCE.notNull(target, schema, propertyKey, handler);
             INSTANCE.sizeString(target, schema);
             INSTANCE.notEmptyString(target, schema);
             break;
@@ -324,7 +333,7 @@ public class BeanValidationScanner {
         }
     }
 
-    void notNull(AnnotationTarget target, Schema schema, Schema parentSchema, String propertyKey) {
+    void notNull(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_NULL);
 
         if (constraint != null) {
@@ -332,25 +341,8 @@ public class BeanValidationScanner {
                 schema.setNullable(Boolean.FALSE);
             }
 
-            if (parentSchema != null && propertyKey != null) {
-                notNullRequired(target, parentSchema, propertyKey);
-            }
-        }
-    }
-
-    void notNullRequired(AnnotationTarget target, Schema parentSchema, String propertyKey) {
-        List<String> requiredProperties = parentSchema.getRequired();
-
-        if (requiredProperties == null || !requiredProperties.contains(propertyKey)) {
-            AnnotationInstance schemaAnnotation = getSchemaAnnotation(target);
-
-            if (schemaAnnotation == null ||
-                    schemaAnnotation.value(OpenApiConstants.PROP_REQUIRED) == null) {
-                /*
-                 * Only mark the schema as required in the parent schema if it has not
-                 * already been specified.
-                 */
-                parentSchema.addRequired(propertyKey);
+            if (handler != null && propertyKey != null) {
+                handler.setRequired(target, propertyKey);
             }
         }
     }

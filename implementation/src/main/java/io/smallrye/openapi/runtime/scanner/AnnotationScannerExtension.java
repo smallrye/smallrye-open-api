@@ -13,18 +13,20 @@ import io.smallrye.openapi.runtime.util.JandexUtil.JaxRsParameterInfo;
 
 /**
  * Extension point for supporting extensions to JAX-RS. Implement this directly or extend {@link DefaultAnnotationScannerExtension}.
- * 
+ *
  * @see DefaultAnnotationScannerExtension
  */
+@SuppressWarnings("deprecation")
 public interface AnnotationScannerExtension {
 
     /**
      * Determines where an @Parameter can be found (examples include Query,
      * Path, Header, Cookie, etc).
-     * 
+     *
      * @param paramInfo
      * @return the parameter location, or null if unknown
      */
+    @Deprecated
     public In parameterIn(MethodParameterInfo paramInfo);
 
     /**
@@ -32,20 +34,21 @@ public interface AnnotationScannerExtension {
      * is invalid or does not refer to a jax-rs parameter then this should
      * return null. Otherwise it will return a {@link JaxRsParameterInfo} object
      * with the name and type of the param.
-     * 
+     *
      * @param method
      *            MethodInfo
      * @param idx
      *            index of parameter
      * @return JaxRsParameterInfo or null if unknown.
      */
+    @Deprecated
     public JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx);
 
     /**
      * Unwraps an asynchronous type such as
      * <code>CompletionStage&lt;X&gt;</code> into its resolved type
      * <code>X</code>
-     * 
+     *
      * @param type
      *            the type to unwrap if it is a supported async type
      * @return the resolved type or null if not supported

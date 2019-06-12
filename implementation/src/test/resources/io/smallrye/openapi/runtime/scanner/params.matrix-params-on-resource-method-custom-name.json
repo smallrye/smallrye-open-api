@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/matrix-params-on-resource-method-custom-name/{id}{r1}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "maxLength": 10
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "name": "r1",
+            "in": "path",
+            "style": "matrix",
+            "required": true,
+            "description": "Additional information for id2",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "m1": {
+                  "type": "string",
+                  "default": "default-m1"
+                },
+                "m2": {
+                  "type": "string",
+                  "minLength": 20
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Widget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

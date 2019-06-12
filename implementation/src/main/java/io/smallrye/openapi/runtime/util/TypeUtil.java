@@ -19,10 +19,12 @@ import io.smallrye.openapi.api.OpenApiConstants;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.WildcardType;
@@ -36,6 +38,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -262,7 +265,14 @@ public class TypeUtil {
             case METHOD:
                 return type.asMethod().annotations();
             case METHOD_PARAMETER:
-                break;
+                MethodParameterInfo parameter = type.asMethodParameter();
+                return parameter
+                           .method()
+                           .annotations()
+                           .stream()
+                           .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                           .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                           .collect(Collectors.toList());
             case TYPE:
                 break;
         }

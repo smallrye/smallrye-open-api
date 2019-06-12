@@ -10,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -60,7 +61,7 @@ public class NestedSchemaOnParameterResource {
     @APIResponse(
             responseCode = "200",
             content = @Content(schema = @Schema(implementation = NestedParameterTestParent.class)))
-    public NestedParameterTestParent getHiddenResponse(@Parameter(name = "arg") NestedParameterTestParent request) {
+    public NestedParameterTestParent getHiddenResponse(@Parameter(name = "arg", in = ParameterIn.COOKIE) NestedParameterTestParent request) {
         return new NestedParameterTestParent();
     }
 }

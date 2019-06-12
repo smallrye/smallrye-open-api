@@ -18,6 +18,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -29,7 +30,11 @@ import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import javax.validation.constraints.NotNull;
+
+import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,7 +42,7 @@ import java.util.Map;
  *
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class AnnotationTargetProcessor {
+public class AnnotationTargetProcessor implements RequirementHandler {
     private static final Logger LOG = Logger.getLogger(AnnotationTargetProcessor.class);
 
     private final AugmentedIndexView index;
@@ -103,6 +108,24 @@ public class AnnotationTargetProcessor {
         return fp.processField();
     }
 
+    @Override
+    public void setRequired(AnnotationTarget target, String propertyKey) {
+        List<String> requiredProperties = parentPathEntry.getSchema().getRequired();
+
+        if (requiredProperties == null || !requiredProperties.contains(propertyKey)) {
+            AnnotationInstance schemaAnnotation = getSchemaAnnotation(target);
+
+            if (schemaAnnotation == null ||
+                    schemaAnnotation.value(OpenApiConstants.PROP_REQUIRED) == null) {
+                /*
+                 * Only mark the schema as required in the parent schema if it has not
+                 * already been specified.
+                 */
+                parentPathEntry.getSchema().addRequired(propertyKey);
+            }
+        }
+    }
+
     Schema processField() {
         AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
 
@@ -116,7 +139,7 @@ public class AnnotationTargetProcessor {
             readSchemaAnnotatedField(propertyKey, schemaAnnotation);
         }
 
-        BeanValidationScanner.applyConstraints(annotationTarget, fieldSchema, parentPathEntry.getSchema(), propertyKey);
+        BeanValidationScanner.applyConstraints(annotationTarget, fieldSchema, propertyKey, this);
         fieldSchema = SchemaRegistry.checkRegistration(entityType, typeResolver, fieldSchema);
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
