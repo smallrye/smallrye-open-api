@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>6</version>
+        <version>7</version>
     </parent>
 
     <artifactId>smallrye-open-api-parent-1.1</artifactId>
