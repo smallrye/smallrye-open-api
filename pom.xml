@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>smallrye-open-api-parent-1.1</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <packaging>pom</packaging>
     <name>SmallRye: MicroProfile OpenAPI Parent</name>
@@ -54,7 +54,7 @@
         <connection>scm:git:git@github.com:smallrye/smallrye-open-api.git</connection>
         <developerConnection>scm:git:git@github.com:smallrye/smallrye-open-api.git</developerConnection>
         <url>https://github.com/smallrye/smallrye-open-api/</url>
-        <tag>HEAD</tag>
+        <tag>smallrye-open-api-1.1-1.0.2</tag>
     </scm>
 
     <modules>
