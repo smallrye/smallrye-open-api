@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.util.Collection;
 
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
+import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
@@ -61,6 +62,18 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
      * @param applications the set of jax-rs application classes
      */
     public void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications) {
+    }
+
+    /**
+     * Returns true if the given annotation is a jax-rs annotation extension, such as would be in the javax.ws.rs
+     * package.
+     * 
+     * @param instance the annotation to check
+     * @return true if the given annotation is a jax-rs annotation extension
+     */
+    @Override
+    public boolean isJaxRsAnnotationExtension(AnnotationInstance instance) {
+        return false;
     }
 
 }

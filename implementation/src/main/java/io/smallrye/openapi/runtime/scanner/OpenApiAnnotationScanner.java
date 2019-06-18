@@ -621,7 +621,7 @@ public class OpenApiAnnotationScanner {
                 if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
                     requestBodyType = JandexUtil.getMethodParameterType(method, annotation.target().asMethodParameter().position());
                 } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-                    requestBodyType = JandexUtil.getRequestBodyParameterClassType(method);
+                    requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
                 }
                 if (requestBodyType != null) {
                     Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
@@ -633,7 +633,7 @@ public class OpenApiAnnotationScanner {
         // If the request body is null, figure it out from the parameters.  Only if the
         // method declares that it @Consumes data
         if (operation.getRequestBody() == null && currentConsumes != null) {
-            Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method);
+            Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
             if (requestBodyType != null) {
                 Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
                 if (schema != null) {
