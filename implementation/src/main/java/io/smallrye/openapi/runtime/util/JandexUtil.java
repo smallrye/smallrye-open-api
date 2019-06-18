@@ -38,6 +38,7 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import static java.util.stream.Collectors.toList;
+import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -393,26 +394,32 @@ public class JandexUtil {
      * Go through the method parameters looking for one that is not annotated with a jax-rs
      * annotation.  That will be the one that is the request body.
      * @param method MethodInfo
+     * @param extensions available extensions
      * @return Type
      */
-    public static Type getRequestBodyParameterClassType(MethodInfo method) {
+    public static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions) {
         List<Type> methodParams = method.parameters();
         if (methodParams.isEmpty()) {
             return null;
         }
         for (short i = 0; i < methodParams.size(); i++) {
             List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
-            if (parameterAnnotations.isEmpty() || !containsJaxRsAnnotations(parameterAnnotations)) {
+            if (parameterAnnotations.isEmpty() || !containsJaxRsAnnotations(parameterAnnotations, extensions)) {
                 return methodParams.get(i);
             }
         }
         return null;
     }
 
-    private static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances) {
+    private static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances,
+            List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
             if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
                 return true;
+            }
+            for (AnnotationScannerExtension extension : extensions) {
+                if (extension.isJaxRsAnnotationExtension(instance))
+                    return true;
             }
         }
         return false;
