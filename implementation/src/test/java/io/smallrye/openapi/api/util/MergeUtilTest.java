@@ -37,6 +37,7 @@ public class MergeUtilTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
+     * 
      * @param testResource
      * @throws IOException
      */
@@ -46,6 +47,7 @@ public class MergeUtilTest {
 
     /**
      * Compares two JSON strings.
+     * 
      * @param expected
      * @param actual
      * @throws JSONException
@@ -55,8 +57,9 @@ public class MergeUtilTest {
     }
 
     /**
-     * Performs a single full merge test.  Two documents are loaded (as resources) and then
-     * merged.  The expected merge result is then loaded and compared with the actual result.
+     * Performs a single full merge test. Two documents are loaded (as resources) and then
+     * merged. The expected merge result is then loaded and compared with the actual result.
+     * 
      * @param resource1
      * @param resource2
      * @param expected
@@ -64,7 +67,8 @@ public class MergeUtilTest {
      * @throws ParseException
      * @throws JSONException
      */
-    private static void doTest(String resource1, String resource2, String expected) throws IOException, ParseException, JSONException {
+    private static void doTest(String resource1, String resource2, String expected)
+            throws IOException, ParseException, JSONException {
         URL resource1Url = MergeUtilTest.class.getResource(resource1);
         URL resource2Url = MergeUtilTest.class.getResource(resource2);
         URL expectedUrl = MergeUtilTest.class.getResource(expected);
@@ -82,7 +86,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Info() throws IOException, ParseException, JSONException {
@@ -90,7 +95,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Extensions() throws IOException, ParseException, JSONException {
@@ -98,7 +104,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Tags() throws IOException, ParseException, JSONException {
@@ -106,7 +113,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Servers() throws IOException, ParseException, JSONException {
@@ -114,7 +122,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_PathDocs() throws IOException, ParseException, JSONException {
@@ -122,7 +131,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_PathDefault() throws IOException, ParseException, JSONException {
@@ -130,7 +140,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Callbacks() throws IOException, ParseException, JSONException {
@@ -138,7 +149,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_Security() throws IOException, ParseException, JSONException {
@@ -146,7 +158,8 @@ public class MergeUtilTest {
     }
 
     /**
-     * Test method for {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
      */
     @Test
     public void testMerge_OperationTags() throws IOException, ParseException, JSONException {

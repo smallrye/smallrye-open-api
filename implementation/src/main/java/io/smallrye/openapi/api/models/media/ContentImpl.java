@@ -33,11 +33,14 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
     private static final long serialVersionUID = -8680275279421417582L;
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Content#addMediaType(java.lang.String, org.eclipse.microprofile.openapi.models.media.MediaType)
+     * @see org.eclipse.microprofile.openapi.models.media.Content#addMediaType(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.media.MediaType)
      */
     @Override
     public Content addMediaType(String name, MediaType mediaType) {
-        if (mediaType == null) { return this; }
+        if (mediaType == null) {
+            return this;
+        }
         this.put(name, mediaType);
         return this;
     }

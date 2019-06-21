@@ -15,15 +15,17 @@
  */
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import java.util.Collection;
+
+import javax.validation.constraints.NotNull;
+
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Type;
 
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * IndexView augmented with additional methods for common operations

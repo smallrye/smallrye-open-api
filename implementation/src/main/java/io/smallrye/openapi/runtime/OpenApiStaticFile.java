@@ -26,10 +26,10 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiStaticFile implements Closeable {
-    
+
     private Format format;
     private InputStream content;
-    
+
     /**
      * Constructor.
      */

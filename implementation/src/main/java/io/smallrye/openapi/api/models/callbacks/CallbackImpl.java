@@ -29,7 +29,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 /**
  * An implementation of the {@link Callback} OpenAPI model interface.
  */
-public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Callback, ModelImpl  {
+public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Callback, ModelImpl {
 
     private static final long serialVersionUID = -8299593311575193028L;
 
@@ -49,7 +49,9 @@ public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Cal
      */
     @Override
     public Callback addExtension(String name, Object value) {
-        if (value == null) { return this; }
+        if (value == null) {
+            return this;
+        }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -104,11 +106,14 @@ public class CallbackImpl extends LinkedHashMap<String, PathItem> implements Cal
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.callbacks.Callback#addPathItem(java.lang.String, org.eclipse.microprofile.openapi.models.PathItem)
+     * @see org.eclipse.microprofile.openapi.models.callbacks.Callback#addPathItem(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.PathItem)
      */
     @Override
     public Callback addPathItem(String name, PathItem item) {
-        if (item == null) { return this; }
+        if (item == null) {
+            return this;
+        }
         this.put(name, item);
         return this;
     }

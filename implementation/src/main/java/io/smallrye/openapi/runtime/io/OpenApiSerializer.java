@@ -68,12 +68,14 @@ import io.smallrye.openapi.api.OpenApiConstants;
 
 /**
  * Class used to serialize an OpenAPI
+ * 
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiSerializer {
 
     public enum Format {
-        JSON("application/json"), YAML("application/yaml");
+        JSON("application/json"),
+        YAML("application/yaml");
 
         private final String mimeType;
 
@@ -88,6 +90,7 @@ public class OpenApiSerializer {
 
     /**
      * Serializes the given OpenAPI object into either JSON or YAML and returns it as a string.
+     * 
      * @param oai the OpenAPI object
      * @param format the serialization format
      * @return OpenAPI object as a String
@@ -118,6 +121,7 @@ public class OpenApiSerializer {
 
     /**
      * Constructor.
+     * 
      * @param oai OpenAPI model
      */
     public OpenApiSerializer(OpenAPI oai) {
@@ -135,6 +139,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the given model.
+     * 
      * @param node
      * @param model
      */
@@ -152,6 +157,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link Info} model to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -172,6 +178,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link Contact} model to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -190,6 +197,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link License} model to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -206,6 +214,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link ExternalDocumentation} model to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -222,6 +231,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link Tag} model array to the JSON tree.
+     * 
      * @param node
      * @param tags
      */
@@ -241,6 +251,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link Server} model array to the JSON tree.
+     * 
      * @param node
      * @param servers
      */
@@ -257,6 +268,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Server} model to the given JSON node.
+     * 
      * @param node ObjectNode
      * @param model Server
      */
@@ -269,6 +281,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link ServerVariables} model to the JSON tree.
+     * 
      * @param serverNode
      * @param variables
      */
@@ -285,6 +298,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link ServerVariable} to the JSON tree.
+     * 
      * @param parent
      * @param variableName
      * @param model
@@ -308,6 +322,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link SecurityRequirement} model array to the JSON tree.
+     * 
      * @param parent
      * @param security
      */
@@ -332,6 +347,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Paths} to the JSON tree.
+     * 
      * @param parent
      * @param paths
      */
@@ -348,6 +364,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link PathItem} to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param pathName
@@ -375,6 +392,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Operation} to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param method
@@ -401,6 +419,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link RequestBody} to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -418,6 +437,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Content} to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -433,6 +453,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link MediaType} to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -451,6 +472,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Schema} to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -465,6 +487,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the {@link Schema} model to the give node.
+     * 
      * @param node
      * @param model
      */
@@ -494,7 +517,8 @@ public class OpenApiSerializer {
         writeSchemaList(node, model.getAllOf(), OpenApiConstants.PROP_ALL_OF);
         writeSchemas(node, model.getProperties(), OpenApiConstants.PROP_PROPERTIES);
         if (model.getAdditionalPropertiesBoolean() != null) {
-            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES, (Boolean) model.getAdditionalPropertiesBoolean());
+            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES,
+                    (Boolean) model.getAdditionalPropertiesBoolean());
         } else {
             writeSchema(node, (Schema) model.getAdditionalPropertiesSchema(), OpenApiConstants.PROP_ADDITIONAL_PROPERTIES);
         }
@@ -514,6 +538,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link XML} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -532,6 +557,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Discriminator} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -546,6 +572,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Encoding} objects to the JSON tree.
+     * 
      * @param parent
      * @param models
      */
@@ -562,6 +589,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Encoding} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -581,6 +609,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link APIResponses} map to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -597,6 +626,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link APIResponse} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -616,6 +646,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a list of {@link SecurityRequirement} to the JSON tree.
+     * 
      * @param parent
      * @param models
      */
@@ -632,6 +663,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link SecurityRequirement} to the given JS node.
+     * 
      * @param node
      * @param model
      */
@@ -647,6 +679,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a list of {@link Parameter} to the JSON tree.
+     * 
      * @param parent
      * @param models
      */
@@ -663,6 +696,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Parameter} into the JSON node.
+     * 
      * @param node
      * @param model
      */
@@ -686,6 +720,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link ServerVariable} to the JSON tree.
+     * 
      * @param parent
      * @param components
      */
@@ -708,6 +743,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Schema} to the JSON tree.
+     * 
      * @param parent
      * @param schemas
      */
@@ -717,6 +753,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Schema} to the JSON tree.
+     * 
      * @param parent
      * @param schemas
      */
@@ -732,6 +769,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a list of {@link Schema} to the JSON tree.
+     * 
      * @param parent
      * @param models
      * @param propertyName
@@ -748,6 +786,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link APIResponse} to the JSON tree.
+     * 
      * @param parent
      * @param responses
      */
@@ -763,6 +802,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Parameter} to the JSON tree.
+     * 
      * @param parent
      * @param parameters
      */
@@ -778,6 +818,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Parameter} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -792,6 +833,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Example} to the JSON tree.
+     * 
      * @param parent
      * @param examples
      */
@@ -807,6 +849,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Example} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -826,6 +869,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link RequestBody} to the JSON tree.
+     * 
      * @param parent
      * @param requestBodies
      */
@@ -841,6 +885,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link RequestBody} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -859,6 +904,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Header} to the JSON tree.
+     * 
      * @param parent
      * @param headers
      */
@@ -874,6 +920,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link RequestBody} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -900,6 +947,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link SecurityScheme} to the JSON tree.
+     * 
      * @param parent
      * @param securitySchemes
      */
@@ -915,6 +963,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link SecurityScheme} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -938,6 +987,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link OAuthFlows} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -955,6 +1005,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link OAuthFlow} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -973,6 +1024,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Link} to the JSON tree.
+     * 
      * @param parent
      * @param links
      */
@@ -988,6 +1040,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Link} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -1009,6 +1062,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes the link parameters to the given node.
+     * 
      * @param parent
      * @param parameters
      */
@@ -1024,6 +1078,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Server} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      */
@@ -1037,6 +1092,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of {@link Callback} to the JSON tree.
+     * 
      * @param parent
      * @param callbacks
      */
@@ -1052,6 +1108,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a {@link Callback} object to the JSON tree.
+     * 
      * @param parent
      * @param model
      * @param name
@@ -1070,6 +1127,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes extensions to the JSON tree.
+     * 
      * @param node
      * @param model
      */
@@ -1087,6 +1145,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes an array of strings to the parent node.
+     * 
      * @param parent
      * @param models
      * @param propertyName
@@ -1103,6 +1162,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes an array of objects to the parent node.
+     * 
      * @param parent
      * @param models
      * @param propertyName
@@ -1119,6 +1179,7 @@ public class OpenApiSerializer {
 
     /**
      * Writes a map of strings to the parent node.
+     * 
      * @param parent
      * @param models
      * @param propertyName
@@ -1182,6 +1243,7 @@ public class OpenApiSerializer {
 
     /**
      * Adds an object to an array.
+     * 
      * @param node
      * @param value
      */

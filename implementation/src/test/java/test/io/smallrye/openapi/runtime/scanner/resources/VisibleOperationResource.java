@@ -20,9 +20,7 @@ public class VisibleOperationResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Operation
-    @APIResponse(responseCode = "200",
-                 description = "A successful response",
-                 content = @Content(schema = @Schema(type = SchemaType.STRING)))
+    @APIResponse(responseCode = "200", description = "A successful response", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     public String getPublicResponse() {
         return "response value";
     }

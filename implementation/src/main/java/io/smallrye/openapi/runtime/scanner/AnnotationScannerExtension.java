@@ -12,7 +12,8 @@ import org.jboss.jandex.Type;
 import io.smallrye.openapi.runtime.util.JandexUtil.JaxRsParameterInfo;
 
 /**
- * Extension point for supporting extensions to JAX-RS. Implement this directly or extend {@link DefaultAnnotationScannerExtension}.
+ * Extension point for supporting extensions to JAX-RS. Implement this directly or extend
+ * {@link DefaultAnnotationScannerExtension}.
  *
  * @see DefaultAnnotationScannerExtension
  */
@@ -36,9 +37,9 @@ public interface AnnotationScannerExtension {
      * with the name and type of the param.
      *
      * @param method
-     *            MethodInfo
+     *        MethodInfo
      * @param idx
-     *            index of parameter
+     *        index of parameter
      * @return JaxRsParameterInfo or null if unknown.
      */
     @Deprecated
@@ -50,13 +51,14 @@ public interface AnnotationScannerExtension {
      * <code>X</code>
      *
      * @param type
-     *            the type to unwrap if it is a supported async type
+     *        the type to unwrap if it is a supported async type
      * @return the resolved type or null if not supported
      */
     public Type resolveAsyncType(Type type);
 
     /**
      * Gives a chance to extensions to process the set of jax-rs application classes.
+     * 
      * @param scanner the scanner used for application scanning
      * @param applications the set of jax-rs application classes
      */

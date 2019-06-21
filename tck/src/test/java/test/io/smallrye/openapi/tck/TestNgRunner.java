@@ -23,7 +23,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 
 /**
- * A Junit 4 test runner used to bridge beteen Junit and TestNG.  Simply extends the 
+ * A Junit 4 test runner used to bridge beteen Junit and TestNG. Simply extends the
  * standard JUnit 4 runner but uses TestNG annotations instead of JUnit annotations.
  *
  * @author eric.wittmann@gmail.com
@@ -32,6 +32,7 @@ public class TestNgRunner extends BlockJUnit4ClassRunner {
 
     /**
      * Constructor.
+     * 
      * @param klass
      * @throws InitializationError
      */

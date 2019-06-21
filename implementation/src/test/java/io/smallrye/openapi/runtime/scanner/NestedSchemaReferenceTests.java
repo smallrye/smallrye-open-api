@@ -56,9 +56,12 @@ public class NestedSchemaReferenceTests extends OpenApiDataObjectScannerTestBase
 
         // Test samples
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestParent.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestChild.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$AnotherNestedChildWithSchemaName.class");
+        index(indexer,
+                "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestParent.class");
+        index(indexer,
+                "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestChild.class");
+        index(indexer,
+                "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$AnotherNestedChildWithSchemaName.class");
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), indexer.complete());
 

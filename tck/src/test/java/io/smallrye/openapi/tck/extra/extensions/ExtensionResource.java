@@ -28,7 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
  */
 @Path("/extensions")
 @Consumes("application/json")
-@Extension(name="x-type-extension", value="Type extension value.")
+@Extension(name = "x-type-extension", value = "Type extension value.")
 public class ExtensionResource {
 
     @GET
@@ -39,7 +39,7 @@ public class ExtensionResource {
 
     @GET
     @Path("/opExtension")
-    @Extension(name="x-operation-extension", value="Operation extension value.")
+    @Extension(name = "x-operation-extension", value = "Operation extension value.")
     public String getValueWithOperationExtension() {
         return "Operation extension value.";
     }
@@ -47,8 +47,8 @@ public class ExtensionResource {
     @GET
     @Path("/opWrapperExtension")
     @Extensions({
-        @Extension(name="x-operation-extension-1", value="Operation extension wrapper value (1)."),
-        @Extension(name="x-operation-extension-2", value="Operation extension wrapper value (2).")
+            @Extension(name = "x-operation-extension-1", value = "Operation extension wrapper value (1)."),
+            @Extension(name = "x-operation-extension-2", value = "Operation extension wrapper value (2).")
     })
     public String getValueWithOperationExtensionWrapper() {
         return "Operation wrapper extension value.";

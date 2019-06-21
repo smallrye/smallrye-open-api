@@ -77,7 +77,6 @@ public class SpecialCaseTests extends OpenApiDataObjectScannerTestBase {
         assertJsonEquals(name, "special.wildcardWithExtendBound.expected.json", result);
     }
 
-
     @Test
     public void testCollection_Wildcard() throws IOException, JSONException {
         String name = SpecialCaseTestContainer.class.getName();

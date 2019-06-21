@@ -81,7 +81,7 @@ public class ParameterProcessor {
     private static Logger LOG = Logger.getLogger(ParameterProcessor.class);
 
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(DOTNAME_PARAMETER,
-                                                                                          DOTNAME_PARAMETERS));
+            DOTNAME_PARAMETERS));
 
     private final IndexView index;
     private final Function<AnnotationInstance, ParameterImpl> reader;
@@ -311,8 +311,8 @@ public class ParameterProcessor {
     }
 
     private ParameterProcessor(IndexView index,
-                               Function<AnnotationInstance, ParameterImpl> reader,
-                               List<AnnotationScannerExtension> extensions) {
+            Function<AnnotationInstance, ParameterImpl> reader,
+            List<AnnotationScannerExtension> extensions) {
         this.index = index;
         this.reader = reader;
         this.extensions = extensions;
@@ -324,21 +324,21 @@ public class ParameterProcessor {
      * {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters
      * are only applicable to the method-level in this component.
      *
-     * @param  index index of classes to be used for further introspection, if necessary
-     * @param  resourceClass the JAX-RS resource class
-     * @param  resourceMethod the JAX-RS resource method, annotated with one of the
-     *         JAX-RS HTTP annotations
-     * @param  reader callback method for a function producing {@link ParameterImpl} from a
-     *         {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
-     * @param  extensions scanner extensions
+     * @param index index of classes to be used for further introspection, if necessary
+     * @param resourceClass the JAX-RS resource class
+     * @param resourceMethod the JAX-RS resource method, annotated with one of the
+     *        JAX-RS HTTP annotations
+     * @param reader callback method for a function producing {@link ParameterImpl} from a
+     *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
+     * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
     public static ResourceParameters process(IndexView index,
-                                             ClassInfo resourceClass,
-                                             MethodInfo resourceMethod,
-                                             Function<AnnotationInstance, ParameterImpl> reader,
-                                             List<AnnotationScannerExtension> extensions) {
+            ClassInfo resourceClass,
+            MethodInfo resourceMethod,
+            Function<AnnotationInstance, ParameterImpl> reader,
+            List<AnnotationScannerExtension> extensions) {
 
         ResourceParameters parameters = new ResourceParameters();
         ParameterProcessor processor = new ParameterProcessor(index, reader, extensions);
@@ -354,27 +354,27 @@ public class ParameterProcessor {
 
         // Phase II - Read method argument @Parameter and JAX-RS *Param annotations
         resourceMethod.annotations()
-                      .stream()
-                      .filter(a -> !a.target().equals(resourceMethod))
-                      // TODO: Replace 'forEach' below with ".forEach(processor::readAnnotatedType);" once @Parameters no longer need to be supported on method arguments
-                      .forEach(annotation -> {
-                          /*
-                           * This condition exists to support @Parameters wrapper annotation
-                           * on method parameters until (if?) the MP-OAI TCK is changed.
-                           */
-                          if (openApiParameterAnnotations.contains(annotation.name())) {
-                              processor.readParameterAnnotation(annotation);
-                          } else {
-                              processor.readAnnotatedType(annotation);
-                          }
-                      });
+                .stream()
+                .filter(a -> !a.target().equals(resourceMethod))
+                // TODO: Replace 'forEach' below with ".forEach(processor::readAnnotatedType);" once @Parameters no longer need to be supported on method arguments
+                .forEach(annotation -> {
+                    /*
+                     * This condition exists to support @Parameters wrapper annotation
+                     * on method parameters until (if?) the MP-OAI TCK is changed.
+                     */
+                    if (openApiParameterAnnotations.contains(annotation.name())) {
+                        processor.readParameterAnnotation(annotation);
+                    } else {
+                        processor.readAnnotatedType(annotation);
+                    }
+                });
 
         // Phase III - Read method @Parameter(s) annotations
         resourceMethod.annotations()
-                      .stream()
-                      .filter(a -> a.target().equals(resourceMethod))
-                      .filter(a -> openApiParameterAnnotations.contains(a.name()))
-                      .forEach(processor::readParameterAnnotation);
+                .stream()
+                .filter(a -> a.target().equals(resourceMethod))
+                .filter(a -> openApiParameterAnnotations.contains(a.name()))
+                .forEach(processor::readParameterAnnotation);
 
         parameters.setOperationParameters(processor.getParameters());
         parameters.setOperationPath(processor.generatePath(resourceMethod, parameters.getOperationParameters()));
@@ -408,10 +408,10 @@ public class ParameterProcessor {
 
         if (matrixParams.size() > 0) {
             String matrixName = parameters.stream()
-                                          .filter(p -> p.getStyle() == Style.MATRIX)
-                                          .map(p -> p.getName())
-                                          .findFirst()
-                                          .orElse("");
+                    .filter(p -> p.getStyle() == Style.MATRIX)
+                    .map(p -> p.getName())
+                    .findFirst()
+                    .orElse("");
 
             // If it's empty, something went wrong
             if (matrixName.length() > 0) {
@@ -440,12 +440,12 @@ public class ParameterProcessor {
 
                 //Find a ParamContext style=matrix at this path
                 ParameterContext context = params.values()
-                                                 .stream()
-                                                 .filter(p -> p.oaiParam != null)
-                                                 .filter(p -> p.oaiParam.getStyle() == Style.MATRIX)
-                                                 .filter(p -> contextPath.equals(fullPathOf(p.target)))
-                                                 .findFirst()
-                                                 .orElse(null);
+                        .stream()
+                        .filter(p -> p.oaiParam != null)
+                        .filter(p -> p.oaiParam.getStyle() == Style.MATRIX)
+                        .filter(p -> contextPath.equals(fullPathOf(p.target)))
+                        .findFirst()
+                        .orElse(null);
 
                 if (context == null) {
                     /*
@@ -531,13 +531,13 @@ public class ParameterProcessor {
             if (param.getSchema() != null) {
                 //TODO: Test BV annotations on all target types
                 BeanValidationScanner.applyConstraints(context.target,
-                                                       param.getSchema(),
-                                                       param.getName(),
-                                                       (target, name) -> {
-                    if (param.getRequired() == null) {
-                        param.setRequired(Boolean.TRUE);
-                    }
-                });
+                        param.getSchema(),
+                        param.getName(),
+                        (target, name) -> {
+                            if (param.getRequired() == null) {
+                                param.setRequired(Boolean.TRUE);
+                            }
+                        });
 
                 if (param.getSchema().getDefaultValue() == null) {
                     param.getSchema().setDefaultValue(context.jaxRsDefaultValue);
@@ -550,9 +550,9 @@ public class ParameterProcessor {
         return parameters.isEmpty()
                 ? null
                 : parameters.stream()
-                            .sorted(Comparator.comparing(Parameter::getIn)
-                                              .thenComparing(Parameter::getName))
-                            .collect(Collectors.toList());
+                        .sorted(Comparator.comparing(Parameter::getIn)
+                                .thenComparing(Parameter::getName))
+                        .collect(Collectors.toList());
     }
 
     /**
@@ -593,15 +593,15 @@ public class ParameterProcessor {
             }
 
             BeanValidationScanner.applyConstraints(paramTarget,
-                                                   paramSchema,
-                                                   paramName,
-                                                   (target, name) -> {
-                List<String> requiredProperties = schema.getRequired();
+                    paramSchema,
+                    paramName,
+                    (target, name) -> {
+                        List<String> requiredProperties = schema.getRequired();
 
-                if (requiredProperties == null || !requiredProperties.contains(name)) {
-                    schema.addRequired(name);
-                }
-            });
+                        if (requiredProperties == null || !requiredProperties.contains(name)) {
+                            schema.addRequired(name);
+                        }
+                    });
 
             if (schema.getProperties() != null) {
                 paramSchema = mergeObjects(schema.getProperties().get(paramName), paramSchema);
@@ -615,7 +615,7 @@ public class ParameterProcessor {
      * {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}.
      *
      * @param parameter
-     *            the parameter to determine if ignored
+     *        the parameter to determine if ignored
      * @return true if the parameter should be ignored, false otherwise
      *
      * @see org.eclipse.microprofile.openapi.annotations.parameters.Parameter#name()
@@ -649,12 +649,12 @@ public class ParameterProcessor {
 
         if (paramIn == Parameter.In.HEADER && paramName != null) {
             switch (paramName.toUpperCase()) {
-            case "ACCEPT":
-            case "AUTHORIZATION":
-            case "CONTENT-TYPE":
-                return true;
-            default:
-                break;
+                case "ACCEPT":
+                case "AUTHORIZATION":
+                case "CONTENT-TYPE":
+                    return true;
+                default:
+                    break;
             }
         }
         return false;
@@ -682,9 +682,9 @@ public class ParameterProcessor {
                  */
                 for (AnnotationInstance nested : annotationValue.asNestedArray()) {
                     readAnnotatedType(AnnotationInstance.create(nested.name(),
-                                                                annotation.target(),
-                                                                nested.values()),
-                                      null);
+                            annotation.target(),
+                            nested.values()),
+                            null);
                 }
             }
         }
@@ -694,7 +694,7 @@ public class ParameterProcessor {
      * Read a single annotation that is either {@link @Parameter} or
      * one of the JAX-RS *Param annotations. The results are stored in the
      * private {@link #params} collection, depending on the type of parameter.
-
+     * 
      * @param annotation a parameter annotation to be read and processed
      */
     void readAnnotatedType(AnnotationInstance annotation) {
@@ -705,7 +705,7 @@ public class ParameterProcessor {
      * Read a single annotation that is either {@link @Parameter} or
      * one of the JAX-RS *Param annotations. The results are stored in the
      * private {@link #params} collection.
-
+     * 
      * @param annotation a parameter annotation to be read and processed
      * @param beanParamAnnotation
      */
@@ -716,11 +716,11 @@ public class ParameterProcessor {
             ParameterImpl oaiParam = reader.apply(annotation);
 
             readParameter(oaiParam.getName(),
-                          oaiParam.getIn(),
-                          oaiParam,
-                          null,
-                          null,
-                          annotation.target());
+                    oaiParam.getIn(),
+                    oaiParam,
+                    null,
+                    null,
+                    annotation.target());
         } else {
             JaxRsParameter jaxRsParam = JaxRsParameter.forName(name);
 
@@ -743,31 +743,31 @@ public class ParameterProcessor {
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 } else if (jaxRsParam.location != null) {
                     readParameter(paramName(annotation),
-                                  jaxRsParam.location,
-                                  null,
-                                  jaxRsParam,
-                                  getDefaultValue(target),
-                                  target);
+                            jaxRsParam.location,
+                            null,
+                            jaxRsParam,
+                            getDefaultValue(target),
+                            target);
                 } else if (target != null) {
                     // This is a @BeanParam
                     DotName targetName = null;
 
                     switch (target.kind()) {
-                    case FIELD:
-                        targetName = target.asField().type().name();
-                        break;
-                    case METHOD:
-                        List<Type> methodParams = target.asMethod().parameters();
-                        if (methodParams.size() == 1) {
-                            // This is a bean property setter
-                            targetName = methodParams.get(0).name();
-                        }
-                        break;
-                    case METHOD_PARAMETER:
-                        targetName = getMethodParameterType(target.asMethodParameter()).name();
-                        break;
-                    default:
-                        break;
+                        case FIELD:
+                            targetName = target.asField().type().name();
+                            break;
+                        case METHOD:
+                            List<Type> methodParams = target.asMethod().parameters();
+                            if (methodParams.size() == 1) {
+                                // This is a bean property setter
+                                targetName = methodParams.get(0).name();
+                            }
+                            break;
+                        case METHOD_PARAMETER:
+                            targetName = getMethodParameterType(target.asMethodParameter()).name();
+                            break;
+                        default:
+                            break;
                     }
 
                     if (targetName != null) {
@@ -801,21 +801,21 @@ public class ParameterProcessor {
         AnnotationTarget target = annotation.target();
 
         switch (target.kind()) {
-        case FIELD:
-            valueString = target.asField().name();
-            break;
-        case METHOD_PARAMETER:
-            valueString = target.asMethodParameter().name();
-            break;
-        case METHOD:
-            // This is a bean property setter
-            MethodInfo method = target.asMethod();
-            if (method.parameters().size() == 1) {
-                valueString = method.parameterName(0);
-            }
-            break;
-        default:
-            break;
+            case FIELD:
+                valueString = target.asField().name();
+                break;
+            case METHOD_PARAMETER:
+                valueString = target.asMethodParameter().name();
+                break;
+            case METHOD:
+                // This is a bean property setter
+                MethodInfo method = target.asMethod();
+                if (method.parameters().size() == 1) {
+                    valueString = method.parameterName(0);
+                }
+                break;
+            default:
+                break;
         }
 
         return valueString;
@@ -843,29 +843,29 @@ public class ParameterProcessor {
 
                 try {
                     switch (primitive) {
-                    case BOOLEAN:
-                        defaultValue = Boolean.parseBoolean(defaultValueString);
-                        break;
-                    case CHAR:
-                        if (defaultValueString.length() == 1) {
-                            defaultValue = defaultValueString.charAt(0);
-                        }
-                        break;
-                    case BYTE:
-                        byte[] bytes = defaultValueString.getBytes();
-                        if (bytes.length == 1) {
-                            defaultValue = bytes[0];
-                        }
-                        break;
-                    case SHORT:
-                    case INT:
-                    case LONG:
-                        defaultValue = Long.valueOf(defaultValueString);
-                        break;
-                    case FLOAT:
-                    case DOUBLE:
-                        defaultValue = Double.valueOf(defaultValueString);
-                        break;
+                        case BOOLEAN:
+                            defaultValue = Boolean.parseBoolean(defaultValueString);
+                            break;
+                        case CHAR:
+                            if (defaultValueString.length() == 1) {
+                                defaultValue = defaultValueString.charAt(0);
+                            }
+                            break;
+                        case BYTE:
+                            byte[] bytes = defaultValueString.getBytes();
+                            if (bytes.length == 1) {
+                                defaultValue = bytes[0];
+                            }
+                            break;
+                        case SHORT:
+                        case INT:
+                        case LONG:
+                            defaultValue = Long.valueOf(defaultValueString);
+                            break;
+                        case FLOAT:
+                        case DOUBLE:
+                            defaultValue = Double.valueOf(defaultValueString);
+                            break;
                     }
                 } catch (@SuppressWarnings("unused") Exception e) {
                     LOG.warnf("Value '%s' is not a valid %s default", defaultValueString, primitive.name().toLowerCase());
@@ -887,35 +887,35 @@ public class ParameterProcessor {
         String pathSegment = null;
 
         switch (target.kind()) {
-        case FIELD:
-            pathSegment = pathOf(target.asField().declaringClass());
-            break;
-        case METHOD: {
-            String methodPath = pathOf(target.asMethod());
-            String classPath = pathOf(target.asMethod().declaringClass());
+            case FIELD:
+                pathSegment = pathOf(target.asField().declaringClass());
+                break;
+            case METHOD: {
+                String methodPath = pathOf(target.asMethod());
+                String classPath = pathOf(target.asMethod().declaringClass());
 
-            if (methodPath.isEmpty()) {
-                pathSegment = classPath;
-            } else {
-                pathSegment = classPath + '/' + methodPath;
+                if (methodPath.isEmpty()) {
+                    pathSegment = classPath;
+                } else {
+                    pathSegment = classPath + '/' + methodPath;
+                }
+
+                break;
             }
+            case METHOD_PARAMETER: {
+                String methodPath = pathOf(target.asMethodParameter().method());
+                String classPath = pathOf(target.asMethodParameter().method().declaringClass());
 
-            break;
-        }
-        case METHOD_PARAMETER: {
-            String methodPath = pathOf(target.asMethodParameter().method());
-            String classPath = pathOf(target.asMethodParameter().method().declaringClass());
+                if (methodPath.isEmpty()) {
+                    pathSegment = classPath;
+                } else {
+                    pathSegment = classPath + '/' + methodPath;
+                }
 
-            if (methodPath.isEmpty()) {
-                pathSegment = classPath;
-            } else {
-                pathSegment = classPath + '/' + methodPath;
+                break;
             }
-
-            break;
-        }
-        default:
-            break;
+            default:
+                break;
         }
 
         return pathSegment;
@@ -925,7 +925,7 @@ public class ParameterProcessor {
      * Reads the {@link javax.ws.rs.Path @Path} annotation present on the
      * target and strips leading and trailing slashes.
      *
-     * @param  target target object
+     * @param target target object
      * @return value of the {@link javax.ws.rs.Path @Path} without
      *         leading/trailing slashes.
      */
@@ -933,14 +933,14 @@ public class ParameterProcessor {
         AnnotationInstance path = null;
 
         switch (target.kind()) {
-        case CLASS:
-            path = target.asClass().classAnnotation(DOTNAME_PATH);
-            break;
-        case METHOD:
-            path = target.asMethod().annotation(DOTNAME_PATH);
-            break;
-        default:
-            break;
+            case CLASS:
+                path = target.asClass().classAnnotation(DOTNAME_PATH);
+                break;
+            case METHOD:
+                path = target.asMethod().annotation(DOTNAME_PATH);
+                break;
+            default:
+                break;
         }
 
         if (path != null) {
@@ -975,21 +975,21 @@ public class ParameterProcessor {
         Type type = null;
 
         switch (target.kind()) {
-        case FIELD:
-            type = target.asField().type();
-            break;
-        case METHOD:
-            List<Type> methodParams = target.asMethod().parameters();
-            if (methodParams.size() == 1) {
-                // This is a bean property setter
-                type = methodParams.get(0);
-            }
-            break;
-        case METHOD_PARAMETER:
-            type = getMethodParameterType(target.asMethodParameter());
-            break;
-        default:
-            break;
+            case FIELD:
+                type = target.asField().type();
+                break;
+            case METHOD:
+                List<Type> methodParams = target.asMethod().parameters();
+                if (methodParams.size() == 1) {
+                    // This is a bean property setter
+                    type = methodParams.get(0);
+                }
+                break;
+            case METHOD_PARAMETER:
+                type = getMethodParameterType(target.asMethodParameter());
+                break;
+            default:
+                break;
         }
 
         return type;
@@ -998,22 +998,22 @@ public class ParameterProcessor {
     /**
      * Merges MP-OAI {@link Parameter}s and JAX-RS parameters for the same {@link In} and name.
      *
-     * @param name              name of the parameter specified by application
-     * @param location          location, given by
-     *                          {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
-     *                          or implied by the type of JAX-RS annotation used on the target
-     * @param oaiParam          scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
-     * @param jaxRsParam        Meta detail about the JAX-RS *Param being processed, if found.
+     * @param name name of the parameter specified by application
+     * @param location location, given by
+     *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
+     *        or implied by the type of JAX-RS annotation used on the target
+     * @param oaiParam scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
+     * @param jaxRsParam Meta detail about the JAX-RS *Param being processed, if found.
      * @param jaxRsDefaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
-     *                          annotation.
-     * @param target            target of the annotation
+     *        annotation.
+     * @param target target of the annotation
      */
     void readParameter(String name,
-                       In location,
-                       ParameterImpl oaiParam,
-                       JaxRsParameter jaxRsParam,
-                       Object jaxRsDefaultValue,
-                       AnnotationTarget target) {
+            In location,
+            ParameterImpl oaiParam,
+            JaxRsParameter jaxRsParam,
+            Object jaxRsDefaultValue,
+            AnnotationTarget target) {
 
         //TODO: Test to ensure @Parameter attributes override JAX-RS for the same parameter
         //      (unless @Parameter was already specified at a "lower" level)
@@ -1073,8 +1073,8 @@ public class ParameterProcessor {
      * @return previously-create {@link ParameterContext} or null, if none found.
      */
     ParameterContext getParameterContext(String name,
-                                         In location,
-                                         AnnotationTarget target) {
+            In location,
+            AnnotationTarget target) {
 
         ParameterContext context = params.get(new ParameterContextKey(name, location));
 
@@ -1150,22 +1150,22 @@ public class ParameterProcessor {
         boolean relevant = false;
 
         switch (target.kind()) {
-        case FIELD:
-            FieldInfo field = target.asField();
-            relevant = hasParameters(field.annotations());
-            break;
-        case METHOD_PARAMETER:
-            MethodParameterInfo param = target.asMethodParameter();
-            relevant = !isResourceMethod(param.method()) &&
-                    hasParameters(TypeUtil.getAnnotations(param));
-            break;
-        case METHOD:
-            MethodInfo method = target.asMethod();
-            relevant = !isResourceMethod(method) &&
-                    hasParameters(method.annotations());
-            break;
-        default:
-            break;
+            case FIELD:
+                FieldInfo field = target.asField();
+                relevant = hasParameters(field.annotations());
+                break;
+            case METHOD_PARAMETER:
+                MethodParameterInfo param = target.asMethodParameter();
+                relevant = !isResourceMethod(param.method()) &&
+                        hasParameters(TypeUtil.getAnnotations(param));
+                break;
+            case METHOD:
+                MethodInfo method = target.asMethod();
+                relevant = !isResourceMethod(method) &&
+                        hasParameters(method.annotations());
+                break;
+            default:
+                break;
         }
 
         return relevant;
@@ -1180,9 +1180,9 @@ public class ParameterProcessor {
      */
     static boolean isResourceMethod(MethodInfo method) {
         return method.annotations()
-                     .stream()
-                     .map(a -> a.name())
-                     .anyMatch(DOTNAME_JAXRS_HTTP_METHODS::contains);
+                .stream()
+                .map(a -> a.name())
+                .anyMatch(DOTNAME_JAXRS_HTTP_METHODS::contains);
     }
 
     /**
@@ -1193,8 +1193,8 @@ public class ParameterProcessor {
      */
     static boolean hasParameters(Collection<AnnotationInstance> annotations) {
         return annotations.stream()
-                          .map(a -> a.name())
-                          .anyMatch(ParameterProcessor::isParameter);
+                .map(a -> a.name())
+                .anyMatch(ParameterProcessor::isParameter);
     }
 
     static boolean isParameter(DotName annotationName) {

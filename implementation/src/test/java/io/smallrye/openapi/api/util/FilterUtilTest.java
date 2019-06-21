@@ -39,6 +39,7 @@ public class FilterUtilTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
+     * 
      * @param testResource
      * @throws IOException
      */
@@ -48,6 +49,7 @@ public class FilterUtilTest {
 
     /**
      * Compares two JSON strings.
+     * 
      * @param expected
      * @param actual
      * @throws JSONException
@@ -57,7 +59,9 @@ public class FilterUtilTest {
     }
 
     /**
-     * Test method for {@link FilterUtil#applyFilter(org.eclipse.microprofile.openapi.OASFilter, org.eclipse.microprofile.openapi.models.OpenAPI)}.
+     * Test method for
+     * {@link FilterUtil#applyFilter(org.eclipse.microprofile.openapi.OASFilter, org.eclipse.microprofile.openapi.models.OpenAPI)}.
+     * 
      * @throws Exception
      */
     @Test
@@ -89,6 +93,7 @@ public class FilterUtilTest {
                 openAPI.getInfo().setLicense(null);
                 openAPI.getInfo().setTitle("Updated API Title");
             }
+
             /**
              * @see org.eclipse.microprofile.openapi.OASFilter#filterPathItem(org.eclipse.microprofile.openapi.models.PathItem)
              */

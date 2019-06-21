@@ -86,21 +86,21 @@ public class BeanValidationScanner {
      * schema.
      *
      * @param target
-     *            the object from which to retrieve the constraint annotations
+     *        the object from which to retrieve the constraint annotations
      * @param schema
-     *            the schema to which the constraints will be applied
+     *        the schema to which the constraints will be applied
      * @param propertyKey
-     *            the name of the property in parentSchema that refers to the
-     *            schema
+     *        the name of the property in parentSchema that refers to the
+     *        schema
      * @param handler
-     *            the handler to be called when a
-     *            {@link javax.validation.constraints.NotNull @NotNull}
-     *            constraint is encountered.
+     *        the handler to be called when a
+     *        {@link javax.validation.constraints.NotNull @NotNull}
+     *        constraint is encountered.
      */
     public static void applyConstraints(AnnotationTarget target,
-                                        Schema schema,
-                                        String propertyKey,
-                                        RequirementHandler handler) {
+            Schema schema,
+            String propertyKey,
+            RequirementHandler handler) {
 
         SchemaType schemaType = schema.getType();
 
@@ -113,52 +113,52 @@ public class BeanValidationScanner {
         }
 
         switch (schemaType) {
-        case ARRAY:
-            INSTANCE.notNull(target, schema, propertyKey, handler);
-            INSTANCE.sizeArray(target, schema);
-            INSTANCE.notEmptyArray(target, schema);
-            break;
-        case BOOLEAN:
-            INSTANCE.notNull(target, schema, propertyKey, handler);
-            break;
-        case INTEGER:
-            INSTANCE.decimalMax(target, schema);
-            INSTANCE.decimalMin(target, schema);
-            INSTANCE.digits(target, schema);
-            INSTANCE.max(target, schema);
-            INSTANCE.min(target, schema);
-            INSTANCE.negative(target, schema);
-            INSTANCE.negativeOrZero(target, schema);
-            INSTANCE.notNull(target, schema, propertyKey, handler);
-            INSTANCE.positive(target, schema);
-            INSTANCE.positiveOrZero(target, schema);
-            break;
-        case NUMBER:
-            INSTANCE.decimalMax(target, schema);
-            INSTANCE.decimalMin(target, schema);
-            INSTANCE.digits(target, schema);
-            INSTANCE.max(target, schema);
-            INSTANCE.min(target, schema);
-            INSTANCE.negative(target, schema);
-            INSTANCE.negativeOrZero(target, schema);
-            INSTANCE.notNull(target, schema, propertyKey, handler);
-            INSTANCE.positive(target, schema);
-            INSTANCE.positiveOrZero(target, schema);
-            break;
-        case OBJECT:
-            INSTANCE.notNull(target, schema, propertyKey, handler);
-            INSTANCE.sizeObject(target, schema);
-            INSTANCE.notEmptyObject(target, schema);
-            break;
-        case STRING:
-            INSTANCE.decimalMax(target, schema);
-            INSTANCE.decimalMin(target, schema);
-            INSTANCE.digits(target, schema);
-            INSTANCE.notBlank(target, schema);
-            INSTANCE.notNull(target, schema, propertyKey, handler);
-            INSTANCE.sizeString(target, schema);
-            INSTANCE.notEmptyString(target, schema);
-            break;
+            case ARRAY:
+                INSTANCE.notNull(target, schema, propertyKey, handler);
+                INSTANCE.sizeArray(target, schema);
+                INSTANCE.notEmptyArray(target, schema);
+                break;
+            case BOOLEAN:
+                INSTANCE.notNull(target, schema, propertyKey, handler);
+                break;
+            case INTEGER:
+                INSTANCE.decimalMax(target, schema);
+                INSTANCE.decimalMin(target, schema);
+                INSTANCE.digits(target, schema);
+                INSTANCE.max(target, schema);
+                INSTANCE.min(target, schema);
+                INSTANCE.negative(target, schema);
+                INSTANCE.negativeOrZero(target, schema);
+                INSTANCE.notNull(target, schema, propertyKey, handler);
+                INSTANCE.positive(target, schema);
+                INSTANCE.positiveOrZero(target, schema);
+                break;
+            case NUMBER:
+                INSTANCE.decimalMax(target, schema);
+                INSTANCE.decimalMin(target, schema);
+                INSTANCE.digits(target, schema);
+                INSTANCE.max(target, schema);
+                INSTANCE.min(target, schema);
+                INSTANCE.negative(target, schema);
+                INSTANCE.negativeOrZero(target, schema);
+                INSTANCE.notNull(target, schema, propertyKey, handler);
+                INSTANCE.positive(target, schema);
+                INSTANCE.positiveOrZero(target, schema);
+                break;
+            case OBJECT:
+                INSTANCE.notNull(target, schema, propertyKey, handler);
+                INSTANCE.sizeObject(target, schema);
+                INSTANCE.notEmptyObject(target, schema);
+                break;
+            case STRING:
+                INSTANCE.decimalMax(target, schema);
+                INSTANCE.decimalMin(target, schema);
+                INSTANCE.digits(target, schema);
+                INSTANCE.notBlank(target, schema);
+                INSTANCE.notNull(target, schema, propertyKey, handler);
+                INSTANCE.sizeString(target, schema);
+                INSTANCE.notEmptyString(target, schema);
+                break;
         }
     }
 
@@ -447,9 +447,9 @@ public class BeanValidationScanner {
      * returns null.
      *
      * @param target
-     *            the object from which to retrieve the constraint annotation
+     *        the object from which to retrieve the constraint annotation
      * @param annotationName
-     *            name of the annotation
+     *        name of the annotation
      * @return the first occurrence of the named constraint if no groups or only
      *         the {@link Default} group is specified, or null
      */
@@ -466,15 +466,15 @@ public class BeanValidationScanner {
             Type[] groups = groupValue.asClassArray();
 
             switch (groups.length) {
-            case 0:
-                return constraint;
-            case 1:
-                if (groups[0].name().equals(BV_DEFAULT_GROUP)) {
+                case 0:
                     return constraint;
-                }
-                break;
-            default:
-                break;
+                case 1:
+                    if (groups[0].name().equals(BV_DEFAULT_GROUP)) {
+                        return constraint;
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 

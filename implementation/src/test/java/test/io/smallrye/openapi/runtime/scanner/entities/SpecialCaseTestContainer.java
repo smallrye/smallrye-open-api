@@ -15,10 +15,10 @@
  */
 package test.io.smallrye.openapi.runtime.scanner.entities;
 
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.apps.airlines.model.CreditCard;
 import org.eclipse.microprofile.openapi.apps.airlines.model.Flight;
-
-import java.util.List;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}

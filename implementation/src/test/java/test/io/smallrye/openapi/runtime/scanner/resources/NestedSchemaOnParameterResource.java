@@ -58,10 +58,9 @@ public class NestedSchemaOnParameterResource {
     @SuppressWarnings("unused")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @APIResponse(
-            responseCode = "200",
-            content = @Content(schema = @Schema(implementation = NestedParameterTestParent.class)))
-    public NestedParameterTestParent getHiddenResponse(@Parameter(name = "arg", in = ParameterIn.COOKIE) NestedParameterTestParent request) {
+    @APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NestedParameterTestParent.class)))
+    public NestedParameterTestParent getHiddenResponse(
+            @Parameter(name = "arg", in = ParameterIn.COOKIE) NestedParameterTestParent request) {
         return new NestedParameterTestParent();
     }
 }

@@ -45,7 +45,9 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public Paths addExtension(String name, Object value) {
-        if (value == null) { return this; }
+        if (value == null) {
+            return this;
+        }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }
@@ -72,11 +74,14 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Paths#addPathItem(java.lang.String, org.eclipse.microprofile.openapi.models.PathItem)
+     * @see org.eclipse.microprofile.openapi.models.Paths#addPathItem(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.PathItem)
      */
     @Override
     public Paths addPathItem(String name, PathItem item) {
-        if (item == null) { return this; }
+        if (item == null) {
+            return this;
+        }
         this.put(name, item);
         return this;
     }

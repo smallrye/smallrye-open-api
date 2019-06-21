@@ -15,14 +15,14 @@
  */
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-import io.smallrye.openapi.api.OpenApiConstants;
-import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
-import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.TypeUtil;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -33,13 +33,14 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
+import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -89,7 +90,7 @@ public class IgnoreResolver {
 
             if (annotationInstance != null) {
                 Boolean isHidden = JandexUtil.booleanValue(annotationInstance,
-                                                           OpenApiConstants.PROP_HIDDEN);
+                        OpenApiConstants.PROP_HIDDEN);
 
                 if (isHidden != null) {
                     return isHidden;

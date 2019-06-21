@@ -106,7 +106,8 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$SomeObject.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$DifferentObject.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$RequestBodyResource.class");
+        index(indexer,
+                "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$RequestBodyResource.class");
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(customSchemaRegistryConfig(), indexer.complete());
 
@@ -115,9 +116,9 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         printToConsole(result);
         assertJsonEquals("resource.testRequestBodyComponentGeneration.json", result);
     }
-    
+
     /**
-     * Example of a simple custom schema registry that has only UUID type schema. 
+     * Example of a simple custom schema registry that has only UUID type schema.
      */
     public static class MyCustomSchemaRegistry implements CustomSchemaRegistry {
 
@@ -133,11 +134,11 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
             schema.setExample("de8681db-b4d6-4c47-a428-4b959c1c8e9a");
             schemaRegistry.register(uuidType, schema);
         }
-        
+
     }
-    
+
     /**
-     * Creates a configuration that has defined a custom schema registry. 
+     * Creates a configuration that has defined a custom schema registry.
      * 
      * @return New configuration instance with {@link MyCustomSchemaRegistry}.
      */
@@ -178,7 +179,7 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
                 // Not needed for this test case
                 return Collections.emptyList();
             }
-            
+
         });
     }
 }

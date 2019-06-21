@@ -15,21 +15,22 @@
  */
 package io.smallrye.openapi.runtime.scanner;
 
+import static org.jboss.jandex.DotName.createSimple;
+
+import java.io.IOException;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.Test;
+
 import test.io.smallrye.openapi.runtime.scanner.entities.Bar;
 import test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList;
 import test.io.smallrye.openapi.runtime.scanner.entities.EnumContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.EnumRequiredContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContainer;
-
-import java.io.IOException;
-
-import static org.jboss.jandex.DotName.createSimple;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -133,7 +134,6 @@ public class ExpectationTests extends OpenApiDataObjectScannerTestBase {
         printToConsole(name, result);
         assertJsonEquals(name, "generic.withBounds.expected.json", result);
     }
-
 
     @Test
     public void genericFieldTest() throws IOException, JSONException {

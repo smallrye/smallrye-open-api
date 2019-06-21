@@ -197,7 +197,9 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public Link addParameter(String name, Object parameter) {
-        if (parameter == null) { return this; }
+        if (parameter == null) {
+            return this;
+        }
         if (this.parameters == null) {
             this.parameters = new LinkedHashMap<>();
         }

@@ -15,9 +15,13 @@
  */
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ARRAY_TYPE_OBJECT;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.COLLECTION_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.OBJECT_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
@@ -27,12 +31,9 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ARRAY_TYPE_OBJECT;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.COLLECTION_TYPE;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_TYPE;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.OBJECT_TYPE;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Process {@link Type} instances.
@@ -53,11 +54,11 @@ public class TypeProcessor {
     private Type type;
 
     public TypeProcessor(AugmentedIndexView index,
-                         DataObjectDeque objectStack,
-                         DataObjectDeque.PathEntry parentPathEntry, TypeResolver typeResolver,
-                         Type type,
-                         Schema schema,
-                         AnnotationTarget annotationTarget) {
+            DataObjectDeque objectStack,
+            DataObjectDeque.PathEntry parentPathEntry, TypeResolver typeResolver,
+            Type type,
+            Schema schema,
+            AnnotationTarget annotationTarget) {
         this.objectStack = objectStack;
         this.typeResolver = typeResolver;
         this.parentPathEntry = parentPathEntry;

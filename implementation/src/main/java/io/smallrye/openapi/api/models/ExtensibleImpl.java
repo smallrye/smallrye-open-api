@@ -22,8 +22,9 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.Extensible;
 
 /**
- * Implementation of the {@link Extensible} OpenAPI model interface.  Base class for many of the
+ * Implementation of the {@link Extensible} OpenAPI model interface. Base class for many of the
  * OpenAPI models.
+ * 
  * @author eric.wittmann@gmail.com
  */
 public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensible<T>, ModelImpl {
@@ -44,7 +45,9 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
     @SuppressWarnings("unchecked")
     @Override
     public T addExtension(String name, Object value) {
-        if (value == null) { return (T) this; }
+        if (value == null) {
+            return (T) this;
+        }
         if (extensions == null) {
             this.extensions = new LinkedHashMap<>();
         }

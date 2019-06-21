@@ -38,7 +38,7 @@ public class JaxRsTest extends BaseTckTest<JaxRsTest.JaxRsTestArquillian> {
         @Deployment(name = "jaxrs")
         public static WebArchive createDeployment() {
             return ShrinkWrap.create(WebArchive.class, "airlines.war")
-                    .addPackages(true, new String[]{"io.smallrye.openapi.tck.extra.jaxrs"});
+                    .addPackages(true, new String[] { "io.smallrye.openapi.tck.extra.jaxrs" });
         }
 
         @RunAsClient

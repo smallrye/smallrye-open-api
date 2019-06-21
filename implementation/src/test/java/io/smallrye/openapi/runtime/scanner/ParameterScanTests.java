@@ -65,91 +65,90 @@ public class ParameterScanTests extends IndexScannerTestBase {
     @Test
     public void testIgnoredMpOpenApiHeaders() throws IOException, JSONException {
         test("params.ignored-mp-openapi-headers.json",
-             IgnoredMpOpenApiHeaderArgsTestResource.class,
-             Widget.class);
+                IgnoredMpOpenApiHeaderArgsTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testParameterOnMethod() throws IOException, JSONException {
         test("params.parameter-on-method.json",
-             ParameterOnMethodTestResource.class,
-             Widget.class);
+                ParameterOnMethodTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testParameterOnField() throws IOException, JSONException {
         test("params.parameter-on-field.json",
-             ResourcePathParamTestResource.class,
-             Widget.class);
+                ResourcePathParamTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testParameterInBeanFromField() throws IOException, JSONException {
         test("params.parameter-in-bean-from-field.json",
-             ParameterInBeanFromFieldTestResource.class,
-             ParameterInBeanFromFieldTestResource.Bean.class,
-             Widget.class);
+                ParameterInBeanFromFieldTestResource.class,
+                ParameterInBeanFromFieldTestResource.Bean.class,
+                Widget.class);
     }
 
     @Test
     public void testParameterInBeanFromSetter() throws IOException, JSONException {
         test("params.parameter-in-bean-from-setter.json",
-             ParameterInBeanFromSetterTestResource.class,
-             ParameterInBeanFromSetterTestResource.Bean.class,
-             Widget.class);
+                ParameterInBeanFromSetterTestResource.class,
+                ParameterInBeanFromSetterTestResource.Bean.class,
+                Widget.class);
     }
 
     @Test
     public void testPathParamWithFormParams() throws IOException, JSONException {
         test("params.path-param-with-form-params.json",
-             PathParamWithFormParamsTestResource.class,
-             Widget.class);
+                PathParamWithFormParamsTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testMultipleContentTypesWithFormParams() throws IOException, JSONException {
         test("params.multiple-content-types-with-form-params.json",
-             MultipleContentTypesWithFormParamsTestResource.class,
-             Widget.class);
+                MultipleContentTypesWithFormParamsTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testParametersInConstructor() throws IOException, JSONException {
         test("params.parameters-in-constructor.json",
-             ParametersInConstructorTestResource.class,
-             ParametersInConstructorTestResource.Bean.class,
-             Widget.class);
+                ParametersInConstructorTestResource.class,
+                ParametersInConstructorTestResource.Bean.class,
+                Widget.class);
     }
 
     @Test
     public void testMatrixParamsOnResourceMethodArgs() throws IOException, JSONException {
         test("params.matrix-params-on-resource-method-args.json",
-             MatrixParamsOnResourceMethodArgsTestResource.class,
-             Widget.class);
+                MatrixParamsOnResourceMethodArgsTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testMatrixParamsOnResourceMethodCustomName() throws IOException, JSONException {
         test("params.matrix-params-on-resource-method-custom-name.json",
-             MatrixParamsOnResourceMethodCustomNameTestResource.class,
-             Widget.class);
+                MatrixParamsOnResourceMethodCustomNameTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testMatrixParamsOnMethodAndFieldArgs() throws IOException, JSONException {
         test("params.matrix-params-on-method-and-field-args.json",
-             MatrixParamsOnMethodAndFieldArgsTestResource.class,
-             Widget.class);
+                MatrixParamsOnMethodAndFieldArgsTestResource.class,
+                Widget.class);
     }
 
     @Test
     public void testAllTheParams() throws IOException, JSONException {
         test("params.all-the-params.json",
-             AllTheParamsTestResource.class,
-             AllTheParamsTestResource.Bean.class,
-             Widget.class);
+                AllTheParamsTestResource.class,
+                AllTheParamsTestResource.Bean.class,
+                Widget.class);
     }
-
 
     /***************** Test models and resources below. ***********************/
 
@@ -164,9 +163,9 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.APPLICATION_JSON)
         @SuppressWarnings("unused")
         public Widget get(@HeaderParam("Authorization") String auth,
-                          @HeaderParam("Content-Type") String contentType,
-                          @HeaderParam("Accept") String accept,
-                          @HeaderParam("X-Custom-Header") String custom) {
+                @HeaderParam("Content-Type") String contentType,
+                @HeaderParam("Accept") String accept,
+                @HeaderParam("X-Custom-Header") String custom) {
             return null;
         }
     }
@@ -179,7 +178,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Parameter(name = "X-Custom-Header", in = ParameterIn.HEADER, required = true)
         @Parameter(name = "id", in = ParameterIn.PATH)
         public Widget get(@HeaderParam("X-Custom-Header") String custom,
-                          @PathParam("id") @DefaultValue("000") String id) {
+                @PathParam("id") @DefaultValue("000") String id) {
             return null;
         }
     }
@@ -267,9 +266,8 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Path("/widgets/create")
         @Consumes(MediaType.APPLICATION_JSON)
         @Operation(operationId = "createWidget")
-        public void createWidget(@RequestBody(
-                required = true,
-                content = @Content(schema = @Schema(implementation = Widget.class))) final Widget w) {
+        public void createWidget(
+                @RequestBody(required = true, content = @Content(schema = @Schema(implementation = Widget.class))) final Widget w) {
         }
 
         @POST
@@ -292,10 +290,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         private Bean param;
 
         public ParametersInConstructorTestResource(
-                @Parameter(
-                        name = "h1",
-                        in = ParameterIn.HEADER,
-                        description = "Description of h1") @HeaderParam("h1") @Deprecated String h1,
+                @Parameter(name = "h1", in = ParameterIn.HEADER, description = "Description of h1") @HeaderParam("h1") @Deprecated String h1,
                 @Parameter(name = "h2", in = ParameterIn.HEADER, hidden = true) @HeaderParam("h2") String h2,
                 @Parameter(name = "q1", deprecated = true) @QueryParam("q1") String q1,
                 @NotNull @CookieParam("c1") String c1,
@@ -320,7 +315,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Path("/anotherpathsegment/reloaded/")
         @Produces(MediaType.APPLICATION_JSON)
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") String m1,
-                          @MatrixParam("m2") @Size(min = 20) String m2) {
+                @MatrixParam("m2") @Size(min = 20) String m2) {
             return null;
         }
     }
@@ -334,13 +329,9 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Parameter(
-                name = "r1",
-                in = ParameterIn.PATH,
-                style = ParameterStyle.MATRIX,
-                description = "Additional information for id2")
+        @Parameter(name = "r1", in = ParameterIn.PATH, style = ParameterStyle.MATRIX, description = "Additional information for id2")
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") String m1,
-                          @MatrixParam("m2") @Size(min = 20) String m2) {
+                @MatrixParam("m2") @Size(min = 20) String m2) {
             return null;
         }
     }
@@ -361,12 +352,9 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @GET
         @Path("/seg1/seg2/resourceA")
         @Produces(MediaType.APPLICATION_JSON)
-        @Parameter(
-                in = ParameterIn.PATH,
-                name = "methodMatrix",
-                style = ParameterStyle.MATRIX)
+        @Parameter(in = ParameterIn.PATH, name = "methodMatrix", style = ParameterStyle.MATRIX)
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") int m1,
-                          @MatrixParam("m2") @DefaultValue("100") @Max(200) int m2) {
+                @MatrixParam("m2") @DefaultValue("100") @Max(200) int m2) {
             return null;
         }
     }
@@ -375,7 +363,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
     @SuppressWarnings("unused")
     static class AllTheParamsTestResource {
         public AllTheParamsTestResource(@PathParam("id1") int id1,
-                                        @org.jboss.resteasy.annotations.jaxrs.PathParam String id2) {
+                @org.jboss.resteasy.annotations.jaxrs.PathParam String id2) {
         }
 
         static class Bean {
@@ -401,16 +389,16 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
         public CompletionStage<Widget> upd(@FormParam("f1") @DefaultValue("42") int f1,
-                                           @org.jboss.resteasy.annotations.jaxrs.FormParam @DefaultValue("f2-default") @NotNull String f2,
-                                           @HeaderParam("h1") @Deprecated int h1,
-                                           @org.jboss.resteasy.annotations.jaxrs.HeaderParam("h2") String notH2) {
+                @org.jboss.resteasy.annotations.jaxrs.FormParam @DefaultValue("f2-default") @NotNull String f2,
+                @HeaderParam("h1") @Deprecated int h1,
+                @org.jboss.resteasy.annotations.jaxrs.HeaderParam("h2") String notH2) {
             return null;
         }
 
         @GET
         @Produces(MediaType.APPLICATION_JSON)
         public Widget get(@QueryParam("q1") @Deprecated long q1,
-                          @org.jboss.resteasy.annotations.jaxrs.QueryParam("q2") String notQ2) {
+                @org.jboss.resteasy.annotations.jaxrs.QueryParam("q2") String notQ2) {
             return null;
         }
     }

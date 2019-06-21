@@ -41,6 +41,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * Base class for all Tck tests.
+ * 
  * @author eric.wittmann@gmail.com
  */
 @SuppressWarnings("restriction")
@@ -103,6 +104,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
 
     /**
      * Calls the endpoint.
+     * 
      * @param format
      */
     protected ValidatableResponse doCallEndpoint(String format) {
@@ -112,7 +114,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
     }
 
     /**
-     * Returns an instance of the TCK test being run.  The subclass must implement
+     * Returns an instance of the TCK test being run. The subclass must implement
      * this so that the correct test delegate is created *and* its callEndpoint()
      * method can be properly overridden.
      */
@@ -120,7 +122,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
     public T getDelegate() {
         try {
             ParameterizedType ptype = (ParameterizedType) this.getClass().getGenericSuperclass();
-            Class cc = (Class)ptype.getActualTypeArguments()[0];
+            Class cc = (Class) ptype.getActualTypeArguments()[0];
             return (T) cc.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -128,7 +130,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
     }
 
     /**
-     * Arguments to pass to each of the test methods in the TCK test.  This is
+     * Arguments to pass to each of the test methods in the TCK test. This is
      * typically null (no arguments) but at least one test ( {@link FilterTest} )
      * has arguments to its methods.
      */

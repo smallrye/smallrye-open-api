@@ -47,6 +47,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
 
     /**
      * Constructor.
+     * 
      * @param config MicroProfile Config instance
      */
     public OpenApiConfigImpl(Config config) {
@@ -168,7 +169,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      */
     @Override
     public Set<String> operationServers(String operationId) {
-        String servers = getConfig().getOptionalValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class).orElse(null);
+        String servers = getConfig().getOptionalValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class)
+                .orElse(null);
         return asCsvSet(servers);
     }
 
@@ -178,7 +180,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public boolean scanDependenciesDisable() {
         if (scanDependenciesDisable == null) {
-            scanDependenciesDisable = getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class).orElse(false);
+            scanDependenciesDisable = getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class)
+                    .orElse(false);
         }
         return scanDependenciesDisable;
     }
@@ -198,7 +201,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public boolean schemaReferencesEnable() {
         if (schemaReferencesEnable == null) {
-            schemaReferencesEnable = getConfig().getOptionalValue(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.class).orElse(false);
+            schemaReferencesEnable = getConfig().getOptionalValue(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.class)
+                    .orElse(false);
         }
         return schemaReferencesEnable;
     }
@@ -206,7 +210,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String customSchemaRegistryClass() {
         if (customSchemaRegistryClass == null) {
-            customSchemaRegistryClass = getConfig().getOptionalValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class).orElse(null);
+            customSchemaRegistryClass = getConfig()
+                    .getOptionalValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class).orElse(null);
         }
         return customSchemaRegistryClass;
     }

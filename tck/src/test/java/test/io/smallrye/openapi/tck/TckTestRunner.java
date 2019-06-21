@@ -53,8 +53,8 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * A Junit 4 test runner used to quickly run the OpenAPI tck tests directly against the
- * {@link OpenApiDocument} without spinning up an MP compliant server.  This is not
- * a replacement for running the full OpenAPI TCK using Arquillian.  However, it runs
+ * {@link OpenApiDocument} without spinning up an MP compliant server. This is not
+ * a replacement for running the full OpenAPI TCK using Arquillian. However, it runs
  * much faster and does *most* of what we need for coverage.
  *
  * @author eric.wittmann@gmail.com
@@ -69,6 +69,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
 
     /**
      * Constructor.
+     * 
      * @param testClass
      * @throws InitializationError
      */
@@ -85,7 +86,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         try {
             IndexView index = ArchiveUtil.archiveToIndex(config, archive);
             OpenApiStaticFile staticFile = ArchiveUtil.archiveToStaticFile(archive);
-            
+
             // Reset and then initialize the OpenApiDocument for this test.
             OpenApiDocument.INSTANCE.reset();
             OpenApiDocument.INSTANCE.config(config);
@@ -94,7 +95,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
             OpenApiDocument.INSTANCE.modelFromReader(OpenApiProcessor.modelFromReader(config, getContextClassLoader()));
             OpenApiDocument.INSTANCE.filter(OpenApiProcessor.getFilter(config, getContextClassLoader()));
             OpenApiDocument.INSTANCE.initialize();
-            
+
             Assert.assertNotNull("Generated OAI document must not be null.", OpenApiDocument.INSTANCE.get());
 
             OPEN_API_DOCS.put(testClass, OpenApiDocument.INSTANCE.get());
@@ -134,12 +135,13 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
 
     /**
      * Figures out what TCK test is being run.
+     * 
      * @throws InitializationError
      */
     @SuppressWarnings("unchecked")
     private Class<? extends Arquillian> determineTckTestClass(Class<?> testClass) throws InitializationError {
         ParameterizedType ptype = (ParameterizedType) testClass.getGenericSuperclass();
-        Class cc = (Class)ptype.getActualTypeArguments()[0];
+        Class cc = (Class) ptype.getActualTypeArguments()[0];
         return cc;
     }
 
@@ -174,8 +176,8 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
     }
 
     /**
-     * Creates the delegate test instance.  This is done by instantiating the test itself
-     * and calling its "getDelegate()" method.  If no such method exists then an error
+     * Creates the delegate test instance. This is done by instantiating the test itself
+     * and calling its "getDelegate()" method. If no such method exists then an error
      * is thrown.
      */
     private Arquillian createDelegate(Object testObj) throws Exception {
@@ -206,11 +208,13 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
                 @Override
                 public void evaluate() throws Throwable {
                     try {
-                        Object [] args = (Object[]) child.getTest().getClass().getMethod("getTestArguments").invoke(child.getTest());
+                        Object[] args = (Object[]) child.getTest().getClass().getMethod("getTestArguments")
+                                .invoke(child.getTest());
                         child.getTestMethod().invoke(child.getDelegate(), args);
                     } catch (InvocationTargetException e) {
                         Throwable cause = e.getCause();
-                        org.testng.annotations.Test testAnno = child.getTestMethod().getAnnotation(org.testng.annotations.Test.class);
+                        org.testng.annotations.Test testAnno = child.getTestMethod()
+                                .getAnnotation(org.testng.annotations.Test.class);
                         Class[] expectedExceptions = testAnno.expectedExceptions();
                         if (expectedExceptions != null && expectedExceptions.length > 0) {
                             Class expectedException = expectedExceptions[0];
@@ -238,7 +242,8 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         if (System.getSecurityManager() == null) {
             return Thread.currentThread().getContextClassLoader();
         }
-        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
+        return AccessController
+                .doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
     }
 
 }

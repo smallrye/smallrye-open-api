@@ -15,13 +15,14 @@
  */
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import io.smallrye.openapi.api.OpenApiConstants;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
-import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
-import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.SchemaFactory;
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -29,13 +30,13 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import javax.validation.constraints.NotNull;
-
-import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
+import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.SchemaFactory;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Process annotation targets such as {@link FieldInfo}.
@@ -58,12 +59,12 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     private AnnotationTarget annotationTarget;
 
     public AnnotationTargetProcessor(AugmentedIndexView index,
-                                     DataObjectDeque objectStack,
-                                     DataObjectDeque.PathEntry parentPathEntry,
-                                     TypeResolver typeResolver,
-                                     AnnotationTarget annotationTarget,
-                                     String entityName,
-                                     Type entityType) {
+            DataObjectDeque objectStack,
+            DataObjectDeque.PathEntry parentPathEntry,
+            TypeResolver typeResolver,
+            AnnotationTarget annotationTarget,
+            String entityName,
+            Type entityType) {
         this.index = index;
         this.objectStack = objectStack;
         this.parentPathEntry = parentPathEntry;
@@ -75,35 +76,35 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     public AnnotationTargetProcessor(AugmentedIndexView index,
-                                     DataObjectDeque objectStack,
-                                     TypeResolver typeResolver,
-                                     DataObjectDeque.PathEntry parentPathEntry,
-                                     FieldInfo fieldInfo) {
+            DataObjectDeque objectStack,
+            TypeResolver typeResolver,
+            DataObjectDeque.PathEntry parentPathEntry,
+            FieldInfo fieldInfo) {
         this(index, objectStack, parentPathEntry, typeResolver, fieldInfo, fieldInfo.name(), fieldInfo.type());
     }
 
     public AnnotationTargetProcessor(AugmentedIndexView index,
-                                     DataObjectDeque objectStack,
-                                     TypeResolver typeResolver,
-                                     DataObjectDeque.PathEntry parentPathEntry,
-                                     Type type) {
+            DataObjectDeque objectStack,
+            TypeResolver typeResolver,
+            DataObjectDeque.PathEntry parentPathEntry,
+            Type type) {
         this(index, objectStack, parentPathEntry, typeResolver, index.getClass(type), type.name().toString(), type);
     }
 
     public static Schema process(AugmentedIndexView index,
-                          DataObjectDeque objectStack,
-                          TypeResolver typeResolver,
-                          DataObjectDeque.PathEntry parentPathEntry,
-                          FieldInfo field) {
+            DataObjectDeque objectStack,
+            TypeResolver typeResolver,
+            DataObjectDeque.PathEntry parentPathEntry,
+            FieldInfo field) {
         AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, objectStack, typeResolver, parentPathEntry, field);
         return fp.processField();
     }
 
     public static Schema process(AugmentedIndexView index,
-                                 DataObjectDeque objectStack,
-                                 TypeResolver typeResolver,
-                                 DataObjectDeque.PathEntry parentPathEntry,
-                                 Type type) {
+            DataObjectDeque objectStack,
+            TypeResolver typeResolver,
+            DataObjectDeque.PathEntry parentPathEntry,
+            Type type) {
         AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, objectStack, typeResolver, parentPathEntry, type);
         return fp.processField();
     }
@@ -154,7 +155,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         if (key == null) {
             AnnotationInstance jsonbAnnotation = TypeUtil.getAnnotation(annotationTarget,
-                                                                        OpenApiConstants.DOTNAME_JSONB_PROPERTY);
+                    OpenApiConstants.DOTNAME_JSONB_PROPERTY);
             if (jsonbAnnotation != null) {
                 key = JandexUtil.stringValue(jsonbAnnotation, OpenApiConstants.PROP_VALUE);
 
@@ -183,7 +184,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
 
         // Type could be replaced (e.g. generics).
-        TypeProcessor typeProcessor = new TypeProcessor(index, objectStack, parentPathEntry, typeResolver, entityType, fieldSchema, annotationTarget);
+        TypeProcessor typeProcessor = new TypeProcessor(index, objectStack, parentPathEntry, typeResolver, entityType,
+                fieldSchema, annotationTarget);
 
         Type postProcessedField = typeProcessor.processType();
         fieldSchema = typeProcessor.getSchema();
@@ -202,7 +204,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     private void readUnannotatedField() {
         LOG.debugv("Processing unannotated field {0}", entityType);
 
-        TypeProcessor typeProcessor = new TypeProcessor(index, objectStack, parentPathEntry, typeResolver, entityType, fieldSchema, annotationTarget);
+        TypeProcessor typeProcessor = new TypeProcessor(index, objectStack, parentPathEntry, typeResolver, entityType,
+                fieldSchema, annotationTarget);
 
         Type postProcessedField = typeProcessor.processType();
         fieldSchema = typeProcessor.getSchema();

@@ -35,9 +35,9 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
      * with the name and type of the param.
      *
      * @param method
-     *            MethodInfo
+     *        MethodInfo
      * @param idx
-     *            index of parameter
+     *        index of parameter
      * @return JaxRsParameterInfo or null if unknown.
      */
     @Deprecated
@@ -51,7 +51,7 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
      * <code>X</code>
      *
      * @param type
-     *            the type to unwrap if it is a supported async type
+     *        the type to unwrap if it is a supported async type
      * @return the resolved type or null if not supported
      */
     public Type resolveAsyncType(Type type) {
@@ -60,6 +60,7 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
 
     /**
      * Gives a chance to extensions to process the set of jax-rs application classes.
+     * 
      * @param scanner the scanner used for application scanning
      * @param applications the set of jax-rs application classes
      */

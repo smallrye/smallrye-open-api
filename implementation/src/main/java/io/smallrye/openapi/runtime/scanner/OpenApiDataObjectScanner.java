@@ -15,14 +15,10 @@
  */
 package io.smallrye.openapi.runtime.scanner;
 
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
-import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
-import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
-import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
-import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
-import io.smallrye.openapi.runtime.util.SchemaFactory;
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
@@ -36,22 +32,26 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
+import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
+import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.util.SchemaFactory;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Explores the class graph from the provided root, creating an OpenAPI {@link Schema}
  * from the entities encountered.
- *<p>
+ * <p>
  * A depth first search is performed, with the following precedence (high to low):
  * <ol>
- *   <li>Explicitly provided attributes/overrides on <tt>@Schema</tt> annotated elements.
- *       Note that some attributes have special behaviours: for example, <tt>ref</tt> is mutually
- *       exclusive, and <tt>implementation</tt> replaces the implementation entirely.</li>
- *   <li>Unannotated fields unless property <tt>openapi.infer-unannotated-types</tt> set false</li>
- *   <li>Inferred attributes, such as name, type, format, etc.</li>
+ * <li>Explicitly provided attributes/overrides on <tt>@Schema</tt> annotated elements.
+ * Note that some attributes have special behaviours: for example, <tt>ref</tt> is mutually
+ * exclusive, and <tt>implementation</tt> replaces the implementation entirely.</li>
+ * <li>Unannotated fields unless property <tt>openapi.infer-unannotated-types</tt> set false</li>
+ * <li>Inferred attributes, such as name, type, format, etc.</li>
  * </ol>
  *
  * <p>
@@ -106,7 +106,7 @@ public class OpenApiDataObjectScanner {
      * <p>
      * Call {@link #process()} to build and return the {@link Schema}.
      *
-     * @param _index    index of types to scan
+     * @param _index index of types to scan
      * @param classType root to begin scan
      */
     public OpenApiDataObjectScanner(IndexView _index, Type classType) {
@@ -134,7 +134,7 @@ public class OpenApiDataObjectScanner {
      * Build a Schema with ClassType as root.
      *
      * @param index index of types to scan
-     * @param type  root to begin scan
+     * @param type root to begin scan
      * @return the OAI schema
      */
     public static Schema process(IndexView index, Type type) {
@@ -232,7 +232,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private Schema readKlass(ClassInfo currentClass,
-                             Schema currentSchema) {
+            Schema currentSchema) {
         AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(currentClass);
         if (annotation != null) {
             // Because of implementation= field, *may* return a new schema rather than modify.

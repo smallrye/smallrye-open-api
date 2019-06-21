@@ -1,7 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 /**
- * A simple registry that allows users to provide a custom schema for some types. 
+ * A simple registry that allows users to provide a custom schema for some types.
  *
  * @author michael.schnell@fuin.org
  */

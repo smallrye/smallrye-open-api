@@ -26,7 +26,7 @@ import test.io.smallrye.openapi.tck.TckTest;
  */
 @TckTest
 public class OASFactoryErrorTckTest extends BaseTckTest<OASFactoryErrorTest> {
-    
+
     /**
      * @see test.io.smallrye.openapi.tck.BaseTckTest#getTestArguments()
      */

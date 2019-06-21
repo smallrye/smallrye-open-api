@@ -16,6 +16,8 @@
 
 package io.smallrye.openapi.runtime.util;
 
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,7 +26,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import io.smallrye.openapi.api.OpenApiConstants;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -37,11 +38,12 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import static java.util.stream.Collectors.toList;
+import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 
 /**
  * Some utility methods for working with Jandex objects.
+ * 
  * @author eric.wittmann@gmail.com
  */
 public class JandexUtil {
@@ -51,6 +53,7 @@ public class JandexUtil {
 
     /**
      * Simple enum to indicate the type of a $ref being read/written.
+     * 
      * @author eric.wittmann@gmail.com
      */
     public enum RefType {
@@ -80,6 +83,7 @@ public class JandexUtil {
     /**
      * Reads a string property named "ref" value from the given annotation and converts it
      * to a value appropriate for setting on a model's "$ref" property.
+     * 
      * @param annotation AnnotationInstance
      * @param refType RefType
      * @return String value
@@ -106,8 +110,9 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a String property value from the given annotation instance.  If no value is found
+     * Reads a String property value from the given annotation instance. If no value is found
      * this will return null.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return String value
@@ -122,8 +127,9 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a Boolean property value from the given annotation instance.  If no value is found
+     * Reads a Boolean property value from the given annotation instance. If no value is found
      * this will return null.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return Boolean value
@@ -138,8 +144,9 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a Boolean property from the given annotation instance.  If no value is found
+     * Reads a Boolean property from the given annotation instance. If no value is found
      * this will return false.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return Boolean value
@@ -150,8 +157,9 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a Double property value from the given annotation instance.  If no value is found
+     * Reads a Double property value from the given annotation instance. If no value is found
      * this will return null.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return BigDecimal value
@@ -167,12 +175,14 @@ public class JandexUtil {
         if (value.kind() == AnnotationValue.Kind.STRING) {
             return new BigDecimal(value.asString());
         }
-        throw new RuntimeException("Call to bigDecimalValue failed because the annotation property was not a double or a String.");
+        throw new RuntimeException(
+                "Call to bigDecimalValue failed because the annotation property was not a double or a String.");
     }
 
     /**
-     * Reads a Integer property value from the given annotation instance.  If no value is found
+     * Reads a Integer property value from the given annotation instance. If no value is found
      * this will return null.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return Integer value
@@ -187,8 +197,9 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a String array property value from the given annotation instance.  If no value is found
+     * Reads a String array property value from the given annotation instance. If no value is found
      * this will return null.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return List of Strings
@@ -203,8 +214,9 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a String property value from the given annotation instance.  If no value is found
+     * Reads a String property value from the given annotation instance. If no value is found
      * this will return null.
+     * 
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @param clazz Class type of the Enum
@@ -233,8 +245,9 @@ public class JandexUtil {
     }
 
     /**
-     * Returns true if the given annotation instance is a "ref".  An annotation is a ref if it has
+     * Returns true if the given annotation instance is a "ref". An annotation is a ref if it has
      * a non-null value for the "ref" property.
+     * 
      * @param annotation AnnotationInstance
      * @return Whether it's a "ref"
      */
@@ -243,8 +256,9 @@ public class JandexUtil {
     }
 
     /**
-     * Returns true if the given annotation is void of any values (and thus is "empty").  An example
+     * Returns true if the given annotation is void of any values (and thus is "empty"). An example
      * of this would be if a jax-rs method were annotated with @Tag()
+     * 
      * @param annotation AnnotationInstance
      * @return Whether it's empty
      */
@@ -253,8 +267,9 @@ public class JandexUtil {
     }
 
     /**
-     * Gets a single class annotation from the given class.  Returns null if no matching annotation
+     * Gets a single class annotation from the given class. Returns null if no matching annotation
      * is found.
+     * 
      * @param ct ClassInfo
      * @param name DotName
      * @return AnnotationInstance
@@ -273,8 +288,9 @@ public class JandexUtil {
     }
 
     /**
-     * Use the jandex index to find all jax-rs resource classes.  This is done by searching for
+     * Use the jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.
+     * 
      * @param index IndexView
      * @return Collection of ClassInfo's
      */
@@ -301,6 +317,7 @@ public class JandexUtil {
 
     /**
      * Returns all annotations configured for a single parameter of a method.
+     * 
      * @param method MethodInfo
      * @param paramPosition parameter position
      * @return List of AnnotationInstance's
@@ -317,8 +334,9 @@ public class JandexUtil {
     }
 
     /**
-     * Gets the name of an item from its ref.  For example, the ref might be "#/components/parameters/departureDate"
+     * Gets the name of an item from its ref. For example, the ref might be "#/components/parameters/departureDate"
      * which would result in a name of "departureDate".
+     * 
      * @param annotation AnnotationInstance
      * @return Name of item from ref
      */
@@ -328,9 +346,10 @@ public class JandexUtil {
     }
 
     /**
-     * Many OAI annotations can either be found singly or as a wrapped array.  This method will
-     * look for both and return a list of all found.  Both the single and wrapper annotation names
+     * Many OAI annotations can either be found singly or as a wrapped array. This method will
+     * look for both and return a list of all found. Both the single and wrapper annotation names
      * must be provided.
+     * 
      * @param method MethodInfo
      * @param singleAnnotationName DotName
      * @param repeatableAnnotationName DotName
@@ -353,9 +372,10 @@ public class JandexUtil {
     }
 
     /**
-     * Many OAI annotations can either be found singly or as a wrapped array.  This method will
-     * look for both and return a list of all found.  Both the single and wrapper annotation names
+     * Many OAI annotations can either be found singly or as a wrapped array. This method will
+     * look for both and return a list of all found. Both the single and wrapper annotation names
      * must be provided.
+     * 
      * @param clazz ClassInfo
      * @param singleAnnotationName DotName
      * @param repeatableAnnotationName DotName
@@ -381,6 +401,7 @@ public class JandexUtil {
 
     /**
      * Returns the class type of the method parameter at the given position.
+     * 
      * @param method MethodInfo
      * @param position parameter position
      * @return Type
@@ -403,7 +424,8 @@ public class JandexUtil {
 
     /**
      * Go through the method parameters looking for one that is not annotated with a jax-rs
-     * annotation.  That will be the one that is the request body.
+     * annotation. That will be the one that is the request body.
+     * 
      * @param method MethodInfo
      * @param extensions available extensions
      * @return Type
@@ -438,7 +460,8 @@ public class JandexUtil {
 
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
-     * method.  Returns null if not found.
+     * method. Returns null if not found.
+     * 
      * @param method
      * @param parameterIndex
      * @param annotationName
@@ -456,8 +479,9 @@ public class JandexUtil {
     }
 
     /**
-     * Returns true if the given @Schema annotation is a simple class schema.  This means that
+     * Returns true if the given @Schema annotation is a simple class schema. This means that
      * the annotation only has one field defined, and that field is "implementation".
+     * 
      * @param annotation AnnotationInstance
      * @return Is it a simple class @Schema
      */
@@ -467,9 +491,10 @@ public class JandexUtil {
     }
 
     /**
-     * Returns true if the given @Schema annotation is a simple array schema.  This is defined
+     * Returns true if the given @Schema annotation is a simple array schema. This is defined
      * as a schema with only a "type" field and "implementation" field defined *and* the type must
      * be array.
+     * 
      * @param annotation AnnotationInstance
      * @return Is it a simple array @Schema
      */
@@ -478,15 +503,16 @@ public class JandexUtil {
         if (values.size() != 2) {
             return false;
         }
-        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type =
-                JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
+        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = JandexUtil.enumValue(annotation,
+                OpenApiConstants.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
         String implementation = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_IMPLEMENTATION);
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY && implementation != null);
     }
 
     /**
-     * Holds relevant information about a jax-rs method parameter.  Specifically its name
+     * Holds relevant information about a jax-rs method parameter. Specifically its name
      * and type (path, query, cookie, etc).
+     * 
      * @author eric.wittmann@gmail.com
      */
     @Deprecated

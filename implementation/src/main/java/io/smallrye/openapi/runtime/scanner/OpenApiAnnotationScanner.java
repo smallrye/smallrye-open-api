@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import javax.ws.rs.core.Application;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -116,8 +117,8 @@ import io.smallrye.openapi.runtime.util.SchemaFactory;
 
 /**
  * Scans a deployment (using the archive and jandex annotation index) for JAX-RS and
- * OpenAPI annotations.  These annotations, if found, are used to generate a valid
- * OpenAPI model.  For reference, see:
+ * OpenAPI annotations. These annotations, if found, are used to generate a valid
+ * OpenAPI model. For reference, see:
  *
  * https://github.com/eclipse/microprofile-open-api/blob/master/spec/src/main/asciidoc/microprofile-openapi-spec.adoc#annotations
  *
@@ -141,6 +142,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
+     * 
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      */
@@ -150,6 +152,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
+     * 
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      * @param extensions A set of extensions to scanning
@@ -161,8 +164,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Scan the deployment for relevant annotations.  Returns an OpenAPI data model that was
+     * Scan the deployment for relevant annotations. Returns an OpenAPI data model that was
      * built from those found annotations.
+     * 
      * @return OpenAPIImpl generated from scanning annotations
      */
     public OpenAPIImpl scan() {
@@ -179,7 +183,8 @@ public class OpenApiAnnotationScanner {
         getCustomSchemaRegistry().registerCustomSchemas(schemaRegistry);
 
         // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
-        Collection<ClassInfo> applications = this.index.getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
+        Collection<ClassInfo> applications = this.index
+                .getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
         for (ClassInfo classInfo : applications) {
             oai = MergeUtil.merge(oai, jaxRsApplicationToOpenApi(classInfo));
         }
@@ -215,9 +220,10 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Processes a JAX-RS {@link Application} and creates an {@link OpenAPI} model.  Performs
-     * annotation scanning and other processing.  Returns a model unique to that single JAX-RS
+     * Processes a JAX-RS {@link Application} and creates an {@link OpenAPI} model. Performs
+     * annotation scanning and other processing. Returns a model unique to that single JAX-RS
      * app.
+     * 
      * @param applicationClass
      */
     private OpenAPIImpl jaxRsApplicationToOpenApi(ClassInfo applicationClass) {
@@ -226,7 +232,8 @@ public class OpenApiAnnotationScanner {
 
         // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
         ////////////////////////////////////////
-        AnnotationInstance appPathAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_APPLICATION_PATH);
+        AnnotationInstance appPathAnno = JandexUtil.getClassAnnotation(applicationClass,
+                OpenApiConstants.DOTNAME_APPLICATION_PATH);
         if (appPathAnno == null) {
             appPathAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_PATH);
         }
@@ -239,7 +246,8 @@ public class OpenApiAnnotationScanner {
 
         // Get the @OpenAPIDefinition annotation and process it.
         ////////////////////////////////////////
-        AnnotationInstance openApiDefAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_OPEN_API_DEFINITION);
+        AnnotationInstance openApiDefAnno = JandexUtil.getClassAnnotation(applicationClass,
+                OpenApiConstants.DOTNAME_OPEN_API_DEFINITION);
         if (openApiDefAnno != null) {
             processDefinition(oai, openApiDefAnno);
         }
@@ -274,6 +282,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Processing a single JAX-RS resource class (annotated with @Path).
+     * 
      * @param openApi
      * @param resourceClass
      */
@@ -375,6 +384,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Process a single JAX-RS method to produce an OpenAPI Operation.
+     * 
      * @param openApi
      * @param resource
      * @param method
@@ -394,7 +404,8 @@ public class OpenApiAnnotationScanner {
         if (method.hasAnnotation(OpenApiConstants.DOTNAME_OPERATION)) {
             AnnotationInstance operationAnno = method.annotation(OpenApiConstants.DOTNAME_OPERATION);
             // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
-            if (operationAnno.value(OpenApiConstants.PROP_HIDDEN) != null && operationAnno.value(OpenApiConstants.PROP_HIDDEN).asBoolean()) {
+            if (operationAnno.value(OpenApiConstants.PROP_HIDDEN) != null
+                    && operationAnno.value(OpenApiConstants.PROP_HIDDEN).asBoolean()) {
                 return;
             }
 
@@ -501,7 +512,8 @@ public class OpenApiAnnotationScanner {
         // Process any @RequestBody annotation
         /////////////////////////////////////////
         // note: the @RequestBody annotation can be found on a method argument *or* on the method
-        List<AnnotationInstance> requestBodyAnnotations = JandexUtil.getRepeatableAnnotation(method, OpenApiConstants.DOTNAME_REQUEST_BODY, null);
+        List<AnnotationInstance> requestBodyAnnotations = JandexUtil.getRepeatableAnnotation(method,
+                OpenApiConstants.DOTNAME_REQUEST_BODY, null);
         for (AnnotationInstance annotation : requestBodyAnnotations) {
             RequestBody requestBody = readRequestBody(annotation);
             // TODO if the method argument type is Request, don't generate a Schema!
@@ -510,7 +522,8 @@ public class OpenApiAnnotationScanner {
             if (requestBody.getRef() == null && !ModelUtil.requestBodyHasSchema(requestBody)) {
                 Type requestBodyType = null;
                 if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
-                    requestBodyType = JandexUtil.getMethodParameterType(method, annotation.target().asMethodParameter().position());
+                    requestBodyType = JandexUtil.getMethodParameterType(method,
+                            annotation.target().asMethodParameter().position());
                 } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
                     requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
                 }
@@ -568,8 +581,8 @@ public class OpenApiAnnotationScanner {
         List<AnnotationInstance> securityRequirementAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_SECURITY_REQUIREMENT, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENTS);
         securityRequirementAnnotations.addAll(
-            JandexUtil.getRepeatableAnnotation(resource, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENT, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENTS)
-        );
+                JandexUtil.getRepeatableAnnotation(resource, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENT,
+                        OpenApiConstants.DOTNAME_SECURITY_REQUIREMENTS));
         for (AnnotationInstance annotation : securityRequirementAnnotations) {
             SecurityRequirement requirement = readSecurityRequirement(annotation);
             if (requirement != null) {
@@ -662,13 +675,15 @@ public class OpenApiAnnotationScanner {
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
         String path = makePath(this.currentAppPath, params.getOperationPath());
 
-        /*if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
-            AnnotationInstance pathAnno = method.annotation(OpenApiConstants.DOTNAME_PATH);
-            String methodPath = pathAnno.value().asString();
-            path = makePath(this.currentAppPath, this.currentResourcePath, methodPath);
-        } else {
-            path = makePath(this.currentAppPath, this.currentResourcePath);
-        }*/
+        /*
+         * if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
+         * AnnotationInstance pathAnno = method.annotation(OpenApiConstants.DOTNAME_PATH);
+         * String methodPath = pathAnno.value().asString();
+         * path = makePath(this.currentAppPath, this.currentResourcePath, methodPath);
+         * } else {
+         * path = makePath(this.currentAppPath, this.currentResourcePath);
+         * }
+         */
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
@@ -683,8 +698,8 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Called when a jax-rs method's APIResponse annotations have all been processed but
-     * no response was actually created for the operation.  This method will create a response
-     * from the method information and add it to the given operation.  It will try to do this
+     * no response was actually created for the operation. This method will create a response
+     * from the method information and add it to the given operation. It will try to do this
      * by examining the method's return value and the type of operation (GET, PUT, POST, DELETE).
      *
      * If there is a return value of some kind (a non-void return type) then the response code
@@ -694,6 +709,7 @@ public class OpenApiAnnotationScanner {
      * depending on the type of request.
      *
      * TODO generate responses for each checked exception?
+     * 
      * @param method
      * @param operation
      */
@@ -736,6 +752,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Make a path out of a number of path segments.
+     * 
      * @param segments String paths
      * @return Path built from the segments
      */
@@ -763,6 +780,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a OpenAPIDefinition annotation.
+     * 
      * @param openApi OpenAPIImpl
      * @param definitionAnno AnnotationInstance
      */
@@ -778,6 +796,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an Info annotation.
+     * 
      * @param infoAnno
      */
     private Info readInfo(AnnotationValue infoAnno) {
@@ -798,6 +817,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an Contact annotation.
+     * 
      * @param contactAnno
      */
     private Contact readContact(AnnotationValue contactAnno) {
@@ -815,6 +835,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an License annotation.
+     * 
      * @param licenseAnno
      */
     private License readLicense(AnnotationValue licenseAnno) {
@@ -830,8 +851,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads any Tag annotations.  The annotation
+     * Reads any Tag annotations. The annotation
      * value is an array of Tag annotations.
+     * 
      * @param tagAnnos
      */
     private List<Tag> readTags(AnnotationValue tagAnnos) {
@@ -851,6 +873,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single Tag annotation.
+     * 
      * @param tagAnno
      */
     private Tag readTag(AnnotationInstance tagAnno) {
@@ -866,7 +889,8 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads any Server annotations.  The annotation value is an array of Server annotations.
+     * Reads any Server annotations. The annotation value is an array of Server annotations.
+     * 
      * @param serverAnnos
      */
     private List<Server> readServers(AnnotationValue serverAnnos) {
@@ -884,6 +908,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single Server annotation.
+     * 
      * @param serverAnno
      */
     private Server readServer(AnnotationValue value) {
@@ -895,6 +920,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single Server annotation.
+     * 
      * @param serverAnno
      */
     private Server readServer(AnnotationInstance serverAnno) {
@@ -910,8 +936,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads an array of ServerVariable annotations, returning a new {@link ServerVariables} model.  The
+     * Reads an array of ServerVariable annotations, returning a new {@link ServerVariables} model. The
      * annotation value is an array of ServerVariable annotations.
+     * 
      * @param value
      * @return
      */
@@ -933,6 +960,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single ServerVariable annotation.
+     * 
      * @param serverVariableAnno
      */
     private ServerVariable readServerVariable(AnnotationInstance serverVariableAnno) {
@@ -948,8 +976,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads any SecurityRequirement annotations.  The annotation value is an array of
+     * Reads any SecurityRequirement annotations. The annotation value is an array of
      * SecurityRequirement annotations.
+     * 
      * @param value
      */
     private List<SecurityRequirement> readSecurity(AnnotationValue securityRequirementAnnos) {
@@ -970,6 +999,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single SecurityRequirement annotation.
+     * 
      * @param annotation
      */
     private SecurityRequirement readSecurityRequirement(AnnotationInstance annotation) {
@@ -989,6 +1019,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an ExternalDocumentation annotation.
+     * 
      * @param externalDocAnno
      */
     private ExternalDocumentation readExternalDocs(AnnotationValue externalDocAnno) {
@@ -1005,6 +1036,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads any Components annotations.
+     * 
      * @param componentsAnno
      */
     private Components readComponents(AnnotationValue componentsAnno) {
@@ -1029,6 +1061,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of Callback annotations.
+     * 
      * @param value
      */
     private Map<String, Callback> readCallbacks(AnnotationValue value) {
@@ -1052,6 +1085,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a Callback annotation into a model.
+     * 
      * @param annotation
      */
     private Callback readCallback(AnnotationInstance annotation) {
@@ -1067,8 +1101,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads the CallbackOperation annotations as a PathItem.  The annotation value
+     * Reads the CallbackOperation annotations as a PathItem. The annotation value
      * in this case is an array of CallbackOperation annotations.
+     * 
      * @param value
      */
     private PathItem readCallbackOperations(AnnotationValue value) {
@@ -1097,6 +1132,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single CallbackOperation annotation.
+     * 
      * @param operationAnno
      * @return
      */
@@ -1119,6 +1155,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an array of Parameter annotations into a list.
+     * 
      * @param value
      */
     private List<Parameter> readCallbackOperationParameters(AnnotationValue value) {
@@ -1139,6 +1176,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an array of APIResponse annotations into an {@link APIResponses} model.
+     * 
      * @param value
      */
     private APIResponses readCallbackOperationResponses(AnnotationValue value) {
@@ -1159,6 +1197,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of Example annotations.
+     * 
      * @param value
      */
     private Map<String, Example> readExamples(AnnotationValue value) {
@@ -1182,6 +1221,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a Example annotation into a model.
+     * 
      * @param annotation
      */
     private Example readExample(AnnotationInstance annotation) {
@@ -1200,6 +1240,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of Header annotations.
+     * 
      * @param value
      */
     private Map<String, Header> readHeaders(AnnotationValue value) {
@@ -1223,6 +1264,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a Header annotation into a model.
+     * 
      * @param annotation
      */
     private Header readHeader(AnnotationInstance annotation) {
@@ -1242,6 +1284,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of Link annotations.
+     * 
      * @param value
      */
     private Map<String, Link> readLinks(AnnotationValue value) {
@@ -1265,6 +1308,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a Link annotation into a model.
+     * 
      * @param annotation
      */
     private Link readLink(AnnotationInstance annotation) {
@@ -1285,6 +1329,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an array of LinkParameter annotations into a map.
+     * 
      * @param value
      */
     private Map<String, Object> readLinkParameters(AnnotationValue value) {
@@ -1305,6 +1350,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of Parameter annotations.
+     * 
      * @param value
      */
     private Map<String, Parameter> readParameters(AnnotationValue value) {
@@ -1331,6 +1377,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a Parameter annotation into a model.
+     * 
      * @param annotation
      */
     private ParameterImpl readParameter(AnnotationInstance annotation) {
@@ -1341,7 +1388,8 @@ public class OpenApiAnnotationScanner {
 
         ParameterImpl parameter = new ParameterImpl();
         parameter.setName(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME));
-        parameter.setIn(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_IN, org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
+        parameter.setIn(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_IN,
+                org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
 
         // Params can be hidden. Skip if that's the case.
         Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
@@ -1355,8 +1403,10 @@ public class OpenApiAnnotationScanner {
         parameter.setRequired(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_REQUIRED));
         parameter.setDeprecated(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED));
         parameter.setAllowEmptyValue(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_ALLOW_EMPTY_VALUE));
-        parameter.setStyle(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_STYLE, org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
-        parameter.setExplode(readExplode(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_EXPLODE, org.eclipse.microprofile.openapi.annotations.enums.Explode.class)));
+        parameter.setStyle(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_STYLE,
+                org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
+        parameter.setExplode(readExplode(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_EXPLODE,
+                org.eclipse.microprofile.openapi.annotations.enums.Explode.class)));
         parameter.setAllowReserved(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_ALLOW_RESERVED));
         parameter.setSchema(SchemaFactory.readSchema(index, annotation.value(OpenApiConstants.PROP_SCHEMA)));
         parameter.setContent(readContent(annotation.value(OpenApiConstants.PROP_CONTENT), ContentDirection.Parameter));
@@ -1368,6 +1418,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Converts from an Explode enum to a true/false/null.
+     * 
      * @param enumValue
      */
     private Boolean readExplode(Explode enumValue) {
@@ -1381,8 +1432,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads a single Content annotation into a model.  The value in this case is an array of
+     * Reads a single Content annotation into a model. The value in this case is an array of
      * Content annotations.
+     * 
      * @param value
      */
     private Content readContent(AnnotationValue value, ContentDirection direction) {
@@ -1420,6 +1472,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single Content annotation into a {@link MediaType} model.
+     * 
      * @param nested
      */
     private MediaType readMediaType(AnnotationInstance annotation) {
@@ -1437,6 +1490,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an array of Encoding annotations as a Map.
+     * 
      * @param value
      */
     private Map<String, Encoding> readEncodings(AnnotationValue value) {
@@ -1457,6 +1511,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single Encoding annotation into a model.
+     * 
      * @param annotation
      */
     private Encoding readEncoding(AnnotationInstance annotation) {
@@ -1466,7 +1521,8 @@ public class OpenApiAnnotationScanner {
         LOG.debug("Processing a single @Encoding annotation.");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_CONTENT_TYPE));
-        encoding.setStyle(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_STYLE, org.eclipse.microprofile.openapi.models.media.Encoding.Style.class));
+        encoding.setStyle(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_STYLE,
+                org.eclipse.microprofile.openapi.models.media.Encoding.Style.class));
         encoding.setExplode(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_EXPLODE));
         encoding.setAllowReserved(JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_ALLOW_RESERVED));
         encoding.setHeaders(readHeaders(annotation.value(OpenApiConstants.PROP_HEADERS)));
@@ -1475,6 +1531,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of RequestBody annotations.
+     * 
      * @param value
      */
     private Map<String, RequestBody> readRequestBodies(AnnotationValue value) {
@@ -1498,6 +1555,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a RequestBody annotation into a model.
+     * 
      * @param value
      */
     private RequestBody readRequestBody(AnnotationValue value) {
@@ -1509,6 +1567,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a RequestBody annotation into a model.
+     * 
      * @param annotation
      */
     private RequestBody readRequestBody(AnnotationInstance annotation) {
@@ -1526,6 +1585,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of APIResponse annotations.
+     * 
      * @param value
      */
     private Map<String, APIResponse> readResponses(AnnotationValue value) {
@@ -1549,6 +1609,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a APIResponse annotation into a model.
+     * 
      * @param annotation
      */
     private APIResponse readResponse(AnnotationInstance annotation) {
@@ -1567,6 +1628,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a map of Schema annotations.
+     * 
      * @param value
      */
     private Map<String, Schema> readSchemas(AnnotationValue value) {
@@ -1586,30 +1648,31 @@ public class OpenApiAnnotationScanner {
             /*
              * The name is REQUIRED when the schema is defined within
              * {@link org.eclipse.microprofile.openapi.annotations.Components}.
-             * */
+             */
             if (name != null) {
                 map.put(name, SchemaFactory.readSchema(index, nested));
             } /*-
-            //For consideration - be more lenient and attempt to use the name from the implementation's @Schema?
-            else {
+              //For consideration - be more lenient and attempt to use the name from the implementation's @Schema?
+              else {
                 if (JandexUtil.isSimpleClassSchema(nested)) {
                     Schema schema = SchemaFactory.readClassSchema(index, nested.value(OpenApiConstants.PROP_IMPLEMENTATION), false);
-
+              
                     if (schema instanceof SchemaImpl) {
                         name = ((SchemaImpl) schema).getName();
-
+              
                         if (name != null) {
                             map.put(name, schema);
                         }
                     }
                 }
-            }*/
+              }*/
         }
         return map;
     }
 
     /**
      * Reads a map of SecurityScheme annotations.
+     * 
      * @param value
      */
     private Map<String, SecurityScheme> readSecuritySchemes(AnnotationValue value) {
@@ -1633,6 +1696,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a SecurityScheme annotation into a model.
+     * 
      * @param annotation
      */
     private SecurityScheme readSecurityScheme(AnnotationInstance annotation) {
@@ -1641,10 +1705,12 @@ public class OpenApiAnnotationScanner {
         }
         LOG.debug("Processing a single @SecurityScheme annotation.");
         SecurityScheme securityScheme = new SecuritySchemeImpl();
-        securityScheme.setType(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE, org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type.class));
+        securityScheme.setType(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE,
+                org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type.class));
         securityScheme.setDescription(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DESCRIPTION));
         securityScheme.setName(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_API_KEY_NAME));
-        securityScheme.setIn(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_IN, org.eclipse.microprofile.openapi.models.security.SecurityScheme.In.class));
+        securityScheme.setIn(JandexUtil.enumValue(annotation, OpenApiConstants.PROP_IN,
+                org.eclipse.microprofile.openapi.models.security.SecurityScheme.In.class));
         securityScheme.setScheme(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_SCHEME));
         securityScheme.setBearerFormat(JandexUtil.stringValue(annotation, OpenApiConstants.PROP_BEARER_FORMAT));
         securityScheme.setFlows(readOAuthFlows(annotation.value(OpenApiConstants.PROP_FLOWS)));
@@ -1655,6 +1721,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an OAuthFlows annotation into a model.
+     * 
      * @param value
      */
     private OAuthFlows readOAuthFlows(AnnotationValue value) {
@@ -1673,6 +1740,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads a single OAuthFlow annotation into a model.
+     * 
      * @param value
      */
     private OAuthFlow readOAuthFlow(AnnotationValue value) {
@@ -1691,6 +1759,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Reads an array of OAuthScope annotations into a Scopes model.
+     * 
      * @param value
      */
     private Scopes readOAuthScopes(AnnotationValue value) {
@@ -1711,8 +1780,9 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Reads an array of Extension annotations.  The AnnotationValue in this case is
-     * an array of Extension annotations.  These must be read and converted into a Map.
+     * Reads an array of Extension annotations. The AnnotationValue in this case is
+     * an array of Extension annotations. These must be read and converted into a Map.
+     * 
      * @param value
      */
     private Map<String, Object> readExtensions(AnnotationValue value) {
@@ -1730,13 +1800,13 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Parses an extension value.  The value may be:
+     * Parses an extension value. The value may be:
      *
-     *   - JSON object - starts with {
-     *   - JSON array - starts with [
-     *   - number
-     *   - boolean
-     *   - string
+     * - JSON object - starts with {
+     * - JSON array - starts with [
+     * - number
+     * - boolean
+     * - string
      *
      * @param value
      */
@@ -1765,21 +1835,31 @@ public class OpenApiAnnotationScanner {
             }
         }
         if (Character.isDigit(value.charAt(0)) || value.charAt(0) == '-' || value.charAt(0) == '+') {
-            try { return Integer.parseInt(value); } catch (Exception e) {}
-            try { return Float.parseFloat(value); } catch (Exception e) {}
-            try { return Double.parseDouble(value); } catch (Exception e) {}
+            try {
+                return Integer.parseInt(value);
+            } catch (Exception e) {
+            }
+            try {
+                return Float.parseFloat(value);
+            } catch (Exception e) {
+            }
+            try {
+                return Double.parseDouble(value);
+            } catch (Exception e) {
+            }
         }
         return value;
     }
 
-
     private CustomSchemaRegistry getCustomSchemaRegistry() {
         if (config == null || config.customSchemaRegistryClass() == null) {
             // Provide default implementation that does nothing
-            return (type) -> {};
+            return (type) -> {
+            };
         } else {
             try {
-                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader()).newInstance();
+                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader())
+                        .newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
                 throw new RuntimeException("Failed to create instance of custom schema registry: "
                         + config.customSchemaRegistryClass(), ex);
@@ -1791,16 +1871,20 @@ public class OpenApiAnnotationScanner {
         if (System.getSecurityManager() == null) {
             return Thread.currentThread().getContextClassLoader();
         }
-        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
+        return AccessController
+                .doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
     }
 
     /**
      * Simple enum to indicate whether an @Content annotation being processed is
      * an input or an output.
+     * 
      * @author eric.wittmann@gmail.com
      */
     private static enum ContentDirection {
-        Input, Output, Parameter
+        Input,
+        Output,
+        Parameter
     }
 
     public void setCurrentAppPath(String path) {

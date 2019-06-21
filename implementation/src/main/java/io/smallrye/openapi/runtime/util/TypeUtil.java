@@ -15,7 +15,18 @@
  */
 package io.smallrye.openapi.runtime.util;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -29,16 +40,7 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.WildcardType;
 
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import io.smallrye.openapi.api.OpenApiConstants;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -157,9 +159,9 @@ public class TypeUtil {
      * <p>
      * Attempts to work with both Jandex and using standard class.
      *
-     * @param index       Jandex index
+     * @param index Jandex index
      * @param testSubject type to test
-     * @param testObject  type to test against
+     * @param testObject type to test against
      * @return true if is of type
      */
     public static boolean isA(IndexView index, Type testSubject, Type testObject) {
@@ -229,7 +231,6 @@ public class TypeUtil {
         return TypeUtil.getBound(type.asWildcardType());
     }
 
-
     public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
         return getAnnotation(annotationTarget, OpenApiConstants.DOTNAME_SCHEMA);
     }
@@ -267,12 +268,12 @@ public class TypeUtil {
             case METHOD_PARAMETER:
                 MethodParameterInfo parameter = type.asMethodParameter();
                 return parameter
-                           .method()
-                           .annotations()
-                           .stream()
-                           .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                           .filter(a -> a.target().asMethodParameter().position() == parameter.position())
-                           .collect(Collectors.toList());
+                        .method()
+                        .annotations()
+                        .stream()
+                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .collect(Collectors.toList());
             case TYPE:
                 break;
         }
@@ -305,7 +306,7 @@ public class TypeUtil {
         private final DataFormat format;
 
         public TypeWithFormat(@NotNull SchemaType schemaType,
-                              @NotNull DataFormat format) {
+                @NotNull DataFormat format) {
             this.schemaType = schemaType;
             this.format = format;
         }
