@@ -48,6 +48,7 @@ public class RequestBodyTestApplication extends Application {
 
         @POST
         @Path("ref")
+        @Consumes
         public void testRef(@RequestBody(ref = "test") SomeObject body) {
             return;
         }
@@ -56,6 +57,13 @@ public class RequestBodyTestApplication extends Application {
         @Consumes(MediaType.APPLICATION_JSON)
         @Path("defaults")
         public void testDefaults(@RequestBody(required = true) SomeObject body) {
+            return;
+        }
+
+        @POST
+        @Path("any")
+        @Consumes
+        public void testAny(SomeObject body) {
             return;
         }
     }

@@ -164,7 +164,7 @@ public class ModelUtil {
         }
         Content content = parameter.getContent();
         if (content.isEmpty()) {
-            String[] defMediaTypes = OpenApiConstants.DEFAULT_PARAMETER_MEDIA_TYPES;
+            String[] defMediaTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             for (String mediaTypeName : defMediaTypes) {
                 MediaType mediaType = new MediaTypeImpl();
                 mediaType.setSchema(schema);
@@ -212,9 +212,11 @@ public class ModelUtil {
             requestBody.setContent(content);
         }
         if (content.isEmpty()) {
-            String[] requestBodyTypes = OpenApiConstants.DEFAULT_REQUEST_BODY_TYPES;
+            String[] requestBodyTypes;
             if (mediaTypes != null && mediaTypes.length > 0) {
                 requestBodyTypes = mediaTypes;
+            } else {
+                requestBodyTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             }
             for (String mediaTypeName : requestBodyTypes) {
                 MediaType mediaType = new MediaTypeImpl();

@@ -78,7 +78,12 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 // TODO: Treat PathSegment params as matrix parameters
 public class ParameterProcessor {
 
-    private static Logger LOG = Logger.getLogger(ParameterProcessor.class);
+    private static final Logger LOG = Logger.getLogger(ParameterProcessor.class);
+
+    private static Comparator<ParameterContextKey> parameterComparator = Comparator.comparing(ParameterContextKey::getLocation,
+            Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(ParameterContextKey::getName,
+                    Comparator.nullsLast(Comparator.reverseOrder()));
 
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(DOTNAME_PARAMETER,
             DOTNAME_PARAMETERS));
@@ -91,7 +96,7 @@ public class ParameterProcessor {
      * Collection of parameters scanned at the current level. This map contains
      * all parameter types except for form parameters and JAX-RS {@link javax.ws.rs.MatrixParam MatrixParam}s.
      */
-    private Map<ParameterContextKey, ParameterContext> params = new TreeMap<>();
+    private Map<ParameterContextKey, ParameterContext> params = new TreeMap<>(parameterComparator);
 
     /**
      * Collection of JAX-RS {@link javax.ws.rs.FormParam FormParam}s found during scanning.
@@ -251,7 +256,7 @@ public class ParameterProcessor {
      * @author Michael Edgar {@literal <michael@xlate.io>}
      *
      */
-    static class ParameterContextKey implements Comparable<ParameterContextKey> {
+    static class ParameterContextKey {
         String name;
         In location;
 
@@ -270,43 +275,12 @@ public class ParameterProcessor {
             return "name: " + name + "; in: " + location;
         }
 
-        @Override
-        public int compareTo(ParameterContextKey other) {
-            if (location == other.location) {
-                return compareName(other.name);
-            }
-
-            if (location == null && other.location != null) {
-                return -1;
-            }
-
-            if (location != null && other.location == null) {
-                return +1;
-            }
-
-            int result;
-
-            if ((result = location.compareTo(other.location)) != 0) {
-                return result;
-            }
-
-            return compareName(other.name);
+        public String getName() {
+            return name;
         }
 
-        private int compareName(String otherName) {
-            if (name == otherName) {
-                return 0;
-            }
-
-            if (name == null && otherName != null) {
-                return -1;
-            }
-
-            if (name != null && otherName == null) {
-                return +1;
-            }
-
-            return name.compareTo(otherName);
+        public In getLocation() {
+            return location;
         }
     }
 
@@ -694,7 +668,7 @@ public class ParameterProcessor {
      * Read a single annotation that is either {@link @Parameter} or
      * one of the JAX-RS *Param annotations. The results are stored in the
      * private {@link #params} collection, depending on the type of parameter.
-     * 
+     *
      * @param annotation a parameter annotation to be read and processed
      */
     void readAnnotatedType(AnnotationInstance annotation) {
@@ -705,7 +679,7 @@ public class ParameterProcessor {
      * Read a single annotation that is either {@link @Parameter} or
      * one of the JAX-RS *Param annotations. The results are stored in the
      * private {@link #params} collection.
-     * 
+     *
      * @param annotation a parameter annotation to be read and processed
      * @param beanParamAnnotation
      */

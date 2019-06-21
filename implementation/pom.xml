@@ -130,14 +130,32 @@
                         <SMALLRYE_MP_CONFIG_PROP>1234</SMALLRYE_MP_CONFIG_PROP>
                     </environmentVariables>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <!--
+                    TODO: Confirm if these are necessary
                     <enableAssertions>true</enableAssertions>
                     <argLine>-Xmx512m</argLine>
-                    <includes>
-                        <include>**/*TestCase.java</include>
-                    </includes>
                     <forkMode>once</forkMode>
+                    -->
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

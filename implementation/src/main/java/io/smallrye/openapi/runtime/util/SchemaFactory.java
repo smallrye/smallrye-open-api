@@ -63,7 +63,8 @@ public class SchemaFactory {
 
         // Schemas can be hidden. Skip if that's the case.
         Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
-        if (isHidden != null && isHidden == Boolean.TRUE) {
+
+        if (Boolean.TRUE.equals(isHidden)) {
             return null;
         }
 
@@ -81,7 +82,8 @@ public class SchemaFactory {
 
         // Schemas can be hidden. Skip if that's the case.
         Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
-        if (isHidden != null && isHidden == Boolean.TRUE) {
+
+        if (Boolean.TRUE.equals(isHidden)) {
             return schema;
         }
 
@@ -335,7 +337,7 @@ public class SchemaFactory {
                 if (schemaValue != null) {
                     ClassType schemaType = schemaValue.asClass().asClassType();
                     Schema schema = introspectClassToSchema(index, schemaType, true);
-                    schemaRef = schema.getRef();
+                    schemaRef = schema != null ? schema.getRef() : null;
                 } else {
                     schemaRef = null;
                 }

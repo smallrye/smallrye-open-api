@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.BeanParam;
@@ -85,8 +86,9 @@ public final class OpenApiConstants {
     public static final String EXTENSION_PROPERTY_PREFIX = "x-";
 
     private static final String MIME_ANY = "*/*";
-    public static final String[] DEFAULT_PARAMETER_MEDIA_TYPES = { MIME_ANY };
-    public static final String[] DEFAULT_REQUEST_BODY_TYPES = { MIME_ANY };
+    public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> {
+        return new String[] { MIME_ANY };
+    };
 
     public static final String PROP_TRACE = "trace";
     public static final String PROP_PATCH = "patch";
@@ -106,6 +108,7 @@ public final class OpenApiConstants {
     public static final String PROP_AUTHORIZATION_URL = "authorizationUrl";
     public static final String PROP_AUTHORIZATION_CODE = "authorizationCode";
     public static final String PROP_CLIENT_CREDENTIALS = "clientCredentials";
+    @SuppressWarnings("squid:S2068") // Instruct SonarCloud to ignore this as a potentially hard-coded credential
     public static final String PROP_PASSWORD = "password";
     public static final String PROP_IMPLICIT = "implicit";
     public static final String PROP_OPEN_ID_CONNECT_URL = "openIdConnectUrl";
@@ -285,9 +288,6 @@ public final class OpenApiConstants {
 
     public static final DotName DOTNAME_JSONB_PROPERTY = DotName.createSimple("javax.json.bind.annotation.JsonbProperty");
     public static final DotName DOTNAME_JSONB_TRANSIENT = DotName.createSimple("javax.json.bind.annotation.JsonbTransient");
-
-    public static final String[] DEFAULT_CONSUMES = new String[] { MIME_ANY };
-    public static final String[] DEFAULT_PRODUCES = new String[] { MIME_ANY };
 
     public static final String REF_PREFIX_API_RESPONSE = "#/components/responses/";
     public static final String REF_PREFIX_CALLBACK = "#/components/callbacks/";

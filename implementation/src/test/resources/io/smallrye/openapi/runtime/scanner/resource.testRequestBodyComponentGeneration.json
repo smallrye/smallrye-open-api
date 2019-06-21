@@ -36,6 +36,24 @@
         }
       }
     },
+    "/requestbodies/any": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SomeObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
     "/requestbodies/defaults": {
       "post": {
         "requestBody": {
