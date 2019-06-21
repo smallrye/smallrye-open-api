@@ -328,11 +328,14 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#addExample(java.lang.String, org.eclipse.microprofile.openapi.models.examples.Example)
+     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#addExample(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.examples.Example)
      */
     @Override
     public Parameter addExample(String key, Example example) {
-        if (example == null) { return this; }
+        if (example == null) {
+            return this;
+        }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }

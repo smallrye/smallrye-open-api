@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 public class IgnoreTestContainer {
     // Should ignore @JsonIgnoreProperty nominated properties for this instance only.
-    @JsonIgnoreProperties({"aLongProperty"})
+    @JsonIgnoreProperties({ "aLongProperty" })
     SimpleValues jipOnFieldTest;
 
     JsonIgnorePropertiesOnClassExample jipOnClassTest;

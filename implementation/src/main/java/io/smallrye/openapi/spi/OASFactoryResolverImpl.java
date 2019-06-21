@@ -88,7 +88,7 @@ import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 
 /**
- * An implementation of the OpenAPI 1.0 spec's {@link OASFactoryResolver}.  This class
+ * An implementation of the OpenAPI 1.0 spec's {@link OASFactoryResolver}. This class
  * is responsible for constructing vendor specific models given a {@link Constructible}
  * model interface.
  *

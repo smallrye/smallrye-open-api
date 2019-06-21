@@ -46,11 +46,11 @@ public class SchemaRegistry {
      * replace the registry in the current thread context with a new instance.
      *
      * @param config
-     *            current runtime configuration
+     *        current runtime configuration
      * @param oai
-     *            the OpenAPI being constructed by the scan
+     *        the OpenAPI being constructed by the scan
      * @param index
-     *            indexed class information
+     *        indexed class information
      * @return the registry
      */
     public static SchemaRegistry newInstance(OpenApiConfig config, OpenAPI oai, IndexView index) {
@@ -96,12 +96,12 @@ public class SchemaRegistry {
      * added.
      *
      * @param type
-     *            the {@link Type} the {@link Schema} applies to
+     *        the {@link Type} the {@link Schema} applies to
      * @param resolver
-     *            a {@link TypeResolver} that will be used to resolve
-     *            parameterized and wildcard types
+     *        a {@link TypeResolver} that will be used to resolve
+     *        parameterized and wildcard types
      * @param schema
-     *            {@link Schema} to add to the registry
+     *        {@link Schema} to add to the registry
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the give Type
      */
@@ -109,13 +109,13 @@ public class SchemaRegistry {
         Type resolvedType = resolver.getResolvedType(type);
 
         switch (resolvedType.kind()) {
-        case CLASS:
-        case PARAMETERIZED_TYPE:
-        case TYPE_VARIABLE:
-        case WILDCARD_TYPE:
-            break;
-        default:
-            return schema;
+            case CLASS:
+            case PARAMETERIZED_TYPE:
+            case TYPE_VARIABLE:
+            case WILDCARD_TYPE:
+                break;
+            default:
+                return schema;
         }
 
         SchemaRegistry registry = currentInstance();
@@ -129,7 +129,7 @@ public class SchemaRegistry {
         if (registry.has(key)) {
             schema = registry.lookupRef(key);
         } else if (registry.index.getClassByName(resolvedType.name()) == null) {
-            return schema;            
+            return schema;
         } else {
             schema = registry.register(key, schema);
         }
@@ -186,9 +186,9 @@ public class SchemaRegistry {
      * replaced by the schema given in this method.
      *
      * @param entityType
-     *            the type the {@link Schema} applies to
+     *        the type the {@link Schema} applies to
      * @param schema
-     *            {@link Schema} to add to the registry
+     *        {@link Schema} to add to the registry
      * @return a reference to the newly registered {@link Schema}
      */
     public Schema register(Type entityType, Schema schema) {
@@ -213,9 +213,9 @@ public class SchemaRegistry {
      * annotation with those found during the model scan.
      *
      * @param key
-     *            a value to be used for referencing the schema in the registry
+     *        a value to be used for referencing the schema in the registry
      * @param schema
-     *            {@link Schema} to add to the registry
+     *        {@link Schema} to add to the registry
      * @return a reference to the newly registered {@link Schema}
      */
     private Schema register(TypeKey key, Schema schema) {
@@ -304,20 +304,20 @@ public class SchemaRegistry {
             StringBuilder name = new StringBuilder(type.name().local());
 
             switch (type.kind()) {
-            case PARAMETERIZED_TYPE:
-                for (Type param : type.asParameterizedType().arguments()) {
-                    if (param.kind() == Type.Kind.WILDCARD_TYPE) {
-                        name.append(wildcardName(param.asWildcardType()));
-                    } else {
-                        name.append(param.name().local());
+                case PARAMETERIZED_TYPE:
+                    for (Type param : type.asParameterizedType().arguments()) {
+                        if (param.kind() == Type.Kind.WILDCARD_TYPE) {
+                            name.append(wildcardName(param.asWildcardType()));
+                        } else {
+                            name.append(param.name().local());
+                        }
                     }
-                }
-                break;
-            case WILDCARD_TYPE:
-                name.append(wildcardName(type.asWildcardType()));
-                break;
-            default:
-                break;
+                    break;
+                case WILDCARD_TYPE:
+                    name.append(wildcardName(type.asWildcardType()));
+                    break;
+                default:
+                    break;
             }
 
             return name.toString();

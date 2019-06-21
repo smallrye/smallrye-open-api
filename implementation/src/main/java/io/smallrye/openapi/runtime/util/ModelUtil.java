@@ -43,6 +43,7 @@ import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 
 /**
  * Class with some convenience methods useful for working with the OAI data model.
+ * 
  * @author eric.wittmann@gmail.com
  */
 public class ModelUtil {
@@ -54,7 +55,8 @@ public class ModelUtil {
     }
 
     /**
-     * Gets the {@link Components} from the OAI model.  If it doesn't exist, creates it.
+     * Gets the {@link Components} from the OAI model. If it doesn't exist, creates it.
+     * 
      * @param openApi OpenAPI
      * @return Components
      */
@@ -66,7 +68,8 @@ public class ModelUtil {
     }
 
     /**
-     * Gets the {@link Paths} from the OAI model.  If it doesn't exist, creates it.
+     * Gets the {@link Paths} from the OAI model. If it doesn't exist, creates it.
+     * 
      * @param openApi OpenAPI
      * @return Paths
      */
@@ -78,8 +81,9 @@ public class ModelUtil {
     }
 
     /**
-     * Gets the {@link APIResponses} child model from the given operation.  If it's null
+     * Gets the {@link APIResponses} child model from the given operation. If it's null
      * then it will be created and returned.
+     * 
      * @param operation Operation
      * @return APIResponses
      */
@@ -92,8 +96,9 @@ public class ModelUtil {
 
     /**
      * Returns true only if the given {@link Parameter} has a schema defined
-     * for it.  A schema can be defined either via the parameter's "schema"
+     * for it. A schema can be defined either via the parameter's "schema"
      * property, or any "content.*.schema" property.
+     * 
      * @param parameter Parameter
      * @return Whether the parameter has a schema
      */
@@ -138,13 +143,14 @@ public class ModelUtil {
     }
 
     /**
-     * Sets the given {@link Schema} on the given {@link Parameter}.  This is tricky
+     * Sets the given {@link Schema} on the given {@link Parameter}. This is tricky
      * because the paramater may EITHER have a schema property or it may have a
      * {@link Content} child which itself has zero or more {@link MediaType} children
      * which will contain the {@link Schema}.
      *
      * The OpenAPI specification requires that a parameter have *either* a schema
      * or a content, but not both.
+     * 
      * @param parameter Parameter
      * @param schema Schema
      */
@@ -174,8 +180,9 @@ public class ModelUtil {
 
     /**
      * Returns true only if the given {@link RequestBody} has a schema defined
-     * for it.  A schema would be found within the request body's Content/MediaType
+     * for it. A schema would be found within the request body's Content/MediaType
      * children.
+     * 
      * @param requestBody RequestBody
      * @return Whether RequestBody has a schema
      */
@@ -193,6 +200,7 @@ public class ModelUtil {
 
     /**
      * Sets the given {@link Schema} on the given {@link RequestBody}.
+     * 
      * @param requestBody RequestBody
      * @param schema Schema
      * @param mediaTypes String array
@@ -223,6 +231,7 @@ public class ModelUtil {
 
     /**
      * Returns true if the given operation has a parameter with the given name.
+     * 
      * @param operation Operation
      * @param name String
      * @return Whether the operation has a parameter
@@ -245,6 +254,7 @@ public class ModelUtil {
 
     /**
      * Returns the name component of the ref.
+     * 
      * @param ref String
      * @return Name
      */

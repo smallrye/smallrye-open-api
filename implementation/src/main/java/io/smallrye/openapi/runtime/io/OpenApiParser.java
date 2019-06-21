@@ -110,6 +110,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.
+ * 
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiParser {
@@ -127,12 +128,14 @@ public class OpenApiParser {
             ENCODING_STYLE_LOOKUP.put(style.toString(), style);
         }
 
-        org.eclipse.microprofile.openapi.models.parameters.Parameter.Style[] parameterStyleValues = org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.values();
+        org.eclipse.microprofile.openapi.models.parameters.Parameter.Style[] parameterStyleValues = org.eclipse.microprofile.openapi.models.parameters.Parameter.Style
+                .values();
         for (org.eclipse.microprofile.openapi.models.parameters.Parameter.Style style : parameterStyleValues) {
             PARAMETER_STYLE_LOOKUP.put(style.toString(), style);
         }
 
-        org.eclipse.microprofile.openapi.models.headers.Header.Style[] headerStyleValues = org.eclipse.microprofile.openapi.models.headers.Header.Style.values();
+        org.eclipse.microprofile.openapi.models.headers.Header.Style[] headerStyleValues = org.eclipse.microprofile.openapi.models.headers.Header.Style
+                .values();
         for (org.eclipse.microprofile.openapi.models.headers.Header.Style style : headerStyleValues) {
             HEADER_STYLE_LOOKUP.put(style.toString(), style);
         }
@@ -147,16 +150,18 @@ public class OpenApiParser {
             SECURITY_SCHEME_IN_LOOKUP.put(type.toString(), type);
         }
 
-        org.eclipse.microprofile.openapi.models.parameters.Parameter.In[] parameterIns = org.eclipse.microprofile.openapi.models.parameters.Parameter.In.values();
+        org.eclipse.microprofile.openapi.models.parameters.Parameter.In[] parameterIns = org.eclipse.microprofile.openapi.models.parameters.Parameter.In
+                .values();
         for (org.eclipse.microprofile.openapi.models.parameters.Parameter.In type : parameterIns) {
             PARAMETER_IN_LOOKUP.put(type.toString(), type);
         }
     }
 
     /**
-     * Parses the resource found at the given URL.  This method accepts resources
-     * either in JSON or YAML format.  It will parse the input and, assuming it is
+     * Parses the resource found at the given URL. This method accepts resources
+     * either in JSON or YAML format. It will parse the input and, assuming it is
      * valid, return an instance of {@link OpenAPI}.
+     * 
      * @param url URL to OpenAPI document
      * @return OpenAPIImpl parsed from URL
      * @throws IOException URL parameter is not found
@@ -176,7 +181,8 @@ public class OpenApiParser {
             boolean isJson = ext.equalsIgnoreCase("json");
             boolean isYaml = ext.equalsIgnoreCase("yaml") || ext.equalsIgnoreCase("yml");
             if (!isJson && !isYaml) {
-                throw new IOException("Invalid file extension for URL (expected json, yaml, or yml): " + url.toURI().toString());
+                throw new IOException(
+                        "Invalid file extension for URL (expected json, yaml, or yml): " + url.toURI().toString());
             }
 
             try (InputStream stream = url.openStream()) {
@@ -188,8 +194,9 @@ public class OpenApiParser {
     }
 
     /**
-     * Parses the resource found at the given stream.  The format of the stream must
+     * Parses the resource found at the given stream. The format of the stream must
      * be specified.
+     * 
      * @param stream InputStream containing an OpenAPI document
      * @param format Format of the stream
      * @return OpenAPIImpl parsed from the stream
@@ -212,6 +219,7 @@ public class OpenApiParser {
 
     /**
      * Constructor.
+     * 
      * @param tree JsonNode
      */
     public OpenApiParser(JsonNode tree) {
@@ -229,6 +237,7 @@ public class OpenApiParser {
 
     /**
      * Reads the root OpenAPI node.
+     * 
      * @param node
      * @param model
      */
@@ -246,6 +255,7 @@ public class OpenApiParser {
 
     /**
      * Reads an {@link Info} OpenAPI node.
+     * 
      * @param node
      */
     private Info readInfo(JsonNode node) {
@@ -265,6 +275,7 @@ public class OpenApiParser {
 
     /**
      * Reads an {@link Contact} OpenAPI node.
+     * 
      * @param node
      */
     private Contact readContact(JsonNode node) {
@@ -281,6 +292,7 @@ public class OpenApiParser {
 
     /**
      * Reads an {@link License} OpenAPI node.
+     * 
      * @param node
      */
     private License readLicense(JsonNode node) {
@@ -296,6 +308,7 @@ public class OpenApiParser {
 
     /**
      * Reads an {@link ExternalDocumentation} OpenAPI node.
+     * 
      * @param node
      */
     private ExternalDocumentation readExternalDocs(JsonNode node) {
@@ -311,6 +324,7 @@ public class OpenApiParser {
 
     /**
      * Reads a list of {@link Tag} OpenAPI nodes.
+     * 
      * @param node
      */
     private List<Tag> readTags(JsonNode node) {
@@ -332,6 +346,7 @@ public class OpenApiParser {
 
     /**
      * Reads a list of {@link Server} OpenAPI nodes.
+     * 
      * @param node
      */
     private List<Server> readServers(JsonNode node) {
@@ -353,6 +368,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link ServerVariables} OpenAPI node.
+     * 
      * @param node
      */
     private ServerVariables readServerVariables(JsonNode node) {
@@ -376,6 +392,7 @@ public class OpenApiParser {
 
     /**
      * Reads a list of {@link ServerVariable} OpenAPI nodes.
+     * 
      * @param node
      */
     private ServerVariable readServerVariable(JsonNode node) {
@@ -399,6 +416,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Paths} OpenAPI nodes.
+     * 
      * @param node
      */
     private Paths readPaths(JsonNode node) {
@@ -407,7 +425,7 @@ public class OpenApiParser {
         }
 
         PathsImpl model = new PathsImpl();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (fieldName.startsWith(OpenApiConstants.EXTENSION_PROPERTY_PREFIX)) {
                 continue;
@@ -420,6 +438,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Components} OpenAPI nodes.
+     * 
      * @param node
      */
     private Components readComponents(JsonNode node) {
@@ -443,6 +462,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Schema} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Schema> readSchemas(JsonNode node) {
@@ -450,7 +470,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Schema> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readSchema(childNode));
@@ -461,6 +481,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Schema} OpenAPI node.
+     * 
      * @param node
      */
     private Schema readSchema(JsonNode node) {
@@ -494,7 +515,8 @@ public class OpenApiParser {
         model.setNot(readSchema(node.get(OpenApiConstants.PROP_NOT)));
         model.setAllOf(readSchemaArray(node.get(OpenApiConstants.PROP_ALL_OF)));
         model.setProperties(readSchemas(node.get(OpenApiConstants.PROP_PROPERTIES)));
-        if (node.has(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES) && node.get(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES).isObject()) {
+        if (node.has(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES)
+                && node.get(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES).isObject()) {
             model.setAdditionalPropertiesSchema(readSchema(node.get(OpenApiConstants.PROP_ADDITIONAL_PROPERTIES)));
         } else {
             model.setAdditionalPropertiesBoolean(JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES));
@@ -516,6 +538,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link XML} OpenAPI node.
+     * 
      * @param node
      */
     private XML readXML(JsonNode node) {
@@ -535,6 +558,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Discriminator} OpenAPI node.
+     * 
      * @param node
      */
     private Discriminator readDiscriminator(JsonNode node) {
@@ -550,6 +574,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link APIResponse} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, APIResponse> readResponses(JsonNode node) {
@@ -557,7 +582,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, APIResponse> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readAPIResponse(childNode));
@@ -568,6 +593,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link APIResponse} OpenAPI node.
+     * 
      * @param node
      */
     private APIResponse readAPIResponse(JsonNode node) {
@@ -586,6 +612,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Content} OpenAPI node.
+     * 
      * @param node
      */
     private Content readContent(JsonNode node) {
@@ -593,7 +620,7 @@ public class OpenApiParser {
             return null;
         }
         ContentImpl model = new ContentImpl();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             model.addMediaType(fieldName, readMediaType(node.get(fieldName)));
         }
@@ -602,6 +629,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link MediaType} OpenAPI node.
+     * 
      * @param node
      * @return
      */
@@ -620,6 +648,7 @@ public class OpenApiParser {
 
     /**
      * Reads a map of {@link MediaType} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Encoding> readEncodings(JsonNode node) {
@@ -627,7 +656,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Encoding> encodings = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String name = fieldNames.next();
             encodings.put(name, readEncoding(node.get(name)));
         }
@@ -636,6 +665,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Encoding} OpenAPI node.
+     * 
      * @param node
      */
     private Encoding readEncoding(JsonNode node) {
@@ -654,6 +684,7 @@ public class OpenApiParser {
 
     /**
      * Reads an encoding style.
+     * 
      * @param node
      */
     private Style readEncodingStyle(JsonNode node) {
@@ -666,6 +697,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Parameter} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Parameter> readParameters(JsonNode node) {
@@ -673,7 +705,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Parameter> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readParameter(childNode));
@@ -684,6 +716,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Parameter} OpenAPI node.
+     * 
      * @param node
      */
     private Parameter readParameter(JsonNode node) {
@@ -712,6 +745,7 @@ public class OpenApiParser {
 
     /**
      * Reads a parameter style.
+     * 
      * @param node
      */
     private org.eclipse.microprofile.openapi.models.parameters.Parameter.Style readParameterStyle(JsonNode node) {
@@ -723,6 +757,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Example} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Example> readExamples(JsonNode node) {
@@ -730,7 +765,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Example> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readExample(childNode));
@@ -741,6 +776,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Example} OpenAPI node.
+     * 
      * @param node
      */
     private Example readExample(JsonNode node) {
@@ -759,6 +795,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link RequestBody} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, RequestBody> readRequestBodies(JsonNode node) {
@@ -766,7 +803,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, RequestBody> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readRequestBody(childNode));
@@ -777,6 +814,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link RequestBody} OpenAPI node.
+     * 
      * @param node
      */
     private RequestBody readRequestBody(JsonNode node) {
@@ -794,6 +832,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Header} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Header> readHeaders(JsonNode node) {
@@ -801,7 +840,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Header> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readHeader(childNode));
@@ -812,6 +851,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Header} OpenAPI node.
+     * 
      * @param node
      */
     private Header readHeader(JsonNode node) {
@@ -836,6 +876,7 @@ public class OpenApiParser {
 
     /**
      * Reads a header style.
+     * 
      * @param node
      */
     private org.eclipse.microprofile.openapi.models.headers.Header.Style readHeaderStyle(JsonNode node) {
@@ -847,6 +888,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link SecurityScheme} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, SecurityScheme> readSecuritySchemes(JsonNode node) {
@@ -854,7 +896,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, SecurityScheme> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readSecurityScheme(childNode));
@@ -865,6 +907,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link SecurityScheme} OpenAPI node.
+     * 
      * @param node
      */
     private SecurityScheme readSecurityScheme(JsonNode node) {
@@ -887,6 +930,7 @@ public class OpenApiParser {
 
     /**
      * Reads a security scheme type.
+     * 
      * @param node
      */
     private Type readSecuritySchemeType(JsonNode node) {
@@ -898,6 +942,7 @@ public class OpenApiParser {
 
     /**
      * Reads a security scheme 'in' property.
+     * 
      * @param node
      */
     private In readSecuritySchemeIn(JsonNode node) {
@@ -909,6 +954,7 @@ public class OpenApiParser {
 
     /**
      * Reads a parameter 'in' property.
+     * 
      * @param node
      */
     private org.eclipse.microprofile.openapi.models.parameters.Parameter.In readParameterIn(JsonNode node) {
@@ -920,6 +966,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link OAuthFlows} OpenAPI node.
+     * 
      * @param node
      */
     private OAuthFlows readOAuthFlows(JsonNode node) {
@@ -937,6 +984,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link OAuthFlow} OpenAPI node.
+     * 
      * @param node
      */
     private OAuthFlow readOAuthFlow(JsonNode node) {
@@ -954,6 +1002,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Scopes} OpenAPI node.
+     * 
      * @param node
      */
     private Scopes readScopes(JsonNode node) {
@@ -961,7 +1010,7 @@ public class OpenApiParser {
             return null;
         }
         ScopesImpl model = new ScopesImpl();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (fieldName.startsWith(OpenApiConstants.EXTENSION_PROPERTY_PREFIX)) {
                 continue;
@@ -975,6 +1024,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Link} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Link> readLinks(JsonNode node) {
@@ -982,7 +1032,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Link> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readLink(childNode));
@@ -993,6 +1043,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Link} OpenAPI node.
+     * 
      * @param node
      */
     private Link readLink(JsonNode node) {
@@ -1014,6 +1065,7 @@ public class OpenApiParser {
 
     /**
      * Reads the map of {@link Link} parameters.
+     * 
      * @param node
      */
     private Map<String, Object> readLinkParameters(JsonNode node) {
@@ -1021,7 +1073,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Object> rval = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             Object value = readObject(node.get(fieldName));
             rval.put(fieldName, value);
@@ -1031,6 +1083,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Server} OpenAPI node.
+     * 
      * @param node
      */
     private Server readServer(JsonNode node) {
@@ -1047,6 +1100,7 @@ public class OpenApiParser {
 
     /**
      * Reads the {@link Callback} OpenAPI nodes.
+     * 
      * @param node
      */
     private Map<String, Callback> readCallbacks(JsonNode node) {
@@ -1054,7 +1108,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, Callback> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode childNode = node.get(fieldName);
             models.put(fieldName, readCallback(childNode));
@@ -1065,6 +1119,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Callback} OpenAPI node.
+     * 
      * @param node
      */
     private Callback readCallback(JsonNode node) {
@@ -1073,9 +1128,10 @@ public class OpenApiParser {
         }
         CallbackImpl model = new CallbackImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (fieldName.startsWith(OpenApiConstants.EXTENSION_PROPERTY_PREFIX) || fieldName.equals(OpenApiConstants.PROP_$REF)) {
+            if (fieldName.startsWith(OpenApiConstants.EXTENSION_PROPERTY_PREFIX)
+                    || fieldName.equals(OpenApiConstants.PROP_$REF)) {
                 continue;
             }
             model.put(fieldName, readPathItem(node.get(fieldName)));
@@ -1086,6 +1142,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link PathItem} OpenAPI node.
+     * 
      * @param node
      */
     private PathItem readPathItem(JsonNode node) {
@@ -1112,6 +1169,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Operation} OpenAPI node.
+     * 
      * @param node
      */
     private Operation readOperation(JsonNode node) {
@@ -1137,6 +1195,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link APIResponses} OpenAPI node.
+     * 
      * @param node
      */
     private APIResponses readAPIResponses(JsonNode node) {
@@ -1145,7 +1204,7 @@ public class OpenApiParser {
         }
         APIResponsesImpl model = new APIResponsesImpl();
         model.setDefaultValue(readAPIResponse(node.get(OpenApiConstants.PROP_DEFAULT)));
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (OpenApiConstants.PROP_DEFAULT.equals(fieldName)) {
                 continue;
@@ -1157,6 +1216,7 @@ public class OpenApiParser {
 
     /**
      * Reads a list of {@link SecurityRequirement} OpenAPI nodes.
+     * 
      * @param node
      */
     private List<SecurityRequirement> readSecurityRequirements(JsonNode node) {
@@ -1173,6 +1233,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link APIResponses} OpenAPI node.
+     * 
      * @param node
      */
     private SecurityRequirement readSecurityRequirement(JsonNode node) {
@@ -1180,7 +1241,7 @@ public class OpenApiParser {
             return null;
         }
         SecurityRequirementImpl model = new SecurityRequirementImpl();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode scopesNode = node.get(fieldName);
             List<String> scopes = readStringArray(scopesNode);
@@ -1195,6 +1256,7 @@ public class OpenApiParser {
 
     /**
      * Reads a {@link Parameter} OpenAPI node.
+     * 
      * @param node
      */
     private List<Parameter> readParameterList(JsonNode node) {
@@ -1211,6 +1273,7 @@ public class OpenApiParser {
 
     /**
      * Reads a schema type.
+     * 
      * @param node
      */
     private SchemaType readSchemaType(JsonNode node) {
@@ -1223,6 +1286,7 @@ public class OpenApiParser {
 
     /**
      * Reads a string array.
+     * 
      * @param node
      */
     private List<String> readStringArray(JsonNode node) {
@@ -1241,6 +1305,7 @@ public class OpenApiParser {
 
     /**
      * Reads an object array.
+     * 
      * @param node
      */
     private List<Object> readObjectArray(JsonNode node) {
@@ -1259,6 +1324,7 @@ public class OpenApiParser {
 
     /**
      * Reads a list of schemas.
+     * 
      * @param node
      */
     private List<Schema> readSchemaArray(JsonNode node) {
@@ -1275,6 +1341,7 @@ public class OpenApiParser {
 
     /**
      * Reads a map of strings.
+     * 
      * @param node
      */
     private Map<String, String> readStringMap(JsonNode node) {
@@ -1282,7 +1349,7 @@ public class OpenApiParser {
             return null;
         }
         Map<String, String> rval = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext(); ) {
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             String value = JsonUtil.stringProperty(node, fieldName);
             rval.put(fieldName, value);
@@ -1291,9 +1358,10 @@ public class OpenApiParser {
     }
 
     /**
-     * Reads the node as a Java object.  This is typically expected to be a literal of
-     * some sort, as in the case of default values and examples.  The node may be anything
+     * Reads the node as a Java object. This is typically expected to be a literal of
+     * some sort, as in the case of default values and examples. The node may be anything
      * from a string to a javascript object.
+     * 
      * @param node
      */
     private Object readObject(JsonNode node) {
@@ -1334,7 +1402,7 @@ public class OpenApiParser {
         }
         if (node.isObject()) {
             Map<String, Object> items = new LinkedHashMap<>();
-            for (Iterator<Entry<String, JsonNode>> fields = node.fields(); fields.hasNext(); ) {
+            for (Iterator<Entry<String, JsonNode>> fields = node.fields(); fields.hasNext();) {
                 Entry<String, JsonNode> field = fields.next();
                 String fieldName = field.getKey();
                 Object fieldValue = readObject(field.getValue());
@@ -1347,6 +1415,7 @@ public class OpenApiParser {
 
     /**
      * Reads model extensions.
+     * 
      * @param node
      * @param model
      */

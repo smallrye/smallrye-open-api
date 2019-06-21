@@ -38,6 +38,7 @@ public class OpenApiParserAndSerializerTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
+     * 
      * @param testResource
      * @throws IOException
      */
@@ -47,6 +48,7 @@ public class OpenApiParserAndSerializerTest {
 
     /**
      * Compares two JSON strings.
+     * 
      * @param expected
      * @param actual
      * @throws JSONException
@@ -65,6 +67,7 @@ public class OpenApiParserAndSerializerTest {
 
     /**
      * Normalizes the YAML by removing any comments.
+     * 
      * @param yaml
      */
     private static String normalizeYaml(String yaml) {
@@ -86,6 +89,7 @@ public class OpenApiParserAndSerializerTest {
 
     /**
      * Performs a full round-trip parse+serialize test on a single resource.
+     * 
      * @param resource
      * @param format
      * @throws IOException

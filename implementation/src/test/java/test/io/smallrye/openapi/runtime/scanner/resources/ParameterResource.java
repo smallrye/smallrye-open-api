@@ -24,24 +24,17 @@ public class ParameterResource {
     @DELETE
     @Path("/unnamed")
     @APIResponse(responseCode = "204", description = "No content")
-    public Response deleteTaskWithoutParamName(@Parameter(
-            description = "The id of the task",
-            example = "e1cb23d0-6cbe-4a29",
-            schema = @Schema(
-                    type = SchemaType.STRING)) @PathParam("taskId") String taskId,
-                                               @QueryParam("nextTask") String nextTaskId) {
+    public Response deleteTaskWithoutParamName(
+            @Parameter(description = "The id of the task", example = "e1cb23d0-6cbe-4a29", schema = @Schema(type = SchemaType.STRING)) @PathParam("taskId") String taskId,
+            @QueryParam("nextTask") String nextTaskId) {
         return Response.noContent().build();
     }
 
     @DELETE
     @Path("/named")
     @APIResponse(responseCode = "204", description = "No content")
-    public Response deleteTaskWithParamName(@Parameter(
-            description = "The id of the task",
-            name = "notTaskId",
-            example = "e1cb23d0-6cbe-4a29",
-            schema = @Schema(
-                    type = SchemaType.STRING)) @PathParam("taskId") String taskId) {
+    public Response deleteTaskWithParamName(
+            @Parameter(description = "The id of the task", name = "notTaskId", example = "e1cb23d0-6cbe-4a29", schema = @Schema(type = SchemaType.STRING)) @PathParam("taskId") String taskId) {
         return Response.noContent().build();
     }
 }

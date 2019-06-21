@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-@JsonIgnoreProperties({"jsonIgnoreProperties1", "jsonIgnoreProperties2"})
+@JsonIgnoreProperties({ "jsonIgnoreProperties1", "jsonIgnoreProperties2" })
 public class JsonIgnorePropertiesOnClassExample {
     // Should be ignored by virtue of @JsonIgnoreProperties on class
     String jsonIgnoreProperties1;

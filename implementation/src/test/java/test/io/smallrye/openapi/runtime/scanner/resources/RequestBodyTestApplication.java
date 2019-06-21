@@ -23,15 +23,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.RequestBodyTestApplica
  *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-@OpenAPIDefinition(
-        info = @Info(title = "Test Request Body", version = "1.0"),
-        components = @Components(
-                requestBodies = @RequestBody(
-                        name = "test",
-                        content = @Content(
-                                mediaType = MediaType.APPLICATION_JSON,
-                                schema = @Schema(implementation = DifferentObject.class)),
-                        required = true)))
+@OpenAPIDefinition(info = @Info(title = "Test Request Body", version = "1.0"), components = @Components(requestBodies = @RequestBody(name = "test", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DifferentObject.class)), required = true)))
 public class RequestBodyTestApplication extends Application {
 
     public static class SomeObject {
@@ -49,11 +41,8 @@ public class RequestBodyTestApplication extends Application {
 
         @POST
         @Path("impl")
-        public void testImpl(@RequestBody(
-                content = @Content(
-                        mediaType = MediaType.APPLICATION_JSON,
-                        schema = @Schema(implementation = DifferentObject.class)),
-                required = true) SomeObject body) {
+        public void testImpl(
+                @RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DifferentObject.class)), required = true) SomeObject body) {
             return;
         }
 

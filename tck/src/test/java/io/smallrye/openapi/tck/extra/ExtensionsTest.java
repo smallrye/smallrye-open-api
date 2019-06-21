@@ -31,6 +31,7 @@ import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
+ * 
  * @author eric.wittmann@gmail.com
  */
 @TckTest
@@ -40,7 +41,7 @@ public class ExtensionsTest extends BaseTckTest<ExtensionsTest.ExtensionsTestArq
         @Deployment(name = "extensions")
         public static WebArchive createDeployment() {
             return ShrinkWrap.create(WebArchive.class, "airlines.war")
-                    .addPackages(true, new String[]{"io.smallrye.openapi.tck.extra.extensions"})
+                    .addPackages(true, new String[] { "io.smallrye.openapi.tck.extra.extensions" })
                     .addAsManifestResource("openapi.yaml", "openapi.yaml");
         }
 

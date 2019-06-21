@@ -120,14 +120,16 @@ public class IndexScannerTestBase {
         return OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON);
     }
 
-    public static void assertJsonEquals(String entityName, String expectedResource, Schema actual) throws JSONException, IOException {
+    public static void assertJsonEquals(String entityName, String expectedResource, Schema actual)
+            throws JSONException, IOException {
         URL resourceUrl = IndexScannerTestBase.class.getResource(expectedResource);
-        JSONAssert.assertEquals(loadResource(resourceUrl), schemaToString(entityName, actual),  true);
+        JSONAssert.assertEquals(loadResource(resourceUrl), schemaToString(entityName, actual), true);
     }
 
     public static void assertJsonEquals(String expectedResource, OpenAPI actual) throws JSONException, IOException {
         URL resourceUrl = IndexScannerTestBase.class.getResource(expectedResource);
-        JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, OpenApiSerializer.Format.JSON),  true);
+        JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, OpenApiSerializer.Format.JSON),
+                true);
     }
 
     public static String loadResource(URL testResource) throws IOException {

@@ -15,7 +15,12 @@
  */
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.ParameterizedType;
@@ -23,11 +28,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.TypeVariable;
 import org.jboss.logging.Logger;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -46,6 +47,7 @@ public class TypeResolver {
 
     /**
      * Resolve the type that was used to initially construct this {@link TypeResolver}
+     * 
      * @return the resolved type (if found)
      */
     public Type resolveType() {
@@ -54,6 +56,7 @@ public class TypeResolver {
 
     /**
      * Resolve a type against this {@link TypeResolver}'s resolution stack
+     * 
      * @param fieldType type to resolve
      * @return resolved type (if found)
      */

@@ -59,8 +59,8 @@ public class ExpectationWithRefsTests extends OpenApiDataObjectScannerTestBase {
     }
 
     private void testAssertion(Class<?> containerClass,
-                               String targetField,
-                               String expectedResourceName) throws IOException, JSONException {
+            String targetField,
+            String expectedResourceName) throws IOException, JSONException {
 
         String containerName = containerClass.getName();
         Type parentType = getFieldFromKlazz(containerName, targetField).type();
@@ -112,7 +112,8 @@ public class ExpectationWithRefsTests extends OpenApiDataObjectScannerTestBase {
 
     @Test
     public void testComplexInheritanceGenericsWithRefs() throws IOException, JSONException {
-        testAssertion(GenericTypeTestContainer.class, "complexInheritance", "refsEnabled.generic.complexInheritance.expected.json");
+        testAssertion(GenericTypeTestContainer.class, "complexInheritance",
+                "refsEnabled.generic.complexInheritance.expected.json");
     }
 
     @Test
@@ -127,6 +128,7 @@ public class ExpectationWithRefsTests extends OpenApiDataObjectScannerTestBase {
 
     @Test
     public void fieldNameOverrideWithRefTest() throws IOException, JSONException {
-        testAssertion(GenericTypeTestContainer.class, "overriddenNames", "refsEnabled.generic.fields.overriddenNames.expected.json");
+        testAssertion(GenericTypeTestContainer.class, "overriddenNames",
+                "refsEnabled.generic.fields.overriddenNames.expected.json");
     }
 }

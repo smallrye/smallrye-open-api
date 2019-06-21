@@ -33,8 +33,8 @@ import test.io.smallrye.openapi.tck.TckTest;
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
  *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 4/19/18
+ *         <br>
+ *         Date: 4/19/18
  */
 @TckTest
 public class ComplexResourceTest extends BaseTckTest<ComplexResourceTest.ComplexResourceTestArquillian> {
@@ -43,7 +43,7 @@ public class ComplexResourceTest extends BaseTckTest<ComplexResourceTest.Complex
         @Deployment(name = "complexTypes")
         public static WebArchive createDeployment() {
             return ShrinkWrap.create(WebArchive.class, "airlines.war")
-                    .addPackages(true, new String[]{"io.smallrye.openapi.tck.extra.complex"})
+                    .addPackages(true, new String[] { "io.smallrye.openapi.tck.extra.complex" })
                     .addAsManifestResource("openapi.yaml", "openapi.yaml");
         }
 

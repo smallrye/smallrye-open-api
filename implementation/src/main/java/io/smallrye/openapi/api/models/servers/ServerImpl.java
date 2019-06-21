@@ -83,7 +83,7 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
         this.description = description;
         return this;
     }
-    
+
     @Override
     public void setVariables(Map<String, ServerVariable> variables) {
         if (variables == null) {

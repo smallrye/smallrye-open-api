@@ -62,11 +62,14 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#addHeader(java.lang.String, org.eclipse.microprofile.openapi.models.headers.Header)
+     * @see org.eclipse.microprofile.openapi.models.media.Encoding#addHeader(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.headers.Header)
      */
     @Override
     public Encoding addHeader(String key, Header header) {
-        if (header == null) { return this; }
+        if (header == null) {
+            return this;
+        }
         if (this.headers == null) {
             this.headers = new LinkedHashMap<>();
         }

@@ -15,6 +15,8 @@
  */
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.IOException;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
@@ -29,8 +31,6 @@ import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreOnFieldExampl
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreTypeExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.TransientFieldExample;
-
-import java.io.IOException;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}

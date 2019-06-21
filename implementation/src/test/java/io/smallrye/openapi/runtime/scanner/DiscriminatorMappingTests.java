@@ -16,6 +16,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -48,61 +49,61 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     public void testDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
         test("polymorphism.declared-discriminator.json",
-             DiscriminatorFullDeclaredInResponseTestResource.class,
-             AbstractPet.class,
-             Cat.class,
-             Dog.class,
-             Lizard.class);
+                DiscriminatorFullDeclaredInResponseTestResource.class,
+                AbstractPet.class,
+                Cat.class,
+                Dog.class,
+                Lizard.class);
     }
 
     @Test
     public void testDiscriminatorNoMappingTestResource() throws IOException, JSONException {
         test("polymorphism.declared-discriminator-no-mapping.json",
-             DiscriminatorNoMappingTestResource.class,
-             AbstractPet.class,
-             Cat.class,
-             Dog.class,
-             Lizard.class);
+                DiscriminatorNoMappingTestResource.class,
+                AbstractPet.class,
+                Cat.class,
+                Dog.class,
+                Lizard.class);
     }
 
     @Test
     public void testDiscriminatorMappingNoSchema() throws IOException, JSONException {
         test("polymorphism.declared-discriminator-no-mapping-schema.json",
-             DiscriminatorMappingNoSchemaTestResource.class,
-             AbstractPet.class,
-             Cat.class,
-             Dog.class,
-             Lizard.class);
+                DiscriminatorMappingNoSchemaTestResource.class,
+                AbstractPet.class,
+                Cat.class,
+                Dog.class,
+                Lizard.class);
     }
 
     @Test
     public void testDiscriminatorMappingNoKey() throws IOException, JSONException {
         test("polymorphism.declared-discriminator-no-mapping-key.json",
-             DiscriminatorMappingNoKeyTestResource.class,
-             AbstractPet.class,
-             Cat.class,
-             Dog.class,
-             Lizard.class);
+                DiscriminatorMappingNoKeyTestResource.class,
+                AbstractPet.class,
+                Cat.class,
+                Dog.class,
+                Lizard.class);
     }
 
     @Test
     public void testDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
         test("polymorphism.declared-discriminator-empty-mapping.json",
-             DiscriminatorMappingEmptyMappingTestResource.class,
-             AbstractPet.class,
-             Cat.class,
-             Dog.class,
-             Lizard.class);
+                DiscriminatorMappingEmptyMappingTestResource.class,
+                AbstractPet.class,
+                Cat.class,
+                Dog.class,
+                Lizard.class);
     }
 
     @Test
     public void testDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
         test("polymorphism.declared-discriminator-no-property-name.json",
-             DiscriminatorMappingNoPropertyNameTestResource.class,
-             AbstractPet.class,
-             Cat.class,
-             Dog.class,
-             Lizard.class);
+                DiscriminatorMappingNoPropertyNameTestResource.class,
+                AbstractPet.class,
+                Cat.class,
+                Dog.class,
+                Lizard.class);
     }
 
     /* Test models and resources below. */
@@ -130,16 +131,12 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
         @GET
         @Produces(MediaType.APPLICATION_JSON)
         @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response")
-        @APIResponse(
-                content = { @Content(
-                        schema = @Schema(
-                                oneOf = { Cat.class, Dog.class, Lizard.class },
-                                discriminatorProperty = "pet_type",
-                                discriminatorMapping = { @DiscriminatorMapping(
-                                        value = "dog",
-                                        schema = Dog.class)
-                                }))
-                })
+        @APIResponse(content = {
+                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
+                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = {
+                                @DiscriminatorMapping(value = "dog", schema = Dog.class)
+                        }))
+        })
         @SuppressWarnings("unused")
         public AbstractPet get(@PathParam("id") String id) {
             return null;
@@ -151,15 +148,11 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
         @Path("{id}")
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Operation(
-                summary = "Returns an AbstractPet with only a discriminator property declared in the response, "
-                        + "no Dogs allowed!")
-        @APIResponse(
-                content = { @Content(
-                        schema = @Schema(
-                                oneOf = { Cat.class, Lizard.class },
-                                discriminatorProperty = "pet_type"))
-                })
+        @Operation(summary = "Returns an AbstractPet with only a discriminator property declared in the response, "
+                + "no Dogs allowed!")
+        @APIResponse(content = {
+                @Content(schema = @Schema(oneOf = { Cat.class, Lizard.class }, discriminatorProperty = "pet_type"))
+        })
         @SuppressWarnings("unused")
         public AbstractPet get(@PathParam("id") String id) {
             return null;
@@ -171,16 +164,13 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
         @Path("{id}")
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Operation(
-                summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                        + "no mapping due to undeclared mapping schema")
-        @APIResponse(
-                content = { @Content(
-                        schema = @Schema(
-                                oneOf = { Cat.class, Dog.class, Lizard.class },
-                                discriminatorProperty = "pet_type",
-                                discriminatorMapping = { @DiscriminatorMapping(value = "dog") }))
-                })
+        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
+                + "no mapping due to undeclared mapping schema")
+        @APIResponse(content = {
+                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
+                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = {
+                                @DiscriminatorMapping(value = "dog") }))
+        })
         @SuppressWarnings("unused")
         public AbstractPet get(@PathParam("id") String id) {
             return null;
@@ -192,16 +182,13 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
         @Path("{id}")
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Operation(
-                summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                        + "mapping with default (implied) key")
-        @APIResponse(
-                content = { @Content(
-                        schema = @Schema(
-                                oneOf = { Cat.class, Dog.class, Lizard.class },
-                                discriminatorProperty = "pet_type",
-                                discriminatorMapping = { @DiscriminatorMapping(schema = Dog.class) }))
-                })
+        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
+                + "mapping with default (implied) key")
+        @APIResponse(content = {
+                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
+                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = {
+                                @DiscriminatorMapping(schema = Dog.class) }))
+        })
         @SuppressWarnings("unused")
         public AbstractPet get(@PathParam("id") String id) {
             return null;
@@ -213,16 +200,12 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
         @Path("{id}")
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Operation(
-                summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                        + "no mapping due to empty @DiscriminatorMapping")
-        @APIResponse(
-                content = { @Content(
-                        schema = @Schema(
-                                oneOf = { Cat.class, Dog.class, Lizard.class },
-                                discriminatorProperty = "pet_type",
-                                discriminatorMapping = { @DiscriminatorMapping }))
-                })
+        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
+                + "no mapping due to empty @DiscriminatorMapping")
+        @APIResponse(content = {
+                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
+                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = { @DiscriminatorMapping }))
+        })
         @SuppressWarnings("unused")
         public AbstractPet get(@PathParam("id") String id) {
             return null;
@@ -234,17 +217,12 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
         @Path("{id}")
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Operation(
-                summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                        + "no property name (invalid OpenAPI document)")
-        @APIResponse(
-                content = { @Content(
-                        schema = @Schema(
-                                oneOf = { Cat.class, Dog.class, Lizard.class },
-                                discriminatorMapping = { @DiscriminatorMapping(
-                                        value = "dog",
-                                        schema = Dog.class) }))
-                })
+        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
+                + "no property name (invalid OpenAPI document)")
+        @APIResponse(content = {
+                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class, Lizard.class }, discriminatorMapping = {
+                        @DiscriminatorMapping(value = "dog", schema = Dog.class) }))
+        })
         @SuppressWarnings("unused")
         public AbstractPet get(@PathParam("id") String id) {
             return null;

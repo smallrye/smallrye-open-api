@@ -15,18 +15,19 @@
  */
 package io.smallrye.openapi.tck.extra.complex;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * <br>
- * Date: 4/19/18
+ *         <br>
+ *         Date: 4/19/18
  */
 @Path("/complex")
 @Consumes("application/json")

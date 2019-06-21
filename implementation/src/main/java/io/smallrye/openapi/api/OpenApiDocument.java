@@ -170,7 +170,8 @@ public class OpenApiDocument {
     }
 
     /**
-     * Filter the final model using a {@link OASFilter} configured by the app. If no filter has been configured, this will simply return the model unchanged.
+     * Filter the final model using a {@link OASFilter} configured by the app. If no filter has been configured, this will
+     * simply return the model unchanged.
      *
      * @param model
      */

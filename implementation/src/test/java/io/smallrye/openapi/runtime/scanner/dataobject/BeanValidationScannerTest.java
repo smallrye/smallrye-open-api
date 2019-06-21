@@ -69,16 +69,16 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
 
     Schema proxySchema(Schema schema, Set<String> methodsInvoked) {
         Schema schemaProxy = (Schema) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                                                      new Class<?>[] { Schema.class },
-                                                      new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy,
-                                 Method method,
-                                 Object[] args) throws Throwable {
-                methodsInvoked.add(method.getName());
-                return method.invoke(schema, args);
-            }
-        });
+                new Class<?>[] { Schema.class },
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy,
+                            Method method,
+                            Object[] args) throws Throwable {
+                        methodsInvoked.add(method.getName());
+                        return method.invoke(schema, args);
+                    }
+                });
 
         return schemaProxy;
     }
@@ -86,13 +86,13 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     @Test
     public void testNullSchemaIgnored() {
         BeanValidationScanner.applyConstraints(targetClass,
-                                               proxySchema(schema, methodsInvoked),
-                                               null,
-                                               null);
+                proxySchema(schema, methodsInvoked),
+                null,
+                null);
 
         assertArrayEquals("Unexpected methods were invoked",
-                          new String[] { "getType" },
-                          methodsInvoked.toArray());
+                new String[] { "getType" },
+                methodsInvoked.toArray());
     }
 
     @Test
@@ -100,13 +100,13 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
         schema.setType(SchemaType.OBJECT);
         schema.setRef("#/components/schemas/Anything");
         BeanValidationScanner.applyConstraints(targetClass,
-                                               proxySchema(schema, methodsInvoked),
-                                               null,
-                                               null);
+                proxySchema(schema, methodsInvoked),
+                null,
+                null);
 
         assertArrayEquals("Unexpected methods were invoked",
-                          new String[] { "getType", "getRef" },
-                          methodsInvoked.toArray());
+                new String[] { "getType", "getRef" },
+                methodsInvoked.toArray());
     }
 
     /**********************************************************************/

@@ -274,11 +274,14 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#addExample(java.lang.String, org.eclipse.microprofile.openapi.models.examples.Example)
+     * @see org.eclipse.microprofile.openapi.models.headers.Header#addExample(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.examples.Example)
      */
     @Override
     public Header addExample(String key, Example example) {
-        if (example == null) { return this; }
+        if (example == null) {
+            return this;
+        }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }

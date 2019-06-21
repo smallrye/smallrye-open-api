@@ -71,11 +71,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addSchema(java.lang.String, org.eclipse.microprofile.openapi.models.media.Schema)
+     * @see org.eclipse.microprofile.openapi.models.Components#addSchema(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.media.Schema)
      */
     @Override
     public Components addSchema(String key, Schema schema) {
-        if (schema == null) { return this; }
+        if (schema == null) {
+            return this;
+        }
         if (this.schemas == null) {
             this.schemas = new LinkedHashMap<>();
         }
@@ -119,11 +122,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addResponse(java.lang.String, org.eclipse.microprofile.openapi.models.responses.APIResponse)
+     * @see org.eclipse.microprofile.openapi.models.Components#addResponse(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.responses.APIResponse)
      */
     @Override
     public Components addResponse(String key, APIResponse response) {
-        if (response == null) { return this; }
+        if (response == null) {
+            return this;
+        }
         if (this.responses == null) {
             this.responses = new LinkedHashMap<>();
         }
@@ -167,11 +173,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addParameter(java.lang.String, org.eclipse.microprofile.openapi.models.parameters.Parameter)
+     * @see org.eclipse.microprofile.openapi.models.Components#addParameter(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.parameters.Parameter)
      */
     @Override
     public Components addParameter(String key, Parameter parameter) {
-        if (parameter == null) { return this; }
+        if (parameter == null) {
+            return this;
+        }
         if (this.parameters == null) {
             this.parameters = new LinkedHashMap<>();
         }
@@ -215,11 +224,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addExample(java.lang.String, org.eclipse.microprofile.openapi.models.examples.Example)
+     * @see org.eclipse.microprofile.openapi.models.Components#addExample(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.examples.Example)
      */
     @Override
     public Components addExample(String key, Example example) {
-        if (example == null) { return this; }
+        if (example == null) {
+            return this;
+        }
         if (this.examples == null) {
             this.examples = new LinkedHashMap<>();
         }
@@ -263,11 +275,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addRequestBody(java.lang.String, org.eclipse.microprofile.openapi.models.parameters.RequestBody)
+     * @see org.eclipse.microprofile.openapi.models.Components#addRequestBody(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.parameters.RequestBody)
      */
     @Override
     public Components addRequestBody(String key, RequestBody requestBody) {
-        if (requestBody == null) { return this; }
+        if (requestBody == null) {
+            return this;
+        }
         if (this.requestBodies == null) {
             this.requestBodies = new LinkedHashMap<>();
         }
@@ -311,11 +326,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addHeader(java.lang.String, org.eclipse.microprofile.openapi.models.headers.Header)
+     * @see org.eclipse.microprofile.openapi.models.Components#addHeader(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.headers.Header)
      */
     @Override
     public Components addHeader(String key, Header header) {
-        if (header == null) { return this; }
+        if (header == null) {
+            return this;
+        }
         if (this.headers == null) {
             this.headers = new LinkedHashMap<>();
         }
@@ -359,11 +377,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addSecurityScheme(java.lang.String, org.eclipse.microprofile.openapi.models.security.SecurityScheme)
+     * @see org.eclipse.microprofile.openapi.models.Components#addSecurityScheme(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.security.SecurityScheme)
      */
     @Override
     public Components addSecurityScheme(String key, SecurityScheme securityScheme) {
-        if (securityScheme == null) { return this; }
+        if (securityScheme == null) {
+            return this;
+        }
         if (this.securitySchemes == null) {
             this.securitySchemes = new LinkedHashMap<>();
         }
@@ -407,11 +428,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addLink(java.lang.String, org.eclipse.microprofile.openapi.models.links.Link)
+     * @see org.eclipse.microprofile.openapi.models.Components#addLink(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.links.Link)
      */
     @Override
     public Components addLink(String key, Link link) {
-        if (link == null) { return this; }
+        if (link == null) {
+            return this;
+        }
         if (this.links == null) {
             this.links = new LinkedHashMap<>();
         }
@@ -455,11 +479,14 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#addCallback(java.lang.String, org.eclipse.microprofile.openapi.models.callbacks.Callback)
+     * @see org.eclipse.microprofile.openapi.models.Components#addCallback(java.lang.String,
+     *      org.eclipse.microprofile.openapi.models.callbacks.Callback)
      */
     @Override
     public Components addCallback(String key, Callback callback) {
-        if (callback == null) { return this; }
+        if (callback == null) {
+            return this;
+        }
         if (this.callbacks == null) {
             this.callbacks = new LinkedHashMap<>();
         }

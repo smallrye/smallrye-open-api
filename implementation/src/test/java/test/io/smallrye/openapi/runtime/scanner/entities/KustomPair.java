@@ -28,4 +28,3 @@ public class KustomPair<A, B> {
     @Schema(required = true)
     private B bar;
 }
-

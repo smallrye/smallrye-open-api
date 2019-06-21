@@ -44,6 +44,7 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**
  * Some useful methods for creating stuff from ShrinkWrap {@link Archive}s.
+ * 
  * @author eric.wittmann@gmail.com
  */
 public class ArchiveUtil {
@@ -54,9 +55,10 @@ public class ArchiveUtil {
      */
     private ArchiveUtil() {
     }
-    
+
     /**
      * Creates an {@link OpenApiConfig} instance from the given ShrinkWrap archive.
+     * 
      * @param archive Shrinkwrap Archive instance
      * @return OpenApiConfig
      */
@@ -70,9 +72,10 @@ public class ArchiveUtil {
 
     /**
      * Finds the static OpenAPI file located in the deployment and, if it exists, returns
-     * it as an {@link OpenApiStaticFile}.  If not found, returns null.  The static file
+     * it as an {@link OpenApiStaticFile}. If not found, returns null. The static file
      * (when not null) contains an {@link InputStream} to the contents of the static file.
      * The caller is responsible for closing this stream.
+     * 
      * @param archive Shrinkwrap Archive instance
      * @return OpenApiStaticFile
      */
@@ -103,7 +106,7 @@ public class ArchiveUtil {
         if (node == null) {
             return null;
         }
-        
+
         rval.setContent(node.getAsset().openStream());
 
         return rval;
@@ -111,6 +114,7 @@ public class ArchiveUtil {
 
     /**
      * Index the ShrinkWrap archive to produce a jandex index.
+     * 
      * @param config OpenApiConfig
      * @param archive Shrinkwrap Archive
      * @return indexed classes in Archive
@@ -136,9 +140,9 @@ public class ArchiveUtil {
         }
     }
 
-
     /**
      * Indexes the given archive.
+     * 
      * @param config
      * @param indexer
      * @param archive
@@ -148,14 +152,16 @@ public class ArchiveUtil {
         try {
             for (Map.Entry<ArchivePath, Node> each : c.entrySet()) {
                 ArchivePath archivePath = each.getKey();
-                if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX) && acceptClassForScanning(config, archivePath.get())) {
+                if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX)
+                        && acceptClassForScanning(config, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
                         LOG.debugv("Indexing asset: {0} from archive: {1}", archivePath.get(), archive.getName());
                         indexer.index(contentStream);
                     }
                     continue;
                 }
-                if (archivePath.get().endsWith(OpenApiConstants.JAR_SUFFIX) && acceptJarForScanning(config, archivePath.get())) {
+                if (archivePath.get().endsWith(OpenApiConstants.JAR_SUFFIX)
+                        && acceptJarForScanning(config, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
                         JavaArchive jarArchive = ShrinkWrap.create(JavaArchive.class, archivePath.get())
                                 .as(ZipImporter.class).importFrom(contentStream).as(JavaArchive.class);
@@ -172,6 +178,7 @@ public class ArchiveUtil {
     /**
      * Returns true if the given JAR archive (dependency) should be cracked open and indexed
      * along with the rest of the deployment's classes.
+     * 
      * @param config
      * @param jarName
      */
@@ -190,6 +197,7 @@ public class ArchiveUtil {
     /**
      * Returns true if the class represented by the given archive path should be included in
      * the annotation index.
+     * 
      * @param config
      * @param archivePath
      */
@@ -236,5 +244,5 @@ public class ArchiveUtil {
         }
         return accept;
     }
-    
+
 }

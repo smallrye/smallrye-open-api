@@ -131,11 +131,11 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
 
         String field3SchemaName = ModelUtil.nameFromRef(result.getProperties().get("field3").getRef());
         String field2SchemaName = oai.getComponents()
-                                     .getSchemas()
-                                     .get(field3SchemaName)
-                                     .getProperties()
-                                     .get("field2")
-                                     .getRef();
+                .getSchemas()
+                .get(field3SchemaName)
+                .getProperties()
+                .get("field2")
+                .getRef();
 
         assertEquals("#/components/schemas/NestableExtendsNestable", field2SchemaName);
     }

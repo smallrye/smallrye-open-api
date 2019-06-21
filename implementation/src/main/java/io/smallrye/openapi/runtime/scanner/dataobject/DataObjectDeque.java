@@ -15,17 +15,18 @@
  */
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
 
 /**
  * Deque for exploring object graph.
@@ -97,9 +98,9 @@ public class DataObjectDeque {
      * @param schema the schema corresponding to this position
      */
     public void push(AnnotationTarget annotationTarget,
-                     @NotNull PathEntry parentPathEntry,
-                     @NotNull Type type,
-                     @NotNull Schema schema) {
+            @NotNull PathEntry parentPathEntry,
+            @NotNull Type type,
+            @NotNull Schema schema) {
         PathEntry entry = leafNode(parentPathEntry, annotationTarget, type, schema);
         ClassInfo klazzInfo = entry.getClazz();
         if (parentPathEntry.hasParent(entry)) {
@@ -139,9 +140,9 @@ public class DataObjectDeque {
      * @return the new leaf node
      */
     public PathEntry leafNode(PathEntry parentNode,
-                              AnnotationTarget annotationTarget,
-                              Type classType,
-                              Schema schema) {
+            AnnotationTarget annotationTarget,
+            Type classType,
+            Schema schema) {
         ClassInfo classInfo = index.getClass(classType);
         return new PathEntry(parentNode, annotationTarget, classInfo, classType, schema);
     }
@@ -159,10 +160,10 @@ public class DataObjectDeque {
         private Schema schema;
 
         private PathEntry(PathEntry enclosing,
-                  AnnotationTarget annotationTarget,
-                  @NotNull ClassInfo clazz,
-                  @NotNull Type clazzType,
-                  @NotNull Schema schema) {
+                AnnotationTarget annotationTarget,
+                @NotNull ClassInfo clazz,
+                @NotNull Type clazzType,
+                @NotNull Schema schema) {
             this.enclosing = enclosing;
             this.annotationTarget = annotationTarget;
             this.clazz = clazz;

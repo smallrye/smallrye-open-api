@@ -36,15 +36,15 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
-
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import org.jboss.logging.Logger;
 
+import io.smallrye.openapi.api.models.OpenAPIImpl;
+
 /**
- * Used to merge two OAI data models into a single one.  The MP+OAI 1.0 spec
+ * Used to merge two OAI data models into a single one. The MP+OAI 1.0 spec
  * requires that any or all of the various mechanisms for producing an OAI document
- * can be used.  When more than one mechanism is used, each mechanism produces an
- * OpenAPI document.  These multiple documents must then be sensibly merged into
+ * can be used. When more than one mechanism is used, each mechanism produces an
+ * OpenAPI document. These multiple documents must then be sensibly merged into
  * a final result.
  *
  * @author eric.wittmann@gmail.com
@@ -65,6 +65,7 @@ public class MergeUtil {
 
     /**
      * Merges two documents and returns the result.
+     * 
      * @param document1 OpenAPIImpl instance
      * @param document2 OpenAPIImpl instance
      * @return Merged OpenAPIImpl instance
@@ -75,6 +76,7 @@ public class MergeUtil {
 
     /**
      * Generic merge of two objects of the same type.
+     * 
      * @param object1 First object
      * @param object2 Second object
      * @param <T> Type parameter
@@ -157,8 +159,9 @@ public class MergeUtil {
     }
 
     /**
-     * Merges two Maps.  Any values missing from Map1 but present in Map2 will be added.  If a value
+     * Merges two Maps. Any values missing from Map1 but present in Map2 will be added. If a value
      * is present in both maps, it will be overridden or merged.
+     * 
      * @param values1
      * @param values2
      */
@@ -217,8 +220,9 @@ public class MergeUtil {
     }
 
     /**
-     * Merges two Lists.  Any values missing from List1 but present in List2 will be added.  Depending on
+     * Merges two Lists. Any values missing from List1 but present in List2 will be added. Depending on
      * the type of list, further processing and de-duping may be required.
+     * 
      * @param values1
      * @param values2
      */
@@ -259,8 +263,9 @@ public class MergeUtil {
     }
 
     /**
-     * Merge a list of strings.  In all cases, string lists are really sets.  So this is just
+     * Merge a list of strings. In all cases, string lists are really sets. So this is just
      * combining the two lists and then culling duplicates.
+     * 
      * @param values1
      * @param values2
      */
@@ -272,10 +277,11 @@ public class MergeUtil {
     }
 
     /**
-     * Merge two lists of Tags.  Tags are a special case because they are named and you cannot
-     * have two Tags with the same name.  This will append any tags from values2 that don't
-     * exist in values1.  It will *merge* any tags found in values2 that already exist in
+     * Merge two lists of Tags. Tags are a special case because they are named and you cannot
+     * have two Tags with the same name. This will append any tags from values2 that don't
+     * exist in values1. It will *merge* any tags found in values2 that already exist in
      * values1.
+     * 
      * @param values1
      * @param values2
      */
@@ -298,8 +304,9 @@ public class MergeUtil {
     }
 
     /**
-     * Merge two lists of Servers.  Servers are a special case because they must be unique
+     * Merge two lists of Servers. Servers are a special case because they must be unique
      * by the 'url' property each must have.
+     * 
      * @param values1
      * @param values2
      */
@@ -322,13 +329,15 @@ public class MergeUtil {
     }
 
     /**
-     * Merge two lists of Security Requirements.  Security Requirement lists are are a
+     * Merge two lists of Security Requirements. Security Requirement lists are are a
      * special case because
      * values1.
+     * 
      * @param values1
      * @param values2
      */
-    private static List<SecurityRequirement> mergeSecurityRequirementLists(List<SecurityRequirement> values1, List<SecurityRequirement> values2) {
+    private static List<SecurityRequirement> mergeSecurityRequirementLists(List<SecurityRequirement> values1,
+            List<SecurityRequirement> values2) {
         for (SecurityRequirement value2 : values2) {
             if (values1.contains(value2)) {
                 continue;
@@ -339,8 +348,9 @@ public class MergeUtil {
     }
 
     /**
-     * Merge two lists of Parameters.  Parameters are a special case because they must be unique
+     * Merge two lists of Parameters. Parameters are a special case because they must be unique
      * by the name in 'in' each have
+     * 
      * @param values1
      * @param values2
      */

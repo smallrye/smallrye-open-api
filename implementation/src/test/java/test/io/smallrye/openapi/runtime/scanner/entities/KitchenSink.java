@@ -13,24 +13,22 @@
 
 package test.io.smallrye.openapi.runtime.scanner.entities;
 
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.apps.airlines.model.Booking;
-import org.eclipse.microprofile.openapi.apps.airlines.model.CreditCard;
-import org.eclipse.microprofile.openapi.apps.airlines.model.Flight;
-
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.apps.airlines.model.Booking;
+import org.eclipse.microprofile.openapi.apps.airlines.model.CreditCard;
+import org.eclipse.microprofile.openapi.apps.airlines.model.Flight;
+
 /**
  * Kitchen sink.
  */
-@Schema(description = "This is the kitchen sink description!",
-        example = "This is the KitchenSink example field in Schema",
-        deprecated = true)
+@Schema(description = "This is the kitchen sink description!", example = "This is the KitchenSink example field in Schema", deprecated = true)
 @SuppressWarnings("rawtypes")
 public class KitchenSink {
 
@@ -51,7 +49,7 @@ public class KitchenSink {
 
     TimerTask[] rawArray = new TimerTask[2];
 
-    Long[] longArray = {1L, 2L};
+    Long[] longArray = { 1L, 2L };
 
     // Generic list with super
     List<? super Flight> barSuper;
@@ -115,9 +113,9 @@ public class KitchenSink {
     Void voidField = null;
 
     // With format and
-    @Schema(type = SchemaType.STRING, format="password")
+    @Schema(type = SchemaType.STRING, format = "password")
     String password = "hunter1";
 
-    public KitchenSink(){
+    public KitchenSink() {
     }
 }
