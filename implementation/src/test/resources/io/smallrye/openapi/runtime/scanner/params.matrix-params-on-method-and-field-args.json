@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/matrix-params-on-method-and-field-args/{id}{idMatrix}/seg1/seg2/resourceA{methodMatrix}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "maxLength": 10
+          }
+        },
+        {
+          "name": "idMatrix",
+          "in": "path",
+          "style": "matrix",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "c1": {
+                "type": "string"
+              },
+              "c2": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "name": "methodMatrix",
+            "in": "path",
+            "style": "matrix",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "m1": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": "default-m1"
+                },
+                "m2": {
+                  "type": "integer",
+                  "format": "int32",
+                  "maximum": 200,
+                  "default": 100
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Widget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

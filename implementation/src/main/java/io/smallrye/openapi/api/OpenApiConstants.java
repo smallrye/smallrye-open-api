@@ -16,6 +16,10 @@
 
 package io.smallrye.openapi.api;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
 import javax.ws.rs.ApplicationPath;
@@ -23,6 +27,7 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -232,6 +237,7 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_PATH = DotName.createSimple(Path.class.getName());
     public static final DotName DOTNAME_PRODUCES = DotName.createSimple(Produces.class.getName());
     public static final DotName DOTNAME_CONSUMES = DotName.createSimple(Consumes.class.getName());
+
     public static final DotName DOTNAME_QUERY_PARAM = DotName.createSimple(QueryParam.class.getName());
     public static final DotName DOTNAME_FORM_PARAM = DotName.createSimple(FormParam.class.getName());
     public static final DotName DOTNAME_COOKIE_PARAM = DotName.createSimple(CookieParam.class.getName());
@@ -239,6 +245,15 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_HEADER_PARAM = DotName.createSimple(HeaderParam.class.getName());
     public static final DotName DOTNAME_MATRIX_PARAM = DotName.createSimple(MatrixParam.class.getName());
     public static final DotName DOTNAME_BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
+
+    public static final DotName DOTNAME_RESTEASY_QUERY_PARAM = DotName.createSimple("org.jboss.resteasy.annotations.jaxrs.QueryParam");
+    public static final DotName DOTNAME_RESTEASY_FORM_PARAM = DotName.createSimple("org.jboss.resteasy.annotations.jaxrs.FormParam");
+    public static final DotName DOTNAME_RESTEASY_COOKIE_PARAM = DotName.createSimple("org.jboss.resteasy.annotations.jaxrs.CookieParam");
+    public static final DotName DOTNAME_RESTEASY_PATH_PARAM = DotName.createSimple("org.jboss.resteasy.annotations.jaxrs.PathParam");
+    public static final DotName DOTNAME_RESTEASY_HEADER_PARAM = DotName.createSimple("org.jboss.resteasy.annotations.jaxrs.HeaderParam");
+    public static final DotName DOTNAME_RESTEASY_MATRIX_PARAM = DotName.createSimple("org.jboss.resteasy.annotations.jaxrs.MatrixParam");
+
+    public static final DotName DOTNAME_DEFAULT_VALUE = DotName.createSimple(DefaultValue.class.getName());
 
     public static final DotName DOTNAME_GET = DotName.createSimple(GET.class.getName());
     public static final DotName DOTNAME_PUT = DotName.createSimple(PUT.class.getName());
@@ -248,7 +263,17 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_OPTIONS = DotName.createSimple(OPTIONS.class.getName());
     public static final DotName DOTNAME_PATCH = DotName.createSimple(PATCH.class.getName());
 
+    public static final Set<DotName> DOTNAME_JAXRS_HTTP_METHODS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_GET,
+                                                                    DOTNAME_PUT,
+                                                                    DOTNAME_POST,
+                                                                    DOTNAME_DELETE,
+                                                                    DOTNAME_HEAD,
+                                                                    DOTNAME_OPTIONS,
+                                                                    DOTNAME_PATCH)));
+
     public static final DotName DOTNAME_RESPONSE = DotName.createSimple(Response.class.getName());
+    public static final DotName DOTNAME_DEPRECATED = DotName.createSimple(Deprecated.class.getName());
 
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 

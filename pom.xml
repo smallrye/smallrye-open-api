@@ -45,6 +45,7 @@
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.skyscreamer>1.5.0</version.org.skyscreamer>
+        <version.org.jboss.resteasy.core-spi>4.0.0.Final</version.org.jboss.resteasy.core-spi>
 
         <!-- Used by release plugin to define git tag -->
         <tagNameFormat>smallrye-open-api-1.1-@{project.version}</tagNameFormat>
@@ -137,6 +138,12 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>java-hamcrest</artifactId>
                 <version>${version.org.hamcrest.java-hamcrest}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-core-spi</artifactId>
+                <version>${version.org.jboss.resteasy.core-spi}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.skyscreamer</groupId>

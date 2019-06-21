@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import io.smallrye.openapi.api.OpenApiConstants;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
-import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
@@ -35,6 +34,7 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import static java.util.stream.Collectors.toList;
@@ -391,6 +391,17 @@ public class JandexUtil {
     }
 
     /**
+     * Returns the class type of the method parameter.
+     *
+     * @param parameter the {@link MethodParameterInfo parameter}
+     * @return Type
+     */
+    public static Type getMethodParameterType(MethodParameterInfo parameter) {
+        Type type = parameter.method().parameters().get(parameter.position());
+        return type;
+    }
+
+    /**
      * Go through the method parameters looking for one that is not annotated with a jax-rs
      * annotation.  That will be the one that is the request body.
      * @param method MethodInfo
@@ -423,51 +434,6 @@ public class JandexUtil {
             }
         }
         return false;
-    }
-
-    /**
-     * Returns jax-rs info about the parameter at the given index.  If the index is invalid
-     * or does not refer to a jax-rs parameter (ie is not annoted with e.g. @PathParam) then
-     * this will return null.  Otherwise it will return a {@link JaxRsParameterInfo} object
-     * with the name and type of the param.
-     * @param method MethodInfo
-     * @param idx index of parameter
-     * @return JaxRsParameterInfo
-     */
-    public static JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx) {
-        AnnotationInstance jaxRsAnno = JandexUtil.getMethodParameterAnnotation(method, idx, OpenApiConstants.DOTNAME_PATH_PARAM);
-        if (jaxRsAnno != null) {
-            JaxRsParameterInfo info = new JaxRsParameterInfo();
-            info.in = In.PATH;
-            info.name = JandexUtil.stringValue(jaxRsAnno, OpenApiConstants.PROP_VALUE);
-            return info;
-        }
-
-        jaxRsAnno = JandexUtil.getMethodParameterAnnotation(method, idx, OpenApiConstants.DOTNAME_QUERY_PARAM);
-        if (jaxRsAnno != null) {
-            JaxRsParameterInfo info = new JaxRsParameterInfo();
-            info.in = In.QUERY;
-            info.name = JandexUtil.stringValue(jaxRsAnno, OpenApiConstants.PROP_VALUE);
-            return info;
-        }
-
-        jaxRsAnno = JandexUtil.getMethodParameterAnnotation(method, idx, OpenApiConstants.DOTNAME_COOKIE_PARAM);
-        if (jaxRsAnno != null) {
-            JaxRsParameterInfo info = new JaxRsParameterInfo();
-            info.in = In.COOKIE;
-            info.name = JandexUtil.stringValue(jaxRsAnno, OpenApiConstants.PROP_VALUE);
-            return info;
-        }
-
-        jaxRsAnno = JandexUtil.getMethodParameterAnnotation(method, idx, OpenApiConstants.DOTNAME_HEADER_PARAM);
-        if (jaxRsAnno != null) {
-            JaxRsParameterInfo info = new JaxRsParameterInfo();
-            info.in = In.HEADER;
-            info.name = JandexUtil.stringValue(jaxRsAnno, OpenApiConstants.PROP_VALUE);
-            return info;
-        }
-
-        return null;
     }
 
     /**
@@ -523,9 +489,9 @@ public class JandexUtil {
      * and type (path, query, cookie, etc).
      * @author eric.wittmann@gmail.com
      */
+    @Deprecated
     public static class JaxRsParameterInfo {
         public String name;
         public Parameter.In in;
     }
-
 }

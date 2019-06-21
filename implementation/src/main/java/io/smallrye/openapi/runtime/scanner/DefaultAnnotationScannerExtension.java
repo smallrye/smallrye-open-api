@@ -19,10 +19,11 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
     /**
      * Determines where an @Parameter can be found (examples include Query,
      * Path, Header, Cookie, etc).
-     * 
+     *
      * @param paramInfo
      * @return the parameter location, or null if unknown
      */
+    @Deprecated
     public In parameterIn(MethodParameterInfo paramInfo) {
         return null;
     }
@@ -32,13 +33,14 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
      * is invalid or does not refer to a jax-rs parameter then this should
      * return null. Otherwise it will return a {@link JaxRsParameterInfo} object
      * with the name and type of the param.
-     * 
+     *
      * @param method
      *            MethodInfo
      * @param idx
      *            index of parameter
      * @return JaxRsParameterInfo or null if unknown.
      */
+    @Deprecated
     public JaxRsParameterInfo getMethodParameterJaxRsInfo(MethodInfo method, int idx) {
         return null;
     }
@@ -47,7 +49,7 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
      * Unwraps an asynchronous type such as
      * <code>CompletionStage&lt;X&gt;</code> into its resolved type
      * <code>X</code>
-     * 
+     *
      * @param type
      *            the type to unwrap if it is a supported async type
      * @return the resolved type or null if not supported
@@ -67,7 +69,7 @@ public class DefaultAnnotationScannerExtension implements AnnotationScannerExten
     /**
      * Returns true if the given annotation is a jax-rs annotation extension, such as would be in the javax.ws.rs
      * package.
-     * 
+     *
      * @param instance the annotation to check
      * @return true if the given annotation is a jax-rs annotation extension
      */

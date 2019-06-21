@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/parameters-in-constructor/{id}/{p1}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "BEAN"
+          }
+        },
+        {
+          "name": "p1",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "q1",
+          "in": "query",
+          "deprecated": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "h1",
+          "in": "header",
+          "description": "Description of h1",
+          "deprecated": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "c1",
+          "in": "cookie",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "nullable": false
+          }
+        }
+      ],
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    }
+  }
+}

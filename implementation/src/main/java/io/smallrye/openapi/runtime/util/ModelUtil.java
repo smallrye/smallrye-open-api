@@ -16,7 +16,10 @@
 
 package io.smallrye.openapi.runtime.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.Components;
@@ -107,6 +110,31 @@ public class ModelUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the list of {@link Schema}s defined for the given {@link Parameter}.
+     * A schema can be defined either via the parameter's "schema" property, or any
+     * "content.*.schema" property.
+     *
+     * @param parameter Parameter
+     * @return list of schemas, never null
+     */
+    public static List<Schema> getParameterSchemas(Parameter parameter) {
+        if (parameter.getSchema() != null) {
+            return Arrays.asList(parameter.getSchema());
+        }
+        if (parameter.getContent() != null && !parameter.getContent().isEmpty()) {
+            Collection<MediaType> mediaTypes = parameter.getContent().values();
+            List<Schema> schemas = new ArrayList<>(mediaTypes.size());
+
+            for (MediaType mediaType : mediaTypes) {
+                if (mediaType.getSchema() != null) {
+                    schemas.add(mediaType.getSchema());
+                }
+            }
+        }
+        return Collections.emptyList();
     }
 
     /**

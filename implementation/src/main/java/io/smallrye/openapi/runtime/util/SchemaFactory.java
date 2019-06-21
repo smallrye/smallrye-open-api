@@ -183,7 +183,13 @@ public class SchemaFactory {
         } else {
             Type asyncType = resolveAsyncType(type, extensions);
             schema = OpenApiDataObjectScanner.process(index, asyncType);
+
+            if (schema != null && index.getClassByName(asyncType.name()) != null) {
+                SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
+                schema = schemaRegistry.register(asyncType, schema);
+            }
         }
+
         return schema;
     }
 
