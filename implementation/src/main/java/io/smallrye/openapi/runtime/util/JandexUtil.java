@@ -170,7 +170,7 @@ public class JandexUtil {
             return null;
         }
         if (value.kind() == AnnotationValue.Kind.DOUBLE) {
-            return new BigDecimal(value.asDouble());
+            return BigDecimal.valueOf(value.asDouble());
         }
         if (value.kind() == AnnotationValue.Kind.STRING) {
             return new BigDecimal(value.asString());

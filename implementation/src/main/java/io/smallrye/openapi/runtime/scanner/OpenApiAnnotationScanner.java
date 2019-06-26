@@ -422,33 +422,8 @@ public class OpenApiAnnotationScanner {
         PathItem pathItem = new PathItemImpl();
 
         // Figure out the current @Produces and @Consumes (if any)
-        currentConsumes = null;
-        currentProduces = null;
-        AnnotationInstance consumesAnno = method.annotation(OpenApiConstants.DOTNAME_CONSUMES);
-        if (consumesAnno == null) {
-            consumesAnno = JandexUtil.getClassAnnotation(method.declaringClass(), OpenApiConstants.DOTNAME_CONSUMES);
-        }
-        AnnotationInstance producesAnno = method.annotation(OpenApiConstants.DOTNAME_PRODUCES);
-        if (producesAnno == null) {
-            producesAnno = JandexUtil.getClassAnnotation(method.declaringClass(), OpenApiConstants.DOTNAME_PRODUCES);
-        }
-
-        if (consumesAnno != null) {
-            AnnotationValue annotationValue = consumesAnno.value();
-            if (annotationValue != null) {
-                currentConsumes = annotationValue.asStringArray();
-            } else {
-                currentConsumes = OpenApiConstants.DEFAULT_CONSUMES;
-            }
-        }
-        if (producesAnno != null) {
-            AnnotationValue annotationValue = producesAnno.value();
-            if (annotationValue != null) {
-                currentProduces = annotationValue.asStringArray();
-            } else {
-                currentProduces = OpenApiConstants.DEFAULT_PRODUCES;
-            }
-        }
+        currentConsumes = getMediaTypes(method, OpenApiConstants.DOTNAME_CONSUMES);
+        currentProduces = getMediaTypes(method, OpenApiConstants.DOTNAME_PRODUCES);
 
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
         /////////////////////////////////////////
@@ -696,6 +671,26 @@ public class OpenApiAnnotationScanner {
         }
     }
 
+    static String[] getMediaTypes(MethodInfo resourceMethod, DotName annotationName) {
+        AnnotationInstance annotation = resourceMethod.annotation(annotationName);
+
+        if (annotation == null) {
+            annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), annotationName);
+        }
+
+        if (annotation != null) {
+            AnnotationValue annotationValue = annotation.value();
+
+            if (annotationValue != null) {
+                return annotationValue.asStringArray();
+            }
+
+            return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+        }
+
+        return null;
+    }
+
     /**
      * Called when a jax-rs method's APIResponse annotations have all been processed but
      * no response was actually created for the operation. This method will create a response
@@ -738,7 +733,7 @@ public class OpenApiAnnotationScanner {
             content = new ContentImpl();
             String[] produces = this.currentProduces;
             if (produces == null || produces.length == 0) {
-                produces = OpenApiConstants.DEFAULT_PRODUCES;
+                produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             }
             for (String producesType : produces) {
                 MediaType mt = new MediaTypeImpl();
@@ -1458,7 +1453,7 @@ public class OpenApiAnnotationScanner {
                     mimeTypes = currentProduces;
                 }
                 if (direction == ContentDirection.Parameter) {
-                    mimeTypes = OpenApiConstants.DEFAULT_PARAMETER_MEDIA_TYPES;
+                    mimeTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
                 }
                 for (String mimeType : mimeTypes) {
                     content.addMediaType(mimeType, mediaTypeModel);

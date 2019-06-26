@@ -21,7 +21,6 @@ mvn clean install
 
 * link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification.
 * link:tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
-* link:docs[] - Project documentation.
 
 === Links
 

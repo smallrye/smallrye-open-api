@@ -80,6 +80,8 @@ public class ArchiveUtil {
      * @return OpenApiStaticFile
      */
     public static OpenApiStaticFile archiveToStaticFile(Archive<?> archive) {
+        // Instruct SonarCloud to ignore this as an unclosed resource (since this method produces it)
+        @SuppressWarnings("squid:S2095")
         OpenApiStaticFile rval = new OpenApiStaticFile();
         rval.setFormat(Format.YAML);
 

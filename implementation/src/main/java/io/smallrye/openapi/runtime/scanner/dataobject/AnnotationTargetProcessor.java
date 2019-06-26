@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -132,9 +130,11 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         final String propertyKey = readPropertyKey(schemaAnnotation);
 
-        if (schemaAnnotation == null && shouldInferUnannotatedFields()) {
+        if (schemaAnnotation == null) {
             // Handle unannotated field and just do simple inference.
-            readUnannotatedField();
+            if (shouldInferUnannotatedFields()) {
+                readUnannotatedField();
+            }
         } else {
             // Handle field annotated with @Schema.
             readSchemaAnnotatedField(propertyKey, schemaAnnotation);
@@ -170,7 +170,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         return key;
     }
 
-    private void readSchemaAnnotatedField(String propertyKey, @NotNull AnnotationInstance annotation) {
+    private void readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation) {
         if (annotation == null) {
             throw new IllegalArgumentException("Annotation must not be null");
         }

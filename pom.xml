@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>7</version>
+        <version>8</version>
     </parent>
 
     <artifactId>smallrye-open-api-parent-1.1</artifactId>
@@ -191,7 +191,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>{version.buildhelper.plugin}</version>
+                    <version>${version.buildhelper.plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
