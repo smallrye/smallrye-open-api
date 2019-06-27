@@ -5,15 +5,8 @@
         "type": "string",
         "enum": [
           "Gold",
-          "Green",
-          "Orange"
-        ],
-        "properties": {
-          "z": {
-            "format": "int32",
-            "type": "integer"
-          }
-        }
+          "Green"
+        ]
       },
       "Baz": {
         "type": "object",

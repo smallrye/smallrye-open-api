@@ -213,27 +213,37 @@ public class TypeProcessor {
                 readEnumeration(valueType, propsSchema);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
+                pushToStack(valueType, propsSchema);
             }
 
-            pushToStack(valueType, propsSchema);
             propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
         }
 
         return propsSchema;
     }
 
+    /**
+     * Add each Enum constant name to the list of the given schema's
+     * enumeration list.
+     *
+     * @param enumType type containing Java Enum constants
+     * @param enumSchema the schema to which the constants' names will
+     *        be added
+     *
+     * @see java.lang.reflect.Field#isEnumConstant()
+     * @see java.lang.reflect.Modifier#ENUM
+     */
     private void readEnumeration(Type enumType, Schema enumSchema) {
         LOG.debugv("Processing an enum {0}", enumType);
+        final int ENUM = 0x00004000;
         ClassInfo enumKlazz = index.getClass(enumType);
 
-        for (FieldInfo enumField : enumKlazz.fields()) {
-            // Ignore the hidden enum array as it's not accessible. Add fields that look like enums (of type enumKlazz)
-            // NB: Eclipse compiler and OpenJDK compiler have different names for this field.
-            if (!enumField.name().endsWith("$VALUES") && TypeUtil.getName(enumField.type()).equals(enumKlazz.name())) {
-                // Enum's value fields.
-                enumSchema.addEnumeration(enumField.name());
-            }
-        }
+        enumKlazz.fields()
+                .stream()
+                .filter(field -> (field.flags() & ENUM) != 0)
+                .map(FieldInfo::name)
+                .sorted() // Make the order determinate
+                .forEach(enumSchema::addEnumeration);
     }
 
     private Type resolveTypeVariable(Schema schema, Type fieldType) {

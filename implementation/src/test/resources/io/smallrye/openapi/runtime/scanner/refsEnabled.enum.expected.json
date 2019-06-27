@@ -5,8 +5,7 @@
         "type": "string",
         "enum": [
           "Gold",
-          "Green",
-          "Orange"
+          "Green"
         ]
       },
       "EnumContainer": {

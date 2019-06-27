@@ -60,7 +60,7 @@ public class IndexScannerTestBase {
                 .getResourceAsStream(path);
     }
 
-    protected static Index indexOf(Class<?>... classes) {
+    public static Index indexOf(Class<?>... classes) {
         Indexer indexer = new Indexer();
 
         for (Class<?> klazz : classes) {
