@@ -5,7 +5,7 @@
         "type": "object",
         "properties" : {
           "bazEnum" : {
-            "enum" : [ "Gold", "Green", "Orange" ],
+            "enum" : [ "Gold", "Green" ],
             "type" : "string"
           }
         }

@@ -5,12 +5,13 @@
         "type": "string",
         "enum": [
           "Gold",
-          "Green",
-          "Orange"
+          "Green"
         ]
       },
       "EnumRequiredContainer": {
-        "required": [ "bazEnum" ],
+        "required": [
+          "bazEnum"
+        ],
         "type": "object",
         "properties": {
           "bazEnum": {
