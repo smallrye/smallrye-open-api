@@ -17,6 +17,8 @@ import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_COOKIE_P
 import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_FORM_PARAM;
 import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_HEADER_PARAM;
 import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_MATRIX_PARAM;
+import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_MULTIPART_FORM;
+import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_PART_TYPE;
 import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_PATH_PARAM;
 import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_QUERY_PARAM;
 import static io.smallrye.openapi.api.OpenApiConstants.PROP_VALUE;
@@ -27,6 +29,7 @@ import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,8 +42,12 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.MediaType;
+
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.media.Content;
+import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -60,6 +67,9 @@ import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
+import io.smallrye.openapi.api.models.media.ContentImpl;
+import io.smallrye.openapi.api.models.media.EncodingImpl;
+import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
@@ -107,6 +117,11 @@ public class ParameterProcessor {
     private Map<String, AnnotationInstance> formParams = new LinkedHashMap<>();
 
     /**
+     * The media type of a form schema found while scanning the parameters.
+     */
+    private String formMediaType;
+
+    /**
      * Collection of JAX-RS {@link javax.ws.rs.MatrixParam MatrixParam}s found during scanning.
      * These annotations will be used as schema properties for the schema of a path parameter
      * having {@link Parameter#setStyle style} of {@link Style#MATRIX}.
@@ -132,7 +147,7 @@ public class ParameterProcessor {
         private String operationPath;
         private List<Parameter> operationParameters;
 
-        private Schema formBodySchema;
+        private Content formBodyContent;
 
         public List<Parameter> getPathItemParameters() {
             return pathItemParameters;
@@ -146,8 +161,15 @@ public class ParameterProcessor {
             return operationParameters;
         }
 
+        public Content getFormBodyContent() {
+            return formBodyContent;
+        }
+
         public Schema getFormBodySchema() {
-            return formBodySchema;
+            if (formBodyContent != null) {
+                return formBodyContent.getMediaTypes().values().iterator().next().getSchema();
+            }
+            return null;
         }
 
         /* Internal setters */
@@ -167,8 +189,8 @@ public class ParameterProcessor {
             this.operationParameters = operationParameters;
         }
 
-        void setFormBodySchema(Schema formBodySchema) {
-            this.formBodySchema = formBodySchema;
+        void setFormBodyContent(Content formBodyContent) {
+            this.formBodyContent = formBodyContent;
         }
     }
 
@@ -178,7 +200,7 @@ public class ParameterProcessor {
      *
      * @author Michael Edgar {@literal <michael@xlate.io>}
      */
-    public static enum JaxRsParameter {
+    public enum JaxRsParameter {
         PATH_PARAM(DOTNAME_PATH_PARAM, In.PATH, null),
         // Apply to the last-matched @Path of the structure injecting the MatrixParam
         MATRIX_PARAM(DOTNAME_MATRIX_PARAM, In.PATH, Style.MATRIX),
@@ -195,16 +217,23 @@ public class ParameterProcessor {
         RESTEASY_QUERY_PARAM(DOTNAME_RESTEASY_QUERY_PARAM, In.QUERY, null),
         RESTEASY_FORM_PARAM(DOTNAME_RESTEASY_FORM_PARAM, null, Style.FORM),
         RESTEASY_HEADER_PARAM(DOTNAME_RESTEASY_HEADER_PARAM, In.HEADER, null),
-        RESTEASY_COOKIE_PARAM(DOTNAME_RESTEASY_COOKIE_PARAM, In.COOKIE, null);
+        RESTEASY_COOKIE_PARAM(DOTNAME_RESTEASY_COOKIE_PARAM, In.COOKIE, null),
+        RESTEASY_MULITIPART_FORM(DOTNAME_RESTEASY_MULTIPART_FORM, null, null, MediaType.MULTIPART_FORM_DATA);
 
         private final DotName name;
         final In location;
         final Style style;
+        final String mediaType;
 
-        private JaxRsParameter(DotName name, In location, Style style) {
+        private JaxRsParameter(DotName name, In location, Style style, String mediaType) {
             this.name = name;
             this.location = location;
             this.style = style;
+            this.mediaType = mediaType;
+        }
+
+        private JaxRsParameter(DotName name, In location, Style style) {
+            this(name, location, style, null);
         }
 
         static JaxRsParameter forName(DotName annotationName) {
@@ -216,7 +245,7 @@ public class ParameterProcessor {
             return null;
         }
 
-        static boolean isParameter(DotName annotationName) {
+        public static boolean isParameter(DotName annotationName) {
             for (JaxRsParameter value : values()) {
                 if (value.name.equals(annotationName)) {
                     return true;
@@ -299,7 +328,6 @@ public class ParameterProcessor {
      * are only applicable to the method-level in this component.
      *
      * @param index index of classes to be used for further introspection, if necessary
-     * @param resourceClass the JAX-RS resource class
      * @param resourceMethod the JAX-RS resource method, annotated with one of the
      *        JAX-RS HTTP annotations
      * @param reader callback method for a function producing {@link ParameterImpl} from a
@@ -309,13 +337,14 @@ public class ParameterProcessor {
      *         object
      */
     public static ResourceParameters process(IndexView index,
-            ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, ParameterImpl> reader,
             List<AnnotationScannerExtension> extensions) {
 
         ResourceParameters parameters = new ResourceParameters();
         ParameterProcessor processor = new ParameterProcessor(index, reader, extensions);
+
+        ClassInfo resourceClass = resourceMethod.declaringClass();
 
         // Phase I - Read class fields, constructors, "setter" methods not annotated with JAX-RS HTTP method
         processor.readParameters(resourceClass, null);
@@ -353,7 +382,7 @@ public class ParameterProcessor {
         parameters.setOperationParameters(processor.getParameters());
         parameters.setOperationPath(processor.generatePath(resourceMethod, parameters.getOperationParameters()));
 
-        parameters.setFormBodySchema(processor.getFormBodySchema());
+        parameters.setFormBodyContent(processor.getFormBodyContent());
 
         return parameters;
     }
@@ -372,7 +401,7 @@ public class ParameterProcessor {
      * @param parameters
      * @return
      */
-    // TODO: Parse path segments to strip out variable names and patterns (apply patters to path param schema)
+    // TODO: Parse path segments to strip out variable names and patterns (apply patterns to path param schema)
     String generatePath(AnnotationTarget target, List<Parameter> parameters) {
         String path = pathOf(target);
 
@@ -383,7 +412,7 @@ public class ParameterProcessor {
         if (matrixParams.size() > 0) {
             String matrixName = parameters.stream()
                     .filter(p -> p.getStyle() == Style.MATRIX)
-                    .map(p -> p.getName())
+                    .map(Parameter::getName)
                     .findFirst()
                     .orElse("");
 
@@ -454,7 +483,7 @@ public class ParameterProcessor {
                 }
 
                 for (Schema schema : schemas) {
-                    setSchemaProperties(schema, matrixPath.getValue());
+                    setSchemaProperties(schema, Collections.emptyMap(), matrixPath.getValue());
                 }
             }
         }
@@ -473,10 +502,8 @@ public class ParameterProcessor {
                 param.setName(context.name);
             }
 
-            if (param.getIn() == null) {
-                if (context.location != null) {
-                    param.setIn(context.location);
-                }
+            if (param.getIn() == null && context.location != null) {
+                param.setIn(context.location);
             }
 
             if (isIgnoredParameter(param)) {
@@ -530,21 +557,39 @@ public class ParameterProcessor {
     }
 
     /**
-     * Create a {@link Schema} and use the scanned {@link javax.ws.rs.FormParam}s
-     * as the properties.
+     * Create a {@link Content} and use the scanned {@link javax.ws.rs.FormParam}s
+     * as the properties. The media type will be defaulted to
+     * 'application/x-www-form-urlencoded' or set to 'multipart/form-data' if a
+     * RESTEasy {@link org.jboss.resteasy.annotations.providers.multipart.MultipartForm MultipartForm}
+     * annotation was used to wrap the {@link javax.ws.rs.FormParam}s. The encoding values
+     * for the {@link Content} will be set to the value of any
+     * {@link org.jboss.resteasy.annotations.providers.multipart.PartType PartType}
+     * annotations found for each parameter.
      *
-     * @return generate form schema
+     * @return generated form content
      */
-    private Schema getFormBodySchema() {
+    private Content getFormBodyContent() {
         if (formParams.isEmpty()) {
             return null;
         }
 
+        Content content = new ContentImpl();
+        MediaTypeImpl mediaType = new MediaTypeImpl();
         Schema schema = new SchemaImpl();
+        Map<String, Encoding> encodings = new HashMap<>();
         schema.setType(SchemaType.OBJECT);
-        setSchemaProperties(schema, formParams);
 
-        return schema;
+        mediaType.setSchema(schema);
+        setSchemaProperties(schema, encodings, formParams);
+
+        if (encodings.size() > 0) {
+            mediaType.setEncoding(encodings);
+        }
+
+        String mediaTypeName = formMediaType != null ? formMediaType : MediaType.APPLICATION_FORM_URLENCODED;
+        content.addMediaType(mediaTypeName, mediaType);
+
+        return content;
     }
 
     /**
@@ -552,12 +597,17 @@ public class ParameterProcessor {
      * given schema.
      *
      * @param schema the {@link Schema} on which the properties will be set
+     * @param encodings map of encodings applicable to the current {@link MediaType} being processed
      * @param params the name/value pairs of annotations for conversion to schema properties
      */
-    void setSchemaProperties(Schema schema, Map<String, AnnotationInstance> params) {
+    void setSchemaProperties(Schema schema,
+            Map<String, Encoding> encodings,
+            Map<String, AnnotationInstance> params) {
+
         for (Entry<String, AnnotationInstance> param : params.entrySet()) {
             String paramName = param.getKey();
             AnnotationTarget paramTarget = param.getValue().target();
+            addEncoding(encodings, paramName, paramTarget);
             Type paramType = getType(paramTarget);
             Schema paramSchema = SchemaFactory.typeToSchema(index, paramType, extensions);
             Object defaultValue = getDefaultValue(paramTarget);
@@ -581,6 +631,30 @@ public class ParameterProcessor {
                 paramSchema = mergeObjects(schema.getProperties().get(paramName), paramSchema);
             }
             schema.addProperty(paramName, paramSchema);
+        }
+    }
+
+    /**
+     * Determine if the paramTarget is annotated with the RestEasy
+     * {@link org.jboss.resteasy.annotations.providers.multipart.PartType @PartType}
+     * annotation and add the value to the encodings map.
+     *
+     * @param encodings map of encodings applicable to the current {@link MediaType} being processed
+     * @param paramName name of the current form parameter being mapped to a schema property
+     * @param paramTarget the target annotated with {@link javax.ws.rs.FormParam FormParam}
+     *
+     */
+    static void addEncoding(Map<String, Encoding> encodings, String paramName, AnnotationTarget paramTarget) {
+        if (paramTarget == null) {
+            return;
+        }
+
+        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, DOTNAME_RESTEASY_PART_TYPE);
+
+        if (type != null) {
+            Encoding encoding = new EncodingImpl();
+            encoding.setContentType(type.value().asString());
+            encodings.put(paramName, encoding);
         }
     }
 
@@ -615,10 +689,8 @@ public class ParameterProcessor {
         /*
          * Name is REQUIRED unless it is a reference.
          */
-        if (paramName == null || paramName.trim().isEmpty()) {
-            if (parameter.getRef() == null) {
-                return true;
-            }
+        if ((paramName == null || paramName.trim().isEmpty()) && parameter.getRef() == null) {
+            return true;
         }
 
         if (paramIn == Parameter.In.HEADER && paramName != null) {
@@ -723,8 +795,9 @@ public class ParameterProcessor {
                             getDefaultValue(target),
                             target);
                 } else if (target != null) {
-                    // This is a @BeanParam
+                    // This is a @BeanParam or a RESTEasy @MultipartForm
                     DotName targetName = null;
+                    setMediaType(jaxRsParam);
 
                     switch (target.kind()) {
                         case FIELD:
@@ -750,6 +823,19 @@ public class ParameterProcessor {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Set this {@link ParameterProcessor}'s formMediaType if it has not already
+     * been set and the value is explicitly known for the parameter type.
+     *
+     * @param jaxRsParam parameter to check for a form media type
+     *
+     */
+    private void setMediaType(JaxRsParameter jaxRsParam) {
+        if (jaxRsParam.mediaType != null && this.formMediaType == null) {
+            formMediaType = jaxRsParam.mediaType;
         }
     }
 
@@ -864,35 +950,34 @@ public class ParameterProcessor {
             case FIELD:
                 pathSegment = pathOf(target.asField().declaringClass());
                 break;
-            case METHOD: {
-                String methodPath = pathOf(target.asMethod());
-                String classPath = pathOf(target.asMethod().declaringClass());
-
-                if (methodPath.isEmpty()) {
-                    pathSegment = classPath;
-                } else {
-                    pathSegment = classPath + '/' + methodPath;
-                }
-
+            case METHOD:
+                pathSegment = methodPath(target.asMethod());
                 break;
-            }
-            case METHOD_PARAMETER: {
-                String methodPath = pathOf(target.asMethodParameter().method());
-                String classPath = pathOf(target.asMethodParameter().method().declaringClass());
-
-                if (methodPath.isEmpty()) {
-                    pathSegment = classPath;
-                } else {
-                    pathSegment = classPath + '/' + methodPath;
-                }
-
+            case METHOD_PARAMETER:
+                pathSegment = methodPath(target.asMethodParameter().method());
                 break;
-            }
             default:
                 break;
         }
 
         return pathSegment;
+    }
+
+    /**
+     * Concatenate the method's path with the path of its declaring
+     * class.
+     *
+     * @param method the method annotated with {@link javax.ws.rs.Path Path}
+     */
+    static String methodPath(MethodInfo method) {
+        String methodPath = pathOf(method);
+        String classPath = pathOf(method.declaringClass());
+
+        if (methodPath.isEmpty()) {
+            return classPath;
+        }
+
+        return classPath + '/' + methodPath;
     }
 
     /**
@@ -1089,20 +1174,10 @@ public class ParameterProcessor {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
-            if (DOTNAME_PARAMETER.equals(name)) {
+            if (DOTNAME_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
                         readAnnotatedType(annotation, beanParamAnnotation);
-                    }
-                }
-            } else {
-                JaxRsParameter jaxRsParam = JaxRsParameter.forName(name);
-
-                if (jaxRsParam != null) {
-                    for (AnnotationInstance annotation : entry.getValue()) {
-                        if (isBeanPropertyParam(annotation)) {
-                            readAnnotatedType(annotation, beanParamAnnotation);
-                        }
                     }
                 }
             }
@@ -1155,7 +1230,7 @@ public class ParameterProcessor {
     static boolean isResourceMethod(MethodInfo method) {
         return method.annotations()
                 .stream()
-                .map(a -> a.name())
+                .map(AnnotationInstance::name)
                 .anyMatch(DOTNAME_JAXRS_HTTP_METHODS::contains);
     }
 
@@ -1167,7 +1242,7 @@ public class ParameterProcessor {
      */
     static boolean hasParameters(Collection<AnnotationInstance> annotations) {
         return annotations.stream()
-                .map(a -> a.name())
+                .map(AnnotationInstance::name)
                 .anyMatch(ParameterProcessor::isParameter);
     }
 

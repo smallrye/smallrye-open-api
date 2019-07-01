@@ -86,9 +86,7 @@ public final class OpenApiConstants {
     public static final String EXTENSION_PROPERTY_PREFIX = "x-";
 
     private static final String MIME_ANY = "*/*";
-    public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> {
-        return new String[] { MIME_ANY };
-    };
+    public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> new String[] { MIME_ANY };
 
     public static final String PROP_TRACE = "trace";
     public static final String PROP_PATCH = "patch";
@@ -164,6 +162,7 @@ public final class OpenApiConstants {
     public static final String PROP_MAXIMUM = "maximum";
     public static final String PROP_MULTIPLE_OF = "multipleOf";
     public static final String PROP_FORMAT = "format";
+    @SuppressWarnings("squid:S00115") // Instruct SonarCloud to ignore this unconventional variable name
     public static final String PROP_$REF = "$ref";
     public static final String PROP_CALLBACKS = "callbacks";
     public static final String PROP_LINKS = "links";
@@ -249,6 +248,7 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_MATRIX_PARAM = DotName.createSimple(MatrixParam.class.getName());
     public static final DotName DOTNAME_BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
 
+    // RestEasy parameter extension annotations
     public static final DotName DOTNAME_RESTEASY_QUERY_PARAM = DotName
             .createSimple("org.jboss.resteasy.annotations.jaxrs.QueryParam");
     public static final DotName DOTNAME_RESTEASY_FORM_PARAM = DotName
@@ -261,6 +261,33 @@ public final class OpenApiConstants {
             .createSimple("org.jboss.resteasy.annotations.jaxrs.HeaderParam");
     public static final DotName DOTNAME_RESTEASY_MATRIX_PARAM = DotName
             .createSimple("org.jboss.resteasy.annotations.jaxrs.MatrixParam");
+
+    // RestEasy multi-part form annotations
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_FORM = DotName
+            .createSimple("org.jboss.resteasy.annotations.providers.multipart.MultipartForm");
+    public static final DotName DOTNAME_RESTEASY_PART_TYPE = DotName
+            .createSimple("org.jboss.resteasy.annotations.providers.multipart.PartType");
+
+    // RestEasy multi-part request body types
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_INPUT = DotName
+            .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartInput");
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_FORM_DATA_INPUT = DotName
+            .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput");
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_RELATED_INPUT = DotName
+            .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartRelatedInput");
+
+    public static final Set<DotName> DOTNAME_RESTEASY_MULTIPART_INPUTS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_RESTEASY_MULTIPART_INPUT,
+                    DOTNAME_RESTEASY_MULTIPART_FORM_DATA_INPUT,
+                    DOTNAME_RESTEASY_MULTIPART_RELATED_INPUT)));
+
+    // RestEasy multi-part response types
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_OUTPUT = DotName
+            .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartOutput");
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_FORM_DATA_OUTPUT = DotName
+            .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput");
+    public static final DotName DOTNAME_RESTEASY_MULTIPART_RELATED_OUTPUT = DotName
+            .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartRelatedOutput");
 
     public static final DotName DOTNAME_DEFAULT_VALUE = DotName.createSimple(DefaultValue.class.getName());
 

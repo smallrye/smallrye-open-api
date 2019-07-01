@@ -1,0 +1,92 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/multipart/{id1}/{id2}": {
+      "parameters": [
+        {
+          "name": "id1",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        {
+          "name": "id2",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [ "formField4", "f3" ],
+                "properties": {
+                  "formField1": {
+                    "type": "string",
+                    "default": "f1-default"
+                  },
+                  "f2": {
+                    "type": "string",
+                    "default": "default2"
+                  },
+                  "f3": {
+                    "type": "integer",
+                    "format": "int32",
+                    "default": 3
+                  },
+                  "formField4": {
+                    "type": "string",
+                    "nullable": false
+                  }
+                }
+              },
+              "encoding": {
+                "formField1": {
+                  "contentType": "text/x-custom-type"
+                },
+                "f2": {
+                  "contentType": "text/plain"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Widget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

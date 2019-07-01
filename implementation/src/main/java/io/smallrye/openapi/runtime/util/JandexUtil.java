@@ -40,6 +40,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
+import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -447,6 +448,9 @@ public class JandexUtil {
     private static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
+            if (JaxRsParameter.isParameter(instance.name())) {
+                return true;
+            }
             if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
                 return true;
             }

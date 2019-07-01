@@ -15,6 +15,9 @@
  */
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +30,9 @@ import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
+import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.Indexer;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
@@ -91,6 +96,30 @@ public class OpenApiDataObjectScanner {
     public static final Type STRING_TYPE = Type.create(DotName.createSimple(String.class.getName()), Type.Kind.CLASS);
     // Array type
     public static final Type ARRAY_TYPE_OBJECT = ArrayType.create(DotName.createSimple("[Ljava.lang.Object;"), Type.Kind.ARRAY);
+
+    private static ClassInfo collectionStandin;
+    private static ClassInfo mapStandin;
+
+    /*-
+     * Index the "standin" collection types for internal use. These are required to wrap
+     * collections of application classes (indexed elsewhere).
+     */
+    static {
+        Indexer indexer = new Indexer();
+        index(indexer, "CollectionStandin.class");
+        index(indexer, "MapStandin.class");
+        Index index = indexer.complete();
+        collectionStandin = index.getClassByName(DotName.createSimple(CollectionStandin.class.getName()));
+        mapStandin = index.getClassByName(DotName.createSimple(MapStandin.class.getName()));
+    }
+
+    private static void index(Indexer indexer, String resourceName) {
+        try (InputStream stream = OpenApiDataObjectScanner.class.getResourceAsStream(resourceName)) {
+            indexer.index(stream);
+        } catch (IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
+    }
 
     private Schema rootSchema;
     private AnnotationTarget rootAnnotationTarget;
@@ -279,11 +308,11 @@ public class OpenApiDataObjectScanner {
 
     private ClassInfo initialType(Type type) {
         if (isA(type, COLLECTION_TYPE)) {
-            return index.getClass(CollectionStandin.class);
+            return collectionStandin;
         }
 
         if (isA(type, MAP_TYPE)) {
-            return index.getClass(MapStandin.class);
+            return mapStandin;
         }
 
         return index.getClass(type);

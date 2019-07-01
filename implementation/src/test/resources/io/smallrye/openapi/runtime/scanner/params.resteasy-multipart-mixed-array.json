@@ -1,0 +1,42 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/multipart-mixed-array/post": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/mixed": {
+              "schema": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/RequestBodyWidget"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RequestBodyWidget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
