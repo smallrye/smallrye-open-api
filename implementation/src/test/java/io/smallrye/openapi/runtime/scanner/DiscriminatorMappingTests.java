@@ -17,6 +17,7 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 
+import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,8 +29,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -38,19 +37,12 @@ import org.junit.Test;
  */
 public class DiscriminatorMappingTests extends IndexScannerTestBase {
 
-    private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
-        Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals(expectedResource, result);
-    }
-
     @Test
     public void testDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
-        test("polymorphism.declared-discriminator.json",
+        assertJsonEquals("polymorphism.declared-discriminator.json",
                 DiscriminatorFullDeclaredInResponseTestResource.class,
                 AbstractPet.class,
+                Canine.class,
                 Cat.class,
                 Dog.class,
                 Lizard.class);
@@ -58,9 +50,10 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
     public void testDiscriminatorNoMappingTestResource() throws IOException, JSONException {
-        test("polymorphism.declared-discriminator-no-mapping.json",
+        assertJsonEquals("polymorphism.declared-discriminator-no-mapping.json",
                 DiscriminatorNoMappingTestResource.class,
                 AbstractPet.class,
+                Canine.class,
                 Cat.class,
                 Dog.class,
                 Lizard.class);
@@ -68,9 +61,10 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
     public void testDiscriminatorMappingNoSchema() throws IOException, JSONException {
-        test("polymorphism.declared-discriminator-no-mapping-schema.json",
+        assertJsonEquals("polymorphism.declared-discriminator-no-mapping-schema.json",
                 DiscriminatorMappingNoSchemaTestResource.class,
                 AbstractPet.class,
+                Canine.class,
                 Cat.class,
                 Dog.class,
                 Lizard.class);
@@ -78,9 +72,10 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
     public void testDiscriminatorMappingNoKey() throws IOException, JSONException {
-        test("polymorphism.declared-discriminator-no-mapping-key.json",
+        assertJsonEquals("polymorphism.declared-discriminator-no-mapping-key.json",
                 DiscriminatorMappingNoKeyTestResource.class,
                 AbstractPet.class,
+                Canine.class,
                 Cat.class,
                 Dog.class,
                 Lizard.class);
@@ -88,9 +83,10 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
     public void testDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
-        test("polymorphism.declared-discriminator-empty-mapping.json",
+        assertJsonEquals("polymorphism.declared-discriminator-empty-mapping.json",
                 DiscriminatorMappingEmptyMappingTestResource.class,
                 AbstractPet.class,
+                Canine.class,
                 Cat.class,
                 Dog.class,
                 Lizard.class);
@@ -98,9 +94,10 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
     public void testDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
-        test("polymorphism.declared-discriminator-no-property-name.json",
+        assertJsonEquals("polymorphism.declared-discriminator-no-property-name.json",
                 DiscriminatorMappingNoPropertyNameTestResource.class,
                 AbstractPet.class,
+                Canine.class,
                 Cat.class,
                 Dog.class,
                 Lizard.class);
@@ -111,16 +108,55 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     public static abstract class AbstractPet {
         @Schema(name = "pet_type", required = true)
         private String type;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+    }
+
+    public static interface Canine {
+        @Schema(name = "bark1", readOnly = true) // Overridden by Dog#bark
+        public String getBark();
     }
 
     public static class Cat extends AbstractPet {
         String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
-    public static class Dog extends AbstractPet {
+    public static class Dog extends AbstractPet implements Canine {
+        @Schema(name = "bark")
         String bark;
+
+        @Override
+        @Schema(name = "bark")
+        public String getBark() {
+            return bark;
+        }
+
+        @Schema(name = "dog_name", description = "An annotated method, no field!")
+        public String getName() {
+            return "Fido";
+        }
+
+        @Schema(description = "This property is not used due to being static")
+        public static int getAge() {
+            return -1;
+        }
     }
 
+    @JsonbPropertyOrder({ "type", "lovesRocks" })
     public static class Lizard extends AbstractPet {
         boolean lovesRocks;
     }

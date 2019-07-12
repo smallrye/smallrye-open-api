@@ -48,7 +48,6 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     private final DataObjectDeque objectStack;
     private final DataObjectDeque.PathEntry parentPathEntry;
     private final TypeResolver typeResolver;
-    private final String entityName;
     private final Type entityType;
 
     // This can be overridden.
@@ -61,13 +60,11 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             DataObjectDeque.PathEntry parentPathEntry,
             TypeResolver typeResolver,
             AnnotationTarget annotationTarget,
-            String entityName,
             Type entityType) {
         this.index = index;
         this.objectStack = objectStack;
         this.parentPathEntry = parentPathEntry;
         this.typeResolver = typeResolver;
-        this.entityName = entityName;
         this.entityType = entityType;
         this.annotationTarget = annotationTarget;
         this.fieldSchema = new SchemaImpl();
@@ -76,9 +73,10 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     public AnnotationTargetProcessor(AugmentedIndexView index,
             DataObjectDeque objectStack,
             TypeResolver typeResolver,
-            DataObjectDeque.PathEntry parentPathEntry,
-            FieldInfo fieldInfo) {
-        this(index, objectStack, parentPathEntry, typeResolver, fieldInfo, fieldInfo.name(), fieldInfo.type());
+            DataObjectDeque.PathEntry parentPathEntry) {
+
+        this(index, objectStack, parentPathEntry, typeResolver, typeResolver.getAnnotationTarget(),
+                typeResolver.getUnresolvedType());
     }
 
     public AnnotationTargetProcessor(AugmentedIndexView index,
@@ -86,15 +84,15 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             TypeResolver typeResolver,
             DataObjectDeque.PathEntry parentPathEntry,
             Type type) {
-        this(index, objectStack, parentPathEntry, typeResolver, index.getClass(type), type.name().toString(), type);
+        this(index, objectStack, parentPathEntry, typeResolver, index.getClass(type), type);
     }
 
     public static Schema process(AugmentedIndexView index,
             DataObjectDeque objectStack,
             TypeResolver typeResolver,
-            DataObjectDeque.PathEntry parentPathEntry,
-            FieldInfo field) {
-        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, objectStack, typeResolver, parentPathEntry, field);
+            DataObjectDeque.PathEntry parentPathEntry) {
+
+        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, objectStack, typeResolver, parentPathEntry);
         return fp.processField();
     }
 
@@ -128,7 +126,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     Schema processField() {
         AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
 
-        final String propertyKey = readPropertyKey(schemaAnnotation);
+        final String propertyKey = typeResolver.getPropertyName();
 
         if (schemaAnnotation == null) {
             // Handle unannotated field and just do simple inference.
@@ -144,30 +142,6 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         fieldSchema = SchemaRegistry.checkRegistration(entityType, typeResolver, fieldSchema);
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
-    }
-
-    private String readPropertyKey(AnnotationInstance schemaAnnotation) {
-        String key = null;
-
-        if (schemaAnnotation != null) {
-            key = JandexUtil.stringValue(schemaAnnotation, OpenApiConstants.PROP_NAME);
-        }
-
-        if (key == null) {
-            AnnotationInstance jsonbAnnotation = TypeUtil.getAnnotation(annotationTarget,
-                    OpenApiConstants.DOTNAME_JSONB_PROPERTY);
-            if (jsonbAnnotation != null) {
-                key = JandexUtil.stringValue(jsonbAnnotation, OpenApiConstants.PROP_VALUE);
-
-                if (key == null) {
-                    key = entityName;
-                }
-            } else {
-                key = entityName;
-            }
-        }
-
-        return key;
     }
 
     private void readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation) {

@@ -18,7 +18,6 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -29,7 +28,6 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
-import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
@@ -242,21 +240,16 @@ public class OpenApiDataObjectScanner {
             LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
 
             // Get all fields *including* inherited.
-            Map<FieldInfo, TypeResolver> allFields = TypeResolver.getAllFields(index, currentType, currentClass);
+            Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, currentType, currentClass);
 
             // Handle fields
-            for (Map.Entry<FieldInfo, TypeResolver> entry : allFields.entrySet()) {
-                FieldInfo field = entry.getKey();
+            for (Map.Entry<String, TypeResolver> entry : properties.entrySet()) {
                 TypeResolver resolver = entry.getValue();
                 // Ignore static fields and fields annotated with ignore.
-                if (!Modifier.isStatic(field.flags()) && !ignoreResolver.isIgnore(field, currentPathEntry)) {
-                    LOG.debugv("Iterating field {0}", field);
-                    AnnotationTargetProcessor.process(index, objectStack, resolver, currentPathEntry, field);
+                if (!ignoreResolver.isIgnore(resolver.getAnnotationTarget(), currentPathEntry)) {
+                    AnnotationTargetProcessor.process(index, objectStack, resolver, currentPathEntry);
                 }
             }
-
-            // Handle methods
-            // TODO put it here!
         }
     }
 
@@ -271,7 +264,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private void resolveSpecial(DataObjectDeque.PathEntry root, Type type) {
-        Map<FieldInfo, TypeResolver> fieldResolution = TypeResolver.getAllFields(index, type, rootClassInfo);
+        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(index, type, rootClassInfo);
         rootSchema = preProcessSpecial(type, fieldResolution.values().iterator().next(), root);
     }
 
