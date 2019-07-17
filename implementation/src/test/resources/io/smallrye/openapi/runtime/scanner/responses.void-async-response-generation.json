@@ -1,0 +1,27 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/pets/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Description 400"
+          }
+        }
+      }
+    }
+  }
+}
