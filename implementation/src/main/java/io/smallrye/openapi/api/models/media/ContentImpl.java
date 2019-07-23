@@ -41,7 +41,7 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
         if (mediaType == null) {
             return this;
         }
-        this.put(name, mediaType);
+        super.put(name, mediaType);
         return this;
     }
 

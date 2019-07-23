@@ -41,11 +41,14 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Encoding;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -147,6 +150,14 @@ public class ParameterScanTests extends IndexScannerTestBase {
         test("params.all-the-params.json",
                 AllTheParamsTestResource.class,
                 AllTheParamsTestResource.Bean.class,
+                Widget.class);
+    }
+
+    @Test
+    public void testMultipartForm() throws IOException, JSONException {
+        test("params.multipart-form.json",
+                MultipartFormTestResource.class,
+                MultipartFormTestResource.Bean.class,
                 Widget.class);
     }
 
@@ -399,6 +410,36 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.APPLICATION_JSON)
         public Widget get(@QueryParam("q1") @Deprecated long q1,
                 @org.jboss.resteasy.annotations.jaxrs.QueryParam("q2") String notQ2) {
+            return null;
+        }
+    }
+
+    @Path("/multipart/{id1}/{id2}")
+    @SuppressWarnings("unused")
+    static class MultipartFormTestResource {
+        public MultipartFormTestResource(@PathParam("id1") int id1,
+                @org.jboss.resteasy.annotations.jaxrs.PathParam String id2) {
+        }
+
+        static class Bean {
+            @org.jboss.resteasy.annotations.jaxrs.FormParam
+            @DefaultValue("f1-default")
+            String formField1;
+
+            @FormParam("f2")
+            @DefaultValue("default2")
+            @PartType("text/plain")
+            String formField2;
+        }
+
+        @POST
+        @Consumes(MediaType.MULTIPART_FORM_DATA)
+        @Produces(MediaType.APPLICATION_JSON)
+        @RequestBody(content = @Content(schema = @Schema(requiredProperties = { "f3" }), encoding = {
+                @Encoding(name = "formField1", contentType = "text/x-custom-type") }))
+        public CompletionStage<Widget> upd(@MultipartForm Bean form,
+                @FormParam("f3") @DefaultValue("3") int formField3,
+                @org.jboss.resteasy.annotations.jaxrs.FormParam @NotNull String formField4) {
             return null;
         }
     }

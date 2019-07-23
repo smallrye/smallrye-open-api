@@ -52,6 +52,7 @@ import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
@@ -95,6 +96,7 @@ import io.smallrye.openapi.api.models.links.LinkImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
@@ -479,7 +481,7 @@ public class OpenApiAnnotationScanner {
 
         // Process @Parameter annotations
         /////////////////////////////////////////
-        ResourceParameters params = ParameterProcessor.process(index, resource, method, this::readParameter, extensions);
+        ResourceParameters params = ParameterProcessor.process(index, method, this::readParameter, extensions);
 
         operation.setParameters(params.getOperationParameters());
         pathItem.setParameters(params.getPathItemParameters());
@@ -487,10 +489,19 @@ public class OpenApiAnnotationScanner {
         // Process any @RequestBody annotation
         /////////////////////////////////////////
         // note: the @RequestBody annotation can be found on a method argument *or* on the method
+        RequestBody requestBody = null;
+
         List<AnnotationInstance> requestBodyAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_REQUEST_BODY, null);
         for (AnnotationInstance annotation : requestBodyAnnotations) {
-            RequestBody requestBody = readRequestBody(annotation);
+            requestBody = readRequestBody(annotation);
+            Content formBodyContent = params.getFormBodyContent();
+
+            if (formBodyContent != null) {
+                // If form parameters were present, overlay RequestBody onto the generated form content
+                requestBody.setContent((Content) MergeUtil.mergeMaps(formBodyContent, requestBody.getContent()));
+            }
+
             // TODO if the method argument type is Request, don't generate a Schema!
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
@@ -504,33 +515,49 @@ public class OpenApiAnnotationScanner {
                 }
                 if (requestBodyType != null) {
                     Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
-                    ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
+                    if (schema != null) {
+                        ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
+                    }
                 }
             }
-            operation.setRequestBody(requestBody);
         }
 
         // If the request body is null, figure it out from the parameters.  Only if the
         // method declares that it @Consumes data
-        if (operation.getRequestBody() == null && currentConsumes != null) {
+        if ((requestBody == null || (requestBody.getContent() == null && requestBody.getRef() == null))
+                && currentConsumes != null) {
             if (params.getFormBodySchema() != null) {
-                // TODO: Merge @FormParam data with @Parameter given by user?
-                RequestBody requestBody = new RequestBodyImpl();
+                if (requestBody == null) {
+                    requestBody = new RequestBodyImpl();
+                }
                 Schema schema = params.getFormBodySchema();
                 ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
-                operation.setRequestBody(requestBody);
             } else {
                 Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
 
                 if (requestBodyType != null) {
-                    Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
+                    Schema schema = null;
+
+                    if (OpenApiConstants.DOTNAME_RESTEASY_MULTIPART_INPUTS.contains(requestBodyType.name())) {
+                        schema = new SchemaImpl();
+                        schema.setType(SchemaType.OBJECT);
+                    } else {
+                        schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
+                    }
+
+                    if (requestBody == null) {
+                        requestBody = new RequestBodyImpl();
+                    }
+
                     if (schema != null) {
-                        RequestBody requestBody = new RequestBodyImpl();
                         ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
-                        operation.setRequestBody(requestBody);
                     }
                 }
             }
+        }
+
+        if (requestBody != null) {
+            operation.setRequestBody(requestBody);
         }
 
         // Process @APIResponse annotations
@@ -649,16 +676,6 @@ public class OpenApiAnnotationScanner {
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
         String path = makePath(this.currentAppPath, params.getOperationPath());
-
-        /*
-         * if (method.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
-         * AnnotationInstance pathAnno = method.annotation(OpenApiConstants.DOTNAME_PATH);
-         * String methodPath = pathAnno.value().asString();
-         * path = makePath(this.currentAppPath, this.currentResourcePath, methodPath);
-         * } else {
-         * path = makePath(this.currentAppPath, this.currentResourcePath);
-         * }
-         */
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);

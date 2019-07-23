@@ -1,0 +1,23 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/multipart-mixed/post": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/mixed": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  }
+}

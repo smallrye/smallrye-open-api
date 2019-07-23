@@ -166,7 +166,7 @@ public class MergeUtil {
      * @param values2
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Map mergeMaps(Map values1, Map values2) {
+    public static Map mergeMaps(Map values1, Map values2) {
         if (values1 == null && values2 == null) {
             return null;
         }
