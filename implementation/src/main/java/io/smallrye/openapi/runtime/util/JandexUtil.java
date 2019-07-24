@@ -233,7 +233,7 @@ public class JandexUtil {
         String strVal = value.asString();
         T[] constants = clazz.getEnumConstants();
         for (T t : constants) {
-            if (t.name().equals(strVal)) {
+            if (t.toString().equals(strVal)) {
                 return t;
             }
         }
