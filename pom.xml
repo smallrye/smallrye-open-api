@@ -33,7 +33,7 @@
 
     <properties>
         <version.buildhelper.plugin>3.0.0</version.buildhelper.plugin>
-        <version.com.fasterxml.jackson>2.9.9</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson>2.10.0.pr1</version.com.fasterxml.jackson>
         <version.com.fasterxml.jackson.dataformat>2.9.9</version.com.fasterxml.jackson.dataformat>
         <version.commons-beanutils>1.9.3</version.commons-beanutils>
         <version.commons-logging>1.2</version.commons-logging>
