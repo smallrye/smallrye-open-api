@@ -313,8 +313,33 @@ public final class OpenApiConstants {
 
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 
-    public static final DotName DOTNAME_JSONB_PROPERTY = DotName.createSimple("javax.json.bind.annotation.JsonbProperty");
-    public static final DotName DOTNAME_JSONB_TRANSIENT = DotName.createSimple("javax.json.bind.annotation.JsonbTransient");
+    public static final DotName DOTNAME_JSONB_PROPERTY = DotName
+            .createSimple("javax.json.bind.annotation.JsonbProperty");
+    public static final DotName DOTNAME_JSONB_TRANSIENT = DotName
+            .createSimple("javax.json.bind.annotation.JsonbTransient");
+    public static final DotName DOTNAME_JSONB_PROPERTY_ORDER = DotName
+            .createSimple("javax.json.bind.annotation.JsonbPropertyOrder");
+
+    public static final DotName DOTNAME_JAXB_XML_TYPE = DotName
+            .createSimple("javax.xml.bind.annotation.XmlType");
+    public static final DotName DOTNAME_JAXB_XML_ELEMENT = DotName
+            .createSimple("javax.xml.bind.annotation.XmlElement");
+    public static final DotName DOTNAME_JAXB_XML_ATTRIBUTE = DotName
+            .createSimple("javax.xml.bind.annotation.XmlAttribute");
+
+    public static final DotName DOTNAME_JACKSON_PROPERTY = DotName
+            .createSimple("com.fasterxml.jackson.annotation.JsonProperty");
+    public static final DotName DOTNAME_JACKSON_IGNORE = DotName
+            .createSimple("com.fasterxml.jackson.annotation.JsonIgnore");
+    public static final DotName DOTNAME_JACKSON_IGNORE_PROPERTIES = DotName
+            .createSimple("com.fasterxml.jackson.annotation.JsonIgnoreProperties");
+    public static final DotName DOTNAME_JACKSON_PROPERTY_ORDER = DotName
+            .createSimple("com.fasterxml.jackson.annotation.JsonPropertyOrder");
+
+    public static final Set<DotName> DOTNAME_PROPERTY_ANNOTATIONS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_SCHEMA,
+                    DOTNAME_JSONB_PROPERTY,
+                    DOTNAME_JACKSON_PROPERTY)));
 
     public static final String REF_PREFIX_API_RESPONSE = "#/components/responses/";
     public static final String REF_PREFIX_CALLBACK = "#/components/callbacks/";

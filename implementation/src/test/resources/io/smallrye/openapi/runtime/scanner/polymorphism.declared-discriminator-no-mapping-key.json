@@ -69,6 +69,10 @@
           "pet_type": {
             "type": "string"
           },
+          "dog_name" : {
+            "type": "string",
+            "description": "An annotated method, no field!"
+          },
           "bark": {
             "type": "string"
           }

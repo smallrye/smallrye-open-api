@@ -132,6 +132,15 @@ public class IndexScannerTestBase {
                 true);
     }
 
+    public static void assertJsonEquals(String expectedResource, Class<?>... classes)
+            throws IOException, JSONException {
+        Index index = indexOf(classes);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals(expectedResource, result);
+    }
+
     public static String loadResource(URL testResource) throws IOException {
         return IOUtils.toString(testResource, "UTF-8");
     }

@@ -26,15 +26,15 @@ import java.util.Set;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 
 import io.smallrye.openapi.api.OpenApiConstants;
@@ -110,14 +110,9 @@ public class IgnoreResolver {
      * Handler for JSON-B's @{@link javax.json.bind.annotation.JsonbTransient}
      */
     private final class JsonbTransientHandler implements IgnoreAnnotationHandler {
-
         @Override
         public boolean shouldIgnore(AnnotationTarget target, DataObjectDeque.PathEntry parentPathEntry) {
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
-            if (annotationInstance != null) {
-                return true;
-            }
-            return false;
+            return TypeUtil.hasAnnotation(target, getName());
         }
 
         @Override
@@ -127,50 +122,75 @@ public class IgnoreResolver {
     }
 
     /**
-     * Handler for Jackson's {@link JsonIgnoreProperties}
+     * Handler for Jackson's {@link com.fasterxml.jackson.annotation.JsonIgnoreProperties JsonIgnoreProperties}
      */
     private final class JsonIgnorePropertiesHandler implements IgnoreAnnotationHandler {
 
         @Override
         public boolean shouldIgnore(AnnotationTarget target, DataObjectDeque.PathEntry parentPathEntry) {
+            if (declaringClassIgnore(target)) {
+                return true;
+            }
 
-            if (target.kind() == AnnotationTarget.Kind.FIELD) {
-                // First look at declaring class for @JsonIgnoreProperties
-                // Then look at enclosing type.
-                FieldInfo field = target.asField();
-                return declaringClassIgnore(field) || nestingFieldIgnore(parentPathEntry.getAnnotationTarget(), field.name());
-            } // TODO add method
-            return false;
+            return nestingPropertyIgnore(parentPathEntry.getAnnotationTarget(), propertyName(target));
         }
 
-        // Declaring class ignore
-        //
-        //  @JsonIgnoreProperties("ignoreMe")
-        //  class A {
-        //    String ignoreMe;
-        //  }
-        private boolean declaringClassIgnore(FieldInfo field) {
-            AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(field.declaringClass(), getName());
-            return shouldIgnoreTarget(declaringClassJIP, field.name());
+        /**
+         * Declaring class ignore
+         * 
+         * <pre>
+         * <code>
+         *  &#64;JsonIgnoreProperties("ignoreMe")
+         *  class A {
+         *    String ignoreMe;
+         *  }
+         * </code>
+         * </pre>
+         *
+         * @param target
+         * @return
+         */
+        private boolean declaringClassIgnore(AnnotationTarget target) {
+            AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(TypeUtil.getDeclaringClass(target), getName());
+            return shouldIgnoreTarget(declaringClassJIP, propertyName(target));
         }
 
-        // Look for nested/enclosing type @JsonIgnoreProperties.
-        //
-        // class A {
-        //   @JsonIgnoreProperties("ignoreMe")
-        //   B foo;
-        // }
-        //
-        // class B {
-        //   String ignoreMe; // Ignored during scan via A.
-        //   String doNotIgnoreMe;
-        // }
-        private boolean nestingFieldIgnore(AnnotationTarget nesting, String fieldName) {
+        /**
+         * Look for nested/enclosing type @com.fasterxml.jackson.annotation.JsonIgnoreProperties.
+         *
+         * <pre>
+         * <code>
+         * class A {
+         *   &#64;com.fasterxml.jackson.annotation.JsonIgnoreProperties("ignoreMe")
+         *   B foo;
+         * }
+         *
+         * class B {
+         *   String ignoreMe; // Ignored during scan via A.
+         *   String doNotIgnoreMe;
+         * }
+         * </code>
+         * </pre>
+         *
+         * @param nesting
+         * @param propertyName
+         * @return
+         */
+        private boolean nestingPropertyIgnore(AnnotationTarget nesting, String propertyName) {
             if (nesting == null) {
                 return false;
             }
             AnnotationInstance nestedTypeJIP = TypeUtil.getAnnotation(nesting, getName());
-            return shouldIgnoreTarget(nestedTypeJIP, fieldName);
+            return shouldIgnoreTarget(nestedTypeJIP, propertyName);
+        }
+
+        private String propertyName(AnnotationTarget target) {
+            if (target.kind() == Kind.FIELD) {
+                return target.asField().name();
+            }
+            // Assuming this is a getter or setter
+            String name = target.asMethod().name().substring(3);
+            return Character.toLowerCase(name.charAt(0)) + name.substring(1);
         }
 
         private boolean shouldIgnoreTarget(AnnotationInstance jipAnnotation, String targetName) {
@@ -183,12 +203,12 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return DotName.createSimple(JsonIgnoreProperties.class.getName());
+            return OpenApiConstants.DOTNAME_JACKSON_IGNORE_PROPERTIES;
         }
     }
 
     /**
-     * Handler for Jackson's @{@link JsonIgnore}
+     * Handler for Jackson's @{@link com.fasterxml.jackson.annotation.JsonIgnore JsonIgnore}
      */
     private final class JsonIgnoreHandler implements IgnoreAnnotationHandler {
 
@@ -203,7 +223,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return DotName.createSimple(JsonIgnore.class.getName());
+            return OpenApiConstants.DOTNAME_JACKSON_IGNORE;
         }
     }
 
@@ -217,10 +237,22 @@ public class IgnoreResolver {
         public boolean shouldIgnore(AnnotationTarget target, DataObjectDeque.PathEntry parentPathEntry) {
             Type classType;
 
-            if (target.kind() == AnnotationTarget.Kind.FIELD) {
-                classType = target.asField().type();
-            } else { // TODO add target.kind() method
-                return false;
+            switch (target.kind()) {
+                case FIELD:
+                    classType = target.asField().type();
+                    break;
+                case METHOD:
+                    MethodInfo method = target.asMethod();
+                    if (method.returnType().kind().equals(Type.Kind.VOID)) {
+                        // Setter method
+                        classType = method.parameters().get(0);
+                    } else {
+                        // Getter method
+                        classType = method.returnType();
+                    }
+                    break;
+                default:
+                    return false;
             }
 
             // Primitive and non-indexed types will result in a null

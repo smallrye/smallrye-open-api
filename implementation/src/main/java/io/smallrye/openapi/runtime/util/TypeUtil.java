@@ -31,6 +31,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
+import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
@@ -231,6 +232,54 @@ public class TypeUtil {
         return TypeUtil.getBound(type.asWildcardType());
     }
 
+    public static boolean equalTypes(Type type1, Type type2) {
+        if (type1.name().equals(type2.name())) {
+            return true;
+        }
+        return equalWrappedTypes(type1, type2) || equalWrappedTypes(type2, type1);
+    }
+
+    public static boolean equalWrappedTypes(Type primitiveCandidate, Type wrappedCandidate) {
+        return primitiveCandidate.kind().equals(Type.Kind.PRIMITIVE) &&
+                wrappedCandidate.kind().equals(Type.Kind.CLASS) &&
+                isPrimitiveWrapper(primitiveCandidate.asPrimitiveType(), wrappedCandidate);
+    }
+
+    public static boolean isPrimitiveWrapper(PrimitiveType primitive, Type wrapped) {
+        Class<?> wrapperType;
+
+        switch (primitive.primitive()) {
+            case BOOLEAN:
+                wrapperType = Boolean.class;
+                break;
+            case BYTE:
+                wrapperType = Byte.class;
+                break;
+            case CHAR:
+                wrapperType = Character.class;
+                break;
+            case DOUBLE:
+                wrapperType = Double.class;
+                break;
+            case FLOAT:
+                wrapperType = Float.class;
+                break;
+            case INT:
+                wrapperType = Integer.class;
+                break;
+            case LONG:
+                wrapperType = Long.class;
+                break;
+            case SHORT:
+                wrapperType = Short.class;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown primitive: " + primitive);
+        }
+
+        return DotName.createSimple(wrapperType.getName()).equals(wrapped.name());
+    }
+
     public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
         return getAnnotation(annotationTarget, OpenApiConstants.DOTNAME_SCHEMA);
     }
@@ -247,6 +296,29 @@ public class TypeUtil {
         return getAnnotation(type, OpenApiConstants.DOTNAME_SCHEMA);
     }
 
+    public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
+        switch (target.kind()) {
+            case CLASS:
+                return target.asClass().classAnnotation(annotationName) != null;
+            case FIELD:
+                return target.asField().hasAnnotation(annotationName);
+            case METHOD:
+                return target.asMethod().hasAnnotation(annotationName);
+            case METHOD_PARAMETER:
+                MethodParameterInfo parameter = target.asMethodParameter();
+                return parameter.method()
+                        .annotations()
+                        .stream()
+                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .anyMatch(a -> a.name().equals(annotationName));
+            case TYPE:
+                break;
+        }
+
+        return false;
+    }
+
     public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
         if (annotationTarget == null) {
             return null;
@@ -255,6 +327,45 @@ public class TypeUtil {
                 .filter(annotation -> annotation.name().equals(annotationName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Convenience method to retrieve the named parameter from an annotation bound to the target.
+     * The value will be unwrapped from its containing {@link AnnotationValue}.
+     *
+     * @param <T> the type of the parameter being retrieved
+     * @param target the target object annotated with the annotation named by annotationName
+     * @param annotationName name of the annotation from which to retrieve the value
+     * @param propertyName the name of the parameter/property in the annotation
+     * @return an unwrapped annotation parameter value
+     */
+    public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName, String propertyName) {
+        return getAnnotationValue(target, annotationName, propertyName, null);
+    }
+
+    /**
+     * Convenience method to retrieve the named parameter from an annotation bound to the target.
+     * The value will be unwrapped from its containing {@link AnnotationValue}.
+     *
+     * @param <T> the type of the parameter being retrieved
+     * @param target the target object annotated with the annotation named by annotationName
+     * @param annotationName name of the annotation from which to retrieve the value
+     * @param propertyName the name of the parameter/property in the annotation
+     * @param defaultValue a default value to return if either the annotation or the value are missing
+     * @return an unwrapped annotation parameter value
+     */
+    public static <T> T getAnnotationValue(AnnotationTarget target,
+            DotName annotationName,
+            String propertyName,
+            T defaultValue) {
+
+        AnnotationInstance annotation = getAnnotation(target, annotationName);
+
+        if (annotation != null) {
+            return JandexUtil.value(annotation, propertyName);
+        }
+
+        return defaultValue;
     }
 
     public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget type) {
@@ -278,6 +389,23 @@ public class TypeUtil {
                 break;
         }
         return Collections.emptyList();
+    }
+
+    public static ClassInfo getDeclaringClass(AnnotationTarget type) {
+        switch (type.kind()) {
+            case FIELD:
+                return type.asField().declaringClass();
+            case METHOD:
+                return type.asMethod().declaringClass();
+            case METHOD_PARAMETER:
+                MethodParameterInfo parameter = type.asMethodParameter();
+                return parameter.method().declaringClass();
+            case CLASS:
+            case TYPE:
+                break;
+        }
+
+        return null;
     }
 
     public static AnnotationInstance getAnnotation(Type type, DotName annotationName) {
