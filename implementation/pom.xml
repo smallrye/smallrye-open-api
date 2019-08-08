@@ -21,11 +21,11 @@
 
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-open-api-parent-1.1</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <artifactId>smallrye-open-api-parent</artifactId>
+        <version>1.1.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-open-api-1.1</artifactId>
+    <artifactId>smallrye-open-api</artifactId>
 
     <name>SmallRye: MicroProfile OpenAPI Implementation</name>
 

@@ -4,11 +4,11 @@
 
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-open-api-parent-1.1</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <artifactId>smallrye-open-api-parent</artifactId>
+        <version>1.1.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-open-api-release-1.1</artifactId>
+    <artifactId>smallrye-open-api-release</artifactId>
 
     <name>Empty Release Project to Avoid Maven Bug</name>
     <description>Empty Release Project to Avoid Maven Bug</description>
