@@ -46,7 +46,7 @@
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.skyscreamer>1.5.0</version.org.skyscreamer>
         <version.org.jboss.resteasy.core-spi>4.2.0.Final</version.org.jboss.resteasy.core-spi>
-        <version.org.jboss.resteasy.multipart-provider>4.1.1.Final</version.org.jboss.resteasy.multipart-provider>
+        <version.org.jboss.resteasy.multipart-provider>4.2.0.Final</version.org.jboss.resteasy.multipart-provider>
 
         <!-- Used by release plugin to define git tag -->
         <tagNameFormat>smallrye-open-api-1.1-@{project.version}</tagNameFormat>
