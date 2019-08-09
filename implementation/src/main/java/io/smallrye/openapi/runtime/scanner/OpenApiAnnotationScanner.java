@@ -562,6 +562,7 @@ public class OpenApiAnnotationScanner {
 
         // Process @APIResponse annotations
         /////////////////////////////////////////
+        APIResponses responses = null;
         List<AnnotationInstance> apiResponseAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_API_RESPONSE, OpenApiConstants.DOTNAME_API_RESPONSES);
         for (AnnotationInstance annotation : apiResponseAnnotations) {
@@ -570,11 +571,17 @@ public class OpenApiAnnotationScanner {
                 responseCode = APIResponses.DEFAULT;
             }
             APIResponse response = readResponse(annotation);
-            APIResponses responses = ModelUtil.responses(operation);
+            responses = ModelUtil.responses(operation);
             responses.addAPIResponse(responseCode, response);
         }
-        // If there are no responses from annotations, try to create a response from the method return value.
-        if (operation.getResponses() == null || operation.getResponses().isEmpty()) {
+        /*
+         * If there is no response from annotations, try to create one from the method return value.
+         * Do not generate a response if the app has used an empty @ApiResponses annotation. This
+         * provides a way for the application to indicate that responses will be supplied some other
+         * way (i.e. static file).
+         */
+        AnnotationInstance apiResponses = method.annotation(OpenApiConstants.DOTNAME_API_RESPONSES);
+        if (apiResponses == null || !JandexUtil.isEmpty(apiResponses)) {
             createResponseFromJaxRsMethod(method, operation);
         }
 
@@ -727,39 +734,91 @@ public class OpenApiAnnotationScanner {
      */
     private void createResponseFromJaxRsMethod(MethodInfo method, Operation operation) {
         Type returnType = method.returnType();
-
-        Schema schema;
-        APIResponses responses;
-        APIResponse response;
-        ContentImpl content;
+        APIResponse response = null;
+        String code = "200";
+        String description = "OK";
 
         if (returnType.kind() == Type.Kind.VOID) {
-            String code = "204";
-            String description = "No Content";
+            boolean asyncResponse = method.parameters()
+                    .stream()
+                    .map(Type::name)
+                    .anyMatch(OpenApiConstants.DOTNAME_ASYNC_RESPONSE::equals);
+
             if (method.hasAnnotation(OpenApiConstants.DOTNAME_POST)) {
                 code = "201";
                 description = "Created";
+            } else if (!asyncResponse) {
+                code = "204";
+                description = "No Content";
             }
-            responses = ModelUtil.responses(operation);
+
+            if (generateResponse(code, operation)) {
+                response = new APIResponseImpl().description(description);
+            }
+        } else if (generateResponse(code, operation)) {
             response = new APIResponseImpl().description(description);
-            responses.addAPIResponse(code, response);
-        } else {
-            schema = SchemaFactory.typeToSchema(index, returnType, extensions);
-            responses = ModelUtil.responses(operation);
-            response = new APIResponseImpl().description("OK");
-            content = new ContentImpl();
-            String[] produces = this.currentProduces;
-            if (produces == null || produces.length == 0) {
-                produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+
+            /*
+             * Only generate content if not already supplied in annotations and the
+             * method does not return an opaque JAX-RS Response
+             */
+            if (!returnType.name().equals(OpenApiConstants.DOTNAME_RESPONSE) &&
+                    (ModelUtil.responses(operation).getAPIResponse(code) == null ||
+                            ModelUtil.responses(operation).getAPIResponse(code).getContent() == null)) {
+
+                Schema schema;
+
+                if (OpenApiConstants.DOTNAME_RESTEASY_MULTIPART_OUTPUTS.contains(returnType.name())) {
+                    schema = new SchemaImpl();
+                    schema.setType(SchemaType.OBJECT);
+                } else {
+                    schema = SchemaFactory.typeToSchema(index, returnType, extensions);
+                }
+
+                ContentImpl content = new ContentImpl();
+                String[] produces = this.currentProduces;
+
+                if (produces == null || produces.length == 0) {
+                    produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                }
+
+                for (String producesType : produces) {
+                    MediaType mt = new MediaTypeImpl();
+                    mt.setSchema(schema);
+                    content.addMediaType(producesType, mt);
+                }
+
+                response.setContent(content);
             }
-            for (String producesType : produces) {
-                MediaType mt = new MediaTypeImpl();
-                mt.setSchema(schema);
-                content.addMediaType(producesType, mt);
-            }
-            response.setContent(content);
-            responses.addAPIResponse("200", response);
         }
+
+        if (response != null) {
+            APIResponses responses = ModelUtil.responses(operation);
+
+            if (responses.hasAPIResponse(code)) {
+                APIResponse responseFromAnnotations = responses.getAPIResponse(code);
+                responses.removeAPIResponse(code);
+
+                // Overlay the information from the annotations (2nd arg) onto the generated details (1st)
+                response = MergeUtil.mergeObjects(response, responseFromAnnotations);
+            }
+
+            responses.addAPIResponse(code, response);
+        }
+    }
+
+    /**
+     * Determine if the default response information should be generated.
+     * It should be done when no responses have been declared or if the default
+     * response already exists and is missing information (e.g. content).
+     *
+     * @param status the status determined to be the generated default
+     * @param operation current operation
+     * @return true if a default response should be generated, otherwise false.
+     */
+    private boolean generateResponse(String status, Operation operation) {
+        APIResponses responses = operation.getResponses();
+        return responses == null || responses.getAPIResponse(status) != null;
     }
 
     /**

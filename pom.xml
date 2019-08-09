@@ -34,6 +34,7 @@
     <properties>
         <version.buildhelper.plugin>3.0.0</version.buildhelper.plugin>
         <version.com.fasterxml.jackson>2.9.9</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson.databind>2.9.9.2</version.com.fasterxml.jackson.databind>
         <version.com.fasterxml.jackson.dataformat>2.9.9</version.com.fasterxml.jackson.dataformat>
         <version.commons-beanutils>1.9.3</version.commons-beanutils>
         <version.commons-logging>1.2</version.commons-logging>
@@ -109,7 +110,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
+                <version>${version.com.fasterxml.jackson.databind}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>

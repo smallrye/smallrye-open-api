@@ -84,7 +84,7 @@ public class APIResponsesImpl extends LinkedHashMap<String, APIResponse> impleme
         if (apiResponse == null) {
             return this;
         }
-        this.put(name, apiResponse);
+        super.put(name, apiResponse);
         return this;
     }
 

@@ -42,6 +42,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 
@@ -247,6 +248,7 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_HEADER_PARAM = DotName.createSimple(HeaderParam.class.getName());
     public static final DotName DOTNAME_MATRIX_PARAM = DotName.createSimple(MatrixParam.class.getName());
     public static final DotName DOTNAME_BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
+    public static final DotName DOTNAME_ASYNC_RESPONSE = DotName.createSimple(AsyncResponse.class.getName());
 
     // RestEasy parameter extension annotations
     public static final DotName DOTNAME_RESTEASY_QUERY_PARAM = DotName
@@ -288,6 +290,11 @@ public final class OpenApiConstants {
             .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput");
     public static final DotName DOTNAME_RESTEASY_MULTIPART_RELATED_OUTPUT = DotName
             .createSimple("org.jboss.resteasy.plugins.providers.multipart.MultipartRelatedOutput");
+
+    public static final Set<DotName> DOTNAME_RESTEASY_MULTIPART_OUTPUTS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_RESTEASY_MULTIPART_OUTPUT,
+                    DOTNAME_RESTEASY_MULTIPART_FORM_DATA_OUTPUT,
+                    DOTNAME_RESTEASY_MULTIPART_RELATED_OUTPUT)));
 
     public static final DotName DOTNAME_DEFAULT_VALUE = DotName.createSimple(DefaultValue.class.getName());
 
