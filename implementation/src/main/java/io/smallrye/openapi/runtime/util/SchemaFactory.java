@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassType;
@@ -31,7 +32,7 @@ import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
  */
 public class SchemaFactory {
 
-    private static Logger LOG = Logger.getLogger(SchemaFactory.class);
+    private static final Logger LOG = Logger.getLogger(SchemaFactory.class);
 
     private SchemaFactory() {
     }
@@ -88,13 +89,13 @@ public class SchemaFactory {
         }
 
         schema.setNot((Schema) overrides.getOrDefault(OpenApiConstants.PROP_NOT,
-                readClassSchema(index, annotation.value(OpenApiConstants.PROP_NOT), true)));
+                readClassSchema(index, JandexUtil.value(annotation, OpenApiConstants.PROP_NOT), true)));
         schema.setOneOf((List<Schema>) overrides.getOrDefault(OpenApiConstants.PROP_ONE_OF,
-                readClassSchemas(index, annotation.value(OpenApiConstants.PROP_ONE_OF))));
+                readClassSchemas(index, JandexUtil.value(annotation, OpenApiConstants.PROP_ONE_OF))));
         schema.setAnyOf((List<Schema>) overrides.getOrDefault(OpenApiConstants.PROP_ANY_OF,
-                readClassSchemas(index, annotation.value(OpenApiConstants.PROP_ANY_OF))));
+                readClassSchemas(index, JandexUtil.value(annotation, OpenApiConstants.PROP_ANY_OF))));
         schema.setAllOf((List<Schema>) overrides.getOrDefault(OpenApiConstants.PROP_ALL_OF,
-                readClassSchemas(index, annotation.value(OpenApiConstants.PROP_ALL_OF))));
+                readClassSchemas(index, JandexUtil.value(annotation, OpenApiConstants.PROP_ALL_OF))));
         schema.setTitle((String) overrides.getOrDefault(OpenApiConstants.PROP_TITLE,
                 JandexUtil.stringValue(annotation, OpenApiConstants.PROP_TITLE)));
         schema.setMultipleOf((BigDecimal) overrides.getOrDefault(OpenApiConstants.PROP_MULTIPLE_OF,
@@ -162,15 +163,18 @@ public class SchemaFactory {
         }
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
-            Schema implSchema = readClassSchema(index, annotation.value(OpenApiConstants.PROP_IMPLEMENTATION), true);
+            Schema implSchema = readClassSchema(index, JandexUtil.value(annotation, OpenApiConstants.PROP_IMPLEMENTATION),
+                    true);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(annotation)) {
-            Schema implSchema = readClassSchema(index, annotation.value(OpenApiConstants.PROP_IMPLEMENTATION), true);
+            Schema implSchema = readClassSchema(index, JandexUtil.value(annotation, OpenApiConstants.PROP_IMPLEMENTATION),
+                    true);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            Schema implSchema = readClassSchema(index, annotation.value(OpenApiConstants.PROP_IMPLEMENTATION), false);
+            Schema implSchema = readClassSchema(index, JandexUtil.value(annotation, OpenApiConstants.PROP_IMPLEMENTATION),
+                    false);
 
             if (schema.getType() == Schema.SchemaType.ARRAY && implSchema != null) {
                 // If the @Schema annotation indicates an array type, then use the Schema
@@ -192,27 +196,40 @@ public class SchemaFactory {
      * whether this class type should be turned into a reference.
      *
      * @param index the index of classes being scanned
-     * @param value annotation
+     * @param type the implementation type of the item to scan
      * @param schemaReferenceSupported
      */
-    public static Schema readClassSchema(IndexView index, AnnotationValue value, boolean schemaReferenceSupported) {
-        if (value == null) {
+    public static Schema readClassSchema(IndexView index, Type type, boolean schemaReferenceSupported) {
+        if (type == null) {
             return null;
         }
-        ClassType ctype = (ClassType) value.asClass();
-        return introspectClassToSchema(index, ctype, schemaReferenceSupported);
+        Schema schema;
+        if (type.kind() == Type.Kind.ARRAY) {
+            schema = new SchemaImpl().type(SchemaType.ARRAY);
+            // Recurse using the type of the array elements
+            schema.items(readClassSchema(index, type.asArrayType().component(), schemaReferenceSupported));
+        } else if (type.kind() == Type.Kind.PRIMITIVE) {
+            schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
+        } else {
+            schema = introspectClassToSchema(index, type.asClassType(), schemaReferenceSupported);
+        }
+        return schema;
     }
 
     /**
      * Converts a jandex type to a {@link Schema} model.
      * 
-     * @param index
-     * @param type
+     * @param index the index of classes being scanned
+     * @param type the implementation type of the item to scan
      * @param extensions
      */
     public static Schema typeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
-        if (type.kind() == Type.Kind.CLASS) {
+        if (type.kind() == Type.Kind.ARRAY) {
+            schema = new SchemaImpl().type(SchemaType.ARRAY);
+            // Recurse using the type of the array elements
+            schema.items(typeToSchema(index, type.asArrayType().component(), extensions));
+        } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(index, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
@@ -260,18 +277,16 @@ public class SchemaFactory {
      * Reads an array of Class annotations to produce a list of {@link Schema} models.
      * 
      * @param index the index of classes being scanned
-     * @param value
+     * @param types the implementation types of the items to scan
      */
-    private static List<Schema> readClassSchemas(IndexView index, AnnotationValue value) {
-        if (value == null) {
+    private static List<Schema> readClassSchemas(IndexView index, Type[] types) {
+        if (types == null) {
             return null;
         }
         LOG.debug("Processing a list of schema Class annotations.");
-        Type[] classArray = value.asClassArray();
-        List<Schema> schemas = new ArrayList<>(classArray.length);
-        for (Type type : classArray) {
-            ClassType ctype = (ClassType) type;
-            Schema schema = introspectClassToSchema(index, ctype, true);
+        List<Schema> schemas = new ArrayList<>(types.length);
+        for (Type type : types) {
+            Schema schema = readClassSchema(index, type, true);
             schemas.add(schema);
         }
         return schemas;

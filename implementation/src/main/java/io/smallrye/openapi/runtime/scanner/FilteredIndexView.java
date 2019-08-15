@@ -67,7 +67,8 @@ public class FilteredIndexView implements IndexView {
      */
     private boolean accepts(DotName className) {
         String fqcn = className.toString();
-        String packageName = fqcn.substring(0, fqcn.lastIndexOf('.'));
+        int index = fqcn.lastIndexOf('.');
+        String packageName = index > -1 ? fqcn.substring(0, index) : "";
         boolean accept;
         // Includes
         if (scanClasses.isEmpty() && scanPackages.isEmpty()) {

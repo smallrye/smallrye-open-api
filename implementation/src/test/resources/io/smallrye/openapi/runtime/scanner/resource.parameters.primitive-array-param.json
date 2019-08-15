@@ -1,0 +1,39 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/v1": {
+      "post": {
+        "summary": "Convert an array of doubles to an array of floats",
+        "requestBody": {
+          "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                     "type": "number",
+                     "format": "double"
+                  }
+                }
+              }
+            }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                     "type": "number",
+                     "format": "float"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -22,7 +22,6 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Ignore;
 import org.testng.annotations.Test;
 
 import io.restassured.response.ValidatableResponse;
@@ -49,7 +48,6 @@ public class ComplexResourceTest extends BaseTckTest<ComplexResourceTest.Complex
 
         @RunAsClient
         @Test(dataProvider = "formatProvider")
-        @Ignore
         public void testArray(String type) {
             ValidatableResponse vr = this.callEndpoint(type);
             String arraySchema = "paths.'/complex/array'.post.requestBody.content.'application/json'.schema";
