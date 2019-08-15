@@ -1,0 +1,50 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/v1": {
+      "get": {
+        "summary": "Get an object containing a primitive array",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrimitiveArrayTestObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PrimitiveArrayTestObject": {
+        "type": "object",
+        "description": "the REST response class",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "a packed data array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "data2": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        }
+      }
+    }
+  }
+}
