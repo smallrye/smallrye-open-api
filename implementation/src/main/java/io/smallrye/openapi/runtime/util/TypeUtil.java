@@ -330,6 +330,19 @@ public class TypeUtil {
     }
 
     /**
+     * Convenience method to retrieve the "value" parameter from an annotation bound to the target.
+     * The value will be unwrapped from its containing {@link AnnotationValue}.
+     *
+     * @param <T> the type of the parameter being retrieved
+     * @param target the target object annotated with the annotation named by annotationName
+     * @param annotationName name of the annotation from which to retrieve the value
+     * @return an unwrapped annotation parameter value
+     */
+    public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName) {
+        return getAnnotationValue(target, annotationName, OpenApiConstants.PROP_VALUE, null);
+    }
+
+    /**
      * Convenience method to retrieve the named parameter from an annotation bound to the target.
      * The value will be unwrapped from its containing {@link AnnotationValue}.
      *

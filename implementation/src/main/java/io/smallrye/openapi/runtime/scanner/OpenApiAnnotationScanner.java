@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -116,6 +117,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Scans a deployment (using the archive and jandex annotation index) for JAX-RS and
@@ -128,17 +130,19 @@ import io.smallrye.openapi.runtime.util.SchemaFactory;
  */
 public class OpenApiAnnotationScanner {
 
-    private static Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
-    private static ObjectMapper MAPPER = new ObjectMapper();
+    private static final Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final OpenApiConfig config;
     private final IndexView index;
 
-    private OpenAPIImpl oai;
-
     private String currentAppPath = "";
     private String[] currentConsumes;
     private String[] currentProduces;
+
+    private String currentSecurityScheme;
+    private List<OAuthFlow> currentFlows;
+    private String[] resourceRolesAllowed;
 
     private List<AnnotationScannerExtension> extensions;
 
@@ -175,7 +179,7 @@ public class OpenApiAnnotationScanner {
         LOG.debug("Scanning deployment for OpenAPI and JAX-RS Annotations.");
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
-        oai = new OpenAPIImpl();
+        OpenAPIImpl oai = new OpenAPIImpl();
         oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Creating a new instance of a registry which will be set on the thread context.
@@ -196,6 +200,8 @@ public class OpenApiAnnotationScanner {
         }
 
         // TODO find all OpenAPIDefinition annotations at the package level
+
+        checkSecurityScheme(oai);
 
         // Now find all jax-rs endpoints
         Collection<ClassInfo> resourceClasses = JandexUtil.getJaxRsResourceClasses(this.index);
@@ -219,6 +225,70 @@ public class OpenApiAnnotationScanner {
         }
 
         return oai;
+    }
+
+    /**
+     * If there is a single security scheme defined by the <code>@OpenAPIDefinition</code>
+     * annotations and the scheme is OAuth2 or OpenIdConnect, any of the flows
+     * where no scopes have yet been provided are eligible to have scopes
+     * filled by <code>@DeclareRoles</code>/<code>@RolesAllowed</code> annotations.
+     * 
+     * @param oai the current OpenAPI result
+     */
+    void checkSecurityScheme(OpenAPI oai) {
+        if (oai.getComponents() == null) {
+            return;
+        }
+
+        Map<String, SecurityScheme> schemes = oai.getComponents().getSecuritySchemes();
+
+        if (schemes != null && schemes.size() == 1) {
+            Map.Entry<String, SecurityScheme> scheme = schemes.entrySet().iterator().next();
+            SecurityScheme.Type schemeType = scheme.getValue().getType();
+
+            if (schemeType != null) {
+                switch (schemeType) {
+                    case OAUTH2:
+                    case OPENIDCONNECT:
+                        saveSecurityScheme(scheme.getKey(), scheme.getValue());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Saves the name of the SecurityScheme and references to any flows
+     * that did not have scopes defined by the application via a component
+     * defined in <code>@OpenAPIDefinition</code> annotations. The saved
+     * flows may have scopes added by values discovered in <code>@RolesAllowed</code>
+     * annotations during scanning.
+     * 
+     * @param scheme the scheme to save for further role processing.
+     */
+    void saveSecurityScheme(String schemeName, SecurityScheme scheme) {
+        this.currentSecurityScheme = schemeName;
+        this.currentFlows = new ArrayList<>();
+
+        OAuthFlows flows = scheme.getFlows();
+        saveFlow(flows.getAuthorizationCode());
+        saveFlow(flows.getClientCredentials());
+        saveFlow(flows.getImplicit());
+        saveFlow(flows.getPassword());
+    }
+
+    /**
+     * Saves an {@link OAuthFlow} object in the list of flows for further processing.
+     * Only saved if no scopes were defined by the application using annotations.
+     * 
+     * @param flow
+     */
+    void saveFlow(OAuthFlow flow) {
+        if (flow != null && flow.getScopes() == null) {
+            currentFlows.add(flow);
+        }
     }
 
     /**
@@ -350,6 +420,10 @@ public class OpenApiAnnotationScanner {
             }
         }
 
+        addScopes(TypeUtil.getAnnotationValue(resourceClass, OpenApiConstants.DOTNAME_DECLARE_ROLES));
+        resourceRolesAllowed = TypeUtil.getAnnotationValue(resourceClass, OpenApiConstants.DOTNAME_ROLES_ALLOWED);
+        addScopes(resourceRolesAllowed);
+
         // Now find and process the operation methods
         ////////////////////////////////////////
         for (MethodInfo methodInfo : resourceClass.methods()) {
@@ -382,6 +456,19 @@ public class OpenApiAnnotationScanner {
                 processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
             }
         }
+    }
+
+    void addScopes(String[] roles) {
+        if (roles == null || this.currentFlows == null) {
+            return;
+        }
+
+        this.currentFlows.forEach(flow -> {
+            if (flow.getScopes() == null) {
+                flow.setScopes(new ScopesImpl());
+            }
+            Arrays.stream(roles).forEach(role -> flow.getScopes().addScope(role, role + " role"));
+        });
     }
 
     /**
@@ -650,6 +737,8 @@ public class OpenApiAnnotationScanner {
             operation.addExtension(name, parsedValue);
         }
 
+        processSecurityRoles(method, operation);
+
         // Now set the operation on the PathItem as appropriate based on the Http method type
         ///////////////////////////////////////////
         switch (methodType) {
@@ -819,6 +908,79 @@ public class OpenApiAnnotationScanner {
     private boolean generateResponse(String status, Operation operation) {
         APIResponses responses = operation.getResponses();
         return responses == null || responses.getAPIResponse(status) != null;
+    }
+
+    /**
+     * Add method-level or resource-level <code>RolesAllowed</code> values as
+     * scopes to the current operation.
+     * 
+     * <ul>
+     * <li>If a <code>DenyAll</code> annotation is present (and a method-level
+     * <code>RolesAllowed</code> is not), the roles allowed will be set to an
+     * empty array.
+     * 
+     * <li>If none of a <code>PermitAll</code>, a <code>DenyAll</code>, and a
+     * <code>RolesAllowed</code> annotation is present at the method-level, the
+     * roles allowed will be set to the resource's <code>RolesAllowed</code>.
+     * 
+     * @param method the current JAX-RS method
+     * @param operation the OpenAPI Operation
+     */
+    void processSecurityRoles(MethodInfo method, Operation operation) {
+        if (this.currentSecurityScheme != null) {
+            String[] rolesAllowed = TypeUtil.getAnnotationValue(method, OpenApiConstants.DOTNAME_ROLES_ALLOWED);
+
+            if (rolesAllowed != null) {
+                addScopes(rolesAllowed);
+                addRolesAllowed(operation, rolesAllowed);
+            } else if (this.resourceRolesAllowed != null) {
+                boolean denyAll = TypeUtil.getAnnotation(method, OpenApiConstants.DOTNAME_DENY_ALL) != null;
+                boolean permitAll = TypeUtil.getAnnotation(method, OpenApiConstants.DOTNAME_PERMIT_ALL) != null;
+
+                if (denyAll) {
+                    addRolesAllowed(operation, new String[0]);
+                } else if (!permitAll) {
+                    addRolesAllowed(operation, this.resourceRolesAllowed);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add an array of roles to the operation's security requirements.
+     * 
+     * If no security requirements yet exists, one is created with the name of the
+     * single OAUTH/OPENIDCONNECT previously defined in the OpenAPI's Components
+     * section.
+     * 
+     * Otherwise, the roles are added to only a single existing requirement
+     * where the name of the requirement's scheme matches the name of the
+     * single OAUTH/OPENIDCONNECT previously defined in the OpenAPI's Components
+     * section.
+     * 
+     * @param operation the OpenAPI Operation
+     * @param roles a list of JAX-RS roles to use as scopes
+     */
+    void addRolesAllowed(Operation operation, String[] roles) {
+        List<SecurityRequirement> requirements = operation.getSecurity();
+
+        if (requirements == null) {
+            SecurityRequirement requirement = new SecurityRequirementImpl();
+            requirement.addScheme(currentSecurityScheme, new ArrayList<>(Arrays.asList(roles)));
+            operation.setSecurity(new ArrayList<>(Arrays.asList(requirement)));
+        } else if (requirements.size() == 1) {
+            SecurityRequirement requirement = requirements.get(0);
+
+            if (requirement.hasScheme(currentSecurityScheme)) {
+                // The name of the declared requirement must match the scheme's name
+                List<String> scopes = requirement.getScheme(currentSecurityScheme);
+                for (String role : roles) {
+                    if (!scopes.contains(role)) {
+                        scopes.add(role);
+                    }
+                }
+            }
+        }
     }
 
     /**
