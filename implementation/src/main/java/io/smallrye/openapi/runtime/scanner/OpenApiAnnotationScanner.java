@@ -458,6 +458,15 @@ public class OpenApiAnnotationScanner {
         }
     }
 
+    /**
+     * Adds the array of roles as scopes to each of the OAuth2 flows stored previously.
+     * The flows are those declared by the application in components/securitySchemes
+     * using annotations where the scopes were not defined. The description of the scope
+     * will be set to the role name plus the string " role".
+     *
+     * @param roles array of roles from either <code>@DeclareRoles</code> or
+     *        <code>@RolesAllowed</code>
+     */
     void addScopes(String[] roles) {
         if (roles == null || this.currentFlows == null) {
             return;
