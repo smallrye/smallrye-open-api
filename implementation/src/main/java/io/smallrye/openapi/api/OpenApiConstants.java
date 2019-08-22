@@ -348,6 +348,15 @@ public final class OpenApiConstants {
                     DOTNAME_JSONB_PROPERTY,
                     DOTNAME_JACKSON_PROPERTY)));
 
+    public static final DotName DOTNAME_DECLARE_ROLES = DotName
+            .createSimple("javax.annotation.security.DeclareRoles");
+    public static final DotName DOTNAME_ROLES_ALLOWED = DotName
+            .createSimple("javax.annotation.security.RolesAllowed");
+    public static final DotName DOTNAME_PERMIT_ALL = DotName
+            .createSimple("javax.annotation.security.PermitAll");
+    public static final DotName DOTNAME_DENY_ALL = DotName
+            .createSimple("javax.annotation.security.DenyAll");
+
     public static final String REF_PREFIX_API_RESPONSE = "#/components/responses/";
     public static final String REF_PREFIX_CALLBACK = "#/components/callbacks/";
     public static final String REF_PREFIX_EXAMPLE = "#/components/examples/";
