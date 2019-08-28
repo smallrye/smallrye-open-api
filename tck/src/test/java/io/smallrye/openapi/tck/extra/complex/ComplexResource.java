@@ -37,7 +37,6 @@ public class ComplexResource {
     public CollectionWrapper postArrayOfInts(Integer[] ints) {
         CollectionWrapper result = new CollectionWrapper();
         result.getValues().addAll(Arrays.asList(ints));
-        result.setData(new byte[] { 1, 2, 3, 4, 5 });
         return result;
     }
 
@@ -46,13 +45,11 @@ public class ComplexResource {
     public CollectionWrapper postArrayOfInts(List<Integer> list) {
         CollectionWrapper result = new CollectionWrapper();
         result.getValues().addAll(list);
-        result.setData(new byte[] { 1, 2, 3, 4, 5 });
         return result;
     }
 
     public static class CollectionWrapper {
         private Collection<Integer> values = new ArrayList<>();
-        private byte[] data;
 
         public Collection<Integer> getValues() {
             return values;
@@ -60,14 +57,6 @@ public class ComplexResource {
 
         public void setValues(Collection<Integer> values) {
             this.values = values;
-        }
-
-        public byte[] getData() {
-            return data;
-        }
-
-        public void setData(byte[] data) {
-            this.data = data;
         }
     }
 }
