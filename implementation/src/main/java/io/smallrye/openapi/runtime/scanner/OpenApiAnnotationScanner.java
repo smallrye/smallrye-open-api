@@ -492,7 +492,6 @@ public class OpenApiAnnotationScanner {
      */
     private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resource, MethodInfo method,
             AnnotationInstance methodAnno, HttpMethod methodType, Set<String> resourceTags) {
-
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
         final Operation operation;

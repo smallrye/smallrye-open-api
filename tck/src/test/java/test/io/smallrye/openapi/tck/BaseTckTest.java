@@ -76,6 +76,8 @@ public abstract class BaseTckTest<T extends Arquillian> {
     @AfterClass
     public static final void tearDown() throws Exception {
         server.stop(0);
+        Thread.sleep(100);
+        System.out.println("TCK test server stopped.");
     }
 
     static class MyHandler implements HttpHandler {

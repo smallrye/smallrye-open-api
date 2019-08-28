@@ -345,12 +345,12 @@ public class TypeResolver {
             // Store all field properties
             currentClass.fields()
                     .stream()
-                    .filter(field -> !Modifier.isStatic(field.flags()))
+                    .filter(field -> acceptField(field))
                     .forEach(field -> scanField(properties, field, stack));
 
             currentClass.methods()
                     .stream()
-                    .filter(method -> !Modifier.isStatic(method.flags()))
+                    .filter(method -> acceptMethod(method))
                     .forEach(method -> scanMethod(properties, method, stack));
 
             currentClass.interfaceTypes()
@@ -362,6 +362,14 @@ public class TypeResolver {
         }
 
         return sorted(properties, chain.keySet());
+    }
+
+    private static boolean acceptMethod(MethodInfo method) {
+        return !Modifier.isStatic(method.flags()) && !method.name().equals("getClass");
+    }
+
+    private static boolean acceptField(FieldInfo field) {
+        return !Modifier.isStatic(field.flags());
     }
 
     /**
