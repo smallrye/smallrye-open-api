@@ -258,6 +258,8 @@ public class IgnoreResolver {
             // Primitive and non-indexed types will result in a null
             if (classType.kind() == Type.Kind.PRIMITIVE ||
                     classType.kind() == Type.Kind.VOID ||
+                    (classType.kind() == Type.Kind.ARRAY && classType.asArrayType().component().kind() == Type.Kind.PRIMITIVE)
+                    ||
                     !index.containsClass(classType)) {
                 return false;
             }
