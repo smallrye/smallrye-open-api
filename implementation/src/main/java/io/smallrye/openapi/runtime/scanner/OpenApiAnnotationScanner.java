@@ -33,7 +33,6 @@ import java.util.TreeSet;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
@@ -1362,7 +1361,7 @@ public class OpenApiAnnotationScanner {
             }
             try {
                 PropertyDescriptor descriptor = new PropertyDescriptor(method.toUpperCase(), pathItem.getClass());
-                Method mutator = PropertyUtils.getWriteMethod(descriptor);
+                Method mutator = descriptor.getWriteMethod();
                 mutator.invoke(pathItem, operation);
             } catch (Exception e) {
                 LOG.error("Error reading a CallbackOperation annotation.", e);
