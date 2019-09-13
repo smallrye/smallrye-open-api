@@ -338,6 +338,8 @@ public final class OpenApiConstants {
             .createSimple("com.fasterxml.jackson.annotation.JsonProperty");
     public static final DotName DOTNAME_JACKSON_IGNORE = DotName
             .createSimple("com.fasterxml.jackson.annotation.JsonIgnore");
+    public static final DotName DOTNAME_JACKSON_IGNORE_TYPE = DotName
+            .createSimple("com.fasterxml.jackson.annotation.JsonIgnoreType");
     public static final DotName DOTNAME_JACKSON_IGNORE_PROPERTIES = DotName
             .createSimple("com.fasterxml.jackson.annotation.JsonIgnoreProperties");
     public static final DotName DOTNAME_JACKSON_PROPERTY_ORDER = DotName

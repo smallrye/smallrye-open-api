@@ -35,8 +35,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
-
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -284,7 +282,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return DotName.createSimple(JsonIgnoreType.class.getName());
+            return OpenApiConstants.DOTNAME_JACKSON_IGNORE_TYPE;
         }
     }
 
