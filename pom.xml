@@ -35,8 +35,8 @@
     <properties>
         <version.buildhelper.plugin>3.0.0</version.buildhelper.plugin>
         <version.com.fasterxml.jackson>2.10.0</version.com.fasterxml.jackson>
-        <version.com.fasterxml.jackson.databind>2.9.10</version.com.fasterxml.jackson.databind>
-        <version.com.fasterxml.jackson.dataformat>2.9.10</version.com.fasterxml.jackson.dataformat>
+        <version.com.fasterxml.jackson.databind>2.10.0</version.com.fasterxml.jackson.databind>
+        <version.com.fasterxml.jackson.dataformat>2.10.0</version.com.fasterxml.jackson.dataformat>
         <version.eclipse.microprofile.config>1.3</version.eclipse.microprofile.config>
         <version.eclipse.microprofile.openapi>1.1.2</version.eclipse.microprofile.openapi>
         <version.io.smallrye.smallrye-config>1.3.9</version.io.smallrye.smallrye-config>
