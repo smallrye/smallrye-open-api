@@ -141,7 +141,7 @@ paths:
       responses:
         default:
           $ref: '#/components/responses/DefaultResponse'
-        200:
+        "200":
           $ref: '#/components/responses/OKResponse'
           description: Successful response.
           headers:
@@ -182,7 +182,7 @@ paths:
               x-link-2: true
             Link-2:
               $ref: '#/components/links/LinkTwo'
-        404:
+        "404":
           $ref: '#/components/responses/NotFound'
       callbacks:
         Callback-1:
