@@ -40,8 +40,7 @@ public class KitchenSink {
     @Schema(maximum = "9001")
     int primitiveFoo;
 
-    // TODO
-    //int[][] array2d;
+    int[][] array2d;
 
     // Handle arrays
     @Schema(required = true)

@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.FieldInfo;
@@ -233,15 +234,24 @@ public class SchemaFactory {
      * @param type the implementation type of the item to scan
      * @param schemaReferenceSupported
      */
-    public static Schema readClassSchema(IndexView index, Type type, boolean schemaReferenceSupported) {
+    static Schema readClassSchema(IndexView index, Type type, boolean schemaReferenceSupported) {
         if (type == null) {
             return null;
         }
         Schema schema;
         if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
-            // Recurse using the type of the array elements
-            schema.items(readClassSchema(index, type.asArrayType().component(), schemaReferenceSupported));
+            ArrayType array = type.asArrayType();
+            int dimensions = array.dimensions();
+            Type componentType = array.component();
+
+            if (dimensions > 1) {
+                // Recurse using a new array type with dimensions decremented
+                schema.items(readClassSchema(index, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
+            } else {
+                // Recurse using the type of the array elements
+                schema.items(readClassSchema(index, componentType, schemaReferenceSupported));
+            }
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
@@ -261,8 +271,17 @@ public class SchemaFactory {
         Schema schema = null;
         if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
-            // Recurse using the type of the array elements
-            schema.items(typeToSchema(index, type.asArrayType().component(), extensions));
+            ArrayType array = type.asArrayType();
+            int dimensions = array.dimensions();
+            Type componentType = array.component();
+
+            if (dimensions > 1) {
+                // Recurse using a new array type with dimensions decremented
+                schema.items(typeToSchema(index, ArrayType.create(componentType, dimensions - 1), extensions));
+            } else {
+                // Recurse using the type of the array elements
+                schema.items(typeToSchema(index, componentType, extensions));
+            }
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(index, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {

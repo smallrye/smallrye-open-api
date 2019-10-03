@@ -73,6 +73,7 @@ import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
+import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
@@ -338,6 +339,7 @@ public class ParameterProcessor {
      *         object
      */
     public static ResourceParameters process(IndexView index,
+            ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, ParameterImpl> reader,
             List<AnnotationScannerExtension> extensions) {
@@ -345,12 +347,28 @@ public class ParameterProcessor {
         ResourceParameters parameters = new ResourceParameters();
         ParameterProcessor processor = new ParameterProcessor(index, reader, extensions);
 
-        ClassInfo resourceClass = resourceMethod.declaringClass();
+        ClassInfo resourceMethodClass = resourceMethod.declaringClass();
 
-        // Phase I - Read class fields, constructors, "setter" methods not annotated with JAX-RS HTTP method
-        processor.readParameters(resourceClass, null);
+        /*
+         * Phase I - Read class fields, constructors, "setter" methods not annotated with JAX-RS
+         * HTTP method. Check both the class declaring the method as well as the resource
+         * class, if different.
+         */
+        processor.readParameters(resourceMethodClass, null);
+        if (!resourceClass.equals(resourceMethodClass)) {
+            /*
+             * The resource class may be a subclass/implementor of the resource method class. Scanning
+             * the resource class after the method's class allows for parameter details to be overridden
+             * by annotations in the subclass.
+             */
+            processor.readParameters(resourceClass, null);
+        }
 
         parameters.setPathItemParameters(processor.getParameters());
+        /*
+         * Generate the path using the provided resource class, which may differ from the method's declaring
+         * class - e.g. for inheritance.
+         */
         parameters.setPathItemPath(processor.generatePath(resourceClass, parameters.getPathItemParameters()));
 
         // Clear Path-level parameters discovered and allows for processing operation-level parameters
@@ -1109,9 +1127,7 @@ public class ParameterProcessor {
             context.location = location;
         }
 
-        if (context.oaiParam == null) {
-            context.oaiParam = oaiParam;
-        }
+        context.oaiParam = MergeUtil.mergeObjects(context.oaiParam, oaiParam);
 
         if (context.jaxRsParam == null) {
             context.jaxRsParam = jaxRsParam;
