@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -201,6 +202,24 @@ public class TypeUtil {
             superKlazzType = superKlazz.superClassType();
         }
         return false;
+    }
+
+    public static boolean isTerminalType(Type type) {
+        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
+                type.kind() == Type.Kind.WILDCARD_TYPE ||
+                type.kind() == Type.Kind.ARRAY) {
+            return false;
+        }
+
+        if (type.kind() == Type.Kind.PRIMITIVE ||
+                type.kind() == Type.Kind.VOID) {
+            return true;
+        }
+
+        TypeUtil.TypeWithFormat tf = TypeUtil.getTypeFormat(type);
+        // If is known type.
+        return tf.getSchemaType() != Schema.SchemaType.OBJECT &&
+                tf.getSchemaType() != Schema.SchemaType.ARRAY;
     }
 
     public static DotName getName(Type type) {

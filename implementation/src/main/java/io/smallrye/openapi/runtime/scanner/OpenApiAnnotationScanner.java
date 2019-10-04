@@ -164,7 +164,13 @@ public class OpenApiAnnotationScanner {
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions) {
         this.config = config;
-        this.index = index;
+
+        if (index instanceof FilteredIndexView) {
+            this.index = index;
+        } else {
+            this.index = new FilteredIndexView(index, config);
+        }
+
         this.extensions = extensions;
     }
 

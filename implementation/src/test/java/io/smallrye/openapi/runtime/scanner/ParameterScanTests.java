@@ -161,6 +161,13 @@ public class ParameterScanTests extends IndexScannerTestBase {
                 Widget.class);
     }
 
+    @Test
+    public void testEnumQueryParam() throws IOException, JSONException {
+        test("params.enum-form-param.json",
+                EnumQueryParamTestResource.class,
+                EnumQueryParamTestResource.TestEnum.class);
+    }
+
     /***************** Test models and resources below. ***********************/
 
     public static class Widget {
@@ -440,6 +447,23 @@ public class ParameterScanTests extends IndexScannerTestBase {
         public CompletionStage<Widget> upd(@MultipartForm Bean form,
                 @FormParam("f3") @DefaultValue("3") int formField3,
                 @org.jboss.resteasy.annotations.jaxrs.FormParam @NotNull String formField4) {
+            return null;
+        }
+    }
+
+    @Path("/enum/formparam")
+    static class EnumQueryParamTestResource {
+        static enum TestEnum {
+            VAL1,
+            VAL2,
+            VAL3;
+        }
+
+        @SuppressWarnings("unused")
+        @POST
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Produces(MediaType.TEXT_PLAIN)
+        public TestEnum postData(@QueryParam("val") TestEnum value) {
             return null;
         }
     }

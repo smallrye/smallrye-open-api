@@ -191,11 +191,15 @@ public class OpenApiDataObjectScanner {
         LOG.debugv("Starting processing with root: {0}", rootClassType.name());
 
         // If top level item is simple
-        if (isTerminalType(rootClassType)) {
+        if (TypeUtil.isTerminalType(rootClassType)) {
             SchemaImpl simpleSchema = new SchemaImpl();
             simpleSchema.setType(rootClassTypeFormat.getSchemaType());
             simpleSchema.setFormat(rootClassTypeFormat.getFormat().format());
             return simpleSchema;
+        }
+
+        if (isA(rootClassType, ENUM_TYPE) && index.containsClass(rootClassType)) {
+            return SchemaFactory.enumToSchema(index, rootClassType);
         }
 
         // If top level item is not indexed
@@ -274,24 +278,6 @@ public class OpenApiDataObjectScanner {
 
     private boolean isA(Type testSubject, Type test) {
         return TypeUtil.isA(index, testSubject, test);
-    }
-
-    private boolean isTerminalType(Type type) {
-        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
-                type.kind() == Type.Kind.WILDCARD_TYPE ||
-                type.kind() == Type.Kind.ARRAY) {
-            return false;
-        }
-
-        if (type.kind() == Type.Kind.PRIMITIVE ||
-                type.kind() == Type.Kind.VOID) {
-            return true;
-        }
-
-        TypeUtil.TypeWithFormat tf = TypeUtil.getTypeFormat(type);
-        // If is known type.
-        return tf.getSchemaType() != Schema.SchemaType.OBJECT &&
-                tf.getSchemaType() != Schema.SchemaType.ARRAY;
     }
 
     // Is Map, Collection, etc.

@@ -80,6 +80,18 @@ public final class OpenApiConstants {
     public static final String SCHEMA_REFERENCES_ENABLE = "mp.openapi.extensions.schema-references.enable";
     public static final String CUSTOM_SCHEMA_REGISTRY_CLASS = "mp.openapi.extensions.custom-schema-registry.class";
 
+    /**
+     * Set of classes which should never be scanned, regardless of user configuration.
+     */
+    public static final Set<String> NEVER_SCAN_CLASSES = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList()));
+
+    /**
+     * Set of packages which should never be scanned, regardless of user configuration.
+     */
+    public static final Set<String> NEVER_SCAN_PACKAGES = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList("java.lang")));
+
     public static final String CLASS_SUFFIX = ".class";
     public static final String JAR_SUFFIX = ".jar";
     public static final String WEB_ARCHIVE_CLASS_PREFIX = "/WEB-INF/classes/";

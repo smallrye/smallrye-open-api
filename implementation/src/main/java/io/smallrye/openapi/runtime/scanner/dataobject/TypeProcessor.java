@@ -21,18 +21,19 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.OBJECT_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
+import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
-import org.jboss.jandex.ClassInfo;
-import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.util.SchemaFactory;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -110,20 +111,18 @@ public class TypeProcessor {
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
-            readEnumeration(type, schema);
+            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, type));
             return STRING_TYPE;
         }
 
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
-            // Parameterised type (e.g. Foo<A, B>)
-            //return readParamType(annotationTarget, pathEntry, schema, fieldType.asParameterizedType(), typeResolver);
+            // Parameterized type (e.g. Foo<A, B>)
             return readParameterizedType(type.asParameterizedType());
         }
 
         if (type.kind() == Type.Kind.TYPE_VARIABLE ||
                 type.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE) {
             // Resolve type variable to real variable.
-            //return resolveTypeVariable(annotationTarget, typeResolver, schema, pathEntry, fieldType);
             return resolveTypeVariable(schema, type);
         }
 
@@ -151,6 +150,7 @@ public class TypeProcessor {
 
     private Type readParameterizedType(ParameterizedType pType) {
         LOG.debugv("Processing parameterized type {0}", pType);
+        Type typeRead = pType;
 
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE)) { // TODO maybe also Iterable?
@@ -171,7 +171,7 @@ public class TypeProcessor {
 
             schema.items(arraySchema);
 
-            return ARRAY_TYPE_OBJECT; // Representing collection as JSON array
+            typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
             LOG.debugv("Processing Map. Will treat as an object.");
             schema.type(Schema.SchemaType.OBJECT);
@@ -189,12 +189,13 @@ public class TypeProcessor {
                 // Add properties schema to field schema.
                 schema.additionalPropertiesSchema(propsSchema);
             }
-            return OBJECT_TYPE;
-        } else {
+            typeRead = OBJECT_TYPE;
+        } else if (index.containsClass(type)) {
             // This type will be resolved later, if necessary.
             pushToStack(pType);
-            return pType;
         }
+
+        return typeRead;
     }
 
     private Schema resolveParameterizedType(Type valueType, Schema propsSchema) {
@@ -209,8 +210,7 @@ public class TypeProcessor {
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
                 LOG.debugv("Processing an enum {0}", valueType);
-                propsSchema.type(Schema.SchemaType.STRING);
-                readEnumeration(valueType, propsSchema);
+                propsSchema = SchemaFactory.enumToSchema(index, valueType);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 pushToStack(valueType, propsSchema);
@@ -220,30 +220,6 @@ public class TypeProcessor {
         }
 
         return propsSchema;
-    }
-
-    /**
-     * Add each Enum constant name to the list of the given schema's
-     * enumeration list.
-     *
-     * @param enumType type containing Java Enum constants
-     * @param enumSchema the schema to which the constants' names will
-     *        be added
-     *
-     * @see java.lang.reflect.Field#isEnumConstant()
-     * @see java.lang.reflect.Modifier#ENUM
-     */
-    private void readEnumeration(Type enumType, Schema enumSchema) {
-        LOG.debugv("Processing an enum {0}", enumType);
-        final int ENUM = 0x00004000;
-        ClassInfo enumKlazz = index.getClass(enumType);
-
-        enumKlazz.fields()
-                .stream()
-                .filter(field -> (field.flags() & ENUM) != 0)
-                .map(FieldInfo::name)
-                .sorted() // Make the order determinate
-                .forEach(enumSchema::addEnumeration);
     }
 
     private Type resolveTypeVariable(Schema schema, Type fieldType) {
@@ -278,23 +254,5 @@ public class TypeProcessor {
 
     private boolean isA(Type testSubject, Type test) {
         return TypeUtil.isA(index, testSubject, test);
-    }
-
-    private boolean isTerminalType(Type type) {
-        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
-                type.kind() == Type.Kind.WILDCARD_TYPE ||
-                type.kind() == Type.Kind.ARRAY) {
-            return false;
-        }
-
-        if (type.kind() == Type.Kind.PRIMITIVE ||
-                type.kind() == Type.Kind.VOID) {
-            return true;
-        }
-
-        TypeUtil.TypeWithFormat tf = TypeUtil.getTypeFormat(type);
-        // If is known type.
-        return tf.getSchemaType() != Schema.SchemaType.OBJECT &&
-                tf.getSchemaType() != Schema.SchemaType.ARRAY;
     }
 }
