@@ -12,7 +12,9 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
+import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
@@ -217,7 +219,7 @@ public class SchemaFactory {
     }
 
     /**
-     * Converts a jandex type to a {@link Schema} model.
+     * Converts a Jandex type to a {@link Schema} model.
      * 
      * @param index the index of classes being scanned
      * @param type the implementation type of the item to scan
@@ -244,6 +246,35 @@ public class SchemaFactory {
         }
 
         return schema;
+    }
+
+    /**
+     * Convert a Jandex enum class type to a {@link Schema} model.
+     * 
+     * Adds each enum constant name to the list of the given schema's
+     * enumeration list. The given type must be found in the index.
+     *
+     * @param index Jandex index containing the ClassInfo for the given enum type
+     * @param enumType type containing Java Enum constants
+     *
+     * @see java.lang.reflect.Field#isEnumConstant()
+     * @see java.lang.reflect.Modifier#ENUM
+     */
+    public static Schema enumToSchema(IndexView index, Type enumType) {
+        LOG.debugv("Processing an enum {0}", enumType);
+        final int ENUM = 0x00004000;
+        ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
+        Schema enumSchema = new SchemaImpl();
+        enumSchema.setType(SchemaType.STRING);
+
+        enumKlazz.fields()
+                .stream()
+                .filter(field -> (field.flags() & ENUM) != 0)
+                .map(FieldInfo::name)
+                .sorted() // Make the order determinate
+                .forEach(enumSchema::addEnumeration);
+
+        return enumSchema;
     }
 
     /**

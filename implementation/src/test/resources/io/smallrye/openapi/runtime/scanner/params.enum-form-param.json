@@ -1,0 +1,38 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/enum/formparam": {
+      "post": {
+        "parameters": [
+          {
+          "name": "val",
+          "in": "query",
+          "schema": {
+            "$ref": "#/components/schemas/TestEnum"
+          }
+        }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestEnum"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TestEnum": {
+        "type": "string",
+        "enum": [ "VAL1", "VAL2", "VAL3" ]
+      }
+    }
+  }
+}

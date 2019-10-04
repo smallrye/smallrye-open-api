@@ -23,8 +23,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
@@ -339,31 +342,23 @@ public class JandexUtil {
     }
 
     /**
-     * Use the jandex index to find all jax-rs resource classes. This is done by searching for
+     * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.
      * 
      * @param index IndexView
      * @return Collection of ClassInfo's
      */
     public static Collection<ClassInfo> getJaxRsResourceClasses(IndexView index) {
-        Collection<ClassInfo> resourceClasses = new ArrayList<>();
-        Collection<AnnotationInstance> pathAnnotations = index.getAnnotations(OpenApiConstants.DOTNAME_PATH);
-        for (AnnotationInstance pathAnno : pathAnnotations) {
-            AnnotationTarget annotationTarget = pathAnno.target();
-            if (annotationTarget.kind() == AnnotationTarget.Kind.CLASS) {
-                ClassInfo classInfo = (ClassInfo) annotationTarget;
-                if (Modifier.isInterface(classInfo.flags())) {
-                    if (index.getAllKnownImplementors(classInfo.name())
-                            .stream()
-                            .anyMatch(info -> !Modifier.isAbstract(info.flags()))) {
-                        resourceClasses.add(annotationTarget.asClass());
-                    }
-                } else {
-                    resourceClasses.add(annotationTarget.asClass());
-                }
-            }
-        }
-        return resourceClasses;
+        return index.getAnnotations(OpenApiConstants.DOTNAME_PATH)
+                .stream()
+                .map(AnnotationInstance::target)
+                .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
+                .map(AnnotationTarget::asClass)
+                .filter(classInfo -> !Modifier.isInterface(classInfo.flags()) ||
+                        index.getAllKnownImplementors(classInfo.name()).stream()
+                                .anyMatch(info -> !Modifier.isAbstract(info.flags())))
+                .distinct() // CompositeIndex instances may return duplicates
+                .collect(Collectors.toList());
     }
 
     /**
@@ -561,6 +556,26 @@ public class JandexUtil {
                 OpenApiConstants.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
         String implementation = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_IMPLEMENTATION);
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY && implementation != null);
+    }
+
+    /**
+     * Builds an insertion-order map of a class's inheritance chain, starting
+     * with the klazz argument.
+     *
+     * @param index index for superclass retrieval
+     * @param klazz the class to retrieve inheritance
+     * @param type type of the klazz
+     * @return map of a class's inheritance chain/ancestry
+     */
+    public static Map<ClassInfo, Type> inheritanceChain(IndexView index, ClassInfo klazz, Type type) {
+        Map<ClassInfo, Type> chain = new LinkedHashMap<>();
+
+        do {
+            chain.put(klazz, type);
+        } while ((type = klazz.superClassType()) != null &&
+                (klazz = index.getClassByName(TypeUtil.getName(type))) != null);
+
+        return chain;
     }
 
     /**

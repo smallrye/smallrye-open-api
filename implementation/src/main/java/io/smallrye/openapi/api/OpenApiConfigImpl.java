@@ -127,6 +127,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         if (scanExcludePackages == null) {
             String packages = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_PACKAGES, String.class).orElse(null);
             scanExcludePackages = asCsvSet(packages);
+            scanExcludePackages.addAll(OpenApiConstants.NEVER_SCAN_PACKAGES);
         }
         return scanExcludePackages;
     }
@@ -139,6 +140,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         if (scanExcludeClasses == null) {
             String classes = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_CLASSES, String.class).orElse(null);
             scanExcludeClasses = asCsvSet(classes);
+            scanExcludeClasses.addAll(OpenApiConstants.NEVER_SCAN_CLASSES);
         }
         return scanExcludeClasses;
     }

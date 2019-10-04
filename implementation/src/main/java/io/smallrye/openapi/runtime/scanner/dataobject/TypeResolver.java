@@ -45,6 +45,7 @@ import org.jboss.jandex.TypeVariable;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -329,7 +330,7 @@ public class TypeResolver {
     }
 
     public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, Type leaf, ClassInfo leafKlazz) {
-        Map<ClassInfo, Type> chain = inheritanceChain(index, leafKlazz, leaf);
+        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
 
@@ -370,28 +371,6 @@ public class TypeResolver {
 
     private static boolean acceptField(FieldInfo field) {
         return !Modifier.isStatic(field.flags());
-    }
-
-    /**
-     * Builds an insertion-order map of a class's inheritance chain, starting
-     * with the klazz argument.
-     *
-     * @param index index for superclass retrieval
-     * @param klazz the class to retrieve inheritance
-     * @param type type of the klazz
-     * @return map of a class's inheritance chain/ancestry
-     */
-    private static Map<ClassInfo, Type> inheritanceChain(AugmentedIndexView index,
-            ClassInfo klazz,
-            Type type) {
-
-        Map<ClassInfo, Type> chain = new LinkedHashMap<>();
-
-        do {
-            chain.put(klazz, type);
-        } while ((type = klazz.superClassType()) != null && (klazz = index.getClass(type)) != null);
-
-        return chain;
     }
 
     /**
