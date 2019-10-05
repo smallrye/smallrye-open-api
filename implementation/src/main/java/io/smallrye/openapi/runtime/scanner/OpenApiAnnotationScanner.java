@@ -211,7 +211,7 @@ public class OpenApiAnnotationScanner {
         // Now find all jax-rs endpoints
         Collection<ClassInfo> resourceClasses = JandexUtil.getJaxRsResourceClasses(this.index);
         for (ClassInfo resourceClass : resourceClasses) {
-            processJaxRsResourceClass(oai, resourceClass);
+            processJaxRsResourceClass(oai, resourceClass, null, null);
         }
 
         // Now that all paths have been created, sort them (we don't have a better way to organize them).
@@ -363,7 +363,8 @@ public class OpenApiAnnotationScanner {
      * @param openApi
      * @param resourceClass
      */
-    private void processJaxRsResourceClass(OpenAPIImpl openApi, ClassInfo resourceClass) {
+    private void processJaxRsResourceClass(OpenAPIImpl openApi, ClassInfo resourceClass,
+            List<Parameter> locatorOperationParameters, List<Parameter> locatorPathItemParameters) {
         LOG.debug("Processing a JAX-RS resource class: " + resourceClass.simpleName());
 
         // TODO handle the use-case where the resource class extends a base class, and the base class has jax-rs relevant methods and annotations
@@ -432,33 +433,63 @@ public class OpenApiAnnotationScanner {
         // Now find and process the operation methods
         ////////////////////////////////////////
         for (MethodInfo methodInfo : resourceClass.methods()) {
+            boolean opMethod = false;
+
             AnnotationInstance get = methodInfo.annotation(OpenApiConstants.DOTNAME_GET);
             if (get != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, get, HttpMethod.GET, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, get, HttpMethod.GET, tagRefs, locatorOperationParameters,
+                        locatorPathItemParameters);
             }
             AnnotationInstance put = methodInfo.annotation(OpenApiConstants.DOTNAME_PUT);
             if (put != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, put, HttpMethod.PUT, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, put, HttpMethod.PUT, tagRefs, locatorOperationParameters,
+                        locatorPathItemParameters);
             }
             AnnotationInstance post = methodInfo.annotation(OpenApiConstants.DOTNAME_POST);
             if (post != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, post, HttpMethod.POST, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, post, HttpMethod.POST, tagRefs,
+                        locatorOperationParameters, locatorPathItemParameters);
             }
             AnnotationInstance delete = methodInfo.annotation(OpenApiConstants.DOTNAME_DELETE);
             if (delete != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, delete, HttpMethod.DELETE, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, delete, HttpMethod.DELETE, tagRefs,
+                        locatorOperationParameters, locatorPathItemParameters);
             }
             AnnotationInstance head = methodInfo.annotation(OpenApiConstants.DOTNAME_HEAD);
             if (head != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, head, HttpMethod.HEAD, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, head, HttpMethod.HEAD, tagRefs,
+                        locatorOperationParameters, locatorPathItemParameters);
             }
             AnnotationInstance options = methodInfo.annotation(OpenApiConstants.DOTNAME_OPTIONS);
             if (options != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs,
+                        locatorOperationParameters, locatorPathItemParameters);
             }
             AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
             if (patch != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs,
+                        locatorOperationParameters, locatorPathItemParameters);
+            }
+            if (!opMethod) {
+                AnnotationInstance path = methodInfo.annotation(OpenApiConstants.DOTNAME_PATH);
+                if (path != null) {
+                    if (!Type.Kind.VOID.equals(methodInfo.returnType().kind())) {
+                        String oldAppPath = this.currentAppPath;
+                        this.currentAppPath = makePath(this.currentAppPath, path.value().asString());
+                        ResourceParameters params = ParameterProcessor.process(index, methodInfo, this::readParameter, extensions);
+                        processJaxRsResourceClass(openApi, index.getClassByName(methodInfo.returnType().name()),
+                                                  mergeNullableLists(locatorOperationParameters, params.getOperationParameters()),
+                                                  mergeNullableLists(locatorPathItemParameters, params.getPathItemParameters()));
+                        this.currentAppPath = oldAppPath;
+                    }
+                }
             }
         }
     }
@@ -496,7 +527,8 @@ public class OpenApiAnnotationScanner {
      * @param resourceTags
      */
     private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resource, MethodInfo method,
-            AnnotationInstance methodAnno, HttpMethod methodType, Set<String> resourceTags) {
+            AnnotationInstance methodAnno, HttpMethod methodType, Set<String> resourceTags,
+            List<Parameter> locatorOperationParameters, List<Parameter> locatorPathItemParameters) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
         final Operation operation;
@@ -583,8 +615,8 @@ public class OpenApiAnnotationScanner {
         /////////////////////////////////////////
         ResourceParameters params = ParameterProcessor.process(index, method, this::readParameter, extensions);
 
-        operation.setParameters(params.getOperationParameters());
-        pathItem.setParameters(params.getPathItemParameters());
+        operation.setParameters(mergeNullableLists(locatorOperationParameters, params.getOperationParameters()));
+        pathItem.setParameters(mergeNullableLists(locatorPathItemParameters, params.getPathItemParameters()));
 
         // Process any @RequestBody annotation
         /////////////////////////////////////////
@@ -2137,4 +2169,13 @@ public class OpenApiAnnotationScanner {
         this.currentAppPath = path;
     }
 
+    private static <T> List<T> mergeNullableLists(List<T>... lists) {
+        List<T> result = new ArrayList<>();
+        for (List<T> list : lists) {
+            if (list != null) {
+                result.addAll(list);
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
 }

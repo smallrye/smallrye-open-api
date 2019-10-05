@@ -348,7 +348,7 @@ public class ParameterProcessor {
         ClassInfo resourceClass = resourceMethod.declaringClass();
 
         // Phase I - Read class fields, constructors, "setter" methods not annotated with JAX-RS HTTP method
-        processor.readParameters(resourceClass, null);
+        processor.readParameters(resourceClass, null, index);
 
         parameters.setPathItemParameters(processor.getParameters());
         parameters.setPathItemPath(processor.generatePath(resourceClass, parameters.getPathItemParameters()));
@@ -367,9 +367,9 @@ public class ParameterProcessor {
                      * on method parameters until (if?) the MP-OAI TCK is changed.
                      */
                     if (openApiParameterAnnotations.contains(annotation.name())) {
-                        processor.readParameterAnnotation(annotation);
+                        processor.readParameterAnnotation(annotation, index);
                     } else {
-                        processor.readAnnotatedType(annotation);
+                        processor.readAnnotatedType(annotation, index);
                     }
                 });
 
@@ -378,7 +378,7 @@ public class ParameterProcessor {
                 .stream()
                 .filter(a -> a.target().equals(resourceMethod))
                 .filter(a -> openApiParameterAnnotations.contains(a.name()))
-                .forEach(processor::readParameterAnnotation);
+                .forEach(a -> processor.readParameterAnnotation(a, index));
 
         parameters.setOperationParameters(processor.getParameters());
         parameters.setOperationPath(processor.generatePath(resourceMethod, parameters.getOperationParameters()));
@@ -715,11 +715,11 @@ public class ParameterProcessor {
      *
      * @param annotation a parameter annotation to be read and processed
      */
-    void readParameterAnnotation(AnnotationInstance annotation) {
+    void readParameterAnnotation(AnnotationInstance annotation, IndexView index) {
         DotName name = annotation.name();
 
         if (DOTNAME_PARAMETER.equals(name)) {
-            readAnnotatedType(annotation, null);
+            readAnnotatedType(annotation, null, index);
         } else if (DOTNAME_PARAMETERS.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
@@ -732,7 +732,7 @@ public class ParameterProcessor {
                     readAnnotatedType(AnnotationInstance.create(nested.name(),
                             annotation.target(),
                             nested.values()),
-                            null);
+                            null, index);
                 }
             }
         }
@@ -745,8 +745,8 @@ public class ParameterProcessor {
      *
      * @param annotation a parameter annotation to be read and processed
      */
-    void readAnnotatedType(AnnotationInstance annotation) {
-        readAnnotatedType(annotation, null);
+    void readAnnotatedType(AnnotationInstance annotation, IndexView index) {
+        readAnnotatedType(annotation, null, index);
     }
 
     /**
@@ -757,7 +757,7 @@ public class ParameterProcessor {
      * @param annotation a parameter annotation to be read and processed
      * @param beanParamAnnotation
      */
-    void readAnnotatedType(AnnotationInstance annotation, AnnotationInstance beanParamAnnotation) {
+    void readAnnotatedType(AnnotationInstance annotation, AnnotationInstance beanParamAnnotation, IndexView index) {
         DotName name = annotation.name();
 
         if (DOTNAME_PARAMETER.equals(name)) {
@@ -821,7 +821,7 @@ public class ParameterProcessor {
 
                     if (targetName != null) {
                         ClassInfo beanParam = index.getClassByName(targetName);
-                        readParameters(beanParam, annotation);
+                        readParameters(beanParam, annotation, index);
                     }
                 }
             }
@@ -1178,14 +1178,14 @@ public class ParameterProcessor {
      * @param clazz the class to be scanned for parameters.
      * @param beanParamAnnotation
      */
-    void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation) {
+    void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, IndexView index) {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
             if (DOTNAME_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
-                    if (isBeanPropertyParam(annotation)) {
-                        readAnnotatedType(annotation, beanParamAnnotation);
+                    if (isBeanPropertyParam(annotation, index)) {
+                        readAnnotatedType(annotation, beanParamAnnotation, index);
                     }
                 }
             }
@@ -1203,7 +1203,7 @@ public class ParameterProcessor {
      * @param annotation
      * @return
      */
-    static boolean isBeanPropertyParam(AnnotationInstance annotation) {
+    static boolean isBeanPropertyParam(AnnotationInstance annotation, IndexView index) {
         AnnotationTarget target = annotation.target();
         boolean relevant = false;
 
@@ -1214,8 +1214,9 @@ public class ParameterProcessor {
                 break;
             case METHOD_PARAMETER:
                 MethodParameterInfo param = target.asMethodParameter();
-                relevant = !isResourceMethod(param.method()) &&
-                        hasParameters(TypeUtil.getAnnotations(param));
+                relevant = !isResourceMethod(param.method())
+                        && hasParameters(TypeUtil.getAnnotations(param))
+                        && !isSubResourceLocator(param.method(), index);
                 break;
             case METHOD:
                 MethodInfo method = target.asMethod();
@@ -1228,6 +1229,18 @@ public class ParameterProcessor {
         }
 
         return relevant;
+    }
+
+    static boolean isSubResourceLocator(MethodInfo method, IndexView index) {
+        switch (method.returnType().kind()) {
+            case CLASS:
+                ClassInfo returnClass = index.getClassByName(method.returnType().name());
+                Map<DotName, List<AnnotationInstance>> annotations = returnClass.annotations();
+                return annotations.keySet().stream()
+                        .anyMatch(DOTNAME_JAXRS_HTTP_METHODS::contains)
+                        || annotations.keySet().contains(DOTNAME_PATH);
+        }
+        return false;
     }
 
     /**
