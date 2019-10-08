@@ -151,7 +151,7 @@ public class TypeUtil {
     }
 
     public static Class<?> getClass(String name) throws ClassNotFoundException {
-        return Class.forName(name);
+        return Class.forName(name, true, Thread.currentThread().getContextClassLoader());
     }
 
     /**
