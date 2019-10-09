@@ -459,7 +459,8 @@
             "$ref": "#/components/schemas/KustomPairKustomPairInteger"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "format": "password"
           },
           "primitiveFoo": {
             "format": "int32",

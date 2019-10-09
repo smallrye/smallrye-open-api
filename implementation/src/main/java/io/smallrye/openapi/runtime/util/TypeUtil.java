@@ -23,9 +23,9 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
@@ -55,9 +55,12 @@ public class TypeUtil {
 
     private static final DotName DOTNAME_OBJECT = DotName.createSimple(Object.class.getName());
     private static final Type OBJECT_TYPE = Type.create(DOTNAME_OBJECT, Type.Kind.CLASS);
+    private static final String UUID_PATTERN = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
     private static final TypeWithFormat STRING_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.NONE);
     private static final TypeWithFormat BYTE_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.BYTE);
     private static final TypeWithFormat CHAR_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.BYTE);
+    private static final TypeWithFormat UUID_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.UUID, UUID_PATTERN);
+    private static final TypeWithFormat URI_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.URI);
     private static final TypeWithFormat NUMBER_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.NONE); // We can't immediately tell if it's int, float, etc.
     private static final TypeWithFormat BIGDECIMAL_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.NONE);
     private static final TypeWithFormat DOUBLE_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.DOUBLE);
@@ -83,6 +86,8 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(StringBuffer.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(StringBuilder.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(CharSequence.class.getName()), STRING_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.net.URI.class.getName()), URI_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.util.UUID.class.getName()), UUID_FORMAT);
 
         // B64 String
         TYPE_MAP.put(DotName.createSimple(Byte.class.getName()), BYTE_FORMAT);
@@ -213,20 +218,69 @@ public class TypeUtil {
     private TypeUtil() {
     }
 
-    public static TypeWithFormat getTypeFormat(PrimitiveType primitiveType) {
-        return TYPE_MAP.get(primitiveType.name());
+    /**
+     * Retrieves the default schema attributes for the given type, wrapped in
+     * a TypeWithFormat instance.
+     *
+     * XXX: Consider additional check for subclasses of java.lang.Number and
+     * implementations of java.lang.CharSequence.
+     *
+     * @param type the type
+     * @return the default schema attributes for the given type, wrapped in
+     *         a TypeWithFormat instance
+     */
+    private static TypeWithFormat getTypeFormat(Type type) {
+        if (type.kind() == Type.Kind.ARRAY) {
+            return arrayFormat();
+        }
+
+        return TYPE_MAP.getOrDefault(getName(type), objectFormat());
     }
 
-    // TODO: consider additional checks for Number interface?
-    public static TypeWithFormat getTypeFormat(Type classType) {
-        if (classType.kind() == Type.Kind.ARRAY) {
-            return arrayFormat();
-        } else {
-            return Optional
-                    .ofNullable(TYPE_MAP.get(getName(classType))) // TODO we could fall back onto tests for interfaces such as CharSequence.
-                    // Otherwise it's some object without a well-known format mapping
-                    .orElse(objectFormat());
+    /**
+     * Determines if a type is eligible for registration. If the schema type is
+     * array or object, the type must be in the provided index. Otherwise, only
+     * those types with defined properties beyond 'type' and 'format' are
+     * eligible.
+     * 
+     * @param index index of classes to consider
+     * @param classType the type to check
+     * @return true if the type may be registered in the SchemaRegistry, false otherwise.
+     */
+    public static boolean allowRegistration(IndexView index, Type classType) {
+        TypeWithFormat typeFormat = getTypeFormat(classType);
+
+        switch (typeFormat.getSchemaType()) {
+            case ARRAY:
+            case OBJECT:
+                return index.getClassByName(classType.name()) != null;
+            default:
+                return typeFormat.getProperties().size() > 2;
         }
+    }
+
+    /**
+     * Retrieves the read-only Map of schema attributes for the given type.
+     * 
+     * @param classType the type
+     * @return Map of default schema attributes
+     */
+    public static Map<String, Object> getTypeAttributes(Type classType) {
+        return getTypeFormat(classType).getProperties();
+    }
+
+    /**
+     * Sets the default schema attributes for the given type on the provided schema
+     * instance.
+     * 
+     * @param classType the type
+     * @param schema a writable schema to be updated with the type's default schema attributes
+     */
+    public static void applyTypeAttributes(Type classType, Schema schema) {
+        TypeWithFormat attrs = getTypeFormat(classType);
+        schema.setType(attrs.getSchemaType());
+        schema.setFormat(attrs.getFormat());
+        schema.setPattern(attrs.getPattern());
     }
 
     public static TypeWithFormat arrayFormat() {
@@ -329,7 +383,8 @@ public class TypeUtil {
             return true;
         }
 
-        TypeUtil.TypeWithFormat tf = TypeUtil.getTypeFormat(type);
+        TypeWithFormat tf = getTypeFormat(type);
+
         // If is known type.
         return tf.getSchemaType() != Schema.SchemaType.OBJECT &&
                 tf.getSchemaType() != Schema.SchemaType.ARRAY;
@@ -574,50 +629,56 @@ public class TypeUtil {
                 .orElse(null);
     }
 
-    public static final class TypeWithFormat {
-        private final SchemaType schemaType;
-        private final DataFormat format;
+    static final class TypeWithFormat {
+        private final Map<String, Object> properties;
 
         public TypeWithFormat(@NotNull SchemaType schemaType,
-                @NotNull DataFormat format) {
-            this.schemaType = schemaType;
-            this.format = format;
+                @NotNull String format) {
+            this(schemaType, format, null);
         }
 
-        public SchemaType getSchemaType() {
-            return schemaType;
+        public TypeWithFormat(@NotNull SchemaType schemaType,
+                @NotNull String format,
+                String pattern) {
+
+            Map<String, Object> props = new HashMap<>(3);
+            props.put(OpenApiConstants.PROP_TYPE, schemaType);
+            props.put(OpenApiConstants.PROP_FORMAT, format);
+            if (pattern != null) {
+                props.put(OpenApiConstants.PROP_PATTERN, pattern);
+            }
+
+            this.properties = Collections.unmodifiableMap(props);
         }
 
-        public DataFormat getFormat() {
-            return format;
+        SchemaType getSchemaType() {
+            return (SchemaType) properties.get(OpenApiConstants.PROP_TYPE);
+        }
+
+        String getFormat() {
+            return (String) properties.get(OpenApiConstants.PROP_FORMAT);
+        }
+
+        String getPattern() {
+            return (String) properties.get(OpenApiConstants.PROP_PATTERN);
+        }
+
+        Map<String, Object> getProperties() {
+            return properties;
         }
     }
 
-    public enum DataFormat {
-        NONE(null),
-        INT32("int32"),
-        INT64("int64"),
-        FLOAT("float"),
-        DOUBLE("double"),
-        BYTE("byte"),
-        BINARY("binary"),
-        DATE("date"),
-        DATE_TIME("date-time"),
-        PASSWORD("password");
-
-        private final String format;
-
-        DataFormat(String format) {
-            this.format = format;
-        }
-
-        public String format() {
-            return format;
-        }
-
-        public boolean hasFormat() {
-            return this != NONE;
-        }
+    private static class DataFormat {
+        static final String NONE = null;
+        static final String INT32 = "int32";
+        static final String INT64 = "int64";
+        static final String FLOAT = "float";
+        static final String DOUBLE = "double";
+        static final String BYTE = "byte";
+        static final String DATE = "date";
+        static final String DATE_TIME = "date-time";
+        static final String URI = "uri";
+        static final String UUID = "uuid";
     }
 
 }

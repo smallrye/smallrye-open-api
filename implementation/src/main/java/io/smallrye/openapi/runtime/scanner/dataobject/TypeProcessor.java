@@ -94,9 +94,7 @@ public class TypeProcessor {
             schema.type(Schema.SchemaType.ARRAY);
 
             // Only use component (excludes the special name formatting for arrays).
-            TypeUtil.TypeWithFormat typeFormat = TypeUtil.getTypeFormat(arrayType.component());
-            arrSchema.setType(typeFormat.getSchemaType());
-            arrSchema.setFormat(typeFormat.getFormat().format());
+            TypeUtil.applyTypeAttributes(arrayType.component(), arrSchema);
 
             // If it's not a terminal type, then push for later inspection.
             if (!isTerminalType(arrayType.component()) && index.containsClass(type)) {
@@ -162,9 +160,7 @@ public class TypeProcessor {
             Type arg = pType.arguments().get(0);
 
             if (isTerminalType(arg)) {
-                TypeUtil.TypeWithFormat terminalType = TypeUtil.getTypeFormat(arg);
-                arraySchema.type(terminalType.getSchemaType());
-                arraySchema.format(terminalType.getFormat().format());
+                TypeUtil.applyTypeAttributes(arg, arraySchema);
             } else {
                 arraySchema = resolveParameterizedType(arg, arraySchema);
             }
@@ -180,9 +176,7 @@ public class TypeProcessor {
                 Type valueType = pType.arguments().get(1);
                 Schema propsSchema = new SchemaImpl();
                 if (isTerminalType(valueType)) {
-                    TypeUtil.TypeWithFormat tf = TypeUtil.getTypeFormat(valueType);
-                    propsSchema.setType(tf.getSchemaType());
-                    propsSchema.setFormat(tf.getFormat().format());
+                    TypeUtil.applyTypeAttributes(valueType, propsSchema);
                 } else {
                     propsSchema = resolveParameterizedType(valueType, propsSchema);
                 }
@@ -229,9 +223,7 @@ public class TypeProcessor {
         LOG.debugv("Resolved type {0} -> {1}", fieldType, resolvedType);
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
             LOG.debugv("Is a terminal type {0}", resolvedType);
-            TypeUtil.TypeWithFormat replacement = TypeUtil.getTypeFormat(resolvedType);
-            schema.setType(replacement.getSchemaType());
-            schema.setFormat(replacement.getFormat().format());
+            TypeUtil.applyTypeAttributes(resolvedType, schema);
         } else {
             LOG.debugv("Attempting to do TYPE_VARIABLE substitution: {0} -> {1}", fieldType, resolvedType);
             if (index.containsClass(resolvedType)) {

@@ -205,7 +205,7 @@ public class JandexUtil {
      * @param propertyName String
      * @return Boolean value
      */
-    public static Boolean booleanValueWithDefault(AnnotationInstance annotation, String propertyName) {
+    public static boolean booleanValueWithDefault(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
         return value != null && value.asBoolean();
     }
@@ -277,13 +277,25 @@ public class JandexUtil {
      * @param <T> Type parameter
      * @return Value of property
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Enum> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
+    public static <T extends Enum<?>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
         AnnotationValue value = annotation.value(propertyName);
         if (value == null) {
             return null;
         }
-        String strVal = value.asString();
+        return enumValue(value.asString(), clazz);
+    }
+
+    /**
+     * Converts a string value to the given enum type. If the string does not match
+     * one of the the enum's values name (case-insensitive) or toString value, null
+     * will be returned.
+     * 
+     * @param strVal String
+     * @param clazz Class type of the Enum
+     * @param <T> Type parameter
+     * @return Value of property
+     */
+    public static <T extends Enum<?>> T enumValue(String strVal, Class<T> clazz) {
         T[] constants = clazz.getEnumConstants();
         for (T t : constants) {
             if (t.toString().equals(strVal)) {

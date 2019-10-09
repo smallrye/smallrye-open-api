@@ -16,6 +16,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 
 import javax.validation.constraints.Max;
@@ -59,7 +60,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
@@ -166,6 +167,13 @@ public class ParameterScanTests extends IndexScannerTestBase {
         test("params.enum-form-param.json",
                 EnumQueryParamTestResource.class,
                 EnumQueryParamTestResource.TestEnum.class);
+    }
+
+    @Test
+    public void testUUIDQueryParam() throws IOException, JSONException {
+        test("params.uuid-params-responses.json",
+                UUIDQueryParamTestResource.class,
+                UUIDQueryParamTestResource.WrappedUUID.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -465,6 +473,29 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.TEXT_PLAIN)
         public TestEnum postData(@QueryParam("val") TestEnum value) {
             return null;
+        }
+    }
+
+    @Path("/uuid")
+    static class UUIDQueryParamTestResource {
+        static class WrappedUUID {
+            @Schema(format = "uuid", description = "test")
+            UUID theUUID;
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public WrappedUUID[] echoWrappedUUID(@QueryParam("val") UUID value) {
+            WrappedUUID result = new WrappedUUID();
+            result.theUUID = value;
+            return new WrappedUUID[] { result };
+        }
+
+        @POST
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        public UUID echoPostedUUID(UUID value) {
+            return value;
         }
     }
 }

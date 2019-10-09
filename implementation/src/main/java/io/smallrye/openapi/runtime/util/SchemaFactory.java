@@ -1,10 +1,12 @@
 package io.smallrye.openapi.runtime.util;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
@@ -74,94 +76,72 @@ public class SchemaFactory {
         return readSchema(index, new SchemaImpl(), annotation, Collections.emptyMap());
     }
 
-    @SuppressWarnings("unchecked")
     public static Schema readSchema(IndexView index,
             Schema schema,
             AnnotationInstance annotation,
-            Map<String, Object> overrides) {
+            Map<String, Object> defaults) {
         if (annotation == null) {
             return schema;
         }
 
         // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
+        Boolean isHidden = readAttr(annotation, OpenApiConstants.PROP_HIDDEN, defaults);
 
         if (Boolean.TRUE.equals(isHidden)) {
             return schema;
         }
 
-        schema.setNot((Schema) overrides.getOrDefault(OpenApiConstants.PROP_NOT,
-                readClassSchema(index, JandexUtil.value(annotation, OpenApiConstants.PROP_NOT), true)));
-        schema.setOneOf((List<Schema>) overrides.getOrDefault(OpenApiConstants.PROP_ONE_OF,
-                readClassSchemas(index, JandexUtil.value(annotation, OpenApiConstants.PROP_ONE_OF))));
-        schema.setAnyOf((List<Schema>) overrides.getOrDefault(OpenApiConstants.PROP_ANY_OF,
-                readClassSchemas(index, JandexUtil.value(annotation, OpenApiConstants.PROP_ANY_OF))));
-        schema.setAllOf((List<Schema>) overrides.getOrDefault(OpenApiConstants.PROP_ALL_OF,
-                readClassSchemas(index, JandexUtil.value(annotation, OpenApiConstants.PROP_ALL_OF))));
-        schema.setTitle((String) overrides.getOrDefault(OpenApiConstants.PROP_TITLE,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_TITLE)));
-        schema.setMultipleOf((BigDecimal) overrides.getOrDefault(OpenApiConstants.PROP_MULTIPLE_OF,
-                JandexUtil.bigDecimalValue(annotation, OpenApiConstants.PROP_MULTIPLE_OF)));
-        schema.setMaximum((BigDecimal) overrides.getOrDefault(OpenApiConstants.PROP_MAXIMUM,
-                JandexUtil.bigDecimalValue(annotation, OpenApiConstants.PROP_MAXIMUM)));
-        schema.setExclusiveMaximum((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_EXCLUSIVE_MAXIMUM,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_EXCLUSIVE_MAXIMUM)));
-        schema.setMinimum((BigDecimal) overrides.getOrDefault(OpenApiConstants.PROP_MINIMUM,
-                JandexUtil.bigDecimalValue(annotation, OpenApiConstants.PROP_MINIMUM)));
-        schema.setExclusiveMinimum((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_EXCLUSIVE_MINIMUM,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_EXCLUSIVE_MINIMUM)));
-        schema.setMaxLength((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MAX_LENGTH,
-                JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_LENGTH)));
-        schema.setMinLength((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MIN_LENGTH,
-                JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_LENGTH)));
-        schema.setPattern((String) overrides.getOrDefault(OpenApiConstants.PROP_PATTERN,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_PATTERN)));
-        schema.setMaxProperties((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MAX_PROPERTIES,
-                JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_PROPERTIES)));
-        schema.setMinProperties((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MIN_PROPERTIES,
-                JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_PROPERTIES)));
-        schema.setRequired((List<String>) overrides.getOrDefault(OpenApiConstants.PROP_REQUIRED_PROPERTIES,
-                JandexUtil.stringListValue(annotation, OpenApiConstants.PROP_REQUIRED_PROPERTIES)));
-        schema.setDescription((String) overrides.getOrDefault(OpenApiConstants.PROP_DESCRIPTION,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DESCRIPTION)));
-        schema.setFormat((String) overrides.getOrDefault(OpenApiConstants.PROP_FORMAT,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_FORMAT)));
-        schema.setRef((String) overrides.getOrDefault(OpenApiConstants.PROP_REF,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_REF)));
-        schema.setNullable((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_NULLABLE,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_NULLABLE)));
-        schema.setReadOnly((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_READ_ONLY,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_READ_ONLY)));
-        schema.setWriteOnly((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_WRITE_ONLY,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_WRITE_ONLY)));
-        schema.setExample(overrides.getOrDefault(OpenApiConstants.PROP_EXAMPLE,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_EXAMPLE)));
-        schema.setExternalDocs(readExternalDocs(annotation.value(OpenApiConstants.PROP_EXTERNAL_DOCS)));
-        schema.setDeprecated((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_DEPRECATED,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_DEPRECATED)));
-        schema.setType((Schema.SchemaType) overrides.getOrDefault(OpenApiConstants.PROP_TYPE,
-                JandexUtil.enumValue(annotation, OpenApiConstants.PROP_TYPE, Schema.SchemaType.class)));
-        schema.setDefaultValue(overrides.getOrDefault(OpenApiConstants.PROP_DEFAULT_VALUE,
-                JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DEFAULT_VALUE)));
+        schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, OpenApiConstants.PROP_NOT,
+                type -> readClassSchema(index, type, true), defaults));
+        schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, OpenApiConstants.PROP_ONE_OF,
+                type -> readClassSchemas(index, type), defaults));
+        schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, OpenApiConstants.PROP_ANY_OF,
+                type -> readClassSchemas(index, type), defaults));
+        schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, OpenApiConstants.PROP_ALL_OF,
+                type -> readClassSchemas(index, type), defaults));
+        schema.setTitle(readAttr(annotation, OpenApiConstants.PROP_TITLE, defaults));
+        schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, OpenApiConstants.PROP_MULTIPLE_OF,
+                BigDecimal::valueOf, defaults));
+        schema.setMaximum(SchemaFactory.<String, BigDecimal> readAttr(annotation, OpenApiConstants.PROP_MAXIMUM,
+                BigDecimal::new, defaults));
+        schema.setMinimum(SchemaFactory.<String, BigDecimal> readAttr(annotation, OpenApiConstants.PROP_MINIMUM,
+                BigDecimal::new, defaults));
+        schema.setExclusiveMaximum(readAttr(annotation, OpenApiConstants.PROP_EXCLUSIVE_MAXIMUM, defaults));
+        schema.setExclusiveMinimum(readAttr(annotation, OpenApiConstants.PROP_EXCLUSIVE_MINIMUM, defaults));
+        schema.setMaxLength(readAttr(annotation, OpenApiConstants.PROP_MAX_LENGTH, defaults));
+        schema.setMinLength(readAttr(annotation, OpenApiConstants.PROP_MIN_LENGTH, defaults));
+        schema.setPattern(readAttr(annotation, OpenApiConstants.PROP_PATTERN, defaults));
+        schema.setMaxProperties(readAttr(annotation, OpenApiConstants.PROP_MAX_PROPERTIES, defaults));
+        schema.setMinProperties(readAttr(annotation, OpenApiConstants.PROP_MIN_PROPERTIES, defaults));
+        schema.setRequired(readAttr(annotation, OpenApiConstants.PROP_REQUIRED_PROPERTIES, defaults));
+        schema.setDescription(readAttr(annotation, OpenApiConstants.PROP_DESCRIPTION, defaults));
+        schema.setFormat(readAttr(annotation, OpenApiConstants.PROP_FORMAT, defaults));
+        schema.setRef(readAttr(annotation, OpenApiConstants.PROP_REF, defaults));
+        schema.setNullable(readAttr(annotation, OpenApiConstants.PROP_NULLABLE, defaults));
+        schema.setReadOnly(readAttr(annotation, OpenApiConstants.PROP_READ_ONLY, defaults));
+        schema.setWriteOnly(readAttr(annotation, OpenApiConstants.PROP_WRITE_ONLY, defaults));
+        schema.setExample(readAttr(annotation, OpenApiConstants.PROP_EXAMPLE, defaults));
+        schema.setExternalDocs(readExternalDocs(JandexUtil.value(annotation, OpenApiConstants.PROP_EXTERNAL_DOCS)));
+        schema.setDeprecated(readAttr(annotation, OpenApiConstants.PROP_DEPRECATED, defaults));
+        schema.setType(SchemaFactory.<String, Schema.SchemaType> readAttr(annotation, OpenApiConstants.PROP_TYPE,
+                value -> JandexUtil.enumValue(value, Schema.SchemaType.class), defaults));
+        schema.setDefaultValue(readAttr(annotation, OpenApiConstants.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
-                readDiscriminator(index, JandexUtil.stringValue(annotation, OpenApiConstants.PROP_DISCRIMINATOR_PROPERTY),
-                        annotation.value(OpenApiConstants.PROP_DISCRIMINATOR_MAPPING)));
-        schema.setMaxItems((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MAX_ITEMS,
-                JandexUtil.intValue(annotation, OpenApiConstants.PROP_MAX_ITEMS)));
-        schema.setMinItems((Integer) overrides.getOrDefault(OpenApiConstants.PROP_MIN_ITEMS,
-                JandexUtil.intValue(annotation, OpenApiConstants.PROP_MIN_ITEMS)));
-        schema.setUniqueItems((Boolean) overrides.getOrDefault(OpenApiConstants.PROP_UNIQUE_ITEMS,
-                JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_UNIQUE_ITEMS)));
+                readDiscriminator(index,
+                        JandexUtil.value(annotation, OpenApiConstants.PROP_DISCRIMINATOR_PROPERTY),
+                        JandexUtil.value(annotation, OpenApiConstants.PROP_DISCRIMINATOR_MAPPING)));
+        schema.setMaxItems(readAttr(annotation, OpenApiConstants.PROP_MAX_ITEMS, defaults));
+        schema.setMinItems(readAttr(annotation, OpenApiConstants.PROP_MIN_ITEMS, defaults));
+        schema.setUniqueItems(readAttr(annotation, OpenApiConstants.PROP_UNIQUE_ITEMS, defaults));
 
-        List<Object> enumeration = (List<Object>) overrides.getOrDefault(OpenApiConstants.PROP_ENUMERATION,
-                JandexUtil.stringListValue(annotation, OpenApiConstants.PROP_ENUMERATION));
+        List<Object> enumeration = readAttr(annotation, OpenApiConstants.PROP_ENUMERATION, defaults);
+
         if (enumeration != null && !enumeration.isEmpty()) {
             schema.setEnumeration(enumeration);
         }
 
         if (schema instanceof SchemaImpl) {
-            ((SchemaImpl) schema).setName((String) overrides.getOrDefault(OpenApiConstants.PROP_NAME,
-                    JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME)));
+            ((SchemaImpl) schema).setName(readAttr(annotation, OpenApiConstants.PROP_NAME, defaults));
         }
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
@@ -191,6 +171,58 @@ public class SchemaFactory {
         }
 
         return schema;
+    }
+
+    /**
+     * Reads the attribute named by propertyName from annotation. If no value was specified,
+     * an optional default value is retrieved from the defaults map using the propertyName as
+     * they key. Array-typed annotation values will be converted to List.
+     * 
+     * @param <T> the type of the annotation attribute value
+     * @param annotation the annotation to read
+     * @param propertyName the name of the attribute to read
+     * @param defaults map of default values
+     * @return the annotation attribute value, a default value, or null
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T readAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults) {
+        Object value = JandexUtil.value(annotation, propertyName);
+
+        if (value == null) {
+            value = defaults.get(propertyName);
+        } else if (value.getClass().isArray()) {
+            value = Arrays.stream((T[]) value).collect(Collectors.toList());
+        }
+
+        return (T) value;
+    }
+
+    /**
+     * Reads the attribute named by propertyName from annotation and converts a non-null value using the
+     * provided converter function. If no value was specified, an optional default value is retrieved
+     * from the defaults map using the propertyName as they key.
+     * 
+     * @param <R> the type of the annotation attribute value
+     * @param <T> the type into which the annotation is to be converted
+     * @param annotation the annotation to read
+     * @param propertyName the name of the attribute to read
+     * @param defaults map of default values
+     * @param converter function used to convert from the raw attribute value to the desired type
+     * @return the converted annotation attribute value, a default value, or null
+     */
+    @SuppressWarnings("unchecked")
+    static <R, T> T readAttr(AnnotationInstance annotation, String propertyName, Function<R, T> converter,
+            Map<String, Object> defaults) {
+        R rawValue = JandexUtil.value(annotation, propertyName);
+        T value;
+
+        if (rawValue == null) {
+            value = (T) defaults.get(propertyName);
+        } else {
+            value = converter.apply(rawValue);
+        }
+
+        return value;
     }
 
     /**
@@ -239,7 +271,7 @@ public class SchemaFactory {
             Type asyncType = resolveAsyncType(type, extensions);
             schema = OpenApiDataObjectScanner.process(index, asyncType);
 
-            if (schema != null && index.getClassByName(asyncType.name()) != null) {
+            if (schema != null && TypeUtil.allowRegistration(index, asyncType)) {
                 SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
                 schema = schemaRegistry.register(asyncType, schema);
             }
@@ -296,7 +328,7 @@ public class SchemaFactory {
             return schemaRegistry.lookupRef(ctype);
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, ctype);
-            if (schemaReferenceSupported && schema != null && index.getClassByName(ctype.name()) != null) {
+            if (schemaReferenceSupported && schema != null && TypeUtil.allowRegistration(index, ctype)) {
                 return schemaRegistry.register(ctype, schema);
             } else {
                 return schema;
@@ -308,19 +340,14 @@ public class SchemaFactory {
      * Reads an array of Class annotations to produce a list of {@link Schema} models.
      * 
      * @param index the index of classes being scanned
-     * @param types the implementation types of the items to scan
+     * @param types the implementation types of the items to scan, never null
      */
     private static List<Schema> readClassSchemas(IndexView index, Type[] types) {
-        if (types == null) {
-            return null;
-        }
         LOG.debug("Processing a list of schema Class annotations.");
-        List<Schema> schemas = new ArrayList<>(types.length);
-        for (Type type : types) {
-            Schema schema = readClassSchema(index, type, true);
-            schemas.add(schema);
-        }
-        return schemas;
+
+        return Arrays.stream(types)
+                .map(type -> readClassSchema(index, type, true))
+                .collect(Collectors.toList());
     }
 
     private static Type resolveAsyncType(Type type, List<AnnotationScannerExtension> extensions) {
@@ -354,7 +381,7 @@ public class SchemaFactory {
      */
     private static Discriminator readDiscriminator(IndexView index,
             String propertyName,
-            AnnotationValue annotation) {
+            AnnotationInstance[] annotation) {
 
         if (propertyName == null && annotation == null) {
             return null;
@@ -374,7 +401,7 @@ public class SchemaFactory {
         if (annotation != null) {
             LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
 
-            for (AnnotationInstance nested : annotation.asNestedArray()) {
+            for (AnnotationInstance nested : annotation) {
                 String propertyValue = JandexUtil.stringValue(nested, OpenApiConstants.PROP_VALUE);
 
                 AnnotationValue schemaValue = nested.value(OpenApiConstants.PROP_SCHEMA);
@@ -400,11 +427,10 @@ public class SchemaFactory {
         return discriminator;
     }
 
-    private static ExternalDocumentation readExternalDocs(AnnotationValue externalDocAnno) {
-        if (externalDocAnno == null) {
+    private static ExternalDocumentation readExternalDocs(AnnotationInstance nested) {
+        if (nested == null) {
             return null;
         }
-        AnnotationInstance nested = externalDocAnno.asNested();
         ExternalDocumentation externalDoc = new ExternalDocumentationImpl();
         externalDoc.setDescription(JandexUtil.stringValue(nested, OpenApiConstants.PROP_DESCRIPTION));
         externalDoc.setUrl(JandexUtil.stringValue(nested, OpenApiConstants.PROP_URL));

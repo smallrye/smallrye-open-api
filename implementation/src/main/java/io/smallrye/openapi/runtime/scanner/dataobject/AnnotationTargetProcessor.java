@@ -17,7 +17,6 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -165,14 +164,10 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         fieldSchema = typeProcessor.getSchema();
 
         // TypeFormat pair contains mappings for Java <-> OAS types and formats.
-        TypeUtil.TypeWithFormat typeFormat = TypeUtil.getTypeFormat(postProcessedField);
-
         // Provide inferred type and format if relevant.
-        Map<String, Object> overrides = new HashMap<>();
-        overrides.put(OpenApiConstants.PROP_TYPE, typeFormat.getSchemaType());
-        overrides.put(OpenApiConstants.PROP_FORMAT, typeFormat.getFormat().format());
+        Map<String, Object> defaults = TypeUtil.getTypeAttributes(postProcessedField);
         // readSchema *may* replace the existing schema, so we must assign.
-        this.fieldSchema = SchemaFactory.readSchema(index, fieldSchema, annotation, overrides);
+        this.fieldSchema = SchemaFactory.readSchema(index, fieldSchema, annotation, defaults);
     }
 
     private void readUnannotatedField() {
@@ -184,12 +179,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         Type postProcessedField = typeProcessor.processType();
         fieldSchema = typeProcessor.getSchema();
 
-        TypeUtil.TypeWithFormat typeFormat = TypeUtil.getTypeFormat(postProcessedField);
-        fieldSchema.setType(typeFormat.getSchemaType());
-
-        if (typeFormat.getFormat().hasFormat()) {
-            fieldSchema.setFormat(typeFormat.getFormat().format());
-        }
+        TypeUtil.applyTypeAttributes(postProcessedField, fieldSchema);
     }
 
     private boolean shouldInferUnannotatedFields() {
