@@ -15,6 +15,9 @@
  */
 package io.smallrye.openapi.runtime.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -37,6 +40,7 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.Indexer;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
@@ -70,6 +74,7 @@ public class TypeUtil {
     private static final TypeWithFormat DATE_TIME_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.DATE_TIME);
 
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
+    private static final IndexView jdkIndex;
 
     // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#dataTypeFormat
     static {
@@ -117,6 +122,92 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(java.time.LocalDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.ZonedDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.OffsetDateTime.class.getName()), DATE_TIME_FORMAT);
+
+        Indexer indexer = new Indexer();
+        index(indexer, java.lang.Enum.class);
+        index(indexer, java.lang.Object.class);
+
+        // Common, expected classes
+        index(indexer, java.lang.Boolean.class);
+        index(indexer, java.lang.Byte.class);
+        index(indexer, java.lang.Character.class);
+        index(indexer, java.lang.Double.class);
+        index(indexer, java.lang.Float.class);
+        index(indexer, java.lang.Integer.class);
+        index(indexer, java.lang.Long.class);
+        index(indexer, java.lang.Number.class);
+        index(indexer, java.lang.Short.class);
+        index(indexer, java.lang.String.class);
+        index(indexer, java.lang.Void.class);
+        index(indexer, java.util.UUID.class);
+
+        // Collection Interfaces
+        index(indexer, java.util.Collection.class);
+        index(indexer, java.util.Deque.class);
+        index(indexer, java.util.List.class);
+        index(indexer, java.util.Map.class);
+        index(indexer, java.util.NavigableMap.class);
+        index(indexer, java.util.NavigableSet.class);
+        index(indexer, java.util.Queue.class);
+        index(indexer, java.util.Set.class);
+        index(indexer, java.util.SortedMap.class);
+        index(indexer, java.util.SortedSet.class);
+        index(indexer, java.util.concurrent.BlockingDeque.class);
+        index(indexer, java.util.concurrent.BlockingQueue.class);
+        index(indexer, java.util.concurrent.ConcurrentMap.class);
+        index(indexer, java.util.concurrent.ConcurrentNavigableMap.class);
+        index(indexer, java.util.concurrent.TransferQueue.class);
+
+        // Abstract Collections
+        index(indexer, java.util.AbstractCollection.class);
+        index(indexer, java.util.AbstractList.class);
+        index(indexer, java.util.AbstractMap.class);
+        index(indexer, java.util.AbstractQueue.class);
+        index(indexer, java.util.AbstractSequentialList.class);
+        index(indexer, java.util.AbstractSet.class);
+        index(indexer, java.util.EnumSet.class);
+
+        // Collections
+        index(indexer, java.util.ArrayDeque.class);
+        index(indexer, java.util.ArrayList.class);
+        index(indexer, java.util.EnumMap.class);
+        index(indexer, java.util.HashMap.class);
+        index(indexer, java.util.HashSet.class);
+        index(indexer, java.util.Hashtable.class);
+        index(indexer, java.util.IdentityHashMap.class);
+        index(indexer, java.util.LinkedHashMap.class);
+        index(indexer, java.util.LinkedHashSet.class);
+        index(indexer, java.util.LinkedList.class);
+        index(indexer, java.util.PriorityQueue.class);
+        index(indexer, java.util.Properties.class);
+        index(indexer, java.util.Stack.class);
+        index(indexer, java.util.TreeMap.class);
+        index(indexer, java.util.TreeSet.class);
+        index(indexer, java.util.Vector.class);
+        index(indexer, java.util.concurrent.ArrayBlockingQueue.class);
+        index(indexer, java.util.concurrent.ConcurrentHashMap.class);
+        index(indexer, java.util.concurrent.ConcurrentLinkedDeque.class);
+        index(indexer, java.util.concurrent.ConcurrentLinkedQueue.class);
+        index(indexer, java.util.concurrent.ConcurrentSkipListMap.class);
+        index(indexer, java.util.concurrent.ConcurrentSkipListSet.class);
+        index(indexer, java.util.concurrent.CopyOnWriteArrayList.class);
+        index(indexer, java.util.concurrent.CopyOnWriteArraySet.class);
+        index(indexer, java.util.concurrent.DelayQueue.class);
+        index(indexer, java.util.concurrent.LinkedBlockingDeque.class);
+        index(indexer, java.util.concurrent.LinkedBlockingQueue.class);
+        index(indexer, java.util.concurrent.LinkedTransferQueue.class);
+        index(indexer, java.util.concurrent.PriorityBlockingQueue.class);
+        index(indexer, java.util.concurrent.SynchronousQueue.class);
+
+        jdkIndex = indexer.complete();
+    }
+
+    private static void index(Indexer indexer, Class<?> klazz) {
+        try (InputStream stream = klazz.getResourceAsStream(klazz.getSimpleName() + ".class")) {
+            indexer.index(stream);
+        } catch (IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
     }
 
     private TypeUtil() {
@@ -146,12 +237,27 @@ public class TypeUtil {
         return OBJECT_FORMAT;
     }
 
-    public static Class<?> getClass(Type type) throws ClassNotFoundException {
-        return getClass(getName(type).toString());
+    static Class<?> getClass(DotName name) throws ClassNotFoundException {
+        return Class.forName(name.toString(), true, Thread.currentThread().getContextClassLoader());
     }
 
-    public static Class<?> getClass(String name) throws ClassNotFoundException {
-        return Class.forName(name, true, Thread.currentThread().getContextClassLoader());
+    static boolean isAssignableFrom(DotName subject, DotName object) {
+        try {
+            Class<?> subjectKlazz = TypeUtil.getClass(subject);
+            Class<?> objectKlazz = TypeUtil.getClass(object);
+            return objectKlazz.isAssignableFrom(subjectKlazz);
+        } catch (ClassNotFoundException nfe) {
+            return false;
+        }
+    }
+
+    static ClassInfo getClassInfo(IndexView appIndex, Type type) {
+        DotName className = getName(type);
+        ClassInfo clazz = appIndex.getClassByName(className);
+        if (clazz == null) {
+            clazz = jdkIndex.getClassByName(className);
+        }
+        return clazz;
     }
 
     /**
@@ -167,38 +273,45 @@ public class TypeUtil {
      * @return true if is of type
      */
     public static boolean isA(IndexView index, Type testSubject, Type testObject) {
+        // The types may be the same -- short circuit looking in the index
+        if (getName(testSubject).equals(getName(testObject))) {
+            return true;
+        }
+        if (testSubject.kind() == Type.Kind.PRIMITIVE && testObject.kind() != Type.Kind.PRIMITIVE) {
+            return false;
+        }
+
         // First, look in Jandex, as target might not be in our classloader
-        ClassInfo subJandexKlazz = index.getClassByName(getName(testSubject));
+        ClassInfo subJandexKlazz = getClassInfo(index, testSubject);
 
         if (subJandexKlazz != null) {
             return subJandexKlazz.interfaceNames().contains(getName(testObject)) || hasSuper(index, subJandexKlazz, testObject);
-        } else {
-            try {
-                Class<?> subjectKlazz = TypeUtil.getClass(testSubject);
-                Class<?> objectKlazz = TypeUtil.getClass(testObject);
-                return objectKlazz.isAssignableFrom(subjectKlazz);
-            } catch (ClassNotFoundException nfe) {
-                return false;
-            }
         }
+
+        return isAssignableFrom(testSubject.name(), testObject.name());
     }
 
     private static boolean hasSuper(IndexView index, ClassInfo testSubject, Type testObject) {
         Type superKlazzType = testSubject.superClassType();
+
         while (superKlazzType != null) {
             if (getName(superKlazzType).equals(getName(testObject))) {
                 return true;
             }
-            ClassInfo superKlazz = index.getClassByName(getName(superKlazzType));
-            if (superKlazz == null) {
-                try {
-                    Class<?> subjectKlazz = TypeUtil.getClass(testSubject.name().toString());
-                    Class<?> objectKlazz = TypeUtil.getClass(testObject);
-                    return objectKlazz.isAssignableFrom(subjectKlazz);
-                } catch (ClassNotFoundException nfe) {
-                    return false;
-                }
+            if (DOTNAME_OBJECT.equals(getName(superKlazzType))) {
+                return false;
             }
+
+            ClassInfo superKlazz = getClassInfo(index, superKlazzType);
+
+            if (superKlazz != null) {
+                if (superKlazz.interfaceNames().contains(getName(testObject))) {
+                    return true;
+                }
+            } else {
+                return isAssignableFrom(testSubject.name(), testObject.name());
+            }
+
             superKlazzType = superKlazz.superClassType();
         }
         return false;
