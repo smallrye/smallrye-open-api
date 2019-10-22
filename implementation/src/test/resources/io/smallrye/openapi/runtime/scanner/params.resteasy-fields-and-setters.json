@@ -37,6 +37,7 @@
           "name": "testMatrix",
           "in": "path",
           "required": true,
+          "explode": true,
           "schema": {
             "type": "object",
             "properties": {

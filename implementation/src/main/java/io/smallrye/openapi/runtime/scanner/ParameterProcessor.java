@@ -470,6 +470,7 @@ public class ParameterProcessor {
                     context.target = null;
                     context.targetType = null;
                     context.oaiParam = new ParameterImpl();
+                    context.oaiParam.explode(Boolean.TRUE);
                     params.put(new ParameterContextKey(context), context);
                 }
 
