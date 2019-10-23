@@ -156,6 +156,8 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     static enum TestEnum {
-        VALUE1, VALUE2, VALUE3;
+        VALUE1,
+        VALUE2,
+        VALUE3;
     }
 }

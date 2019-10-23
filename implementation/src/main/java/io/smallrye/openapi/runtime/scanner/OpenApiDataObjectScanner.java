@@ -25,7 +25,6 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
@@ -93,7 +92,7 @@ public class OpenApiDataObjectScanner {
     // String type
     public static final Type STRING_TYPE = Type.create(DotName.createSimple(String.class.getName()), Type.Kind.CLASS);
     // Array type
-    public static final Type ARRAY_TYPE_OBJECT = ArrayType.create(DotName.createSimple("[Ljava.lang.Object;"), Type.Kind.ARRAY);
+    public static final Type ARRAY_TYPE_OBJECT = Type.create(DotName.createSimple("[Ljava.lang.Object;"), Type.Kind.ARRAY);
 
     private static ClassInfo collectionStandin;
     private static ClassInfo mapStandin;
@@ -123,7 +122,6 @@ public class OpenApiDataObjectScanner {
     private AnnotationTarget rootAnnotationTarget;
     private final Type rootClassType;
     private final ClassInfo rootClassInfo;
-    private final TypeUtil.TypeWithFormat rootClassTypeFormat;
     private final AugmentedIndexView index;
     private final DataObjectDeque objectStack;
     private final IgnoreResolver ignoreResolver;
@@ -133,25 +131,23 @@ public class OpenApiDataObjectScanner {
      * <p>
      * Call {@link #process()} to build and return the {@link Schema}.
      *
-     * @param _index index of types to scan
+     * @param index index of types to scan
      * @param classType root to begin scan
      */
-    public OpenApiDataObjectScanner(IndexView _index, Type classType) {
-        this.index = new AugmentedIndexView(_index);
-        this.objectStack = new DataObjectDeque(index);
-        this.ignoreResolver = new IgnoreResolver(index);
+    public OpenApiDataObjectScanner(IndexView index, Type classType) {
+        this.index = new AugmentedIndexView(index);
+        this.objectStack = new DataObjectDeque(this.index);
+        this.ignoreResolver = new IgnoreResolver(this.index);
         this.rootClassType = classType;
-        this.rootClassTypeFormat = TypeUtil.getTypeFormat(classType);
         this.rootSchema = new SchemaImpl();
         this.rootClassInfo = initialType(classType);
     }
 
-    OpenApiDataObjectScanner(IndexView _index, AnnotationTarget annotationTarget, Type classType) {
-        this.index = new AugmentedIndexView(_index);
-        this.objectStack = new DataObjectDeque(index);
-        this.ignoreResolver = new IgnoreResolver(index);
+    OpenApiDataObjectScanner(IndexView index, AnnotationTarget annotationTarget, Type classType) {
+        this.index = new AugmentedIndexView(index);
+        this.objectStack = new DataObjectDeque(this.index);
+        this.ignoreResolver = new IgnoreResolver(this.index);
         this.rootClassType = classType;
-        this.rootClassTypeFormat = TypeUtil.getTypeFormat(classType);
         this.rootSchema = new SchemaImpl();
         this.rootClassInfo = initialType(classType);
         this.rootAnnotationTarget = annotationTarget;
@@ -175,10 +171,8 @@ public class OpenApiDataObjectScanner {
      * @return the OAI schema
      */
     public static Schema process(PrimitiveType primitive) {
-        TypeUtil.TypeWithFormat typeFormat = TypeUtil.getTypeFormat(primitive);
         Schema primitiveSchema = new SchemaImpl();
-        primitiveSchema.setType(typeFormat.getSchemaType());
-        primitiveSchema.setFormat(typeFormat.getFormat().format());
+        TypeUtil.applyTypeAttributes(primitive, primitiveSchema);
         return primitiveSchema;
     }
 
@@ -193,8 +187,7 @@ public class OpenApiDataObjectScanner {
         // If top level item is simple
         if (TypeUtil.isTerminalType(rootClassType)) {
             SchemaImpl simpleSchema = new SchemaImpl();
-            simpleSchema.setType(rootClassTypeFormat.getSchemaType());
-            simpleSchema.setFormat(rootClassTypeFormat.getFormat().format());
+            TypeUtil.applyTypeAttributes(rootClassType, simpleSchema);
             return simpleSchema;
         }
 

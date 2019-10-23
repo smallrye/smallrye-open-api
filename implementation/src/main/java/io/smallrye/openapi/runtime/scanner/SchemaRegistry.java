@@ -224,7 +224,7 @@ public class SchemaRegistry {
          * property name rather then a schema name.
          */
         AnnotationTarget targetSchema = index.getClassByName(key.type.name());
-        AnnotationInstance schemaAnnotation = getSchemaAnnotation(targetSchema);
+        AnnotationInstance schemaAnnotation = targetSchema != null ? getSchemaAnnotation(targetSchema) : null;
         String schemaName = null;
 
         if (schemaAnnotation != null) {
@@ -294,7 +294,7 @@ public class SchemaRegistry {
      */
     static class TypeKey {
         private final Type type;
-        private int hash = 0;
+        private int hashCode = 0;
 
         TypeKey(Type type) {
             this.type = type;
@@ -410,7 +410,7 @@ public class SchemaRegistry {
          */
         @Override
         public int hashCode() {
-            int hash = this.hash;
+            int hash = this.hashCode;
 
             if (hash != 0) {
                 return hash;
@@ -436,7 +436,8 @@ public class SchemaRegistry {
                 hash = 31 * hash + Objects.hash(wildType.extendsBound(), wildType.superBound());
             }
 
-            return this.hash = hash;
+            this.hashCode = hash;
+            return hash;
         }
     }
 }
