@@ -26,6 +26,7 @@ import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 
+import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -469,6 +470,7 @@ public class ParameterProcessor {
                     context.target = null;
                     context.targetType = null;
                     context.oaiParam = new ParameterImpl();
+                    context.oaiParam.explode(Boolean.TRUE);
                     params.put(new ParameterContextKey(context), context);
                 }
 
@@ -871,7 +873,13 @@ public class ParameterProcessor {
                 // This is a bean property setter
                 MethodInfo method = target.asMethod();
                 if (method.parameters().size() == 1) {
-                    valueString = method.parameterName(0);
+                    String methodName = method.name();
+
+                    if (methodName.startsWith("set")) {
+                        valueString = Introspector.decapitalize(methodName.substring(3));
+                    } else {
+                        valueString = methodName;
+                    }
                 }
                 break;
             default:
@@ -1189,7 +1197,8 @@ public class ParameterProcessor {
      * must be annotated with a JAX-RS parameter annotation or
      * {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}.
      *
-     * Method targets must not be annotated with one of the JAX-RS HTTP method annotations.
+     * Method targets must not be annotated with one of the JAX-RS HTTP method annotations and
+     * the method must have a single argument.
      *
      * @param annotation
      * @return
@@ -1211,7 +1220,8 @@ public class ParameterProcessor {
             case METHOD:
                 MethodInfo method = target.asMethod();
                 relevant = !isResourceMethod(method) &&
-                        hasParameters(method.annotations());
+                        hasParameters(method.annotations()) &&
+                        getType(target) != null;
                 break;
             default:
                 break;

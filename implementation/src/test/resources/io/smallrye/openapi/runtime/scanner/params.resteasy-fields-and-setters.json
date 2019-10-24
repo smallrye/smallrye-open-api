@@ -1,0 +1,106 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/test{testMatrix}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "pathField",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "pathProperty",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "testMatrix",
+          "in": "path",
+          "required": true,
+          "explode": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "matrixProperty": {
+                "type": "string"
+              },
+              "matrixField": {
+                "type": "string"
+              }
+            }
+          },
+          "style": "matrix"
+        },
+        {
+          "name": "queryField",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "queryProperty",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "queryProperty2",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "headerField",
+          "in": "header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "headerProperty",
+          "in": "header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "cookieField",
+          "in": "cookie",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "cookieProperty",
+          "in": "cookie",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    }
+  }
+}

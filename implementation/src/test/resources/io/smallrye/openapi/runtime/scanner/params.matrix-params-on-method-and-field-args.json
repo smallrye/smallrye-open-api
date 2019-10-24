@@ -16,6 +16,7 @@
           "name": "idMatrix",
           "in": "path",
           "style": "matrix",
+          "explode": true,
           "required": true,
           "schema": {
             "type": "object",
