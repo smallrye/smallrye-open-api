@@ -486,7 +486,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes the {@link Schema} model to the give node.
+     * Writes the {@link Schema} model to the given node.
      * 
      * @param node
      * @param model

@@ -16,16 +16,33 @@
 
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
+
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.openapi.annotations.tags.Tags;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
@@ -36,7 +53,10 @@ import org.junit.Test;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.io.OpenApiParser;
+import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -181,5 +201,101 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
             }
 
         });
+    }
+
+    @Test
+    public void testTagScanning() throws IOException, JSONException {
+        Index index = indexOf(TagTestResource1.class, TagTestResource2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.tags.multilocation.json", result);
+    }
+
+    @Test
+    public void testTagScanning_OrderGivenAnnotations() throws IOException, JSONException {
+        Index index = indexOf(TagTestApp.class, TagTestResource1.class, TagTestResource2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.tags.ordergiven.annotation.json", result);
+    }
+
+    @Test
+    public void testTagScanning_OrderGivenStaticFile() throws IOException, JSONException {
+        Index index = indexOf(TagTestResource1.class, TagTestResource2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenAPI scanResult = scanner.scan();
+        OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(
+                "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}"
+                        .getBytes()),
+                Format.JSON);
+        OpenApiDocument doc = OpenApiDocument.INSTANCE;
+        doc.config(nestingSupportConfig());
+        doc.modelFromStaticFile(staticResult);
+        doc.modelFromAnnotations(scanResult);
+        doc.initialize();
+        OpenAPI result = doc.get();
+        printToConsole(result);
+        assertJsonEquals("resource.tags.ordergiven.staticfile.json", result);
+    }
+
+    @Path("/tags1")
+    @Tag(name = "tag3", description = "TAG3 from TagTestResource1")
+    @SuppressWarnings("unused")
+    static class TagTestResource1 {
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public String getValue1() {
+            return null;
+        }
+
+        @POST
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Tag(name = "tag1", description = "TAG1 from TagTestResource1#postValue")
+        public void postValue(String value) {
+        }
+
+        @PATCH
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Tag
+        public void patchValue(String value) {
+        }
+    }
+
+    @Path("/tags2")
+    @Tag(description = "This tag will not appear without a name")
+    @Tag(name = "tag1", description = "TAG1 from TagTestResource2")
+    @Tag(ref = "http://example/com/tag2")
+    @SuppressWarnings("unused")
+    static class TagTestResource2 {
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        @Tag(name = "tag3", description = "TAG3 from TagTestResource2#getValue1", externalDocs = @ExternalDocumentation(description = "Ext doc from TagTestResource2#getValue1"))
+        public String getValue1() {
+            return null;
+        }
+
+        @POST
+        @Consumes(MediaType.TEXT_PLAIN)
+        public void postValue(String value) {
+        }
+
+        @PATCH
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Tags({
+                @Tag, @Tag
+        })
+        public void patchValue(String value) {
+        }
+    }
+
+    @ApplicationPath("/tags")
+    @OpenAPIDefinition(info = @Info(title = "Testing user-specified tag order", version = "1.0.0"), tags = {
+            @Tag(name = "tag3"),
+            @Tag(name = "tag1") })
+    static class TagTestApp extends Application {
     }
 }

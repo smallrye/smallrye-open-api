@@ -24,8 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -202,6 +203,9 @@ public class OpenApiAnnotationScanner {
         for (ClassInfo classInfo : applications) {
             oai = MergeUtil.merge(oai, jaxRsApplicationToOpenApi(classInfo));
         }
+
+        boolean tagsDefined = oai.getTags() != null && !oai.getTags().isEmpty();
+
         // this can be a useful extension point to set/override the application path
         for (AnnotationScannerExtension extension : extensions) {
             extension.processJaxRsApplications(this, applications);
@@ -217,8 +221,16 @@ public class OpenApiAnnotationScanner {
             processJaxRsResourceClass(oai, resourceClass, null);
         }
 
-        // Now that all paths have been created, sort them (we don't have a better way to organize them).
         if (oai != null) {
+            // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
+            if (!tagsDefined && oai.getTags() != null) {
+                oai.setTags(oai.getTags()
+                        .stream()
+                        .sorted(Comparator.comparing(Tag::getName))
+                        .collect(Collectors.toList()));
+            }
+
+            // Now that all paths have been created, sort them (we don't have a better way to organize them).
             Paths paths = oai.getPaths();
             if (paths != null) {
                 Paths sortedPaths = new PathsImpl();
@@ -365,6 +377,7 @@ public class OpenApiAnnotationScanner {
      * 
      * @param openApi
      * @param resourceClass
+     * @param locatorPathParameters
      */
     private void processJaxRsResourceClass(OpenAPIImpl openApi, ClassInfo resourceClass,
             List<Parameter> locatorPathParameters) {
@@ -388,44 +401,7 @@ public class OpenApiAnnotationScanner {
 
         // Process tags (both declarations and references)
         ////////////////////////////////////////
-        Set<String> tagRefs = new HashSet<>();
-        AnnotationInstance tagAnno = JandexUtil.getClassAnnotation(resourceClass, OpenApiConstants.DOTNAME_TAG);
-        if (tagAnno != null) {
-            if (JandexUtil.isRef(tagAnno)) {
-                String tagRef = JandexUtil.stringValue(tagAnno, OpenApiConstants.PROP_REF);
-                tagRefs.add(tagRef);
-            } else {
-                Tag tag = readTag(tagAnno);
-                if (tag.getName() != null) {
-                    openApi.addTag(tag);
-                    tagRefs.add(tag.getName());
-                }
-            }
-        }
-        AnnotationInstance tagsAnno = JandexUtil.getClassAnnotation(resourceClass, OpenApiConstants.DOTNAME_TAGS);
-        if (tagsAnno != null) {
-            AnnotationValue tagsArrayVal = tagsAnno.value();
-            if (tagsArrayVal != null) {
-                AnnotationInstance[] tagsArray = tagsArrayVal.asNestedArray();
-                for (AnnotationInstance ta : tagsArray) {
-                    if (JandexUtil.isRef(ta)) {
-                        String tagRef = JandexUtil.stringValue(ta, OpenApiConstants.PROP_REF);
-                        tagRefs.add(tagRef);
-                    } else {
-                        Tag tag = readTag(ta);
-                        if (tag.getName() != null) {
-                            openApi.addTag(tag);
-                            tagRefs.add(tag.getName());
-                        }
-                    }
-                }
-            }
-
-            List<String> listValue = JandexUtil.stringListValue(tagsAnno, OpenApiConstants.PROP_REFS);
-            if (listValue != null) {
-                tagRefs.addAll(listValue);
-            }
-        }
+        Set<String> tagRefs = processTags(openApi, resourceClass, false);
 
         addScopes(TypeUtil.getAnnotationValue(resourceClass, OpenApiConstants.DOTNAME_DECLARE_ROLES));
         resourceRolesAllowed = TypeUtil.getAnnotationValue(resourceClass, OpenApiConstants.DOTNAME_ROLES_ALLOWED);
@@ -506,6 +482,7 @@ public class OpenApiAnnotationScanner {
      * 
      * @param openApi current OAI result
      * @param locatorPathParameters the parent resource's list of path parameters, may be null
+     * @param resourceClass the JAX-RS resource class being processed. May be a sub-class of the class which declares method
      * @param method sub-resource locator JAX-RS method
      */
     private void processJaxRsSubResource(OpenAPIImpl openApi, List<Parameter> locatorPathParameters, ClassInfo resourceClass,
@@ -544,11 +521,11 @@ public class OpenApiAnnotationScanner {
      * Process a single JAX-RS method to produce an OpenAPI Operation.
      * 
      * @param openApi
-     * @param resource
+     * @param resourceClass
      * @param method
-     * @param methodAnno
      * @param methodType
      * @param resourceTags
+     * @param locatorPathParameters
      */
     private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resourceClass, MethodInfo method,
             HttpMethod methodType, Set<String> resourceTags,
@@ -585,53 +562,13 @@ public class OpenApiAnnotationScanner {
 
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
         /////////////////////////////////////////
-        boolean hasOpTags = false;
-        Set<String> tags = new HashSet<>();
-        if (method.hasAnnotation(OpenApiConstants.DOTNAME_TAG)) {
-            hasOpTags = true;
-            AnnotationInstance tagAnno = method.annotation(OpenApiConstants.DOTNAME_TAG);
-            if (JandexUtil.isRef(tagAnno)) {
-                String tagRef = JandexUtil.stringValue(tagAnno, OpenApiConstants.PROP_REF);
-                tags.add(tagRef);
-            } else if (JandexUtil.isEmpty(tagAnno)) {
-                // Nothing to do here.  The @Tag() was empty.
-            } else {
-                Tag tag = readTag(tagAnno);
-                if (tag.getName() != null) {
-                    openApi.addTag(tag);
-                    tags.add(tag.getName());
-                }
-            }
-        }
-        if (method.hasAnnotation(OpenApiConstants.DOTNAME_TAGS)) {
-            hasOpTags = true;
-            AnnotationInstance tagsAnno = method.annotation(OpenApiConstants.DOTNAME_TAGS);
-            AnnotationValue tagsArrayVal = tagsAnno.value();
-            if (tagsArrayVal != null) {
-                AnnotationInstance[] tagsArray = tagsArrayVal.asNestedArray();
-                for (AnnotationInstance tagAnno : tagsArray) {
-                    if (JandexUtil.isRef(tagAnno)) {
-                        String tagRef = JandexUtil.stringValue(tagAnno, OpenApiConstants.PROP_REF);
-                        tags.add(tagRef);
-                    } else {
-                        Tag tag = readTag(tagAnno);
-                        if (tag.getName() != null) {
-                            openApi.addTag(tag);
-                            tags.add(tag.getName());
-                        }
-                    }
-                }
-            }
+        Set<String> tags = processTags(openApi, method, true);
 
-            List<String> listValue = JandexUtil.stringListValue(tagsAnno, OpenApiConstants.PROP_REFS);
-            if (listValue != null) {
-                tags.addAll(listValue);
+        if (tags == null) {
+            if (!resourceTags.isEmpty()) {
+                operation.setTags(new ArrayList<>(resourceTags));
             }
-        }
-        if (!hasOpTags) {
-            tags.addAll(resourceTags);
-        }
-        if (!tags.isEmpty()) {
+        } else if (!tags.isEmpty()) {
             operation.setTags(new ArrayList<>(tags));
         }
 
@@ -851,6 +788,50 @@ public class OpenApiAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
+    }
+
+    /**
+     * Processes any {@link org.eclipse.microprofile.openapi.annotations.tags.Tag} or
+     * {@link org.eclipse.microprofile.openapi.annotations.tags.Tags} annotations present on
+     * the annotation target and adds them to the OpenAPI model. The set of tag names found
+     * (with iteration order preserved) is returned.
+     * 
+     * @param openApi OpenAPI model
+     * @param target a MethodInfo or ClassInfo to read for tag annotations
+     * @param nullWhenMissing determines if an empty set or a null value is returned when no annotations are found.
+     * @return the set of tag names found
+     */
+    Set<String> processTags(OpenAPIImpl openApi, AnnotationTarget target, boolean nullWhenMissing) {
+        if (!TypeUtil.hasAnnotation(target, OpenApiConstants.DOTNAME_TAG) &&
+                !TypeUtil.hasAnnotation(target, OpenApiConstants.DOTNAME_TAGS)) {
+            return nullWhenMissing ? null : Collections.emptySet();
+        }
+
+        Set<String> tags = new LinkedHashSet<>();
+        List<AnnotationInstance> tagAnnos = JandexUtil.getRepeatableAnnotation(target,
+                OpenApiConstants.DOTNAME_TAG,
+                OpenApiConstants.DOTNAME_TAGS);
+
+        for (AnnotationInstance ta : tagAnnos) {
+            if (JandexUtil.isRef(ta)) {
+                tags.add(JandexUtil.value(ta, OpenApiConstants.PROP_REF));
+            } else {
+                Tag tag = readTag(ta);
+
+                if (tag.getName() != null) {
+                    ModelUtil.addTag(openApi, tag);
+                    tags.add(tag.getName());
+                }
+            }
+        }
+
+        String[] refs = TypeUtil.getAnnotationValue(target, OpenApiConstants.DOTNAME_TAGS, OpenApiConstants.PROP_REFS);
+
+        if (refs != null) {
+            Arrays.stream(refs).forEach(tags::add);
+        }
+
+        return tags;
     }
 
     static String[] getMediaTypes(MethodInfo resourceMethod, DotName annotationName) {

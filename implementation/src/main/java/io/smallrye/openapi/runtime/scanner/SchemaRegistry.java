@@ -103,7 +103,7 @@ public class SchemaRegistry {
      * @param schema
      *        {@link Schema} to add to the registry
      * @return the same schema if not eligible for registration, or a reference
-     *         to the schema registered for the give Type
+     *         to the schema registered for the given Type
      */
     public static Schema checkRegistration(Type type, TypeResolver resolver, Schema schema) {
         Type resolvedType = resolver.getResolvedType(type);
