@@ -28,8 +28,10 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Application;
 
@@ -211,7 +213,7 @@ public class OpenApiAnnotationScanner {
         // Now find all jax-rs endpoints
         Collection<ClassInfo> resourceClasses = JandexUtil.getJaxRsResourceClasses(this.index);
         for (ClassInfo resourceClass : resourceClasses) {
-            processJaxRsResourceClass(oai, resourceClass);
+            processJaxRsResourceClass(oai, resourceClass, null);
         }
 
         // Now that all paths have been created, sort them (we don't have a better way to organize them).
@@ -363,7 +365,8 @@ public class OpenApiAnnotationScanner {
      * @param openApi
      * @param resourceClass
      */
-    private void processJaxRsResourceClass(OpenAPIImpl openApi, ClassInfo resourceClass) {
+    private void processJaxRsResourceClass(OpenAPIImpl openApi, ClassInfo resourceClass,
+            List<Parameter> locatorPathParameters) {
         LOG.debug("Processing a JAX-RS resource class: " + resourceClass.simpleName());
 
         // TODO handle the use-case where the resource class extends a base class, and the base class has jax-rs relevant methods and annotations
@@ -432,33 +435,47 @@ public class OpenApiAnnotationScanner {
         // Now find and process the operation methods
         ////////////////////////////////////////
         for (MethodInfo methodInfo : resourceClass.methods()) {
+            boolean opMethod = false;
+
             AnnotationInstance get = methodInfo.annotation(OpenApiConstants.DOTNAME_GET);
             if (get != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, get, HttpMethod.GET, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, get, HttpMethod.GET, tagRefs, locatorPathParameters);
             }
             AnnotationInstance put = methodInfo.annotation(OpenApiConstants.DOTNAME_PUT);
             if (put != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, put, HttpMethod.PUT, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, put, HttpMethod.PUT, tagRefs, locatorPathParameters);
             }
             AnnotationInstance post = methodInfo.annotation(OpenApiConstants.DOTNAME_POST);
             if (post != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, post, HttpMethod.POST, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, post, HttpMethod.POST, tagRefs, locatorPathParameters);
             }
             AnnotationInstance delete = methodInfo.annotation(OpenApiConstants.DOTNAME_DELETE);
             if (delete != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, delete, HttpMethod.DELETE, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, delete, HttpMethod.DELETE, tagRefs,
+                        locatorPathParameters);
             }
             AnnotationInstance head = methodInfo.annotation(OpenApiConstants.DOTNAME_HEAD);
             if (head != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, head, HttpMethod.HEAD, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, head, HttpMethod.HEAD, tagRefs, locatorPathParameters);
             }
             AnnotationInstance options = methodInfo.annotation(OpenApiConstants.DOTNAME_OPTIONS);
             if (options != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs,
+                        locatorPathParameters);
             }
             AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
             if (patch != null) {
-                processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs);
+                opMethod = true;
+                processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs, locatorPathParameters);
+            }
+            if (!opMethod && methodInfo.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
+                processJaxRsSubResource(openApi, locatorPathParameters, methodInfo);
             }
         }
     }
@@ -486,6 +503,45 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
+     * Scans a sub-resource locator method's return type as a resource class. The list of locator path parameters
+     * will be expanded with any parameters that apply to the resource sub-locator method (both path and operation
+     * parameters).
+     * 
+     * @param openApi current OAI result
+     * @param locatorPathParameters the parent resource's list of path parameters, may be null
+     * @param method sub-resource locator JAX-RS method
+     */
+    private void processJaxRsSubResource(OpenAPIImpl openApi, List<Parameter> locatorPathParameters, MethodInfo method) {
+        final Type methodReturnType = method.returnType();
+
+        if (Type.Kind.VOID.equals(methodReturnType.kind())) {
+            // Can sub-resource locators return a CompletionStage?
+            return;
+        }
+
+        ClassInfo subResourceClass = index.getClassByName(methodReturnType.name());
+
+        if (subResourceClass != null) {
+            final String originalAppPath = this.currentAppPath;
+            ResourceParameters params = ParameterProcessor.process(index, method, this::readParameter, extensions);
+
+            this.currentAppPath = makePath(this.currentAppPath, params.getOperationPath());
+
+            /*
+             * Combine parameters passed previously with all of those from the current resource class and
+             * method that apply to this Path. The full list will be used as PATH-LEVEL parameters for
+             * sub-resource methods deeper in the scan.
+             */
+            processJaxRsResourceClass(openApi, subResourceClass,
+                    mergeNullableLists(locatorPathParameters,
+                            params.getPathItemParameters(),
+                            params.getOperationParameters()));
+
+            this.currentAppPath = originalAppPath;
+        }
+    }
+
+    /**
      * Process a single JAX-RS method to produce an OpenAPI Operation.
      * 
      * @param openApi
@@ -496,7 +552,8 @@ public class OpenApiAnnotationScanner {
      * @param resourceTags
      */
     private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resource, MethodInfo method,
-            AnnotationInstance methodAnno, HttpMethod methodType, Set<String> resourceTags) {
+            AnnotationInstance methodAnno, HttpMethod methodType, Set<String> resourceTags,
+            List<Parameter> locatorPathParameters) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
         final Operation operation;
@@ -584,7 +641,7 @@ public class OpenApiAnnotationScanner {
         ResourceParameters params = ParameterProcessor.process(index, method, this::readParameter, extensions);
 
         operation.setParameters(params.getOperationParameters());
-        pathItem.setParameters(params.getPathItemParameters());
+        pathItem.setParameters(mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
 
         // Process any @RequestBody annotation
         /////////////////////////////////////////
@@ -2137,4 +2194,23 @@ public class OpenApiAnnotationScanner {
         this.currentAppPath = path;
     }
 
+    /**
+     * Combines the lists passed into a new list, excluding any null lists given.
+     * If the resulting list is empty, return null. This method is marked with
+     * {@code @SafeVarargs} because the elements of the lists handled generically
+     * and the input/output types match.
+     * 
+     * @param <T> element type of the list
+     * @param lists one or more lists to combine
+     * @return the combined/merged lists or null if the resulting merged list is empty
+     */
+    @SafeVarargs
+    private static <T> List<T> mergeNullableLists(List<T>... lists) {
+        List<T> result = (List<T>) Arrays.stream(lists)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        return result.isEmpty() ? null : result;
+    }
 }

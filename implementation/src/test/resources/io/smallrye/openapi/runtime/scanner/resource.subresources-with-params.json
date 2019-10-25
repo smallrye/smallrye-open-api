@@ -1,0 +1,267 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/resource{resourceMatrix}/sub/{id}{idMatrix}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "q3",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
+      "patch": {
+        "requestBody": {
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "resourceMatrix",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "r0m0": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "r0m1": {
+                "format": "date-time",
+                "type": "string"
+              }
+            }
+          },
+          "style": "matrix",
+          "explode": true
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Resource Identifier",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "idMatrix",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "m1": {
+                "type": "string"
+              },
+              "m2": {
+                "format": "int32",
+                "type": "integer"
+              }
+            }
+          },
+          "style": "matrix",
+          "explode": true
+        },
+        {
+          "name": "q1",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "q2",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/resource{resourceMatrix}/sub/{id}{idMatrix}/sub2/{subsubid}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "subsubid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "resourceMatrix",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "r0m0": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "r0m1": {
+                "format": "date-time",
+                "type": "string"
+              }
+            }
+          },
+          "style": "matrix",
+          "explode": true
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Resource Identifier",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "idMatrix",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "m1": {
+                "type": "string"
+              },
+              "m2": {
+                "format": "int32",
+                "type": "integer"
+              }
+            }
+          },
+          "style": "matrix",
+          "explode": true
+        },
+        {
+          "name": "q1",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "q2",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/resource{resourceMatrix}/sub0": {
+      "get": {
+        "parameters": [
+          {
+            "name": "q4",
+            "in": "query",
+            "description": "Q4 Query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "resourceMatrix",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "r0m0": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "r0m1": {
+                "format": "date-time",
+                "type": "string"
+              }
+            }
+          },
+          "style": "matrix",
+          "explode": true
+        }
+      ]
+    }
+  }
+}

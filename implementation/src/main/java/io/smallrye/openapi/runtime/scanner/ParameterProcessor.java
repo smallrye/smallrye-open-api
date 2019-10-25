@@ -1203,7 +1203,7 @@ public class ParameterProcessor {
      * @param annotation
      * @return
      */
-    static boolean isBeanPropertyParam(AnnotationInstance annotation) {
+    boolean isBeanPropertyParam(AnnotationInstance annotation) {
         AnnotationTarget target = annotation.target();
         boolean relevant = false;
 
@@ -1215,19 +1215,37 @@ public class ParameterProcessor {
             case METHOD_PARAMETER:
                 MethodParameterInfo param = target.asMethodParameter();
                 relevant = !isResourceMethod(param.method()) &&
-                        hasParameters(TypeUtil.getAnnotations(param));
+                        hasParameters(TypeUtil.getAnnotations(param)) &&
+                        !isSubResourceLocator(param.method());
                 break;
             case METHOD:
                 MethodInfo method = target.asMethod();
                 relevant = !isResourceMethod(method) &&
                         hasParameters(method.annotations()) &&
-                        getType(target) != null;
+                        getType(target) != null &&
+                        !isSubResourceLocator(method);
                 break;
             default:
                 break;
         }
 
         return relevant;
+    }
+
+    /**
+     * Determines if the give method is a JAX-RS sub-resource locator method
+     * annotated by {@code @Path} but NOT annotated with one of the HTTP method
+     * annotations.
+     *
+     * @param method method to check
+     * @return true if the method is JAX-RS sub-resource locator, false otherwise
+     */
+    boolean isSubResourceLocator(MethodInfo method) {
+        return method.returnType().kind() == Type.Kind.CLASS &&
+                method.hasAnnotation(DOTNAME_PATH) &&
+                method.annotations().stream()
+                        .map(AnnotationInstance::name)
+                        .noneMatch(DOTNAME_JAXRS_HTTP_METHODS::contains);
     }
 
     /**

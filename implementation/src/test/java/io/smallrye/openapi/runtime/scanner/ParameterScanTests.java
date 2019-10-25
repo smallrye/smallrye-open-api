@@ -179,7 +179,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
     @Test
     public void testRestEasyFieldsAndSetters() throws IOException, JSONException {
         test("params.resteasy-fields-and-setters.json",
-             RestEasyFieldsAndSettersTestResource.class);
+                RestEasyFieldsAndSettersTestResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
