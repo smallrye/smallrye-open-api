@@ -41,6 +41,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Encoding;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -180,6 +181,13 @@ public class ParameterScanTests extends IndexScannerTestBase {
     public void testRestEasyFieldsAndSetters() throws IOException, JSONException {
         test("params.resteasy-fields-and-setters.json",
                 RestEasyFieldsAndSettersTestResource.class);
+    }
+
+    @Test
+    public void testCharSequenceArrayParam() throws IOException, JSONException {
+        test("params.char-sequence-arrays.json",
+                CharSequenceArrayParamTestResource.class,
+                CharSequenceArrayParamTestResource.EchoResult.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -604,6 +612,29 @@ public class ParameterScanTests extends IndexScannerTestBase {
         // This annotation is not considered for processing (too many arguments)
         @org.jboss.resteasy.annotations.jaxrs.QueryParam
         public void setQueryProperty(String p, String p2) {
+        }
+    }
+
+    @Path("/char/sequence")
+    static class CharSequenceArrayParamTestResource {
+        static class EchoResult {
+            // The 'implementation' specifies one less array dimensions since the type implies one dimension
+            @Schema(type = SchemaType.ARRAY, implementation = CharSequence[][].class)
+            CharSequence[][][] resultWithSchema;
+
+            CharSequence[][][] resultNoSchema;
+
+            EchoResult result(CharSequence[][][] result) {
+                this.resultWithSchema = result;
+                this.resultNoSchema = result;
+                return this;
+            }
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public EchoResult echo(@QueryParam("val") CharSequence[][][] value) {
+            return new EchoResult().result(value);
         }
     }
 }

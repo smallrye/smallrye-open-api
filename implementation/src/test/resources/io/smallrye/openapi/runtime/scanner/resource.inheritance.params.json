@@ -1,0 +1,157 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/hello": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hello/extension": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hello/greet/{from}": {
+      "parameters": [
+        {
+          "name": "from",
+          "in": "path",
+          "required": true,
+          "description": "The name of the person sending the greeting",
+          "schema": {
+            "type": "string"
+          },
+          "style": "simple"
+        },
+        {
+          "name": "date",
+          "in": "header",
+          "description": "The local date when the greeting is sent",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "allowEmptyValue": false,
+          "example": "2019-12-31"
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "greetingName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hi/extension": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hi/greet/{from}": {
+      "parameters": [
+        {
+          "name": "from",
+          "in": "path",
+          "required": true,
+          "description": "The name of the person sending the greeting",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "date",
+          "in": "header",
+          "description": "The local date when the greeting is sent",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "allowEmptyValue": true
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "greetingName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

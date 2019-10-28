@@ -494,6 +494,16 @@
             "format": "int32",
             "type": "integer",
             "writeOnly": true
+          },
+          "array2d": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "format": "int32",
+                "type": "integer"
+              }
+            }
           }
         },
         "example": "This is the KitchenSink example field in Schema",

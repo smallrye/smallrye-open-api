@@ -87,8 +87,6 @@ public class TypeProcessor {
             LOG.debugv("Processing an array {0}", type);
             ArrayType arrayType = type.asArrayType();
 
-            // TODO handle multi-dimensional arrays.
-
             // Array-type schema
             Schema arrSchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
@@ -102,6 +100,15 @@ public class TypeProcessor {
             }
 
             arrSchema = SchemaRegistry.checkRegistration(arrayType.component(), typeResolver, arrSchema);
+
+            while (arrayType.dimensions() > 1) {
+                Schema parentArrSchema = new SchemaImpl();
+                parentArrSchema.setType(Schema.SchemaType.ARRAY);
+                parentArrSchema.items(arrSchema);
+
+                arrSchema = parentArrSchema;
+                arrayType = ArrayType.create(arrayType.component(), arrayType.dimensions() - 1);
+            }
 
             schema.items(arrSchema);
 

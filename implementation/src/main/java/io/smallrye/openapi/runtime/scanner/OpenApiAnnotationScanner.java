@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Application;
@@ -369,8 +370,6 @@ public class OpenApiAnnotationScanner {
             List<Parameter> locatorPathParameters) {
         LOG.debug("Processing a JAX-RS resource class: " + resourceClass.simpleName());
 
-        // TODO handle the use-case where the resource class extends a base class, and the base class has jax-rs relevant methods and annotations
-
         // Process @SecurityScheme annotations
         ////////////////////////////////////////
         List<AnnotationInstance> securitySchemeAnnotations = JandexUtil.getRepeatableAnnotation(resourceClass,
@@ -434,48 +433,21 @@ public class OpenApiAnnotationScanner {
 
         // Now find and process the operation methods
         ////////////////////////////////////////
-        for (MethodInfo methodInfo : resourceClass.methods()) {
-            boolean opMethod = false;
+        for (MethodInfo methodInfo : getResourceMethods(resourceClass)) {
+            final AtomicInteger resourceCount = new AtomicInteger(0);
 
-            AnnotationInstance get = methodInfo.annotation(OpenApiConstants.DOTNAME_GET);
-            if (get != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, get, HttpMethod.GET, tagRefs, locatorPathParameters);
-            }
-            AnnotationInstance put = methodInfo.annotation(OpenApiConstants.DOTNAME_PUT);
-            if (put != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, put, HttpMethod.PUT, tagRefs, locatorPathParameters);
-            }
-            AnnotationInstance post = methodInfo.annotation(OpenApiConstants.DOTNAME_POST);
-            if (post != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, post, HttpMethod.POST, tagRefs, locatorPathParameters);
-            }
-            AnnotationInstance delete = methodInfo.annotation(OpenApiConstants.DOTNAME_DELETE);
-            if (delete != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, delete, HttpMethod.DELETE, tagRefs,
-                        locatorPathParameters);
-            }
-            AnnotationInstance head = methodInfo.annotation(OpenApiConstants.DOTNAME_HEAD);
-            if (head != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, head, HttpMethod.HEAD, tagRefs, locatorPathParameters);
-            }
-            AnnotationInstance options = methodInfo.annotation(OpenApiConstants.DOTNAME_OPTIONS);
-            if (options != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, options, HttpMethod.OPTIONS, tagRefs,
-                        locatorPathParameters);
-            }
-            AnnotationInstance patch = methodInfo.annotation(OpenApiConstants.DOTNAME_PATCH);
-            if (patch != null) {
-                opMethod = true;
-                processJaxRsMethod(openApi, resourceClass, methodInfo, patch, HttpMethod.PATCH, tagRefs, locatorPathParameters);
-            }
-            if (!opMethod && methodInfo.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
-                processJaxRsSubResource(openApi, locatorPathParameters, methodInfo);
+            OpenApiConstants.DOTNAME_JAXRS_HTTP_METHODS
+                    .stream()
+                    .filter(methodInfo::hasAnnotation)
+                    .map(DotName::withoutPackagePrefix)
+                    .map(HttpMethod::valueOf)
+                    .forEach(httpMethod -> {
+                        resourceCount.incrementAndGet();
+                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters);
+                    });
+
+            if (resourceCount.get() == 0 && methodInfo.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
+                processJaxRsSubResource(openApi, locatorPathParameters, resourceClass, methodInfo);
             }
         }
     }
@@ -503,6 +475,31 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
+     * Extracts all methods from the provided class and its ancestors that are known to the instance's index
+     * 
+     * @param resource
+     * @return all methods from the provided class and its ancestors
+     */
+    List<MethodInfo> getResourceMethods(ClassInfo resource) {
+        Type resourceType = Type.create(resource.name(), Type.Kind.CLASS);
+        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, resource, resourceType);
+        List<MethodInfo> methods = new ArrayList<>();
+
+        for (ClassInfo classInfo : chain.keySet()) {
+            methods.addAll(classInfo.methods());
+
+            classInfo.interfaceTypes()
+                    .stream()
+                    .map(iface -> index.getClassByName(TypeUtil.getName(iface)))
+                    .filter(Objects::nonNull)
+                    .flatMap(iface -> iface.methods().stream())
+                    .forEach(methods::add);
+        }
+
+        return methods;
+    }
+
+    /**
      * Scans a sub-resource locator method's return type as a resource class. The list of locator path parameters
      * will be expanded with any parameters that apply to the resource sub-locator method (both path and operation
      * parameters).
@@ -511,7 +508,8 @@ public class OpenApiAnnotationScanner {
      * @param locatorPathParameters the parent resource's list of path parameters, may be null
      * @param method sub-resource locator JAX-RS method
      */
-    private void processJaxRsSubResource(OpenAPIImpl openApi, List<Parameter> locatorPathParameters, MethodInfo method) {
+    private void processJaxRsSubResource(OpenAPIImpl openApi, List<Parameter> locatorPathParameters, ClassInfo resourceClass,
+            MethodInfo method) {
         final Type methodReturnType = method.returnType();
 
         if (Type.Kind.VOID.equals(methodReturnType.kind())) {
@@ -523,7 +521,8 @@ public class OpenApiAnnotationScanner {
 
         if (subResourceClass != null) {
             final String originalAppPath = this.currentAppPath;
-            ResourceParameters params = ParameterProcessor.process(index, method, this::readParameter, extensions);
+            ResourceParameters params = ParameterProcessor.process(index, resourceClass, method, this::readParameter,
+                    extensions);
 
             this.currentAppPath = makePath(this.currentAppPath, params.getOperationPath());
 
@@ -551,8 +550,8 @@ public class OpenApiAnnotationScanner {
      * @param methodType
      * @param resourceTags
      */
-    private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resource, MethodInfo method,
-            AnnotationInstance methodAnno, HttpMethod methodType, Set<String> resourceTags,
+    private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resourceClass, MethodInfo method,
+            HttpMethod methodType, Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
@@ -638,7 +637,7 @@ public class OpenApiAnnotationScanner {
 
         // Process @Parameter annotations
         /////////////////////////////////////////
-        ResourceParameters params = ParameterProcessor.process(index, method, this::readParameter, extensions);
+        ResourceParameters params = ParameterProcessor.process(index, resourceClass, method, this::readParameter, extensions);
 
         operation.setParameters(params.getOperationParameters());
         pathItem.setParameters(mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -747,7 +746,7 @@ public class OpenApiAnnotationScanner {
         List<AnnotationInstance> securityRequirementAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_SECURITY_REQUIREMENT, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENTS);
         securityRequirementAnnotations.addAll(
-                JandexUtil.getRepeatableAnnotation(resource, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENT,
+                JandexUtil.getRepeatableAnnotation(resourceClass, OpenApiConstants.DOTNAME_SECURITY_REQUIREMENT,
                         OpenApiConstants.DOTNAME_SECURITY_REQUIREMENTS));
         for (AnnotationInstance annotation : securityRequirementAnnotations) {
             SecurityRequirement requirement = readSecurityRequirement(annotation);
@@ -1177,12 +1176,10 @@ public class OpenApiAnnotationScanner {
     /**
      * Reads a single Tag annotation.
      * 
-     * @param tagAnno
+     * @param tagAnno tag annotation, must not be null
      */
     private Tag readTag(AnnotationInstance tagAnno) {
-        if (tagAnno == null) {
-            return null;
-        }
+        Objects.requireNonNull(tagAnno, "Tag annotation must not be null");
         LOG.debug("Processing a single @Tag annotation.");
         TagImpl tag = new TagImpl();
         tag.setName(JandexUtil.stringValue(tagAnno, OpenApiConstants.PROP_NAME));
