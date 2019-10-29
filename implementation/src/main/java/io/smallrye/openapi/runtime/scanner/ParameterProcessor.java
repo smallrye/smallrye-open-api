@@ -1249,7 +1249,7 @@ public class ParameterProcessor {
     }
 
     /**
-     * Determines if the give method is a JAX-RS sub-resource locator method
+     * Determines if the given method is a JAX-RS sub-resource locator method
      * annotated by {@code @Path} but NOT annotated with one of the HTTP method
      * annotations.
      *
@@ -1265,7 +1265,7 @@ public class ParameterProcessor {
     }
 
     /**
-     * Determines if the give method is a JAX-RS resource method annotated by one
+     * Determines if the given method is a JAX-RS resource method annotated by one
      * of the HTTP method annotations.
      *
      * @param method method to check

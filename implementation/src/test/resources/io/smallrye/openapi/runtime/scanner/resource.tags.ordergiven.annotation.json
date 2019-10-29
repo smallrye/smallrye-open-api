@@ -1,0 +1,119 @@
+{
+  "openapi" : "3.0.1",
+  "info": {
+    "title" : "Testing user-specified tag order",
+    "version" : "1.0.0"
+  },
+  "tags" : [ {
+    "name" : "tag3",
+    "description" : "TAG3 from TagTestResource2#getValue1",
+    "externalDocs" : {
+      "description" : "Ext doc from TagTestResource2#getValue1"
+    }
+  }, {
+    "name" : "tag1",
+    "description" : "TAG1 from TagTestResource2"
+  } ],
+  "paths" : {
+    "/tags/tags1" : {
+      "get" : {
+        "tags" : [ "tag3" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "tag1" ],
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created"
+          }
+        }
+      },
+      "patch" : {
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    },
+    "/tags/tags2" : {
+      "get" : {
+        "tags" : [ "tag3" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "tag1", "http://example/com/tag2" ],
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created"
+          }
+        }
+      },
+      "patch" : {
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    }
+  }
+}

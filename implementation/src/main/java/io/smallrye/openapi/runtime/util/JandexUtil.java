@@ -408,52 +408,33 @@ public class JandexUtil {
      * look for both and return a list of all found. Both the single and wrapper annotation names
      * must be provided.
      * 
-     * @param method MethodInfo
+     * @param target the annotated target (e.g. ClassInfo, MethodInfo)
      * @param singleAnnotationName DotName
      * @param repeatableAnnotationName DotName
      * @return List of AnnotationInstance's
      */
-    public static List<AnnotationInstance> getRepeatableAnnotation(MethodInfo method,
-            DotName singleAnnotationName, DotName repeatableAnnotationName) {
-        List<AnnotationInstance> annotations = method.annotations()
-                .stream().filter(annotation -> annotation.name().equals(singleAnnotationName))
-                .collect(toList());
-        if (repeatableAnnotationName != null && method.hasAnnotation(repeatableAnnotationName)) {
-            AnnotationInstance annotation = method.annotation(repeatableAnnotationName);
-            AnnotationValue annotationValue = annotation.value();
-            if (annotationValue != null) {
-                AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-                annotations.addAll(Arrays.asList(nestedArray));
-            }
-        }
-        return annotations;
-    }
+    public static List<AnnotationInstance> getRepeatableAnnotation(AnnotationTarget target,
+            DotName singleAnnotationName,
+            DotName repeatableAnnotationName) {
 
-    /**
-     * Many OAI annotations can either be found singly or as a wrapped array. This method will
-     * look for both and return a list of all found. Both the single and wrapper annotation names
-     * must be provided.
-     * 
-     * @param clazz ClassInfo
-     * @param singleAnnotationName DotName
-     * @param repeatableAnnotationName DotName
-     * @return List of AnnotationInstance's
-     */
-    public static List<AnnotationInstance> getRepeatableAnnotation(ClassInfo clazz,
-            DotName singleAnnotationName, DotName repeatableAnnotationName) {
         List<AnnotationInstance> annotations = new ArrayList<>();
-        AnnotationInstance single = JandexUtil.getClassAnnotation(clazz, singleAnnotationName);
-        AnnotationInstance repeatable = JandexUtil.getClassAnnotation(clazz, repeatableAnnotationName);
-        if (single != null) {
-            annotations.add(single);
+
+        AnnotationInstance annotation = TypeUtil.getAnnotation(target, singleAnnotationName);
+
+        if (annotation != null) {
+            annotations.add(annotation);
         }
-        if (repeatable != null) {
-            AnnotationValue annotationValue = repeatable.value();
-            if (annotationValue != null) {
-                AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
+
+        if (repeatableAnnotationName != null) {
+            AnnotationInstance[] nestedArray = TypeUtil.getAnnotationValue(target,
+                    repeatableAnnotationName,
+                    OpenApiConstants.PROP_VALUE);
+
+            if (nestedArray != null) {
                 annotations.addAll(Arrays.asList(nestedArray));
             }
         }
+
         return annotations;
     }
 

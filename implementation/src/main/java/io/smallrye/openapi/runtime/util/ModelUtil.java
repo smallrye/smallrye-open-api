@@ -32,6 +32,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
+import org.eclipse.microprofile.openapi.models.tags.Tag;
 
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
@@ -40,6 +41,7 @@ import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
+import io.smallrye.openapi.api.util.MergeUtil;
 
 /**
  * Class with some convenience methods useful for working with the OAI data model.
@@ -52,6 +54,34 @@ public class ModelUtil {
      * Constructor.
      */
     private ModelUtil() {
+    }
+
+    /**
+     * Adds a {@link Tag} to the {@link OpenAPI} model. If a tag having the same
+     * name already exists in the model, the tags' attributes are merged, with the
+     * new tag's attributes overriding the value of any attributes specified on
+     * both.
+     * 
+     * @param openApi the OpenAPI model
+     * @param tag a new {@link Tag} to add
+     */
+    public static void addTag(OpenAPI openApi, Tag tag) {
+        List<Tag> tags = openApi.getTags();
+
+        if (tags == null || tags.isEmpty()) {
+            openApi.addTag(tag);
+            return;
+        }
+
+        Tag current = tags.stream().filter(t -> t.getName().equals(tag.getName())).findFirst().orElse(null);
+        int currentIndex = tags.indexOf(current);
+
+        if (current != null) {
+            Tag replacement = MergeUtil.mergeObjects(current, tag);
+            tags.set(currentIndex, replacement);
+        } else {
+            openApi.addTag(tag);
+        }
     }
 
     /**
@@ -264,5 +294,4 @@ public class ModelUtil {
         String[] split = ref.split("/");
         return split[split.length - 1];
     }
-
 }
