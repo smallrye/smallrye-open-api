@@ -21,6 +21,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
@@ -28,6 +29,7 @@ import org.junit.Test;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent;
+import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -52,18 +54,12 @@ public class NestedSchemaReferenceTests extends OpenApiDataObjectScannerTestBase
 
     @Test
     public void testNestedSchemaOnParameter() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
+        IndexView index = indexOf(NestedSchemaOnParameterResource.class,
+                NestedSchemaOnParameterResource.NestedParameterTestParent.class,
+                NestedSchemaOnParameterResource.NestedParameterTestChild.class,
+                NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
 
-        // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource.class");
-        index(indexer,
-                "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestParent.class");
-        index(indexer,
-                "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$NestedParameterTestChild.class");
-        index(indexer,
-                "test/io/smallrye/openapi/runtime/scanner/resources/NestedSchemaOnParameterResource$AnotherNestedChildWithSchemaName.class");
-
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), indexer.complete());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
 
         OpenAPI result = scanner.scan();
 

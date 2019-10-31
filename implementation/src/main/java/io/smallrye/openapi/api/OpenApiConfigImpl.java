@@ -162,8 +162,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      */
     @Override
     public Set<String> pathServers(String path) {
-        String servers = getConfig().getOptionalValue(OASConfig.SERVERS_PATH_PREFIX + path, String.class).orElse(null);
-        return asCsvSet(servers);
+        String pathServers = getConfig().getOptionalValue(OASConfig.SERVERS_PATH_PREFIX + path, String.class).orElse(null);
+        return asCsvSet(pathServers);
     }
 
     /**
@@ -171,9 +171,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      */
     @Override
     public Set<String> operationServers(String operationId) {
-        String servers = getConfig().getOptionalValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class)
+        String opServers = getConfig().getOptionalValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class)
                 .orElse(null);
-        return asCsvSet(servers);
+        return asCsvSet(opServers);
     }
 
     /**
@@ -204,7 +204,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     public boolean schemaReferencesEnable() {
         if (schemaReferencesEnable == null) {
             schemaReferencesEnable = getConfig().getOptionalValue(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.class)
-                    .orElse(false);
+                    .orElse(true);
         }
         return schemaReferencesEnable;
     }

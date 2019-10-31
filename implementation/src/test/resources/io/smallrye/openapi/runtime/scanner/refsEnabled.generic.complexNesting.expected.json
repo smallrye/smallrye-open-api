@@ -12,12 +12,18 @@
             "type": "object"
           },
           "foo": {
-            "$ref": "#/components/schemas/FuzzStringDate"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuzzStringDate"
+              },
+              {
+                "maxLength": 123456
+              }
+            ]
           }
         }
       },
       "FuzzStringDate": {
-        "maxLength": 123456,
         "type": "object",
         "properties": {
           "qAgain": {

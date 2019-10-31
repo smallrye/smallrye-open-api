@@ -77,6 +77,50 @@ public class SchemaFactory {
         return readSchema(index, new SchemaImpl(), annotation, Collections.emptyMap());
     }
 
+    /**
+     * Populates the schema using the {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * on the provided class. If the schema has already been registered (in components), the existing
+     * registration will be replaced.
+     * 
+     * @param index application class index
+     * @param schema schema model to populate
+     * @param annotation schema annotation to read
+     * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
+     */
+    public static Schema readSchema(IndexView index,
+            Schema schema,
+            AnnotationInstance annotation,
+            ClassInfo clazz) {
+
+        if (annotation == null) {
+            return schema;
+        }
+
+        // Schemas can be hidden. Skip if that's the case.
+        Boolean isHidden = JandexUtil.booleanValue(annotation, OpenApiConstants.PROP_HIDDEN);
+
+        if (Boolean.TRUE.equals(isHidden)) {
+            return schema;
+        }
+
+        schema = readSchema(index, schema, annotation, Collections.emptyMap());
+        ClassType clazzType = (ClassType) Type.create(clazz.name(), Type.Kind.CLASS);
+        SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
+
+        /*
+         * The registry may already contain the type from earlier in the scan if the
+         * type has been referenced as a field, etc. The schema here is "fuller" as it
+         * now contains information gathered from the @Schema annotation on the class.
+         */
+        if (schemaRegistry != null && TypeUtil.allowRegistration(index, clazzType)) {
+            // Ignore the reference returned by register, the caller expects the full schema
+            schemaRegistry.register(clazzType, schema);
+        }
+
+        return schema;
+    }
+
     public static Schema readSchema(IndexView index,
             Schema schema,
             AnnotationInstance annotation,

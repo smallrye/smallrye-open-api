@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
@@ -283,6 +284,26 @@ public class TypeUtil {
         schema.setPattern(attrs.getPattern());
     }
 
+    /**
+     * Removes the known default schema attributes from the fieldSchema if they are also
+     * present and have the same value in the typeSchema. This method reduces any duplicate
+     * attributes between the two schemas when they are in an 'allOf' composition.
+     * 
+     * @param fieldSchema the schema for a field of the type described by typeSchema
+     * @param typeSchema the schema for a class type
+     */
+    public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
+        if (Objects.equals(fieldSchema.getType(), typeSchema.getType())) {
+            fieldSchema.setType(null);
+        }
+        if (Objects.equals(fieldSchema.getFormat(), typeSchema.getFormat())) {
+            fieldSchema.setFormat(null);
+        }
+        if (Objects.equals(fieldSchema.getPattern(), typeSchema.getPattern())) {
+            fieldSchema.setPattern(null);
+        }
+    }
+
     public static TypeWithFormat arrayFormat() {
         return ARRAY_FORMAT;
     }
@@ -300,7 +321,7 @@ public class TypeUtil {
             Class<?> subjectKlazz = TypeUtil.getClass(subject);
             Class<?> objectKlazz = TypeUtil.getClass(object);
             return objectKlazz.isAssignableFrom(subjectKlazz);
-        } catch (ClassNotFoundException nfe) {
+        } catch (@SuppressWarnings("unused") ClassNotFoundException nfe) {
             return false;
         }
     }
