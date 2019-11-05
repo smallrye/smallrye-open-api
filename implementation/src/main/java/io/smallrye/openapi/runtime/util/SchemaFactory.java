@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.util;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -92,6 +93,26 @@ public class SchemaFactory {
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz) {
+        return readSchema(index, schema, annotation, clazz, Collections.emptyMap());
+    }
+
+    /**
+     * Populates the schema using the {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * on the provided class. If the schema has already been registered (in components), the existing
+     * registration will be replaced.
+     * 
+     * @param index application class index
+     * @param schema schema model to populate
+     * @param annotation schema annotation to read
+     * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * @param defaults default values to be set on the schema when not present in the annotation
+     * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
+     */
+    public static Schema readSchema(IndexView index,
+            Schema schema,
+            AnnotationInstance annotation,
+            ClassInfo clazz,
+            Map<String, Object> defaults) {
 
         if (annotation == null) {
             return schema;
@@ -104,7 +125,7 @@ public class SchemaFactory {
             return schema;
         }
 
-        schema = readSchema(index, schema, annotation, Collections.emptyMap());
+        schema = readSchema(index, schema, annotation, defaults);
         ClassType clazzType = (ClassType) Type.create(clazz.name(), Type.Kind.CLASS);
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
@@ -353,21 +374,30 @@ public class SchemaFactory {
      * @param enumType type containing Java Enum constants
      *
      * @see java.lang.reflect.Field#isEnumConstant()
-     * @see java.lang.reflect.Modifier#ENUM
      */
     public static Schema enumToSchema(IndexView index, Type enumType) {
         LOG.debugv("Processing an enum {0}", enumType);
-        final int ENUM = 0x00004000;
+        final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
+        AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(OpenApiConstants.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
-        enumSchema.setType(SchemaType.STRING);
-
-        enumKlazz.fields()
+        List<Object> enumeration = enumKlazz.fields()
                 .stream()
                 .filter(field -> (field.flags() & ENUM) != 0)
                 .map(FieldInfo::name)
                 .sorted() // Make the order determinate
-                .forEach(enumSchema::addEnumeration);
+                .collect(Collectors.toList());
+
+        if (schemaAnnotation != null) {
+            Map<String, Object> defaults = new HashMap<>(2);
+            defaults.put(OpenApiConstants.PROP_TYPE, SchemaType.STRING);
+            defaults.put(OpenApiConstants.PROP_ENUMERATION, enumeration);
+
+            enumSchema = readSchema(index, enumSchema, schemaAnnotation, enumKlazz, defaults);
+        } else {
+            enumSchema.setType(SchemaType.STRING);
+            enumSchema.setEnumeration(enumeration);
+        }
 
         return enumSchema;
     }

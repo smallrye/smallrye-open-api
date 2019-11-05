@@ -38,6 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
@@ -167,7 +168,8 @@ public class ParameterScanTests extends IndexScannerTestBase {
     public void testEnumQueryParam() throws IOException, JSONException {
         test("params.enum-form-param.json",
                 EnumQueryParamTestResource.class,
-                EnumQueryParamTestResource.TestEnum.class);
+                EnumQueryParamTestResource.TestEnum.class,
+                EnumQueryParamTestResource.TestEnumWithSchema.class);
     }
 
     @Test
@@ -480,11 +482,19 @@ public class ParameterScanTests extends IndexScannerTestBase {
             VAL3;
         }
 
+        @Schema(name = "RestrictedEnum", title = "Restricted enum with fewer values", enumeration = { "VAL1",
+                "VAL3" }, externalDocs = @ExternalDocumentation(description = "When to use RestrictedEnum?", url = "http://example.com/RestrictedEnum/info.html"))
+        static enum TestEnumWithSchema {
+            VAL1,
+            VAL2,
+            VAL3;
+        }
+
         @SuppressWarnings("unused")
         @POST
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.TEXT_PLAIN)
-        public TestEnum postData(@QueryParam("val") TestEnum value) {
+        public TestEnum postData(@QueryParam("val") TestEnum value, @QueryParam("restr") TestEnumWithSchema restr) {
             return null;
         }
     }

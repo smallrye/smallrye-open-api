@@ -234,6 +234,11 @@ public class OpenApiDataObjectScanner {
                 currentSchema.setType(Schema.SchemaType.OBJECT);
             }
 
+            if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
+                // Only 'object' type schemas should have properties of their own
+                continue;
+            }
+
             LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
 
             // Get all fields *including* inherited.
