@@ -221,6 +221,9 @@ public class ArchiveUtil {
         }
         String fqcn = archivePath.replaceAll("/", ".").substring(0, archivePath.lastIndexOf(OpenApiConstants.CLASS_SUFFIX));
         String packageName = "";
+        if (fqcn.startsWith(".")) {
+            fqcn = fqcn.substring(1);
+        }
         if (fqcn.contains(".")) {
             int idx = fqcn.lastIndexOf(".");
             packageName = fqcn.substring(0, idx);
