@@ -137,6 +137,21 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         assertJsonEquals("resource.testRequestBodyComponentGeneration.json", result);
     }
 
+    @Test
+    public void testPackageInfoDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/package-info.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/PackageInfoTestApplication.class");
+        index(indexer,
+                "test/io/smallrye/openapi/runtime/scanner/resources/PackageInfoTestApplication$PackageInfoTestResource.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testPackageInfoDefinitionScanning.json", result);
+    }
+
     /**
      * Example of a simple custom schema registry that has only UUID type schema.
      */
