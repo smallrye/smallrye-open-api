@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -226,12 +225,18 @@ public class OpenApiDataObjectScanner {
             Schema currentSchema = currentPathEntry.getSchema();
             Type currentType = currentPathEntry.getClazzType();
 
-            // First, handle class annotations.
-            currentPathEntry.setSchema(readKlass(currentClass, currentSchema));
+            // First, handle class annotations (re-assign since readKlass may return new schema)
+            currentSchema = readKlass(currentClass, currentSchema);
+            currentPathEntry.setSchema(currentSchema);
 
             if (currentSchema.getType() == null) {
                 // If not schema has yet been set, consider this an "object"
                 currentSchema.setType(Schema.SchemaType.OBJECT);
+            }
+
+            if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
+                // Only 'object' type schemas should have properties of their own
+                continue;
             }
 
             LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
@@ -255,7 +260,7 @@ public class OpenApiDataObjectScanner {
         AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(currentClass);
         if (annotation != null) {
             // Because of implementation= field, *may* return a new schema rather than modify.
-            return SchemaFactory.readSchema(index, currentSchema, annotation, Collections.emptyMap());
+            return SchemaFactory.readSchema(index, currentSchema, annotation, currentClass);
         }
         return currentSchema;
     }

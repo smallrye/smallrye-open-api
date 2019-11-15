@@ -2,7 +2,6 @@
   "components": {
     "schemas": {
       "KustomPairStringString": {
-        "maxLength": 123456,
         "required": [
           "bar",
           "foo"
@@ -30,7 +29,14 @@
             "type": "integer"
           },
           "foo": {
-            "$ref": "#/components/schemas/KustomPairStringString"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KustomPairStringString"
+              },
+              {
+                "maxLength": 123456
+              }
+            ]
           }
         }
       }

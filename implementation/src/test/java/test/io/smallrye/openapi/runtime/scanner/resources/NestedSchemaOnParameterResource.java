@@ -31,7 +31,7 @@ public class NestedSchemaOnParameterResource {
         NestedParameterTestChild nested;
 
         @JsonbProperty("will_not_be_used")
-        @Schema(name = "another_child", description = "This schema and description will be replaced with a $ref to 'another_nested', but the name will be used for the property")
+        @Schema(name = "another_child", description = "This schema will be unioned to $ref to 'another_nested', name will be used for the property, and this description will be present on this property")
         AnotherNestedChildWithSchemaName another;
 
         List<NestedParameterTestChild> childList;
