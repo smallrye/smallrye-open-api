@@ -453,6 +453,11 @@ public class TypeResolver {
             nameStart = methodName.startsWith("is") ? 2 : 3;
         }
 
+        if (methodName.length() == nameStart) {
+            // The method's name is "get", "set", or "is" without the property name
+            return;
+        }
+
         propertyName = Character.toLowerCase(methodName.charAt(nameStart)) + methodName.substring(nameStart + 1);
         TypeResolver resolver;
 

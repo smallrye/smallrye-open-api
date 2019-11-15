@@ -330,6 +330,16 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_RESPONSE = DotName.createSimple(Response.class.getName());
     public static final DotName DOTNAME_DEPRECATED = DotName.createSimple(Deprecated.class.getName());
 
+    public static final DotName DOTNAME_OPTIONAL = DotName.createSimple(java.util.Optional.class.getName());
+    public static final DotName DOTNAME_OPTIONAL_DOUBLE = DotName.createSimple(java.util.OptionalDouble.class.getName());
+    public static final DotName DOTNAME_OPTIONAL_INT = DotName.createSimple(java.util.OptionalInt.class.getName());
+    public static final DotName DOTNAME_OPTIONAL_LONG = DotName.createSimple(java.util.OptionalLong.class.getName());
+    public static final Set<DotName> DOTNAME_OPTIONALS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_OPTIONAL,
+                    DOTNAME_OPTIONAL_DOUBLE,
+                    DOTNAME_OPTIONAL_INT,
+                    DOTNAME_OPTIONAL_LONG)));
+
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 
     public static final DotName DOTNAME_JSONB_PROPERTY = DotName

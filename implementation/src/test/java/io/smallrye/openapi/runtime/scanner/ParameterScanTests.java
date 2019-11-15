@@ -16,6 +16,9 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 
@@ -190,6 +193,18 @@ public class ParameterScanTests extends IndexScannerTestBase {
         test("params.char-sequence-arrays.json",
                 CharSequenceArrayParamTestResource.class,
                 CharSequenceArrayParamTestResource.EchoResult.class);
+    }
+
+    @Test
+    public void testOptionalParam() throws IOException, JSONException {
+        test("params.optional-types.json",
+                OptionalParamTestResource.class,
+                OptionalParamTestResource.Bean.class,
+                OptionalParamTestResource.NestedBean.class,
+                OptionalParamTestResource.OptionalWrapper.class,
+                Optional.class,
+                OptionalDouble.class,
+                OptionalLong.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -645,6 +660,102 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.TEXT_PLAIN)
         public EchoResult echo(@QueryParam("val") CharSequence[][][] value) {
             return new EchoResult().result(value);
+        }
+    }
+
+    @Path("/optional")
+    static class OptionalParamTestResource {
+        static class OptionalWrapper {
+            Optional<String> value;
+        }
+
+        static class NestedBean {
+            @NotNull
+            Optional<String> title;
+        }
+
+        @Schema(name = "multipurpose-bean")
+        static class Bean {
+            @QueryParam("name6")
+            Optional<String> name;
+
+            @QueryParam("age6")
+            OptionalDouble age;
+
+            Optional<NestedBean> nested;
+        }
+
+        @GET
+        @Path("/n1")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String helloName(@QueryParam("name") Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+
+        @GET
+        @Path("/n2")
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "name2", required = true)
+        public String helloName2(@QueryParam("name2") Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+
+        @GET
+        @Path("/n3")
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "name3", required = false)
+        public Optional<String> helloName3(@QueryParam("name3") Optional<String> name) {
+            return Optional.of("hello " + name.orElse("SmallRye!"));
+        }
+
+        @POST
+        @Path("/n4")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "name4")
+        public OptionalWrapper helloName4(@FormParam("name4") Optional<String> name) {
+            OptionalWrapper r = new OptionalWrapper();
+            r.value = Optional.of("hello " + name.orElse("SmallRye!"));
+            return r;
+        }
+
+        @POST
+        @Path("/n5")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        public Optional<String> helloName5(Optional<String> name, @CookieParam("age5") OptionalLong age) {
+            return Optional.of("hello " + name.orElse("SmallRye!") + ' ' + age.orElse(-1));
+        }
+
+        @SuppressWarnings("unused")
+        @GET
+        @Path("/n6")
+        @Produces(MediaType.TEXT_PLAIN)
+        public Optional<String> helloName6(@BeanParam Optional<Bean> bean) {
+            return null;
+        }
+
+        @GET
+        @Path("/n7/{name}")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String helloName7(@PathParam("name") Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+
+        @SuppressWarnings("unused")
+        @POST
+        @Path("/n8")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        public Optional<String> helloName8(@RequestBody Optional<Bean> bean) {
+            return null;
+        }
+
+        @GET
+        @Path("/n9")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String helloName9(@QueryParam("name9") @NotNull Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
         }
     }
 }
