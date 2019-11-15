@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "paths": {
-    "/matrix-params-on-resource-method-args/{id}/anotherpathsegment/reloaded{reloadedMatrix}": {
+    "/matrix-params-on-resource-method-args/{id}/anotherpathsegment/reloaded{reloaded}": {
       "parameters": [
         {
           "name": "id",
@@ -17,7 +17,7 @@
       "get": {
         "parameters": [
           {
-            "name": "reloadedMatrix",
+            "name": "reloaded",
             "in": "path",
             "style": "matrix",
             "explode": true,

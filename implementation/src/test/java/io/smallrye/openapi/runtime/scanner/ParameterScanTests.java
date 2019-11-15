@@ -40,6 +40,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.PathSegment;
 
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -211,6 +212,18 @@ public class ParameterScanTests extends IndexScannerTestBase {
     public void testPathParamTemplateRegex() throws IOException, JSONException {
         test("params.path-param-templates.json",
                 PathParamTemplateRegexTestResource.class);
+    }
+
+    @Test
+    public void testPathSegmentMatrix() throws IOException, JSONException {
+        test("params.path-segment-param.json",
+                PathSegmentMatrixTestResource.class);
+    }
+
+    @Test
+    public void testParamNameOverride() throws IOException, JSONException {
+        test("params.param-name-override.json",
+                ParamNameOverrideTestResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -391,7 +404,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Parameter(name = "r1", in = ParameterIn.PATH, style = ParameterStyle.MATRIX, description = "Additional information for id2")
+        @Parameter(name = "id", in = ParameterIn.PATH, style = ParameterStyle.MATRIX, description = "Additional information for id2")
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") String m1,
                 @MatrixParam("m2") @Size(min = 20) String m2) {
             return null;
@@ -414,7 +427,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @GET
         @Path("/seg1/seg2/resourceA")
         @Produces(MediaType.APPLICATION_JSON)
-        @Parameter(in = ParameterIn.PATH, name = "methodMatrix", style = ParameterStyle.MATRIX)
+        @Parameter(in = ParameterIn.PATH, name = "resourceA", style = ParameterStyle.MATRIX)
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") int m1,
                 @MatrixParam("m2") @DefaultValue("100") @Max(200) int m2) {
             return null;
@@ -443,7 +456,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
             String cookieF1;
         }
 
-        @Parameter(in = ParameterIn.PATH, style = ParameterStyle.MATRIX, name = "mtx")
+        @Parameter(in = ParameterIn.PATH, style = ParameterStyle.MATRIX, name = "id2")
         @BeanParam
         private Bean param;
 
@@ -773,6 +786,41 @@ public class ParameterScanTests extends IndexScannerTestBase {
         public String echo(@PathParam("id") Integer id, @PathParam("name") String name, @PathParam("nickname") String nickname,
                 @PathParam("age") String age) {
             return String.valueOf(id) + ' ' + name + ' ' + nickname + ' ' + age;
+        }
+    }
+
+    @Path("/segments")
+    static class PathSegmentMatrixTestResource {
+        @GET
+        @Path("seg1")
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "segments", description = "Test", style = ParameterStyle.MATRIX, in = ParameterIn.PATH)
+        public String echo(@PathParam("segments") PathSegment segmentsMatrix) {
+            return segmentsMatrix.getPath();
+        }
+    }
+
+    @Path("/override")
+    static class ParamNameOverrideTestResource {
+        @HeaderParam("h1")
+        @Parameter(name = "X-Header1", in = ParameterIn.HEADER, content = {})
+        String h1;
+        @CookieParam("c1")
+        @Parameter(name = "Cookie1", in = ParameterIn.COOKIE, content = @Content(mediaType = MediaType.TEXT_PLAIN))
+        String c1;
+        @QueryParam("q1")
+        @Parameter(name = "query1", in = ParameterIn.QUERY, content = {
+                @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(description = "A JSON query parameter", type = SchemaType.OBJECT)),
+                @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(description = "A plain text query parameter", type = SchemaType.STRING)),
+        })
+        String q1;
+
+        @GET
+        @Path("{p1}")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String echo(
+                @Parameter(name = "Path1", in = ParameterIn.PATH, style = ParameterStyle.SIMPLE, description = "The name 'Path1' will not be used instead of 'p1'") @PathParam("p1") String p1) {
+            return p1;
         }
     }
 }

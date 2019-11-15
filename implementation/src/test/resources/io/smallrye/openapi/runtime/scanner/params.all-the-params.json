@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "paths": {
-    "/all/the/params/{id1}/{id2}{mtx}": {
+    "/all/the/params/{id1}/{id2}{id2Matrix}": {
       "parameters": [
         {
           "name": "id1",
@@ -21,7 +21,7 @@
           }
         },
         {
-          "name": "mtx",
+          "name": "id2Matrix",
           "in": "path",
           "style": "matrix",
           "required": true,

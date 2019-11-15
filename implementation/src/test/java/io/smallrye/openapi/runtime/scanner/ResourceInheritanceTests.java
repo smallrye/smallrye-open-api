@@ -29,6 +29,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -88,11 +89,11 @@ public class ResourceInheritanceTests extends OpenApiDataObjectScannerTestBase {
         }
 
         @PathParam("from")
-        @Parameter(name = "from", description = "The name of the person sending the greeting")
+        @Parameter(name = "from", in = ParameterIn.PATH, description = "The name of the person sending the greeting")
         void setFromName(String from);
 
         @HeaderParam("date")
-        @Parameter(name = "date", description = "The local date when the greeting is sent", allowEmptyValue = true)
+        @Parameter(name = "date", in = ParameterIn.HEADER, description = "The local date when the greeting is sent", allowEmptyValue = true)
         void setGreetingDate(LocalDate date);
 
         @POST
@@ -137,12 +138,12 @@ public class ResourceInheritanceTests extends OpenApiDataObjectScannerTestBase {
         String from;
 
         @Override
-        @Parameter(name = "from", style = ParameterStyle.SIMPLE)
+        @Parameter(name = "from", in = ParameterIn.PATH, style = ParameterStyle.SIMPLE)
         public void setFromName(String from) {
             this.from = from;
         }
 
-        @Parameter(name = "date", example = "2019-12-31", allowEmptyValue = false)
+        @Parameter(name = "date", in = ParameterIn.HEADER, example = "2019-12-31", allowEmptyValue = false)
         LocalDate date;
 
         @Override
