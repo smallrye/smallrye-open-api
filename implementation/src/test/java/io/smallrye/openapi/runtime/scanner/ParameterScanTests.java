@@ -207,6 +207,12 @@ public class ParameterScanTests extends IndexScannerTestBase {
                 OptionalLong.class);
     }
 
+    @Test
+    public void testPathParamTemplateRegex() throws IOException, JSONException {
+        test("params.path-param-templates.json",
+                PathParamTemplateRegexTestResource.class);
+    }
+
     /***************** Test models and resources below. ***********************/
 
     public static class Widget {
@@ -756,6 +762,17 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.TEXT_PLAIN)
         public String helloName9(@QueryParam("name9") @NotNull Optional<String> name) {
             return "hello " + name.orElse("SmallRye!");
+        }
+    }
+
+    @Path("/template")
+    static class PathParamTemplateRegexTestResource {
+        @GET
+        @Path("{id:\\d+}/{name: [A-Z]+    }/{  nickname :[a-zA-Z]+}/{age: [0-9]{1,3}}")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String echo(@PathParam("id") Integer id, @PathParam("name") String name, @PathParam("nickname") String nickname,
+                @PathParam("age") String age) {
+            return String.valueOf(id) + ' ' + name + ' ' + nickname + ' ' + age;
         }
     }
 }

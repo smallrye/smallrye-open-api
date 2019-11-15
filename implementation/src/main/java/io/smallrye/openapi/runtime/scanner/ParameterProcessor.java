@@ -41,6 +41,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MediaType;
@@ -91,6 +93,14 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 public class ParameterProcessor {
 
     private static final Logger LOG = Logger.getLogger(ParameterProcessor.class);
+
+    /**
+     * Pattern to describe a path template parameter with a regular expression pattern restriction.
+     * 
+     * See JAX-RS {@link javax.ws.rs.Path Path} JavaDoc for explanation.
+     */
+    static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
+            .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}");
 
     private static Comparator<ParameterContextKey> parameterComparator = Comparator.comparing(ParameterContextKey::getLocation,
             Comparator.nullsLast(Comparator.reverseOrder()))
@@ -420,7 +430,6 @@ public class ParameterProcessor {
      * @param parameters
      * @return
      */
-    // TODO: Parse path segments to strip out variable names and patterns (apply patterns to path param schema)
     String generatePath(AnnotationTarget target, List<Parameter> parameters) {
         String path = pathOf(target);
 
@@ -443,7 +452,42 @@ public class ParameterProcessor {
             }
         }
 
+        /*
+         * Search for path template variables where a regular expression
+         * is specified, extract the pattern and apply to the parameter's schema
+         * if no pattern is otherwise specified and the parameter is a string.
+         */
+        Matcher templateMatcher = TEMPLATE_PARAM_PATTERN.matcher(path);
+
+        while (templateMatcher.find()) {
+            String variableName = templateMatcher.group(1).trim();
+            String variablePattern = templateMatcher.group(2).trim();
+
+            parameters.stream()
+                    .filter(p -> variableName.equals(p.getName()))
+                    .filter(ParameterProcessor::templateParameterPatternEligible)
+                    .forEach(p -> p.getSchema().setPattern(variablePattern));
+
+            path = templateMatcher.replaceFirst('{' + variableName + '}');
+            templateMatcher = TEMPLATE_PARAM_PATTERN.matcher(path);
+        }
+
         return path;
+    }
+
+    /**
+     * Determines if the parameter is eligible to have a pattern constraint
+     * applied to its schema.
+     * 
+     * @param param the parameter
+     * @return true if the parameter may have the patter applied, otherwise false
+     */
+    static boolean templateParameterPatternEligible(Parameter param) {
+        return Parameter.In.PATH.equals(param.getIn())
+                && !Style.MATRIX.equals(param.getStyle())
+                && param.getSchema() != null
+                && SchemaType.STRING.equals(param.getSchema().getType())
+                && param.getSchema().getPattern() == null;
     }
 
     /**
