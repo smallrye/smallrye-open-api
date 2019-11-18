@@ -597,20 +597,26 @@ public class OpenApiAnnotationScanner {
 
             // TODO if the method argument type is Request, don't generate a Schema!
 
+            Type requestBodyType = null;
+            if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
+                requestBodyType = JandexUtil.getMethodParameterType(method,
+                        annotation.target().asMethodParameter().position());
+            } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
+                requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
+            }
+
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
-            if (requestBody.getRef() == null && !ModelUtil.requestBodyHasSchema(requestBody)) {
-                Type requestBodyType = null;
-                if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
-                    requestBodyType = JandexUtil.getMethodParameterType(method,
-                            annotation.target().asMethodParameter().position());
-                } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-                    requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, extensions);
-                }
-                if (requestBodyType != null) {
+            if (requestBodyType != null && requestBody.getRef() == null) {
+                if (!ModelUtil.requestBodyHasSchema(requestBody)) {
                     Schema schema = SchemaFactory.typeToSchema(index, requestBodyType, extensions);
+
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
                     }
+                }
+
+                if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
+                    requestBody.setRequired(Boolean.FALSE);
                 }
             }
         }
@@ -644,6 +650,10 @@ public class OpenApiAnnotationScanner {
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, currentConsumes);
+                    }
+
+                    if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
+                        requestBody.setRequired(Boolean.FALSE);
                     }
                 }
             }
@@ -919,6 +929,10 @@ public class OpenApiAnnotationScanner {
 
                 if (produces == null || produces.length == 0) {
                     produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                }
+
+                if (schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
+                    schema.setNullable(Boolean.TRUE);
                 }
 
                 for (String producesType : produces) {

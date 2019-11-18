@@ -411,6 +411,50 @@ public class TypeUtil {
                 tf.getSchemaType() != Schema.SchemaType.ARRAY;
     }
 
+    /**
+     * Determine if a given type is one of the following types:
+     * 
+     * <ul>
+     * <li><code>java.util.Optional</code>
+     * <li><code>java.util.OptionalDouble</code>
+     * <li><code>java.util.OptionalInt</code>
+     * <li><code>java.util.OptionalLong</code>
+     * </ul>
+     * 
+     * @param type the type to check
+     * @return true if the type is one of the four optional types, otherwise false
+     */
+    public static boolean isOptional(Type type) {
+        return type != null && OpenApiConstants.DOTNAME_OPTIONALS.contains(type.name());
+    }
+
+    /**
+     * Unwraps the type parameter (generic or primitive) from the given optional
+     * type.
+     * 
+     * @param type the type to unwrap
+     * @return the generic type argument for <code>java.util.Optional</code>, otherwise the optional primitive double, int, or
+     *         long
+     */
+    public static Type getOptionalType(Type type) {
+        if (type == null) {
+            return null;
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL.equals(type.name())) {
+            return type.asParameterizedType().arguments().get(0);
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL_DOUBLE.equals(type.name())) {
+            return PrimitiveType.DOUBLE;
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL_INT.equals(type.name())) {
+            return PrimitiveType.INT;
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL_LONG.equals(type.name())) {
+            return PrimitiveType.LONG;
+        }
+        return null;
+    }
+
     public static DotName getName(Type type) {
         if (type.kind() == Type.Kind.ARRAY) {
             return type.asArrayType().component().name();
@@ -505,6 +549,9 @@ public class TypeUtil {
     }
 
     public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
+        if (target == null) {
+            return false;
+        }
         switch (target.kind()) {
             case CLASS:
                 return target.asClass().classAnnotation(annotationName) != null;

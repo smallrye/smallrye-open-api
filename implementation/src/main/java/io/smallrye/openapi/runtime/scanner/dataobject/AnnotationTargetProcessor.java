@@ -156,7 +156,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             TypeUtil.applyTypeAttributes(fieldType, typeSchema);
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
-            registeredTypeSchema = SchemaRegistry.checkRegistration(entityType, typeResolver, typeSchema);
+            Type registrationType = TypeUtil.isOptional(entityType) ? fieldType : entityType;
+            registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, typeResolver, typeSchema);
         }
 
         Schema fieldSchema;
@@ -165,11 +166,15 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             // Handle field annotated with @Schema.
             fieldSchema = readSchemaAnnotatedField(propertyKey, schemaAnnotation, fieldType);
         } else {
-            // Use the type's schema for the field as a starting point
-            fieldSchema = typeSchema;
+            // Use the type's schema for the field as a starting point (poor man's clone)
+            fieldSchema = MergeUtil.mergeObjects(new SchemaImpl(), typeSchema);
         }
 
         BeanValidationScanner.applyConstraints(annotationTarget, fieldSchema, propertyKey, this);
+
+        if (fieldSchema.getNullable() == null && TypeUtil.isOptional(entityType)) {
+            fieldSchema.setNullable(Boolean.TRUE);
+        }
 
         // Only when registration was successful (ref is present and the registered type is a different instance)
         if (typeSchema != registeredTypeSchema && registeredTypeSchema.getRef() != null) {

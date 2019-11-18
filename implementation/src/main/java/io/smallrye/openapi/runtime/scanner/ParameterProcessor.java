@@ -543,10 +543,8 @@ public class ParameterProcessor {
                 ModelUtil.setParameterSchema(param, schema);
             }
 
-            if (param.getDeprecated() == null) {
-                if (TypeUtil.getAnnotation(context.target, DOTNAME_DEPRECATED) != null) {
-                    param.setDeprecated(Boolean.TRUE);
-                }
+            if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
+                param.setDeprecated(Boolean.TRUE);
             }
 
             if (param.getSchema() != null) {
@@ -563,6 +561,10 @@ public class ParameterProcessor {
                 if (param.getSchema().getDefaultValue() == null) {
                     param.getSchema().setDefaultValue(context.jaxRsDefaultValue);
                 }
+            }
+
+            if (param.getRequired() == null && TypeUtil.isOptional(context.targetType)) {
+                param.setRequired(Boolean.FALSE);
             }
 
             parameters.add(param);
@@ -646,6 +648,10 @@ public class ParameterProcessor {
                             schema.addRequired(name);
                         }
                     });
+
+            if (paramSchema.getNullable() == null && TypeUtil.isOptional(paramType)) {
+                paramSchema.setNullable(Boolean.TRUE);
+            }
 
             if (schema.getProperties() != null) {
                 paramSchema = mergeObjects(schema.getProperties().get(paramName), paramSchema);
@@ -816,29 +822,15 @@ public class ParameterProcessor {
                             target);
                 } else if (target != null) {
                     // This is a @BeanParam or a RESTEasy @MultipartForm
-                    DotName targetName = null;
                     setMediaType(jaxRsParam);
+                    Type targetType = getType(target);
 
-                    switch (target.kind()) {
-                        case FIELD:
-                            targetName = target.asField().type().name();
-                            break;
-                        case METHOD:
-                            List<Type> methodParams = target.asMethod().parameters();
-                            if (methodParams.size() == 1) {
-                                // This is a bean property setter
-                                targetName = methodParams.get(0).name();
-                            }
-                            break;
-                        case METHOD_PARAMETER:
-                            targetName = getMethodParameterType(target.asMethodParameter()).name();
-                            break;
-                        default:
-                            break;
+                    if (TypeUtil.isOptional(targetType)) {
+                        targetType = TypeUtil.getOptionalType(targetType);
                     }
 
-                    if (targetName != null) {
-                        ClassInfo beanParam = index.getClassByName(targetName);
+                    if (targetType != null) {
+                        ClassInfo beanParam = index.getClassByName(targetType.name());
                         readParameters(beanParam, annotation);
                     }
                 }

@@ -115,6 +115,14 @@ public class TypeProcessor {
             return arrayType;
         }
 
+        if (TypeUtil.isOptional(type)) {
+            Type optType = TypeUtil.getOptionalType(type);
+            if (!isTerminalType(optType) && index.containsClass(optType)) {
+                pushToStack(optType);
+            }
+            return optType;
+        }
+
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
             MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, type));
             return STRING_TYPE;
