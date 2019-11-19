@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/template/{id}/{name}/{nickname}/{age}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "age",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9]{1,3}",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[A-Z]+",
+              "type": "string"
+            }
+          },
+          {
+            "name": "nickname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[a-zA-Z]+",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
