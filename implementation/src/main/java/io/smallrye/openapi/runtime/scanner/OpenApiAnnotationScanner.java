@@ -197,6 +197,9 @@ public class OpenApiAnnotationScanner {
         // Register custom schemas if available
         getCustomSchemaRegistry().registerCustomSchemas(schemaRegistry);
 
+        // Find all OpenAPIDefinition annotations at the package level
+        processPackageOpenAPIDefinitions(oai);
+
         // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
         Collection<ClassInfo> applications = this.index
                 .getAllKnownSubclasses(DotName.createSimple(Application.class.getName()));
@@ -210,8 +213,6 @@ public class OpenApiAnnotationScanner {
         for (AnnotationScannerExtension extension : extensions) {
             extension.processJaxRsApplications(this, applications);
         }
-
-        // TODO find all OpenAPIDefinition annotations at the package level
 
         checkSecurityScheme(oai);
 
@@ -245,6 +246,26 @@ public class OpenApiAnnotationScanner {
         }
 
         return oai;
+    }
+
+    /**
+     * Scans all <code>@OpenAPIDefinition</code> annotations present on <code>package-info</code>
+     * classes known to the scanner's index.
+     * 
+     * @param oai the current OpenAPI result
+     */
+    void processPackageOpenAPIDefinitions(OpenAPIImpl oai) {
+        List<AnnotationInstance> packageDefs = index.getAnnotations(OpenApiConstants.DOTNAME_OPEN_API_DEFINITION)
+                .stream()
+                .filter(annotation -> annotation.target().kind() == AnnotationTarget.Kind.CLASS)
+                .filter(annotation -> annotation.target().asClass().name().withoutPackagePrefix().equals("package-info"))
+                .collect(Collectors.toList());
+
+        for (AnnotationInstance packageDef : packageDefs) {
+            OpenAPIImpl packageOai = new OpenAPIImpl();
+            processDefinition(packageOai, packageDef);
+            oai = MergeUtil.merge(oai, packageOai);
+        }
     }
 
     /**
