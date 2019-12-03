@@ -20,22 +20,13 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.Application;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.models.Components;
@@ -220,6 +211,8 @@ public class OpenApiAnnotationScanner {
         for (ClassInfo resourceClass : resourceClasses) {
             processJaxRsResourceClass(oai, resourceClass, null);
         }
+
+
 
         if (oai != null) {
             // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
@@ -532,6 +525,10 @@ public class OpenApiAnnotationScanner {
             List<Parameter> locatorPathParameters) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
+
+
+
+
         final Operation operation;
 
         // Process any @Operation annotation
@@ -677,6 +674,33 @@ public class OpenApiAnnotationScanner {
         if (apiResponses == null || !JandexUtil.isEmpty(apiResponses)) {
             createResponseFromJaxRsMethod(method, operation);
         }
+
+        //Add common response using exception mapper
+        //Collection<ClassInfo> exceptionMappers = this.index.getAllKnownImplementors(DotName.createSimple(ExceptionMapper.class.getName()));
+
+        Collection<ClassInfo> exceptionMappers = this.index.getKnownDirectImplementors(DotName.createSimple(ExceptionMapper.class.getName()));
+        List<AnnotationInstance> collect = exceptionMappers.stream()
+                .map(classInfo -> classInfo.annotations().get(DotName.createSimple(org.eclipse.microprofile.openapi.annotations.responses.APIResponse.class.getName())))
+                .flatMap(List::stream).collect(Collectors.toList());
+
+        method.exceptions();
+
+
+        ClassInfo classInfo = exceptionMappers.stream().findFirst().get();
+
+        Map<DotName, List<AnnotationInstance>> mapperToResponse = classInfo.annotations();
+        List<AnnotationInstance> apiResponseAnnotationInstances = mapperToResponse.get(DotName.createSimple(APIResponse.class.getName()));
+        AnnotationInstance test = (AnnotationInstance) mapperToResponse.get(DotName.createSimple(org.eclipse.microprofile.openapi.annotations.responses.APIResponse.class.getName())).get(1);
+
+        String responseCode = JandexUtil.stringValue(test, OpenApiConstants.PROP_RESPONSE_CODE);
+        if (responseCode == null) {
+            responseCode = APIResponses.DEFAULT;
+        }
+        APIResponse response = readResponse(test);
+        responses = ModelUtil.responses(operation);
+        responses.addAPIResponse(responseCode, response);
+
+
 
         // Process @SecurityRequirement annotations
         ///////////////////////////////////////////

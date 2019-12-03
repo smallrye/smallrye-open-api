@@ -45,6 +45,8 @@ import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 
+import javax.ws.rs.ext.ExceptionMapper;
+
 /**
  * Some utility methods for working with Jandex objects.
  * 
@@ -351,6 +353,14 @@ public class JandexUtil {
             }
         }
         return null;
+    }
+
+    public static Collection<ClassInfo> getJaxRsExceptionMapperClasses(IndexView index) {
+        return index.getKnownDirectImplementors(DotName.createSimple(ExceptionMapper.class.getName()))
+                .stream()
+                //.map()
+                .collect(toList());
+        //return null;
     }
 
     /**
