@@ -16,7 +16,6 @@
 
 package io.smallrye.openapi.api.models.media;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,6 +24,7 @@ import org.eclipse.microprofile.openapi.models.media.Encoding;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Encoding} OpenAPI model interface.
@@ -36,15 +36,6 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
     private Style style;
     private Boolean explode;
     private Boolean allowReserved;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#contentType(java.lang.String)
-     */
-    @Override
-    public Encoding contentType(String contentType) {
-        this.contentType = contentType;
-        return this;
-    }
 
     /**
      * @see org.eclipse.microprofile.openapi.models.media.Encoding#getContentType()
@@ -68,13 +59,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public Encoding addHeader(String key, Header header) {
-        if (header == null) {
-            return this;
-        }
-        if (this.headers == null) {
-            this.headers = new LinkedHashMap<>();
-        }
-        this.headers.put(key, header);
+        this.headers = ModelUtil.add(key, header, this.headers, LinkedHashMap<String, Header>::new);
         return this;
     }
 
@@ -83,18 +68,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public void removeHeader(String key) {
-        if (this.headers != null) {
-            this.headers.remove(key);
-        }
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#headers(java.util.Map)
-     */
-    @Override
-    public Encoding headers(Map<String, Header> headers) {
-        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
-        return this;
+        ModelUtil.remove(this.headers, key);
     }
 
     /**
@@ -102,7 +76,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public Map<String, Header> getHeaders() {
-        return (this.headers == null) ? null : Collections.unmodifiableMap(this.headers);
+        return ModelUtil.unmodifiableMap(this.headers);
     }
 
     /**
@@ -110,16 +84,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = (headers == null) ? null : new LinkedHashMap<>(headers);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#style(org.eclipse.microprofile.openapi.models.media.Encoding.Style)
-     */
-    @Override
-    public Encoding style(Style style) {
-        this.style = style;
-        return this;
+        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
     }
 
     /**
@@ -139,15 +104,6 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#explode(java.lang.Boolean)
-     */
-    @Override
-    public Encoding explode(Boolean explode) {
-        this.explode = explode;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Encoding#getExplode()
      */
     @Override
@@ -161,15 +117,6 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
     @Override
     public void setExplode(Boolean explode) {
         this.explode = explode;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#allowReserved(java.lang.Boolean)
-     */
-    @Override
-    public Encoding allowReserved(Boolean allowReserved) {
-        this.allowReserved = allowReserved;
-        return this;
     }
 
     /**

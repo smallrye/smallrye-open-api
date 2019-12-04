@@ -49,15 +49,6 @@ public class XMLImpl extends ExtensibleImpl<XML> implements XML, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.XML#name(java.lang.String)
-     */
-    @Override
-    public XML name(String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.XML#getNamespace()
      */
     @Override
@@ -71,15 +62,6 @@ public class XMLImpl extends ExtensibleImpl<XML> implements XML, ModelImpl {
     @Override
     public void setNamespace(String namespace) {
         this.namespace = namespace;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.XML#namespace(java.lang.String)
-     */
-    @Override
-    public XML namespace(String namespace) {
-        this.namespace = namespace;
-        return this;
     }
 
     /**
@@ -99,15 +81,6 @@ public class XMLImpl extends ExtensibleImpl<XML> implements XML, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.XML#prefix(java.lang.String)
-     */
-    @Override
-    public XML prefix(String prefix) {
-        this.prefix = prefix;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.XML#getAttribute()
      */
     @Override
@@ -124,15 +97,6 @@ public class XMLImpl extends ExtensibleImpl<XML> implements XML, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.XML#attribute(java.lang.Boolean)
-     */
-    @Override
-    public XML attribute(Boolean attribute) {
-        this.attribute = attribute;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.XML#getWrapped()
      */
     @Override
@@ -146,15 +110,6 @@ public class XMLImpl extends ExtensibleImpl<XML> implements XML, ModelImpl {
     @Override
     public void setWrapped(Boolean wrapped) {
         this.wrapped = wrapped;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.XML#wrapped(java.lang.Boolean)
-     */
-    @Override
-    public XML wrapped(Boolean wrapped) {
-        this.wrapped = wrapped;
-        return this;
     }
 
 }

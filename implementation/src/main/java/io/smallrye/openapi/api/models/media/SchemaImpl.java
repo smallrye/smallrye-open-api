@@ -18,7 +18,6 @@ package io.smallrye.openapi.api.models.media;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,7 @@ import org.eclipse.microprofile.openapi.models.media.XML;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Content} OpenAPI model interface.
@@ -97,15 +97,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public Schema ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getDiscriminator()
      */
     @Override
@@ -119,15 +110,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setDiscriminator(Discriminator discriminator) {
         this.discriminator = discriminator;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#discriminator(org.eclipse.microprofile.openapi.models.media.Discriminator)
-     */
-    @Override
-    public Schema discriminator(Discriminator discriminator) {
-        this.discriminator = discriminator;
-        return this;
     }
 
     public String getName() {
@@ -155,15 +137,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#title(java.lang.String)
-     */
-    @Override
-    public Schema title(String title) {
-        this.title = title;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getDefaultValue()
      */
     @Override
@@ -180,20 +153,11 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#defaultValue(java.lang.Object)
-     */
-    @Override
-    public Schema defaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getEnumeration()
      */
     @Override
     public List<Object> getEnumeration() {
-        return (this.enumeration == null) ? null : Collections.unmodifiableList(this.enumeration);
+        return ModelUtil.unmodifiableList(this.enumeration);
     }
 
     /**
@@ -201,16 +165,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setEnumeration(List<Object> enumeration) {
-        this.enumeration = (enumeration == null) ? null : new ArrayList<>(enumeration);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#enumeration(java.util.List)
-     */
-    @Override
-    public Schema enumeration(List<Object> enumeration) {
-        this.enumeration = (enumeration == null) ? null : new ArrayList<>(enumeration);
-        return this;
+        this.enumeration = ModelUtil.replace(enumeration, ArrayList<Object>::new);
     }
 
     /**
@@ -218,13 +173,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addEnumeration(Object enumeration) {
-        if (enumeration == null) {
-            return this;
-        }
-        if (this.enumeration == null) {
-            this.enumeration = new ArrayList<>();
-        }
-        this.enumeration.add(enumeration);
+        this.enumeration = ModelUtil.add(enumeration, this.enumeration, ArrayList<Object>::new);
         return this;
     }
 
@@ -233,9 +182,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeEnumeration(Object enumeration) {
-        if (this.enumeration != null) {
-            this.enumeration.remove(enumeration);
-        }
+        ModelUtil.remove(this.enumeration, enumeration);
     }
 
     /**
@@ -255,15 +202,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#multipleOf(java.math.BigDecimal)
-     */
-    @Override
-    public Schema multipleOf(BigDecimal multipleOf) {
-        this.multipleOf = multipleOf;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getMaximum()
      */
     @Override
@@ -277,15 +215,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setMaximum(BigDecimal maximum) {
         this.maximum = maximum;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#maximum(java.math.BigDecimal)
-     */
-    @Override
-    public Schema maximum(BigDecimal maximum) {
-        this.maximum = maximum;
-        return this;
     }
 
     /**
@@ -305,15 +234,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#exclusiveMaximum(java.lang.Boolean)
-     */
-    @Override
-    public Schema exclusiveMaximum(Boolean exclusiveMaximum) {
-        this.exclusiveMaximum = exclusiveMaximum;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getMinimum()
      */
     @Override
@@ -327,15 +247,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setMinimum(BigDecimal minimum) {
         this.minimum = minimum;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#minimum(java.math.BigDecimal)
-     */
-    @Override
-    public Schema minimum(BigDecimal minimum) {
-        this.minimum = minimum;
-        return this;
     }
 
     /**
@@ -355,15 +266,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#exclusiveMinimum(java.lang.Boolean)
-     */
-    @Override
-    public Schema exclusiveMinimum(Boolean exclusiveMinimum) {
-        this.exclusiveMinimum = exclusiveMinimum;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getMaxLength()
      */
     @Override
@@ -377,15 +279,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#maxLength(java.lang.Integer)
-     */
-    @Override
-    public Schema maxLength(Integer maxLength) {
-        this.maxLength = maxLength;
-        return this;
     }
 
     /**
@@ -405,15 +298,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#minLength(java.lang.Integer)
-     */
-    @Override
-    public Schema minLength(Integer minLength) {
-        this.minLength = minLength;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getPattern()
      */
     @Override
@@ -427,15 +311,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setPattern(String pattern) {
         this.pattern = pattern;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#pattern(java.lang.String)
-     */
-    @Override
-    public Schema pattern(String pattern) {
-        this.pattern = pattern;
-        return this;
     }
 
     /**
@@ -455,15 +330,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#maxItems(java.lang.Integer)
-     */
-    @Override
-    public Schema maxItems(Integer maxItems) {
-        this.maxItems = maxItems;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getMinItems()
      */
     @Override
@@ -477,15 +343,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setMinItems(Integer minItems) {
         this.minItems = minItems;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#minItems(java.lang.Integer)
-     */
-    @Override
-    public Schema minItems(Integer minItems) {
-        this.minItems = minItems;
-        return this;
     }
 
     /**
@@ -505,15 +362,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#uniqueItems(java.lang.Boolean)
-     */
-    @Override
-    public Schema uniqueItems(Boolean uniqueItems) {
-        this.uniqueItems = uniqueItems;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getMaxProperties()
      */
     @Override
@@ -527,15 +375,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setMaxProperties(Integer maxProperties) {
         this.maxProperties = maxProperties;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#maxProperties(java.lang.Integer)
-     */
-    @Override
-    public Schema maxProperties(Integer maxProperties) {
-        this.maxProperties = maxProperties;
-        return this;
     }
 
     /**
@@ -555,20 +394,11 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#minProperties(java.lang.Integer)
-     */
-    @Override
-    public Schema minProperties(Integer minProperties) {
-        this.minProperties = minProperties;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getRequired()
      */
     @Override
     public List<String> getRequired() {
-        return (this.required == null) ? null : Collections.unmodifiableList(this.required);
+        return ModelUtil.unmodifiableList(this.required);
     }
 
     /**
@@ -576,16 +406,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setRequired(List<String> required) {
-        this.required = (required == null) ? null : new ArrayList<>(required);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#required(java.util.List)
-     */
-    @Override
-    public Schema required(List<String> required) {
-        this.required = (required == null) ? null : new ArrayList<>(required);
-        return this;
+        this.required = ModelUtil.replace(required, ArrayList<String>::new);
     }
 
     /**
@@ -593,13 +414,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addRequired(String required) {
-        if (required == null) {
-            return this;
-        }
-        if (this.required == null) {
-            this.required = new ArrayList<>();
-        }
-        this.required.add(required);
+        this.required = ModelUtil.add(required, this.required, ArrayList<String>::new);
         return this;
     }
 
@@ -608,9 +423,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeRequired(String required) {
-        if (this.required != null) {
-            this.required.remove(required);
-        }
+        ModelUtil.remove(this.required, required);
     }
 
     /**
@@ -630,15 +443,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#type(org.eclipse.microprofile.openapi.models.media.Schema.SchemaType)
-     */
-    @Override
-    public Schema type(SchemaType type) {
-        this.type = type;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getNot()
      */
     @Override
@@ -655,20 +459,11 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#not(org.eclipse.microprofile.openapi.models.media.Schema)
-     */
-    @Override
-    public Schema not(Schema not) {
-        this.not = not;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getProperties()
      */
     @Override
     public Map<String, Schema> getProperties() {
-        return (this.properties == null) ? null : Collections.unmodifiableMap(this.properties);
+        return ModelUtil.unmodifiableMap(this.properties);
     }
 
     /**
@@ -676,16 +471,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setProperties(Map<String, Schema> properties) {
-        this.properties = (properties == null) ? null : new LinkedHashMap<>(properties);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#properties(java.util.Map)
-     */
-    @Override
-    public Schema properties(Map<String, Schema> properties) {
-        this.properties = (properties == null) ? null : new LinkedHashMap<>(properties);
-        return this;
+        this.properties = ModelUtil.replace(properties, LinkedHashMap<String, Schema>::new);
     }
 
     /**
@@ -694,13 +480,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addProperty(String key, Schema propertySchema) {
-        if (propertySchema == null) {
-            return this;
-        }
-        if (this.properties == null) {
-            this.properties = new LinkedHashMap<>();
-        }
-        this.properties.put(key, propertySchema);
+        this.properties = ModelUtil.add(key, propertySchema, this.properties, LinkedHashMap<String, Schema>::new);
         return this;
     }
 
@@ -709,9 +489,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeProperty(String key) {
-        if (this.properties != null) {
-            this.properties.remove(key);
-        }
+        ModelUtil.remove(this.properties, key);
     }
 
     @Override
@@ -743,26 +521,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#additionalPropertiesSchema(org.eclipse.microprofile.openapi.models.media.Schema)
-     */
-    @Override
-    public Schema additionalPropertiesSchema(Schema additionalProperties) {
-        this.additionalPropertiesBoolean = null;
-        this.additionalPropertiesSchema = additionalProperties;
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#additionalPropertiesBoolean(java.lang.Boolean)
-     */
-    @Override
-    public Schema additionalPropertiesBoolean(Boolean additionalProperties) {
-        this.additionalPropertiesSchema = null;
-        this.additionalPropertiesBoolean = additionalProperties;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getDescription()
      */
     @Override
@@ -776,15 +534,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#description(java.lang.String)
-     */
-    @Override
-    public Schema description(String description) {
-        this.description = description;
-        return this;
     }
 
     /**
@@ -804,15 +553,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#format(java.lang.String)
-     */
-    @Override
-    public Schema format(String format) {
-        this.format = format;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getNullable()
      */
     @Override
@@ -826,15 +566,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setNullable(Boolean nullable) {
         this.nullable = nullable;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#nullable(java.lang.Boolean)
-     */
-    @Override
-    public Schema nullable(Boolean nullable) {
-        this.nullable = nullable;
-        return this;
     }
 
     /**
@@ -854,15 +585,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#readOnly(java.lang.Boolean)
-     */
-    @Override
-    public Schema readOnly(Boolean readOnly) {
-        this.readOnly = readOnly;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getWriteOnly()
      */
     @Override
@@ -876,15 +598,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setWriteOnly(Boolean writeOnly) {
         this.writeOnly = writeOnly;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#writeOnly(java.lang.Boolean)
-     */
-    @Override
-    public Schema writeOnly(Boolean writeOnly) {
-        this.writeOnly = writeOnly;
-        return this;
     }
 
     /**
@@ -904,15 +617,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#example(java.lang.Object)
-     */
-    @Override
-    public Schema example(Object example) {
-        this.example = example;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getExternalDocs()
      */
     @Override
@@ -926,15 +630,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setExternalDocs(ExternalDocumentation externalDocs) {
         this.externalDocs = externalDocs;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#externalDocs(org.eclipse.microprofile.openapi.models.ExternalDocumentation)
-     */
-    @Override
-    public Schema externalDocs(ExternalDocumentation externalDocs) {
-        this.externalDocs = externalDocs;
-        return this;
     }
 
     /**
@@ -954,15 +649,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#deprecated(java.lang.Boolean)
-     */
-    @Override
-    public Schema deprecated(Boolean deprecated) {
-        this.deprecated = deprecated;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getXml()
      */
     @Override
@@ -976,15 +662,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setXml(XML xml) {
         this.xml = xml;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#xml(org.eclipse.microprofile.openapi.models.media.XML)
-     */
-    @Override
-    public Schema xml(XML xml) {
-        this.xml = xml;
-        return this;
     }
 
     /**
@@ -1004,20 +681,11 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#items(org.eclipse.microprofile.openapi.models.media.Schema)
-     */
-    @Override
-    public Schema items(Schema items) {
-        this.items = items;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getAllOf()
      */
     @Override
     public List<Schema> getAllOf() {
-        return (this.allOf == null) ? null : Collections.unmodifiableList(this.allOf);
+        return ModelUtil.unmodifiableList(this.allOf);
     }
 
     /**
@@ -1025,16 +693,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAllOf(List<Schema> allOf) {
-        this.allOf = (allOf == null) ? null : new ArrayList<>(allOf);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#allOf(java.util.List)
-     */
-    @Override
-    public Schema allOf(List<Schema> allOf) {
-        this.allOf = (allOf == null) ? null : new ArrayList<>(allOf);
-        return this;
+        this.allOf = ModelUtil.replace(allOf, ArrayList<Schema>::new);
     }
 
     /**
@@ -1042,13 +701,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addAllOf(Schema allOf) {
-        if (allOf == null) {
-            return this;
-        }
-        if (this.allOf == null) {
-            this.allOf = new ArrayList<>();
-        }
-        this.allOf.add(allOf);
+        this.allOf = ModelUtil.add(allOf, this.allOf, ArrayList<Schema>::new);
         return this;
     }
 
@@ -1057,9 +710,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeAllOf(Schema allOf) {
-        if (this.allOf != null) {
-            this.allOf.remove(allOf);
-        }
+        ModelUtil.remove(this.allOf, allOf);
     }
 
     /**
@@ -1067,7 +718,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<Schema> getAnyOf() {
-        return (this.anyOf == null) ? null : Collections.unmodifiableList(this.anyOf);
+        return ModelUtil.unmodifiableList(this.anyOf);
     }
 
     /**
@@ -1075,16 +726,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAnyOf(List<Schema> anyOf) {
-        this.anyOf = (anyOf == null) ? null : new ArrayList<>(anyOf);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#anyOf(java.util.List)
-     */
-    @Override
-    public Schema anyOf(List<Schema> anyOf) {
-        this.anyOf = (anyOf == null) ? null : new ArrayList<>(anyOf);
-        return this;
+        this.anyOf = ModelUtil.replace(anyOf, ArrayList<Schema>::new);
     }
 
     /**
@@ -1092,13 +734,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addAnyOf(Schema anyOf) {
-        if (anyOf == null) {
-            return this;
-        }
-        if (this.anyOf == null) {
-            this.anyOf = new ArrayList<>();
-        }
-        this.anyOf.add(anyOf);
+        this.anyOf = ModelUtil.add(anyOf, this.anyOf, ArrayList<Schema>::new);
         return this;
     }
 
@@ -1107,9 +743,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeAnyOf(Schema anyOf) {
-        if (this.anyOf != null) {
-            this.anyOf.remove(anyOf);
-        }
+        ModelUtil.remove(this.anyOf, anyOf);
     }
 
     /**
@@ -1117,7 +751,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public List<Schema> getOneOf() {
-        return (this.oneOf == null) ? null : Collections.unmodifiableList(this.oneOf);
+        return ModelUtil.unmodifiableList(this.oneOf);
     }
 
     /**
@@ -1125,16 +759,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setOneOf(List<Schema> oneOf) {
-        this.oneOf = (oneOf == null) ? null : new ArrayList<>(oneOf);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#oneOf(java.util.List)
-     */
-    @Override
-    public Schema oneOf(List<Schema> oneOf) {
-        this.oneOf = (oneOf == null) ? null : new ArrayList<>(oneOf);
-        return this;
+        this.oneOf = ModelUtil.replace(oneOf, ArrayList<Schema>::new);
     }
 
     /**
@@ -1142,13 +767,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addOneOf(Schema oneOf) {
-        if (oneOf == null) {
-            return this;
-        }
-        if (this.oneOf == null) {
-            this.oneOf = new ArrayList<>();
-        }
-        this.oneOf.add(oneOf);
+        this.oneOf = ModelUtil.add(oneOf, this.oneOf, ArrayList<Schema>::new);
         return this;
     }
 
@@ -1157,9 +776,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeOneOf(Schema oneOf) {
-        if (this.oneOf != null) {
-            this.oneOf.remove(oneOf);
-        }
+        ModelUtil.remove(this.oneOf, oneOf);
     }
 
 }

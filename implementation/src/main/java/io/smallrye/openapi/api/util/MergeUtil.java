@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.logging.Logger;
 
+import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 
 /**
@@ -166,7 +168,7 @@ public class MergeUtil {
      * @param values2
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static Map mergeMaps(Map values1, Map values2) {
+    private static Map mergeMaps(Map values1, Map values2) {
         if (values1 == null && values2 == null) {
             return null;
         }
@@ -175,6 +177,13 @@ public class MergeUtil {
         }
         if (values1 == null && values2 != null) {
             return values2;
+        }
+
+        if (!(values1 instanceof ModelImpl)) {
+            values1 = new LinkedHashMap<>(values1);
+        }
+        if (!(values2 instanceof ModelImpl)) {
+            values2 = new LinkedHashMap<>(values2);
         }
 
         for (Object key : values2.keySet()) {
@@ -273,7 +282,7 @@ public class MergeUtil {
         Set<String> set = new LinkedHashSet<String>();
         set.addAll(values1);
         set.addAll(values2);
-        return new ArrayList<String>(set);
+        return new ArrayList<>(set);
     }
 
     /**
@@ -286,6 +295,8 @@ public class MergeUtil {
      * @param values2
      */
     private static List<Tag> mergeTagLists(List<Tag> values1, List<Tag> values2) {
+        values1 = new ArrayList<>(values1);
+
         for (Tag value2 : values2) {
             Tag match = null;
             for (Tag value1 : values1) {
@@ -311,6 +322,8 @@ public class MergeUtil {
      * @param values2
      */
     private static List<Server> mergeServerLists(List<Server> values1, List<Server> values2) {
+        values1 = new ArrayList<>(values1);
+
         for (Server value2 : values2) {
             Server match = null;
             for (Server value1 : values1) {
@@ -338,6 +351,9 @@ public class MergeUtil {
      */
     private static List<SecurityRequirement> mergeSecurityRequirementLists(List<SecurityRequirement> values1,
             List<SecurityRequirement> values2) {
+
+        values1 = new ArrayList<>(values1);
+
         for (SecurityRequirement value2 : values2) {
             if (values1.contains(value2)) {
                 continue;
@@ -355,6 +371,8 @@ public class MergeUtil {
      * @param values2
      */
     private static List<Parameter> mergeParameterLists(List<Parameter> values1, List<Parameter> values2) {
+        values1 = new ArrayList<>(values1);
+
         for (Parameter value2 : values2) {
             Parameter match = null;
             for (Parameter value1 : values1) {

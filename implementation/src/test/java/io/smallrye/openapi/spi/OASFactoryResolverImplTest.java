@@ -43,12 +43,10 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
-import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.junit.Assert;
 import org.junit.Test;
@@ -71,8 +69,8 @@ public class OASFactoryResolverImplTest {
                 Contact.class, Content.class, Discriminator.class, Encoding.class, Example.class,
                 ExternalDocumentation.class, Header.class, Info.class, License.class, Link.class, MediaType.class,
                 OAuthFlow.class, OAuthFlows.class, OpenAPI.class, Operation.class, Parameter.class, PathItem.class,
-                Paths.class, RequestBody.class, Schema.class, Scopes.class, SecurityRequirement.class,
-                SecurityScheme.class, Server.class, ServerVariable.class, ServerVariables.class, Tag.class, XML.class };
+                Paths.class, RequestBody.class, Schema.class, SecurityRequirement.class,
+                SecurityScheme.class, Server.class, ServerVariable.class, Tag.class, XML.class };
         for (Class modelClass : modelClasses) {
             Constructible object = OASFactory.createObject(modelClass);
             Assert.assertNotNull(object);

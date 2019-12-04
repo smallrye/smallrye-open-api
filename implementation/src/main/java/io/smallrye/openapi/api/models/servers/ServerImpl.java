@@ -16,11 +16,15 @@
 
 package io.smallrye.openapi.api.models.servers;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.eclipse.microprofile.openapi.models.servers.Server;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
+import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Server} OpenAPI model interface.
@@ -29,7 +33,7 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
 
     private String url;
     private String description;
-    private ServerVariables variables;
+    private Map<String, ServerVariable> variables;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.servers.Server#getUrl()
@@ -45,15 +49,6 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
     @Override
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.servers.Server#url(java.lang.String)
-     */
-    @Override
-    public Server url(String url) {
-        this.url = url;
-        return this;
     }
 
     /**
@@ -73,37 +68,35 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.servers.Server#description(java.lang.String)
-     */
-    @Override
-    public Server description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.servers.Server#getVariables()
      */
     @Override
-    public ServerVariables getVariables() {
-        return this.variables;
+    public Map<String, ServerVariable> getVariables() {
+        return ModelUtil.unmodifiableMap(this.variables);
     }
 
     /**
      * @see org.eclipse.microprofile.openapi.models.servers.Server#setVariables(org.eclipse.microprofile.openapi.models.servers.ServerVariables)
      */
     @Override
-    public void setVariables(ServerVariables variables) {
-        this.variables = variables;
+    public void setVariables(Map<String, ServerVariable> variables) {
+        this.variables = ModelUtil.replace(variables, LinkedHashMap<String, ServerVariable>::new);
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.servers.Server#variables(org.eclipse.microprofile.openapi.models.servers.ServerVariables)
+     * @see org.eclipse.microprofile.openapi.models.servers.Server#addVariable(java.lang.String, ServerVariable)
      */
     @Override
-    public Server variables(ServerVariables variables) {
-        this.variables = variables;
+    public Server addVariable(String variableName, ServerVariable variable) {
+        this.variables = ModelUtil.add(variableName, variable, this.variables, LinkedHashMap<String, ServerVariable>::new);
         return this;
     }
 
+    /**
+     * @see org.eclipse.microprofile.openapi.models.servers.Server#removeVariable(java.lang.String)
+     */
+    @Override
+    public void removeVariable(String variableName) {
+        ModelUtil.remove(this.variables, variableName);
+    }
 }

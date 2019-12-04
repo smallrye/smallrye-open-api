@@ -16,7 +16,6 @@
 
 package io.smallrye.openapi.api.models.links;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,6 +25,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Link} OpenAPI model interface.
@@ -60,15 +60,6 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public Link ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.links.Link#getServer()
      */
     @Override
@@ -82,15 +73,6 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     @Override
     public void setServer(Server server) {
         this.server = server;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.links.Link#server(org.eclipse.microprofile.openapi.models.servers.Server)
-     */
-    @Override
-    public Link server(Server server) {
-        this.server = server;
-        return this;
     }
 
     /**
@@ -110,15 +92,6 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.links.Link#operationRef(java.lang.String)
-     */
-    @Override
-    public Link operationRef(String operationRef) {
-        this.operationRef = operationRef;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.links.Link#getRequestBody()
      */
     @Override
@@ -132,15 +105,6 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     @Override
     public void setRequestBody(Object requestBody) {
         this.requestBody = requestBody;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.links.Link#requestBody(java.lang.Object)
-     */
-    @Override
-    public Link requestBody(Object requestBody) {
-        this.requestBody = requestBody;
-        return this;
     }
 
     /**
@@ -160,20 +124,11 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.links.Link#operationId(java.lang.String)
-     */
-    @Override
-    public Link operationId(String operationId) {
-        this.operationId = operationId;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.links.Link#getParameters()
      */
     @Override
     public Map<String, Object> getParameters() {
-        return (this.parameters == null) ? null : Collections.unmodifiableMap(this.parameters);
+        return ModelUtil.unmodifiableMap(this.parameters);
     }
 
     /**
@@ -181,16 +136,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public void setParameters(Map<String, Object> parameters) {
-        this.parameters = (parameters == null) ? null : new LinkedHashMap<>(parameters);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.links.Link#parameters(java.util.Map)
-     */
-    @Override
-    public Link parameters(Map<String, Object> parameters) {
-        this.parameters = (parameters == null) ? null : new LinkedHashMap<>(parameters);
-        return this;
+        this.parameters = ModelUtil.replace(parameters, LinkedHashMap<String, Object>::new);
     }
 
     /**
@@ -198,13 +144,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public Link addParameter(String name, Object parameter) {
-        if (parameter == null) {
-            return this;
-        }
-        if (this.parameters == null) {
-            this.parameters = new LinkedHashMap<>();
-        }
-        this.parameters.put(name, parameter);
+        this.parameters = ModelUtil.add(name, parameter, this.parameters, LinkedHashMap<String, Object>::new);
         return this;
     }
 
@@ -213,9 +153,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public void removeParameter(String name) {
-        if (this.parameters != null) {
-            this.parameters.remove(name);
-        }
+        ModelUtil.remove(this.parameters, name);
     }
 
     /**
@@ -232,15 +170,6 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.links.Link#description(java.lang.String)
-     */
-    @Override
-    public Link description(String description) {
-        this.description = description;
-        return this;
     }
 
 }

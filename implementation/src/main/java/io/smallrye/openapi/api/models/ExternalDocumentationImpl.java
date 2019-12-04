@@ -44,15 +44,6 @@ public class ExternalDocumentationImpl extends ExtensibleImpl<ExternalDocumentat
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#description(java.lang.String)
-     */
-    @Override
-    public ExternalDocumentation description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#getUrl()
      */
     @Override
@@ -66,15 +57,6 @@ public class ExternalDocumentationImpl extends ExtensibleImpl<ExternalDocumentat
     @Override
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#url(java.lang.String)
-     */
-    @Override
-    public ExternalDocumentation url(String url) {
-        this.url = url;
-        return this;
     }
 
 }

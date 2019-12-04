@@ -65,12 +65,10 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
-import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -107,12 +105,10 @@ import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
-import io.smallrye.openapi.api.models.security.ScopesImpl;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
 import io.smallrye.openapi.api.models.servers.ServerImpl;
 import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor.ResourceParameters;
@@ -511,9 +507,9 @@ public class OpenApiAnnotationScanner {
 
         this.currentFlows.forEach(flow -> {
             if (flow.getScopes() == null) {
-                flow.setScopes(new ScopesImpl());
+                flow.setScopes(new LinkedHashMap<String, String>());
             }
-            Arrays.stream(roles).forEach(role -> flow.getScopes().addScope(role, role + " role"));
+            Arrays.stream(roles).forEach(role -> flow.addScope(role, role + " role"));
         });
     }
 
@@ -1341,17 +1337,17 @@ public class OpenApiAnnotationScanner {
      * @param value
      * @return
      */
-    private ServerVariables readServerVariables(AnnotationValue serverVariableAnnos) {
+    private Map<String, ServerVariable> readServerVariables(AnnotationValue serverVariableAnnos) {
         if (serverVariableAnnos == null) {
             return null;
         }
         LOG.debug("Processing an array of @ServerVariable annotations.");
         AnnotationInstance[] nestedArray = serverVariableAnnos.asNestedArray();
-        ServerVariables variables = new ServerVariablesImpl();
+        Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (AnnotationInstance serverVariableAnno : nestedArray) {
             String name = JandexUtil.stringValue(serverVariableAnno, OpenApiConstants.PROP_NAME);
             if (name != null) {
-                variables.addServerVariable(name, readServerVariable(serverVariableAnno));
+                variables.put(name, readServerVariable(serverVariableAnno));
             }
         }
         return variables;
@@ -2161,18 +2157,18 @@ public class OpenApiAnnotationScanner {
      * 
      * @param value
      */
-    private Scopes readOAuthScopes(AnnotationValue value) {
+    private Map<String, String> readOAuthScopes(AnnotationValue value) {
         if (value == null) {
             return null;
         }
         LOG.debug("Processing a list of @OAuthScope annotations.");
         AnnotationInstance[] nestedArray = value.asNestedArray();
-        Scopes scopes = new ScopesImpl();
+        Map<String, String> scopes = new LinkedHashMap<>();
         for (AnnotationInstance nested : nestedArray) {
             String name = JandexUtil.stringValue(nested, OpenApiConstants.PROP_NAME);
             if (name != null) {
                 String description = JandexUtil.stringValue(nested, OpenApiConstants.PROP_DESCRIPTION);
-                scopes.addScope(name, description);
+                scopes.put(name, description);
             }
         }
         return scopes;

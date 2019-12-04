@@ -53,15 +53,6 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public RequestBody ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.RequestBody#getDescription()
      */
     @Override
@@ -75,15 +66,6 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.RequestBody#description(java.lang.String)
-     */
-    @Override
-    public RequestBody description(String description) {
-        this.description = description;
-        return this;
     }
 
     /**
@@ -103,15 +85,6 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.RequestBody#content(org.eclipse.microprofile.openapi.models.media.Content)
-     */
-    @Override
-    public RequestBody content(Content content) {
-        this.content = content;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.RequestBody#getRequired()
      */
     @Override
@@ -125,15 +98,6 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     @Override
     public void setRequired(Boolean required) {
         this.required = required;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.RequestBody#required(java.lang.Boolean)
-     */
-    @Override
-    public RequestBody required(Boolean required) {
-        this.required = required;
-        return this;
     }
 
 }

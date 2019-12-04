@@ -16,7 +16,6 @@
 
 package io.smallrye.openapi.api.models.parameters;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,6 +27,7 @@ import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Parameter} OpenAPI model interface.
@@ -70,15 +70,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public Parameter ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getName()
      */
     @Override
@@ -92,15 +83,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#name(java.lang.String)
-     */
-    @Override
-    public Parameter name(String name) {
-        this.name = name;
-        return this;
     }
 
     /**
@@ -120,15 +102,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#description(java.lang.String)
-     */
-    @Override
-    public Parameter description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getRequired()
      */
     @Override
@@ -142,15 +115,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     @Override
     public void setRequired(Boolean required) {
         this.required = required;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#required(java.lang.Boolean)
-     */
-    @Override
-    public Parameter required(Boolean required) {
-        this.required = required;
-        return this;
     }
 
     /**
@@ -170,15 +134,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#deprecated(java.lang.Boolean)
-     */
-    @Override
-    public Parameter deprecated(Boolean deprecated) {
-        this.deprecated = deprecated;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getAllowEmptyValue()
      */
     @Override
@@ -192,15 +147,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     @Override
     public void setAllowEmptyValue(Boolean allowEmptyValue) {
         this.allowEmptyValue = allowEmptyValue;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#allowEmptyValue(java.lang.Boolean)
-     */
-    @Override
-    public Parameter allowEmptyValue(Boolean allowEmptyValue) {
-        this.allowEmptyValue = allowEmptyValue;
-        return this;
     }
 
     /**
@@ -220,15 +166,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#style(Style)
-     */
-    @Override
-    public Parameter style(Style style) {
-        this.style = style;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getExplode()
      */
     @Override
@@ -242,15 +179,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     @Override
     public void setExplode(Boolean explode) {
         this.explode = explode;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#explode(java.lang.Boolean)
-     */
-    @Override
-    public Parameter explode(Boolean explode) {
-        this.explode = explode;
-        return this;
     }
 
     /**
@@ -270,15 +198,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#allowReserved(java.lang.Boolean)
-     */
-    @Override
-    public Parameter allowReserved(Boolean allowReserved) {
-        this.allowReserved = allowReserved;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getSchema()
      */
     @Override
@@ -295,20 +214,11 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#schema(org.eclipse.microprofile.openapi.models.media.Schema)
-     */
-    @Override
-    public Parameter schema(Schema schema) {
-        this.schema = schema;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getExamples()
      */
     @Override
     public Map<String, Example> getExamples() {
-        return (this.examples == null) ? null : Collections.unmodifiableMap(this.examples);
+        return ModelUtil.unmodifiableMap(this.examples);
     }
 
     /**
@@ -316,16 +226,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#examples(java.util.Map)
-     */
-    @Override
-    public Parameter examples(Map<String, Example> examples) {
-        this.examples = (examples == null) ? null : new LinkedHashMap<>(examples);
-        return this;
+        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
     }
 
     /**
@@ -334,13 +235,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public Parameter addExample(String key, Example example) {
-        if (example == null) {
-            return this;
-        }
-        if (this.examples == null) {
-            this.examples = new LinkedHashMap<>();
-        }
-        this.examples.put(key, example);
+        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
         return this;
     }
 
@@ -349,9 +244,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public void removeExample(String key) {
-        if (this.examples != null) {
-            this.examples.remove(key);
-        }
+        ModelUtil.remove(this.examples, key);
     }
 
     /**
@@ -371,15 +264,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#example(java.lang.Object)
-     */
-    @Override
-    public Parameter example(Object example) {
-        this.example = example;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getContent()
      */
     @Override
@@ -396,15 +280,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#content(org.eclipse.microprofile.openapi.models.media.Content)
-     */
-    @Override
-    public Parameter content(Content content) {
-        this.content = content;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#getIn()
      */
     @Override
@@ -418,15 +293,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     @Override
     public void setIn(In in) {
         this.in = in;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#in(org.eclipse.microprofile.openapi.models.parameters.Parameter.In)
-     */
-    @Override
-    public Parameter in(In in) {
-        this.in = in;
-        return this;
     }
 
     public boolean isHidden() {

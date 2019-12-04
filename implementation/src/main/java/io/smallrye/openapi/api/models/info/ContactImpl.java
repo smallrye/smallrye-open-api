@@ -47,15 +47,6 @@ public class ContactImpl extends ExtensibleImpl<Contact> implements Contact, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.info.Contact#name(java.lang.String)
-     */
-    @Override
-    public Contact name(String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.info.Contact#getUrl()
      */
     @Override
@@ -72,15 +63,6 @@ public class ContactImpl extends ExtensibleImpl<Contact> implements Contact, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.info.Contact#url(java.lang.String)
-     */
-    @Override
-    public Contact url(String url) {
-        this.url = url;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.info.Contact#getEmail()
      */
     @Override
@@ -94,15 +76,6 @@ public class ContactImpl extends ExtensibleImpl<Contact> implements Contact, Mod
     @Override
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.info.Contact#email(java.lang.String)
-     */
-    @Override
-    public Contact email(String email) {
-        this.email = email;
-        return this;
     }
 
 }

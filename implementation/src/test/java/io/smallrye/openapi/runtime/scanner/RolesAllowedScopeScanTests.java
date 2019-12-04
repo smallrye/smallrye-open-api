@@ -56,7 +56,6 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
                         .getFlows()
                         .getClientCredentials()
                         .getScopes()
-                        .getScopes()
                         .keySet()
                         .iterator().next());
     }
@@ -105,7 +104,6 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
                         .getFlows()
                         .getClientCredentials()
                         .getScopes()
-                        .getScopes()
                         .keySet()
                         .toArray());
     }
@@ -140,7 +138,6 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
                         .get("rolesScheme")
                         .getFlows()
                         .getClientCredentials()
-                        .getScopes()
                         .getScopes()
                         .keySet()
                         .toArray());

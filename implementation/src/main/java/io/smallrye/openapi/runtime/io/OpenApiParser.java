@@ -57,14 +57,12 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
-import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme.In;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -98,12 +96,10 @@ import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
-import io.smallrye.openapi.api.models.security.ScopesImpl;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
 import io.smallrye.openapi.api.models.servers.ServerImpl;
 import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
@@ -370,11 +366,11 @@ public class OpenApiParser {
      * 
      * @param node
      */
-    private ServerVariables readServerVariables(JsonNode node) {
+    private Map<String, ServerVariable> readServerVariables(JsonNode node) {
         if (node == null) {
             return null;
         }
-        ServerVariablesImpl model = new ServerVariablesImpl();
+        Map<String, ServerVariable> model = new LinkedHashMap<>();
 
         for (Iterator<String> iterator = node.fieldNames(); iterator.hasNext();) {
             String fieldName = iterator.next();
@@ -385,7 +381,6 @@ public class OpenApiParser {
             }
         }
 
-        readExtensions(node, model);
         return model;
     }
 
@@ -1004,11 +999,11 @@ public class OpenApiParser {
      * 
      * @param node
      */
-    private Scopes readScopes(JsonNode node) {
+    private Map<String, String> readScopes(JsonNode node) {
         if (node == null || !node.isObject()) {
             return null;
         }
-        ScopesImpl model = new ScopesImpl();
+        Map<String, String> model = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (fieldName.startsWith(OpenApiConstants.EXTENSION_PROPERTY_PREFIX)) {
@@ -1017,7 +1012,6 @@ public class OpenApiParser {
             String value = JsonUtil.stringProperty(node, fieldName);
             model.put(fieldName, value);
         }
-        readExtensions(node, model);
         return model;
     }
 
@@ -1133,7 +1127,7 @@ public class OpenApiParser {
                     || fieldName.equals(OpenApiConstants.PROP_$REF)) {
                 continue;
             }
-            model.put(fieldName, readPathItem(node.get(fieldName)));
+            model.addPathItem(fieldName, readPathItem(node.get(fieldName)));
         }
         readExtensions(node, model);
         return model;

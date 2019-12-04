@@ -47,12 +47,10 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
-import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
 /**
@@ -162,7 +160,7 @@ public class FilterUtil {
         if (model == null) {
             return;
         }
-        filterParameterList(filter, model.getParameters());
+        model.setParameters(filterParameterList(filter, model.getParameters()));
         filterOperation(filter, model.getDELETE());
         if (model.getDELETE() != null) {
             model.setDELETE(filter.filterOperation(model.getDELETE()));
@@ -205,10 +203,11 @@ public class FilterUtil {
      * @param filter
      * @param models
      */
-    private static void filterParameterList(OASFilter filter, List<Parameter> models) {
+    private static List<Parameter> filterParameterList(OASFilter filter, List<Parameter> models) {
         if (models == null) {
-            return;
+            return null;
         }
+        models = new ArrayList<>(models);
         ListIterator<Parameter> iterator = models.listIterator();
         while (iterator.hasNext()) {
             Parameter model = iterator.next();
@@ -218,6 +217,7 @@ public class FilterUtil {
                 iterator.remove();
             }
         }
+        return models;
     }
 
     /**
@@ -233,12 +233,14 @@ public class FilterUtil {
         filterCallbacks(filter, model.getCallbacks());
         filterExtensions(filter, model.getExtensions());
         filterExternalDocs(filter, model.getExternalDocs());
-        filterParameterList(filter, model.getParameters());
+        model.setParameters(filterParameterList(filter, model.getParameters()));
         filterRequestBody(filter, model.getRequestBody());
         if (model.getRequestBody() != null && filter.filterRequestBody(model.getRequestBody()) == null) {
             model.setRequestBody(null);
         }
-        filterAPIResponses(filter, model.getResponses().getAPIResponses());
+        if (model.getResponses() != null) {
+            filterAPIResponses(filter, model.getResponses().getAPIResponses());
+        }
         filterSecurity(filter, model.getSecurity());
         filterServers(filter, model.getServers());
     }
@@ -320,9 +322,10 @@ public class FilterUtil {
      * @param model
      */
     private static void filterContent(OASFilter filter, Content model) {
-        if (model == null) {
+        if (model == null || model.getMediaTypes() == null) {
             return;
         }
+
         Collection<String> keys = new ArrayList<>(model.getMediaTypes().keySet());
         for (String key : keys) {
             MediaType childModel = model.getMediaType(key);
@@ -703,11 +706,10 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterScopes(OASFilter filter, Scopes model) {
+    private static void filterScopes(OASFilter filter, Map<String, String> model) {
         if (model == null) {
             return;
         }
-        filterExtensions(filter, model.getExtensions());
     }
 
     /**
@@ -867,16 +869,15 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterServerVariables(OASFilter filter, ServerVariables model) {
+    private static void filterServerVariables(OASFilter filter, Map<String, ServerVariable> model) {
         if (model == null) {
             return;
         }
-        Collection<String> keys = new ArrayList<>(model.getServerVariables().keySet());
+        Collection<String> keys = new ArrayList<>(model.keySet());
         for (String key : keys) {
-            ServerVariable childModel = model.getServerVariable(key);
+            ServerVariable childModel = model.get(key);
             filterServerVariable(filter, childModel);
         }
-        filterExtensions(filter, model.getExtensions());
     }
 
     /**

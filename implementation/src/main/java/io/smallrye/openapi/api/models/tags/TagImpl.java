@@ -48,15 +48,6 @@ public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.tags.Tag#name(java.lang.String)
-     */
-    @Override
-    public Tag name(String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.tags.Tag#getDescription()
      */
     @Override
@@ -73,15 +64,6 @@ public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.tags.Tag#description(java.lang.String)
-     */
-    @Override
-    public Tag description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.tags.Tag#getExternalDocs()
      */
     @Override
@@ -95,15 +77,6 @@ public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
     @Override
     public void setExternalDocs(ExternalDocumentation externalDocs) {
         this.externalDocs = externalDocs;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.tags.Tag#externalDocs(org.eclipse.microprofile.openapi.models.ExternalDocumentation)
-     */
-    @Override
-    public Tag externalDocs(ExternalDocumentation externalDocs) {
-        this.externalDocs = externalDocs;
-        return this;
     }
 
 }

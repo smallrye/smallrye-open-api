@@ -17,6 +17,7 @@
 package io.smallrye.openapi.api.util;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -53,10 +54,11 @@ public class ServersUtil {
         }
 
         // Now the PathItem and Operation servers
-        Set<String> pathNames = oai.getPaths().getPathItems().keySet();
-        for (String pathName : pathNames) {
-            PathItem pathItem = oai.getPaths().getPathItems().get(pathName);
-            configureServers(config, pathName, pathItem);
+        Map<String, PathItem> pathItems = oai.getPaths().getPathItems();
+        if (pathItems != null) {
+            pathItems.entrySet().forEach(entry -> {
+                configureServers(config, entry.getKey(), entry.getValue());
+            });
         }
     }
 

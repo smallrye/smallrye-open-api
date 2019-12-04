@@ -16,13 +16,13 @@
 
 package io.smallrye.openapi.api.models.media;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Discriminator} OpenAPI model interface.
@@ -31,15 +31,6 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
 
     private String propertyName;
     private Map<String, String> mapping;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#propertyName(java.lang.String)
-     */
-    @Override
-    public Discriminator propertyName(String propertyName) {
-        this.propertyName = propertyName;
-        return this;
-    }
 
     /**
      * @see org.eclipse.microprofile.openapi.models.media.Discriminator#getPropertyName()
@@ -62,13 +53,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public Discriminator addMapping(String name, String value) {
-        if (value == null) {
-            return this;
-        }
-        if (this.mapping == null) {
-            this.mapping = new LinkedHashMap<>();
-        }
-        this.mapping.put(name, value);
+        this.mapping = ModelUtil.add(name, value, this.mapping, LinkedHashMap<String, String>::new);
         return this;
     }
 
@@ -77,18 +62,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public void removeMapping(String name) {
-        if (this.mapping != null) {
-            this.mapping.remove(name);
-        }
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#mapping(java.util.Map)
-     */
-    @Override
-    public Discriminator mapping(Map<String, String> mapping) {
-        this.mapping = (mapping == null) ? null : new LinkedHashMap<>(mapping);
-        return this;
+        ModelUtil.remove(this.mapping, name);
     }
 
     /**
@@ -96,7 +70,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public Map<String, String> getMapping() {
-        return (this.mapping == null) ? null : Collections.unmodifiableMap(this.mapping);
+        return ModelUtil.unmodifiableMap(this.mapping);
     }
 
     /**
@@ -104,7 +78,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public void setMapping(Map<String, String> mapping) {
-        this.mapping = (mapping == null) ? null : new LinkedHashMap<>(mapping);
+        this.mapping = ModelUtil.replace(mapping, LinkedHashMap<String, String>::new);
     }
 
 }
