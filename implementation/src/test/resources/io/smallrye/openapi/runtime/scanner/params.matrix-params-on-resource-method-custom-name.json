@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "paths": {
-    "/matrix-params-on-resource-method-custom-name/{id}{r1}": {
+    "/matrix-params-on-resource-method-custom-name/{id}{idMatrix}": {
       "parameters": [
         {
           "name": "id",
@@ -16,7 +16,7 @@
       "get": {
         "parameters": [
           {
-            "name": "r1",
+            "name": "idMatrix",
             "in": "path",
             "style": "matrix",
             "required": true,

@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "paths": {
-    "/matrix-params-on-method-and-field-args/{id}{idMatrix}/seg1/seg2/resourceA{methodMatrix}": {
+    "/matrix-params-on-method-and-field-args/{id}{idMatrix}/seg1/seg2/resourceA{resourceA}": {
       "parameters": [
         {
           "name": "id",
@@ -34,7 +34,7 @@
       "get": {
         "parameters": [
           {
-            "name": "methodMatrix",
+            "name": "resourceA",
             "in": "path",
             "style": "matrix",
             "required": true,

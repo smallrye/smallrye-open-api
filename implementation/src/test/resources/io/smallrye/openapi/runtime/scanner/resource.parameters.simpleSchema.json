@@ -29,10 +29,10 @@
     "/params/{taskId}/named": {
       "delete": {
         "parameters": [{
-          "name": "notTaskId",
+          "name": "taskId",
           "in": "path",
           "required": true,
-          "description": "The id of the task",
+          "description": "The id of the task, invalid name discarded when @Parameter and JAX-RS annotation have same target",
           "schema": {
             "type": "string"
           },

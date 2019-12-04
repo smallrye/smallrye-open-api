@@ -1,0 +1,75 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/override/{p1}": {
+      "parameters": [
+        {
+          "name": "query1",
+          "in": "query",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "A JSON query parameter"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string",
+                "description": "A plain text query parameter"
+              }
+            }
+          }
+        },
+        {
+          "name": "X-Header1",
+          "in": "header",
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "Cookie1",
+          "in": "cookie",
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "name": "p1",
+            "in": "path",
+            "required": true,
+            "description": "The name 'Path1' will not be used instead of 'p1'",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -44,6 +44,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
@@ -328,6 +329,7 @@ public final class OpenApiConstants {
                     DOTNAME_PATCH)));
 
     public static final DotName DOTNAME_RESPONSE = DotName.createSimple(Response.class.getName());
+    public static final DotName DOTNAME_PATH_SEGMENT = DotName.createSimple(PathSegment.class.getName());
     public static final DotName DOTNAME_DEPRECATED = DotName.createSimple(Deprecated.class.getName());
 
     public static final DotName DOTNAME_OPTIONAL = DotName.createSimple(java.util.Optional.class.getName());

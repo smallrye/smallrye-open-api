@@ -2,6 +2,19 @@
   "openapi": "3.0.1",
   "paths": {
     "/hello": {
+      "parameters": [
+        {
+          "name": "date",
+          "in": "header",
+          "description": "The local date when the greeting is sent",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "allowEmptyValue": false,
+          "example": "2019-12-31"
+        }
+      ],
       "get": {
         "responses": {
           "200": {
