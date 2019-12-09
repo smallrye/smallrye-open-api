@@ -16,14 +16,15 @@
 
 package test.io.smallrye.openapi.tck;
 
-import static io.restassured.RestAssured.given;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 
-import org.eclipse.microprofile.openapi.tck.FilterTest;
+import javax.ws.rs.core.MediaType;
+
+import org.eclipse.microprofile.openapi.tck.utils.YamlToJsonFilter;
 import org.jboss.arquillian.testng.Arquillian;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -34,7 +35,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
@@ -71,6 +71,10 @@ public abstract class BaseTckTest<T extends Arquillian> {
         server.createContext("/openapi", new MyHandler());
         server.setExecutor(null);
         server.start();
+
+        // Register a filter that performs YAML to JSON conversion
+        // Called here because the TCK's AppTestBase#setUp() is not called. (Remove for 2.0)
+        RestAssured.filters(new YamlToJsonFilter());
     }
 
     @AfterClass
@@ -83,36 +87,46 @@ public abstract class BaseTckTest<T extends Arquillian> {
     static class MyHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
+            String acceptedTypes = t.getRequestHeaders().getFirst("Accept");
+            if (acceptedTypes == null) {
+                acceptedTypes = MediaType.WILDCARD;
+            }
+            String queryString = t.getRequestURI().getQuery();
+            Format format;
+            String mediaType;
+
+            if ((queryString != null && Arrays.asList(queryString.split("&")).contains("format=JSON"))
+                    || acceptedTypes.contains(MediaType.APPLICATION_JSON)) {
+                format = Format.JSON;
+                mediaType = MediaType.APPLICATION_JSON;
+            } else {
+                format = Format.YAML;
+                mediaType = "application/x-yaml";
+            }
+
             String response = null;
             try {
-                response = OpenApiSerializer.serialize(OpenApiDocument.INSTANCE.get(), Format.JSON);
+                response = OpenApiSerializer.serialize(OpenApiDocument.INSTANCE.get(), format);
             } catch (Throwable e) {
                 e.printStackTrace();
-                t.getResponseHeaders().add("Content-Type", APPLICATION_JSON);
+                t.getResponseHeaders().add("Content-Type", mediaType);
                 OutputStream os = t.getResponseBody();
-                os.write("{}".getBytes("UTF-8"));
+                if (format == Format.JSON) {
+                    os.write("{}".getBytes("UTF-8"));
+                } else {
+                    os.write("".getBytes("UTF-8"));
+                }
                 os.flush();
                 os.close();
                 return;
             }
 
-            t.getResponseHeaders().add("Content-Type", APPLICATION_JSON);
+            t.getResponseHeaders().add("Content-Type", mediaType);
             t.sendResponseHeaders(200, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes());
             os.close();
         }
-    }
-
-    /**
-     * Calls the endpoint.
-     * 
-     * @param format
-     */
-    protected ValidatableResponse doCallEndpoint(String format) {
-        ValidatableResponse vr;
-        vr = given().accept(APPLICATION_JSON).when().get("/openapi").then().statusCode(200);
-        return vr;
     }
 
     /**
@@ -129,15 +143,6 @@ public abstract class BaseTckTest<T extends Arquillian> {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Arguments to pass to each of the test methods in the TCK test. This is
-     * typically null (no arguments) but at least one test ( {@link FilterTest} )
-     * has arguments to its methods.
-     */
-    public Object[] getTestArguments() {
-        return new String[] { "JSON" };
     }
 
 }
