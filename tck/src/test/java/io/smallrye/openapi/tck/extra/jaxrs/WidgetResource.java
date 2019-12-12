@@ -47,6 +47,21 @@ public class WidgetResource {
         return rval;
     }
 
+    @GET
+    @Path("iter")
+    public Iterable<Widget> getAllWidgetsAsIterable() {
+        List<Widget> rval = new ArrayList<>();
+        Widget w1 = new Widget();
+        w1.setName("Widget One");
+        w1.setDescription("The description of widget one.");
+        Widget w2 = new Widget();
+        w2.setName("Widget Two");
+        w2.setDescription("The description of widget two.");
+        rval.add(w1);
+        rval.add(w2);
+        return rval;
+    }
+
     @POST
     public void createWidget(Widget widget) {
         // Add the widget to the DB

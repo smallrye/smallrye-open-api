@@ -35,6 +35,7 @@ public class OpenApiDataObjectScannerTestBase extends IndexScannerTestBase {
 
         // Stand-in stuff
         index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
+        index(indexer, "io/smallrye/openapi/runtime/scanner/IterableStandin.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
 
         // Test samples
