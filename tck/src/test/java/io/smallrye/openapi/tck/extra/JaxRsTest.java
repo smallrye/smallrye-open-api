@@ -37,7 +37,7 @@ public class JaxRsTest extends BaseTckTest<JaxRsTest.JaxRsTestArquillian> {
     public static class JaxRsTestArquillian extends AppTestBase {
         @Deployment(name = "jaxrs")
         public static WebArchive createDeployment() {
-            return ShrinkWrap.create(WebArchive.class, "airlines.war")
+            return ShrinkWrap.create(WebArchive.class, "jaxrstest.war")
                     .addPackages(true, new String[] { "io.smallrye.openapi.tck.extra.jaxrs" });
         }
 
@@ -61,5 +61,16 @@ public class JaxRsTest extends BaseTckTest<JaxRsTest.JaxRsTestArquillian> {
             ValidatableResponse vr = this.callEndpoint(type);
             vr.body("paths.'/jaxrs/widgets/{widgetId}'.put.responses.'204'.description", equalTo("No Content"));
         }
+
+        @RunAsClient
+        @Test(dataProvider = "formatProvider")
+        public void test200IterableResponse(String type) {
+            ValidatableResponse vr = this.callEndpoint(type);
+            vr.body("paths.'/jaxrs/widgets/iter'.get.responses.'200'.description", equalTo("OK"));
+            vr.body("paths.'/jaxrs/widgets/iter'.get.responses.'200'.content.'*/*'.schema.type", equalTo("array"));
+            vr.body("paths.'/jaxrs/widgets/iter'.get.responses.'200'.content.'*/*'.schema.items.'$ref'",
+                    equalTo("#/components/schemas/Widget"));
+        }
+
     }
 }

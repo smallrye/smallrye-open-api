@@ -128,6 +128,7 @@ public class ArchiveUtil {
 
         Indexer indexer = new Indexer();
         index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
+        index(indexer, "io/smallrye/openapi/runtime/scanner/IterableStandin.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
         indexArchive(config, indexer, archive);
         return indexer.complete();
