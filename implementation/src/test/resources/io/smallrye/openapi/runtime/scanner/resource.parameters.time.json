@@ -1,0 +1,129 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/times/local": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalTime"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/times/utc": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UTC"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "local",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/LocalTime"
+            }
+          },
+          {
+            "name": "offsetId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffsetTime"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/times/zoned": {
+      "get": {
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffsetTime"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LocalTime": {
+        "type": "string",
+        "format": "local-time",
+        "externalDocs": {
+          "description": "As defined by 'partial-time' in RFC3339",
+          "url": "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14"
+        },
+        "example": "13:45.30.123456789"
+      },
+      "OffsetTime": {
+        "type": "string",
+        "format": "time",
+        "externalDocs": {
+          "description": "As defined by 'full-time' in RFC3339",
+          "url": "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14"
+        },
+        "example": "13:45.30.123456789+02:00"
+      },
+      "UTC": {
+        "type": "object",
+        "properties": {
+          "utc": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OffsetTime"
+              },
+              {
+                "description": "Current time at offset '00:00'"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
