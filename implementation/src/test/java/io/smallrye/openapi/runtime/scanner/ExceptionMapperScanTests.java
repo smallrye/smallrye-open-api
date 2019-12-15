@@ -60,7 +60,7 @@ public class ExceptionMapperScanTests extends  IndexScannerTestBase {
     static class ExceptionHandler2 implements ExceptionMapper<NotFoundException> {
 
         @Override
-        @APIResponse(responseCode = "400", description = "Not Found")
+        @APIResponse(responseCode = "404", description = "Not Found")
         public Response toResponse(NotFoundException e) {
             return null;
         }

@@ -14,7 +14,7 @@
               }
             }
           },
-          "400" : {
+          "404" : {
             "description" : "Not Found"
           }
         }
