@@ -16,8 +16,6 @@
 
 package io.smallrye.openapi.runtime.util;
 
-import static java.util.stream.Collectors.toList;
-
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
+import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -41,11 +41,8 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.OpenApiConstants;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 
-import javax.ws.rs.ext.ExceptionMapper;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -354,15 +351,7 @@ public class JandexUtil {
         }
         return null;
     }
-
-    public static Collection<ClassInfo> getJaxRsExceptionMapperClasses(IndexView index) {
-        return index.getKnownDirectImplementors(DotName.createSimple(ExceptionMapper.class.getName()))
-                .stream()
-                //.map()
-                .collect(toList());
-        //return null;
-    }
-
+    
     /**
      * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.

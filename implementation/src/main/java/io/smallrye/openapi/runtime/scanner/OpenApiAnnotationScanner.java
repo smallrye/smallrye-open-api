@@ -20,14 +20,62 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.ExceptionMapper;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.models.ComponentsImpl;
+import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
+import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.models.OperationImpl;
+import io.smallrye.openapi.api.models.PathItemImpl;
+import io.smallrye.openapi.api.models.PathsImpl;
+import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
+import io.smallrye.openapi.api.models.examples.ExampleImpl;
+import io.smallrye.openapi.api.models.headers.HeaderImpl;
+import io.smallrye.openapi.api.models.info.ContactImpl;
+import io.smallrye.openapi.api.models.info.InfoImpl;
+import io.smallrye.openapi.api.models.info.LicenseImpl;
+import io.smallrye.openapi.api.models.links.LinkImpl;
+import io.smallrye.openapi.api.models.media.ContentImpl;
+import io.smallrye.openapi.api.models.media.EncodingImpl;
+import io.smallrye.openapi.api.models.media.MediaTypeImpl;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.parameters.ParameterImpl;
+import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
+import io.smallrye.openapi.api.models.responses.APIResponseImpl;
+import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
+import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
+import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
+import io.smallrye.openapi.api.models.security.ScopesImpl;
+import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
+import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
+import io.smallrye.openapi.api.models.servers.ServerImpl;
+import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
+import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
+import io.smallrye.openapi.api.models.tags.TagImpl;
+import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.scanner.ParameterProcessor.ResourceParameters;
+import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
+import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.SchemaFactory;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
@@ -70,48 +118,6 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConstants;
-import io.smallrye.openapi.api.models.ComponentsImpl;
-import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.PathItemImpl;
-import io.smallrye.openapi.api.models.PathsImpl;
-import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
-import io.smallrye.openapi.api.models.examples.ExampleImpl;
-import io.smallrye.openapi.api.models.headers.HeaderImpl;
-import io.smallrye.openapi.api.models.info.ContactImpl;
-import io.smallrye.openapi.api.models.info.InfoImpl;
-import io.smallrye.openapi.api.models.info.LicenseImpl;
-import io.smallrye.openapi.api.models.links.LinkImpl;
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.EncodingImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.parameters.ParameterImpl;
-import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
-import io.smallrye.openapi.api.models.responses.APIResponseImpl;
-import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
-import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
-import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
-import io.smallrye.openapi.api.models.security.ScopesImpl;
-import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
-import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
-import io.smallrye.openapi.api.models.servers.ServerImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
-import io.smallrye.openapi.api.models.tags.TagImpl;
-import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.scanner.ParameterProcessor.ResourceParameters;
-import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
-import io.smallrye.openapi.runtime.util.ModelUtil;
-import io.smallrye.openapi.runtime.util.SchemaFactory;
-import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Scans a deployment (using the archive and jandex annotation index) for JAX-RS and
@@ -400,6 +406,10 @@ public class OpenApiAnnotationScanner {
         resourceRolesAllowed = TypeUtil.getAnnotationValue(resourceClass, OpenApiConstants.DOTNAME_ROLES_ALLOWED);
         addScopes(resourceRolesAllowed);
 
+        // Process exception mapper to auto generate api response based on method exceptions
+        ////////////////////////////////////////
+        Map<DotName, AnnotationInstance> exceptionAnnotationMap = processExceptionMappers();
+
         // Now find and process the operation methods
         ////////////////////////////////////////
         for (MethodInfo methodInfo : getResourceMethods(resourceClass)) {
@@ -412,13 +422,35 @@ public class OpenApiAnnotationScanner {
                     .map(HttpMethod::valueOf)
                     .forEach(httpMethod -> {
                         resourceCount.incrementAndGet();
-                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters);
+                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters, exceptionAnnotationMap);
                     });
 
             if (resourceCount.get() == 0 && methodInfo.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
                 processJaxRsSubResource(openApi, locatorPathParameters, resourceClass, methodInfo);
             }
         }
+    }
+
+    /**
+     * Build a map between exception class name and its corresponding @ApiResponse annotation in the jax-rs exception mapper
+     *
+     */
+    private Map<DotName, AnnotationInstance> processExceptionMappers() {
+        Map<DotName, AnnotationInstance> exceptionHandlerMap = new HashMap<>();
+        Collection<ClassInfo> exceptionMappers = this.index.getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
+
+        for (ClassInfo classInfo : exceptionMappers) {
+            DotName exceptionDotName = classInfo.interfaceTypes().get(0).asParameterizedType().arguments().get(0).name();
+
+            MethodInfo toResponseMethod = classInfo.method("toResponse", Type.create(exceptionDotName, Type.Kind.CLASS));
+
+            if (toResponseMethod.hasAnnotation(OpenApiConstants.DOTNAME_API_RESPONSE)) {
+                AnnotationInstance apiResponseAnnotation = toResponseMethod.annotation(OpenApiConstants.DOTNAME_API_RESPONSE);
+                exceptionHandlerMap.put(exceptionDotName, apiResponseAnnotation);
+            }
+        }
+
+        return exceptionHandlerMap;
     }
 
     /**
@@ -522,7 +554,7 @@ public class OpenApiAnnotationScanner {
      */
     private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resourceClass, MethodInfo method,
             HttpMethod methodType, Set<String> resourceTags,
-            List<Parameter> locatorPathParameters) {
+            List<Parameter> locatorPathParameters, Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
 
@@ -656,13 +688,7 @@ public class OpenApiAnnotationScanner {
         List<AnnotationInstance> apiResponseAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_API_RESPONSE, OpenApiConstants.DOTNAME_API_RESPONSES);
         for (AnnotationInstance annotation : apiResponseAnnotations) {
-            String responseCode = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_RESPONSE_CODE);
-            if (responseCode == null) {
-                responseCode = APIResponses.DEFAULT;
-            }
-            APIResponse response = readResponse(annotation);
-            responses = ModelUtil.responses(operation);
-            responses.addAPIResponse(responseCode, response);
+            addApiReponseFromAnnotation(annotation, operation);
         }
         /*
          * If there is no response from annotations, try to create one from the method return value.
@@ -675,32 +701,16 @@ public class OpenApiAnnotationScanner {
             createResponseFromJaxRsMethod(method, operation);
         }
 
-        //Add common response using exception mapper
-        //Collection<ClassInfo> exceptionMappers = this.index.getAllKnownImplementors(DotName.createSimple(ExceptionMapper.class.getName()));
+        //Add api response using list of exceptions in the methods and exception mappers
+        List<Type> methodExceptions = method.exceptions();
 
-        Collection<ClassInfo> exceptionMappers = this.index.getKnownDirectImplementors(DotName.createSimple(ExceptionMapper.class.getName()));
-        List<AnnotationInstance> collect = exceptionMappers.stream()
-                .map(classInfo -> classInfo.annotations().get(DotName.createSimple(org.eclipse.microprofile.openapi.annotations.responses.APIResponse.class.getName())))
-                .flatMap(List::stream).collect(Collectors.toList());
-
-        method.exceptions();
-
-
-        ClassInfo classInfo = exceptionMappers.stream().findFirst().get();
-
-        Map<DotName, List<AnnotationInstance>> mapperToResponse = classInfo.annotations();
-        List<AnnotationInstance> apiResponseAnnotationInstances = mapperToResponse.get(DotName.createSimple(APIResponse.class.getName()));
-        AnnotationInstance test = (AnnotationInstance) mapperToResponse.get(DotName.createSimple(org.eclipse.microprofile.openapi.annotations.responses.APIResponse.class.getName())).get(1);
-
-        String responseCode = JandexUtil.stringValue(test, OpenApiConstants.PROP_RESPONSE_CODE);
-        if (responseCode == null) {
-            responseCode = APIResponses.DEFAULT;
+        for (Type type : methodExceptions) {
+            DotName exceptionDotName = type.name();
+            if (exceptionAnnotationMap.keySet().contains(exceptionDotName)) {
+                AnnotationInstance apiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
+                addApiReponseFromAnnotation(apiResponseAnnotation, operation);
+            }
         }
-        APIResponse response = readResponse(test);
-        responses = ModelUtil.responses(operation);
-        responses.addAPIResponse(responseCode, response);
-
-
 
         // Process @SecurityRequirement annotations
         ///////////////////////////////////////////
@@ -813,6 +823,23 @@ public class OpenApiAnnotationScanner {
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
     }
+
+    /**
+     * Add api response to api responses using the annotation information
+     *
+     * @param apiResponseAnnotation The api response annotation
+     * @param operation the method operation
+     */
+    private void addApiReponseFromAnnotation(AnnotationInstance apiResponseAnnotation, Operation operation) {
+        String responseCode = JandexUtil.stringValue(apiResponseAnnotation, OpenApiConstants.PROP_RESPONSE_CODE);
+        if (responseCode == null) {
+            responseCode = APIResponses.DEFAULT;
+        }
+        APIResponse response = readResponse(apiResponseAnnotation);
+        APIResponses responses = ModelUtil.responses(operation);
+        responses.addAPIResponse(responseCode, response);
+    }
+
 
     /**
      * Processes any {@link org.eclipse.microprofile.openapi.annotations.tags.Tag} or
