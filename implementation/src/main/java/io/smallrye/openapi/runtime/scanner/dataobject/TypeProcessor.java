@@ -18,6 +18,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ARRAY_TYPE_OBJECT;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.COLLECTION_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ITERABLE_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.OBJECT_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
@@ -115,6 +116,14 @@ public class TypeProcessor {
             return arrayType;
         }
 
+        if (TypeUtil.isOptional(type)) {
+            Type optType = TypeUtil.getOptionalType(type);
+            if (!isTerminalType(optType) && index.containsClass(optType)) {
+                pushToStack(optType);
+            }
+            return optType;
+        }
+
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
             MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, type));
             return STRING_TYPE;
@@ -133,6 +142,11 @@ public class TypeProcessor {
 
         // Raw Collection
         if (isA(type, COLLECTION_TYPE)) {
+            return ARRAY_TYPE_OBJECT;
+        }
+
+        // Raw Iterable
+        if (isA(type, ITERABLE_TYPE)) {
             return ARRAY_TYPE_OBJECT;
         }
 
@@ -158,7 +172,7 @@ public class TypeProcessor {
         Type typeRead = pType;
 
         // If it's a collection, we should treat it as an array.
-        if (isA(pType, COLLECTION_TYPE)) { // TODO maybe also Iterable?
+        if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
             LOG.debugv("Processing Java Collection. Will treat as an array.");
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);

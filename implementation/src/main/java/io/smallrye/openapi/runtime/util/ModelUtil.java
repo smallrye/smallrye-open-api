@@ -262,29 +262,6 @@ public class ModelUtil {
     }
 
     /**
-     * Returns true if the given operation has a parameter with the given name.
-     * 
-     * @param operation Operation
-     * @param name String
-     * @return Whether the operation has a parameter
-     */
-    public static boolean operationHasParameter(Operation operation, String name) {
-        List<Parameter> parameters = operation.getParameters();
-        if (parameters == null) {
-            return false;
-        }
-        for (Parameter parameter : parameters) {
-            if (parameter.getName() != null && parameter.getName().equals(name)) {
-                return true;
-            }
-            if (parameter.getRef() != null && ModelUtil.nameFromRef(parameter.getRef()).equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns the name component of the ref.
      * 
      * @param ref String

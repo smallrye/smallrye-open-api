@@ -59,7 +59,14 @@
         "type": "object",
         "properties": {
           "theUUID": {
-            "$ref": "#/components/schemas/UUID"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UUID"
+              },
+              {
+                "description": "test"
+              }
+            ]
           }
         }
       },

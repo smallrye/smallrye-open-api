@@ -16,12 +16,14 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.net.URI;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -36,6 +38,9 @@ import org.jboss.jandex.IndexView;
 import org.json.JSONException;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import io.smallrye.openapi.api.OpenApiConfig;
 import test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource;
 
@@ -45,7 +50,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource;
 public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
 
     /*
-     * Test cast derived from original example in Smallrye OpenAPI issue #25.
+     * Test case derived from original example in Smallrye OpenAPI issue #25.
      *
      * https://github.com/smallrye/smallrye-open-api/issues/25
      *
@@ -60,7 +65,7 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
     }
 
     /*
-     * Test cast derived from original example in Smallrye OpenAPI issue #165.
+     * Test case derived from original example in Smallrye OpenAPI issue #165.
      *
      * https://github.com/smallrye/smallrye-open-api/issues/165
      *
@@ -149,6 +154,72 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
                         float[].class, double[].class }))) })
         public Object intToFloat(@SuppressWarnings("unused") Object input) {
             return null;
+        }
+    }
+
+    /*
+     * Test case derived from original example in Smallrye OpenAPI issue #201.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/201
+     *
+     */
+    @Test
+    public void testSchemaImplementationType() throws IOException, JSONException {
+        Index index = indexOf(SchemaImplementationTypeResource.class,
+                SchemaImplementationTypeResource.GreetingMessage.class,
+                SchemaImplementationTypeResource.SimpleString.class);
+
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(index, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.string-implementation-wrapped.json", result);
+    }
+
+    @Path("/hello")
+    static class SchemaImplementationTypeResource {
+        static class GreetingMessage {
+            @Schema(description = "Used to send a message")
+            private final SimpleString message;
+
+            @Schema(implementation = String.class, description = "Simply a string", required = false)
+            private SimpleString optionalMessage;
+
+            public GreetingMessage(@JsonProperty SimpleString message) {
+                this.message = message;
+            }
+
+            public SimpleString getMessage() {
+                return message;
+            }
+
+            public SimpleString getOptionalMessage() {
+                return optionalMessage;
+            }
+        }
+
+        @Schema(implementation = String.class, title = "A Simple String")
+        static class SimpleString {
+            @Schema(hidden = true)
+            private final String value;
+
+            public SimpleString(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String getValue() {
+                return value;
+            }
+        }
+
+        @SuppressWarnings("unused")
+        @POST
+        @Consumes("application/json")
+        @Produces("application/json")
+        public Response doPost(GreetingMessage message) {
+            return Response.created(URI.create("http://example.com")).build();
         }
     }
 }

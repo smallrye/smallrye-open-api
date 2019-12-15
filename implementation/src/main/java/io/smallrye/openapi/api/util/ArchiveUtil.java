@@ -128,6 +128,7 @@ public class ArchiveUtil {
 
         Indexer indexer = new Indexer();
         index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
+        index(indexer, "io/smallrye/openapi/runtime/scanner/IterableStandin.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
         indexArchive(config, indexer, archive);
         return indexer.complete();
@@ -221,6 +222,9 @@ public class ArchiveUtil {
         }
         String fqcn = archivePath.replaceAll("/", ".").substring(0, archivePath.lastIndexOf(OpenApiConstants.CLASS_SUFFIX));
         String packageName = "";
+        if (fqcn.startsWith(".")) {
+            fqcn = fqcn.substring(1);
+        }
         if (fqcn.contains(".")) {
             int idx = fqcn.lastIndexOf(".");
             packageName = fqcn.substring(0, idx);

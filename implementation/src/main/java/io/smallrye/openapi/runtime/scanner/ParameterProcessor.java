@@ -38,9 +38,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MediaType;
@@ -68,13 +70,16 @@ import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
+import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -87,15 +92,20 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Michael Edgar {@literal <michael@xlate.io>}
  *
  */
-// TODO: Treat PathSegment params as matrix parameters
 public class ParameterProcessor {
 
     private static final Logger LOG = Logger.getLogger(ParameterProcessor.class);
 
-    private static Comparator<ParameterContextKey> parameterComparator = Comparator.comparing(ParameterContextKey::getLocation,
-            Comparator.nullsLast(Comparator.reverseOrder()))
-            .thenComparing(ParameterContextKey::getName,
-                    Comparator.nullsLast(Comparator.reverseOrder()));
+    /**
+     * Pattern to describe a path template parameter with a regular expression pattern restriction.
+     * 
+     * See JAX-RS {@link javax.ws.rs.Path Path} JavaDoc for explanation.
+     */
+    static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
+            .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}");
+
+    private static Comparator<Parameter> parameterComparator = Comparator.comparing(Parameter::getIn)
+            .thenComparing(Parameter::getName);
 
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(DOTNAME_PARAMETER,
             DOTNAME_PARAMETERS));
@@ -108,7 +118,7 @@ public class ParameterProcessor {
      * Collection of parameters scanned at the current level. This map contains
      * all parameter types except for form parameters and JAX-RS {@link javax.ws.rs.MatrixParam MatrixParam}s.
      */
-    private Map<ParameterContextKey, ParameterContext> params = new TreeMap<>(parameterComparator);
+    private Map<ParameterContextKey, ParameterContext> params = new HashMap<>();
 
     /**
      * Collection of JAX-RS {@link javax.ws.rs.FormParam FormParam}s found during scanning.
@@ -129,6 +139,8 @@ public class ParameterProcessor {
      * having {@link Parameter#setStyle style} of {@link Style#MATRIX}.
      */
     private Map<String, Map<String, AnnotationInstance>> matrixParams = new LinkedHashMap<>();
+
+    private Set<String> processedMatrixSegments = new HashSet<>();
 
     /**
      * Result object returned to the annotation scanner. Parameters are split between
@@ -174,6 +186,20 @@ public class ParameterProcessor {
             return null;
         }
 
+        List<Parameter> getAllParameters() {
+            List<Parameter> all = new ArrayList<>();
+
+            if (pathItemParameters != null) {
+                all.addAll(pathItemParameters);
+            }
+
+            if (operationParameters != null) {
+                all.addAll(operationParameters);
+            }
+
+            return all;
+        }
+
         /* Internal setters */
         void setPathItemPath(String pathItemPath) {
             this.pathItemPath = pathItemPath;
@@ -194,6 +220,15 @@ public class ParameterProcessor {
         void setFormBodyContent(Content formBodyContent) {
             this.formBodyContent = formBodyContent;
         }
+
+        void sort() {
+            if (pathItemParameters != null) {
+                pathItemParameters.sort(parameterComparator);
+            }
+            if (operationParameters != null) {
+                operationParameters.sort(parameterComparator);
+            }
+        }
     }
 
     /**
@@ -203,39 +238,41 @@ public class ParameterProcessor {
      * @author Michael Edgar {@literal <michael@xlate.io>}
      */
     public enum JaxRsParameter {
-        PATH_PARAM(DOTNAME_PATH_PARAM, In.PATH, null),
+        PATH_PARAM(DOTNAME_PATH_PARAM, In.PATH, null, Style.SIMPLE),
         // Apply to the last-matched @Path of the structure injecting the MatrixParam
-        MATRIX_PARAM(DOTNAME_MATRIX_PARAM, In.PATH, Style.MATRIX),
-        QUERY_PARAM(DOTNAME_QUERY_PARAM, In.QUERY, null),
-        FORM_PARAM(DOTNAME_FORM_PARAM, null, Style.FORM),
-        HEADER_PARAM(DOTNAME_HEADER_PARAM, In.HEADER, null),
-        COOKIE_PARAM(DOTNAME_COOKIE_PARAM, In.COOKIE, null),
-        BEAN_PARAM(DOTNAME_BEAN_PARAM, null, null),
+        MATRIX_PARAM(DOTNAME_MATRIX_PARAM, In.PATH, Style.MATRIX, Style.MATRIX),
+        QUERY_PARAM(DOTNAME_QUERY_PARAM, In.QUERY, null, Style.FORM),
+        FORM_PARAM(DOTNAME_FORM_PARAM, null, Style.FORM, Style.FORM),
+        HEADER_PARAM(DOTNAME_HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
+        COOKIE_PARAM(DOTNAME_COOKIE_PARAM, In.COOKIE, null, Style.FORM),
+        BEAN_PARAM(DOTNAME_BEAN_PARAM, null, null, null),
 
         // Support RESTEasy annotations directly
-        RESTEASY_PATH_PARAM(DOTNAME_RESTEASY_PATH_PARAM, In.PATH, null),
+        RESTEASY_PATH_PARAM(DOTNAME_RESTEASY_PATH_PARAM, In.PATH, null, Style.SIMPLE),
         // Apply to the last-matched @Path of the structure injecting the MatrixParam
-        RESTEASY_MATRIX_PARAM(DOTNAME_RESTEASY_MATRIX_PARAM, In.PATH, Style.MATRIX),
-        RESTEASY_QUERY_PARAM(DOTNAME_RESTEASY_QUERY_PARAM, In.QUERY, null),
-        RESTEASY_FORM_PARAM(DOTNAME_RESTEASY_FORM_PARAM, null, Style.FORM),
-        RESTEASY_HEADER_PARAM(DOTNAME_RESTEASY_HEADER_PARAM, In.HEADER, null),
-        RESTEASY_COOKIE_PARAM(DOTNAME_RESTEASY_COOKIE_PARAM, In.COOKIE, null),
-        RESTEASY_MULITIPART_FORM(DOTNAME_RESTEASY_MULTIPART_FORM, null, null, MediaType.MULTIPART_FORM_DATA);
+        RESTEASY_MATRIX_PARAM(DOTNAME_RESTEASY_MATRIX_PARAM, In.PATH, Style.MATRIX, Style.MATRIX),
+        RESTEASY_QUERY_PARAM(DOTNAME_RESTEASY_QUERY_PARAM, In.QUERY, null, Style.FORM),
+        RESTEASY_FORM_PARAM(DOTNAME_RESTEASY_FORM_PARAM, null, Style.FORM, Style.FORM),
+        RESTEASY_HEADER_PARAM(DOTNAME_RESTEASY_HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
+        RESTEASY_COOKIE_PARAM(DOTNAME_RESTEASY_COOKIE_PARAM, In.COOKIE, null, Style.FORM),
+        RESTEASY_MULITIPART_FORM(DOTNAME_RESTEASY_MULTIPART_FORM, null, null, null, MediaType.MULTIPART_FORM_DATA);
 
         private final DotName name;
         final In location;
         final Style style;
+        final Style defaultStyle;
         final String mediaType;
 
-        private JaxRsParameter(DotName name, In location, Style style, String mediaType) {
+        private JaxRsParameter(DotName name, In location, Style style, Style defaultStyle, String mediaType) {
             this.name = name;
             this.location = location;
             this.style = style;
+            this.defaultStyle = defaultStyle;
             this.mediaType = mediaType;
         }
 
-        private JaxRsParameter(DotName name, In location, Style style) {
-            this(name, location, style, null);
+        private JaxRsParameter(DotName name, In location, Style style, Style defaultStyle) {
+            this(name, location, style, defaultStyle, null);
         }
 
         static JaxRsParameter forName(DotName annotationName) {
@@ -268,6 +305,7 @@ public class ParameterProcessor {
     static class ParameterContext {
         String name;
         In location;
+        Style style;
         ParameterImpl oaiParam;
         JaxRsParameter jaxRsParam;
         Object jaxRsDefaultValue;
@@ -288,30 +326,42 @@ public class ParameterProcessor {
      *
      */
     static class ParameterContextKey {
-        String name;
-        In location;
+        final String name;
+        final In location;
+        final Style style;
 
-        ParameterContextKey(String name, In location) {
+        ParameterContextKey(String name, In location, Style style) {
             this.name = name;
             this.location = location;
+            this.style = style;
         }
 
         ParameterContextKey(ParameterContext context) {
             this.name = context.name;
             this.location = context.location;
+            this.style = context.style;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ParameterContextKey) {
+                ParameterContextKey other = (ParameterContextKey) obj;
+
+                return Objects.equals(this.name, other.name) &&
+                        Objects.equals(this.location, other.location) &&
+                        Objects.equals(this.style, other.style);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, location, style);
         }
 
         @Override
         public String toString() {
             return "name: " + name + "; in: " + location;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public In getLocation() {
-            return location;
         }
     }
 
@@ -354,22 +404,33 @@ public class ParameterProcessor {
          * HTTP method. Check both the class declaring the method as well as the resource
          * class, if different.
          */
-        processor.readParameters(resourceMethodClass, null);
+        AugmentedIndexView augmentedIndex = new AugmentedIndexView(index);
+        List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, resourceMethodClass, null).keySet());
+        /*
+         * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
+         */
+        Collections.reverse(ancestors);
+
+        ancestors.forEach(c -> {
+            c.interfaceTypes()
+                    .stream()
+                    .map(augmentedIndex::getClass)
+                    .filter(Objects::nonNull)
+                    .forEach(iface -> processor.readParameters(iface, null, false));
+
+            processor.readParameters(c, null, false);
+        });
+
         if (!resourceClass.equals(resourceMethodClass)) {
             /*
              * The resource class may be a subclass/implementor of the resource method class. Scanning
              * the resource class after the method's class allows for parameter details to be overridden
              * by annotations in the subclass.
              */
-            processor.readParameters(resourceClass, null);
+            processor.readParameters(resourceClass, null, true);
         }
 
-        parameters.setPathItemParameters(processor.getParameters());
-        /*
-         * Generate the path using the provided resource class, which may differ from the method's declaring
-         * class - e.g. for inheritance.
-         */
-        parameters.setPathItemPath(processor.generatePath(resourceClass, parameters.getPathItemParameters()));
+        parameters.setPathItemParameters(processor.getParameters(resourceMethod));
 
         // Clear Path-level parameters discovered and allows for processing operation-level parameters
         processor.reset();
@@ -398,8 +459,21 @@ public class ParameterProcessor {
                 .filter(a -> openApiParameterAnnotations.contains(a.name()))
                 .forEach(processor::readParameterAnnotation);
 
-        parameters.setOperationParameters(processor.getParameters());
-        parameters.setOperationPath(processor.generatePath(resourceMethod, parameters.getOperationParameters()));
+        parameters.setOperationParameters(processor.getParameters(resourceMethod));
+
+        /*
+         * Working list of all parameters.
+         */
+        List<Parameter> allParameters = parameters.getAllParameters();
+        /*
+         * Generate the path using the provided resource class, which may differ from the method's declaring
+         * class - e.g. for inheritance.
+         */
+        parameters.setPathItemPath(processor.generatePath(resourceClass, allParameters));
+        parameters.setOperationPath(processor.generatePath(resourceMethod, allParameters));
+
+        // Re-sort (names of matrix parameters may have changed)
+        parameters.sort();
 
         parameters.setFormBodyContent(processor.getFormBodyContent());
 
@@ -420,30 +494,80 @@ public class ParameterProcessor {
      * @param parameters
      * @return
      */
-    // TODO: Parse path segments to strip out variable names and patterns (apply patterns to path param schema)
     String generatePath(AnnotationTarget target, List<Parameter> parameters) {
-        String path = pathOf(target);
+        final StringBuilder path = new StringBuilder(pathOf(target));
 
         if (path.length() > 0) {
-            path = '/' + path;
+            path.insert(0, '/');
         }
 
-        if (matrixParams.size() > 0) {
-            String matrixName = parameters.stream()
-                    .filter(p -> p.getStyle() == Style.MATRIX)
-                    .map(Parameter::getName)
-                    .findFirst()
-                    .orElse("");
+        /*
+         * Search for path template variables where a regular expression
+         * is specified, extract the pattern and apply to the parameter's schema
+         * if no pattern is otherwise specified and the parameter is a string.
+         */
+        Matcher templateMatcher = TEMPLATE_PARAM_PATTERN.matcher(path);
 
-            // If it's empty, something went wrong
-            if (matrixName.length() > 0) {
-                path = path + '{' + matrixName + '}';
-            } else {
-                LOG.debugf("Matrix parameter was blank for path %s, target %s", path, target.toString());
-            }
+        while (templateMatcher.find()) {
+            String variableName = templateMatcher.group(1).trim();
+            String variablePattern = templateMatcher.group(2).trim();
+
+            parameters.stream()
+                    .filter(p -> variableName.equals(p.getName()))
+                    .filter(ParameterProcessor::templateParameterPatternEligible)
+                    .forEach(p -> p.getSchema().setPattern(variablePattern));
+
+            String replacement = templateMatcher.replaceFirst('{' + variableName + '}');
+            path.setLength(0);
+            path.append(replacement);
+
+            templateMatcher = TEMPLATE_PARAM_PATTERN.matcher(path);
         }
 
-        return path;
+        parameters.stream()
+                .filter(p -> Style.MATRIX.equals(p.getStyle()))
+                .filter(p -> !processedMatrixSegments.contains(p.getName()))
+                .filter(p -> path.indexOf(p.getName()) > -1)
+                .forEach(matrix -> {
+                    String segmentName = matrix.getName();
+                    processedMatrixSegments.add(segmentName);
+
+                    String matrixRef = '{' + segmentName + '}';
+                    int insertIndex = -1;
+
+                    if ((insertIndex = path.lastIndexOf(matrixRef)) > -1) {
+                        insertIndex += matrixRef.length();
+                        // Path already contains a variable of same name, the matrix must be renamed
+                        String generatedName = segmentName + "Matrix";
+                        matrix.setName(generatedName);
+                        matrixRef = '{' + generatedName + '}';
+                    } else if ((insertIndex = path.lastIndexOf(segmentName)) > -1) {
+                        insertIndex += segmentName.length();
+                    }
+
+                    if (insertIndex > -1) {
+                        path.insert(insertIndex, matrixRef);
+                    } else {
+                        LOG.warnf("Matrix parameter references missing path segment: %s", segmentName);
+                    }
+                });
+
+        return path.toString();
+    }
+
+    /**
+     * Determines if the parameter is eligible to have a pattern constraint
+     * applied to its schema.
+     * 
+     * @param param the parameter
+     * @return true if the parameter may have the patter applied, otherwise false
+     */
+    static boolean templateParameterPatternEligible(Parameter param) {
+        return Parameter.In.PATH.equals(param.getIn())
+                && !Style.MATRIX.equals(param.getStyle())
+                && param.getSchema() != null
+                && SchemaType.STRING.equals(param.getSchema().getType())
+                && param.getSchema().getPattern() == null;
     }
 
     /**
@@ -452,64 +576,56 @@ public class ParameterProcessor {
      *
      * @return list of {@link Parameter}s
      */
-    private List<Parameter> getParameters() {
+    private List<Parameter> getParameters(MethodInfo resourceMethod) {
         List<Parameter> parameters = new ArrayList<>();
 
         // Process any Matrix Parameters found
-        if (matrixParams.size() > 0) {
-            for (Entry<String, Map<String, AnnotationInstance>> matrixPath : matrixParams.entrySet()) {
-                String contextPath = matrixPath.getKey();
+        for (Entry<String, Map<String, AnnotationInstance>> matrixPath : matrixParams.entrySet()) {
+            String segmentName = matrixPath.getKey();
 
-                //Find a ParamContext style=matrix at this path
-                ParameterContext context = params.values()
-                        .stream()
-                        .filter(p -> p.oaiParam != null)
-                        .filter(p -> p.oaiParam.getStyle() == Style.MATRIX)
-                        .filter(p -> contextPath.equals(fullPathOf(p.target)))
-                        .findFirst()
-                        .orElse(null);
+            //Find a ParamContext style=matrix at this path
+            ParameterContext context = params.values()
+                    .stream()
+                    .filter(p -> p.oaiParam != null)
+                    .filter(p -> p.oaiParam.getStyle() == Style.MATRIX)
+                    .filter(p -> segmentName.equals(p.name))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        /*
+                         * @Parameter style=matrix was not specified at the same @Path segment of
+                         * this @MatrixParam. Generate one here
+                         */
+                        ParameterContext generated = new ParameterContext();
+                        generated.name = segmentName;
+                        generated.location = In.PATH;
+                        generated.style = Style.MATRIX;
+                        generated.jaxRsParam = JaxRsParameter.MATRIX_PARAM;
+                        generated.target = null;
+                        generated.targetType = null;
+                        generated.oaiParam = new ParameterImpl();
+                        generated.oaiParam.setStyle(Style.MATRIX);
+                        generated.oaiParam.setExplode(Boolean.TRUE);
+                        params.put(new ParameterContextKey(generated), generated);
+                        return generated;
+                    });
 
-                if (context == null) {
-                    /*
-                     * @Parameter style=matrix was not specified at the same @Path segment of this @MatrixParam
-                     * Generate one here
-                     */
-                    context = new ParameterContext();
+            List<Schema> schemas = ModelUtil.getParameterSchemas(context.oaiParam);
 
-                    String finalSegment = contextPath.substring(contextPath.lastIndexOf('/') + 1);
+            if (schemas.isEmpty()) {
+                // ParameterContext was generated above or no @Schema was provided on the @Parameter style=matrix
+                Schema schema = new SchemaImpl();
+                schema.setType(SchemaType.OBJECT);
+                ModelUtil.setParameterSchema(context.oaiParam, schema);
+                schemas = Arrays.asList(schema);
+            }
 
-                    if (finalSegment.startsWith("{") && finalSegment.endsWith("}")) {
-                        finalSegment = finalSegment.substring(1, finalSegment.length() - 1);
-                    }
-
-                    context.name = finalSegment + "Matrix";
-                    context.location = In.PATH;
-                    context.jaxRsParam = JaxRsParameter.MATRIX_PARAM;
-                    context.target = null;
-                    context.targetType = null;
-                    context.oaiParam = new ParameterImpl();
-                    context.oaiParam.explode(Boolean.TRUE);
-                    params.put(new ParameterContextKey(context), context);
-                }
-
-                List<Schema> schemas = ModelUtil.getParameterSchemas(context.oaiParam);
-
-                if (schemas.isEmpty()) {
-                    // ParameterContext was generated above or no @Schema was provided on the @Parameter style=matrix
-                    Schema schema = new SchemaImpl();
-                    schema.setType(SchemaType.OBJECT);
-                    ModelUtil.setParameterSchema(context.oaiParam, schema);
-                    schemas = Arrays.asList(schema);
-                }
-
-                for (Schema schema : schemas) {
-                    setSchemaProperties(schema, Collections.emptyMap(), matrixPath.getValue());
-                }
+            for (Schema schema : schemas) {
+                setSchemaProperties(schema, Collections.emptyMap(), matrixPath.getValue());
             }
         }
 
         // Convert ParameterContext entries to MP-OAI Parameters
-        for (ParameterContext context : params.values()) {
+        params.values().stream().forEach(context -> {
             ParameterImpl param;
 
             if (context.oaiParam == null) {
@@ -518,16 +634,14 @@ public class ParameterProcessor {
                 param = context.oaiParam;
             }
 
-            if (param.getName() == null) {
-                param.setName(context.name);
-            }
+            param.setName(context.name);
 
             if (param.getIn() == null && context.location != null) {
                 param.setIn(context.location);
             }
 
-            if (isIgnoredParameter(param)) {
-                continue;
+            if (isIgnoredParameter(param, resourceMethod)) {
+                return;
             }
 
             if (param.getIn() == In.PATH) {
@@ -543,10 +657,8 @@ public class ParameterProcessor {
                 ModelUtil.setParameterSchema(param, schema);
             }
 
-            if (param.getDeprecated() == null) {
-                if (TypeUtil.getAnnotation(context.target, DOTNAME_DEPRECATED) != null) {
-                    param.setDeprecated(Boolean.TRUE);
-                }
+            if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
+                param.setDeprecated(Boolean.TRUE);
             }
 
             if (param.getSchema() != null) {
@@ -565,8 +677,12 @@ public class ParameterProcessor {
                 }
             }
 
+            if (param.getRequired() == null && TypeUtil.isOptional(context.targetType)) {
+                param.setRequired(Boolean.FALSE);
+            }
+
             parameters.add(param);
-        }
+        });
 
         return parameters.isEmpty()
                 ? null
@@ -647,6 +763,10 @@ public class ParameterProcessor {
                         }
                     });
 
+            if (paramSchema.getNullable() == null && TypeUtil.isOptional(paramType)) {
+                paramSchema.setNullable(Boolean.TRUE);
+            }
+
             if (schema.getProperties() != null) {
                 paramSchema = mergeObjects(schema.getProperties().get(paramName), paramSchema);
             }
@@ -682,14 +802,18 @@ public class ParameterProcessor {
      * Determine if this is an ignored parameter, per the MP+OAI specification in
      * {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}.
      *
+     * Path parameters that do not have a corresponding path segment will be ignored.
+     *
      * @param parameter
      *        the parameter to determine if ignored
+     * @param resourceMethod
+     *        the resource method to which the parameter may apply
      * @return true if the parameter should be ignored, false otherwise
      *
      * @see org.eclipse.microprofile.openapi.annotations.parameters.Parameter#name()
      * @see org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in()
      */
-    static boolean isIgnoredParameter(ParameterImpl parameter) {
+    static boolean isIgnoredParameter(ParameterImpl parameter, AnnotationTarget resourceMethod) {
         String paramName = parameter.getName();
         In paramIn = parameter.getIn();
 
@@ -713,6 +837,10 @@ public class ParameterProcessor {
             return true;
         }
 
+        if (paramIn == In.PATH && !parameterInPath(paramName, parameter.getStyle(), fullPathOf(resourceMethod))) {
+            return true;
+        }
+
         if (paramIn == Parameter.In.HEADER && paramName != null) {
             switch (paramName.toUpperCase()) {
                 case "ACCEPT":
@@ -727,6 +855,30 @@ public class ParameterProcessor {
     }
 
     /**
+     * Check if the given parameter name is present as a path segment in the resourcePath.
+     * 
+     * @param paramName name of parameter
+     * @param paramStyle style of parameter, e.g. simple or matrix
+     * @param resourcePath resource path/URL
+     * @return true if the paramName is in the resourcePath, false otherwise.
+     */
+    static boolean parameterInPath(String paramName, Style paramStyle, String resourcePath) {
+        if (paramName == null || resourcePath == null) {
+            return true;
+        }
+
+        final String regex;
+
+        if (Style.MATRIX.equals(paramStyle)) {
+            regex = String.format("(?:\\{[ \\t]*|^|/?)\\Q%s\\E(?:[ \\t]*(?:}|:)|/?|$)", paramName);
+        } else {
+            regex = String.format("\\{[ \\t]*\\Q%s\\E[ \\t]*(?:}|:)", paramName);
+        }
+
+        return Pattern.compile(regex).matcher(resourcePath).find();
+    }
+
+    /**
      * Read a single annotation that is either {@link @Parameter} or
      * {@link @Parameters}. The results are stored in the private {@link #params}
      * collection.
@@ -737,7 +889,7 @@ public class ParameterProcessor {
         DotName name = annotation.name();
 
         if (DOTNAME_PARAMETER.equals(name)) {
-            readAnnotatedType(annotation, null);
+            readAnnotatedType(annotation, null, false);
         } else if (DOTNAME_PARAMETERS.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
@@ -750,7 +902,8 @@ public class ParameterProcessor {
                     readAnnotatedType(AnnotationInstance.create(nested.name(),
                             annotation.target(),
                             nested.values()),
-                            null);
+                            null,
+                            false);
                 }
             }
         }
@@ -764,34 +917,38 @@ public class ParameterProcessor {
      * @param annotation a parameter annotation to be read and processed
      */
     void readAnnotatedType(AnnotationInstance annotation) {
-        readAnnotatedType(annotation, null);
+        readAnnotatedType(annotation, null, false);
     }
 
     /**
      * Read a single annotation that is either {@link @Parameter} or
      * one of the JAX-RS *Param annotations. The results are stored in the
-     * private {@link #params} collection.
+     * private {@link #params} collection. When overriddenParametersOnly is true,
+     * new parameters not already known in {@link #params} will be ignored.
      *
      * @param annotation a parameter annotation to be read and processed
      * @param beanParamAnnotation
+     * @param overriddenParametersOnly
      */
-    void readAnnotatedType(AnnotationInstance annotation, AnnotationInstance beanParamAnnotation) {
+    void readAnnotatedType(AnnotationInstance annotation, AnnotationInstance beanParamAnnotation,
+            boolean overriddenParametersOnly) {
         DotName name = annotation.name();
 
         if (DOTNAME_PARAMETER.equals(name)) {
             ParameterImpl oaiParam = reader.apply(annotation);
 
-            readParameter(oaiParam.getName(),
-                    oaiParam.getIn(),
+            readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
                     oaiParam,
                     null,
                     null,
-                    annotation.target());
+                    annotation.target(),
+                    overriddenParametersOnly);
         } else {
             JaxRsParameter jaxRsParam = JaxRsParameter.forName(name);
 
             if (jaxRsParam != null) {
                 AnnotationTarget target = annotation.target();
+                Type targetType = getType(target);
 
                 if (jaxRsParam.style == Style.FORM) {
                     // Store the @FormParam for later processing
@@ -799,51 +956,71 @@ public class ParameterProcessor {
                 } else if (jaxRsParam.style == Style.MATRIX) {
                     // Store the @MatrixParam for later processing
                     String pathSegment = beanParamAnnotation != null
-                            ? fullPathOf(beanParamAnnotation.target())
-                            : fullPathOf(target);
+                            ? lastPathSegmentOf(beanParamAnnotation.target())
+                            : lastPathSegmentOf(target);
 
                     if (!matrixParams.containsKey(pathSegment)) {
                         matrixParams.put(pathSegment, new HashMap<>());
                     }
 
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
+                } else if (jaxRsParam.location == In.PATH && targetType != null
+                        && OpenApiConstants.DOTNAME_PATH_SEGMENT.equals(targetType.name())) {
+                    String pathSegment = JandexUtil.value(annotation, OpenApiConstants.PROP_VALUE);
+
+                    if (!matrixParams.containsKey(pathSegment)) {
+                        matrixParams.put(pathSegment, new HashMap<>());
+                    }
                 } else if (jaxRsParam.location != null) {
-                    readParameter(paramName(annotation),
-                            jaxRsParam.location,
+                    readParameter(new ParameterContextKey(paramName(annotation), jaxRsParam.location, jaxRsParam.defaultStyle),
                             null,
                             jaxRsParam,
                             getDefaultValue(target),
-                            target);
+                            target,
+                            overriddenParametersOnly);
                 } else if (target != null) {
                     // This is a @BeanParam or a RESTEasy @MultipartForm
-                    DotName targetName = null;
                     setMediaType(jaxRsParam);
 
-                    switch (target.kind()) {
-                        case FIELD:
-                            targetName = target.asField().type().name();
-                            break;
-                        case METHOD:
-                            List<Type> methodParams = target.asMethod().parameters();
-                            if (methodParams.size() == 1) {
-                                // This is a bean property setter
-                                targetName = methodParams.get(0).name();
-                            }
-                            break;
-                        case METHOD_PARAMETER:
-                            targetName = getMethodParameterType(target.asMethodParameter()).name();
-                            break;
-                        default:
-                            break;
+                    if (TypeUtil.isOptional(targetType)) {
+                        targetType = TypeUtil.getOptionalType(targetType);
                     }
 
-                    if (targetName != null) {
-                        ClassInfo beanParam = index.getClassByName(targetName);
-                        readParameters(beanParam, annotation);
+                    if (targetType != null) {
+                        ClassInfo beanParam = index.getClassByName(targetType.name());
+                        readParameters(beanParam, annotation, overriddenParametersOnly);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Retrieves either the provided parameter {@link Parameter.Style}, the default
+     * style of the parameter based on the <code>in</code> attribute, or null if <code>in</code> is not defined.
+     * 
+     * @param param the {@link Parameter}
+     * @return the param's style, the default style defined based on <code>in</code>, or null if <code>in</code> is not defined.
+     */
+    Style styleOf(Parameter param) {
+        if (param.getStyle() != null) {
+            return param.getStyle();
+        }
+
+        if (param.getIn() != null) {
+            switch (param.getIn()) {
+                case COOKIE:
+                case QUERY:
+                    return Style.FORM;
+                case HEADER:
+                case PATH:
+                    return Style.SIMPLE;
+                default:
+                    break;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -926,40 +1103,73 @@ public class ParameterProcessor {
 
             if (targetType != null && targetType.kind() == Type.Kind.PRIMITIVE) {
                 Primitive primitive = targetType.asPrimitiveType().primitive();
+                Object primitiveValue = primitiveToObject(primitive, defaultValueString);
 
-                try {
-                    switch (primitive) {
-                        case BOOLEAN:
-                            defaultValue = Boolean.parseBoolean(defaultValueString);
-                            break;
-                        case CHAR:
-                            if (defaultValueString.length() == 1) {
-                                defaultValue = defaultValueString.charAt(0);
-                            }
-                            break;
-                        case BYTE:
-                            byte[] bytes = defaultValueString.getBytes();
-                            if (bytes.length == 1) {
-                                defaultValue = bytes[0];
-                            }
-                            break;
-                        case SHORT:
-                        case INT:
-                        case LONG:
-                            defaultValue = Long.valueOf(defaultValueString);
-                            break;
-                        case FLOAT:
-                        case DOUBLE:
-                            defaultValue = Double.valueOf(defaultValueString);
-                            break;
-                    }
-                } catch (@SuppressWarnings("unused") Exception e) {
-                    LOG.warnf("Value '%s' is not a valid %s default", defaultValueString, primitive.name().toLowerCase());
+                if (primitiveValue != null) {
+                    defaultValue = primitiveValue;
                 }
             }
         }
 
         return defaultValue;
+    }
+
+    static Object primitiveToObject(Primitive primitive, String stringValue) {
+        Object value = null;
+
+        try {
+            switch (primitive) {
+                case BOOLEAN:
+                    value = Boolean.parseBoolean(stringValue);
+                    break;
+                case CHAR:
+                    if (stringValue.length() == 1) {
+                        value = Character.valueOf(stringValue.charAt(0));
+                    }
+                    break;
+                case BYTE:
+                    byte[] bytes = stringValue.getBytes();
+                    if (bytes.length == 1) {
+                        value = Byte.valueOf(bytes[0]);
+                    }
+                    break;
+                case SHORT:
+                case INT:
+                case LONG:
+                    value = Long.valueOf(stringValue);
+                    break;
+                case FLOAT:
+                case DOUBLE:
+                    value = Double.valueOf(stringValue);
+                    break;
+            }
+        } catch (@SuppressWarnings("unused") Exception e) {
+            LOG.warnf("Value '%s' is not a valid %s default", stringValue, primitive.name().toLowerCase());
+        }
+
+        return value;
+    }
+
+    /**
+     * Retrieves the last path segment of the full path associated with the target. If
+     * the last path segment contains a path variable name, returns the variable name.
+     * 
+     * @param target
+     * @return the last path segment of the target, or null if no path is defined
+     */
+    static String lastPathSegmentOf(AnnotationTarget target) {
+        String fullPath = fullPathOf(target);
+        String lastSegment = null;
+
+        if (fullPath != null) {
+            lastSegment = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+
+            if (lastSegment.startsWith("{") && lastSegment.endsWith("}")) {
+                lastSegment = lastSegment.substring(1, lastSegment.length() - 1);
+            }
+        }
+
+        return lastSegment;
     }
 
     /**
@@ -1081,50 +1291,67 @@ public class ParameterProcessor {
     }
 
     /**
-     * Merges MP-OAI {@link Parameter}s and JAX-RS parameters for the same {@link In} and name.
+     * Merges MP-OAI {@link Parameter}s and JAX-RS parameters for the same {@link In} and name,
+     * and {@link Style}. When overriddenParametersOnly is true, new parameters not already known
+     * in {@link #params} will be ignored.
+     * 
+     * The given {@link ParameterContextKey key} contains:
+     * 
+     * <ul>
+     * <li>the name of the parameter specified by application
+     * <li>location, given by {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
+     * or implied by the type of JAX-RS annotation used on the target
+     * <li>style, the parameter's style, either specified by the application or implied by the parameter's location
+     * </ul>
      *
-     * @param name name of the parameter specified by application
-     * @param location location, given by
-     *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
-     *        or implied by the type of JAX-RS annotation used on the target
+     * @param key the key for the parameter being processed
      * @param oaiParam scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
      * @param jaxRsParam Meta detail about the JAX-RS *Param being processed, if found.
      * @param jaxRsDefaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
      *        annotation.
      * @param target target of the annotation
+     * @param overriddenParametersOnly
      */
-    void readParameter(String name,
-            In location,
+    void readParameter(ParameterContextKey key,
             ParameterImpl oaiParam,
             JaxRsParameter jaxRsParam,
             Object jaxRsDefaultValue,
-            AnnotationTarget target) {
+            AnnotationTarget target,
+            boolean overriddenParametersOnly) {
 
         //TODO: Test to ensure @Parameter attributes override JAX-RS for the same parameter
         //      (unless @Parameter was already specified at a "lower" level)
 
-        ParameterContext context = getParameterContext(name, location, target);
+        ParameterContext context = getParameterContext(key, target);
         boolean addParam = false;
 
         if (context == null) {
+            if (overriddenParametersOnly) {
+                return;
+            }
+
             context = new ParameterContext();
             addParam = true;
         }
 
-        if (oaiParam != null && name != null) {
+        boolean oaiNameOverride = oaiParam != null && key.name != null && !key.name.equals(context.name)
+                && context.location != In.PATH;
+
+        if (context.name == null || oaiNameOverride) {
             if (context.name != null) {
                 // Name is being overridden by the OAI @Parameter name
-                params.remove(new ParameterContextKey(context.name, context.location));
+                params.remove(new ParameterContextKey(context));
                 addParam = true;
             }
-            context.name = name;
-        } else if (context.name == null) {
-            // Name has not yet been set
-            context.name = name;
+            context.name = key.name;
         }
 
         if (context.location == null) {
-            context.location = location;
+            context.location = key.location;
+        }
+
+        if (context.style == null) {
+            context.style = key.style;
         }
 
         context.oaiParam = MergeUtil.mergeObjects(context.oaiParam, oaiParam);
@@ -1140,44 +1367,38 @@ public class ParameterProcessor {
         }
 
         if (addParam) {
-            params.put(new ParameterContextKey(name, location), context);
+            params.put(new ParameterContextKey(context), context);
         }
     }
 
     /**
-     * Find a previously-created {@link ParameterContext} for the name and {@link In}
+     * Find a previously-created {@link ParameterContext} for the given {@link ParameterContextKey key}.
      *
      * If no match, check for a match using the annotation target. Finally, check for
-     * a match on name alone.
+     * a match on name and style alone.
      *
-     * @param name parameter name
-     * @param location {@link In} location of the parameter
+     * @param key the key for the parameter being processed
      * @param target annotation target being processed
      * @return previously-create {@link ParameterContext} or null, if none found.
      */
-    ParameterContext getParameterContext(String name,
-            In location,
-            AnnotationTarget target) {
+    ParameterContext getParameterContext(ParameterContextKey key, AnnotationTarget target) {
 
-        ParameterContext context = params.get(new ParameterContextKey(name, location));
+        ParameterContext context = params.get(key);
 
-        if (context == null && target.kind() != Kind.METHOD) {
-            /*
-             * If the annotations have the same (non-method) target, it's the same parameter.
-             * This covers the situation where a @Parameter annotation was missing either
-             * 'name' or 'location' attributes (or both).
-             */
-            context = params.values().stream().filter(c -> target.equals(c.target)).findFirst().orElse(null);
+        if (context == null) {
+            context = params.values().stream().filter(c -> haveSameAnnotatedTarget(c, target, key.name))
+                    .findFirst()
+                    .orElse(null);
         }
 
         if (context == null) {
             /*
-             * Allow a match on just the name if one of the Parameter.In values
+             * Allow a match on just the name and style if one of the Parameter.In values
              * is not specified
              */
             context = params.values().stream().filter(c -> {
-                if (c.location == null || location == null) {
-                    return c.name != null && c.name.equals(name);
+                if (c.location == null || key.location == null) {
+                    return Objects.equals(c.name, key.name) && Objects.equals(c.style, key.style);
                 }
                 return false;
             }).findFirst().orElse(null);
@@ -1187,6 +1408,27 @@ public class ParameterProcessor {
         return context;
     }
 
+    boolean haveSameAnnotatedTarget(ParameterContext context, AnnotationTarget target, String name) {
+        boolean nameMatches = Objects.equals(context.name, name);
+
+        if (target.equals(context.target)) {
+            /*
+             * If the annotations have the same (non-method) target or the same name with a common
+             * method target, it's the same parameter.
+             * 
+             * This covers the situation where a @Parameter annotation was missing either
+             * 'name' or 'location' attributes (or both).
+             */
+            return nameMatches || target.kind() != Kind.METHOD;
+        }
+
+        if (nameMatches && target.kind() == Kind.METHOD && context.target.kind() == Kind.METHOD_PARAMETER) {
+            return context.target.asMethodParameter().method().equals(target);
+        }
+
+        return false;
+    }
+
     /**
      * Scans for class level parameters. This method is used for both resource class
      * annotation scanning and {@link javax.ws.rs.BeanParam @BeanParam} target type scanning.
@@ -1194,14 +1436,14 @@ public class ParameterProcessor {
      * @param clazz the class to be scanned for parameters.
      * @param beanParamAnnotation
      */
-    void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation) {
+    void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
             if (DOTNAME_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
-                        readAnnotatedType(annotation, beanParamAnnotation);
+                        readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
                     }
                 }
             }

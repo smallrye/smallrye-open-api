@@ -5,6 +5,12 @@
       "post": {
         "parameters": [
           {
+          "name": "restr",
+          "in": "query",
+          "schema": {
+            "$ref": "#/components/schemas/RestrictedEnum"
+          }
+        }, {
           "name": "val",
           "in": "query",
           "schema": {
@@ -32,6 +38,15 @@
       "TestEnum": {
         "type": "string",
         "enum": [ "VAL1", "VAL2", "VAL3" ]
+      },
+      "RestrictedEnum": {
+        "type": "string",
+        "title": "Restricted enum with fewer values",
+        "enum": [ "VAL1", "VAL3" ],
+        "externalDocs": {
+           "url": "http://example.com/RestrictedEnum/info.html",
+           "description": "When to use RestrictedEnum?"
+        }
       }
     }
   }

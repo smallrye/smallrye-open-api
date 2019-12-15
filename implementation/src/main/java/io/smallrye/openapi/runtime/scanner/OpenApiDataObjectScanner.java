@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -83,6 +82,9 @@ public class OpenApiDataObjectScanner {
     // Collection (list-type things)
     public static final DotName COLLECTION_INTERFACE_NAME = DotName.createSimple(Collection.class.getName());
     public static final Type COLLECTION_TYPE = Type.create(COLLECTION_INTERFACE_NAME, Type.Kind.CLASS);
+    // Iterable (also list-type things)
+    public static final DotName ITERABLE_INTERFACE_NAME = DotName.createSimple(Iterable.class.getName());
+    public static final Type ITERABLE_TYPE = Type.create(ITERABLE_INTERFACE_NAME, Type.Kind.CLASS);
     // Map
     public static final DotName MAP_INTERFACE_NAME = DotName.createSimple(Map.class.getName());
     public static final Type MAP_TYPE = Type.create(MAP_INTERFACE_NAME, Type.Kind.CLASS);
@@ -95,6 +97,7 @@ public class OpenApiDataObjectScanner {
     public static final Type ARRAY_TYPE_OBJECT = Type.create(DotName.createSimple("[Ljava.lang.Object;"), Type.Kind.ARRAY);
 
     private static ClassInfo collectionStandin;
+    private static ClassInfo iterableStandin;
     private static ClassInfo mapStandin;
 
     /*-
@@ -104,9 +107,11 @@ public class OpenApiDataObjectScanner {
     static {
         Indexer indexer = new Indexer();
         index(indexer, "CollectionStandin.class");
+        index(indexer, "IterableStandin.class");
         index(indexer, "MapStandin.class");
         Index index = indexer.complete();
         collectionStandin = index.getClassByName(DotName.createSimple(CollectionStandin.class.getName()));
+        iterableStandin = index.getClassByName(DotName.createSimple(IterableStandin.class.getName()));
         mapStandin = index.getClassByName(DotName.createSimple(MapStandin.class.getName()));
     }
 
@@ -226,12 +231,18 @@ public class OpenApiDataObjectScanner {
             Schema currentSchema = currentPathEntry.getSchema();
             Type currentType = currentPathEntry.getClazzType();
 
-            // First, handle class annotations.
-            currentPathEntry.setSchema(readKlass(currentClass, currentSchema));
+            // First, handle class annotations (re-assign since readKlass may return new schema)
+            currentSchema = readKlass(currentClass, currentSchema);
+            currentPathEntry.setSchema(currentSchema);
 
             if (currentSchema.getType() == null) {
                 // If not schema has yet been set, consider this an "object"
                 currentSchema.setType(Schema.SchemaType.OBJECT);
+            }
+
+            if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
+                // Only 'object' type schemas should have properties of their own
+                continue;
             }
 
             LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
@@ -255,7 +266,7 @@ public class OpenApiDataObjectScanner {
         AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(currentClass);
         if (annotation != null) {
             // Because of implementation= field, *may* return a new schema rather than modify.
-            return SchemaFactory.readSchema(index, currentSchema, annotation, Collections.emptyMap());
+            return SchemaFactory.readSchema(index, currentSchema, annotation, currentClass);
         }
         return currentSchema;
     }
@@ -275,12 +286,16 @@ public class OpenApiDataObjectScanner {
 
     // Is Map, Collection, etc.
     private boolean isSpecialType(Type type) {
-        return isA(type, COLLECTION_TYPE) || isA(type, MAP_TYPE);
+        return isA(type, COLLECTION_TYPE) || isA(type, ITERABLE_TYPE) || isA(type, MAP_TYPE);
     }
 
     private ClassInfo initialType(Type type) {
         if (isA(type, COLLECTION_TYPE)) {
             return collectionStandin;
+        }
+
+        if (isA(type, ITERABLE_TYPE)) {
+            return iterableStandin;
         }
 
         if (isA(type, MAP_TYPE)) {

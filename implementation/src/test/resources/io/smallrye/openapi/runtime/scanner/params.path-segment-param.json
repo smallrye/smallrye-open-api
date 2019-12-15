@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/segments{segments}/seg1": {
+      "get": {
+        "parameters": [
+          {
+            "name": "segments",
+            "in": "path",
+            "required": true,
+            "description": "Test",
+            "schema": {
+              "type": "object"
+            },
+            "style": "matrix"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

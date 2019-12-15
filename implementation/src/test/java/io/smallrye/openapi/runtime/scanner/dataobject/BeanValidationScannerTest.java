@@ -35,7 +35,6 @@ import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
-import org.jboss.jandex.Indexer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,12 +55,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     @Before
     public void beforeEach() {
         testTarget = BeanValidationScanner.INSTANCE;
-
-        Indexer indexer = new Indexer();
-        index(indexer, "io/smallrye/openapi/runtime/scanner/dataobject/BeanValidationScannerTest.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/dataobject/BeanValidationScannerTest$BVTestContainer.class");
-        index = indexer.complete();
-
+        index = indexOf(BVTestContainer.class);
         methodsInvoked.clear();
         schema = new SchemaImpl();
         targetClass = index.getClassByName(componentize(BVTestContainer.class.getName()));

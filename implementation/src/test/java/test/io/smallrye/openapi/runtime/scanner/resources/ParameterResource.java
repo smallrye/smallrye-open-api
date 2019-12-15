@@ -34,7 +34,7 @@ public class ParameterResource {
     @Path("/named")
     @APIResponse(responseCode = "204", description = "No content")
     public Response deleteTaskWithParamName(
-            @Parameter(description = "The id of the task", name = "notTaskId", example = "e1cb23d0-6cbe-4a29", schema = @Schema(type = SchemaType.STRING)) @PathParam("taskId") String taskId) {
+            @Parameter(description = "The id of the task, invalid name discarded when @Parameter and JAX-RS annotation have same target", name = "notTaskId", example = "e1cb23d0-6cbe-4a29", schema = @Schema(type = SchemaType.STRING)) @PathParam("taskId") String taskId) {
         return Response.noContent().build();
     }
 }

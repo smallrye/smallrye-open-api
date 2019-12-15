@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "paths": {
-    "/test{testMatrix}": {
+    "/test{test}": {
       "get": {
         "responses": {
           "200": {
@@ -18,23 +18,7 @@
       },
       "parameters": [
         {
-          "name": "pathField",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "pathProperty",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "testMatrix",
+          "name": "test",
           "in": "path",
           "required": true,
           "explode": true,

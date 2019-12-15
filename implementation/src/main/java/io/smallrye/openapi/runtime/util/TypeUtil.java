@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
@@ -283,6 +284,26 @@ public class TypeUtil {
         schema.setPattern(attrs.getPattern());
     }
 
+    /**
+     * Removes the known default schema attributes from the fieldSchema if they are also
+     * present and have the same value in the typeSchema. This method reduces any duplicate
+     * attributes between the two schemas when they are in an 'allOf' composition.
+     * 
+     * @param fieldSchema the schema for a field of the type described by typeSchema
+     * @param typeSchema the schema for a class type
+     */
+    public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
+        if (Objects.equals(fieldSchema.getType(), typeSchema.getType())) {
+            fieldSchema.setType(null);
+        }
+        if (Objects.equals(fieldSchema.getFormat(), typeSchema.getFormat())) {
+            fieldSchema.setFormat(null);
+        }
+        if (Objects.equals(fieldSchema.getPattern(), typeSchema.getPattern())) {
+            fieldSchema.setPattern(null);
+        }
+    }
+
     public static TypeWithFormat arrayFormat() {
         return ARRAY_FORMAT;
     }
@@ -300,7 +321,7 @@ public class TypeUtil {
             Class<?> subjectKlazz = TypeUtil.getClass(subject);
             Class<?> objectKlazz = TypeUtil.getClass(object);
             return objectKlazz.isAssignableFrom(subjectKlazz);
-        } catch (ClassNotFoundException nfe) {
+        } catch (@SuppressWarnings("unused") ClassNotFoundException nfe) {
             return false;
         }
     }
@@ -388,6 +409,50 @@ public class TypeUtil {
         // If is known type.
         return tf.getSchemaType() != Schema.SchemaType.OBJECT &&
                 tf.getSchemaType() != Schema.SchemaType.ARRAY;
+    }
+
+    /**
+     * Determine if a given type is one of the following types:
+     * 
+     * <ul>
+     * <li><code>java.util.Optional</code>
+     * <li><code>java.util.OptionalDouble</code>
+     * <li><code>java.util.OptionalInt</code>
+     * <li><code>java.util.OptionalLong</code>
+     * </ul>
+     * 
+     * @param type the type to check
+     * @return true if the type is one of the four optional types, otherwise false
+     */
+    public static boolean isOptional(Type type) {
+        return type != null && OpenApiConstants.DOTNAME_OPTIONALS.contains(type.name());
+    }
+
+    /**
+     * Unwraps the type parameter (generic or primitive) from the given optional
+     * type.
+     * 
+     * @param type the type to unwrap
+     * @return the generic type argument for <code>java.util.Optional</code>, otherwise the optional primitive double, int, or
+     *         long
+     */
+    public static Type getOptionalType(Type type) {
+        if (type == null) {
+            return null;
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL.equals(type.name())) {
+            return type.asParameterizedType().arguments().get(0);
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL_DOUBLE.equals(type.name())) {
+            return PrimitiveType.DOUBLE;
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL_INT.equals(type.name())) {
+            return PrimitiveType.INT;
+        }
+        if (OpenApiConstants.DOTNAME_OPTIONAL_LONG.equals(type.name())) {
+            return PrimitiveType.LONG;
+        }
+        return null;
     }
 
     public static DotName getName(Type type) {
@@ -484,6 +549,9 @@ public class TypeUtil {
     }
 
     public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
+        if (target == null) {
+            return false;
+        }
         switch (target.kind()) {
             case CLASS:
                 return target.asClass().classAnnotation(annotationName) != null;

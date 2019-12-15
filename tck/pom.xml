@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-parent</artifactId>
-        <version>1.1.20-SNAPSHOT</version>
+        <version>1.1.21-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-open-api-tck</artifactId>
     <name>SmallRye: MicroProfile OpenAPI TCK</name>
@@ -17,14 +17,14 @@
 
         <!-- SmallRye Config -->
         <dependency>
-            <groupId>io.smallrye</groupId>
+            <groupId>io.smallrye.config</groupId>
             <artifactId>smallrye-config</artifactId>
         </dependency>
 
         <!-- Test Only -->
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

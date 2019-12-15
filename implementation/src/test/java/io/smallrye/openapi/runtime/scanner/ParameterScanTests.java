@@ -16,6 +16,9 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 
@@ -37,7 +40,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.PathSegment;
 
+import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
@@ -167,7 +172,8 @@ public class ParameterScanTests extends IndexScannerTestBase {
     public void testEnumQueryParam() throws IOException, JSONException {
         test("params.enum-form-param.json",
                 EnumQueryParamTestResource.class,
-                EnumQueryParamTestResource.TestEnum.class);
+                EnumQueryParamTestResource.TestEnum.class,
+                EnumQueryParamTestResource.TestEnumWithSchema.class);
     }
 
     @Test
@@ -188,6 +194,36 @@ public class ParameterScanTests extends IndexScannerTestBase {
         test("params.char-sequence-arrays.json",
                 CharSequenceArrayParamTestResource.class,
                 CharSequenceArrayParamTestResource.EchoResult.class);
+    }
+
+    @Test
+    public void testOptionalParam() throws IOException, JSONException {
+        test("params.optional-types.json",
+                OptionalParamTestResource.class,
+                OptionalParamTestResource.Bean.class,
+                OptionalParamTestResource.NestedBean.class,
+                OptionalParamTestResource.OptionalWrapper.class,
+                Optional.class,
+                OptionalDouble.class,
+                OptionalLong.class);
+    }
+
+    @Test
+    public void testPathParamTemplateRegex() throws IOException, JSONException {
+        test("params.path-param-templates.json",
+                PathParamTemplateRegexTestResource.class);
+    }
+
+    @Test
+    public void testPathSegmentMatrix() throws IOException, JSONException {
+        test("params.path-segment-param.json",
+                PathSegmentMatrixTestResource.class);
+    }
+
+    @Test
+    public void testParamNameOverride() throws IOException, JSONException {
+        test("params.param-name-override.json",
+                ParamNameOverrideTestResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -368,7 +404,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        @Parameter(name = "r1", in = ParameterIn.PATH, style = ParameterStyle.MATRIX, description = "Additional information for id2")
+        @Parameter(name = "id", in = ParameterIn.PATH, style = ParameterStyle.MATRIX, description = "Additional information for id2")
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") String m1,
                 @MatrixParam("m2") @Size(min = 20) String m2) {
             return null;
@@ -391,7 +427,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @GET
         @Path("/seg1/seg2/resourceA")
         @Produces(MediaType.APPLICATION_JSON)
-        @Parameter(in = ParameterIn.PATH, name = "methodMatrix", style = ParameterStyle.MATRIX)
+        @Parameter(in = ParameterIn.PATH, name = "resourceA", style = ParameterStyle.MATRIX)
         public Widget get(@MatrixParam("m1") @DefaultValue("default-m1") int m1,
                 @MatrixParam("m2") @DefaultValue("100") @Max(200) int m2) {
             return null;
@@ -420,7 +456,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
             String cookieF1;
         }
 
-        @Parameter(in = ParameterIn.PATH, style = ParameterStyle.MATRIX, name = "mtx")
+        @Parameter(in = ParameterIn.PATH, style = ParameterStyle.MATRIX, name = "id2")
         @BeanParam
         private Bean param;
 
@@ -480,11 +516,19 @@ public class ParameterScanTests extends IndexScannerTestBase {
             VAL3;
         }
 
+        @Schema(name = "RestrictedEnum", title = "Restricted enum with fewer values", enumeration = { "VAL1",
+                "VAL3" }, externalDocs = @ExternalDocumentation(description = "When to use RestrictedEnum?", url = "http://example.com/RestrictedEnum/info.html"))
+        static enum TestEnumWithSchema {
+            VAL1,
+            VAL2,
+            VAL3;
+        }
+
         @SuppressWarnings("unused")
         @POST
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.TEXT_PLAIN)
-        public TestEnum postData(@QueryParam("val") TestEnum value) {
+        public TestEnum postData(@QueryParam("val") TestEnum value, @QueryParam("restr") TestEnumWithSchema restr) {
             return null;
         }
     }
@@ -635,6 +679,148 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.TEXT_PLAIN)
         public EchoResult echo(@QueryParam("val") CharSequence[][][] value) {
             return new EchoResult().result(value);
+        }
+    }
+
+    @Path("/optional")
+    static class OptionalParamTestResource {
+        static class OptionalWrapper {
+            Optional<String> value;
+        }
+
+        static class NestedBean {
+            @NotNull
+            Optional<String> title;
+        }
+
+        @Schema(name = "multipurpose-bean")
+        static class Bean {
+            @QueryParam("name6")
+            Optional<String> name;
+
+            @QueryParam("age6")
+            OptionalDouble age;
+
+            Optional<NestedBean> nested;
+        }
+
+        @GET
+        @Path("/n1")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String helloName(@QueryParam("name") Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+
+        @GET
+        @Path("/n2")
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "name2", required = true)
+        public String helloName2(@QueryParam("name2") Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+
+        @GET
+        @Path("/n3")
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "name3", required = false)
+        public Optional<String> helloName3(@QueryParam("name3") Optional<String> name) {
+            return Optional.of("hello " + name.orElse("SmallRye!"));
+        }
+
+        @POST
+        @Path("/n4")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "name4")
+        public OptionalWrapper helloName4(@FormParam("name4") Optional<String> name) {
+            OptionalWrapper r = new OptionalWrapper();
+            r.value = Optional.of("hello " + name.orElse("SmallRye!"));
+            return r;
+        }
+
+        @POST
+        @Path("/n5")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        public Optional<String> helloName5(Optional<String> name, @CookieParam("age5") OptionalLong age) {
+            return Optional.of("hello " + name.orElse("SmallRye!") + ' ' + age.orElse(-1));
+        }
+
+        @SuppressWarnings("unused")
+        @GET
+        @Path("/n6")
+        @Produces(MediaType.TEXT_PLAIN)
+        public Optional<String> helloName6(@BeanParam Optional<Bean> bean) {
+            return null;
+        }
+
+        @GET
+        @Path("/n7/{name}")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String helloName7(@PathParam("name") Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+
+        @SuppressWarnings("unused")
+        @POST
+        @Path("/n8")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        public Optional<String> helloName8(@RequestBody Optional<Bean> bean) {
+            return null;
+        }
+
+        @GET
+        @Path("/n9")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String helloName9(@QueryParam("name9") @NotNull Optional<String> name) {
+            return "hello " + name.orElse("SmallRye!");
+        }
+    }
+
+    @Path("/template")
+    static class PathParamTemplateRegexTestResource {
+        @GET
+        @Path("{id:\\d+}/{name: [A-Z]+    }/{  nickname :[a-zA-Z]+}/{age: [0-9]{1,3}}")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String echo(@PathParam("id") Integer id, @PathParam("name") String name, @PathParam("nickname") String nickname,
+                @PathParam("age") String age) {
+            return String.valueOf(id) + ' ' + name + ' ' + nickname + ' ' + age;
+        }
+    }
+
+    @Path("/segments")
+    static class PathSegmentMatrixTestResource {
+        @GET
+        @Path("seg1")
+        @Produces(MediaType.TEXT_PLAIN)
+        @Parameter(name = "segments", description = "Test", style = ParameterStyle.MATRIX, in = ParameterIn.PATH)
+        public String echo(@PathParam("segments") PathSegment segmentsMatrix) {
+            return segmentsMatrix.getPath();
+        }
+    }
+
+    @Path("/override")
+    static class ParamNameOverrideTestResource {
+        @HeaderParam("h1")
+        @Parameter(name = "X-Header1", in = ParameterIn.HEADER, content = {})
+        String h1;
+        @CookieParam("c1")
+        @Parameter(name = "Cookie1", in = ParameterIn.COOKIE, content = @Content(mediaType = MediaType.TEXT_PLAIN))
+        String c1;
+        @QueryParam("q1")
+        @Parameter(name = "query1", in = ParameterIn.QUERY, content = {
+                @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(description = "A JSON query parameter", type = SchemaType.OBJECT)),
+                @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(description = "A plain text query parameter", type = SchemaType.STRING)),
+        })
+        String q1;
+
+        @GET
+        @Path("{p1}")
+        @Produces(MediaType.TEXT_PLAIN)
+        public String echo(
+                @Parameter(name = "Path1", in = ParameterIn.PATH, style = ParameterStyle.SIMPLE, description = "The name 'Path1' will not be used instead of 'p1'") @PathParam("p1") String p1) {
+            return p1;
         }
     }
 }

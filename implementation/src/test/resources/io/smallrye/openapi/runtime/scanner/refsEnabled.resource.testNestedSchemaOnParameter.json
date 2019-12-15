@@ -47,7 +47,14 @@
             "$ref": "#/components/schemas/NestedParameterTestChild"
           },
           "another_child": {
-            "$ref": "#/components/schemas/another_nested"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/another_nested"
+              },
+              {
+                "description": "This schema will be unioned to $ref to 'another_nested', name will be used for the property, and this description will be present on this property"
+              }
+            ]
           },
           "childList": {
             "type": "array",

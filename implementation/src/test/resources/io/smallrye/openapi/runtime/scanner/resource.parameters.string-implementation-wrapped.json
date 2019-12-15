@@ -1,0 +1,50 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/hello": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GreetingMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GreetingMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SimpleString"
+              },
+              {
+                "description": "Used to send a message"
+              }
+            ]
+          },
+          "optionalMessage": {
+            "type": "string",
+            "description": "Simply a string"
+          }
+        }
+      },
+      "SimpleString": {
+        "type": "string",
+        "title": "A Simple String"
+      }
+    }
+  }
+}

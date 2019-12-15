@@ -1,0 +1,26 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Title from the application",
+    "description": "Description from the package",
+    "version": "1.0"
+  },
+  "paths": {
+    "/package-info-test": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

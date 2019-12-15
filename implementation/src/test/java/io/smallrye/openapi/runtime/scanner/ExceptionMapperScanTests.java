@@ -1,19 +1,19 @@
 package io.smallrye.openapi.runtime.scanner;
 
-import jdk.nashorn.internal.objects.annotations.Getter;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.ClassInfo;
-import org.jboss.jandex.DotName;
-import org.jboss.jandex.Index;
-import org.json.JSONException;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.*;
+import java.io.IOException;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.jandex.Index;
+import org.json.JSONException;
+import org.testng.annotations.Test;
 
 public class ExceptionMapperScanTests extends  IndexScannerTestBase {
 

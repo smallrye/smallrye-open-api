@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
-import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
@@ -97,19 +96,19 @@ public class JandexUtil {
             return null;
         }
 
-        String $ref = value.asString();
+        String ref = value.asString();
 
-        if (!componentKeyPattern.matcher($ref).matches()) {
-            return $ref;
+        if (!componentKeyPattern.matcher(ref).matches()) {
+            return ref;
         }
 
         if (refType != null) {
-            $ref = "#/components/" + refType.componentPath + "/" + $ref;
+            ref = "#/components/" + refType.componentPath + "/" + ref;
         } else {
             throw new NullPointerException("RefType must not be null");
         }
 
-        return $ref;
+        return ref;
     }
 
     /**
@@ -445,8 +444,7 @@ public class JandexUtil {
      * @return Type
      */
     public static Type getMethodParameterType(MethodInfo method, short position) {
-        Type type = method.parameters().get(position);
-        return type;
+        return method.parameters().get(position);
     }
 
     /**
@@ -456,8 +454,7 @@ public class JandexUtil {
      * @return Type
      */
     public static Type getMethodParameterType(MethodParameterInfo parameter) {
-        Type type = parameter.method().parameters().get(parameter.position());
-        return type;
+        return parameter.method().parameters().get(parameter.position());
     }
 
     /**
@@ -527,8 +524,7 @@ public class JandexUtil {
      * @return Is it a simple class @Schema
      */
     public static boolean isSimpleClassSchema(AnnotationInstance annotation) {
-        List<AnnotationValue> values = annotation.values();
-        return values.size() == 1 && values.get(0).name().equals(OpenApiConstants.PROP_IMPLEMENTATION);
+        return annotation.values().size() == 1 && hasImplementation(annotation);
     }
 
     /**
@@ -540,14 +536,41 @@ public class JandexUtil {
      * @return Is it a simple array @Schema
      */
     public static boolean isSimpleArraySchema(AnnotationInstance annotation) {
-        List<AnnotationValue> values = annotation.values();
-        if (values.size() != 2) {
+        if (annotation.values().size() != 2) {
             return false;
         }
+
+        return isArraySchema(annotation);
+    }
+
+    /**
+     * Returns true if the given {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * annotation is an array schema. This is defined as a schema with a "type" field and "implementation"
+     * field defined *and* the type must be array.
+     * 
+     * @param annotation AnnotationInstance
+     * @return Is it an array {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     */
+    public static boolean isArraySchema(AnnotationInstance annotation) {
+        if (!hasImplementation(annotation)) {
+            return false;
+        }
+
         org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = JandexUtil.enumValue(annotation,
                 OpenApiConstants.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
-        String implementation = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_IMPLEMENTATION);
-        return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY && implementation != null);
+
+        return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY);
+    }
+
+    /**
+     * Returns true if the given {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * annotation has defined an "implementation" field.
+     * 
+     * @param annotation AnnotationInstance
+     * @return true if the annotation defines an implementation, otherwise false
+     */
+    public static boolean hasImplementation(AnnotationInstance annotation) {
+        return annotation.value(OpenApiConstants.PROP_IMPLEMENTATION) != null;
     }
 
     /**
@@ -568,17 +591,5 @@ public class JandexUtil {
                 (klazz = index.getClassByName(TypeUtil.getName(type))) != null);
 
         return chain;
-    }
-
-    /**
-     * Holds relevant information about a jax-rs method parameter. Specifically its name
-     * and type (path, query, cookie, etc).
-     * 
-     * @author eric.wittmann@gmail.com
-     */
-    @Deprecated
-    public static class JaxRsParameterInfo {
-        public String name;
-        public Parameter.In in;
     }
 }

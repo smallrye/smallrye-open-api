@@ -20,7 +20,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
-import org.jboss.jandex.Indexer;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,13 +37,7 @@ public class BeanValidationResourceTest extends IndexScannerTestBase {
 
     @Before
     public void beforeEach() {
-        Indexer indexer = new Indexer();
-        index(indexer, "io/smallrye/openapi/runtime/scanner/dataobject/BeanValidationScannerTest.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/dataobject/BeanValidationScannerTest$BVTestContainer.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/dataobject/BeanValidationResourceTest$BVTestResource.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/dataobject/BeanValidationResourceTest$BVTestResourceEntity.class");
-
-        index = indexer.complete();
+        index = indexOf(BVTestResource.class, BVTestResourceEntity.class, BeanValidationScannerTest.BVTestContainer.class);
     }
 
     @Test

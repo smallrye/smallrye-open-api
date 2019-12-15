@@ -44,6 +44,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -330,7 +331,18 @@ public final class OpenApiConstants {
                     DOTNAME_PATCH)));
 
     public static final DotName DOTNAME_RESPONSE = DotName.createSimple(Response.class.getName());
+    public static final DotName DOTNAME_PATH_SEGMENT = DotName.createSimple(PathSegment.class.getName());
     public static final DotName DOTNAME_DEPRECATED = DotName.createSimple(Deprecated.class.getName());
+
+    public static final DotName DOTNAME_OPTIONAL = DotName.createSimple(java.util.Optional.class.getName());
+    public static final DotName DOTNAME_OPTIONAL_DOUBLE = DotName.createSimple(java.util.OptionalDouble.class.getName());
+    public static final DotName DOTNAME_OPTIONAL_INT = DotName.createSimple(java.util.OptionalInt.class.getName());
+    public static final DotName DOTNAME_OPTIONAL_LONG = DotName.createSimple(java.util.OptionalLong.class.getName());
+    public static final Set<DotName> DOTNAME_OPTIONALS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_OPTIONAL,
+                    DOTNAME_OPTIONAL_DOUBLE,
+                    DOTNAME_OPTIONAL_INT,
+                    DOTNAME_OPTIONAL_LONG)));
 
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
 

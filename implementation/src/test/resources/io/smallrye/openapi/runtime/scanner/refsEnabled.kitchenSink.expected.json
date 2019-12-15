@@ -178,7 +178,6 @@
         }
       },
       "FuzzStringObject": {
-        "maxLength": 123456,
         "type": "object",
         "properties": {
           "qAgain": {
@@ -214,7 +213,14 @@
             "type": "integer"
           },
           "foo": {
-            "$ref": "#/components/schemas/FuzzStringObject"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuzzStringObject"
+              },
+              {
+                "maxLength": 123456
+              }
+            ]
           }
         }
       },
@@ -269,7 +275,14 @@
             "$ref": "#/components/schemas/FooExtendsFoo"
           },
           "qValue": {
-            "$ref": "#/components/schemas/FooExtendsFoo"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FooExtendsFoo"
+              },
+              {
+                "description": "Ah, Q, my favourite variable!"
+              }
+            ]
           },
           "tAgain2": {
             "type": "string"
@@ -310,12 +323,18 @@
             "type": "integer"
           },
           "foo": {
-            "$ref": "#/components/schemas/KustomPairStringString"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KustomPairStringString"
+              },
+              {
+                "maxLength": 123456
+              }
+            ]
           }
         }
       },
       "KustomPairStringString": {
-        "maxLength": 123456,
         "required": [
           "bar",
           "foo"
