@@ -210,6 +210,25 @@ public class OpenApiParser {
         return parser.parse();
     }
 
+    /**
+     * Parses the schema in the provided String. The format of the stream must
+     * be JSON.
+     *
+     * @param schemaJson String containing a JSON formatted schema
+     * @return Schema parsed from the String
+     * @throws IOException Errors in reading the String
+     */
+    public static final SchemaImpl parseSchema(String schemaJson) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode tree = mapper.readTree(schemaJson);
+        OpenApiParser parser = new OpenApiParser(tree);
+        SchemaImpl schema = parser.readSchema(tree);
+        if (schema != null) {
+            schema.setName(JsonUtil.stringProperty(tree, OpenApiConstants.PROP_NAME));
+        }
+        return schema;
+    }
+
     private final JsonNode tree;
 
     /**
@@ -478,7 +497,7 @@ public class OpenApiParser {
      * 
      * @param node
      */
-    private Schema readSchema(JsonNode node) {
+    private SchemaImpl readSchema(JsonNode node) {
         if (node == null || !node.isObject()) {
             return null;
         }

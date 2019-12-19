@@ -17,7 +17,10 @@
 package io.smallrye.openapi.api;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.OASConfig;
@@ -45,6 +48,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Boolean schemaReferencesEnable;
     private String customSchemaRegistryClass;
     private Boolean applicationPathDisable;
+    private Map<String, String> schemas;
 
     /**
      * Constructor.
@@ -224,6 +228,19 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                     .orElse(false);
         }
         return applicationPathDisable;
+    }
+
+    @Override
+    public Map<String, String> getSchemas() {
+        if (schemas == null) {
+            schemas = StreamSupport
+                    .stream(config.getPropertyNames().spliterator(), false)
+                    .filter(name -> name.startsWith("mp.openapi.schema.") || 
+                                    name.startsWith("MP_OPENAPI_SCHEMA_"))
+                    .collect(Collectors.toMap(name -> name.substring("mp.openapi.schema.".length()),
+                                              name -> config.getValue(name, String.class)));
+        }
+        return schemas;
     }
 
     /**
