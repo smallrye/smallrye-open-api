@@ -17,12 +17,18 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -220,6 +226,55 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
         @Produces("application/json")
         public Response doPost(GreetingMessage message) {
             return Response.created(URI.create("http://example.com")).build();
+        }
+    }
+
+    /*
+     * Test case derived for Smallrye OpenAPI issue #233.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/233
+     *
+     */
+    @Test
+    public void testTimeResource() throws IOException, JSONException {
+        Index index = indexOf(TimeTestResource.class, TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.time.json", result);
+    }
+
+    @Path("/times")
+    @Produces(MediaType.TEXT_PLAIN)
+    static class TimeTestResource {
+
+        static class UTC {
+            @Schema(description = "Current time at offset '00:00'")
+            OffsetTime utc = OffsetTime.now(ZoneId.of("UTC"));
+        }
+
+        @Path("local")
+        @GET
+        public LocalTime getLocalTime() {
+            return LocalTime.now();
+        }
+
+        @Path("zoned")
+        @GET
+        public OffsetTime getZonedTime(@QueryParam("zoneId") String zoneId) {
+            return OffsetTime.now(ZoneId.of(zoneId));
+        }
+
+        @Path("utc")
+        @GET
+        public UTC getUTC() {
+            return new UTC();
+        }
+
+        @Path("utc")
+        @POST
+        public OffsetTime toUTC(@QueryParam("local") LocalTime local, @QueryParam("offsetId") String offsetId) {
+            return OffsetTime.of(local, ZoneOffset.of(offsetId));
         }
     }
 }
