@@ -35,47 +35,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.core.Application;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConstants;
-import io.smallrye.openapi.api.models.ComponentsImpl;
-import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.PathItemImpl;
-import io.smallrye.openapi.api.models.PathsImpl;
-import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
-import io.smallrye.openapi.api.models.examples.ExampleImpl;
-import io.smallrye.openapi.api.models.headers.HeaderImpl;
-import io.smallrye.openapi.api.models.info.ContactImpl;
-import io.smallrye.openapi.api.models.info.InfoImpl;
-import io.smallrye.openapi.api.models.info.LicenseImpl;
-import io.smallrye.openapi.api.models.links.LinkImpl;
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.EncodingImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.parameters.ParameterImpl;
-import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
-import io.smallrye.openapi.api.models.responses.APIResponseImpl;
-import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
-import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
-import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
-import io.smallrye.openapi.api.models.security.ScopesImpl;
-import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
-import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
-import io.smallrye.openapi.api.models.servers.ServerImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
-import io.smallrye.openapi.api.models.tags.TagImpl;
-import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.scanner.ParameterProcessor.ResourceParameters;
-import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
-import io.smallrye.openapi.runtime.util.ModelUtil;
-import io.smallrye.openapi.runtime.util.SchemaFactory;
-import io.smallrye.openapi.runtime.util.TypeUtil;
+
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
@@ -118,6 +80,48 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.models.ComponentsImpl;
+import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
+import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.models.OperationImpl;
+import io.smallrye.openapi.api.models.PathItemImpl;
+import io.smallrye.openapi.api.models.PathsImpl;
+import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
+import io.smallrye.openapi.api.models.examples.ExampleImpl;
+import io.smallrye.openapi.api.models.headers.HeaderImpl;
+import io.smallrye.openapi.api.models.info.ContactImpl;
+import io.smallrye.openapi.api.models.info.InfoImpl;
+import io.smallrye.openapi.api.models.info.LicenseImpl;
+import io.smallrye.openapi.api.models.links.LinkImpl;
+import io.smallrye.openapi.api.models.media.ContentImpl;
+import io.smallrye.openapi.api.models.media.EncodingImpl;
+import io.smallrye.openapi.api.models.media.MediaTypeImpl;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.parameters.ParameterImpl;
+import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
+import io.smallrye.openapi.api.models.responses.APIResponseImpl;
+import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
+import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
+import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
+import io.smallrye.openapi.api.models.security.ScopesImpl;
+import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
+import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
+import io.smallrye.openapi.api.models.servers.ServerImpl;
+import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
+import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
+import io.smallrye.openapi.api.models.tags.TagImpl;
+import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.scanner.ParameterProcessor.ResourceParameters;
+import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
+import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.SchemaFactory;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Scans a deployment (using the archive and jandex annotation index) for JAX-RS and
@@ -218,8 +222,6 @@ public class OpenApiAnnotationScanner {
         for (ClassInfo resourceClass : resourceClasses) {
             processJaxRsResourceClass(oai, resourceClass, null);
         }
-
-
 
         if (oai != null) {
             // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
@@ -443,7 +445,8 @@ public class OpenApiAnnotationScanner {
                     .map(HttpMethod::valueOf)
                     .forEach(httpMethod -> {
                         resourceCount.incrementAndGet();
-                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters, exceptionAnnotationMap);
+                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters,
+                                exceptionAnnotationMap);
                     });
 
             if (resourceCount.get() == 0 && methodInfo.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
@@ -458,7 +461,8 @@ public class OpenApiAnnotationScanner {
      */
     private Map<DotName, AnnotationInstance> processExceptionMappers() {
         Map<DotName, AnnotationInstance> exceptionHandlerMap = new HashMap<>();
-        Collection<ClassInfo> exceptionMappers = this.index.getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
+        Collection<ClassInfo> exceptionMappers = this.index
+                .getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
 
         for (ClassInfo classInfo : exceptionMappers) {
             DotName exceptionDotName = classInfo.interfaceTypes().get(0).asParameterizedType().arguments().get(0).name();
@@ -577,10 +581,6 @@ public class OpenApiAnnotationScanner {
             HttpMethod methodType, Set<String> resourceTags,
             List<Parameter> locatorPathParameters, Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
-
-
-
-
 
         final Operation operation;
 
@@ -870,7 +870,6 @@ public class OpenApiAnnotationScanner {
         APIResponses responses = ModelUtil.responses(operation);
         responses.addAPIResponse(responseCode, response);
     }
-
 
     /**
      * Processes any {@link org.eclipse.microprofile.openapi.annotations.tags.Tag} or

@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -9,13 +10,14 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.testng.annotations.Test;
 
-public class ExceptionMapperScanTests extends  IndexScannerTestBase {
+public class ExceptionMapperScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -27,10 +29,9 @@ public class ExceptionMapperScanTests extends  IndexScannerTestBase {
 
     @Test
     public void testExceptionMapper() throws IOException, JSONException {
-        test("responses.exception-mapper-generation.json", TestResource.class, ExceptionHandler1.class, ExceptionHandler2.class);
+        test("responses.exception-mapper-generation.json", TestResource.class, ExceptionHandler1.class,
+                ExceptionHandler2.class);
     }
-
-
 
     @Path("/resources")
     static class TestResource {
@@ -65,6 +66,5 @@ public class ExceptionMapperScanTests extends  IndexScannerTestBase {
             return null;
         }
     }
-
 
 }

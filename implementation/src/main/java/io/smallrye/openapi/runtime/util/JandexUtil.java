@@ -16,6 +16,8 @@
 
 package io.smallrye.openapi.runtime.util;
 
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import io.smallrye.openapi.api.OpenApiConstants;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
+
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
@@ -40,8 +40,9 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-
-import static java.util.stream.Collectors.toList;
+import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
+import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -350,7 +351,7 @@ public class JandexUtil {
         }
         return null;
     }
-    
+
     /**
      * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.
