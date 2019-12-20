@@ -43,7 +43,7 @@
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.jboss.shrinkwrap>1.2.6</version.org.jboss.shrinkwrap>
         <version.org.skyscreamer>1.5.0</version.org.skyscreamer>
-        <version.org.jboss.resteasy>4.4.1.Final</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy>4.4.2.Final</version.org.jboss.resteasy>
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/tck/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../tck/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
