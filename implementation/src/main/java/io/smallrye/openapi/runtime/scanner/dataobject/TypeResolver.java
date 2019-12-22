@@ -317,13 +317,22 @@ public class TypeResolver {
         Type current = TypeUtil.resolveWildcard(fieldType);
 
         for (Map<String, Type> map : resolutionStack) {
-            // Look in next entry map-set.
-            if (current.kind() == Type.Kind.TYPE_VARIABLE) {
-                current = map.get(current.asTypeVariable().identifier());
-            } else if (current.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE) {
-                current = map.get(current.asUnresolvedTypeVariable().identifier());
-            } else {
-                return current;
+            String varName = null;
+
+            switch (current.kind()) {
+                case TYPE_VARIABLE:
+                    varName = current.asTypeVariable().identifier();
+                    break;
+                case UNRESOLVED_TYPE_VARIABLE:
+                    varName = current.asUnresolvedTypeVariable().identifier();
+                    break;
+                default:
+                    break;
+            }
+
+            // Look in next entry map-set if the name is present.
+            if (varName != null && map.containsKey(varName)) {
+                current = map.get(varName);
             }
         }
         return current;
