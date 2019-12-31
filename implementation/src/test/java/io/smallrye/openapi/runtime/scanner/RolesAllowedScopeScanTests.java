@@ -26,6 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.annotations.security.OAuthFlows;
 import org.eclipse.microprofile.openapi.annotations.security.OAuthScope;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
+import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.Index;
@@ -145,6 +146,30 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
                         .toArray());
     }
 
+    /*
+     * Test case derived for Smallrye OpenAPI issue #240.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/240
+     *
+     */
+    @Test
+    public void testSchemesWithoutRoles() throws IOException {
+        Index index = indexOf(UndeclaredFlowsNoRolesAllowedApp.class, NoRolesResource.class);
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(index, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        SecurityRequirement requirement = result.getPaths().getPathItem("/v1/secured").getGET().getSecurity().get(0);
+        assertNotNull(requirement);
+        assertEquals(1, requirement.getScheme("oidc").size());
+        assertEquals("admin", requirement.getScheme("oidc").get(0));
+        assertNull(result.getComponents()
+                .getSecuritySchemes()
+                .get("oidc")
+                .getFlows());
+    }
+
     @OpenAPIDefinition(info = @Info(title = "RolesAllowed App", version = "1.0"), components = @Components(securitySchemes = {
             @SecurityScheme(securitySchemeName = "rolesScheme", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(), implicit = @OAuthFlow(scopes = {
                     @OAuthScope(name = "scope1", description = "Provided by OAI annotation") })))
@@ -157,6 +182,13 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
                     @OAuthScope(name = "scope1", description = "Provided by OAI annotation") })))
     }))
     static class RolesNotAllowedApp extends Application {
+    }
+
+    @OpenAPIDefinition(info = @Info(title = "UndeclaredFlowsNoRolesAllowed App", version = "1.0"))
+    // Single scheme missing 'flows'
+    @SecuritySchemes(value = {
+            @SecurityScheme(securitySchemeName = "oidc", type = SecuritySchemeType.OPENIDCONNECT, openIdConnectUrl = "https://example.com/auth/realms/custom_realm/.well-known/openid-configuration") })
+    static class UndeclaredFlowsNoRolesAllowedApp extends Application {
     }
 
     @Path("/v1")
@@ -203,6 +235,18 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     @SuppressWarnings("unused")
     @DeclareRoles({ "admin", "users" })
     static class RolesDeclaredResource {
+        @GET
+        @Path("secured")
+        @Produces("application/json")
+        @RolesAllowed({ "admin" })
+        public Response getSecuredData(int id) {
+            return null;
+        }
+    }
+
+    @Path("/v1")
+    @SuppressWarnings("unused")
+    static class NoRolesResource {
         @GET
         @Path("secured")
         @Produces("application/json")

@@ -314,10 +314,13 @@ public class OpenApiAnnotationScanner {
         this.currentFlows = new ArrayList<>();
 
         OAuthFlows flows = scheme.getFlows();
-        saveFlow(flows.getAuthorizationCode());
-        saveFlow(flows.getClientCredentials());
-        saveFlow(flows.getImplicit());
-        saveFlow(flows.getPassword());
+
+        if (flows != null) {
+            saveFlow(flows.getAuthorizationCode());
+            saveFlow(flows.getClientCredentials());
+            saveFlow(flows.getImplicit());
+            saveFlow(flows.getPassword());
+        }
     }
 
     /**
