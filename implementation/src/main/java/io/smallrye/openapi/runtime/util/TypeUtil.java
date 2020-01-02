@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -27,10 +28,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
-
+import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
@@ -48,6 +49,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -57,25 +59,35 @@ public class TypeUtil {
     private static final DotName DOTNAME_OBJECT = DotName.createSimple(Object.class.getName());
     private static final Type OBJECT_TYPE = Type.create(DOTNAME_OBJECT, Type.Kind.CLASS);
     private static final String UUID_PATTERN = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
-    private static final TypeWithFormat STRING_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.NONE);
-    private static final TypeWithFormat BYTE_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.BYTE);
-    private static final TypeWithFormat CHAR_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.BYTE);
-    private static final TypeWithFormat UUID_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.UUID, UUID_PATTERN);
-    private static final TypeWithFormat URI_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.URI);
-    private static final TypeWithFormat NUMBER_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.NONE); // We can't immediately tell if it's int, float, etc.
-    private static final TypeWithFormat BIGDECIMAL_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.NONE);
-    private static final TypeWithFormat DOUBLE_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.DOUBLE);
-    private static final TypeWithFormat FLOAT_FORMAT = new TypeWithFormat(SchemaType.NUMBER, DataFormat.FLOAT);
-    private static final TypeWithFormat BIGINTEGER_FORMAT = new TypeWithFormat(SchemaType.INTEGER, DataFormat.NONE);
-    private static final TypeWithFormat INTEGER_FORMAT = new TypeWithFormat(SchemaType.INTEGER, DataFormat.INT32);
-    private static final TypeWithFormat LONG_FORMAT = new TypeWithFormat(SchemaType.INTEGER, DataFormat.INT64);
-    private static final TypeWithFormat SHORT_FORMAT = new TypeWithFormat(SchemaType.INTEGER, DataFormat.NONE);
-    private static final TypeWithFormat BOOLEAN_FORMAT = new TypeWithFormat(SchemaType.BOOLEAN, DataFormat.NONE);
+    private static final TypeWithFormat STRING_FORMAT = TypeWithFormat.of(SchemaType.STRING).build();
+    private static final TypeWithFormat BYTE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
+    private static final TypeWithFormat CHAR_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
+    private static final TypeWithFormat UUID_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.UUID)
+            .pattern(UUID_PATTERN).build();
+    private static final TypeWithFormat URI_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.URI).build();
+    private static final TypeWithFormat NUMBER_FORMAT = TypeWithFormat.of(SchemaType.NUMBER).build(); // We can't immediately tell if it's int, float, etc.
+    private static final TypeWithFormat BIGDECIMAL_FORMAT = TypeWithFormat.of(SchemaType.NUMBER).build();
+    private static final TypeWithFormat DOUBLE_FORMAT = TypeWithFormat.of(SchemaType.NUMBER).format(DataFormat.DOUBLE).build();
+    private static final TypeWithFormat FLOAT_FORMAT = TypeWithFormat.of(SchemaType.NUMBER).format(DataFormat.FLOAT).build();
+    private static final TypeWithFormat BIGINTEGER_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).build();
+    private static final TypeWithFormat INTEGER_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).format(DataFormat.INT32).build();
+    private static final TypeWithFormat LONG_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).format(DataFormat.INT64).build();
+    private static final TypeWithFormat SHORT_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).build();
+    private static final TypeWithFormat BOOLEAN_FORMAT = TypeWithFormat.of(SchemaType.BOOLEAN).build();
     // SPECIAL FORMATS
-    private static final TypeWithFormat ARRAY_FORMAT = new TypeWithFormat(SchemaType.ARRAY, DataFormat.NONE);
-    private static final TypeWithFormat OBJECT_FORMAT = new TypeWithFormat(SchemaType.OBJECT, DataFormat.NONE);
-    private static final TypeWithFormat DATE_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.DATE);
-    private static final TypeWithFormat DATE_TIME_FORMAT = new TypeWithFormat(SchemaType.STRING, DataFormat.DATE_TIME);
+    private static final TypeWithFormat ARRAY_FORMAT = TypeWithFormat.of(SchemaType.ARRAY).build();
+    private static final TypeWithFormat OBJECT_FORMAT = TypeWithFormat.of(SchemaType.OBJECT).build();
+    private static final TypeWithFormat DATE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE).build();
+    private static final TypeWithFormat DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE_TIME)
+            .build();
+    private static final TypeWithFormat TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.TIME)
+            .externalDocumentation("As defined by 'full-time' in RFC3339",
+                    "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14")
+            .example("13:45.30.123456789+02:00").build();
+    private static final TypeWithFormat TIME_LOCAL_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.TIME_LOCAL)
+            .externalDocumentation("As defined by 'partial-time' in RFC3339",
+                    "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14")
+            .example("13:45.30.123456789").build();
 
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
     private static final IndexView jdkIndex;
@@ -128,6 +140,10 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(java.time.LocalDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.ZonedDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.OffsetDateTime.class.getName()), DATE_TIME_FORMAT);
+
+        // Time
+        TYPE_MAP.put(DotName.createSimple(java.time.LocalTime.class.getName()), TIME_LOCAL_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.OffsetTime.class.getName()), TIME_FORMAT);
 
         Indexer indexer = new Indexer();
         index(indexer, java.lang.Enum.class);
@@ -251,13 +267,10 @@ public class TypeUtil {
     public static boolean allowRegistration(IndexView index, Type classType) {
         TypeWithFormat typeFormat = getTypeFormat(classType);
 
-        switch (typeFormat.getSchemaType()) {
-            case ARRAY:
-            case OBJECT:
-                return index.getClassByName(classType.name()) != null;
-            default:
-                return typeFormat.getProperties().size() > 2;
+        if (typeFormat.isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT)) {
+            return index.getClassByName(classType.name()) != null;
         }
+        return typeFormat.getProperties().size() > 2;
     }
 
     /**
@@ -278,10 +291,13 @@ public class TypeUtil {
      * @param schema a writable schema to be updated with the type's default schema attributes
      */
     public static void applyTypeAttributes(Type classType, Schema schema) {
-        TypeWithFormat attrs = getTypeFormat(classType);
-        schema.setType(attrs.getSchemaType());
-        schema.setFormat(attrs.getFormat());
-        schema.setPattern(attrs.getPattern());
+        Map<String, Object> properties = getTypeAttributes(classType);
+
+        schema.setType((SchemaType) properties.get(OpenApiConstants.PROP_TYPE));
+        schema.setFormat((String) properties.get(OpenApiConstants.PROP_FORMAT));
+        schema.setPattern((String) properties.get(OpenApiConstants.PROP_PATTERN));
+        schema.setExample(properties.get(OpenApiConstants.PROP_EXAMPLE));
+        schema.setExternalDocs((ExternalDocumentation) properties.get(OpenApiConstants.PROP_EXTERNAL_DOCS));
     }
 
     /**
@@ -293,22 +309,24 @@ public class TypeUtil {
      * @param typeSchema the schema for a class type
      */
     public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
-        if (Objects.equals(fieldSchema.getType(), typeSchema.getType())) {
-            fieldSchema.setType(null);
-        }
-        if (Objects.equals(fieldSchema.getFormat(), typeSchema.getFormat())) {
-            fieldSchema.setFormat(null);
-        }
-        if (Objects.equals(fieldSchema.getPattern(), typeSchema.getPattern())) {
-            fieldSchema.setPattern(null);
+        clearIfEqual(fieldSchema.getType(), typeSchema.getType(), fieldSchema::setType);
+        clearIfEqual(fieldSchema.getFormat(), typeSchema.getFormat(), fieldSchema::setFormat);
+        clearIfEqual(fieldSchema.getPattern(), typeSchema.getPattern(), fieldSchema::setPattern);
+        clearIfEqual(fieldSchema.getExample(), typeSchema.getExample(), fieldSchema::setExample);
+        clearIfEqual(fieldSchema.getExternalDocs(), typeSchema.getExternalDocs(), fieldSchema::setExternalDocs);
+    }
+
+    static <T> void clearIfEqual(T fieldSchemaVal, T typeSchemaVal, Consumer<T> setter) {
+        if (Objects.equals(fieldSchemaVal, typeSchemaVal)) {
+            setter.accept(null);
         }
     }
 
-    public static TypeWithFormat arrayFormat() {
+    private static TypeWithFormat arrayFormat() {
         return ARRAY_FORMAT;
     }
 
-    public static TypeWithFormat objectFormat() {
+    private static TypeWithFormat objectFormat() {
         return OBJECT_FORMAT;
     }
 
@@ -404,11 +422,8 @@ public class TypeUtil {
             return true;
         }
 
-        TypeWithFormat tf = getTypeFormat(type);
-
         // If is known type.
-        return tf.getSchemaType() != Schema.SchemaType.OBJECT &&
-                tf.getSchemaType() != Schema.SchemaType.ARRAY;
+        return !getTypeFormat(type).isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT);
     }
 
     /**
@@ -698,37 +713,55 @@ public class TypeUtil {
     }
 
     static final class TypeWithFormat {
-        private final Map<String, Object> properties;
+        static class Builder {
+            private final Map<String, Object> properties = new HashMap<>();
 
-        public TypeWithFormat(@NotNull SchemaType schemaType,
-                @NotNull String format) {
-            this(schemaType, format, null);
-        }
-
-        public TypeWithFormat(@NotNull SchemaType schemaType,
-                @NotNull String format,
-                String pattern) {
-
-            Map<String, Object> props = new HashMap<>(3);
-            props.put(OpenApiConstants.PROP_TYPE, schemaType);
-            props.put(OpenApiConstants.PROP_FORMAT, format);
-            if (pattern != null) {
-                props.put(OpenApiConstants.PROP_PATTERN, pattern);
+            Builder(SchemaType schemaType) {
+                Objects.requireNonNull(schemaType);
+                properties.put(OpenApiConstants.PROP_TYPE, schemaType);
             }
 
-            this.properties = Collections.unmodifiableMap(props);
+            Builder format(String format) {
+                properties.put(OpenApiConstants.PROP_FORMAT, format);
+                return this;
+            }
+
+            Builder pattern(String pattern) {
+                properties.put(OpenApiConstants.PROP_PATTERN, pattern);
+                return this;
+            }
+
+            Builder example(Object example) {
+                properties.put(OpenApiConstants.PROP_EXAMPLE, example);
+                return this;
+            }
+
+            Builder externalDocumentation(String description, String url) {
+                ExternalDocumentation doc = new ExternalDocumentationImpl();
+                doc.setDescription(description);
+                doc.setUrl(url);
+                properties.put(OpenApiConstants.PROP_EXTERNAL_DOCS, doc);
+                return this;
+            }
+
+            TypeWithFormat build() {
+                return new TypeWithFormat(properties);
+            }
         }
 
-        SchemaType getSchemaType() {
-            return (SchemaType) properties.get(OpenApiConstants.PROP_TYPE);
+        static Builder of(SchemaType schemaType) {
+            return new Builder(schemaType);
         }
 
-        String getFormat() {
-            return (String) properties.get(OpenApiConstants.PROP_FORMAT);
+        private final Map<String, Object> properties;
+
+        private TypeWithFormat(Map<String, Object> properties) {
+            this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
         }
 
-        String getPattern() {
-            return (String) properties.get(OpenApiConstants.PROP_PATTERN);
+        boolean isSchemaType(SchemaType... schemaTypes) {
+            return Arrays.stream(schemaTypes)
+                    .anyMatch(properties.get(OpenApiConstants.PROP_TYPE)::equals);
         }
 
         Map<String, Object> getProperties() {
@@ -737,7 +770,6 @@ public class TypeUtil {
     }
 
     private static class DataFormat {
-        static final String NONE = null;
         static final String INT32 = "int32";
         static final String INT64 = "int64";
         static final String FLOAT = "float";
@@ -747,6 +779,8 @@ public class TypeUtil {
         static final String DATE_TIME = "date-time";
         static final String URI = "uri";
         static final String UUID = "uuid";
+        static final String TIME = "time";
+        static final String TIME_LOCAL = "local-time";
     }
 
 }
