@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -471,7 +472,9 @@ public class OpenApiAnnotationScanner {
 
             if (toResponseMethod.hasAnnotation(OpenApiConstants.DOTNAME_API_RESPONSE)) {
                 AnnotationInstance apiResponseAnnotation = toResponseMethod.annotation(OpenApiConstants.DOTNAME_API_RESPONSE);
-                exceptionHandlerMap.put(exceptionDotName, apiResponseAnnotation);
+                if (apiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE) != null) {
+                    exceptionHandlerMap.put(exceptionDotName, apiResponseAnnotation);
+                }
             }
         }
 
@@ -738,8 +741,10 @@ public class OpenApiAnnotationScanner {
         for (Type type : methodExceptions) {
             DotName exceptionDotName = type.name();
             if (exceptionAnnotationMap.keySet().contains(exceptionDotName)) {
-                AnnotationInstance apiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
-                addApiReponseFromAnnotation(apiResponseAnnotation, operation);
+                AnnotationInstance exMapperApiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
+                if (!this.responseCodeExistInMethodAnnotations(exMapperApiResponseAnnotation, apiResponseAnnotations)) {
+                    addApiReponseFromAnnotation(exMapperApiResponseAnnotation, operation);
+                }
             }
         }
 
@@ -853,6 +858,24 @@ public class OpenApiAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
+    }
+
+    /**
+     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the method.
+     * If the reponse code already exists then ignore the exception mapper annotation.
+     *
+     * @param exMapperApiResponseAnnotation ApiResponse annotation declared in the exception mapper
+     * @param methodApiResponseAnnotations List of ApiResponse annotations declared in the jax-rs method.
+     * @return response code exist or not
+     */
+    private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation, List<AnnotationInstance> methodApiResponseAnnotations) {
+        AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE);
+        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream().filter(annotationInstance -> {
+            AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
+            return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
+        }).findFirst();
+
+        return apiResponseWithSameCode.isPresent();
     }
 
     /**

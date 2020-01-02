@@ -33,6 +33,11 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
                 ExceptionHandler2.class);
     }
 
+    @Test
+    public void testMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
+        test("responses.exception-mapper-overridden-by-method-annotation-generation.json", TestResource2.class, ExceptionHandler1.class, ExceptionHandler2.class);
+    }
+
     @Path("/resources")
     static class TestResource {
 
@@ -46,6 +51,24 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
             return "OK";
         }
     }
+
+    @Path("resource2s")
+    static class TestResource2 {
+
+        @GET
+        @APIResponse(responseCode = "500", description = "Internal Server Error")
+        @APIResponse(responseCode = "404", description = "Resource Not Found")
+        public String getResource() throws NotFoundException {
+            return "resource2";
+        }
+
+        @POST
+        public String createResource() throws WebApplicationException {
+            return "OK";
+        }
+
+    }
+
 
     @Provider
     static class ExceptionHandler1 implements ExceptionMapper<WebApplicationException> {
