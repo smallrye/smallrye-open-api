@@ -21,11 +21,13 @@ import java.time.LocalTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -163,6 +165,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
         }
     }
 
+    /*************************************************************************/
+
     /*
      * Test case derived from original example in Smallrye OpenAPI issue #201.
      *
@@ -229,6 +233,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
         }
     }
 
+    /*************************************************************************/
+
     /*
      * Test case derived for Smallrye OpenAPI issue #233.
      *
@@ -275,6 +281,45 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
         @POST
         public OffsetTime toUTC(@QueryParam("local") LocalTime local, @QueryParam("offsetId") String offsetId) {
             return OffsetTime.of(local, ZoneOffset.of(offsetId));
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #237.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/237
+     *
+     */
+    @Test
+    public void testTypeVariableResponse() throws IOException, JSONException {
+        Index index = indexOf(TypeVariableResponseTestResource.class,
+                TypeVariableResponseTestResource.Dto.class);
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(index, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.type-variable.json", result);
+    }
+
+    @Path("/variable-types")
+    @SuppressWarnings("unused")
+    static class TypeVariableResponseTestResource<TEST extends TypeVariableResponseTestResource.Dto> {
+        static class Dto {
+            String id;
+        }
+
+        @GET
+        public List<TEST> getAll() {
+            return null;
+        }
+
+        @GET
+        @Path("{id}")
+        public TEST getOne(@PathParam("id") String id) {
+            return null;
         }
     }
 }
