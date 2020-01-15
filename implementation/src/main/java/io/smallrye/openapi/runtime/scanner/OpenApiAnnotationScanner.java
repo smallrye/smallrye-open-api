@@ -466,9 +466,11 @@ public class OpenApiAnnotationScanner {
                 .getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
 
         for (ClassInfo classInfo : exceptionMappers) {
-            DotName exceptionDotName = classInfo.interfaceTypes().get(0).asParameterizedType().arguments().get(0).name();
+            Type emType = classInfo.interfaceTypes().stream().filter(it -> it.name().equals(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER)).findFirst().get();
 
-            MethodInfo toResponseMethod = classInfo.method("toResponse", Type.create(exceptionDotName, Type.Kind.CLASS));
+            DotName exceptionDotName = emType.asParameterizedType().arguments().stream().findFirst().get().name();
+
+            MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME, Type.create(exceptionDotName, Type.Kind.CLASS));
 
             if (toResponseMethod.hasAnnotation(OpenApiConstants.DOTNAME_API_RESPONSE)) {
                 AnnotationInstance apiResponseAnnotation = toResponseMethod.annotation(OpenApiConstants.DOTNAME_API_RESPONSE);

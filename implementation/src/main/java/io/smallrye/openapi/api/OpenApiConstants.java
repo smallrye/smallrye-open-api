@@ -395,6 +395,8 @@ public final class OpenApiConstants {
     public static final String REF_PREFIX_SCHEMA = "#/components/schemas/";
     public static final String REF_PREFIX_SECURITY_SCHEME = "#/components/securitySchemes/";
 
+    public static final String TO_RESPONSE_METHOD_NAME = "toResponse";
+
     /**
      * Constructor.
      */
