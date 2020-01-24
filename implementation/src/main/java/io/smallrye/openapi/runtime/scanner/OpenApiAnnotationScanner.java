@@ -25,11 +25,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -431,6 +433,10 @@ public class OpenApiAnnotationScanner {
         resourceRolesAllowed = TypeUtil.getAnnotationValue(resourceClass, OpenApiConstants.DOTNAME_ROLES_ALLOWED);
         addScopes(resourceRolesAllowed);
 
+        // Process exception mapper to auto generate api response based on method exceptions
+        ////////////////////////////////////////
+        Map<DotName, AnnotationInstance> exceptionAnnotationMap = processExceptionMappers();
+
         // Now find and process the operation methods
         ////////////////////////////////////////
         for (MethodInfo methodInfo : getResourceMethods(resourceClass)) {
@@ -443,13 +449,41 @@ public class OpenApiAnnotationScanner {
                     .map(HttpMethod::valueOf)
                     .forEach(httpMethod -> {
                         resourceCount.incrementAndGet();
-                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters);
+                        processJaxRsMethod(openApi, resourceClass, methodInfo, httpMethod, tagRefs, locatorPathParameters,
+                                exceptionAnnotationMap);
                     });
 
             if (resourceCount.get() == 0 && methodInfo.hasAnnotation(OpenApiConstants.DOTNAME_PATH)) {
                 processJaxRsSubResource(openApi, locatorPathParameters, resourceClass, methodInfo);
             }
         }
+    }
+
+    /**
+     * Build a map between exception class name and its corresponding @ApiResponse annotation in the jax-rs exception mapper
+     *
+     */
+    private Map<DotName, AnnotationInstance> processExceptionMappers() {
+        Map<DotName, AnnotationInstance> exceptionHandlerMap = new HashMap<>();
+        Collection<ClassInfo> exceptionMappers = this.index
+                .getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
+
+        for (ClassInfo classInfo : exceptionMappers) {
+            Type emType = classInfo.interfaceTypes().stream().filter(it -> it.name().equals(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER)).findFirst().get();
+
+            DotName exceptionDotName = emType.asParameterizedType().arguments().stream().findFirst().get().name();
+
+            MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME, Type.create(exceptionDotName, Type.Kind.CLASS));
+
+            if (toResponseMethod.hasAnnotation(OpenApiConstants.DOTNAME_API_RESPONSE)) {
+                AnnotationInstance apiResponseAnnotation = toResponseMethod.annotation(OpenApiConstants.DOTNAME_API_RESPONSE);
+                if (apiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE) != null) {
+                    exceptionHandlerMap.put(exceptionDotName, apiResponseAnnotation);
+                }
+            }
+        }
+
+        return exceptionHandlerMap;
     }
 
     /**
@@ -553,7 +587,7 @@ public class OpenApiAnnotationScanner {
      */
     private void processJaxRsMethod(OpenAPIImpl openApi, ClassInfo resourceClass, MethodInfo method,
             HttpMethod methodType, Set<String> resourceTags,
-            List<Parameter> locatorPathParameters) {
+            List<Parameter> locatorPathParameters, Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
         final Operation operation;
@@ -693,13 +727,7 @@ public class OpenApiAnnotationScanner {
         List<AnnotationInstance> apiResponseAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_API_RESPONSE, OpenApiConstants.DOTNAME_API_RESPONSES);
         for (AnnotationInstance annotation : apiResponseAnnotations) {
-            String responseCode = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_RESPONSE_CODE);
-            if (responseCode == null) {
-                responseCode = APIResponses.DEFAULT;
-            }
-            APIResponse response = readResponse(annotation);
-            responses = ModelUtil.responses(operation);
-            responses.addAPIResponse(responseCode, response);
+            addApiReponseFromAnnotation(annotation, operation);
         }
         /*
          * If there is no response from annotations, try to create one from the method return value.
@@ -710,6 +738,19 @@ public class OpenApiAnnotationScanner {
         AnnotationInstance apiResponses = method.annotation(OpenApiConstants.DOTNAME_API_RESPONSES);
         if (apiResponses == null || !JandexUtil.isEmpty(apiResponses)) {
             createResponseFromJaxRsMethod(method, operation);
+        }
+
+        //Add api response using list of exceptions in the methods and exception mappers
+        List<Type> methodExceptions = method.exceptions();
+
+        for (Type type : methodExceptions) {
+            DotName exceptionDotName = type.name();
+            if (exceptionAnnotationMap.keySet().contains(exceptionDotName)) {
+                AnnotationInstance exMapperApiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
+                if (!this.responseCodeExistInMethodAnnotations(exMapperApiResponseAnnotation, apiResponseAnnotations)) {
+                    addApiReponseFromAnnotation(exMapperApiResponseAnnotation, operation);
+                }
+            }
         }
 
         // Process @SecurityRequirement annotations
@@ -822,6 +863,40 @@ public class OpenApiAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
+    }
+
+    /**
+     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the method.
+     * If the reponse code already exists then ignore the exception mapper annotation.
+     *
+     * @param exMapperApiResponseAnnotation ApiResponse annotation declared in the exception mapper
+     * @param methodApiResponseAnnotations List of ApiResponse annotations declared in the jax-rs method.
+     * @return response code exist or not
+     */
+    private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation, List<AnnotationInstance> methodApiResponseAnnotations) {
+        AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE);
+        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream().filter(annotationInstance -> {
+            AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
+            return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
+        }).findFirst();
+
+        return apiResponseWithSameCode.isPresent();
+    }
+
+    /**
+     * Add api response to api responses using the annotation information
+     *
+     * @param apiResponseAnnotation The api response annotation
+     * @param operation the method operation
+     */
+    private void addApiReponseFromAnnotation(AnnotationInstance apiResponseAnnotation, Operation operation) {
+        String responseCode = JandexUtil.stringValue(apiResponseAnnotation, OpenApiConstants.PROP_RESPONSE_CODE);
+        if (responseCode == null) {
+            responseCode = APIResponses.DEFAULT;
+        }
+        APIResponse response = readResponse(apiResponseAnnotation);
+        APIResponses responses = ModelUtil.responses(operation);
+        responses.addAPIResponse(responseCode, response);
     }
 
     /**

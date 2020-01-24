@@ -1,0 +1,34 @@
+{
+  "openapi" : "3.0.1",
+  "paths" : {
+    "/resource2s" : {
+      "get" : {
+        "responses" : {
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "404" : {
+            "description" : "Resource Not Found"
+          }
+        }
+      },
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      }
+    }
+  }
+}

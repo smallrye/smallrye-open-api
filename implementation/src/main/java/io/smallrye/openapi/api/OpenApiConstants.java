@@ -46,6 +46,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -234,6 +235,7 @@ public final class OpenApiConstants {
     public static final DotName DOTNAME_SECURITY_REQUIREMENTS = DotName.createSimple(SecurityRequirements.class.getName());
     public static final DotName DOTNAME_CALLBACK = DotName.createSimple(Callback.class.getName());
     public static final DotName DOTNAME_CALLBACKS = DotName.createSimple(Callbacks.class.getName());
+    public static final DotName DOTNAME_EXCEPTION_MAPPER = DotName.createSimple(ExceptionMapper.class.getName());
     public static final DotName DOTNAME_SCHEMA = DotName.createSimple(Schema.class.getName());
     public static final DotName DOTNAME_TAG = DotName.createSimple(Tag.class.getName());
     public static final DotName DOTNAME_TAGS = DotName.createSimple(Tags.class.getName());
@@ -392,6 +394,8 @@ public final class OpenApiConstants {
     public static final String REF_PREFIX_REQUEST_BODY = "#/components/requestBodies/";
     public static final String REF_PREFIX_SCHEMA = "#/components/schemas/";
     public static final String REF_PREFIX_SECURITY_SCHEME = "#/components/securitySchemes/";
+
+    public static final String TO_RESPONSE_METHOD_NAME = "toResponse";
 
     /**
      * Constructor.
