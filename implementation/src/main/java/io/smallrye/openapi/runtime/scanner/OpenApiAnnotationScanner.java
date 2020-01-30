@@ -469,11 +469,13 @@ public class OpenApiAnnotationScanner {
                 .getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
 
         for (ClassInfo classInfo : exceptionMappers) {
-            Type emType = classInfo.interfaceTypes().stream().filter(it -> it.name().equals(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER)).findFirst().get();
+            Type emType = classInfo.interfaceTypes().stream()
+                    .filter(it -> it.name().equals(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER)).findFirst().get();
 
             DotName exceptionDotName = emType.asParameterizedType().arguments().stream().findFirst().get().name();
 
-            MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME, Type.create(exceptionDotName, Type.Kind.CLASS));
+            MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME,
+                    Type.create(exceptionDotName, Type.Kind.CLASS));
 
             if (toResponseMethod.hasAnnotation(OpenApiConstants.DOTNAME_API_RESPONSE)) {
                 AnnotationInstance apiResponseAnnotation = toResponseMethod.annotation(OpenApiConstants.DOTNAME_API_RESPONSE);
@@ -866,19 +868,22 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the method.
+     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the
+     * method.
      * If the reponse code already exists then ignore the exception mapper annotation.
      *
      * @param exMapperApiResponseAnnotation ApiResponse annotation declared in the exception mapper
      * @param methodApiResponseAnnotations List of ApiResponse annotations declared in the jax-rs method.
      * @return response code exist or not
      */
-    private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation, List<AnnotationInstance> methodApiResponseAnnotations) {
+    private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation,
+            List<AnnotationInstance> methodApiResponseAnnotations) {
         AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE);
-        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream().filter(annotationInstance -> {
-            AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
-            return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
-        }).findFirst();
+        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream()
+                .filter(annotationInstance -> {
+                    AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
+                    return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
+                }).findFirst();
 
         return apiResponseWithSameCode.isPresent();
     }
