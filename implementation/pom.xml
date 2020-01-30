@@ -63,10 +63,6 @@
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-api</artifactId>
-        </dependency>
 
         <!-- Provided Dependencies -->
         <dependency>
@@ -117,7 +113,6 @@
             <scope>test</scope>
             <type>pom</type>
         </dependency>
-
     </dependencies>
 
     <build>
