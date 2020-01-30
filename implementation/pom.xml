@@ -117,7 +117,6 @@
             <scope>test</scope>
             <type>pom</type>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -131,13 +130,36 @@
                         <SMALLRYE_MP_CONFIG_PROP>1234</SMALLRYE_MP_CONFIG_PROP>
                     </environmentVariables>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <!--
-                    TODO: Confirm if these are necessary
-                    <enableAssertions>true</enableAssertions>
-                    <argLine>-Xmx512m</argLine>
-                    <forkMode>once</forkMode>
-                    -->
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/CustomExtensionParsingTests.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jackson-exclusion-tests</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/CustomExtensionParsingTests.java</include>
+                            </includes>
+                            <systemProperties>
+                                <classpath.jackson.excluded>true</classpath.jackson.excluded>
+                            </systemProperties>
+                            <classpathDependencyExcludes>
+                                <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
+                                <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-databind</classpathDependencyExclude>
+                                <classpathDependencyExclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</classpathDependencyExclude>
+                            </classpathDependencyExcludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
