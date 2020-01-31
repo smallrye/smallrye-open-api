@@ -16,10 +16,10 @@
 
 package io.smallrye.openapi.runtime.io;
 
+import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.Extensible;
@@ -1355,62 +1354,6 @@ public class OpenApiParser {
             rval.put(fieldName, value);
         }
         return rval;
-    }
-
-    /**
-     * Reads the node as a Java object. This is typically expected to be a literal of
-     * some sort, as in the case of default values and examples. The node may be anything
-     * from a string to a javascript object.
-     * 
-     * @param node
-     */
-    private Object readObject(JsonNode node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.isBigDecimal()) {
-            return new BigDecimal(node.asText());
-        }
-        if (node.isBigInteger()) {
-            return new BigInteger(node.asText());
-        }
-        if (node.isBoolean()) {
-            return node.asBoolean();
-        }
-        if (node.isDouble()) {
-            return node.asDouble();
-        }
-        if (node.isFloat()) {
-            return node.asDouble();
-        }
-        if (node.isInt()) {
-            return node.asInt();
-        }
-        if (node.isLong()) {
-            return node.asLong();
-        }
-        if (node.isTextual()) {
-            return node.asText();
-        }
-        if (node.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) node;
-            List<Object> items = new ArrayList<>();
-            for (JsonNode itemNode : arrayNode) {
-                items.add(readObject(itemNode));
-            }
-            return items;
-        }
-        if (node.isObject()) {
-            Map<String, Object> items = new LinkedHashMap<>();
-            for (Iterator<Entry<String, JsonNode>> fields = node.fields(); fields.hasNext();) {
-                Entry<String, JsonNode> field = fields.next();
-                String fieldName = field.getKey();
-                Object fieldValue = readObject(field.getValue());
-                items.put(fieldName, fieldValue);
-            }
-            return items;
-        }
-        return null;
     }
 
     /**

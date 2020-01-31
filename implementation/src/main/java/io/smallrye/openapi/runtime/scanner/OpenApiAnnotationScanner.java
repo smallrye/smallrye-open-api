@@ -82,8 +82,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
@@ -136,7 +134,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 public class OpenApiAnnotationScanner {
 
     private static final Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final OpenApiConfig config;
     private final IndexView index;
@@ -158,7 +155,8 @@ public class OpenApiAnnotationScanner {
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
-        this(config, index, Collections.emptyList());
+        this(config, index, Collections.singletonList(new AnnotationScannerExtension() {
+        }));
     }
 
     /**
@@ -469,11 +467,22 @@ public class OpenApiAnnotationScanner {
                 .getKnownDirectImplementors(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER);
 
         for (ClassInfo classInfo : exceptionMappers) {
-            Type emType = classInfo.interfaceTypes().stream().filter(it -> it.name().equals(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER)).findFirst().get();
+            DotName exceptionDotName = classInfo.interfaceTypes()
+                    .stream()
+                    .filter(it -> it.name().equals(OpenApiConstants.DOTNAME_EXCEPTION_MAPPER))
+                    .filter(it -> it.kind() == Type.Kind.PARAMETERIZED_TYPE)
+                    .map(Type::asParameterizedType)
+                    .map(type -> type.arguments().get(0)) // ExceptionMapper<?> has a single type argument
+                    .map(Type::name)
+                    .findFirst()
+                    .orElse(null);
 
-            DotName exceptionDotName = emType.asParameterizedType().arguments().stream().findFirst().get().name();
+            if (exceptionDotName == null) {
+                continue;
+            }
 
-            MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME, Type.create(exceptionDotName, Type.Kind.CLASS));
+            MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME,
+                    Type.create(exceptionDotName, Type.Kind.CLASS));
 
             if (toResponseMethod.hasAnnotation(OpenApiConstants.DOTNAME_API_RESPONSE)) {
                 AnnotationInstance apiResponseAnnotation = toResponseMethod.annotation(OpenApiConstants.DOTNAME_API_RESPONSE);
@@ -809,13 +818,7 @@ public class OpenApiAnnotationScanner {
         }
         for (AnnotationInstance annotation : extensionAnnotations) {
             String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
-            String value = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_VALUE);
-            boolean parseValue = JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_PARSE_VALUE);
-            Object parsedValue = value;
-            if (parseValue) {
-                parsedValue = parseExtensionValue(value);
-            }
-            operation.addExtension(name, parsedValue);
+            operation.addExtension(name, readExtensionValue(name, annotation));
         }
 
         processSecurityRoles(method, operation);
@@ -866,19 +869,22 @@ public class OpenApiAnnotationScanner {
     }
 
     /**
-     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the method.
+     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the
+     * method.
      * If the reponse code already exists then ignore the exception mapper annotation.
      *
      * @param exMapperApiResponseAnnotation ApiResponse annotation declared in the exception mapper
      * @param methodApiResponseAnnotations List of ApiResponse annotations declared in the jax-rs method.
      * @return response code exist or not
      */
-    private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation, List<AnnotationInstance> methodApiResponseAnnotations) {
+    private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation,
+            List<AnnotationInstance> methodApiResponseAnnotations) {
         AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE);
-        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream().filter(annotationInstance -> {
-            AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
-            return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
-        }).findFirst();
+        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream()
+                .filter(annotationInstance -> {
+                    AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
+                    return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
+                }).findFirst();
 
         return apiResponseWithSameCode.isPresent();
     }
@@ -2187,62 +2193,33 @@ public class OpenApiAnnotationScanner {
         AnnotationInstance[] nestedArray = value.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
             String extName = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
-            String extValue = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_VALUE);
-            extensions.put(extName, extValue);
+            extensions.put(extName, readExtensionValue(extName, annotation));
         }
         return extensions;
     }
 
     /**
-     * Parses an extension value. The value may be:
+     * Reads a single Extension annotation. If the value must be parsed (as indicated by the
+     * 'parseValue' attribute of the annotation), the parsing is delegated to the extensions
+     * currently set in the scanner. The default value will parse the string using Jackson.
      *
-     * - JSON object - starts with {
-     * - JSON array - starts with [
-     * - number
-     * - boolean
-     * - string
-     *
-     * @param value
+     * @param annotation Extension annotation
+     * @return a Java representation of the 'value' property, either a String or parsed value
+     * 
      */
-    private Object parseExtensionValue(String value) {
-        if (value == null) {
-            return null;
-        }
-        if ("true".equals(value)) {
-            return Boolean.TRUE;
-        }
-        if ("false".equals(value)) {
-            return Boolean.FALSE;
-        }
-        if (value.trim().startsWith("{")) {
-            try {
-                return MAPPER.readTree(value.trim());
-            } catch (Exception e) {
-                // TODO log the error
+    private Object readExtensionValue(String name, AnnotationInstance annotation) {
+        String extValue = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_VALUE);
+        boolean parseValue = JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_PARSE_VALUE);
+        Object parsedValue = extValue;
+        if (parseValue) {
+            for (AnnotationScannerExtension e : this.extensions) {
+                parsedValue = e.parseExtension(name, extValue);
+                if (parsedValue != null) {
+                    break;
+                }
             }
         }
-        if (value.trim().startsWith("[")) {
-            try {
-                return MAPPER.readTree(value.trim());
-            } catch (Exception e) {
-                // TODO log the error
-            }
-        }
-        if (Character.isDigit(value.charAt(0)) || value.charAt(0) == '-' || value.charAt(0) == '+') {
-            try {
-                return Integer.parseInt(value);
-            } catch (Exception e) {
-            }
-            try {
-                return Float.parseFloat(value);
-            } catch (Exception e) {
-            }
-            try {
-                return Double.parseDouble(value);
-            } catch (Exception e) {
-            }
-        }
-        return value;
+        return parsedValue;
     }
 
     private CustomSchemaRegistry getCustomSchemaRegistry() {

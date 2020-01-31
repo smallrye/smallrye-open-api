@@ -15,7 +15,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 public class ExceptionMapperScanTests extends IndexScannerTestBase {
 
@@ -35,7 +35,8 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
 
     @Test
     public void testMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
-        test("responses.exception-mapper-overridden-by-method-annotation-generation.json", TestResource2.class, ExceptionHandler1.class, ExceptionHandler2.class);
+        test("responses.exception-mapper-overridden-by-method-annotation-generation.json", TestResource2.class,
+                ExceptionHandler1.class, ExceptionHandler2.class);
     }
 
     @Path("/resources")
@@ -68,7 +69,6 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
         }
 
     }
-
 
     @Provider
     static class ExceptionHandler1 implements ExceptionMapper<WebApplicationException> {

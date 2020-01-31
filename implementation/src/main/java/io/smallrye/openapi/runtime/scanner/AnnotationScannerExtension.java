@@ -47,4 +47,19 @@ public interface AnnotationScannerExtension {
         return false;
     }
 
+    /**
+     * Parses an OpenAPI Extension value. The value may be:
+     *
+     * - JSON object - starts with '{'
+     * - JSON array - starts with '['
+     * - number
+     * - boolean
+     * - string
+     *
+     * @param key the name of the extension property
+     * @param value the string value of the extension
+     */
+    default Object parseExtension(String key, String value) {
+        return io.smallrye.openapi.runtime.io.JsonUtil.parseValue(value);
+    }
 }
