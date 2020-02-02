@@ -732,7 +732,6 @@ public class OpenApiAnnotationScanner {
 
         // Process @APIResponse annotations
         /////////////////////////////////////////
-        APIResponses responses = null;
         List<AnnotationInstance> apiResponseAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_API_RESPONSE, OpenApiConstants.DOTNAME_API_RESPONSES);
         for (AnnotationInstance annotation : apiResponseAnnotations) {
@@ -1036,7 +1035,7 @@ public class OpenApiAnnotationScanner {
                     produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
                 }
 
-                if (schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
+                if (schema != null && schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
                     schema.setNullable(Boolean.TRUE);
                 }
 
