@@ -322,4 +322,35 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
             return null;
         }
     }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #248.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/248
+     *
+     */
+    @Test
+    public void testResponseTypeUnindexed() throws IOException, JSONException {
+        // Index is intentionally missing ResponseTypeUnindexedTestResource$ThirdPartyType
+        Index index = indexOf(ResponseTypeUnindexedTestResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.unknown-type.empty-schema.json", result);
+    }
+
+    @Path("/unindexed")
+    static class ResponseTypeUnindexedTestResource {
+        // This type will not be in the Jandex index, nor does it implement Map or List.
+        static class ThirdPartyType {
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public ThirdPartyType hello() {
+            return null;
+        }
+    }
 }
