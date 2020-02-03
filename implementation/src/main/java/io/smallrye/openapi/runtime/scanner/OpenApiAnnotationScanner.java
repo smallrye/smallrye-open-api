@@ -350,7 +350,7 @@ public class OpenApiAnnotationScanner {
         ////////////////////////////////////////
         AnnotationInstance appPathAnno = JandexUtil.getClassAnnotation(applicationClass,
                 OpenApiConstants.DOTNAME_APPLICATION_PATH);
-        if (appPathAnno == null) {
+        if (appPathAnno == null || config.applicationPathDisable()) {
             appPathAnno = JandexUtil.getClassAnnotation(applicationClass, OpenApiConstants.DOTNAME_PATH);
         }
         // TODO: Add support for Application selection when there are more than one

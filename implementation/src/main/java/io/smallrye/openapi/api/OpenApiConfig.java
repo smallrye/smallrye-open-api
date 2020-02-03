@@ -56,4 +56,6 @@ public interface OpenApiConfig {
 
     public String customSchemaRegistryClass();
 
+    public boolean applicationPathDisable();
+
 }
