@@ -44,6 +44,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Set<String> scanDependenciesJars;
     private Boolean schemaReferencesEnable;
     private String customSchemaRegistryClass;
+    private Boolean applicationPathDisable;
 
     /**
      * Constructor.
@@ -216,6 +217,15 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                     .getOptionalValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class).orElse(null);
         }
         return customSchemaRegistryClass;
+    }
+
+    @Override
+    public boolean applicationPathDisable() {
+        if (applicationPathDisable == null) {
+            applicationPathDisable = getConfig().getOptionalValue(OpenApiConstants.APP_PATH_DISABLE, Boolean.class)
+                    .orElse(false);
+        }
+        return applicationPathDisable;
     }
 
     private static Set<String> asCsvSet(String items) {

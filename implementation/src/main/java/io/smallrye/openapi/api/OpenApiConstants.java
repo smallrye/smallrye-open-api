@@ -81,6 +81,7 @@ public final class OpenApiConstants {
     public static final String SCAN_DEPENDENCIES_JARS = "mp.openapi.extensions.scan-dependencies.jars";
     public static final String SCHEMA_REFERENCES_ENABLE = "mp.openapi.extensions.schema-references.enable";
     public static final String CUSTOM_SCHEMA_REGISTRY_CLASS = "mp.openapi.extensions.custom-schema-registry.class";
+    public static final String APP_PATH_DISABLE = "mp.openapi.extensions.application-path.disable";
 
     /**
      * Set of classes which should never be scanned, regardless of user configuration.
