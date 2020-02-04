@@ -66,6 +66,7 @@
         <dependency>
             <groupId>org.jboss.shrinkwrap</groupId>
             <artifactId>shrinkwrap-api</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- Provided Dependencies -->
