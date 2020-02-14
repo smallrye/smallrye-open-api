@@ -69,7 +69,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String modelReader() {
         if (modelReader == null) {
-            modelReader = getConfig().getOptionalValue(OASConfig.MODEL_READER, String.class).orElse(null);
+            modelReader = getStringConfigValue(OASConfig.MODEL_READER);
         }
         return modelReader;
     }
@@ -80,7 +80,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String filter() {
         if (filter == null) {
-            filter = getConfig().getOptionalValue(OASConfig.FILTER, String.class).orElse(null);
+            filter = getStringConfigValue(OASConfig.FILTER);
         }
         return filter;
     }
@@ -102,7 +102,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> scanPackages() {
         if (scanPackages == null) {
-            String packages = getConfig().getOptionalValue(OASConfig.SCAN_PACKAGES, String.class).orElse(null);
+            String packages = getStringConfigValue(OASConfig.SCAN_PACKAGES);
             scanPackages = asCsvSet(packages);
         }
         return scanPackages;
@@ -114,7 +114,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> scanClasses() {
         if (scanClasses == null) {
-            String classes = getConfig().getOptionalValue(OASConfig.SCAN_CLASSES, String.class).orElse(null);
+            String classes = getStringConfigValue(OASConfig.SCAN_CLASSES);
             scanClasses = asCsvSet(classes);
         }
         return scanClasses;
@@ -126,7 +126,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> scanExcludePackages() {
         if (scanExcludePackages == null) {
-            String packages = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_PACKAGES, String.class).orElse(null);
+            String packages = getStringConfigValue(OASConfig.SCAN_EXCLUDE_PACKAGES);
             scanExcludePackages = asCsvSet(packages);
             scanExcludePackages.addAll(OpenApiConstants.NEVER_SCAN_PACKAGES);
         }
@@ -139,7 +139,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> scanExcludeClasses() {
         if (scanExcludeClasses == null) {
-            String classes = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_CLASSES, String.class).orElse(null);
+            String classes = getStringConfigValue(OASConfig.SCAN_EXCLUDE_CLASSES);
             scanExcludeClasses = asCsvSet(classes);
             scanExcludeClasses.addAll(OpenApiConstants.NEVER_SCAN_CLASSES);
         }
@@ -152,7 +152,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> servers() {
         if (servers == null) {
-            String theServers = getConfig().getOptionalValue(OASConfig.SERVERS, String.class).orElse(null);
+            String theServers = getStringConfigValue(OASConfig.SERVERS);
             servers = asCsvSet(theServers);
         }
         return servers;
@@ -163,7 +163,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      */
     @Override
     public Set<String> pathServers(String path) {
-        String pathServers = getConfig().getOptionalValue(OASConfig.SERVERS_PATH_PREFIX + path, String.class).orElse(null);
+        String pathServers = getStringConfigValue(OASConfig.SERVERS_PATH_PREFIX + path);
         return asCsvSet(pathServers);
     }
 
@@ -172,8 +172,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      */
     @Override
     public Set<String> operationServers(String operationId) {
-        String opServers = getConfig().getOptionalValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class)
-                .orElse(null);
+        String opServers = getStringConfigValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId);
         return asCsvSet(opServers);
     }
 
@@ -195,7 +194,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> scanDependenciesJars() {
         if (scanDependenciesJars == null) {
-            String classes = getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS, String.class).orElse(null);
+            String classes = getStringConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS);
             scanDependenciesJars = asCsvSet(classes);
         }
         return scanDependenciesJars;
@@ -213,8 +212,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String customSchemaRegistryClass() {
         if (customSchemaRegistryClass == null) {
-            customSchemaRegistryClass = getConfig()
-                    .getOptionalValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class).orElse(null);
+            customSchemaRegistryClass = getStringConfigValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS);
         }
         return customSchemaRegistryClass;
     }
@@ -226,6 +224,14 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                     .orElse(false);
         }
         return applicationPathDisable;
+    }
+
+    /**
+     * getConfig().getOptionalValue(key) can return "" if optional {@link Converter}s are used. Enforce a null value if
+     * we get an empty string back.
+     */
+    private String getStringConfigValue(String key) {
+        return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v) ? null : v).orElse(null);
     }
 
     private static Set<String> asCsvSet(String items) {
