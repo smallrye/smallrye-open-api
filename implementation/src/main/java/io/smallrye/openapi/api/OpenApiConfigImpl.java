@@ -231,7 +231,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * we get an empty string back.
      */
     private String getStringConfigValue(String key) {
-        return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v) ? null : v).orElse(null);
+        return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v.trim()) ? null : v).orElse(null);
     }
 
     private static Set<String> asCsvSet(String items) {
