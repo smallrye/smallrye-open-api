@@ -17,7 +17,6 @@
 package io.smallrye.openapi.tck;
 
 import org.eclipse.microprofile.openapi.tck.ModelReaderAppTest;
-import org.junit.Ignore;
 
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
@@ -26,7 +25,6 @@ import test.io.smallrye.openapi.tck.TckTest;
  * @author eric.wittmann@gmail.com
  */
 @TckTest
-@Ignore //TODO: Solve the "UnsupportedOperationException" in "io.smallrye.openapi.api.util.MergeUtil"
 public class ModelReaderAppTckTest extends BaseTckTest<ModelReaderAppTest> {
 
 }

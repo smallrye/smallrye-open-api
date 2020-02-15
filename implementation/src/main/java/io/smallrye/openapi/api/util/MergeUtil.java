@@ -267,8 +267,10 @@ public class MergeUtil {
             return mergeParameterLists(values1, values2);
         }
 
-        values1.addAll(values2);
-        return values1;
+        List merged = new ArrayList<>(values1.size() + values2.size());
+        merged.addAll(values1);
+        merged.addAll(values2);
+        return merged;
     }
 
     /**
@@ -279,7 +281,7 @@ public class MergeUtil {
      * @param values2
      */
     private static List<String> mergeStringLists(List<String> values1, List<String> values2) {
-        Set<String> set = new LinkedHashSet<String>();
+        Set<String> set = new LinkedHashSet<>();
         set.addAll(values1);
         set.addAll(values2);
         return new ArrayList<>(set);
