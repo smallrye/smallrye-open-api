@@ -263,7 +263,22 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
      */
     @Override
     protected boolean isIgnored(ProxiedTckTest child) {
-        return child.getTestMethod().isAnnotationPresent(Ignore.class);
+        Method testMethod = child.getTestMethod();
+
+        if (testMethod.isAnnotationPresent(Ignore.class)) {
+            return true;
+        }
+
+        Method testMethodOverride;
+
+        try {
+            testMethodOverride = testClass.getMethod(testMethod.getName(), testMethod.getParameterTypes());
+            return testMethodOverride.isAnnotationPresent(Ignore.class);
+        } catch (NoSuchMethodException | SecurityException e) {
+            // Ignore, no override has been specified in the BaseTckTest subclass
+        }
+
+        return false;
     }
 
     private static ClassLoader getContextClassLoader() {
