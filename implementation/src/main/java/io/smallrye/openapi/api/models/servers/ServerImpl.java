@@ -76,7 +76,7 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.servers.Server#setVariables(org.eclipse.microprofile.openapi.models.servers.ServerVariables)
+     * @see org.eclipse.microprofile.openapi.models.servers.Server#setVariables(java.util.Map)
      */
     @Override
     public void setVariables(Map<String, ServerVariable> variables) {

@@ -29,6 +29,11 @@
 
     <name>SmallRye: MicroProfile OpenAPI Implementation</name>
 
+    <properties>
+        <!-- Excluded model classes for duplication checks (getters/setters treated as duplicates by Sonar) -->
+        <sonar.cpd.exclusions>src/main/java/io/smallrye/openapi/api/models/**/*.java</sonar.cpd.exclusions>
+    </properties>
+
     <dependencies>
         <!-- MP OpenAPI Spec -->
         <dependency>

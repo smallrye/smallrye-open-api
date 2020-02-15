@@ -92,7 +92,7 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#setScopes(org.eclipse.microprofile.openapi.models.security.Scopes)
+     * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#setScopes(java.util.Map)
      */
     @Override
     public void setScopes(Map<String, String> scopes) {

@@ -235,10 +235,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         if (schemas == null) {
             schemas = StreamSupport
                     .stream(config.getPropertyNames().spliterator(), false)
-                    .filter(name -> name.startsWith("mp.openapi.schema.") || 
-                                    name.startsWith("MP_OPENAPI_SCHEMA_"))
+                    .filter(name -> name.startsWith("mp.openapi.schema.") ||
+                            name.startsWith("MP_OPENAPI_SCHEMA_"))
                     .collect(Collectors.toMap(name -> name.substring("mp.openapi.schema.".length()),
-                                              name -> config.getValue(name, String.class)));
+                            name -> config.getValue(name, String.class)));
         }
         return schemas;
     }
