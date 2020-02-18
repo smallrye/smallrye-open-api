@@ -108,7 +108,7 @@ public class SchemaFactory {
      * @param defaults default values to be set on the schema when not present in the annotation
      * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
      */
-    public static Schema readSchema(IndexView index,
+    static Schema readSchema(IndexView index,
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz,
@@ -127,17 +127,15 @@ public class SchemaFactory {
 
         schema = readSchema(index, schema, annotation, defaults);
         ClassType clazzType = (ClassType) Type.create(clazz.name(), Type.Kind.CLASS);
-        SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
         /*
          * The registry may already contain the type from earlier in the scan if the
          * type has been referenced as a field, etc. The schema here is "fuller" as it
          * now contains information gathered from the @Schema annotation on the class.
+         * 
+         * Ignore the reference returned by register, the caller expects the full schema.
          */
-        if (schemaRegistry != null && TypeUtil.allowRegistration(index, clazzType)) {
-            // Ignore the reference returned by register, the caller expects the full schema
-            schemaRegistry.register(clazzType, schema);
-        }
+        schemaRegistration(index, clazzType, schema);
 
         return schema;
     }
@@ -357,12 +355,7 @@ public class SchemaFactory {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
             Type asyncType = resolveAsyncType(type, extensions);
-            schema = OpenApiDataObjectScanner.process(index, asyncType);
-
-            if (schema != null && TypeUtil.allowRegistration(index, asyncType)) {
-                SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
-                schema = schemaRegistry.register(asyncType, schema);
-            }
+            schema = schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
         }
 
         return schema;
@@ -425,12 +418,56 @@ public class SchemaFactory {
             return schemaRegistry.lookupRef(ctype);
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, ctype);
-            if (schemaReferenceSupported && schema != null && TypeUtil.allowRegistration(index, ctype)) {
-                return schemaRegistry.register(ctype, schema);
+            if (schemaReferenceSupported) {
+                return schemaRegistration(index, ctype, schema);
             } else {
                 return schema;
             }
         }
+    }
+
+    /**
+     * Register the provided schema in the SchemaRegistry if allowed.
+     * 
+     * @param index the index of classes being scanned
+     * @param type the type of the schema to register
+     * @param schema a schema
+     * @return a reference to the registered schema or the input schema when registration is not allowed/possible
+     */
+    static Schema schemaRegistration(IndexView index, Type type, Schema schema) {
+        SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
+
+        if (allowRegistration(index, schemaRegistry, type, schema)) {
+            schema = schemaRegistry.register(type, schema);
+        }
+
+        return schema;
+    }
+
+    /**
+     * Determines if the give schema may be registered. Schemas may only be registered
+     * if non-null; the type is allowed for registration; and a schema for the given type
+     * is not already in the registry or the schema being registered is not already a
+     * reference that has been registered.
+     * 
+     * @param index
+     * @param registry
+     * @param type
+     * @param schema
+     * @return true if the schema may be registered, otherwise false
+     */
+    static boolean allowRegistration(IndexView index, SchemaRegistry registry, Type type, Schema schema) {
+        if (schema == null || registry == null || !TypeUtil.allowRegistration(index, type)) {
+            return false;
+        }
+
+        /*
+         * Only register if the type is not already registered or the schema
+         * being registered is not the same as an existing reference already
+         * in the registry. Such a situation may occur if a downstream process
+         * registered the schema now being checked.
+         */
+        return !registry.has(type) || !registry.lookupRef(type).equals(schema);
     }
 
     /**
