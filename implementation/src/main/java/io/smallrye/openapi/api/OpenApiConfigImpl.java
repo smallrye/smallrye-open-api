@@ -230,7 +230,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * getConfig().getOptionalValue(key) can return "" if optional {@link Converter}s are used. Enforce a null value if
      * we get an empty string back.
      */
-    private String getStringConfigValue(String key) {
+    String getStringConfigValue(String key) {
         return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v.trim()) ? null : v).orElse(null);
     }
 
