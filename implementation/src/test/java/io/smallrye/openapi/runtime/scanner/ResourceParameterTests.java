@@ -22,8 +22,10 @@ import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -352,5 +354,62 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
         public ThirdPartyType hello() {
             return null;
         }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test cases derived from original example in SmallRye OpenAPI issue #260.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/260
+     *
+     */
+    @Test
+    public void testGenericSetResponseWithSetIndexed() throws IOException, JSONException {
+        Index index = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.generic-collection.set-indexed.json", result);
+    }
+
+    @Test
+    public void testGenericSetResponseWithSetUnindexed() throws IOException, JSONException {
+        Index index = indexOf(FruitResource.class, Fruit.class, Seed.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.generic-collection.set-unindexed.json", result);
+    }
+
+    @Path("/fruits")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @SuppressWarnings("unused")
+    static class FruitResource {
+        @GET
+        public Set<Fruit> list() {
+            return null;
+        }
+
+        @POST
+        public Set<Fruit> add(Fruit fruit) {
+            return null;
+        }
+
+        @DELETE
+        public Set<Fruit> delete(Fruit fruit) {
+            return null;
+        }
+    }
+
+    static class Fruit {
+        String description;
+        String name;
+        List<Seed> seeds;
+    }
+
+    static class Seed {
+
     }
 }
