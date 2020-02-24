@@ -49,15 +49,6 @@ public class OAuthFlowsImpl extends ExtensibleImpl<OAuthFlows> implements OAuthF
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.OAuthFlows#implicit(org.eclipse.microprofile.openapi.models.security.OAuthFlow)
-     */
-    @Override
-    public OAuthFlows implicit(OAuthFlow implicit) {
-        this.implicit = implicit;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlows#getPassword()
      */
     @Override
@@ -71,15 +62,6 @@ public class OAuthFlowsImpl extends ExtensibleImpl<OAuthFlows> implements OAuthF
     @Override
     public void setPassword(OAuthFlow password) {
         this.password = password;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.security.OAuthFlows#password(org.eclipse.microprofile.openapi.models.security.OAuthFlow)
-     */
-    @Override
-    public OAuthFlows password(OAuthFlow password) {
-        this.password = password;
-        return this;
     }
 
     /**
@@ -99,15 +81,6 @@ public class OAuthFlowsImpl extends ExtensibleImpl<OAuthFlows> implements OAuthF
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.OAuthFlows#clientCredentials(org.eclipse.microprofile.openapi.models.security.OAuthFlow)
-     */
-    @Override
-    public OAuthFlows clientCredentials(OAuthFlow clientCredentials) {
-        this.clientCredentials = clientCredentials;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlows#getAuthorizationCode()
      */
     @Override
@@ -121,15 +94,6 @@ public class OAuthFlowsImpl extends ExtensibleImpl<OAuthFlows> implements OAuthF
     @Override
     public void setAuthorizationCode(OAuthFlow authorizationCode) {
         this.authorizationCode = authorizationCode;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.security.OAuthFlows#authorizationCode(org.eclipse.microprofile.openapi.models.security.OAuthFlow)
-     */
-    @Override
-    public OAuthFlows authorizationCode(OAuthFlow authorizationCode) {
-        this.authorizationCode = authorizationCode;
-        return this;
     }
 
 }

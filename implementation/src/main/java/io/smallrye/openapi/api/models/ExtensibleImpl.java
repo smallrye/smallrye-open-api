@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
 
+import io.smallrye.openapi.runtime.util.ModelUtil;
+
 /**
  * Implementation of the {@link Extensible} OpenAPI model interface. Base class for many of the
  * OpenAPI models.
@@ -36,7 +38,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
      */
     @Override
     public Map<String, Object> getExtensions() {
-        return this.extensions;
+        return ModelUtil.unmodifiableMap(this.extensions);
     }
 
     /**
@@ -45,13 +47,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
     @SuppressWarnings("unchecked")
     @Override
     public T addExtension(String name, Object value) {
-        if (value == null) {
-            return (T) this;
-        }
-        if (extensions == null) {
-            this.extensions = new LinkedHashMap<>();
-        }
-        this.extensions.put(name, value);
+        this.extensions = ModelUtil.add(name, value, this.extensions, LinkedHashMap<String, Object>::new);
         return (T) this;
     }
 
@@ -60,9 +56,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
      */
     @Override
     public void removeExtension(String name) {
-        if (this.extensions != null) {
-            this.extensions.remove(name);
-        }
+        ModelUtil.remove(this.extensions, name);
     }
 
     /**
@@ -70,7 +64,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
      */
     @Override
     public void setExtensions(Map<String, Object> extensions) {
-        this.extensions = extensions;
+        this.extensions = ModelUtil.replace(extensions, LinkedHashMap<String, Object>::new);
     }
 
 }

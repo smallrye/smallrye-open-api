@@ -58,15 +58,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public SecurityScheme ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#getType()
      */
     @Override
@@ -80,15 +71,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     @Override
     public void setType(Type type) {
         this.type = type;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#type(org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type)
-     */
-    @Override
-    public SecurityScheme type(Type type) {
-        this.type = type;
-        return this;
     }
 
     /**
@@ -108,15 +90,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#description(java.lang.String)
-     */
-    @Override
-    public SecurityScheme description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#getName()
      */
     @Override
@@ -130,15 +103,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#name(java.lang.String)
-     */
-    @Override
-    public SecurityScheme name(String name) {
-        this.name = name;
-        return this;
     }
 
     /**
@@ -158,15 +122,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#in(org.eclipse.microprofile.openapi.models.security.SecurityScheme.In)
-     */
-    @Override
-    public SecurityScheme in(In in) {
-        this.in = in;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#getScheme()
      */
     @Override
@@ -180,15 +135,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     @Override
     public void setScheme(String scheme) {
         this.scheme = scheme;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#scheme(java.lang.String)
-     */
-    @Override
-    public SecurityScheme scheme(String scheme) {
-        this.scheme = scheme;
-        return this;
     }
 
     /**
@@ -208,15 +154,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#bearerFormat(java.lang.String)
-     */
-    @Override
-    public SecurityScheme bearerFormat(String bearerFormat) {
-        this.bearerFormat = bearerFormat;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#getFlows()
      */
     @Override
@@ -233,15 +170,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#flows(org.eclipse.microprofile.openapi.models.security.OAuthFlows)
-     */
-    @Override
-    public SecurityScheme flows(OAuthFlows flows) {
-        this.flows = flows;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#getOpenIdConnectUrl()
      */
     @Override
@@ -255,15 +183,6 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     @Override
     public void setOpenIdConnectUrl(String openIdConnectUrl) {
         this.openIdConnectUrl = openIdConnectUrl;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.security.SecurityScheme#openIdConnectUrl(java.lang.String)
-     */
-    @Override
-    public SecurityScheme openIdConnectUrl(String openIdConnectUrl) {
-        this.openIdConnectUrl = openIdConnectUrl;
-        return this;
     }
 
 }

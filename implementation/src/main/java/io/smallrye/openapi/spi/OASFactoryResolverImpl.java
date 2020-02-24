@@ -45,12 +45,10 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
-import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
-import org.eclipse.microprofile.openapi.models.servers.ServerVariables;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.eclipse.microprofile.openapi.spi.OASFactoryResolver;
 
@@ -79,12 +77,10 @@ import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
-import io.smallrye.openapi.api.models.security.ScopesImpl;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
 import io.smallrye.openapi.api.models.servers.ServerImpl;
 import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariablesImpl;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 
 /**
@@ -122,12 +118,10 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
         registry.put(Paths.class, PathsImpl.class);
         registry.put(RequestBody.class, RequestBodyImpl.class);
         registry.put(Schema.class, SchemaImpl.class);
-        registry.put(Scopes.class, ScopesImpl.class);
         registry.put(SecurityRequirement.class, SecurityRequirementImpl.class);
         registry.put(SecurityScheme.class, SecuritySchemeImpl.class);
         registry.put(Server.class, ServerImpl.class);
         registry.put(ServerVariable.class, ServerVariableImpl.class);
-        registry.put(ServerVariables.class, ServerVariablesImpl.class);
         registry.put(Tag.class, TagImpl.class);
         registry.put(XML.class, XMLImpl.class);
     }

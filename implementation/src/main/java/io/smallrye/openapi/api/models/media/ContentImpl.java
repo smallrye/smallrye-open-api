@@ -16,7 +16,6 @@
 
 package io.smallrye.openapi.api.models.media;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,13 +23,14 @@ import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Content} OpenAPI model interface.
  */
-public class ContentImpl extends LinkedHashMap<String, MediaType> implements Content, ModelImpl {
+public class ContentImpl implements Content, ModelImpl {
 
-    private static final long serialVersionUID = -8680275279421417582L;
+    private Map<String, MediaType> mediaTypes;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.media.Content#addMediaType(java.lang.String,
@@ -38,10 +38,7 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
      */
     @Override
     public Content addMediaType(String name, MediaType mediaType) {
-        if (mediaType == null) {
-            return this;
-        }
-        super.put(name, mediaType);
+        this.mediaTypes = ModelUtil.add(name, mediaType, this.mediaTypes, LinkedHashMap<String, MediaType>::new);
         return this;
     }
 
@@ -50,7 +47,7 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
      */
     @Override
     public void removeMediaType(String name) {
-        this.remove(name);
+        ModelUtil.remove(this.mediaTypes, name);
     }
 
     /**
@@ -58,7 +55,7 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
      */
     @Override
     public Map<String, MediaType> getMediaTypes() {
-        return Collections.unmodifiableMap(this);
+        return ModelUtil.unmodifiableMap(this.mediaTypes);
     }
 
     /**
@@ -66,8 +63,7 @@ public class ContentImpl extends LinkedHashMap<String, MediaType> implements Con
      */
     @Override
     public void setMediaTypes(Map<String, MediaType> mediaTypes) {
-        this.clear();
-        this.putAll(mediaTypes);
+        this.mediaTypes = ModelUtil.replace(mediaTypes, LinkedHashMap<String, MediaType>::new);
     }
 
 }

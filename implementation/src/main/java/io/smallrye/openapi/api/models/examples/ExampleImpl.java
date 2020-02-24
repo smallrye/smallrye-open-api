@@ -53,15 +53,6 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public Example ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.examples.Example#getSummary()
      */
     @Override
@@ -75,15 +66,6 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
     @Override
     public void setSummary(String summary) {
         this.summary = summary;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.examples.Example#summary(java.lang.String)
-     */
-    @Override
-    public Example summary(String summary) {
-        this.summary = summary;
-        return this;
     }
 
     /**
@@ -103,15 +85,6 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.examples.Example#description(java.lang.String)
-     */
-    @Override
-    public Example description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.examples.Example#getValue()
      */
     @Override
@@ -128,15 +101,6 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.examples.Example#value(java.lang.Object)
-     */
-    @Override
-    public Example value(Object value) {
-        this.value = value;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.examples.Example#getExternalValue()
      */
     @Override
@@ -150,15 +114,6 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
     @Override
     public void setExternalValue(String externalValue) {
         this.externalValue = externalValue;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.examples.Example#externalValue(java.lang.String)
-     */
-    @Override
-    public Example externalValue(String externalValue) {
-        this.externalValue = externalValue;
-        return this;
     }
 
 }

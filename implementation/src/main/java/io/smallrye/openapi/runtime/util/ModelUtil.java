@@ -18,9 +18,11 @@ package io.smallrye.openapi.runtime.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -78,7 +80,9 @@ public class ModelUtil {
 
         if (current != null) {
             Tag replacement = MergeUtil.mergeObjects(current, tag);
+            tags = new ArrayList<>(tags);
             tags.set(currentIndex, replacement);
+            openApi.setTags(tags);
         } else {
             openApi.addTag(tag);
         }
@@ -136,9 +140,9 @@ public class ModelUtil {
         if (parameter.getSchema() != null) {
             return true;
         }
-        if (parameter.getContent() != null && !parameter.getContent().isEmpty()) {
-            Collection<MediaType> mediaTypes = parameter.getContent().values();
-            for (MediaType mediaType : mediaTypes) {
+        Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(parameter.getContent());
+        if (!mediaTypes.isEmpty()) {
+            for (MediaType mediaType : mediaTypes.values()) {
                 if (mediaType.getSchema() != null) {
                     return true;
                 }
@@ -159,11 +163,11 @@ public class ModelUtil {
         if (parameter.getSchema() != null) {
             return Arrays.asList(parameter.getSchema());
         }
-        if (parameter.getContent() != null && !parameter.getContent().isEmpty()) {
-            Collection<MediaType> mediaTypes = parameter.getContent().values();
+        Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(parameter.getContent());
+        if (!mediaTypes.isEmpty()) {
             List<Schema> schemas = new ArrayList<>(mediaTypes.size());
 
-            for (MediaType mediaType : mediaTypes) {
+            for (MediaType mediaType : mediaTypes.values()) {
                 if (mediaType.getSchema() != null) {
                     schemas.add(mediaType.getSchema());
                 }
@@ -193,7 +197,8 @@ public class ModelUtil {
             return;
         }
         Content content = parameter.getContent();
-        if (content.isEmpty()) {
+        Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(content);
+        if (mediaTypes.isEmpty()) {
             String[] defMediaTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             for (String mediaTypeName : defMediaTypes) {
                 MediaType mediaType = new MediaTypeImpl();
@@ -202,7 +207,7 @@ public class ModelUtil {
             }
             return;
         }
-        for (String mediaTypeName : content.keySet()) {
+        for (String mediaTypeName : mediaTypes.keySet()) {
             MediaType mediaType = content.getMediaType(mediaTypeName);
             mediaType.setSchema(schema);
         }
@@ -217,9 +222,9 @@ public class ModelUtil {
      * @return Whether RequestBody has a schema
      */
     public static boolean requestBodyHasSchema(RequestBody requestBody) {
-        if (requestBody.getContent() != null && !requestBody.getContent().isEmpty()) {
-            Collection<MediaType> mediaTypes = requestBody.getContent().values();
-            for (MediaType mediaType : mediaTypes) {
+        Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(requestBody.getContent());
+        if (!mediaTypes.isEmpty()) {
+            for (MediaType mediaType : mediaTypes.values()) {
                 if (mediaType.getSchema() != null) {
                     return true;
                 }
@@ -241,7 +246,8 @@ public class ModelUtil {
             content = new ContentImpl();
             requestBody.setContent(content);
         }
-        if (content.isEmpty()) {
+        Map<String, MediaType> contentMediaTypes = getMediaTypesOrEmpty(content);
+        if (contentMediaTypes.isEmpty()) {
             String[] requestBodyTypes;
             if (mediaTypes != null && mediaTypes.length > 0) {
                 requestBodyTypes = mediaTypes;
@@ -255,10 +261,17 @@ public class ModelUtil {
             }
             return;
         }
-        for (String mediaTypeName : content.keySet()) {
+        for (String mediaTypeName : contentMediaTypes.keySet()) {
             MediaType mediaType = content.getMediaType(mediaTypeName);
             mediaType.setSchema(schema);
         }
+    }
+
+    static Map<String, MediaType> getMediaTypesOrEmpty(Content content) {
+        if (content != null && content.getMediaTypes() != null) {
+            return content.getMediaTypes();
+        }
+        return Collections.emptyMap();
     }
 
     /**
@@ -270,5 +283,70 @@ public class ModelUtil {
     public static String nameFromRef(String ref) {
         String[] split = ref.split("/");
         return split[split.length - 1];
+    }
+
+    public static <V> Map<String, V> unmodifiableMap(Map<String, V> map) {
+        return map != null ? Collections.unmodifiableMap(map) : null;
+    }
+
+    public static <V> Map<String, V> replace(Map<String, V> modified, UnaryOperator<Map<String, V>> factory) {
+
+        final Map<String, V> replacement;
+
+        if (modified == null) {
+            replacement = null;
+        } else {
+            replacement = factory.apply(modified);
+        }
+
+        return replacement;
+    }
+
+    public static <V> Map<String, V> add(String key, V value, Map<String, V> map, Supplier<Map<String, V>> factory) {
+        if (value != null) {
+            if (map == null) {
+                map = factory.get();
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static <V> void remove(Map<String, V> map, String key) {
+        if (map != null) {
+            map.remove(key);
+        }
+    }
+
+    public static <V> List<V> unmodifiableList(List<V> list) {
+        return list != null ? Collections.unmodifiableList(list) : null;
+    }
+
+    public static <V> List<V> replace(List<V> modified, UnaryOperator<List<V>> factory) {
+        final List<V> replacement;
+
+        if (modified == null) {
+            replacement = null;
+        } else {
+            replacement = factory.apply(modified);
+        }
+
+        return replacement;
+    }
+
+    public static <V> List<V> add(V value, List<V> list, Supplier<List<V>> factory) {
+        if (value != null) {
+            if (list == null) {
+                list = factory.get();
+            }
+            list.add(value);
+        }
+        return list;
+    }
+
+    public static <V> void remove(List<V> list, V value) {
+        if (list != null) {
+            list.remove(value);
+        }
     }
 }

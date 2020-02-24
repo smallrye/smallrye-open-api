@@ -52,15 +52,6 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.info.Info#title(java.lang.String)
-     */
-    @Override
-    public Info title(String title) {
-        this.title = title;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.info.Info#getDescription()
      */
     @Override
@@ -74,15 +65,6 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.info.Info#description(java.lang.String)
-     */
-    @Override
-    public Info description(String description) {
-        this.description = description;
-        return this;
     }
 
     /**
@@ -102,15 +84,6 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.info.Info#termsOfService(java.lang.String)
-     */
-    @Override
-    public Info termsOfService(String termsOfService) {
-        this.termsOfService = termsOfService;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.info.Info#getContact()
      */
     @Override
@@ -124,15 +97,6 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     @Override
     public void setContact(Contact contact) {
         this.contact = contact;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.info.Info#contact(org.eclipse.microprofile.openapi.models.info.Contact)
-     */
-    @Override
-    public Info contact(Contact contact) {
-        this.contact = contact;
-        return this;
     }
 
     /**
@@ -152,15 +116,6 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.info.Info#license(org.eclipse.microprofile.openapi.models.info.License)
-     */
-    @Override
-    public Info license(License license) {
-        this.license = license;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.info.Info#getVersion()
      */
     @Override
@@ -174,15 +129,6 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     @Override
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.info.Info#version(java.lang.String)
-     */
-    @Override
-    public Info version(String version) {
-        this.version = version;
-        return this;
     }
 
 }

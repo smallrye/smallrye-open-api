@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Header} OpenAPI model interface.
@@ -65,15 +66,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public Header ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#getDescription()
      */
     @Override
@@ -87,15 +79,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#description(java.lang.String)
-     */
-    @Override
-    public Header description(String description) {
-        this.description = description;
-        return this;
     }
 
     /**
@@ -115,15 +98,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#required(java.lang.Boolean)
-     */
-    @Override
-    public Header required(Boolean required) {
-        this.required = required;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#getDeprecated()
      */
     @Override
@@ -137,15 +111,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     @Override
     public void setDeprecated(Boolean deprecated) {
         this.deprecated = deprecated;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#deprecated(java.lang.Boolean)
-     */
-    @Override
-    public Header deprecated(Boolean deprecated) {
-        this.deprecated = deprecated;
-        return this;
     }
 
     /**
@@ -165,15 +130,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#allowEmptyValue(java.lang.Boolean)
-     */
-    @Override
-    public Header allowEmptyValue(Boolean allowEmptyValue) {
-        this.allowEmptyValue = allowEmptyValue;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#getStyle()
      */
     @Override
@@ -187,15 +143,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     @Override
     public void setStyle(Style style) {
         this.style = style;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#style(org.eclipse.microprofile.openapi.models.headers.Header.Style)
-     */
-    @Override
-    public Header style(Style style) {
-        this.style = style;
-        return this;
     }
 
     /**
@@ -215,15 +162,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#explode(java.lang.Boolean)
-     */
-    @Override
-    public Header explode(Boolean explode) {
-        this.explode = explode;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#getSchema()
      */
     @Override
@@ -240,20 +178,11 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#schema(org.eclipse.microprofile.openapi.models.media.Schema)
-     */
-    @Override
-    public Header schema(Schema schema) {
-        this.schema = schema;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#getExamples()
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return ModelUtil.unmodifiableMap(this.examples);
     }
 
     /**
@@ -261,16 +190,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#examples(java.util.Map)
-     */
-    @Override
-    public Header examples(Map<String, Example> examples) {
-        this.examples = examples;
-        return this;
+        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
     }
 
     /**
@@ -279,13 +199,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public Header addExample(String key, Example example) {
-        if (example == null) {
-            return this;
-        }
-        if (this.examples == null) {
-            this.examples = new LinkedHashMap<>();
-        }
-        this.examples.put(key, example);
+        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
         return this;
     }
 
@@ -294,9 +208,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public void removeExample(String key) {
-        if (this.examples != null) {
-            this.examples.remove(key);
-        }
+        ModelUtil.remove(this.examples, key);
     }
 
     /**
@@ -316,15 +228,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#example(java.lang.Object)
-     */
-    @Override
-    public Header example(Object example) {
-        this.example = example;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#getContent()
      */
     @Override
@@ -338,15 +241,6 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     @Override
     public void setContent(Content content) {
         this.content = content;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.headers.Header#content(org.eclipse.microprofile.openapi.models.media.Content)
-     */
-    @Override
-    public Header content(Content content) {
-        this.content = content;
-        return this;
     }
 
 }

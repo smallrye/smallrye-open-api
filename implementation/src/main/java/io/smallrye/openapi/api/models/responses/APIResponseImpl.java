@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link APIResponse} OpenAPI model interface.
@@ -59,15 +60,6 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public APIResponse ref(String ref) {
-        setRef(ref);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#getDescription()
      */
     @Override
@@ -84,20 +76,11 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#description(java.lang.String)
-     */
-    @Override
-    public APIResponse description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#getHeaders()
      */
     @Override
     public Map<String, Header> getHeaders() {
-        return this.headers;
+        return ModelUtil.unmodifiableMap(this.headers);
     }
 
     /**
@@ -105,16 +88,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = headers;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#headers(java.util.Map)
-     */
-    @Override
-    public APIResponse headers(Map<String, Header> headers) {
-        this.headers = headers;
-        return this;
+        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
     }
 
     /**
@@ -123,13 +97,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse addHeader(String name, Header header) {
-        if (header == null) {
-            return this;
-        }
-        if (this.headers == null) {
-            this.headers = new LinkedHashMap<>();
-        }
-        this.headers.put(name, header);
+        this.headers = ModelUtil.add(name, header, this.headers, LinkedHashMap<String, Header>::new);
         return this;
     }
 
@@ -138,9 +106,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void removeHeader(String name) {
-        if (this.headers != null) {
-            this.headers.remove(name);
-        }
+        ModelUtil.remove(this.headers, name);
     }
 
     /**
@@ -160,20 +126,11 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#content(org.eclipse.microprofile.openapi.models.media.Content)
-     */
-    @Override
-    public APIResponse content(Content content) {
-        this.content = content;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#getLinks()
      */
     @Override
     public Map<String, Link> getLinks() {
-        return this.links;
+        return ModelUtil.unmodifiableMap(this.links);
     }
 
     /**
@@ -181,16 +138,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void setLinks(Map<String, Link> links) {
-        this.links = links;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponse#links(java.util.Map)
-     */
-    @Override
-    public APIResponse links(Map<String, Link> links) {
-        this.links = links;
-        return this;
+        this.links = ModelUtil.replace(links, LinkedHashMap<String, Link>::new);
     }
 
     /**
@@ -199,13 +147,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse addLink(String name, Link link) {
-        if (link == null) {
-            return this;
-        }
-        if (this.links == null) {
-            this.links = new LinkedHashMap<>();
-        }
-        this.links.put(name, link);
+        this.links = ModelUtil.add(name, link, this.links, LinkedHashMap<String, Link>::new);
         return this;
     }
 
@@ -214,9 +156,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void removeLink(String name) {
-        if (this.links != null) {
-            this.links.remove(name);
-        }
+        ModelUtil.remove(this.links, name);
     }
 
 }

@@ -28,6 +28,16 @@ public class ProxiedTckTest {
     private Arquillian delegate;
     private Object test;
     private Method testMethod;
+    private Object[] arguments;
+
+    public static ProxiedTckTest create(Arquillian delegate, Object test, Method testMethod, Object[] arguments) {
+        ProxiedTckTest tckTest = new ProxiedTckTest();
+        tckTest.delegate = delegate;
+        tckTest.test = test;
+        tckTest.testMethod = testMethod;
+        tckTest.arguments = arguments;
+        return tckTest;
+    }
 
     /**
      * Constructor.
@@ -75,6 +85,14 @@ public class ProxiedTckTest {
      */
     public void setTest(Object test) {
         this.test = test;
+    }
+
+    public Object[] getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(Object[] arguments) {
+        this.arguments = arguments;
     }
 
 }

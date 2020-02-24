@@ -24,10 +24,12 @@ import java.lang.reflect.ParameterizedType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -42,6 +44,8 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
@@ -153,14 +157,33 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         List<ProxiedTckTest> children = new ArrayList<>();
         Method[] methods = tckTestClass.getMethods();
         for (Method method : methods) {
-            if (method.isAnnotationPresent(org.testng.annotations.Test.class)) {
+            if (method.isAnnotationPresent(Test.class)) {
                 try {
-                    ProxiedTckTest test = new ProxiedTckTest();
                     Object theTestObj = this.testClass.newInstance();
-                    test.setTest(theTestObj);
-                    test.setTestMethod(method);
-                    test.setDelegate(createDelegate(theTestObj));
-                    children.add(test);
+                    Arquillian delegate = createDelegate(theTestObj);
+                    Test testAnnotation = method.getAnnotation(Test.class);
+                    String providerMethodName = testAnnotation.dataProvider();
+                    Method providerMethod = null;
+
+                    for (Method m : tckTestClass.getMethods()) {
+                        if (m.isAnnotationPresent(DataProvider.class)) {
+                            DataProvider provider = m.getAnnotation(DataProvider.class);
+                            if (provider.name().equals(providerMethodName)) {
+                                providerMethod = m;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (method.getParameterCount() > 0 && providerMethod != null) {
+                        Object[][] args = (Object[][]) providerMethod.invoke(delegate);
+
+                        for (Object[] arg : args) {
+                            children.add(ProxiedTckTest.create(delegate, theTestObj, method, arg));
+                        }
+                    } else {
+                        children.add(ProxiedTckTest.create(delegate, theTestObj, method, new Object[0]));
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -190,7 +213,14 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
      */
     @Override
     protected Description describeChild(ProxiedTckTest child) {
-        return Description.createTestDescription(tckTestClass, child.getTestMethod().getName());
+        StringBuilder name = new StringBuilder(child.getTestMethod().getName());
+
+        if (child.getArguments().length > 0) {
+            name.append(' ');
+            name.append(Arrays.stream(child.getArguments()).map(Object::toString).collect(Collectors.joining(",")));
+        }
+
+        return Description.createTestDescription(tckTestClass, name.toString());
     }
 
     /**
@@ -208,13 +238,11 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
                 @Override
                 public void evaluate() throws Throwable {
                     try {
-                        Object[] args = (Object[]) child.getTest().getClass().getMethod("getTestArguments")
-                                .invoke(child.getTest());
-                        child.getTestMethod().invoke(child.getDelegate(), args);
+                        Method testMethod = child.getTestMethod();
+                        testMethod.invoke(child.getDelegate(), child.getArguments());
                     } catch (InvocationTargetException e) {
                         Throwable cause = e.getCause();
-                        org.testng.annotations.Test testAnno = child.getTestMethod()
-                                .getAnnotation(org.testng.annotations.Test.class);
+                        Test testAnno = child.getTestMethod().getAnnotation(Test.class);
                         Class[] expectedExceptions = testAnno.expectedExceptions();
                         if (expectedExceptions != null && expectedExceptions.length > 0) {
                             Class expectedException = expectedExceptions[0];
@@ -235,7 +263,22 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
      */
     @Override
     protected boolean isIgnored(ProxiedTckTest child) {
-        return child.getTestMethod().isAnnotationPresent(Ignore.class);
+        Method testMethod = child.getTestMethod();
+
+        if (testMethod.isAnnotationPresent(Ignore.class)) {
+            return true;
+        }
+
+        Method testMethodOverride;
+
+        try {
+            testMethodOverride = testClass.getMethod(testMethod.getName(), testMethod.getParameterTypes());
+            return testMethodOverride.isAnnotationPresent(Ignore.class);
+        } catch (NoSuchMethodException | SecurityException e) {
+            // Ignore, no override has been specified in the BaseTckTest subclass
+        }
+
+        return false;
     }
 
     private static ClassLoader getContextClassLoader() {

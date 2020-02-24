@@ -16,62 +16,20 @@
 
 package io.smallrye.openapi.api.models;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
 
+import io.smallrye.openapi.runtime.util.ModelUtil;
+
 /**
  * An implementation of the {@link Paths} OpenAPI model interface.
  */
-public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths, ModelImpl {
+public class PathsImpl extends ExtensibleImpl<Paths> implements Paths, ModelImpl {
 
-    private static final long serialVersionUID = 8872198998600578356L;
-
-    private Map<String, Object> extensions;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Extensible#getExtensions()
-     */
-    @Override
-    public Map<String, Object> getExtensions() {
-        return this.extensions;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Extensible#addExtension(java.lang.String, java.lang.Object)
-     */
-    @Override
-    public Paths addExtension(String name, Object value) {
-        if (value == null) {
-            return this;
-        }
-        if (extensions == null) {
-            this.extensions = new LinkedHashMap<>();
-        }
-        this.extensions.put(name, value);
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Extensible#removeExtension(java.lang.String)
-     */
-    @Override
-    public void removeExtension(String name) {
-        if (this.extensions != null) {
-            this.extensions.remove(name);
-        }
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Extensible#setExtensions(java.util.Map)
-     */
-    @Override
-    public void setExtensions(Map<String, Object> extensions) {
-        this.extensions = extensions;
-    }
+    private Map<String, PathItem> pathItems;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.Paths#addPathItem(java.lang.String,
@@ -79,10 +37,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public Paths addPathItem(String name, PathItem item) {
-        if (item == null) {
-            return this;
-        }
-        this.put(name, item);
+        this.pathItems = ModelUtil.add(name, item, this.pathItems, LinkedHashMap<String, PathItem>::new);
         return this;
     }
 
@@ -91,7 +46,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public void removePathItem(String name) {
-        this.remove(name);
+        ModelUtil.remove(this.pathItems, name);
     }
 
     /**
@@ -99,7 +54,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public Map<String, PathItem> getPathItems() {
-        return Collections.unmodifiableMap(this);
+        return ModelUtil.unmodifiableMap(this.pathItems);
     }
 
     /**
@@ -107,8 +62,7 @@ public class PathsImpl extends LinkedHashMap<String, PathItem> implements Paths,
      */
     @Override
     public void setPathItems(Map<String, PathItem> items) {
-        this.clear();
-        this.putAll(items);
+        this.pathItems = ModelUtil.replace(items, LinkedHashMap<String, PathItem>::new);
     }
 
 }

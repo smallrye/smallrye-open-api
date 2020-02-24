@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Discriminator} MediaType model interface.
@@ -55,20 +56,11 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.MediaType#schema(org.eclipse.microprofile.openapi.models.media.Schema)
-     */
-    @Override
-    public MediaType schema(Schema schema) {
-        this.schema = schema;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.MediaType#getExamples()
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return ModelUtil.unmodifiableMap(this.examples);
     }
 
     /**
@@ -76,16 +68,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.MediaType#examples(java.util.Map)
-     */
-    @Override
-    public MediaType examples(Map<String, Example> examples) {
-        this.examples = examples;
-        return this;
+        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
     }
 
     /**
@@ -94,13 +77,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType addExample(String key, Example example) {
-        if (example == null) {
-            return this;
-        }
-        if (this.examples == null) {
-            this.examples = new LinkedHashMap<>();
-        }
-        this.examples.put(key, example);
+        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
         return this;
     }
 
@@ -109,9 +86,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void removeExample(String key) {
-        if (this.examples != null) {
-            this.examples.remove(key);
-        }
+        ModelUtil.remove(this.examples, key);
     }
 
     /**
@@ -131,20 +106,11 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.MediaType#example(java.lang.Object)
-     */
-    @Override
-    public MediaType example(Object example) {
-        this.example = example;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.MediaType#getEncoding()
      */
     @Override
     public Map<String, Encoding> getEncoding() {
-        return this.encoding;
+        return ModelUtil.unmodifiableMap(this.encoding);
     }
 
     /**
@@ -152,16 +118,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void setEncoding(Map<String, Encoding> encoding) {
-        this.encoding = encoding;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.MediaType#encoding(java.util.Map)
-     */
-    @Override
-    public MediaType encoding(Map<String, Encoding> encoding) {
-        this.encoding = encoding;
-        return this;
+        this.encoding = ModelUtil.replace(encoding, LinkedHashMap<String, Encoding>::new);
     }
 
     /**
@@ -170,13 +127,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType addEncoding(String key, Encoding encodingItem) {
-        if (encodingItem == null) {
-            return this;
-        }
-        if (this.encoding == null) {
-            this.encoding = new LinkedHashMap<>();
-        }
-        this.encoding.put(key, encodingItem);
+        this.encoding = ModelUtil.add(key, encodingItem, this.encoding, LinkedHashMap<String, Encoding>::new);
         return this;
     }
 
@@ -185,9 +136,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void removeEncoding(String key) {
-        if (this.encoding != null) {
-            this.encoding.remove(key);
-        }
+        ModelUtil.remove(this.encoding, key);
     }
 
 }

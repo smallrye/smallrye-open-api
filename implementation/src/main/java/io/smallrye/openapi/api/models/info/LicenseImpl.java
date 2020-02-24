@@ -46,15 +46,6 @@ public class LicenseImpl extends ExtensibleImpl<License> implements License, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.info.License#name(java.lang.String)
-     */
-    @Override
-    public License name(String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.info.License#getUrl()
      */
     @Override
@@ -68,15 +59,6 @@ public class LicenseImpl extends ExtensibleImpl<License> implements License, Mod
     @Override
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.info.License#url(java.lang.String)
-     */
-    @Override
-    public License url(String url) {
-        this.url = url;
-        return this;
     }
 
 }

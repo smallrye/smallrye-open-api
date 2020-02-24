@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Red Hat, Inc, and individual contributors.
+ * Copyright 2020 Red Hat, Inc, and individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package io.smallrye.openapi.tck;
 
-import org.eclipse.microprofile.openapi.tck.OASFactoryErrorTest;
+import org.eclipse.microprofile.openapi.tck.OASConfigSchemaTest;
 
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
- * @author eric.wittmann@gmail.com
+ * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 @TckTest
-public class OASFactoryErrorTckTest extends BaseTckTest<OASFactoryErrorTest> {
+public class OASConfigSchemaTckTest extends BaseTckTest<OASConfigSchemaTest> {
 
 }

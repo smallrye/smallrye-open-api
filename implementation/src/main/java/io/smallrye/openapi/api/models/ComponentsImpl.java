@@ -30,6 +30,8 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 
+import io.smallrye.openapi.runtime.util.ModelUtil;
+
 /**
  * An implementation of the {@link Components} OpenAPI model interface.
  */
@@ -50,7 +52,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Schema> getSchemas() {
-        return this.schemas;
+        return ModelUtil.unmodifiableMap(this.schemas);
     }
 
     /**
@@ -58,16 +60,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setSchemas(Map<String, Schema> schemas) {
-        this.schemas = schemas;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#schemas(java.util.Map)
-     */
-    @Override
-    public Components schemas(Map<String, Schema> schemas) {
-        this.schemas = schemas;
-        return this;
+        this.schemas = ModelUtil.replace(schemas, LinkedHashMap<String, Schema>::new);
     }
 
     /**
@@ -76,13 +69,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addSchema(String key, Schema schema) {
-        if (schema == null) {
-            return this;
-        }
-        if (this.schemas == null) {
-            this.schemas = new LinkedHashMap<>();
-        }
-        this.schemas.put(key, schema);
+        this.schemas = ModelUtil.add(key, schema, this.schemas, LinkedHashMap<String, Schema>::new);
         return this;
     }
 
@@ -91,9 +78,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeSchema(String key) {
-        if (this.schemas != null) {
-            this.schemas.remove(key);
-        }
+        ModelUtil.remove(this.schemas, key);
     }
 
     /**
@@ -101,7 +86,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, APIResponse> getResponses() {
-        return this.responses;
+        return ModelUtil.unmodifiableMap(this.responses);
     }
 
     /**
@@ -109,16 +94,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setResponses(Map<String, APIResponse> responses) {
-        this.responses = responses;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#responses(java.util.Map)
-     */
-    @Override
-    public Components responses(Map<String, APIResponse> responses) {
-        this.responses = responses;
-        return this;
+        this.responses = ModelUtil.replace(responses, LinkedHashMap<String, APIResponse>::new);
     }
 
     /**
@@ -127,13 +103,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addResponse(String key, APIResponse response) {
-        if (response == null) {
-            return this;
-        }
-        if (this.responses == null) {
-            this.responses = new LinkedHashMap<>();
-        }
-        this.responses.put(key, response);
+        this.responses = ModelUtil.add(key, response, this.responses, LinkedHashMap<String, APIResponse>::new);
         return this;
     }
 
@@ -142,9 +112,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeResponse(String key) {
-        if (this.responses != null) {
-            this.responses.remove(key);
-        }
+        ModelUtil.remove(this.responses, key);
     }
 
     /**
@@ -152,7 +120,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Parameter> getParameters() {
-        return this.parameters;
+        return ModelUtil.unmodifiableMap(this.parameters);
     }
 
     /**
@@ -160,16 +128,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setParameters(Map<String, Parameter> parameters) {
-        this.parameters = parameters;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#parameters(java.util.Map)
-     */
-    @Override
-    public Components parameters(Map<String, Parameter> parameters) {
-        this.parameters = parameters;
-        return this;
+        this.parameters = ModelUtil.replace(parameters, LinkedHashMap<String, Parameter>::new);
     }
 
     /**
@@ -178,13 +137,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addParameter(String key, Parameter parameter) {
-        if (parameter == null) {
-            return this;
-        }
-        if (this.parameters == null) {
-            this.parameters = new LinkedHashMap<>();
-        }
-        this.parameters.put(key, parameter);
+        this.parameters = ModelUtil.add(key, parameter, this.parameters, LinkedHashMap<String, Parameter>::new);
         return this;
     }
 
@@ -193,9 +146,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeParameter(String key) {
-        if (this.parameters != null) {
-            this.parameters.remove(key);
-        }
+        ModelUtil.remove(this.parameters, key);
     }
 
     /**
@@ -203,7 +154,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Example> getExamples() {
-        return this.examples;
+        return ModelUtil.unmodifiableMap(this.examples);
     }
 
     /**
@@ -211,16 +162,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = examples;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#examples(java.util.Map)
-     */
-    @Override
-    public Components examples(Map<String, Example> examples) {
-        this.examples = examples;
-        return this;
+        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
     }
 
     /**
@@ -229,13 +171,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addExample(String key, Example example) {
-        if (example == null) {
-            return this;
-        }
-        if (this.examples == null) {
-            this.examples = new LinkedHashMap<>();
-        }
-        this.examples.put(key, example);
+        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
         return this;
     }
 
@@ -244,9 +180,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeExample(String key) {
-        if (this.examples != null) {
-            this.examples.remove(key);
-        }
+        ModelUtil.remove(this.examples, key);
     }
 
     /**
@@ -254,7 +188,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, RequestBody> getRequestBodies() {
-        return this.requestBodies;
+        return ModelUtil.unmodifiableMap(this.requestBodies);
     }
 
     /**
@@ -262,16 +196,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setRequestBodies(Map<String, RequestBody> requestBodies) {
-        this.requestBodies = requestBodies;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#requestBodies(java.util.Map)
-     */
-    @Override
-    public Components requestBodies(Map<String, RequestBody> requestBodies) {
-        this.requestBodies = requestBodies;
-        return this;
+        this.requestBodies = ModelUtil.replace(requestBodies, LinkedHashMap<String, RequestBody>::new);
     }
 
     /**
@@ -280,13 +205,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addRequestBody(String key, RequestBody requestBody) {
-        if (requestBody == null) {
-            return this;
-        }
-        if (this.requestBodies == null) {
-            this.requestBodies = new LinkedHashMap<>();
-        }
-        this.requestBodies.put(key, requestBody);
+        this.requestBodies = ModelUtil.add(key, requestBody, this.requestBodies, LinkedHashMap<String, RequestBody>::new);
         return this;
     }
 
@@ -295,9 +214,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeRequestBody(String key) {
-        if (this.requestBodies != null) {
-            this.requestBodies.remove(key);
-        }
+        ModelUtil.remove(this.requestBodies, key);
     }
 
     /**
@@ -305,7 +222,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Header> getHeaders() {
-        return this.headers;
+        return ModelUtil.unmodifiableMap(this.headers);
     }
 
     /**
@@ -313,16 +230,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = headers;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#headers(java.util.Map)
-     */
-    @Override
-    public Components headers(Map<String, Header> headers) {
-        this.headers = headers;
-        return this;
+        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
     }
 
     /**
@@ -331,13 +239,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addHeader(String key, Header header) {
-        if (header == null) {
-            return this;
-        }
-        if (this.headers == null) {
-            this.headers = new LinkedHashMap<>();
-        }
-        this.headers.put(key, header);
+        this.headers = ModelUtil.add(key, header, this.headers, LinkedHashMap<String, Header>::new);
         return this;
     }
 
@@ -346,9 +248,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeHeader(String key) {
-        if (this.headers != null) {
-            this.headers.remove(key);
-        }
+        ModelUtil.remove(this.headers, key);
     }
 
     /**
@@ -356,7 +256,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, SecurityScheme> getSecuritySchemes() {
-        return this.securitySchemes;
+        return ModelUtil.unmodifiableMap(this.securitySchemes);
     }
 
     /**
@@ -364,16 +264,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setSecuritySchemes(Map<String, SecurityScheme> securitySchemes) {
-        this.securitySchemes = securitySchemes;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#securitySchemes(java.util.Map)
-     */
-    @Override
-    public Components securitySchemes(Map<String, SecurityScheme> securitySchemes) {
-        this.securitySchemes = securitySchemes;
-        return this;
+        this.securitySchemes = ModelUtil.replace(securitySchemes, LinkedHashMap<String, SecurityScheme>::new);
     }
 
     /**
@@ -382,13 +273,8 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addSecurityScheme(String key, SecurityScheme securityScheme) {
-        if (securityScheme == null) {
-            return this;
-        }
-        if (this.securitySchemes == null) {
-            this.securitySchemes = new LinkedHashMap<>();
-        }
-        this.securitySchemes.put(key, securityScheme);
+        this.securitySchemes = ModelUtil.add(key, securityScheme, this.securitySchemes,
+                LinkedHashMap<String, SecurityScheme>::new);
         return this;
     }
 
@@ -397,9 +283,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeSecurityScheme(String key) {
-        if (this.securitySchemes != null) {
-            this.securitySchemes.remove(key);
-        }
+        ModelUtil.remove(this.securitySchemes, key);
     }
 
     /**
@@ -407,7 +291,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Link> getLinks() {
-        return this.links;
+        return ModelUtil.unmodifiableMap(this.links);
     }
 
     /**
@@ -415,16 +299,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setLinks(Map<String, Link> links) {
-        this.links = links;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#links(java.util.Map)
-     */
-    @Override
-    public Components links(Map<String, Link> links) {
-        this.links = links;
-        return this;
+        this.links = ModelUtil.replace(links, LinkedHashMap<String, Link>::new);
     }
 
     /**
@@ -433,13 +308,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addLink(String key, Link link) {
-        if (link == null) {
-            return this;
-        }
-        if (this.links == null) {
-            this.links = new LinkedHashMap<>();
-        }
-        this.links.put(key, link);
+        this.links = ModelUtil.add(key, link, this.links, LinkedHashMap<String, Link>::new);
         return this;
     }
 
@@ -448,9 +317,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeLink(String key) {
-        if (this.links != null) {
-            this.links.remove(key);
-        }
+        ModelUtil.remove(this.links, key);
     }
 
     /**
@@ -458,7 +325,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Map<String, Callback> getCallbacks() {
-        return this.callbacks;
+        return ModelUtil.unmodifiableMap(this.callbacks);
     }
 
     /**
@@ -466,16 +333,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setCallbacks(Map<String, Callback> callbacks) {
-        this.callbacks = callbacks;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#callbacks(java.util.Map)
-     */
-    @Override
-    public Components callbacks(Map<String, Callback> callbacks) {
-        this.callbacks = callbacks;
-        return this;
+        this.callbacks = ModelUtil.replace(callbacks, LinkedHashMap<String, Callback>::new);
     }
 
     /**
@@ -484,13 +342,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addCallback(String key, Callback callback) {
-        if (callback == null) {
-            return this;
-        }
-        if (this.callbacks == null) {
-            this.callbacks = new LinkedHashMap<>();
-        }
-        this.callbacks.put(key, callback);
+        this.callbacks = ModelUtil.add(key, callback, this.callbacks, LinkedHashMap<String, Callback>::new);
         return this;
     }
 
@@ -499,9 +351,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void removeCallback(String key) {
-        if (this.callbacks != null) {
-            this.callbacks.remove(key);
-        }
+        ModelUtil.remove(this.callbacks, key);
     }
 
 }

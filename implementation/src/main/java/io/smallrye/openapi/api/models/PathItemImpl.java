@@ -26,6 +26,8 @@ import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 
+import io.smallrye.openapi.runtime.util.ModelUtil;
+
 /**
  * An implementation of the {@link PathItem} OpenAPI model interface.
  */
@@ -59,15 +61,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     @Override
     public void setRef(String ref) {
         this.$ref = ref;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Reference#ref(java.lang.String)
-     */
-    @Override
-    public PathItem ref(String ref) {
-        this.$ref = ref;
-        return this;
     }
 
     /**
@@ -112,15 +105,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#description(java.lang.String)
-     */
-    @Override
-    public PathItem description(String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getGET()
      */
     @Override
@@ -134,15 +118,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     @Override
     public void setGET(Operation get) {
         this.get = get;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#GET(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem GET(Operation get) {
-        this.get = get;
-        return this;
     }
 
     /**
@@ -162,15 +137,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#PUT(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem PUT(Operation put) {
-        this.put = put;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getPOST()
      */
     @Override
@@ -184,15 +150,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     @Override
     public void setPOST(Operation post) {
         this.post = post;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#POST(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem POST(Operation post) {
-        this.post = post;
-        return this;
     }
 
     /**
@@ -212,15 +169,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#DELETE(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem DELETE(Operation delete) {
-        this.delete = delete;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getOPTIONS()
      */
     @Override
@@ -234,15 +182,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     @Override
     public void setOPTIONS(Operation options) {
         this.options = options;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#OPTIONS(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem OPTIONS(Operation options) {
-        this.options = options;
-        return this;
     }
 
     /**
@@ -262,15 +201,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#HEAD(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem HEAD(Operation head) {
-        this.head = head;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getPATCH()
      */
     @Override
@@ -287,15 +217,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#PATCH(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem PATCH(Operation patch) {
-        this.patch = patch;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getTRACE()
      */
     @Override
@@ -309,32 +230,6 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     @Override
     public void setTRACE(Operation trace) {
         this.trace = trace;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#TRACE(org.eclipse.microprofile.openapi.models.Operation)
-     */
-    @Override
-    public PathItem TRACE(Operation trace) {
-        this.trace = trace;
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#readOperations()
-     */
-    @Override
-    public List<Operation> readOperations() {
-        List<Operation> ops = new ArrayList<>();
-        addOperationToList(this.get, ops);
-        addOperationToList(this.put, ops);
-        addOperationToList(this.post, ops);
-        addOperationToList(this.delete, ops);
-        addOperationToList(this.options, ops);
-        addOperationToList(this.head, ops);
-        addOperationToList(this.patch, ops);
-        addOperationToList(this.trace, ops);
-        return ops;
     }
 
     /**
@@ -359,7 +254,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public List<Server> getServers() {
-        return this.servers;
+        return ModelUtil.unmodifiableList(this.servers);
     }
 
     /**
@@ -367,16 +262,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = servers;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#servers(java.util.List)
-     */
-    @Override
-    public PathItem servers(List<Server> servers) {
-        this.servers = servers;
-        return this;
+        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
     }
 
     /**
@@ -384,10 +270,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public PathItem addServer(Server server) {
-        if (this.servers == null) {
-            this.servers = new ArrayList<>();
-        }
-        this.servers.add(server);
+        this.servers = ModelUtil.add(server, this.servers, ArrayList<Server>::new);
         return this;
     }
 
@@ -396,9 +279,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void removeServer(Server server) {
-        if (this.servers != null) {
-            this.servers.remove(server);
-        }
+        ModelUtil.remove(this.servers, server);
     }
 
     /**
@@ -406,7 +287,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public List<Parameter> getParameters() {
-        return this.parameters;
+        return ModelUtil.unmodifiableList(this.parameters);
     }
 
     /**
@@ -414,16 +295,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#parameters(java.util.List)
-     */
-    @Override
-    public PathItem parameters(List<Parameter> parameters) {
-        this.parameters = parameters;
-        return this;
+        this.parameters = ModelUtil.replace(parameters, ArrayList<Parameter>::new);
     }
 
     /**
@@ -431,10 +303,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public PathItem addParameter(Parameter parameter) {
-        if (this.parameters == null) {
-            this.parameters = new ArrayList<>();
-        }
-        this.parameters.add(parameter);
+        this.parameters = ModelUtil.add(parameter, this.parameters, ArrayList<Parameter>::new);
         return this;
     }
 
@@ -443,21 +312,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void removeParameter(Parameter parameter) {
-        if (this.parameters != null) {
-            this.parameters.remove(parameter);
-        }
-    }
-
-    /**
-     * Adds the given operation to the given list only if the operation is not null.
-     * 
-     * @param operation
-     * @param operationList
-     */
-    private static void addOperationToList(Operation operation, List<Operation> operationList) {
-        if (operation != null) {
-            operationList.add(operation);
-        }
+        ModelUtil.remove(this.parameters, parameter);
     }
 
     /**

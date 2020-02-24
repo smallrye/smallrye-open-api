@@ -16,6 +16,7 @@
 
 package io.smallrye.openapi.api;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -58,4 +59,5 @@ public interface OpenApiConfig {
 
     public boolean applicationPathDisable();
 
+    public Map<String, String> getSchemas();
 }

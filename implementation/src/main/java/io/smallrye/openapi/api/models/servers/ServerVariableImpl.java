@@ -23,6 +23,7 @@ import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link ServerVariable} OpenAPI model interface.
@@ -38,7 +39,7 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
      */
     @Override
     public List<String> getEnumeration() {
-        return this.enumeration;
+        return ModelUtil.unmodifiableList(this.enumeration);
     }
 
     /**
@@ -46,16 +47,7 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
      */
     @Override
     public void setEnumeration(List<String> enumeration) {
-        this.enumeration = enumeration;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#enumeration(java.util.List)
-     */
-    @Override
-    public ServerVariable enumeration(List<String> enumeration) {
-        this.enumeration = enumeration;
-        return this;
+        this.enumeration = ModelUtil.replace(enumeration, ArrayList<String>::new);
     }
 
     /**
@@ -63,13 +55,7 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
      */
     @Override
     public ServerVariable addEnumeration(String enumeration) {
-        if (enumeration == null) {
-            return this;
-        }
-        if (this.enumeration == null) {
-            this.enumeration = new ArrayList<>();
-        }
-        this.enumeration.add(enumeration);
+        this.enumeration = ModelUtil.add(enumeration, this.enumeration, ArrayList<String>::new);
         return this;
     }
 
@@ -78,9 +64,7 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
      */
     @Override
     public void removeEnumeration(String enumeration) {
-        if (this.enumeration != null) {
-            this.enumeration.remove(enumeration);
-        }
+        ModelUtil.remove(this.enumeration, enumeration);
     }
 
     /**
@@ -100,15 +84,6 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#defaultValue(java.lang.String)
-     */
-    @Override
-    public ServerVariable defaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#getDescription()
      */
     @Override
@@ -122,15 +97,6 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#description(java.lang.String)
-     */
-    @Override
-    public ServerVariable description(String description) {
-        this.description = description;
-        return this;
     }
 
 }
