@@ -23,6 +23,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -220,6 +221,37 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
         @Produces("application/json")
         public Response doPost(GreetingMessage message) {
             return Response.created(URI.create("http://example.com")).build();
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #248.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/248
+     *
+     */
+    @Test
+    public void testResponseTypeUnindexed() throws IOException, JSONException {
+        // Index is intentionally missing ResponseTypeUnindexedTestResource$ThirdPartyType
+        Index index = indexOf(ResponseTypeUnindexedTestResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.unknown-type.empty-schema.json", result);
+    }
+
+    @Path("/unindexed")
+    static class ResponseTypeUnindexedTestResource {
+        // This type will not be in the Jandex index, nor does it implement Map or List.
+        static class ThirdPartyType {
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public ThirdPartyType hello() {
+            return null;
         }
     }
 }
