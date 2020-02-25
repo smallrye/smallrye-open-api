@@ -665,6 +665,7 @@ public class OpenApiAnnotationScanner {
 
         // Process @APIResponse annotations
         /////////////////////////////////////////
+        APIResponses responses = null;
         List<AnnotationInstance> apiResponseAnnotations = JandexUtil.getRepeatableAnnotation(method,
                 OpenApiConstants.DOTNAME_API_RESPONSE, OpenApiConstants.DOTNAME_API_RESPONSES);
         for (AnnotationInstance annotation : apiResponseAnnotations) {
