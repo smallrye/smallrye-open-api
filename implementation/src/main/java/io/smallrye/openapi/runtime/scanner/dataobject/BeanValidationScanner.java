@@ -8,8 +8,6 @@ import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
 
-import javax.validation.groups.Default;
-
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
@@ -78,7 +76,7 @@ public class BeanValidationScanner {
      * Each of the constraints (defined in javax.validation.constraints) will
      * apply to the schema based on the schema's type.
      *
-     * When a {@link javax.validation.constraints.NotNull @NotNull} constraint
+     * When a bean validation @NotNull constraint
      * applies to the schema, the provided {@link RequirementHandler} will be
      * called in order for the component calling this method to determine if and
      * how to apply the requirement. E.g. a required Schema is communicated
@@ -94,8 +92,7 @@ public class BeanValidationScanner {
      *        schema
      * @param handler
      *        the handler to be called when a
-     *        {@link javax.validation.constraints.NotNull @NotNull}
-     *        constraint is encountered.
+     *        bean validation @NotNull constraint is encountered.
      */
     public static void applyConstraints(AnnotationTarget target,
             Schema schema,
