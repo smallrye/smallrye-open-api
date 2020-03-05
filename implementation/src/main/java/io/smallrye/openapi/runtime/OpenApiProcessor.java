@@ -43,7 +43,7 @@ public class OpenApiProcessor {
      * @param staticFile OpenApiStaticFile to be parsed
      * @return OpenApiImpl
      */
-    public static OpenAPIImpl modelFromStaticFile(OpenApiStaticFile staticFile) {
+    public static OpenAPI modelFromStaticFile(OpenApiStaticFile staticFile) {
         if (staticFile == null) {
             return null;
         }
@@ -63,7 +63,7 @@ public class OpenApiProcessor {
      * @param index IndexView of Archive
      * @return OpenAPIImpl generated from annotations
      */
-    public static OpenAPIImpl modelFromAnnotations(OpenApiConfig config, IndexView index) {
+    public static OpenAPI modelFromAnnotations(OpenApiConfig config, IndexView index) {
         if (config.scanDisable()) {
             return null;
         }
@@ -81,7 +81,7 @@ public class OpenApiProcessor {
      * @param loader ClassLoader
      * @return OpenApiImpl created from OASModelReader
      */
-    public static OpenAPIImpl modelFromReader(OpenApiConfig config, ClassLoader loader) {
+    public static OpenAPI modelFromReader(OpenApiConfig config, ClassLoader loader) {
         String readerClassName = config.modelReader();
         if (readerClassName == null) {
             return null;

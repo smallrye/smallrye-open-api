@@ -6,6 +6,8 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+
 /**
  * Extension point for supporting extensions to JAX-RS. Implement this directly or extend
  * {@link DefaultAnnotationScannerExtension}.
@@ -33,7 +35,7 @@ public interface AnnotationScannerExtension {
      * @param scanner the scanner used for application scanning
      * @param applications the set of jax-rs application classes
      */
-    default void processJaxRsApplications(OpenApiAnnotationScanner scanner, Collection<ClassInfo> applications) {
+    default void processJaxRsApplications(AnnotationScanner scanner, Collection<ClassInfo> applications) {
     }
 
     /**

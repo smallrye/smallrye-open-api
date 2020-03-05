@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.Constructible;
 import org.eclipse.microprofile.openapi.models.Extensible;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Reference;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
@@ -40,7 +41,6 @@ import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.ModelImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 
 /**
  * Used to merge two OAI data models into a single one. The MP+OAI 1.0 spec
@@ -72,7 +72,7 @@ public class MergeUtil {
      * @param document2 OpenAPIImpl instance
      * @return Merged OpenAPIImpl instance
      */
-    public static final OpenAPIImpl merge(OpenAPIImpl document1, OpenAPIImpl document2) {
+    public static final OpenAPI merge(OpenAPI document1, OpenAPI document2) {
         return mergeObjects(document1, document2);
     }
 

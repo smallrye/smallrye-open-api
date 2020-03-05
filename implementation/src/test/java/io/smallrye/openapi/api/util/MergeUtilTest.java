@@ -21,6 +21,7 @@ import java.net.URL;
 import java.text.ParseException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -75,10 +76,10 @@ public class MergeUtilTest {
 
         String expectedContent = loadResource(expectedUrl);
 
-        OpenAPIImpl resource1Model = OpenApiParser.parse(resource1Url);
-        OpenAPIImpl resource2Model = OpenApiParser.parse(resource2Url);
+        OpenAPI resource1Model = OpenApiParser.parse(resource1Url);
+        OpenAPI resource2Model = OpenApiParser.parse(resource2Url);
 
-        OpenAPIImpl actualModel = MergeUtil.merge(resource1Model, resource2Model);
+        OpenAPI actualModel = MergeUtil.merge(resource1Model, resource2Model);
 
         String actual = OpenApiSerializer.serialize(actualModel, Format.JSON);
 

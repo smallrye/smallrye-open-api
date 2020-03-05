@@ -23,12 +23,12 @@ import java.net.URL;
 import java.text.ParseException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
@@ -99,7 +99,7 @@ public class OpenApiParserAndSerializerTest {
     private static void doTest(String resource, Format format) throws IOException, ParseException, JSONException {
         URL testResource = OpenApiParserAndSerializerTest.class.getResource(resource);
         String original = loadResource(testResource);
-        OpenAPIImpl impl = OpenApiParser.parse(testResource);
+        OpenAPI impl = OpenApiParser.parse(testResource);
         String roundTrip = OpenApiSerializer.serialize(impl, format);
 
         try {

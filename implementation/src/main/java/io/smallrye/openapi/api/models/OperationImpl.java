@@ -33,7 +33,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
- * An implementation of the {@link ExternalDocumentation} OpenAPI model interface.
+ * An implementation of the {@link Operation} OpenAPI model interface.
  */
 public class OperationImpl extends ExtensibleImpl<Operation> implements Operation, ModelImpl {
 

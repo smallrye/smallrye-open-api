@@ -64,26 +64,26 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBase {
 
     /**
-     * Test method for {@link OpenApiAnnotationScanner#makePath(java.lang.String[])}.
+     * Test method for {@link PathMaker#makePath(java.lang.String[])}.
      */
     @Test
     public void testMakePath() {
-        String path = OpenApiAnnotationScanner.makePath("", "", "");
+        String path = PathMaker.makePath("", "", "");
         Assert.assertEquals("/", path);
 
-        path = OpenApiAnnotationScanner.makePath("/", "/");
+        path = PathMaker.makePath("/", "/");
         Assert.assertEquals("/", path);
 
-        path = OpenApiAnnotationScanner.makePath("", "/bookings");
+        path = PathMaker.makePath("", "/bookings");
         Assert.assertEquals("/bookings", path);
 
-        path = OpenApiAnnotationScanner.makePath("/api", "/bookings");
+        path = PathMaker.makePath("/api", "/bookings");
         Assert.assertEquals("/api/bookings", path);
 
-        path = OpenApiAnnotationScanner.makePath("api", "bookings");
+        path = PathMaker.makePath("api", "bookings");
         Assert.assertEquals("/api/bookings", path);
 
-        path = OpenApiAnnotationScanner.makePath("/", "/bookings", "{id}");
+        path = PathMaker.makePath("/", "/bookings", "{id}");
         Assert.assertEquals("/bookings/{id}", path);
     }
 
@@ -220,8 +220,8 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
 
     @Test
     public void testTagScanning() throws IOException, JSONException {
-        Index index = indexOf(TagTestResource1.class, TagTestResource2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        Index i = indexOf(TagTestResource1.class, TagTestResource2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.tags.multilocation.json", result);
@@ -229,8 +229,8 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
 
     @Test
     public void testTagScanning_OrderGivenAnnotations() throws IOException, JSONException {
-        Index index = indexOf(TagTestApp.class, TagTestResource1.class, TagTestResource2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        Index i = indexOf(TagTestApp.class, TagTestResource1.class, TagTestResource2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.tags.ordergiven.annotation.json", result);
@@ -238,8 +238,8 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
 
     @Test
     public void testTagScanning_OrderGivenStaticFile() throws IOException, JSONException {
-        Index index = indexOf(TagTestResource1.class, TagTestResource2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        Index i = indexOf(TagTestResource1.class, TagTestResource2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
         OpenAPI scanResult = scanner.scan();
         OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(
                 "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}"

@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
-import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -30,7 +29,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
- * An implementation of the {@link Discriminator} MediaType model interface.
+ * An implementation of the {@link MediaType} OpenAPI model interface.
  */
 public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaType, ModelImpl {
 

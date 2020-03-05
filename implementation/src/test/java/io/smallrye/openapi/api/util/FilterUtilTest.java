@@ -27,7 +27,6 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
@@ -69,10 +68,10 @@ public class FilterUtilTest {
         URL beforeUrl = FilterUtilTest.class.getResource("filter-before.json");
         URL afterUrl = FilterUtilTest.class.getResource("filter-after.json");
 
-        OpenAPIImpl model = OpenApiParser.parse(beforeUrl);
+        OpenAPI model = OpenApiParser.parse(beforeUrl);
         OASFilter filter = filter();
 
-        model = (OpenAPIImpl) FilterUtil.applyFilter(filter, model);
+        model = FilterUtil.applyFilter(filter, model);
 
         String actual = OpenApiSerializer.serialize(model, Format.JSON);
         String expected = loadResource(afterUrl);

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
-import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.XML;
@@ -34,7 +33,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
- * An implementation of the {@link Content} OpenAPI model interface.
+ * An implementation of the {@link Schema} OpenAPI model interface.
  */
 public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelImpl {
 
@@ -77,6 +76,22 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     private Boolean writeOnly;
     private Boolean deprecated;
 
+    public SchemaImpl() {
+
+    }
+
+    public SchemaImpl(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     /**
      * @see org.eclipse.microprofile.openapi.models.Reference#getRef()
      */
@@ -110,14 +125,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setDiscriminator(Discriminator discriminator) {
         this.discriminator = discriminator;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**

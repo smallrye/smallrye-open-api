@@ -162,7 +162,7 @@ public class OpenApiParser {
      * @throws IOException URL parameter is not found
      * @throws ParseException Failed to parse the document
      */
-    public static final OpenAPIImpl parse(URL url) throws IOException, ParseException {
+    public static final OpenAPI parse(URL url) throws IOException, ParseException {
         try {
             String fname = url.getFile();
             if (fname == null) {
@@ -197,7 +197,7 @@ public class OpenApiParser {
      * @return OpenAPIImpl parsed from the stream
      * @throws IOException Errors in reading the stream
      */
-    public static final OpenAPIImpl parse(InputStream stream, Format format) throws IOException {
+    public static final OpenAPI parse(InputStream stream, Format format) throws IOException {
         ObjectMapper mapper;
         if (format == Format.JSON) {
             mapper = new ObjectMapper();
@@ -218,15 +218,11 @@ public class OpenApiParser {
      * @return Schema parsed from the String
      * @throws IOException Errors in reading the String
      */
-    public static final SchemaImpl parseSchema(String schemaJson) throws IOException {
+    public static final Schema parseSchema(String schemaJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode tree = mapper.readTree(schemaJson);
         OpenApiParser parser = new OpenApiParser(tree);
-        SchemaImpl schema = parser.readSchema(tree);
-        if (schema != null) {
-            schema.setName(JsonUtil.stringProperty(tree, OpenApiConstants.PROP_NAME));
-        }
-        return schema;
+        return parser.readSchema(tree);
     }
 
     private final JsonNode tree;
@@ -243,8 +239,8 @@ public class OpenApiParser {
     /**
      * Parses the json tree into an OpenAPI data model.
      */
-    private OpenAPIImpl parse() {
-        OpenAPIImpl oai = new OpenAPIImpl();
+    private OpenAPI parse() {
+        OpenAPI oai = new OpenAPIImpl();
         this.readOpenAPI(tree, oai);
         return oai;
     }
@@ -255,7 +251,7 @@ public class OpenApiParser {
      * @param node
      * @param model
      */
-    private void readOpenAPI(JsonNode node, OpenAPIImpl model) {
+    private void readOpenAPI(JsonNode node, OpenAPI model) {
         model.setOpenapi(JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPENAPI));
         model.setInfo(readInfo(node.get(OpenApiConstants.PROP_INFO)));
         model.setExternalDocs(readExternalDocs(node.get(OpenApiConstants.PROP_EXTERNAL_DOCS)));
@@ -276,7 +272,7 @@ public class OpenApiParser {
         if (node == null) {
             return null;
         }
-        InfoImpl model = new InfoImpl();
+        Info model = new InfoImpl();
         model.setTitle(JsonUtil.stringProperty(node, OpenApiConstants.PROP_TITLE));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
         model.setTermsOfService(JsonUtil.stringProperty(node, OpenApiConstants.PROP_TERMS_OF_SERVICE));
@@ -296,7 +292,7 @@ public class OpenApiParser {
         if (node == null) {
             return null;
         }
-        ContactImpl model = new ContactImpl();
+        Contact model = new ContactImpl();
         model.setName(JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME));
         model.setUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL));
         model.setEmail(JsonUtil.stringProperty(node, OpenApiConstants.PROP_EMAIL));
@@ -313,7 +309,7 @@ public class OpenApiParser {
         if (node == null) {
             return null;
         }
-        LicenseImpl model = new LicenseImpl();
+        License model = new LicenseImpl();
         model.setName(JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME));
         model.setUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL));
         readExtensions(node, model);
@@ -329,7 +325,7 @@ public class OpenApiParser {
         if (node == null) {
             return null;
         }
-        ExternalDocumentationImpl model = new ExternalDocumentationImpl();
+        ExternalDocumentation model = new ExternalDocumentationImpl();
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
         model.setUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL));
         readExtensions(node, model);
@@ -348,7 +344,7 @@ public class OpenApiParser {
         ArrayNode nodes = (ArrayNode) node;
         List<Tag> rval = new ArrayList<>(nodes.size());
         for (JsonNode tagNode : nodes) {
-            TagImpl model = new TagImpl();
+            Tag model = new TagImpl();
             model.setName(JsonUtil.stringProperty(tagNode, OpenApiConstants.PROP_NAME));
             model.setDescription(JsonUtil.stringProperty(tagNode, OpenApiConstants.PROP_DESCRIPTION));
             model.setExternalDocs(readExternalDocs(tagNode.get(OpenApiConstants.PROP_EXTERNAL_DOCS)));
@@ -370,7 +366,7 @@ public class OpenApiParser {
         ArrayNode nodes = (ArrayNode) node;
         List<Server> rval = new ArrayList<>(nodes.size());
         for (JsonNode serverNode : nodes) {
-            ServerImpl model = new ServerImpl();
+            Server model = new ServerImpl();
             model.setUrl(JsonUtil.stringProperty(serverNode, OpenApiConstants.PROP_URL));
             model.setDescription(JsonUtil.stringProperty(serverNode, OpenApiConstants.PROP_DESCRIPTION));
             model.setVariables(readServerVariables(serverNode.get(OpenApiConstants.PROP_VARIABLES)));
@@ -412,7 +408,7 @@ public class OpenApiParser {
         if (node == null) {
             return null;
         }
-        ServerVariableImpl model = new ServerVariableImpl();
+        ServerVariable model = new ServerVariableImpl();
         JsonNode enumNode = node.get(OpenApiConstants.PROP_ENUM);
         if (enumNode != null && enumNode.isArray()) {
             List<String> enums = new ArrayList<>(enumNode.size());
@@ -437,7 +433,7 @@ public class OpenApiParser {
             return null;
         }
 
-        PathsImpl model = new PathsImpl();
+        Paths model = new PathsImpl();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (fieldName.startsWith(OpenApiConstants.EXTENSION_PROPERTY_PREFIX)) {
@@ -459,7 +455,7 @@ public class OpenApiParser {
             return null;
         }
 
-        ComponentsImpl model = new ComponentsImpl();
+        Components model = new ComponentsImpl();
         model.setSchemas(readSchemas(node.get(OpenApiConstants.PROP_SCHEMAS)));
         model.setResponses(readResponses(node.get(OpenApiConstants.PROP_RESPONSES)));
         model.setParameters(readParameters(node.get(OpenApiConstants.PROP_PARAMETERS)));
@@ -497,12 +493,13 @@ public class OpenApiParser {
      * 
      * @param node
      */
-    private SchemaImpl readSchema(JsonNode node) {
+    private Schema readSchema(JsonNode node) {
         if (node == null || !node.isObject()) {
             return null;
         }
+        String name = JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME);
 
-        SchemaImpl model = new SchemaImpl();
+        Schema model = new SchemaImpl(name);
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setFormat(JsonUtil.stringProperty(node, OpenApiConstants.PROP_FORMAT));
         model.setTitle(JsonUtil.stringProperty(node, OpenApiConstants.PROP_TITLE));
@@ -559,7 +556,7 @@ public class OpenApiParser {
             return null;
         }
 
-        XMLImpl model = new XMLImpl();
+        XML model = new XMLImpl();
         model.setName(JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME));
         model.setNamespace(JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAMESPACE));
         model.setPrefix(JsonUtil.stringProperty(node, OpenApiConstants.PROP_PREFIX));
@@ -579,7 +576,7 @@ public class OpenApiParser {
             return null;
         }
 
-        DiscriminatorImpl model = new DiscriminatorImpl();
+        Discriminator model = new DiscriminatorImpl();
         model.setPropertyName(JsonUtil.stringProperty(node, OpenApiConstants.PROP_PROPERTY_NAME));
         model.setMapping(readStringMap(node.get(OpenApiConstants.PROP_MAPPING)));
         return model;
@@ -613,7 +610,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        APIResponseImpl model = new APIResponseImpl();
+        APIResponse model = new APIResponseImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
         model.setHeaders(readHeaders(node.get(OpenApiConstants.PROP_HEADERS)));
@@ -632,7 +629,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        ContentImpl model = new ContentImpl();
+        Content model = new ContentImpl();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             model.addMediaType(fieldName, readMediaType(node.get(fieldName)));
@@ -650,7 +647,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        MediaTypeImpl model = new MediaTypeImpl();
+        MediaType model = new MediaTypeImpl();
         model.setSchema(readSchema(node.get(OpenApiConstants.PROP_SCHEMA)));
         model.setExample(readObject(node.get(OpenApiConstants.PROP_EXAMPLE)));
         model.setExamples(readExamples(node.get(OpenApiConstants.PROP_EXAMPLES)));
@@ -685,7 +682,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        EncodingImpl model = new EncodingImpl();
+        Encoding model = new EncodingImpl();
         model.setContentType(JsonUtil.stringProperty(node, OpenApiConstants.PROP_CONTENT_TYPE));
         model.setHeaders(readHeaders(node.get(OpenApiConstants.PROP_HEADERS)));
         model.setStyle(readEncodingStyle(node.get(OpenApiConstants.PROP_STYLE)));
@@ -796,7 +793,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        ExampleImpl model = new ExampleImpl();
+        Example model = new ExampleImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setSummary(JsonUtil.stringProperty(node, OpenApiConstants.PROP_SUMMARY));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
@@ -834,7 +831,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        RequestBodyImpl model = new RequestBodyImpl();
+        RequestBody model = new RequestBodyImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
         model.setContent(readContent(node.get(OpenApiConstants.PROP_CONTENT)));
@@ -871,7 +868,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        HeaderImpl model = new HeaderImpl();
+        Header model = new HeaderImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
         model.setRequired(JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED));
@@ -927,7 +924,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        SecuritySchemeImpl model = new SecuritySchemeImpl();
+        SecurityScheme model = new SecuritySchemeImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setType(readSecuritySchemeType(node.get(OpenApiConstants.PROP_TYPE)));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
@@ -986,7 +983,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        OAuthFlowsImpl model = new OAuthFlowsImpl();
+        OAuthFlows model = new OAuthFlowsImpl();
         model.setImplicit(readOAuthFlow(node.get(OpenApiConstants.PROP_IMPLICIT)));
         model.setPassword(readOAuthFlow(node.get(OpenApiConstants.PROP_PASSWORD)));
         model.setClientCredentials(readOAuthFlow(node.get(OpenApiConstants.PROP_CLIENT_CREDENTIALS)));
@@ -1004,7 +1001,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        OAuthFlowImpl model = new OAuthFlowImpl();
+        OAuthFlow model = new OAuthFlowImpl();
         model.setAuthorizationUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_AUTHORIZATION_URL));
         model.setTokenUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_TOKEN_URL));
         model.setRefreshUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_REFRESH_URL));
@@ -1062,7 +1059,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LinkImpl model = new LinkImpl();
+        Link model = new LinkImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
 
         model.setOperationRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_REF));
@@ -1102,7 +1099,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        ServerImpl model = new ServerImpl();
+        Server model = new ServerImpl();
         model.setUrl(JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
         model.setVariables(readServerVariables(node.get(OpenApiConstants.PROP_VARIABLES)));
@@ -1138,7 +1135,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        CallbackImpl model = new CallbackImpl();
+        Callback model = new CallbackImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -1161,7 +1158,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        PathItemImpl model = new PathItemImpl();
+        PathItem model = new PathItemImpl();
         model.setRef(JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF));
         model.setSummary(JsonUtil.stringProperty(node, OpenApiConstants.PROP_SUMMARY));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
@@ -1188,7 +1185,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        OperationImpl model = new OperationImpl();
+        Operation model = new OperationImpl();
         model.setTags(readStringArray(node.get(OpenApiConstants.PROP_TAGS)));
         model.setSummary(JsonUtil.stringProperty(node, OpenApiConstants.PROP_SUMMARY));
         model.setDescription(JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION));
@@ -1214,7 +1211,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        APIResponsesImpl model = new APIResponsesImpl();
+        APIResponses model = new APIResponsesImpl();
         model.setDefaultValue(readAPIResponse(node.get(OpenApiConstants.PROP_DEFAULT)));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -1252,7 +1249,7 @@ public class OpenApiParser {
         if (node == null || !node.isObject()) {
             return null;
         }
-        SecurityRequirementImpl model = new SecurityRequirementImpl();
+        SecurityRequirement model = new SecurityRequirementImpl();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             JsonNode scopesNode = node.get(fieldName);

@@ -38,7 +38,6 @@ import org.eclipse.microprofile.openapi.models.tags.Tag;
 
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
@@ -107,7 +106,7 @@ public class ModelUtil {
      * @param openApi OpenAPI
      * @return Paths
      */
-    public static Paths paths(OpenAPIImpl openApi) {
+    public static Paths paths(OpenAPI openApi) {
         if (openApi.getPaths() == null) {
             openApi.setPaths(new PathsImpl());
         }

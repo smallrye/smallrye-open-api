@@ -186,7 +186,7 @@ public class SchemaRegistry {
         config.getSchemas().entrySet().forEach(entry -> {
             String className = entry.getKey();
             String jsonSchema = entry.getValue();
-            SchemaImpl schema;
+            Schema schema;
 
             try {
                 schema = OpenApiParser.parseSchema(jsonSchema);
@@ -196,7 +196,7 @@ public class SchemaRegistry {
             }
 
             Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
-            this.register(new TypeKey(type), schema, schema.getName());
+            this.register(new TypeKey(type), schema, ((SchemaImpl) schema).getName());
             LOG.infof("Configured schema for %s has been registered", className);
         });
     }
