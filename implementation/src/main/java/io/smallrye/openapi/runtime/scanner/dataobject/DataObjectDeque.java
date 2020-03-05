@@ -19,8 +19,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
@@ -98,9 +96,11 @@ public class DataObjectDeque {
      * @param schema the schema corresponding to this position
      */
     public void push(AnnotationTarget annotationTarget,
-            @NotNull PathEntry parentPathEntry,
-            @NotNull Type type,
-            @NotNull Schema schema) {
+            PathEntry parentPathEntry,
+            Type type,
+            Schema schema) {
+
+        validateInput(parentPathEntry, type, schema);
         PathEntry entry = leafNode(parentPathEntry, annotationTarget, type, schema);
         ClassInfo klazzInfo = entry.getClazz();
         if (parentPathEntry.hasParent(entry)) {
@@ -161,9 +161,10 @@ public class DataObjectDeque {
 
         private PathEntry(PathEntry enclosing,
                 AnnotationTarget annotationTarget,
-                @NotNull ClassInfo clazz,
-                @NotNull Type clazzType,
-                @NotNull Schema schema) {
+                ClassInfo clazz,
+                Type clazzType,
+                Schema schema) {
+            validateInput(clazz, clazzType, schema);
             this.enclosing = enclosing;
             this.annotationTarget = annotationTarget;
             this.clazz = clazz;
@@ -257,6 +258,12 @@ public class DataObjectDeque {
                     ", schema=" + schema +
                     ", parent=" + (enclosing != null ? enclosing.toStringWithGraph() : "<root>") + "}";
         }
+    }
 
+    private static <T> void validateInput(T... input) {
+        for (T t : input) {
+            if (t == null)
+                throw new RuntimeException("Input parameter can not be null");
+        }
     }
 }
