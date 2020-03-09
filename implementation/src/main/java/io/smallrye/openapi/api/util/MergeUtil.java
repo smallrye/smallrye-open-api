@@ -22,9 +22,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +45,7 @@ import org.jboss.logging.Logger;
 import io.smallrye.openapi.api.models.ModelImpl;
 
 /**
- * Used to merge two OAI data models into a single one. The MP+OAI 1.0 spec
+ * Used to merge OAI data models into a single one. The MP+OAI 1.0 spec
  * requires that any or all of the various mechanisms for producing an OAI document
  * can be used. When more than one mechanism is used, each mechanism produces an
  * OpenAPI document. These multiple documents must then be sensibly merged into
@@ -66,14 +68,38 @@ public class MergeUtil {
     }
 
     /**
-     * Merges two documents and returns the result.
+     * Merges documents and returns the result.
      * 
-     * @param document1 OpenAPIImpl instance
-     * @param document2 OpenAPIImpl instance
-     * @return Merged OpenAPIImpl instance
+     * @param documents OpenAPI instance
+     * @return Merged OpenAPI instance
      */
-    public static final OpenAPI merge(OpenAPI document1, OpenAPI document2) {
-        return mergeObjects(document1, document2);
+    public static final OpenAPI merge(OpenAPI... documents) {
+        if (documents == null || documents.length == 0) {
+            return null;
+        }
+        return merge(Arrays.asList(documents));
+    }
+
+    /**
+     * Merges documents and returns the result.
+     * 
+     * @param documents OpenAPI instance
+     * @return Merged OpenAPI instance
+     */
+    public static final OpenAPI merge(List<OpenAPI> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return null;
+        }
+
+        LinkedList<OpenAPI> documentList = new LinkedList<>(documents);
+        OpenAPI oai = documentList.pop();
+
+        if (!documentList.isEmpty()) {
+            for (OpenAPI document : documents) {
+                oai = mergeObjects(oai, document);
+            }
+        }
+        return oai;
     }
 
     /**

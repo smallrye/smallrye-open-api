@@ -25,6 +25,8 @@ import static io.smallrye.openapi.api.OpenApiConstants.PROP_VALUE;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -45,12 +47,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.MediaType;
-
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
+import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -111,7 +112,7 @@ public class ParameterProcessor {
             DOTNAME_PARAMETERS));
 
     private final IndexView index;
-    private final Function<AnnotationInstance, ParameterImpl> reader;
+    private final Function<AnnotationInstance, Parameter> readerFunction;
     private final List<AnnotationScannerExtension> extensions;
 
     /**
@@ -255,7 +256,7 @@ public class ParameterProcessor {
         RESTEASY_FORM_PARAM(DOTNAME_RESTEASY_FORM_PARAM, null, Style.FORM, Style.FORM),
         RESTEASY_HEADER_PARAM(DOTNAME_RESTEASY_HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
         RESTEASY_COOKIE_PARAM(DOTNAME_RESTEASY_COOKIE_PARAM, In.COOKIE, null, Style.FORM),
-        RESTEASY_MULITIPART_FORM(DOTNAME_RESTEASY_MULTIPART_FORM, null, null, null, MediaType.MULTIPART_FORM_DATA);
+        RESTEASY_MULITIPART_FORM(DOTNAME_RESTEASY_MULTIPART_FORM, null, null, null, MULTIPART_FORM_DATA);
 
         private final DotName name;
         final In location;
@@ -306,7 +307,7 @@ public class ParameterProcessor {
         String name;
         In location;
         Style style;
-        ParameterImpl oaiParam;
+        Parameter oaiParam;
         JaxRsParameter jaxRsParam;
         Object jaxRsDefaultValue;
         AnnotationTarget target;
@@ -366,10 +367,10 @@ public class ParameterProcessor {
     }
 
     private ParameterProcessor(IndexView index,
-            Function<AnnotationInstance, ParameterImpl> reader,
+            Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         this.index = index;
-        this.reader = reader;
+        this.readerFunction = reader;
         this.extensions = extensions;
     }
 
@@ -382,7 +383,7 @@ public class ParameterProcessor {
      * @param index index of classes to be used for further introspection, if necessary
      * @param resourceMethod the JAX-RS resource method, annotated with one of the
      *        JAX-RS HTTP annotations
-     * @param reader callback method for a function producing {@link ParameterImpl} from a
+     * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
      * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
@@ -391,7 +392,7 @@ public class ParameterProcessor {
     public static ResourceParameters process(IndexView index,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
-            Function<AnnotationInstance, ParameterImpl> reader,
+            Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
         ResourceParameters parameters = new ResourceParameters();
@@ -626,7 +627,7 @@ public class ParameterProcessor {
 
         // Convert ParameterContext entries to MP-OAI Parameters
         params.values().stream().forEach(context -> {
-            ParameterImpl param;
+            Parameter param;
 
             if (context.oaiParam == null) {
                 param = new ParameterImpl();
@@ -710,7 +711,7 @@ public class ParameterProcessor {
         }
 
         Content content = new ContentImpl();
-        MediaTypeImpl mediaType = new MediaTypeImpl();
+        MediaType mediaType = new MediaTypeImpl();
         Schema schema = new SchemaImpl();
         Map<String, Encoding> encodings = new HashMap<>();
         schema.setType(SchemaType.OBJECT);
@@ -722,7 +723,7 @@ public class ParameterProcessor {
             mediaType.setEncoding(encodings);
         }
 
-        String mediaTypeName = formMediaType != null ? formMediaType : MediaType.APPLICATION_FORM_URLENCODED;
+        String mediaTypeName = formMediaType != null ? formMediaType : APPLICATION_FORM_URLENCODED;
         content.addMediaType(mediaTypeName, mediaType);
 
         return content;
@@ -813,7 +814,7 @@ public class ParameterProcessor {
      * @see org.eclipse.microprofile.openapi.annotations.parameters.Parameter#name()
      * @see org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in()
      */
-    static boolean isIgnoredParameter(ParameterImpl parameter, AnnotationTarget resourceMethod) {
+    static boolean isIgnoredParameter(Parameter parameter, AnnotationTarget resourceMethod) {
         String paramName = parameter.getName();
         In paramIn = parameter.getIn();
 
@@ -826,7 +827,7 @@ public class ParameterProcessor {
             return true;
         }
 
-        if (parameter.isHidden()) {
+        if (isHidden(parameter)) {
             return true;
         }
 
@@ -852,6 +853,14 @@ public class ParameterProcessor {
             }
         }
         return false;
+    }
+
+    private static boolean isHidden(Parameter parameter) {
+
+        return parameter.getExtensions() != null
+                && !parameter.getExtensions().isEmpty()
+                && parameter.getExtensions().containsKey(OpenApiConstants.PROP_HIDDEN)
+                && parameter.getExtensions().get(OpenApiConstants.PROP_HIDDEN).equals(true);
     }
 
     /**
@@ -934,8 +943,8 @@ public class ParameterProcessor {
             boolean overriddenParametersOnly) {
         DotName name = annotation.name();
 
-        if (DOTNAME_PARAMETER.equals(name)) {
-            ParameterImpl oaiParam = reader.apply(annotation);
+        if (DOTNAME_PARAMETER.equals(name) && readerFunction != null) {
+            Parameter oaiParam = readerFunction.apply(annotation);
 
             readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
                     oaiParam,
@@ -1313,7 +1322,7 @@ public class ParameterProcessor {
      * @param overriddenParametersOnly
      */
     void readParameter(ParameterContextKey key,
-            ParameterImpl oaiParam,
+            Parameter oaiParam,
             JaxRsParameter jaxRsParam,
             Object jaxRsDefaultValue,
             AnnotationTarget target,

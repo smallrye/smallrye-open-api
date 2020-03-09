@@ -16,8 +16,8 @@
 
 package io.smallrye.openapi.runtime.scanner;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -25,6 +25,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
@@ -83,13 +84,15 @@ public class OpenApiAnnotationScanner {
      */
     public OpenAPI scan() {
 
-        List<OpenAPI> scans = new ArrayList<>();
+        List<OpenAPI> scans = new LinkedList<>();
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
             LOG.debug("Scanning deployment for OpenAPI and " + annotationScanner.getName() + " Annotations.");
             scans.add(annotationScanner.scan(annotationScannerContext));
         }
-        // TODO: Merge all scans.
-        return scans.get(0);
+
+        OpenAPI merged = MergeUtil.merge(scans);
+
+        return merged;
     }
 }

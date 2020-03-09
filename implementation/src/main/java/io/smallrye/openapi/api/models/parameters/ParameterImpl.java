@@ -48,7 +48,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     private Object example;
     private Map<String, Example> examples;
     private Content content;
-    private boolean hidden;
+    //private boolean hidden;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.Reference#getRef()
@@ -295,11 +295,12 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
         this.in = in;
     }
 
-    public boolean isHidden() {
-        return hidden;
-    }
-
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
-    }
+    // TODO: get rid of this.
+    //    public boolean isHidden() {
+    //        return hidden;
+    //    }
+    //
+    //    public void setHidden(boolean hidden) {
+    //        this.hidden = hidden;
+    //    }
 }

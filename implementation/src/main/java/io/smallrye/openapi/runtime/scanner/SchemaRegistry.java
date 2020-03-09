@@ -41,7 +41,7 @@ public class SchemaRegistry {
     private static final Logger LOG = Logger.getLogger(SchemaRegistry.class);
 
     // Initial value is null
-    private static ThreadLocal<SchemaRegistry> current = new ThreadLocal<>();
+    private static final ThreadLocal<SchemaRegistry> current = new ThreadLocal<>();
 
     /**
      * Create a new instance of a {@link SchemaRegistry} on this thread. The

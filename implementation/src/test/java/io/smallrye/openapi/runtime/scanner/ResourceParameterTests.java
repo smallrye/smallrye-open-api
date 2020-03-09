@@ -67,8 +67,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testParameterResource() throws IOException, JSONException {
-        Index index = indexOf(ParameterResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        Index i = indexOf(ParameterResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.parameters.simpleSchema.json", result);
@@ -82,10 +82,10 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testPrimitiveArraySchema() throws IOException, JSONException {
-        Index index = indexOf(PrimitiveArraySchemaTestResource.class,
+        Index i = indexOf(PrimitiveArraySchemaTestResource.class,
                 PrimitiveArraySchemaTestResource.PrimitiveArrayTestObject.class);
         OpenApiConfig config = emptyConfig();
-        IndexView filtered = new FilteredIndexView(index, config);
+        IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);
@@ -117,9 +117,9 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
 
     @Test
     public void testPrimitiveArrayParameter() throws IOException, JSONException {
-        Index index = indexOf(PrimitiveArrayParameterTestResource.class);
+        Index i = indexOf(PrimitiveArrayParameterTestResource.class);
         OpenApiConfig config = emptyConfig();
-        IndexView filtered = new FilteredIndexView(index, config);
+        IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);
@@ -143,9 +143,9 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
 
     @Test
     public void testPrimitiveArrayPolymorphism() throws IOException, JSONException {
-        Index index = indexOf(PrimitiveArrayPolymorphismTestResource.class);
+        Index i = indexOf(PrimitiveArrayPolymorphismTestResource.class);
         OpenApiConfig config = emptyConfig();
-        IndexView filtered = new FilteredIndexView(index, config);
+        IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);
@@ -177,12 +177,12 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testSchemaImplementationType() throws IOException, JSONException {
-        Index index = indexOf(SchemaImplementationTypeResource.class,
+        Index i = indexOf(SchemaImplementationTypeResource.class,
                 SchemaImplementationTypeResource.GreetingMessage.class,
                 SchemaImplementationTypeResource.SimpleString.class);
 
         OpenApiConfig config = emptyConfig();
-        IndexView filtered = new FilteredIndexView(index, config);
+        IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);
@@ -245,8 +245,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testTimeResource() throws IOException, JSONException {
-        Index index = indexOf(TimeTestResource.class, TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        Index i = indexOf(TimeTestResource.class, TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.parameters.time.json", result);
@@ -296,10 +296,10 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testTypeVariableResponse() throws IOException, JSONException {
-        Index index = indexOf(TypeVariableResponseTestResource.class,
+        Index i = indexOf(TypeVariableResponseTestResource.class,
                 TypeVariableResponseTestResource.Dto.class);
         OpenApiConfig config = emptyConfig();
-        IndexView filtered = new FilteredIndexView(index, config);
+        IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);
@@ -336,8 +336,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
     @Test
     public void testResponseTypeUnindexed() throws IOException, JSONException {
         // Index is intentionally missing ResponseTypeUnindexedTestResource$ThirdPartyType
-        Index index = indexOf(ResponseTypeUnindexedTestResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        Index i = indexOf(ResponseTypeUnindexedTestResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.unknown-type.empty-schema.json", result);
@@ -366,8 +366,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testGenericSetResponseWithSetIndexed() throws IOException, JSONException {
-        Index index = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        Index i = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.generic-collection.set-indexed.json", result);
@@ -375,8 +375,8 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
 
     @Test
     public void testGenericSetResponseWithSetUnindexed() throws IOException, JSONException {
-        Index index = indexOf(FruitResource.class, Fruit.class, Seed.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        Index i = indexOf(FruitResource.class, Fruit.class, Seed.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.generic-collection.set-unindexed.json", result);
