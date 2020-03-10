@@ -16,15 +16,24 @@
 
 package io.smallrye.openapi.runtime.scanner;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.IndexView;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.reader.DefinitionReader;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -84,15 +93,86 @@ public class OpenApiAnnotationScanner {
      */
     public OpenAPI scan() {
 
+        // First scan the MicroProfile OpenAPI Annotations. Maybe later we can load this with SPI as well, and allow other Annotation sets.
+        OpenAPI oai = scanMicroProfileOpenApiAnnotations();
+
+        // Now load all entry points with SPI and scan those
         List<OpenAPI> scans = new LinkedList<>();
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
-            LOG.debug("Scanning deployment for OpenAPI and " + annotationScanner.getName() + " Annotations.");
-            scans.add(annotationScanner.scan(annotationScannerContext));
+            LOG.debug("Scanning deployment " + annotationScanner.getName() + " Annotations.");
+            scans.add(annotationScanner.scan(annotationScannerContext, oai));
         }
 
         OpenAPI merged = MergeUtil.merge(scans);
 
         return merged;
+    }
+
+    private OpenAPI scanMicroProfileOpenApiAnnotations() {
+
+        // Initialize a new OAI document.  Even if nothing is found, this will be returned.
+        OpenAPI oai = new OpenAPIImpl();
+        oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+
+        // Creating a new instance of a registry which will be set on the thread context.
+        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext.getConfig(), oai,
+                annotationScannerContext.getIndex());
+
+        // Register custom schemas if available
+        getCustomSchemaRegistry(annotationScannerContext.getConfig()).registerCustomSchemas(schemaRegistry);
+
+        // Find all OpenAPIDefinition annotations at the package level
+        LOG.debug("Scanning deployment for OpenAPI Annotations.");
+        processPackageOpenAPIDefinitions(annotationScannerContext, oai);
+
+        return oai;
+    }
+
+    /**
+     * Scans all <code>@OpenAPIDefinition</code> annotations present on <code>package-info</code>
+     * classes known to the scanner's index.
+     * 
+     * @param oai the current OpenAPI result
+     * @return the created OpenAPI
+     */
+    private OpenAPI processPackageOpenAPIDefinitions(final AnnotationScannerContext context, OpenAPI oai) {
+        List<AnnotationInstance> packageDefs = context.getIndex()
+                .getAnnotations(MPOpenApiConstants.OPEN_API_DEFINITION)
+                .stream()
+                .filter(annotation -> annotation.target().kind() == AnnotationTarget.Kind.CLASS)
+                .filter(annotation -> annotation.target().asClass().name().withoutPackagePrefix().equals("package-info"))
+                .collect(Collectors.toList());
+
+        for (AnnotationInstance packageDef : packageDefs) {
+            OpenAPI packageOai = new OpenAPIImpl();
+            DefinitionReader.processDefinition(context, packageOai, packageDef);
+            oai = MergeUtil.merge(oai, packageOai);
+        }
+        return oai;
+    }
+
+    private CustomSchemaRegistry getCustomSchemaRegistry(final OpenApiConfig config) {
+        if (config == null || config.customSchemaRegistryClass() == null) {
+            // Provide default implementation that does nothing
+            return (type) -> {
+            };
+        } else {
+            try {
+                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader())
+                        .newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+                throw new RuntimeException("Failed to create instance of custom schema registry: "
+                        + config.customSchemaRegistryClass(), ex);
+            }
+        }
+    }
+
+    private static ClassLoader getContextClassLoader() {
+        if (System.getSecurityManager() == null) {
+            return Thread.currentThread().getContextClassLoader();
+        }
+        return AccessController
+                .doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
     }
 }

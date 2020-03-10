@@ -1,27 +1,13 @@
 package io.smallrye.openapi.runtime.scanner;
 
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_BEAN_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_COOKIE_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_DEFAULT_VALUE;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_DEPRECATED;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_FORM_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_HEADER_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_JAXRS_HTTP_METHODS;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_MATRIX_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_PARAMETER;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_PARAMETERS;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_PATH;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_PATH_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_QUERY_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_COOKIE_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_FORM_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_HEADER_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_MATRIX_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_MULTIPART_FORM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_PART_TYPE;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_PATH_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.DOTNAME_RESTEASY_QUERY_PARAM;
-import static io.smallrye.openapi.api.OpenApiConstants.PROP_VALUE;
+import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
+import static io.smallrye.openapi.api.constants.JaxRsConstants.DEFAULT_VALUE;
+import static io.smallrye.openapi.api.constants.JaxRsConstants.HTTP_METHODS;
+import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH;
+import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH_SEGMENT;
+import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER;
+import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETERS;
+import static io.smallrye.openapi.api.constants.OpenApiConstants.PROP_VALUE;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
@@ -71,7 +57,9 @@ import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.JaxRsConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.constants.RestEasyConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
@@ -108,8 +96,8 @@ public class ParameterProcessor {
     private static Comparator<Parameter> parameterComparator = Comparator.comparing(Parameter::getIn)
             .thenComparing(Parameter::getName);
 
-    private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(DOTNAME_PARAMETER,
-            DOTNAME_PARAMETERS));
+    private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(PARAMETER,
+            PARAMETERS));
 
     private final IndexView index;
     private final Function<AnnotationInstance, Parameter> readerFunction;
@@ -239,24 +227,24 @@ public class ParameterProcessor {
      * @author Michael Edgar {@literal <michael@xlate.io>}
      */
     public enum JaxRsParameter {
-        PATH_PARAM(DOTNAME_PATH_PARAM, In.PATH, null, Style.SIMPLE),
+        PATH_PARAM(JaxRsConstants.PATH_PARAM, In.PATH, null, Style.SIMPLE),
         // Apply to the last-matched @Path of the structure injecting the MatrixParam
-        MATRIX_PARAM(DOTNAME_MATRIX_PARAM, In.PATH, Style.MATRIX, Style.MATRIX),
-        QUERY_PARAM(DOTNAME_QUERY_PARAM, In.QUERY, null, Style.FORM),
-        FORM_PARAM(DOTNAME_FORM_PARAM, null, Style.FORM, Style.FORM),
-        HEADER_PARAM(DOTNAME_HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
-        COOKIE_PARAM(DOTNAME_COOKIE_PARAM, In.COOKIE, null, Style.FORM),
-        BEAN_PARAM(DOTNAME_BEAN_PARAM, null, null, null),
+        MATRIX_PARAM(JaxRsConstants.MATRIX_PARAM, In.PATH, Style.MATRIX, Style.MATRIX),
+        QUERY_PARAM(JaxRsConstants.QUERY_PARAM, In.QUERY, null, Style.FORM),
+        FORM_PARAM(JaxRsConstants.FORM_PARAM, null, Style.FORM, Style.FORM),
+        HEADER_PARAM(JaxRsConstants.HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
+        COOKIE_PARAM(JaxRsConstants.COOKIE_PARAM, In.COOKIE, null, Style.FORM),
+        BEAN_PARAM(JaxRsConstants.BEAN_PARAM, null, null, null),
 
         // Support RESTEasy annotations directly
-        RESTEASY_PATH_PARAM(DOTNAME_RESTEASY_PATH_PARAM, In.PATH, null, Style.SIMPLE),
+        RESTEASY_PATH_PARAM(RestEasyConstants.PATH_PARAM, In.PATH, null, Style.SIMPLE),
         // Apply to the last-matched @Path of the structure injecting the MatrixParam
-        RESTEASY_MATRIX_PARAM(DOTNAME_RESTEASY_MATRIX_PARAM, In.PATH, Style.MATRIX, Style.MATRIX),
-        RESTEASY_QUERY_PARAM(DOTNAME_RESTEASY_QUERY_PARAM, In.QUERY, null, Style.FORM),
-        RESTEASY_FORM_PARAM(DOTNAME_RESTEASY_FORM_PARAM, null, Style.FORM, Style.FORM),
-        RESTEASY_HEADER_PARAM(DOTNAME_RESTEASY_HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
-        RESTEASY_COOKIE_PARAM(DOTNAME_RESTEASY_COOKIE_PARAM, In.COOKIE, null, Style.FORM),
-        RESTEASY_MULITIPART_FORM(DOTNAME_RESTEASY_MULTIPART_FORM, null, null, null, MULTIPART_FORM_DATA);
+        RESTEASY_MATRIX_PARAM(RestEasyConstants.MATRIX_PARAM, In.PATH, Style.MATRIX, Style.MATRIX),
+        RESTEASY_QUERY_PARAM(RestEasyConstants.QUERY_PARAM, In.QUERY, null, Style.FORM),
+        RESTEASY_FORM_PARAM(RestEasyConstants.FORM_PARAM, null, Style.FORM, Style.FORM),
+        RESTEASY_HEADER_PARAM(RestEasyConstants.HEADER_PARAM, In.HEADER, null, Style.SIMPLE),
+        RESTEASY_COOKIE_PARAM(RestEasyConstants.COOKIE_PARAM, In.COOKIE, null, Style.FORM),
+        RESTEASY_MULITIPART_FORM(RestEasyConstants.MULTIPART_FORM, null, null, null, MULTIPART_FORM_DATA);
 
         private final DotName name;
         final In location;
@@ -790,7 +778,7 @@ public class ParameterProcessor {
             return;
         }
 
-        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, DOTNAME_RESTEASY_PART_TYPE);
+        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, RestEasyConstants.PART_TYPE);
 
         if (type != null) {
             Encoding encoding = new EncodingImpl();
@@ -889,9 +877,9 @@ public class ParameterProcessor {
     void readParameterAnnotation(AnnotationInstance annotation) {
         DotName name = annotation.name();
 
-        if (DOTNAME_PARAMETER.equals(name)) {
+        if (PARAMETER.equals(name)) {
             readAnnotatedType(annotation, null, false);
-        } else if (DOTNAME_PARAMETERS.equals(name)) {
+        } else if (PARAMETERS.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
@@ -935,7 +923,7 @@ public class ParameterProcessor {
             boolean overriddenParametersOnly) {
         DotName name = annotation.name();
 
-        if (DOTNAME_PARAMETER.equals(name) && readerFunction != null) {
+        if (PARAMETER.equals(name) && readerFunction != null) {
             Parameter oaiParam = readerFunction.apply(annotation);
 
             readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
@@ -966,7 +954,7 @@ public class ParameterProcessor {
 
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 } else if (jaxRsParam.location == In.PATH && targetType != null
-                        && OpenApiConstants.DOTNAME_PATH_SEGMENT.equals(targetType.name())) {
+                        && PATH_SEGMENT.equals(targetType.name())) {
                     String pathSegment = JandexUtil.value(annotation, OpenApiConstants.PROP_VALUE);
 
                     if (!matrixParams.containsKey(pathSegment)) {
@@ -1094,7 +1082,7 @@ public class ParameterProcessor {
      * @return the default value
      */
     static Object getDefaultValue(AnnotationTarget target) {
-        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, DOTNAME_DEFAULT_VALUE);
+        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, DEFAULT_VALUE);
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
@@ -1230,10 +1218,10 @@ public class ParameterProcessor {
 
         switch (target.kind()) {
             case CLASS:
-                path = target.asClass().classAnnotation(DOTNAME_PATH);
+                path = target.asClass().classAnnotation(PATH);
                 break;
             case METHOD:
-                path = target.asMethod().annotation(DOTNAME_PATH);
+                path = target.asMethod().annotation(PATH);
                 break;
             default:
                 break;
@@ -1441,7 +1429,7 @@ public class ParameterProcessor {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
-            if (DOTNAME_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
+            if (PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
                         readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
@@ -1501,10 +1489,10 @@ public class ParameterProcessor {
      */
     boolean isSubResourceLocator(MethodInfo method) {
         return method.returnType().kind() == Type.Kind.CLASS &&
-                method.hasAnnotation(DOTNAME_PATH) &&
+                method.hasAnnotation(PATH) &&
                 method.annotations().stream()
                         .map(AnnotationInstance::name)
-                        .noneMatch(DOTNAME_JAXRS_HTTP_METHODS::contains);
+                        .noneMatch(HTTP_METHODS::contains);
     }
 
     /**
@@ -1518,7 +1506,7 @@ public class ParameterProcessor {
         return method.annotations()
                 .stream()
                 .map(AnnotationInstance::name)
-                .anyMatch(DOTNAME_JAXRS_HTTP_METHODS::contains);
+                .anyMatch(HTTP_METHODS::contains);
     }
 
     /**
@@ -1537,9 +1525,9 @@ public class ParameterProcessor {
         if (JaxRsParameter.isParameter(annotationName)) {
             return true;
         }
-        if (DOTNAME_PARAMETER.equals(annotationName)) {
+        if (PARAMETER.equals(annotationName)) {
             return true;
         }
-        return DOTNAME_PARAMETERS.equals(annotationName);
+        return PARAMETERS.equals(annotationName);
     }
 }

@@ -48,7 +48,9 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.WildcardType;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.JDKConstants;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 
 /**
@@ -440,7 +442,7 @@ public class TypeUtil {
      * @return true if the type is one of the four optional types, otherwise false
      */
     public static boolean isOptional(Type type) {
-        return type != null && OpenApiConstants.DOTNAME_OPTIONALS.contains(type.name());
+        return type != null && JDKConstants.DOTNAME_OPTIONALS.contains(type.name());
     }
 
     /**
@@ -455,16 +457,16 @@ public class TypeUtil {
         if (type == null) {
             return null;
         }
-        if (OpenApiConstants.DOTNAME_OPTIONAL.equals(type.name())) {
+        if (JDKConstants.DOTNAME_OPTIONAL.equals(type.name())) {
             return type.asParameterizedType().arguments().get(0);
         }
-        if (OpenApiConstants.DOTNAME_OPTIONAL_DOUBLE.equals(type.name())) {
+        if (JDKConstants.DOTNAME_OPTIONAL_DOUBLE.equals(type.name())) {
             return PrimitiveType.DOUBLE;
         }
-        if (OpenApiConstants.DOTNAME_OPTIONAL_INT.equals(type.name())) {
+        if (JDKConstants.DOTNAME_OPTIONAL_INT.equals(type.name())) {
             return PrimitiveType.INT;
         }
-        if (OpenApiConstants.DOTNAME_OPTIONAL_LONG.equals(type.name())) {
+        if (JDKConstants.DOTNAME_OPTIONAL_LONG.equals(type.name())) {
             return PrimitiveType.LONG;
         }
         return null;
@@ -548,19 +550,19 @@ public class TypeUtil {
     }
 
     public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
-        return getAnnotation(annotationTarget, OpenApiConstants.DOTNAME_SCHEMA);
+        return getAnnotation(annotationTarget, MPOpenApiConstants.SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(ClassInfo field) {
-        return getAnnotation(field, OpenApiConstants.DOTNAME_SCHEMA);
+        return getAnnotation(field, MPOpenApiConstants.SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(FieldInfo field) {
-        return getAnnotation(field, OpenApiConstants.DOTNAME_SCHEMA);
+        return getAnnotation(field, MPOpenApiConstants.SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(Type type) {
-        return getAnnotation(type, OpenApiConstants.DOTNAME_SCHEMA);
+        return getAnnotation(type, MPOpenApiConstants.SCHEMA);
     }
 
     public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {

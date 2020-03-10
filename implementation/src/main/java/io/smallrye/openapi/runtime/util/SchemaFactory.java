@@ -24,7 +24,10 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.JDKConstants;
+import io.smallrye.openapi.api.constants.JaxRsConstants;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
@@ -376,7 +379,7 @@ public class SchemaFactory {
         LOG.debugv("Processing an enum {0}", enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
-        AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(OpenApiConstants.DOTNAME_SCHEMA);
+        AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(MPOpenApiConstants.SCHEMA);
         Schema enumSchema = new SchemaImpl();
         List<Object> enumeration = enumKlazz.fields()
                 .stream()
@@ -408,7 +411,7 @@ public class SchemaFactory {
      * @param schemaReferenceSupported
      */
     private static Schema introspectClassToSchema(IndexView index, ClassType ctype, boolean schemaReferenceSupported) {
-        if (ctype.name().equals(OpenApiConstants.DOTNAME_RESPONSE)) {
+        if (ctype.name().equals(JaxRsConstants.RESPONSE)) {
             return null;
         }
 
@@ -487,7 +490,7 @@ public class SchemaFactory {
     private static Type resolveAsyncType(Type type, List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
-            if (pType.name().equals(OpenApiConstants.COMPLETION_STAGE_NAME)
+            if (pType.name().equals(JDKConstants.COMPLETION_STAGE_NAME)
                     && pType.arguments().size() == 1)
                 return pType.arguments().get(0);
         }

@@ -11,7 +11,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
@@ -40,15 +40,11 @@ public class MediaTypeObjectReader {
      * @param context the scanning context
      * @param annotationValue the {@literal @}Content annotation
      * @param direction the content direction
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Content model
      */
     public static Content readContent(final AnnotationScannerContext context,
             final AnnotationValue annotationValue,
-            final ContentDirection direction,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final ContentDirection direction) {
 
         if (annotationValue == null) {
             return null;
@@ -63,11 +59,11 @@ public class MediaTypeObjectReader {
                 // If the content type is not provided in the @Content annotation, then
                 // we assume it applies to all the jax-rs method's @Consumes or @Produces
                 String[] mimeTypes = {};
-                if (direction == ContentDirection.Input && currentConsumes != null) {
-                    mimeTypes = currentConsumes;
+                if (direction == ContentDirection.Input && CurrentContentTypes.getCurrentConsumes() != null) {
+                    mimeTypes = CurrentContentTypes.getCurrentConsumes();
                 }
-                if (direction == ContentDirection.Output && currentProduces != null) {
-                    mimeTypes = currentProduces;
+                if (direction == ContentDirection.Output && CurrentContentTypes.getCurrentProduces() != null) {
+                    mimeTypes = CurrentContentTypes.getCurrentProduces();
                 }
                 if (direction == ContentDirection.Parameter) {
                     mimeTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();

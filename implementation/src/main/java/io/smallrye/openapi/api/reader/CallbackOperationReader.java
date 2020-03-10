@@ -6,7 +6,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -31,14 +31,10 @@ public class CallbackOperationReader {
      * 
      * @param context the scanning context
      * @param annotationInstance {@literal @}CallbackOperation annotation
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Operation model
      */
     public static Operation readOperation(final AnnotationScannerContext context,
-            final AnnotationInstance annotationInstance,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationInstance annotationInstance) {
         if (annotationInstance == null) {
             return null;
         }
@@ -49,11 +45,11 @@ public class CallbackOperationReader {
         operation.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(annotationInstance.value(OpenApiConstants.PROP_EXTERNAL_DOCS)));
         operation.setParameters(ParameterReader.readParametersAsList(context,
-                annotationInstance.value(OpenApiConstants.PROP_PARAMETERS), currentConsumes, currentProduces));
+                annotationInstance.value(OpenApiConstants.PROP_PARAMETERS)));
         operation.setRequestBody(RequestBodyReader.readRequestBody(context,
-                annotationInstance.value(OpenApiConstants.PROP_REQUEST_BODY), currentConsumes, currentProduces));
+                annotationInstance.value(OpenApiConstants.PROP_REQUEST_BODY)));
         operation.setResponses(readCallbackOperationResponses(context,
-                annotationInstance.value(OpenApiConstants.PROP_RESPONSES), currentConsumes, currentProduces));
+                annotationInstance.value(OpenApiConstants.PROP_RESPONSES)));
         operation.setSecurity(SecurityReader.readSecurity(annotationInstance.value(OpenApiConstants.PROP_SECURITY)));
         operation.setExtensions(
                 ExtensionReader.readExtensions(context, annotationInstance.value(OpenApiConstants.PROP_EXTENSIONS)));
@@ -65,14 +61,10 @@ public class CallbackOperationReader {
      * 
      * @param context the scanning context
      * @param annotationValue {@literal @}APIResponse annotation
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return APIResponses model
      */
     private static APIResponses readCallbackOperationResponses(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -83,7 +75,7 @@ public class CallbackOperationReader {
             String responseCode = JandexUtil.stringValue(nested, OpenApiConstants.PROP_RESPONSE_CODE);
             if (responseCode != null) {
                 responses.addAPIResponse(responseCode,
-                        ResponseObjectReader.readResponse(context, nested, currentConsumes, currentProduces));
+                        ResponseObjectReader.readResponse(context, nested));
             }
         }
         return responses;

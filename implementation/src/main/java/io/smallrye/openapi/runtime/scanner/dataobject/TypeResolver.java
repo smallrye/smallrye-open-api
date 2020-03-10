@@ -44,7 +44,11 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.TypeVariable;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.JacksonConstants;
+import io.smallrye.openapi.api.constants.JaxbConstants;
+import io.smallrye.openapi.api.constants.JsonbConstants;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -82,19 +86,19 @@ public class TypeResolver {
         int result;
 
         // Annotated elements sort to the top of the priority queue
-        if ((result = compareAnnotation(t1, t2, OpenApiConstants.DOTNAME_SCHEMA)) != 0) {
+        if ((result = compareAnnotation(t1, t2, MPOpenApiConstants.SCHEMA)) != 0) {
             return result;
         }
-        if ((result = compareAnnotation(t1, t2, OpenApiConstants.DOTNAME_JSONB_PROPERTY)) != 0) {
+        if ((result = compareAnnotation(t1, t2, JsonbConstants.JSONB_PROPERTY)) != 0) {
             return result;
         }
-        if ((result = compareAnnotation(t1, t2, OpenApiConstants.DOTNAME_JACKSON_PROPERTY)) != 0) {
+        if ((result = compareAnnotation(t1, t2, JacksonConstants.JSON_PROPERTY)) != 0) {
             return result;
         }
-        if ((result = compareAnnotation(t1, t2, OpenApiConstants.DOTNAME_JAXB_XML_ELEMENT)) != 0) {
+        if ((result = compareAnnotation(t1, t2, JaxbConstants.XML_ELEMENT)) != 0) {
             return result;
         }
-        if ((result = compareAnnotation(t1, t2, OpenApiConstants.DOTNAME_JAXB_XML_ATTRIBUTE)) != 0) {
+        if ((result = compareAnnotation(t1, t2, JaxbConstants.XML_ATTRIBUTE)) != 0) {
             return result;
         }
         if (t1.kind() == Kind.FIELD) {
@@ -193,31 +197,31 @@ public class TypeResolver {
         String name;
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                OpenApiConstants.DOTNAME_SCHEMA,
+                MPOpenApiConstants.SCHEMA,
                 OpenApiConstants.PROP_NAME)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                OpenApiConstants.DOTNAME_JSONB_PROPERTY,
+                JsonbConstants.JSONB_PROPERTY,
                 OpenApiConstants.PROP_VALUE)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                OpenApiConstants.DOTNAME_JACKSON_PROPERTY,
+                JacksonConstants.JSON_PROPERTY,
                 OpenApiConstants.PROP_VALUE)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                OpenApiConstants.DOTNAME_JAXB_XML_ELEMENT,
+                JaxbConstants.XML_ELEMENT,
                 OpenApiConstants.PROP_NAME)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                OpenApiConstants.DOTNAME_JAXB_XML_ATTRIBUTE,
+                JaxbConstants.XML_ATTRIBUTE,
                 OpenApiConstants.PROP_NAME)) != null) {
             return name;
         }
@@ -622,11 +626,11 @@ public class TypeResolver {
         AnnotationInstance propertyOrder;
         AnnotationValue orderArray = null;
 
-        if ((propertyOrder = clazz.classAnnotation(OpenApiConstants.DOTNAME_JSONB_PROPERTY_ORDER)) != null) {
+        if ((propertyOrder = clazz.classAnnotation(JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
-        } else if ((propertyOrder = clazz.classAnnotation(OpenApiConstants.DOTNAME_JAXB_XML_TYPE)) != null) {
+        } else if ((propertyOrder = clazz.classAnnotation(JaxbConstants.XML_TYPE)) != null) {
             orderArray = propertyOrder.value("propOrder");
-        } else if ((propertyOrder = clazz.classAnnotation(OpenApiConstants.DOTNAME_JACKSON_PROPERTY_ORDER)) != null) {
+        } else if ((propertyOrder = clazz.classAnnotation(JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
         }
 

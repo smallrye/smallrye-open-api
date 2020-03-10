@@ -4,7 +4,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
@@ -27,14 +27,10 @@ public class DefinitionReader {
      * @param context the scanning context
      * @param openApi OpenAPIImpl
      * @param annotationInstance {@literal @}OpenAPIDefinition annotation
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      */
     public static void processDefinition(final AnnotationScannerContext context,
             OpenAPI openApi, // TODO: make this a return ?
-            final AnnotationInstance annotationInstance,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationInstance annotationInstance) {
         LOG.debug("Processing an @OpenAPIDefinition annotation.");
         openApi.setInfo(InfoReader.readInfo(annotationInstance.value(OpenApiConstants.PROP_INFO)));
         openApi.setTags(TagReader.readTags(annotationInstance.value(OpenApiConstants.PROP_TAGS)));
@@ -43,6 +39,6 @@ public class DefinitionReader {
         openApi.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(annotationInstance.value(OpenApiConstants.PROP_EXTERNAL_DOCS)));
         openApi.setComponents(ComponentsReader.readComponents(context,
-                annotationInstance.value(OpenApiConstants.PROP_COMPONENTS), currentConsumes, currentProduces));
+                annotationInstance.value(OpenApiConstants.PROP_COMPONENTS)));
     }
 }

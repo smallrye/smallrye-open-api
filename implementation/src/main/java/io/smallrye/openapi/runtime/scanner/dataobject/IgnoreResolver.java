@@ -35,7 +35,10 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.JacksonConstants;
+import io.smallrye.openapi.api.constants.JsonbConstants;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -100,7 +103,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return OpenApiConstants.DOTNAME_SCHEMA;
+            return MPOpenApiConstants.SCHEMA;
         }
     }
 
@@ -115,7 +118,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return OpenApiConstants.DOTNAME_JSONB_TRANSIENT;
+            return JsonbConstants.JSONB_TRANSIENT;
         }
     }
 
@@ -201,7 +204,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return OpenApiConstants.DOTNAME_JACKSON_IGNORE_PROPERTIES;
+            return JacksonConstants.JSON_IGNORE_PROPERTIES;
         }
     }
 
@@ -221,7 +224,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return OpenApiConstants.DOTNAME_JACKSON_IGNORE;
+            return JacksonConstants.JSON_IGNORE;
         }
     }
 
@@ -282,7 +285,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return OpenApiConstants.DOTNAME_JACKSON_IGNORE_TYPE;
+            return JacksonConstants.JSON_IGNORE_TYPE;
         }
     }
 

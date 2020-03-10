@@ -5,7 +5,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -28,14 +28,10 @@ public class ComponentsReader {
      * 
      * @param context the scanning context
      * @param annotationValue the {@literal @}Components annotation
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Components model
      */
     public static Components readComponents(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -43,17 +39,14 @@ public class ComponentsReader {
         AnnotationInstance nested = annotationValue.asNested();
         Components components = new ComponentsImpl();
         // TODO for EVERY item below, handle the case where the annotation is ref-only.  then strip the ref path and use the final segment as the name
-        components.setCallbacks(CallbackReader.readCallbacks(context, nested.value(OpenApiConstants.PROP_CALLBACKS),
-                currentConsumes, currentProduces));
+        components.setCallbacks(CallbackReader.readCallbacks(context, nested.value(OpenApiConstants.PROP_CALLBACKS)));
         components.setExamples(ExampleReader.readExamples(nested.value(OpenApiConstants.PROP_EXAMPLES)));
         components.setHeaders(HeaderReader.readHeaders(context, nested.value(OpenApiConstants.PROP_HEADERS)));
         components.setLinks(LinkReader.readLinks(nested.value(OpenApiConstants.PROP_LINKS)));
-        components.setParameters(ParameterReader.readParameters(context, nested.value(OpenApiConstants.PROP_PARAMETERS),
-                currentConsumes, currentProduces));
+        components.setParameters(ParameterReader.readParameters(context, nested.value(OpenApiConstants.PROP_PARAMETERS)));
         components.setRequestBodies(RequestBodyReader.readRequestBodies(context,
-                nested.value(OpenApiConstants.PROP_REQUEST_BODIES), currentConsumes, currentProduces));
-        components.setResponses(ResponseObjectReader.readResponses(context, nested.value(OpenApiConstants.PROP_RESPONSES),
-                currentConsumes, currentProduces));
+                nested.value(OpenApiConstants.PROP_REQUEST_BODIES)));
+        components.setResponses(ResponseObjectReader.readResponses(context, nested.value(OpenApiConstants.PROP_RESPONSES)));
         components.setSchemas(SchemaReader.readSchemas(context, nested.value(OpenApiConstants.PROP_SCHEMAS)));
         components.setSecuritySchemes(
                 SecuritySchemeReader.readSecuritySchemes(nested.value(OpenApiConstants.PROP_SECURITY_SCHEMES)));

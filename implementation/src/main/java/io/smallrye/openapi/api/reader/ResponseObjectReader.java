@@ -8,7 +8,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -32,14 +32,10 @@ public class ResponseObjectReader {
      * 
      * @param context the scanning context
      * @param annotationValue map of {@literal @}APIResponse annotations
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Map of APIResponse models
      */
     public static Map<String, APIResponse> readResponses(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -52,7 +48,7 @@ public class ResponseObjectReader {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                map.put(name, readResponse(context, nested, currentConsumes, currentProduces));
+                map.put(name, readResponse(context, nested));
             }
         }
         return map;
@@ -63,14 +59,10 @@ public class ResponseObjectReader {
      * 
      * @param context the scanning context
      * @param annotationInstance {@literal @}APIResponse annotation
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return APIResponse model
      */
     public static APIResponse readResponse(final AnnotationScannerContext context,
-            final AnnotationInstance annotationInstance,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationInstance annotationInstance) {
         if (annotationInstance == null) {
             return null;
         }
@@ -80,7 +72,7 @@ public class ResponseObjectReader {
         response.setHeaders(HeaderReader.readHeaders(context, annotationInstance.value(OpenApiConstants.PROP_HEADERS)));
         response.setLinks(LinkReader.readLinks(annotationInstance.value(OpenApiConstants.PROP_LINKS)));
         response.setContent(MediaTypeObjectReader.readContent(context, annotationInstance.value(OpenApiConstants.PROP_CONTENT),
-                ContentDirection.Output, currentConsumes, currentProduces));
+                ContentDirection.Output));
         response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Response));
         return response;
     }

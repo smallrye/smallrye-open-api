@@ -40,7 +40,8 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.JaxRsConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 
@@ -360,7 +361,7 @@ public class JandexUtil {
      * @return Collection of ClassInfo's
      */
     public static Collection<ClassInfo> getJaxRsResourceClasses(IndexView index) {
-        return index.getAnnotations(OpenApiConstants.DOTNAME_PATH)
+        return index.getAnnotations(JaxRsConstants.PATH)
                 .stream()
                 .map(AnnotationInstance::target)
                 .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)

@@ -11,7 +11,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -36,14 +36,10 @@ public class ParameterReader {
      * 
      * @param context the scanning context
      * @param annotationValue Map of {@literal @}Parameter annotations
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Map of Parameter model
      */
     public static List<Parameter> readParametersAsList(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -51,7 +47,7 @@ public class ParameterReader {
         List<Parameter> parameters = new ArrayList<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            Parameter parameter = readParameter(context, nested, currentConsumes, currentProduces);
+            Parameter parameter = readParameter(context, nested);
             if (parameter != null) {
                 parameters.add(parameter);
             }
@@ -64,14 +60,10 @@ public class ParameterReader {
      * 
      * @param context the scanning context
      * @param annotationValue Map of {@literal @}Parameter annotations
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Map of Parameter model
      */
     public static Map<String, Parameter> readParameters(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -84,7 +76,7 @@ public class ParameterReader {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                Parameter parameter = readParameter(context, nested, currentConsumes, currentProduces);
+                Parameter parameter = readParameter(context, nested);
                 if (parameter != null) {
                     map.put(name, parameter);
                 }
@@ -98,14 +90,10 @@ public class ParameterReader {
      * 
      * @param context the scanning context
      * @param annotationInstance {@literal @}Parameter model
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Parameter model
      */
     public static Parameter readParameter(final AnnotationScannerContext context,
-            final AnnotationInstance annotationInstance,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationInstance annotationInstance) {
 
         if (annotationInstance == null) {
             return null;
@@ -137,7 +125,7 @@ public class ParameterReader {
         parameter.setSchema(
                 SchemaFactory.readSchema(context.getIndex(), annotationInstance.value(OpenApiConstants.PROP_SCHEMA)));
         parameter.setContent(MediaTypeObjectReader.readContent(context, annotationInstance.value(OpenApiConstants.PROP_CONTENT),
-                ContentDirection.Parameter, currentConsumes, currentProduces));
+                ContentDirection.Parameter));
         parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(OpenApiConstants.PROP_EXAMPLES)));
         parameter.setExample(JandexUtil.stringValue(annotationInstance, OpenApiConstants.PROP_EXAMPLE));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Parameter));

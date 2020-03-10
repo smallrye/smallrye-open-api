@@ -25,6 +25,8 @@ import java.util.stream.StreamSupport;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.OASConfig;
 
+import io.smallrye.openapi.api.constants.OpenApiConstants;
+
 /**
  * Implementation of the {@link OpenApiConfig} interface that gets config information from a
  * standard MP Config object.

@@ -18,7 +18,7 @@ package io.smallrye.openapi.api.models.examples;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
 

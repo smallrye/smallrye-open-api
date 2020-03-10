@@ -14,7 +14,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.OpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -39,14 +39,10 @@ public class CallbackReader {
      * 
      * @param context the scanner context
      * @param annotationValue Map of {@literal @}Callback annotations
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Map of Callback models
      */
     public static Map<String, Callback> readCallbacks(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -59,7 +55,7 @@ public class CallbackReader {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                map.put(name, readCallback(context, nested, currentConsumes, currentProduces));
+                map.put(name, readCallback(context, nested));
             }
         }
         return map;
@@ -70,14 +66,10 @@ public class CallbackReader {
      * 
      * @param annotation the {@literal @}Callback annotation
      * @param context the scanner context
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      * @return Callback model
      */
     public static Callback readCallback(final AnnotationScannerContext context,
-            final AnnotationInstance annotation,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationInstance annotation) {
         if (annotation == null) {
             return null;
         }
@@ -86,8 +78,7 @@ public class CallbackReader {
         callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.Callback));
         String expression = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
-                readCallbackOperations(context, annotation.value(OpenApiConstants.PROP_OPERATIONS), currentConsumes,
-                        currentProduces));
+                readCallbackOperations(context, annotation.value(OpenApiConstants.PROP_OPERATIONS)));
         return callback;
     }
 
@@ -97,13 +88,9 @@ public class CallbackReader {
      * 
      * @param context the scanning context
      * @param annotationValue the {@literal @}CallbackOperation annotations
-     * @param currentConsumes the current document consumes value
-     * @param currentProduces the current document produces value
      */
     private static PathItem readCallbackOperations(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue,
-            final String[] currentConsumes,
-            final String[] currentProduces) {
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -112,8 +99,7 @@ public class CallbackReader {
         PathItem pathItem = new PathItemImpl();
         for (AnnotationInstance operationAnno : nestedArray) {
             String method = JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_METHOD);
-            Operation operation = CallbackOperationReader.readOperation(context, operationAnno, currentConsumes,
-                    currentProduces);
+            Operation operation = CallbackOperationReader.readOperation(context, operationAnno);
             if (method == null) {
                 continue;
             }
