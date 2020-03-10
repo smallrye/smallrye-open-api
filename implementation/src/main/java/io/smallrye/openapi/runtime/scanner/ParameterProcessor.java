@@ -827,7 +827,7 @@ public class ParameterProcessor {
             return true;
         }
 
-        if (isHidden(parameter)) {
+        if (ParameterImpl.isHidden(parameter)) {
             return true;
         }
 
@@ -853,14 +853,6 @@ public class ParameterProcessor {
             }
         }
         return false;
-    }
-
-    private static boolean isHidden(Parameter parameter) {
-
-        return parameter.getExtensions() != null
-                && !parameter.getExtensions().isEmpty()
-                && parameter.getExtensions().containsKey(OpenApiConstants.PROP_HIDDEN)
-                && parameter.getExtensions().get(OpenApiConstants.PROP_HIDDEN).equals(true);
     }
 
     /**

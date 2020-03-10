@@ -54,12 +54,12 @@ public class NestedSchemaReferenceTests extends OpenApiDataObjectScannerTestBase
 
     @Test
     public void testNestedSchemaOnParameter() throws IOException, JSONException {
-        IndexView index = indexOf(NestedSchemaOnParameterResource.class,
+        IndexView i = indexOf(NestedSchemaOnParameterResource.class,
                 NestedSchemaOnParameterResource.NestedParameterTestParent.class,
                 NestedSchemaOnParameterResource.NestedParameterTestChild.class,
                 NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
 
         OpenAPI result = scanner.scan();
 

@@ -121,7 +121,7 @@ public class ParameterReader {
         // Params can be hidden. Skip if that's the case.
         Boolean isHidden = JandexUtil.booleanValue(annotationInstance, OpenApiConstants.PROP_HIDDEN);
         if (Boolean.TRUE.equals(isHidden)) {
-            parameter.addExtension(OpenApiConstants.PROP_HIDDEN, true);
+            ParameterImpl.setHidden(parameter, true);
             return parameter;
         }
 

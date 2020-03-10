@@ -55,14 +55,14 @@ public class ResourceInheritanceTests extends OpenApiDataObjectScannerTestBase {
      */
     @Test
     public void testInheritedResourceMethod() throws IOException, JSONException {
-        Index index = indexOf(GenericResource.class,
+        Index i = indexOf(GenericResource.class,
                 ExampleResource1.class,
                 ExampleResource2.class,
                 Greetable.class,
                 Greetable.GreetingBean.class);
 
         OpenApiConfig config = emptyConfig();
-        IndexView filtered = new FilteredIndexView(index, config);
+        IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);

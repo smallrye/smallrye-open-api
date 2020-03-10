@@ -293,4 +293,21 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     public void setIn(In in) {
         this.in = in;
     }
+
+    public static boolean isHidden(Parameter parameter) {
+        return parameter != null
+                && parameter.getExtensions() != null
+                && !parameter.getExtensions().isEmpty()
+                && parameter.getExtensions().containsKey(HIDDEN)
+                && parameter.getExtensions().get(HIDDEN) != null
+                && parameter.getExtensions().get(HIDDEN).equals(true);
+    }
+
+    public static void setHidden(Parameter parameter, boolean hidden) {
+        if (parameter != null) {
+            parameter.addExtension(HIDDEN, hidden);
+        }
+    }
+
+    public static final String HIDDEN = "smallrye.internal.hidden";
 }
