@@ -31,10 +31,9 @@ import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.MPOpenApiConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.api.reader.DefinitionReader;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.reader.DefinitionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
@@ -113,7 +112,7 @@ public class OpenApiAnnotationScanner {
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
         OpenAPI oai = new OpenAPIImpl();
-        oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        oai.setOpenapi(MPOpenApiConstants.OPEN_API_VERSION);
 
         // Creating a new instance of a registry which will be set on the thread context.
         SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext.getConfig(), oai,
@@ -138,7 +137,7 @@ public class OpenApiAnnotationScanner {
      */
     private OpenAPI processPackageOpenAPIDefinitions(final AnnotationScannerContext context, OpenAPI oai) {
         List<AnnotationInstance> packageDefs = context.getIndex()
-                .getAnnotations(MPOpenApiConstants.OPEN_API_DEFINITION)
+                .getAnnotations(MPOpenApiConstants.OPEN_API_DEFINITION.TYPE_OPEN_API_DEFINITION)
                 .stream()
                 .filter(annotation -> annotation.target().kind() == AnnotationTarget.Kind.CLASS)
                 .filter(annotation -> annotation.target().asClass().name().withoutPackagePrefix().equals("package-info"))

@@ -1,4 +1,4 @@
-package io.smallrye.openapi.api.reader;
+package io.smallrye.openapi.runtime.reader;
 
 /**
  * Simple enum to indicate whether an {@literal @}Content annotation being processed is

@@ -63,6 +63,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
@@ -143,7 +144,7 @@ public class OpenApiSerializer {
      * @param model
      */
     private void writeOpenAPI(ObjectNode node, OpenAPI model) {
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPENAPI, model.getOpenapi());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.OPEN_API_DEFINITION.PROP_OPENAPI, model.getOpenapi());
         writeInfo(node, model.getInfo());
         writeExternalDocumentation(node, model.getExternalDocs());
         writeServers(node, model.getServers());
@@ -164,14 +165,14 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_INFO);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_INFO);
 
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_TITLE, model.getTitle());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_TERMS_OF_SERVICE, model.getTermsOfService());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.INFO.PROP_TITLE, model.getTitle());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.INFO.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.INFO.PROP_TERMS_OF_SERVICE, model.getTermsOfService());
         writeContact(node, model.getContact());
         writeLicense(node, model.getLicense());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_VERSION, model.getVersion());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.INFO.PROP_VERSION, model.getVersion());
         writeExtensions(node, model);
     }
 
@@ -186,11 +187,11 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = JsonUtil.objectNode();
-        parent.set(OpenApiConstants.PROP_CONTACT, node);
+        parent.set(MPOpenApiConstants.INFO.PROP_CONTACT, node);
 
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME, model.getName());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL, model.getUrl());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_EMAIL, model.getEmail());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.CONTACT.PROP_NAME, model.getName());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.CONTACT.PROP_URL, model.getUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.CONTACT.PROP_EMAIL, model.getEmail());
         writeExtensions(node, model);
     }
 
@@ -204,10 +205,10 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_LICENSE);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.INFO.PROP_LICENSE);
 
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME, model.getName());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL, model.getUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.LICENSE.PROP_NAME, model.getName());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.LICENSE.PROP_URL, model.getUrl());
         writeExtensions(node, model);
     }
 
@@ -221,10 +222,10 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_EXTERNAL_DOCS);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_EXTERNAL_DOCS);
 
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL, model.getUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.EXTERNAL_DOCUMENTATION.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.EXTERNAL_DOCUMENTATION.PROP_URL, model.getUrl());
         writeExtensions(node, model);
     }
 
@@ -238,11 +239,11 @@ public class OpenApiSerializer {
         if (tags == null) {
             return;
         }
-        ArrayNode array = node.putArray(OpenApiConstants.PROP_TAGS);
+        ArrayNode array = node.putArray(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_TAGS);
         for (Tag tag : tags) {
             ObjectNode tagNode = array.addObject();
-            JsonUtil.stringProperty(tagNode, OpenApiConstants.PROP_NAME, tag.getName());
-            JsonUtil.stringProperty(tagNode, OpenApiConstants.PROP_DESCRIPTION, tag.getDescription());
+            JsonUtil.stringProperty(tagNode, MPOpenApiConstants.TAG.PROP_NAME, tag.getName());
+            JsonUtil.stringProperty(tagNode, MPOpenApiConstants.TAG.PROP_DESCRIPTION, tag.getDescription());
             writeExternalDocumentation(tagNode, tag.getExternalDocs());
             writeExtensions(tagNode, tag);
         }
@@ -258,7 +259,7 @@ public class OpenApiSerializer {
         if (servers == null) {
             return;
         }
-        ArrayNode array = node.putArray(OpenApiConstants.PROP_SERVERS);
+        ArrayNode array = node.putArray(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_SERVERS);
         for (Server server : servers) {
             ObjectNode serverNode = array.addObject();
             writeServerToNode(serverNode, server);
@@ -272,8 +273,8 @@ public class OpenApiSerializer {
      * @param model Server
      */
     protected void writeServerToNode(ObjectNode node, Server model) {
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_URL, model.getUrl());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SERVER.PROP_URL, model.getUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SERVER.PROP_DESCRIPTION, model.getDescription());
         writeServerVariables(node, model.getVariables());
         writeExtensions(node, model);
     }
@@ -288,7 +289,7 @@ public class OpenApiSerializer {
         if (variables == null) {
             return;
         }
-        ObjectNode variablesNode = serverNode.putObject(OpenApiConstants.PROP_VARIABLES);
+        ObjectNode variablesNode = serverNode.putObject(MPOpenApiConstants.SERVER.PROP_VARIABLES);
         write(variablesNode, variables, this::writeServerVariable);
     }
 
@@ -304,11 +305,11 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(variableName);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DEFAULT, model.getDefaultValue());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SERVER_VARIABLE.PROP_DEFAULT, model.getDefaultValue());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SERVER_VARIABLE.PROP_DESCRIPTION, model.getDescription());
         List<String> enumeration = model.getEnumeration();
         if (enumeration != null) {
-            ArrayNode enumArray = node.putArray(OpenApiConstants.PROP_ENUM);
+            ArrayNode enumArray = node.putArray(MPOpenApiConstants.SERVER_VARIABLE.PROP_ENUM);
             for (String enumValue : enumeration) {
                 enumArray.add(enumValue);
             }
@@ -326,7 +327,7 @@ public class OpenApiSerializer {
         if (security == null) {
             return;
         }
-        ArrayNode array = parent.putArray(OpenApiConstants.PROP_SECURITY);
+        ArrayNode array = parent.putArray(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_SECURITY);
         for (SecurityRequirement securityRequirement : security) {
             ObjectNode srNode = array.addObject();
             for (Entry<String, List<String>> entry : securityRequirement.getSchemes().entrySet()) {
@@ -352,7 +353,7 @@ public class OpenApiSerializer {
         if (paths == null) {
             return;
         }
-        ObjectNode pathsNode = parent.putObject(OpenApiConstants.PROP_PATHS);
+        ObjectNode pathsNode = parent.putObject(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_PATHS);
         write(pathsNode, paths.getPathItems(), this::writePathItem);
         writeExtensions(pathsNode, paths);
     }
@@ -369,17 +370,17 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(pathName);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_SUMMARY, model.getSummary());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        writeOperation(node, model.getGET(), OpenApiConstants.PROP_GET);
-        writeOperation(node, model.getPUT(), OpenApiConstants.PROP_PUT);
-        writeOperation(node, model.getPOST(), OpenApiConstants.PROP_POST);
-        writeOperation(node, model.getDELETE(), OpenApiConstants.PROP_DELETE);
-        writeOperation(node, model.getOPTIONS(), OpenApiConstants.PROP_OPTIONS);
-        writeOperation(node, model.getHEAD(), OpenApiConstants.PROP_HEAD);
-        writeOperation(node, model.getPATCH(), OpenApiConstants.PROP_PATCH);
-        writeOperation(node, model.getTRACE(), OpenApiConstants.PROP_TRACE);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.PATHITEM.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.PATHITEM.PROP_SUMMARY, model.getSummary());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.PATHITEM.PROP_DESCRIPTION, model.getDescription());
+        writeOperation(node, model.getGET(), MPOpenApiConstants.PATHITEM.PROP_GET);
+        writeOperation(node, model.getPUT(), MPOpenApiConstants.PATHITEM.PROP_PUT);
+        writeOperation(node, model.getPOST(), MPOpenApiConstants.PATHITEM.PROP_POST);
+        writeOperation(node, model.getDELETE(), MPOpenApiConstants.PATHITEM.PROP_DELETE);
+        writeOperation(node, model.getOPTIONS(), MPOpenApiConstants.PATHITEM.PROP_OPTIONS);
+        writeOperation(node, model.getHEAD(), MPOpenApiConstants.PATHITEM.PROP_HEAD);
+        writeOperation(node, model.getPATCH(), MPOpenApiConstants.PATHITEM.PROP_PATCH);
+        writeOperation(node, model.getTRACE(), MPOpenApiConstants.PATHITEM.PROP_TRACE);
         writeParameterList(node, model.getParameters());
         writeServers(node, model.getServers());
         writeExtensions(node, model);
@@ -397,16 +398,16 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(method);
-        writeStringArray(node, model.getTags(), OpenApiConstants.PROP_TAGS);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_SUMMARY, model.getSummary());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        writeStringArray(node, model.getTags(), MPOpenApiConstants.OPERATION.PROP_TAGS);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.OPERATION.PROP_SUMMARY, model.getSummary());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.OPERATION.PROP_DESCRIPTION, model.getDescription());
         writeExternalDocumentation(node, model.getExternalDocs());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_ID, model.getOperationId());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.OPERATION.PROP_OPERATION_ID, model.getOperationId());
         writeParameterList(node, model.getParameters());
         writeRequestBody(node, model.getRequestBody());
         writeAPIResponses(node, model.getResponses());
         writeCallbacks(node, model.getCallbacks());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_DEPRECATED, model.getDeprecated());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.OPERATION.PROP_DEPRECATED, model.getDeprecated());
         writeSecurityRequirements(node, model.getSecurity());
         writeServers(node, model.getServers());
         writeExtensions(node, model);
@@ -422,11 +423,11 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_REQUEST_BODY);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        ObjectNode node = parent.putObject(MPOpenApiConstants.REQUESTBODY.PROP_REQUEST_BODY);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_DESCRIPTION, model.getDescription());
         writeContent(node, model.getContent());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED, model.getRequired());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REQUIRED, model.getRequired());
         writeExtensions(node, model);
     }
 
@@ -440,7 +441,7 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_CONTENT);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.CONTENT.PROP_CONTENT);
         write(node, model.getMediaTypes(), this::writeMediaType);
     }
 
@@ -456,8 +457,8 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        writeSchema(node, model.getSchema(), OpenApiConstants.PROP_SCHEMA);
-        writeObject(node, OpenApiConstants.PROP_EXAMPLE, model.getExample());
+        writeSchema(node, model.getSchema(), MPOpenApiConstants.MEDIATYPE.PROP_SCHEMA);
+        writeObject(node, MPOpenApiConstants.MEDIATYPE.PROP_EXAMPLE, model.getExample());
         writeExamples(node, model.getExamples());
         writeEncodings(node, model.getEncoding());
         writeExtensions(node, model);
@@ -485,47 +486,48 @@ public class OpenApiSerializer {
      * @param model
      */
     private void writeSchemaToNode(ObjectNode node, Schema model) {
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_FORMAT, model.getFormat());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_TITLE, model.getTitle());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        writeObject(node, OpenApiConstants.PROP_DEFAULT, model.getDefaultValue());
-        JsonUtil.bigDecimalProperty(node, OpenApiConstants.PROP_MULTIPLE_OF, model.getMultipleOf());
-        JsonUtil.bigDecimalProperty(node, OpenApiConstants.PROP_MAXIMUM, model.getMaximum());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXCLUSIVE_MAXIMUM, model.getExclusiveMaximum());
-        JsonUtil.bigDecimalProperty(node, OpenApiConstants.PROP_MINIMUM, model.getMinimum());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXCLUSIVE_MINIMUM, model.getExclusiveMinimum());
-        JsonUtil.intProperty(node, OpenApiConstants.PROP_MAX_LENGTH, model.getMaxLength());
-        JsonUtil.intProperty(node, OpenApiConstants.PROP_MIN_LENGTH, model.getMinLength());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_PATTERN, model.getPattern());
-        JsonUtil.intProperty(node, OpenApiConstants.PROP_MAX_ITEMS, model.getMaxItems());
-        JsonUtil.intProperty(node, OpenApiConstants.PROP_MIN_ITEMS, model.getMinItems());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_UNIQUE_ITEMS, model.getUniqueItems());
-        JsonUtil.intProperty(node, OpenApiConstants.PROP_MAX_PROPERTIES, model.getMaxProperties());
-        JsonUtil.intProperty(node, OpenApiConstants.PROP_MIN_PROPERTIES, model.getMinProperties());
-        writeStringArray(node, model.getRequired(), OpenApiConstants.PROP_REQUIRED);
-        writeObjectArray(node, model.getEnumeration(), OpenApiConstants.PROP_ENUM);
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_TYPE, model.getType());
-        writeSchema(node, model.getItems(), OpenApiConstants.PROP_ITEMS);
-        writeSchemaList(node, model.getAllOf(), OpenApiConstants.PROP_ALL_OF);
-        writeSchemas(node, model.getProperties(), OpenApiConstants.PROP_PROPERTIES);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SCHEMA.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SCHEMA.PROP_FORMAT, model.getFormat());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SCHEMA.PROP_TITLE, model.getTitle());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SCHEMA.PROP_DESCRIPTION, model.getDescription());
+        writeObject(node, MPOpenApiConstants.SCHEMA.PROP_DEFAULT, model.getDefaultValue());
+        JsonUtil.bigDecimalProperty(node, MPOpenApiConstants.SCHEMA.PROP_MULTIPLE_OF, model.getMultipleOf());
+        JsonUtil.bigDecimalProperty(node, MPOpenApiConstants.SCHEMA.PROP_MAXIMUM, model.getMaximum());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_EXCLUSIVE_MAXIMUM, model.getExclusiveMaximum());
+        JsonUtil.bigDecimalProperty(node, MPOpenApiConstants.SCHEMA.PROP_MINIMUM, model.getMinimum());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_EXCLUSIVE_MINIMUM, model.getExclusiveMinimum());
+        JsonUtil.intProperty(node, MPOpenApiConstants.SCHEMA.PROP_MAX_LENGTH, model.getMaxLength());
+        JsonUtil.intProperty(node, MPOpenApiConstants.SCHEMA.PROP_MIN_LENGTH, model.getMinLength());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SCHEMA.PROP_PATTERN, model.getPattern());
+        JsonUtil.intProperty(node, MPOpenApiConstants.SCHEMA.PROP_MAX_ITEMS, model.getMaxItems());
+        JsonUtil.intProperty(node, MPOpenApiConstants.SCHEMA.PROP_MIN_ITEMS, model.getMinItems());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_UNIQUE_ITEMS, model.getUniqueItems());
+        JsonUtil.intProperty(node, MPOpenApiConstants.SCHEMA.PROP_MAX_PROPERTIES, model.getMaxProperties());
+        JsonUtil.intProperty(node, MPOpenApiConstants.SCHEMA.PROP_MIN_PROPERTIES, model.getMinProperties());
+        writeStringArray(node, model.getRequired(), MPOpenApiConstants.SCHEMA.PROP_REQUIRED);
+        writeObjectArray(node, model.getEnumeration(), MPOpenApiConstants.SCHEMA.PROP_ENUM);
+        JsonUtil.enumProperty(node, MPOpenApiConstants.SCHEMA.PROP_TYPE, model.getType());
+        writeSchema(node, model.getItems(), MPOpenApiConstants.SCHEMA.PROP_ITEMS);
+        writeSchemaList(node, model.getAllOf(), MPOpenApiConstants.SCHEMA.PROP_ALL_OF);
+        writeSchemas(node, model.getProperties(), MPOpenApiConstants.SCHEMA.PROP_PROPERTIES);
         if (model.getAdditionalPropertiesBoolean() != null) {
-            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ADDITIONAL_PROPERTIES,
-                    (Boolean) model.getAdditionalPropertiesBoolean());
+            JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_ADDITIONAL_PROPERTIES,
+                    model.getAdditionalPropertiesBoolean());
         } else {
-            writeSchema(node, (Schema) model.getAdditionalPropertiesSchema(), OpenApiConstants.PROP_ADDITIONAL_PROPERTIES);
+            writeSchema(node, (Schema) model.getAdditionalPropertiesSchema(),
+                    MPOpenApiConstants.SCHEMA.PROP_ADDITIONAL_PROPERTIES);
         }
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_READ_ONLY, model.getReadOnly());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_READ_ONLY, model.getReadOnly());
         writeXML(node, model.getXml());
         writeExternalDocumentation(node, model.getExternalDocs());
-        writeObject(node, OpenApiConstants.PROP_EXAMPLE, model.getExample());
-        writeSchemaList(node, model.getOneOf(), OpenApiConstants.PROP_ONE_OF);
-        writeSchemaList(node, model.getAnyOf(), OpenApiConstants.PROP_ANY_OF);
-        writeSchema(node, model.getNot(), OpenApiConstants.PROP_NOT);
+        writeObject(node, MPOpenApiConstants.SCHEMA.PROP_EXAMPLE, model.getExample());
+        writeSchemaList(node, model.getOneOf(), MPOpenApiConstants.SCHEMA.PROP_ONE_OF);
+        writeSchemaList(node, model.getAnyOf(), MPOpenApiConstants.SCHEMA.PROP_ANY_OF);
+        writeSchema(node, model.getNot(), MPOpenApiConstants.SCHEMA.PROP_NOT);
         writeDiscriminator(node, model.getDiscriminator());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_NULLABLE, model.getNullable());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_WRITE_ONLY, model.getWriteOnly());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_DEPRECATED, model.getDeprecated());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_NULLABLE, model.getNullable());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_WRITE_ONLY, model.getWriteOnly());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.SCHEMA.PROP_DEPRECATED, model.getDeprecated());
         writeExtensions(node, model);
     }
 
@@ -539,12 +541,12 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_XML);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME, model.getName());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAMESPACE, model.getNamespace());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_PREFIX, model.getPrefix());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ATTRIBUTE, model.getAttribute());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_WRAPPED, model.getWrapped());
+        ObjectNode node = parent.putObject(MPOpenApiConstants.SCHEMA.PROP_XML);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.XML.PROP_NAME, model.getName());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.XML.PROP_NAMESPACE, model.getNamespace());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.XML.PROP_PREFIX, model.getPrefix());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.XML.PROP_ATTRIBUTE, model.getAttribute());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.XML.PROP_WRAPPED, model.getWrapped());
         writeExtensions(node, model);
     }
 
@@ -558,9 +560,9 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_DISCRIMINATOR);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_PROPERTY_NAME, model.getPropertyName());
-        writeStringMap(node, model.getMapping(), OpenApiConstants.PROP_MAPPING);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.SCHEMA.PROP_DISCRIMINATOR);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.DISCRIMINATOR.PROP_PROPERTY_NAME, model.getPropertyName());
+        writeStringMap(node, model.getMapping(), MPOpenApiConstants.DISCRIMINATOR.PROP_MAPPING);
     }
 
     /**
@@ -573,7 +575,7 @@ public class OpenApiSerializer {
         if (models == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_ENCODING);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.ENCODING.PROP_ENCODING);
         for (String name : models.keySet()) {
             Encoding encoding = models.get(name);
             writeEncoding(node, encoding, name);
@@ -592,11 +594,11 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_CONTENT_TYPE, model.getContentType());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.ENCODING.PROP_CONTENT_TYPE, model.getContentType());
         writeHeaders(node, model.getHeaders());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_STYLE, model.getStyle());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXPLODE, model.getExplode());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ALLOW_RESERVED, model.getAllowReserved());
+        JsonUtil.enumProperty(node, MPOpenApiConstants.ENCODING.PROP_STYLE, model.getStyle());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.ENCODING.PROP_EXPLODE, model.getExplode());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.ENCODING.PROP_ALLOW_RESERVED, model.getAllowReserved());
         writeExtensions(node, model);
     }
 
@@ -610,8 +612,8 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_RESPONSES);
-        writeAPIResponse(node, model.getDefaultValue(), OpenApiConstants.PROP_DEFAULT);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.RESPONSE.PROP_RESPONSES);
+        writeAPIResponse(node, model.getDefaultValue(), MPOpenApiConstants.RESPONSE.PROP_DEFAULT);
         write(node, model.getAPIResponses(), this::writeAPIResponse);
     }
 
@@ -627,8 +629,8 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.RESPONSE.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.RESPONSE.PROP_DESCRIPTION, model.getDescription());
         writeHeaders(node, model.getHeaders());
         writeContent(node, model.getContent());
         writeLinks(node, model.getLinks());
@@ -645,7 +647,7 @@ public class OpenApiSerializer {
         if (models == null) {
             return;
         }
-        ArrayNode node = parent.putArray(OpenApiConstants.PROP_SECURITY);
+        ArrayNode node = parent.putArray(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_SECURITY);
         for (SecurityRequirement securityRequirement : models) {
             ObjectNode secNode = node.addObject();
             writeSecurityRequirementToNode(secNode, securityRequirement);
@@ -653,7 +655,7 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Writes a {@link SecurityRequirement} to the given JS node.
+     * Writes a {@link SecurityRequirement} to the given Json node.
      * 
      * @param node
      * @param model
@@ -675,7 +677,7 @@ public class OpenApiSerializer {
         if (models == null) {
             return;
         }
-        ArrayNode node = parent.putArray(OpenApiConstants.PROP_PARAMETERS);
+        ArrayNode node = parent.putArray(MPOpenApiConstants.PARAMETER.PROP_PARAMETERS);
         for (Parameter model : models) {
             ObjectNode paramNode = node.addObject();
             writeParameterToNode(paramNode, model);
@@ -689,18 +691,18 @@ public class OpenApiSerializer {
      * @param model
      */
     private void writeParameterToNode(ObjectNode node, Parameter model) {
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME, model.getName());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_IN, model.getIn());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED, model.getRequired());
-        writeSchema(node, model.getSchema(), OpenApiConstants.PROP_SCHEMA);
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_DEPRECATED, model.getDeprecated());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_STYLE, model.getStyle());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXPLODE, model.getExplode());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ALLOW_RESERVED, model.getAllowReserved());
-        writeObject(node, OpenApiConstants.PROP_EXAMPLE, model.getExample());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.PARAMETER.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.PARAMETER.PROP_NAME, model.getName());
+        JsonUtil.enumProperty(node, MPOpenApiConstants.PARAMETER.PROP_IN, model.getIn());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.PARAMETER.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.PARAMETER.PROP_REQUIRED, model.getRequired());
+        writeSchema(node, model.getSchema(), MPOpenApiConstants.PARAMETER.PROP_SCHEMA);
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.PARAMETER.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.PARAMETER.PROP_DEPRECATED, model.getDeprecated());
+        JsonUtil.enumProperty(node, MPOpenApiConstants.PARAMETER.PROP_STYLE, model.getStyle());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.PARAMETER.PROP_EXPLODE, model.getExplode());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.PARAMETER.PROP_ALLOW_RESERVED, model.getAllowReserved());
+        writeObject(node, MPOpenApiConstants.PARAMETER.PROP_EXAMPLE, model.getExample());
         writeExamples(node, model.getExamples());
         writeContent(node, model.getContent());
         writeExtensions(node, model);
@@ -716,7 +718,7 @@ public class OpenApiSerializer {
         if (components == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_COMPONENTS);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_COMPONENTS);
         writeSchemas(node, components.getSchemas());
         writeResponses(node, components.getResponses());
         writeParameters(node, components.getParameters());
@@ -736,7 +738,7 @@ public class OpenApiSerializer {
      * @param schemas
      */
     private void writeSchemas(ObjectNode parent, Map<String, Schema> schemas) {
-        writeSchemas(parent, schemas, OpenApiConstants.PROP_SCHEMAS);
+        writeSchemas(parent, schemas, MPOpenApiConstants.COMPONENTS.PROP_SCHEMAS);
     }
 
     /**
@@ -782,7 +784,7 @@ public class OpenApiSerializer {
         if (responses == null) {
             return;
         }
-        ObjectNode responsesNode = parent.putObject(OpenApiConstants.PROP_RESPONSES);
+        ObjectNode responsesNode = parent.putObject(MPOpenApiConstants.RESPONSE.PROP_RESPONSES);
         for (String responseName : responses.keySet()) {
             writeAPIResponse(responsesNode, responses.get(responseName), responseName);
         }
@@ -798,7 +800,7 @@ public class OpenApiSerializer {
         if (parameters == null) {
             return;
         }
-        ObjectNode parametersNode = parent.putObject(OpenApiConstants.PROP_PARAMETERS);
+        ObjectNode parametersNode = parent.putObject(MPOpenApiConstants.PARAMETER.PROP_PARAMETERS);
         for (String parameterName : parameters.keySet()) {
             writeParameter(parametersNode, parameters.get(parameterName), parameterName);
         }
@@ -829,7 +831,7 @@ public class OpenApiSerializer {
         if (examples == null) {
             return;
         }
-        ObjectNode examplesNode = parent.putObject(OpenApiConstants.PROP_EXAMPLES);
+        ObjectNode examplesNode = parent.putObject(MPOpenApiConstants.EXAMPLE.PROP_EXAMPLES);
         for (String exampleName : examples.keySet()) {
             writeExample(examplesNode, examples.get(exampleName), exampleName);
         }
@@ -847,11 +849,11 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_SUMMARY, model.getSummary());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        writeObject(node, OpenApiConstants.PROP_VALUE, model.getValue());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_EXTERNAL_VALUE, model.getExternalValue());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.EXAMPLE.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.EXAMPLE.PROP_SUMMARY, model.getSummary());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.EXAMPLE.PROP_DESCRIPTION, model.getDescription());
+        writeObject(node, MPOpenApiConstants.EXAMPLE.PROP_VALUE, model.getValue());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.EXAMPLE.PROP_EXTERNAL_VALUE, model.getExternalValue());
         writeExtensions(node, model);
     }
 
@@ -865,7 +867,7 @@ public class OpenApiSerializer {
         if (requestBodies == null) {
             return;
         }
-        ObjectNode requestBodiesNode = parent.putObject(OpenApiConstants.PROP_REQUEST_BODIES);
+        ObjectNode requestBodiesNode = parent.putObject(MPOpenApiConstants.COMPONENTS.PROP_REQUEST_BODIES);
         for (String requestBodyName : requestBodies.keySet()) {
             writeRequestBody(requestBodiesNode, requestBodies.get(requestBodyName), requestBodyName);
         }
@@ -883,10 +885,10 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_DESCRIPTION, model.getDescription());
         writeContent(node, model.getContent());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED, model.getRequired());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REQUIRED, model.getRequired());
         writeExtensions(node, model);
     }
 
@@ -900,7 +902,7 @@ public class OpenApiSerializer {
         if (headers == null) {
             return;
         }
-        ObjectNode headersNode = parent.putObject(OpenApiConstants.PROP_HEADERS);
+        ObjectNode headersNode = parent.putObject(MPOpenApiConstants.HEADER.PROP_HEADERS);
         for (String headerName : headers.keySet()) {
             writeHeader(headersNode, headers.get(headerName), headerName);
         }
@@ -918,15 +920,15 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED, model.getRequired());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_DEPRECATED, model.getDeprecated());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_STYLE, model.getStyle());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXPLODE, model.getExplode());
-        writeSchema(node, model.getSchema(), OpenApiConstants.PROP_SCHEMA);
-        writeObject(node, OpenApiConstants.PROP_EXAMPLE, model.getExample());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.HEADER.PROP_REF_VAR, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.HEADER.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.HEADER.PROP_REQUIRED, model.getRequired());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.HEADER.PROP_DEPRECATED, model.getDeprecated());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.HEADER.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
+        JsonUtil.enumProperty(node, MPOpenApiConstants.HEADER.PROP_STYLE, model.getStyle());
+        JsonUtil.booleanProperty(node, MPOpenApiConstants.HEADER.PROP_EXPLODE, model.getExplode());
+        writeSchema(node, model.getSchema(), MPOpenApiConstants.HEADER.PROP_SCHEMA);
+        writeObject(node, MPOpenApiConstants.HEADER.PROP_EXAMPLE, model.getExample());
         writeExamples(node, model.getExamples());
         writeContent(node, model.getContent());
         writeExtensions(node, model);
@@ -943,7 +945,7 @@ public class OpenApiSerializer {
         if (securitySchemes == null) {
             return;
         }
-        ObjectNode securitySchemesNode = parent.putObject(OpenApiConstants.PROP_SECURITY_SCHEMES);
+        ObjectNode securitySchemesNode = parent.putObject(MPOpenApiConstants.COMPONENTS.PROP_SECURITY_SCHEMES);
         for (String securitySchemeName : securitySchemes.keySet()) {
             writeSecurityScheme(securitySchemesNode, securitySchemes.get(securitySchemeName), securitySchemeName);
         }
@@ -961,15 +963,15 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_TYPE, model.getType());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_NAME, model.getName());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_IN, model.getIn());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_SCHEME, model.getScheme());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_BEARER_FORMAT, model.getBearerFormat());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_REF_VAR, model.getRef());
+        JsonUtil.enumProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_TYPE, model.getType());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_DESCRIPTION, model.getDescription());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_NAME, model.getName());
+        JsonUtil.enumProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_IN, model.getIn());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_SCHEME, model.getScheme());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_BEARER_FORMAT, model.getBearerFormat());
         writeOAuthFlows(node, model.getFlows());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPEN_ID_CONNECT_URL, model.getOpenIdConnectUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_OPEN_ID_CONNECT_URL, model.getOpenIdConnectUrl());
         writeExtensions(node, model);
     }
 
@@ -983,11 +985,11 @@ public class OpenApiSerializer {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_FLOWS);
-        writeOAuthFlow(node, model.getImplicit(), OpenApiConstants.PROP_IMPLICIT);
-        writeOAuthFlow(node, model.getPassword(), OpenApiConstants.PROP_PASSWORD);
-        writeOAuthFlow(node, model.getClientCredentials(), OpenApiConstants.PROP_CLIENT_CREDENTIALS);
-        writeOAuthFlow(node, model.getAuthorizationCode(), OpenApiConstants.PROP_AUTHORIZATION_CODE);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.SECURITYSCHEME.PROP_FLOWS);
+        writeOAuthFlow(node, model.getImplicit(), MPOpenApiConstants.SECURITYSCHEME.PROP_IMPLICIT);
+        writeOAuthFlow(node, model.getPassword(), MPOpenApiConstants.SECURITYSCHEME.PROP_PASSWORD);
+        writeOAuthFlow(node, model.getClientCredentials(), MPOpenApiConstants.SECURITYSCHEME.PROP_CLIENT_CREDENTIALS);
+        writeOAuthFlow(node, model.getAuthorizationCode(), MPOpenApiConstants.SECURITYSCHEME.PROP_AUTHORIZATION_CODE);
         writeExtensions(node, model);
     }
 
@@ -1003,10 +1005,10 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_AUTHORIZATION_URL, model.getAuthorizationUrl());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_TOKEN_URL, model.getTokenUrl());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_REFRESH_URL, model.getRefreshUrl());
-        writeStringMap(node, model.getScopes(), OpenApiConstants.PROP_SCOPES);
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_AUTHORIZATION_URL, model.getAuthorizationUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_TOKEN_URL, model.getTokenUrl());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.SECURITYSCHEME.PROP_REFRESH_URL, model.getRefreshUrl());
+        writeStringMap(node, model.getScopes(), MPOpenApiConstants.SECURITYSCHEME.PROP_SCOPES);
         writeExtensions(node, model);
     }
 
@@ -1020,7 +1022,7 @@ public class OpenApiSerializer {
         if (links == null) {
             return;
         }
-        ObjectNode linksNode = parent.putObject(OpenApiConstants.PROP_LINKS);
+        ObjectNode linksNode = parent.putObject(MPOpenApiConstants.LINK.PROP_LINKS);
         for (String linkName : links.keySet()) {
             writeLink(linksNode, links.get(linkName), linkName);
         }
@@ -1038,12 +1040,12 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.LINK.PROP_REF_VAR, model.getRef());
         JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_REF, model.getOperationRef());
         JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_ID, model.getOperationId());
         writeLinkParameters(node, model.getParameters());
-        writeObject(node, OpenApiConstants.PROP_REQUEST_BODY, model.getRequestBody());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+        writeObject(node, MPOpenApiConstants.LINK.PROP_REQUEST_BODY, model.getRequestBody());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.LINK.PROP_DESCRIPTION, model.getDescription());
         writeServer(node, model.getServer());
         writeExtensions(node, model);
     }
@@ -1058,7 +1060,7 @@ public class OpenApiSerializer {
         if (parameters == null) {
             return;
         }
-        ObjectNode node = parent.putObject(OpenApiConstants.PROP_PARAMETERS);
+        ObjectNode node = parent.putObject(MPOpenApiConstants.LINK.PROP_PARAMETERS);
         for (String name : parameters.keySet()) {
             writeObject(node, name, parameters.get(name));
         }
@@ -1088,7 +1090,7 @@ public class OpenApiSerializer {
         if (callbacks == null) {
             return;
         }
-        ObjectNode callbacksNode = parent.putObject(OpenApiConstants.PROP_CALLBACKS);
+        ObjectNode callbacksNode = parent.putObject(MPOpenApiConstants.CALLBACK.PROP_CALLBACKS);
         write(callbacksNode, callbacks, this::writeCallback);
     }
 
@@ -1104,7 +1106,7 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, MPOpenApiConstants.CALLBACK.PROP_REF_VAR, model.getRef());
         write(node, model.getPathItems(), this::writePathItem);
         writeExtensions(node, model);
     }

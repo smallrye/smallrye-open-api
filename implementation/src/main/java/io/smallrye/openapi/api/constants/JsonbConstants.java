@@ -17,6 +17,8 @@ public class JsonbConstants {
     public static final DotName JSONB_PROPERTY_ORDER = DotName
             .createSimple("javax.json.bind.annotation.JsonbPropertyOrder");
 
+    public static final String PROP_VALUE = "value";
+
     private JsonbConstants() {
     }
 }

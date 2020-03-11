@@ -1,4 +1,4 @@
-package io.smallrye.openapi.api.reader;
+package io.smallrye.openapi.runtime.reader;
 
 /**
  * A simple registry to hold the current content types

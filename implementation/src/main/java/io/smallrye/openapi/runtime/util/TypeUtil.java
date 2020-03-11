@@ -50,7 +50,6 @@ import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.MPOpenApiConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 
 /**
@@ -295,11 +294,11 @@ public class TypeUtil {
     public static void applyTypeAttributes(Type classType, Schema schema) {
         Map<String, Object> properties = getTypeAttributes(classType);
 
-        schema.setType((SchemaType) properties.get(OpenApiConstants.PROP_TYPE));
-        schema.setFormat((String) properties.get(OpenApiConstants.PROP_FORMAT));
-        schema.setPattern((String) properties.get(OpenApiConstants.PROP_PATTERN));
-        schema.setExample(properties.get(OpenApiConstants.PROP_EXAMPLE));
-        schema.setExternalDocs((ExternalDocumentation) properties.get(OpenApiConstants.PROP_EXTERNAL_DOCS));
+        schema.setType((SchemaType) properties.get(MPOpenApiConstants.SCHEMA.PROP_TYPE));
+        schema.setFormat((String) properties.get(MPOpenApiConstants.SCHEMA.PROP_FORMAT));
+        schema.setPattern((String) properties.get(MPOpenApiConstants.SCHEMA.PROP_PATTERN));
+        schema.setExample(properties.get(MPOpenApiConstants.SCHEMA.PROP_EXAMPLE));
+        schema.setExternalDocs((ExternalDocumentation) properties.get(MPOpenApiConstants.SCHEMA.PROP_EXTERNAL_DOCS));
     }
 
     /**
@@ -550,19 +549,19 @@ public class TypeUtil {
     }
 
     public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
-        return getAnnotation(annotationTarget, MPOpenApiConstants.SCHEMA);
+        return getAnnotation(annotationTarget, MPOpenApiConstants.SCHEMA.TYPE_SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(ClassInfo field) {
-        return getAnnotation(field, MPOpenApiConstants.SCHEMA);
+        return getAnnotation(field, MPOpenApiConstants.SCHEMA.TYPE_SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(FieldInfo field) {
-        return getAnnotation(field, MPOpenApiConstants.SCHEMA);
+        return getAnnotation(field, MPOpenApiConstants.SCHEMA.TYPE_SCHEMA);
     }
 
     public static AnnotationInstance getSchemaAnnotation(Type type) {
-        return getAnnotation(type, MPOpenApiConstants.SCHEMA);
+        return getAnnotation(type, MPOpenApiConstants.SCHEMA.TYPE_SCHEMA);
     }
 
     public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
@@ -611,7 +610,7 @@ public class TypeUtil {
      * @return an unwrapped annotation parameter value
      */
     public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName) {
-        return getAnnotationValue(target, annotationName, OpenApiConstants.PROP_VALUE, null);
+        return getAnnotationValue(target, annotationName, MPOpenApiConstants.VALUE, null);
     }
 
     /**
@@ -720,21 +719,21 @@ public class TypeUtil {
 
             Builder(SchemaType schemaType) {
                 Objects.requireNonNull(schemaType);
-                properties.put(OpenApiConstants.PROP_TYPE, schemaType);
+                properties.put(MPOpenApiConstants.SCHEMA.PROP_TYPE, schemaType);
             }
 
             Builder format(String format) {
-                properties.put(OpenApiConstants.PROP_FORMAT, format);
+                properties.put(MPOpenApiConstants.SCHEMA.PROP_FORMAT, format);
                 return this;
             }
 
             Builder pattern(String pattern) {
-                properties.put(OpenApiConstants.PROP_PATTERN, pattern);
+                properties.put(MPOpenApiConstants.SCHEMA.PROP_PATTERN, pattern);
                 return this;
             }
 
             Builder example(Object example) {
-                properties.put(OpenApiConstants.PROP_EXAMPLE, example);
+                properties.put(MPOpenApiConstants.SCHEMA.PROP_EXAMPLE, example);
                 return this;
             }
 
@@ -742,7 +741,7 @@ public class TypeUtil {
                 ExternalDocumentation doc = new ExternalDocumentationImpl();
                 doc.setDescription(description);
                 doc.setUrl(url);
-                properties.put(OpenApiConstants.PROP_EXTERNAL_DOCS, doc);
+                properties.put(MPOpenApiConstants.SCHEMA.PROP_EXTERNAL_DOCS, doc);
                 return this;
             }
 
@@ -763,7 +762,7 @@ public class TypeUtil {
 
         boolean isSchemaType(SchemaType... schemaTypes) {
             return Arrays.stream(schemaTypes)
-                    .anyMatch(properties.get(OpenApiConstants.PROP_TYPE)::equals);
+                    .anyMatch(properties.get(MPOpenApiConstants.SCHEMA.PROP_TYPE)::equals);
         }
 
         Map<String, Object> getProperties() {

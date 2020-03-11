@@ -1,5 +1,6 @@
-package io.smallrye.openapi.api.reader;
+package io.smallrye.openapi.runtime.reader;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,8 +9,11 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -40,18 +44,38 @@ public class RequestBodyReader {
             return null;
         }
         LOG.debug("Processing a map of @RequestBody annotations.");
-        Map<String, RequestBody> map = new LinkedHashMap<>();
+        Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, OpenApiConstants.PROP_NAME);
+            String name = JandexUtil.stringValue(nested, MPOpenApiConstants.REQUESTBODY.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                map.put(name, readRequestBody(context, nested));
+                requestBodies.put(name, readRequestBody(context, nested));
             }
         }
-        return map;
+        return requestBodies;
+    }
+
+    /**
+     * Reads the {@link RequestBody} OpenAPI nodes.
+     * 
+     * @param node json map of Request Bodies
+     * @return Map of RequestBody model
+     */
+    public static Map<String, RequestBody> readRequestBodies(final JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return null;
+        }
+        LOG.debug("Processing a json map of RequestBody.");
+        Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
+            String fieldName = fieldNames.next();
+            JsonNode childNode = node.get(fieldName);
+            requestBodies.put(fieldName, readRequestBody(childNode));
+        }
+        return requestBodies;
     }
 
     /**
@@ -83,12 +107,32 @@ public class RequestBodyReader {
         }
         LOG.debug("Processing a single @RequestBody annotation.");
         RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(JandexUtil.stringValue(annotationInstance, OpenApiConstants.PROP_DESCRIPTION));
+        requestBody.setDescription(JandexUtil.stringValue(annotationInstance, MPOpenApiConstants.REQUESTBODY.PROP_DESCRIPTION));
         requestBody
-                .setContent(MediaTypeObjectReader.readContent(context, annotationInstance.value(OpenApiConstants.PROP_CONTENT),
+                .setContent(ContentReader.readContent(context,
+                        annotationInstance.value(MPOpenApiConstants.REQUESTBODY.PROP_CONTENT),
                         ContentDirection.Input));
-        requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, OpenApiConstants.PROP_REQUIRED));
+        requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, MPOpenApiConstants.REQUESTBODY.PROP_REQUIRED));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RequestBody));
+        return requestBody;
+    }
+
+    /**
+     * Reads a {@link RequestBody} OpenAPI node.
+     * 
+     * @param node the json object
+     * @return RequestBody model
+     */
+    public static RequestBody readRequestBody(final JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return null;
+        }
+        RequestBody requestBody = new RequestBodyImpl();
+        requestBody.setDescription(JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_DESCRIPTION));
+        requestBody.setContent(ContentReader.readContent(node.get(MPOpenApiConstants.REQUESTBODY.PROP_CONTENT)));
+        requestBody.setRequired(JsonUtil.booleanProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REQUIRED));
+        requestBody.setRef(JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REF_VAR));
+        ExtensionReader.readExtensions(node, requestBody);
         return requestBody;
     }
 

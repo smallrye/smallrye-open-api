@@ -1,4 +1,4 @@
-package io.smallrye.openapi.api.reader;
+package io.smallrye.openapi.runtime.reader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +9,16 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.models.tags.TagImpl;
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
- * Reading the Tag annotation
+ * Reading the Tag from annotation or json
  * 
  * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#tagObject
  * 
@@ -50,6 +54,25 @@ public class TagReader {
     }
 
     /**
+     * Reads a list of {@link Tag} OpenAPI nodes.
+     * 
+     * @param node the json array node
+     * @return List of Tag models
+     */
+    public static List<Tag> readTags(final JsonNode node) {
+        if (node == null || !node.isArray()) {
+            return null;
+        }
+        LOG.debug("Processing an array of Tag json nodes.");
+        ArrayNode nodes = (ArrayNode) node;
+        List<Tag> rval = new ArrayList<>(nodes.size());
+        for (JsonNode tagNode : nodes) {
+            rval.add(readTag(tagNode));
+        }
+        return rval;
+    }
+
+    /**
      * Reads a single Tag annotation.
      * 
      * @param annotationInstance {@literal @}Tag annotation, must not be null
@@ -59,9 +82,26 @@ public class TagReader {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
         LOG.debug("Processing a single @Tag annotation.");
         Tag tag = new TagImpl();
-        tag.setName(JandexUtil.stringValue(annotationInstance, OpenApiConstants.PROP_NAME));
-        tag.setDescription(JandexUtil.stringValue(annotationInstance, OpenApiConstants.PROP_DESCRIPTION));
-        tag.setExternalDocs(ExternalDocsReader.readExternalDocs(annotationInstance.value(OpenApiConstants.PROP_EXTERNAL_DOCS)));
+        tag.setName(JandexUtil.stringValue(annotationInstance, MPOpenApiConstants.TAG.PROP_NAME));
+        tag.setDescription(JandexUtil.stringValue(annotationInstance, MPOpenApiConstants.TAG.PROP_DESCRIPTION));
+        tag.setExternalDocs(
+                ExternalDocsReader.readExternalDocs(annotationInstance.value(MPOpenApiConstants.TAG.PROP_EXTERNAL_DOCS)));
+        return tag;
+    }
+
+    /**
+     * Reads a {@link Tag} OpenAPI node.
+     * 
+     * @param node the json node
+     * @return Tag model
+     */
+    private static Tag readTag(final JsonNode node) {
+        LOG.debug("Processing a single Tag json node.");
+        Tag tag = new TagImpl();
+        tag.setName(JsonUtil.stringProperty(node, MPOpenApiConstants.TAG.PROP_NAME));
+        tag.setDescription(JsonUtil.stringProperty(node, MPOpenApiConstants.TAG.PROP_DESCRIPTION));
+        tag.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(MPOpenApiConstants.TAG.PROP_EXTERNAL_DOCS)));
+        ExtensionReader.readExtensions(node, tag);
         return tag;
     }
 }

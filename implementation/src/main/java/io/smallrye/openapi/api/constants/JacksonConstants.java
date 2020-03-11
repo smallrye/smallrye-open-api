@@ -21,6 +21,8 @@ public class JacksonConstants {
     public static final DotName JSON_PROPERTY_ORDER = DotName
             .createSimple("com.fasterxml.jackson.annotation.JsonPropertyOrder");
 
+    public static final String PROP_VALUE = "value";
+
     private JacksonConstants() {
     }
 }

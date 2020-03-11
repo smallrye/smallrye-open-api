@@ -17,6 +17,8 @@ public class JaxbConstants {
     public static final DotName XML_ATTRIBUTE = DotName
             .createSimple("javax.xml.bind.annotation.XmlAttribute");
 
+    public static final String PROP_NAME = "name";
+
     private JaxbConstants() {
     }
 }

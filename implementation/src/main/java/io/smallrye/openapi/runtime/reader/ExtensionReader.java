@@ -1,13 +1,19 @@
-package io.smallrye.openapi.api.reader;
+package io.smallrye.openapi.runtime.reader;
 
+import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
+
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.models.Extensible;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -43,7 +49,7 @@ public class ExtensionReader {
         Map<String, Object> e = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
-            String extName = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
+            String extName = JandexUtil.stringValue(annotation, MPOpenApiConstants.EXTENSIONS.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
         return e;
@@ -63,8 +69,9 @@ public class ExtensionReader {
     public static Object readExtensionValue(final AnnotationScannerContext context, final String name,
             final AnnotationInstance annotationInstance) {
         LOG.debug("Processing @Extention annotation");
-        String extValue = JandexUtil.stringValue(annotationInstance, OpenApiConstants.PROP_VALUE);
-        boolean parseValue = JandexUtil.booleanValueWithDefault(annotationInstance, OpenApiConstants.PROP_PARSE_VALUE);
+        String extValue = JandexUtil.stringValue(annotationInstance, MPOpenApiConstants.EXTENSIONS.PROP_VALUE);
+        boolean parseValue = JandexUtil.booleanValueWithDefault(annotationInstance,
+                MPOpenApiConstants.EXTENSIONS.PROP_PARSE_VALUE);
         Object parsedValue = extValue;
         if (parseValue) {
             for (AnnotationScannerExtension e : context.getExtensions()) {
@@ -75,5 +82,21 @@ public class ExtensionReader {
             }
         }
         return parsedValue;
+    }
+
+    /**
+     * Reads model extensions.
+     * 
+     * @param node the json object
+     * @param model the model to read to
+     */
+    public static void readExtensions(final JsonNode node, final Extensible<?> model) {
+        for (Iterator<String> iterator = node.fieldNames(); iterator.hasNext();) {
+            String fieldName = iterator.next();
+            if (fieldName.toLowerCase().startsWith(MPOpenApiConstants.EXTENSIONS.EXTENSION_PROPERTY_PREFIX)) {
+                Object value = readObject(node.get(fieldName));
+                model.addExtension(fieldName, value);
+            }
+        }
     }
 }

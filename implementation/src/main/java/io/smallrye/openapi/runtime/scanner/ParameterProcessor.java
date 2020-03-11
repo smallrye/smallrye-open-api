@@ -5,9 +5,9 @@ import static io.smallrye.openapi.api.constants.JaxRsConstants.DEFAULT_VALUE;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.HTTP_METHODS;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH_SEGMENT;
-import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER;
-import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETERS;
-import static io.smallrye.openapi.api.constants.OpenApiConstants.PROP_VALUE;
+import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER.PROP_VALUE;
+import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER.TYPE_PARAMETER;
+import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER.TYPE_PARAMETERS;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
@@ -58,7 +58,6 @@ import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JaxRsConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.RestEasyConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
@@ -96,8 +95,8 @@ public class ParameterProcessor {
     private static Comparator<Parameter> parameterComparator = Comparator.comparing(Parameter::getIn)
             .thenComparing(Parameter::getName);
 
-    private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(PARAMETER,
-            PARAMETERS));
+    private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(TYPE_PARAMETER,
+            TYPE_PARAMETERS));
 
     private final IndexView index;
     private final Function<AnnotationInstance, Parameter> readerFunction;
@@ -877,9 +876,9 @@ public class ParameterProcessor {
     void readParameterAnnotation(AnnotationInstance annotation) {
         DotName name = annotation.name();
 
-        if (PARAMETER.equals(name)) {
+        if (TYPE_PARAMETER.equals(name)) {
             readAnnotatedType(annotation, null, false);
-        } else if (PARAMETERS.equals(name)) {
+        } else if (TYPE_PARAMETER.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
@@ -923,7 +922,7 @@ public class ParameterProcessor {
             boolean overriddenParametersOnly) {
         DotName name = annotation.name();
 
-        if (PARAMETER.equals(name) && readerFunction != null) {
+        if (TYPE_PARAMETER.equals(name) && readerFunction != null) {
             Parameter oaiParam = readerFunction.apply(annotation);
 
             readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
@@ -955,7 +954,7 @@ public class ParameterProcessor {
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 } else if (jaxRsParam.location == In.PATH && targetType != null
                         && PATH_SEGMENT.equals(targetType.name())) {
-                    String pathSegment = JandexUtil.value(annotation, OpenApiConstants.PROP_VALUE);
+                    String pathSegment = JandexUtil.value(annotation, PROP_VALUE);
 
                     if (!matrixParams.containsKey(pathSegment)) {
                         matrixParams.put(pathSegment, new HashMap<>());
@@ -1429,7 +1428,7 @@ public class ParameterProcessor {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
-            if (PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
+            if (TYPE_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
                         readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
@@ -1525,9 +1524,9 @@ public class ParameterProcessor {
         if (JaxRsParameter.isParameter(annotationName)) {
             return true;
         }
-        if (PARAMETER.equals(annotationName)) {
+        if (TYPE_PARAMETER.equals(annotationName)) {
             return true;
         }
-        return PARAMETERS.equals(annotationName);
+        return TYPE_PARAMETERS.equals(annotationName);
     }
 }

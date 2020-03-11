@@ -23,6 +23,7 @@ import org.jboss.jandex.WildcardType;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
@@ -249,7 +250,7 @@ public class SchemaRegistry {
             AnnotationInstance schemaAnnotation = targetSchema != null ? getSchemaAnnotation(targetSchema) : null;
 
             if (schemaAnnotation != null) {
-                schemaName = JandexUtil.stringValue(schemaAnnotation, OpenApiConstants.PROP_NAME);
+                schemaName = JandexUtil.stringValue(schemaAnnotation, MPOpenApiConstants.SCHEMA.PROP_NAME);
             }
         }
 

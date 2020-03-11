@@ -1,22 +1,19 @@
-package io.smallrye.openapi.api.reader;
+package io.smallrye.openapi.runtime.reader;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.microprofile.openapi.models.Operation;
-import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.api.models.PathItemImpl;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -47,18 +44,39 @@ public class CallbackReader {
             return null;
         }
         LOG.debug("Processing a map of @Callback annotations.");
-        Map<String, Callback> map = new LinkedHashMap<>();
+        Map<String, Callback> callbacks = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, OpenApiConstants.PROP_NAME);
+            String name = JandexUtil.stringValue(nested, MPOpenApiConstants.CALLBACK.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                map.put(name, readCallback(context, nested));
+                callbacks.put(name, readCallback(context, nested));
             }
         }
-        return map;
+        return callbacks;
+    }
+
+    /**
+     * Reads the {@link Callback} OpenAPI nodes.
+     * 
+     * @param node the json node
+     * @return Map of Callback models
+     */
+    public static Map<String, Callback> readCallbacks(final JsonNode node) {
+        if (node == null || !node.isObject()) {
+            return null;
+        }
+        LOG.debug("Processing a json map of Callback nodes.");
+        Map<String, Callback> callbacks = new LinkedHashMap<>();
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
+            String fieldName = fieldNames.next();
+            JsonNode childNode = node.get(fieldName);
+            callbacks.put(fieldName, readCallback(childNode));
+        }
+
+        return callbacks;
     }
 
     /**
@@ -76,42 +94,34 @@ public class CallbackReader {
         LOG.debug("Processing a single @Callback annotation.");
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.Callback));
-        String expression = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_CALLBACK_URL_EXPRESSION);
+        String expression = JandexUtil.stringValue(annotation, MPOpenApiConstants.CALLBACK.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
-                readCallbackOperations(context, annotation.value(OpenApiConstants.PROP_OPERATIONS)));
+                PathsReader.readPathItem(context, annotation.value(MPOpenApiConstants.CALLBACK.PROP_OPERATIONS)));
         return callback;
     }
 
     /**
-     * Reads the CallbackOperation annotations as a PathItem. The annotation value
-     * in this case is an array of CallbackOperation annotations.
+     * Reads a {@link Callback} OpenAPI node.
      * 
-     * @param context the scanning context
-     * @param annotationValue the {@literal @}CallbackOperation annotations
+     * @param node the json node
+     * @return Callback model
      */
-    private static PathItem readCallbackOperations(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue) {
-        if (annotationValue == null) {
+    private static Callback readCallback(final JsonNode node) {
+        if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing an array of @CallbackOperation annotations.");
-        AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        PathItem pathItem = new PathItemImpl();
-        for (AnnotationInstance operationAnno : nestedArray) {
-            String method = JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_METHOD);
-            Operation operation = CallbackOperationReader.readOperation(context, operationAnno);
-            if (method == null) {
+        LOG.debug("Processing a single Callback json node.");
+        Callback callback = new CallbackImpl();
+        callback.setRef(JsonUtil.stringProperty(node, MPOpenApiConstants.CALLBACK.PROP_REF_VAR));
+        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
+            String fieldName = fieldNames.next();
+            if (fieldName.startsWith(MPOpenApiConstants.EXTENSIONS.EXTENSION_PROPERTY_PREFIX)
+                    || fieldName.equals(MPOpenApiConstants.CALLBACK.PROP_REF_VAR)) {
                 continue;
             }
-            try {
-                PropertyDescriptor descriptor = new PropertyDescriptor(method.toUpperCase(), pathItem.getClass());
-                Method mutator = descriptor.getWriteMethod();
-                mutator.invoke(pathItem, operation);
-            } catch (IntrospectionException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                LOG.error("Error reading a CallbackOperation annotation.", e);
-            }
+            callback.addPathItem(fieldName, PathsReader.readPathItem(node.get(fieldName)));
         }
-        return pathItem;
+        ExtensionReader.readExtensions(node, callback);
+        return callback;
     }
-
 }

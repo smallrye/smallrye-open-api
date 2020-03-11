@@ -78,18 +78,18 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
-import io.smallrye.openapi.api.reader.CallbackReader;
-import io.smallrye.openapi.api.reader.CurrentContentTypes;
-import io.smallrye.openapi.api.reader.DefinitionReader;
-import io.smallrye.openapi.api.reader.ExtensionReader;
-import io.smallrye.openapi.api.reader.ParameterReader;
-import io.smallrye.openapi.api.reader.RequestBodyReader;
-import io.smallrye.openapi.api.reader.ResponseObjectReader;
-import io.smallrye.openapi.api.reader.SecurityReader;
-import io.smallrye.openapi.api.reader.SecuritySchemeReader;
-import io.smallrye.openapi.api.reader.ServerReader;
-import io.smallrye.openapi.api.reader.TagReader;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.reader.CallbackReader;
+import io.smallrye.openapi.runtime.reader.CurrentContentTypes;
+import io.smallrye.openapi.runtime.reader.DefinitionReader;
+import io.smallrye.openapi.runtime.reader.ExtensionReader;
+import io.smallrye.openapi.runtime.reader.ParameterReader;
+import io.smallrye.openapi.runtime.reader.RequestBodyReader;
+import io.smallrye.openapi.runtime.reader.ResponseReader;
+import io.smallrye.openapi.runtime.reader.SecurityRequirementReader;
+import io.smallrye.openapi.runtime.reader.SecuritySchemeReader;
+import io.smallrye.openapi.runtime.reader.ServerReader;
+import io.smallrye.openapi.runtime.reader.TagReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.PathMaker;
@@ -244,7 +244,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      */
     private OpenAPI jaxRsApplicationToOpenApi(final AnnotationScannerContext context, ClassInfo applicationClass) {
         OpenAPI oai = new OpenAPIImpl();
-        oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        oai.setOpenapi(MPOpenApiConstants.OPEN_API_VERSION);
 
         // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
         ////////////////////////////////////////
@@ -263,7 +263,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Get the @OpenAPIDefinition annotation and process it.
         ////////////////////////////////////////
         AnnotationInstance openApiDefAnno = JandexUtil.getClassAnnotation(applicationClass,
-                MPOpenApiConstants.OPEN_API_DEFINITION);
+                MPOpenApiConstants.OPEN_API_DEFINITION.TYPE_OPEN_API_DEFINITION);
         if (openApiDefAnno != null) {
             DefinitionReader.processDefinition(context, oai, openApiDefAnno);
         }
@@ -271,9 +271,10 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @SecurityScheme annotations
         ////////////////////////////////////////
         List<AnnotationInstance> securitySchemeAnnotations = JandexUtil.getRepeatableAnnotation(applicationClass,
-                MPOpenApiConstants.SECURITY_SCHEME, MPOpenApiConstants.SECURITY_SCHEMES);
+                MPOpenApiConstants.SECURITYSCHEME.TYPE_SECURITY_SCHEME,
+                MPOpenApiConstants.SECURITYSCHEME.TYPE_SECURITY_SCHEMES);
         for (AnnotationInstance annotation : securitySchemeAnnotations) {
-            String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_SECURITY_SCHEME_NAME);
+            String name = JandexUtil.stringValue(annotation, MPOpenApiConstants.SECURITYSCHEME.PROP_SECURITY_SCHEME_NAME);
             if (name == null && JandexUtil.isRef(annotation)) {
                 name = JandexUtil.nameFromRef(annotation);
             }
@@ -287,7 +288,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @Server annotations
         ///////////////////////////////////
         List<AnnotationInstance> serverAnnotations = JandexUtil.getRepeatableAnnotation(applicationClass,
-                MPOpenApiConstants.SERVER, MPOpenApiConstants.SERVERS);
+                MPOpenApiConstants.SERVER.TYPE_SERVER, MPOpenApiConstants.SERVER.TYPE_SERVERS);
         for (AnnotationInstance annotation : serverAnnotations) {
             Server server = ServerReader.readServer(annotation);
             oai.addServer(server);
@@ -312,9 +313,10 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @SecurityScheme annotations
         ////////////////////////////////////////
         List<AnnotationInstance> securitySchemeAnnotations = JandexUtil.getRepeatableAnnotation(resourceClass,
-                MPOpenApiConstants.SECURITY_SCHEME, MPOpenApiConstants.SECURITY_SCHEMES);
+                MPOpenApiConstants.SECURITYSCHEME.TYPE_SECURITY_SCHEME,
+                MPOpenApiConstants.SECURITYSCHEME.TYPE_SECURITY_SCHEMES);
         for (AnnotationInstance annotation : securitySchemeAnnotations) {
-            String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_SECURITY_SCHEME_NAME);
+            String name = JandexUtil.stringValue(annotation, MPOpenApiConstants.SECURITYSCHEME.PROP_SECURITY_SCHEME_NAME);
             if (name == null && JandexUtil.isRef(annotation)) {
                 name = JandexUtil.nameFromRef(annotation);
             }
@@ -387,10 +389,10 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             MethodInfo toResponseMethod = classInfo.method(OpenApiConstants.TO_RESPONSE_METHOD_NAME,
                     Type.create(exceptionDotName, Type.Kind.CLASS));
 
-            if (toResponseMethod.hasAnnotation(MPOpenApiConstants.API_RESPONSE)) {
+            if (toResponseMethod.hasAnnotation(MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSE)) {
                 AnnotationInstance apiResponseAnnotation = toResponseMethod
-                        .annotation(MPOpenApiConstants.API_RESPONSE);
-                if (apiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE) != null) {
+                        .annotation(MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSE);
+                if (apiResponseAnnotation.value(MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE) != null) {
                     exceptionHandlerMap.put(exceptionDotName, apiResponseAnnotation);
                 }
             }
@@ -520,20 +522,20 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
 
         // Process any @Operation annotation
         /////////////////////////////////////////
-        if (method.hasAnnotation(MPOpenApiConstants.OPERATION)) {
-            AnnotationInstance operationAnno = method.annotation(MPOpenApiConstants.OPERATION);
+        if (method.hasAnnotation(MPOpenApiConstants.OPERATION.TYPE_OPERATION)) {
+            AnnotationInstance operationAnno = method.annotation(MPOpenApiConstants.OPERATION.TYPE_OPERATION);
             // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
-            if (operationAnno.value(OpenApiConstants.PROP_HIDDEN) != null
-                    && operationAnno.value(OpenApiConstants.PROP_HIDDEN).asBoolean()) {
+            if (operationAnno.value(MPOpenApiConstants.OPERATION.PROP_HIDDEN) != null
+                    && operationAnno.value(MPOpenApiConstants.OPERATION.PROP_HIDDEN).asBoolean()) {
                 return;
             }
 
             operation = new OperationImpl();
             // Otherwise, set various bits of meta-data from the values in the @Operation annotation
-            operation.setSummary(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_SUMMARY));
-            operation.setDescription(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_DESCRIPTION));
-            operation.setOperationId(JandexUtil.stringValue(operationAnno, OpenApiConstants.PROP_OPERATION_ID));
-            operation.setDeprecated(JandexUtil.booleanValue(operationAnno, OpenApiConstants.PROP_DEPRECATED));
+            operation.setSummary(JandexUtil.stringValue(operationAnno, MPOpenApiConstants.OPERATION.PROP_SUMMARY));
+            operation.setDescription(JandexUtil.stringValue(operationAnno, MPOpenApiConstants.OPERATION.PROP_DESCRIPTION));
+            operation.setOperationId(JandexUtil.stringValue(operationAnno, MPOpenApiConstants.OPERATION.PROP_OPERATION_ID));
+            operation.setDeprecated(JandexUtil.booleanValue(operationAnno, MPOpenApiConstants.OPERATION.PROP_DEPRECATED));
         } else {
             operation = new OperationImpl();
         }
@@ -575,7 +577,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         RequestBody requestBody = null;
 
         List<AnnotationInstance> requestBodyAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                MPOpenApiConstants.REQUEST_BODY, null);
+                MPOpenApiConstants.REQUESTBODY.TYPE_REQUESTBODY, null);
         for (AnnotationInstance annotation : requestBodyAnnotations) {
             requestBody = RequestBodyReader.readRequestBody(context, annotation);
             Content formBodyContent = params.getFormBodyContent();
@@ -656,7 +658,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @APIResponse annotations
         /////////////////////////////////////////
         List<AnnotationInstance> apiResponseAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                MPOpenApiConstants.API_RESPONSE, MPOpenApiConstants.API_RESPONSES);
+                MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSE, MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSES);
         for (AnnotationInstance annotation : apiResponseAnnotations) {
             addApiReponseFromAnnotation(context, annotation, operation);
         }
@@ -666,7 +668,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
          * provides a way for the application to indicate that responses will be supplied some other
          * way (i.e. static file).
          */
-        AnnotationInstance apiResponses = method.annotation(MPOpenApiConstants.API_RESPONSES);
+        AnnotationInstance apiResponses = method.annotation(MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSES);
         if (apiResponses == null || !JandexUtil.isEmpty(apiResponses)) {
             createResponseFromJaxRsMethod(context, method, operation);
         }
@@ -687,13 +689,14 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @SecurityRequirement annotations
         ///////////////////////////////////////////
         List<AnnotationInstance> securityRequirementAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                MPOpenApiConstants.SECURITY_REQUIREMENT,
-                MPOpenApiConstants.SECURITY_REQUIREMENTS);
+                MPOpenApiConstants.SECURITYREQUIREMENT.TYPE_SECURITY_REQUIREMENT,
+                MPOpenApiConstants.SECURITYREQUIREMENT.TYPE_SECURITY_REQUIREMENTS);
         securityRequirementAnnotations
-                .addAll(JandexUtil.getRepeatableAnnotation(resourceClass, MPOpenApiConstants.SECURITY_REQUIREMENT,
-                        MPOpenApiConstants.SECURITY_REQUIREMENTS));
+                .addAll(JandexUtil.getRepeatableAnnotation(resourceClass,
+                        MPOpenApiConstants.SECURITYREQUIREMENT.TYPE_SECURITY_REQUIREMENT,
+                        MPOpenApiConstants.SECURITYREQUIREMENT.TYPE_SECURITY_REQUIREMENTS));
         for (AnnotationInstance annotation : securityRequirementAnnotations) {
-            SecurityRequirement requirement = SecurityReader.readSecurityRequirement(annotation);
+            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(annotation);
             if (requirement != null) {
                 operation.addSecurityRequirement(requirement);
             }
@@ -702,10 +705,10 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @Callback annotations
         /////////////////////////////////////////
         List<AnnotationInstance> callbackAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                MPOpenApiConstants.CALLBACK, MPOpenApiConstants.CALLBACKS);
+                MPOpenApiConstants.CALLBACK.TYPE_CALLBACK, MPOpenApiConstants.CALLBACK.TYPE_CALLBACKS);
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         for (AnnotationInstance annotation : callbackAnnotations) {
-            String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
+            String name = JandexUtil.stringValue(annotation, MPOpenApiConstants.CALLBACK.PROP_NAME);
             if (name == null && JandexUtil.isRef(annotation)) {
                 name = JandexUtil.nameFromRef(annotation);
             }
@@ -721,10 +724,10 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @Server annotations
         ///////////////////////////////////
         List<AnnotationInstance> serverAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                MPOpenApiConstants.SERVER, MPOpenApiConstants.SERVERS);
+                MPOpenApiConstants.SERVER.TYPE_SERVER, MPOpenApiConstants.SERVER.TYPE_SERVERS);
         if (serverAnnotations.isEmpty()) {
             serverAnnotations.addAll(JandexUtil.getRepeatableAnnotation(method.declaringClass(),
-                    MPOpenApiConstants.SERVER, MPOpenApiConstants.SERVERS));
+                    MPOpenApiConstants.SERVER.TYPE_SERVER, MPOpenApiConstants.SERVER.TYPE_SERVERS));
         }
         for (AnnotationInstance annotation : serverAnnotations) {
             Server server = ServerReader.readServer(annotation);
@@ -734,13 +737,13 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Process @Extension annotations
         ///////////////////////////////////
         List<AnnotationInstance> extensionAnnotations = JandexUtil.getRepeatableAnnotation(method,
-                MPOpenApiConstants.EXTENSION, MPOpenApiConstants.EXTENSIONS);
+                MPOpenApiConstants.EXTENSIONS.TYPE_EXTENSION, MPOpenApiConstants.EXTENSIONS.TYPE_EXTENSIONS);
         if (extensionAnnotations.isEmpty()) {
             extensionAnnotations.addAll(JandexUtil.getRepeatableAnnotation(method.declaringClass(),
-                    MPOpenApiConstants.EXTENSION, MPOpenApiConstants.EXTENSIONS));
+                    MPOpenApiConstants.EXTENSIONS.TYPE_EXTENSION, MPOpenApiConstants.EXTENSIONS.TYPE_EXTENSIONS));
         }
         for (AnnotationInstance annotation : extensionAnnotations) {
-            String name = JandexUtil.stringValue(annotation, OpenApiConstants.PROP_NAME);
+            String name = JandexUtil.stringValue(annotation, MPOpenApiConstants.EXTENSIONS.PROP_NAME);
             operation.addExtension(name, ExtensionReader.readExtensionValue(context, name, annotation));
         }
 
@@ -802,10 +805,12 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      */
     private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation,
             List<AnnotationInstance> methodApiResponseAnnotations) {
-        AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation.value(OpenApiConstants.PROP_RESPONSE_CODE);
+        AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation
+                .value(MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE);
         Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream()
                 .filter(annotationInstance -> {
-                    AnnotationValue methodAnnotationValue = annotationInstance.value(OpenApiConstants.PROP_RESPONSE_CODE);
+                    AnnotationValue methodAnnotationValue = annotationInstance
+                            .value(MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE);
                     return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
                 }).findFirst();
 
@@ -820,11 +825,11 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      */
     private void addApiReponseFromAnnotation(final AnnotationScannerContext context, AnnotationInstance apiResponseAnnotation,
             Operation operation) {
-        String responseCode = JandexUtil.stringValue(apiResponseAnnotation, OpenApiConstants.PROP_RESPONSE_CODE);
+        String responseCode = JandexUtil.stringValue(apiResponseAnnotation, MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE);
         if (responseCode == null) {
             responseCode = APIResponses.DEFAULT;
         }
-        APIResponse response = ResponseObjectReader.readResponse(context, apiResponseAnnotation);
+        APIResponse response = ResponseReader.readResponse(context, apiResponseAnnotation);
         APIResponses responses = ModelUtil.responses(operation);
         responses.addAPIResponse(responseCode, response);
     }
@@ -841,19 +846,19 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      * @return the set of tag names found
      */
     private Set<String> processTags(OpenAPI openApi, AnnotationTarget target, boolean nullWhenMissing) {
-        if (!TypeUtil.hasAnnotation(target, MPOpenApiConstants.TAG) &&
-                !TypeUtil.hasAnnotation(target, MPOpenApiConstants.TAGS)) {
+        if (!TypeUtil.hasAnnotation(target, MPOpenApiConstants.TAG.TYPE_TAG) &&
+                !TypeUtil.hasAnnotation(target, MPOpenApiConstants.TAG.TYPE_TAGS)) {
             return nullWhenMissing ? null : Collections.emptySet();
         }
 
         Set<String> tags = new LinkedHashSet<>();
         List<AnnotationInstance> tagAnnos = JandexUtil.getRepeatableAnnotation(target,
-                MPOpenApiConstants.TAG,
-                MPOpenApiConstants.TAGS);
+                MPOpenApiConstants.TAG.TYPE_TAG,
+                MPOpenApiConstants.TAG.TYPE_TAGS);
 
         for (AnnotationInstance ta : tagAnnos) {
             if (JandexUtil.isRef(ta)) {
-                tags.add(JandexUtil.value(ta, OpenApiConstants.PROP_REF));
+                tags.add(JandexUtil.value(ta, MPOpenApiConstants.REF));
             } else {
                 Tag tag = TagReader.readTag(ta);
 
@@ -864,8 +869,8 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             }
         }
 
-        String[] refs = TypeUtil.getAnnotationValue(target, MPOpenApiConstants.TAGS,
-                OpenApiConstants.PROP_REFS);
+        String[] refs = TypeUtil.getAnnotationValue(target, MPOpenApiConstants.TAG.TYPE_TAGS,
+                MPOpenApiConstants.REFS);
 
         if (refs != null) {
             Arrays.stream(refs).forEach(tags::add);

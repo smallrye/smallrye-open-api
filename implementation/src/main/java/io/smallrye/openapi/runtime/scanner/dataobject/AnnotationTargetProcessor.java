@@ -28,7 +28,7 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -52,7 +52,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     private final Type entityType;
 
     // May be null if field is unannotated.
-    private AnnotationTarget annotationTarget;
+    private final AnnotationTarget annotationTarget;
 
     public AnnotationTargetProcessor(AugmentedIndexView index,
             DataObjectDeque objectStack,
@@ -97,7 +97,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
 
             if (schemaAnnotation == null ||
-                    schemaAnnotation.value(OpenApiConstants.PROP_REQUIRED) == null) {
+                    schemaAnnotation.value(MPOpenApiConstants.SCHEMA.PROP_REQUIRED) == null) {
                 /*
                  * Only mark the schema as required in the parent schema if it has not
                  * already been specified.
@@ -141,7 +141,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (schemaAnnotation != null && JandexUtil.hasImplementation(schemaAnnotation)) {
             typeSchema = null;
             registeredTypeSchema = null;
-            fieldType = JandexUtil.value(schemaAnnotation, OpenApiConstants.PROP_IMPLEMENTATION);
+            fieldType = JandexUtil.value(schemaAnnotation, MPOpenApiConstants.SCHEMA.PROP_IMPLEMENTATION);
         } else {
             // Process the type of the field to derive the typeSchema
             TypeProcessor typeProcessor = new TypeProcessor(index, objectStack, parentPathEntry, typeResolver, entityType,
@@ -202,7 +202,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
-        if (JandexUtil.booleanValueWithDefault(annotation, OpenApiConstants.PROP_REQUIRED)) {
+        if (JandexUtil.booleanValueWithDefault(annotation, MPOpenApiConstants.SCHEMA.PROP_REQUIRED)) {
             parentPathEntry.getSchema().addRequired(propertyKey);
         }
 

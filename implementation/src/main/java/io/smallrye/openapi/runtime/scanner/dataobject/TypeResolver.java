@@ -48,7 +48,6 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.api.constants.MPOpenApiConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -82,11 +81,11 @@ public class TypeResolver {
      * </ol>
      *
      */
-    private static Comparator<AnnotationTarget> targetComparator = (t1, t2) -> {
+    private static final Comparator<AnnotationTarget> targetComparator = (t1, t2) -> {
         int result;
 
         // Annotated elements sort to the top of the priority queue
-        if ((result = compareAnnotation(t1, t2, MPOpenApiConstants.SCHEMA)) != 0) {
+        if ((result = compareAnnotation(t1, t2, MPOpenApiConstants.SCHEMA.TYPE_SCHEMA)) != 0) {
             return result;
         }
         if ((result = compareAnnotation(t1, t2, JsonbConstants.JSONB_PROPERTY)) != 0) {
@@ -197,32 +196,32 @@ public class TypeResolver {
         String name;
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                MPOpenApiConstants.SCHEMA,
-                OpenApiConstants.PROP_NAME)) != null) {
+                MPOpenApiConstants.SCHEMA.TYPE_SCHEMA,
+                MPOpenApiConstants.SCHEMA.PROP_NAME)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
                 JsonbConstants.JSONB_PROPERTY,
-                OpenApiConstants.PROP_VALUE)) != null) {
+                JsonbConstants.PROP_VALUE)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
                 JacksonConstants.JSON_PROPERTY,
-                OpenApiConstants.PROP_VALUE)) != null) {
+                JacksonConstants.PROP_VALUE)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
                 JaxbConstants.XML_ELEMENT,
-                OpenApiConstants.PROP_NAME)) != null) {
+                JaxbConstants.PROP_NAME)) != null) {
             return name;
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
                 JaxbConstants.XML_ATTRIBUTE,
-                OpenApiConstants.PROP_NAME)) != null) {
+                JaxbConstants.PROP_NAME)) != null) {
             return name;
         }
 
