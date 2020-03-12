@@ -878,7 +878,7 @@ public class ParameterProcessor {
 
         if (TYPE_PARAMETER.equals(name)) {
             readAnnotatedType(annotation, null, false);
-        } else if (TYPE_PARAMETER.equals(name)) {
+        } else if (TYPE_PARAMETERS.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
