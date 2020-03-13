@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.reader;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the OpenAPIDefinition from an annotation or json
@@ -72,5 +74,11 @@ public class DefinitionReader {
                 ComponentsReader.readComponents(node.get(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_COMPONENTS)));
         openApi.setPaths(PathsReader.readPaths(node.get(MPOpenApiConstants.OPEN_API_DEFINITION.PROP_PATHS)));
         ExtensionReader.readExtensions(node, openApi);
+    }
+
+    // helper methods for scanners
+    public static AnnotationInstance getDefinitionAnnotation(final ClassInfo targetClass) {
+        return JandexUtil.getClassAnnotation(targetClass,
+                MPOpenApiConstants.OPEN_API_DEFINITION.TYPE_OPEN_API_DEFINITION);
     }
 }

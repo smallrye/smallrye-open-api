@@ -2,12 +2,15 @@ package io.smallrye.openapi.runtime.reader;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -174,4 +177,34 @@ public class ResponseReader {
         ExtensionReader.readExtensions(node, model);
         return model;
     }
+
+    // helper methods for scanners
+    public static List<AnnotationInstance> getResponseAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSE,
+                MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSES);
+    }
+
+    public static boolean hasResponseCodeValue(final MethodInfo method) {
+        if (method.hasAnnotation(MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSE)) {
+            AnnotationInstance annotation = getResponseAnnotation(method);
+            if (annotation.value(MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static AnnotationInstance getResponseAnnotation(final MethodInfo method) {
+        return method.annotation(MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSE);
+    }
+    
+    public static AnnotationInstance getResponsesAnnotation(final MethodInfo method) {
+        return method.annotation(MPOpenApiConstants.RESPONSE.TYPE_API_RESPONSES);
+    }
+    
+    public static String getResponseName(AnnotationInstance annotation){
+        return JandexUtil.stringValue(annotation, MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE);
+    }
+    
 }

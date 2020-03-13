@@ -66,6 +66,8 @@ public class JaxRsConstants {
     public static final DotName OPTIONS = DotName.createSimple(OPTIONS.class.getName());
     public static final DotName PATCH = DotName.createSimple(PATCH.class.getName());
 
+    public static final String TO_RESPONSE_METHOD_NAME = "toResponse";
+
     public static final Set<DotName> HTTP_METHODS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(GET,
                     PUT,

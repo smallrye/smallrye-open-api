@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -16,6 +17,7 @@ import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the Tag from annotation or json
@@ -104,4 +106,17 @@ public class TagReader {
         ExtensionReader.readExtensions(node, tag);
         return tag;
     }
+
+    // Helpers for scanner classes
+    public static boolean hasTagAnnotation(final AnnotationTarget target) {
+        return TypeUtil.hasAnnotation(target, MPOpenApiConstants.TAG.TYPE_TAG) ||
+                TypeUtil.hasAnnotation(target, MPOpenApiConstants.TAG.TYPE_TAGS);
+    }
+
+    public static List<AnnotationInstance> getTagAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.TAG.TYPE_TAG,
+                MPOpenApiConstants.TAG.TYPE_TAGS);
+    }
+
 }

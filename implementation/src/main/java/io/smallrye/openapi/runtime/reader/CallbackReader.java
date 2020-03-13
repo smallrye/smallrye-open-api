@@ -2,10 +2,12 @@ package io.smallrye.openapi.runtime.reader;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -123,5 +125,16 @@ public class CallbackReader {
         }
         ExtensionReader.readExtensions(node, callback);
         return callback;
+    }
+
+    // helper methods for scanners
+    public static List<AnnotationInstance> getCallbackAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.CALLBACK.TYPE_CALLBACK,
+                MPOpenApiConstants.CALLBACK.TYPE_CALLBACKS);
+    }
+    
+    public static String getCallbackName(AnnotationInstance annotation){
+        return JandexUtil.stringValue(annotation, MPOpenApiConstants.CALLBACK.PROP_NAME);
     }
 }

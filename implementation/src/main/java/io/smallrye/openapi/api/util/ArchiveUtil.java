@@ -34,9 +34,6 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 public class ArchiveUtil {
     private static final Logger LOG = Logger.getLogger(ArchiveUtil.class);
 
-    /**
-     * Constructor.
-     */
     private ArchiveUtil() {
     }
 

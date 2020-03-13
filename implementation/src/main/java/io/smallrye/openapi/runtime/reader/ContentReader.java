@@ -10,6 +10,7 @@ import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.smallrye.openapi.api.constants.MPOpenApiConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -62,7 +63,7 @@ public class ContentReader {
                     mimeTypes = CurrentContentTypes.getCurrentProduces();
                 }
                 if (direction == ContentDirection.Parameter) {
-                    mimeTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                    mimeTypes = MPOpenApiConstants.DEFAULT_MEDIA_TYPES.get();
                 }
                 for (String mimeType : mimeTypes) {
                     content.addMediaType(mimeType, mediaTypeModel);

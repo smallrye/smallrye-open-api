@@ -19,9 +19,6 @@ import io.smallrye.openapi.api.models.servers.ServerImpl;
  */
 public class ServersUtil {
 
-    /**
-     * Constructor.
-     */
     private ServersUtil() {
     }
 

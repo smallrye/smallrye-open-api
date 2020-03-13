@@ -42,9 +42,6 @@ import org.eclipse.microprofile.openapi.models.tags.Tag;
  */
 public class FilterUtil {
 
-    /**
-     * Constructor.
-     */
     private FilterUtil() {
     }
 

@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.reader;
 
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,10 +57,15 @@ public class OperationReader {
                 ExtensionReader.readExtensions(context,
                         annotationInstance.value(MPOpenApiConstants.OPERATION.PROP_EXTENSIONS)));
 
+        // Below is only used in Jax-rs ??
+        // Operation Id ??
+        operation.setOperationId(JandexUtil.stringValue(annotationInstance, MPOpenApiConstants.OPERATION.PROP_OPERATION_ID));
+        // Deprecated ??
+        operation.setDeprecated(JandexUtil.booleanValue(annotationInstance, MPOpenApiConstants.OPERATION.PROP_DEPRECATED));
+
+        // Below is not used ?
         // Tags ?
-        // Operation Id ?
         // Callbacks
-        // Deprecated
         // Servers
         return operation;
     }
@@ -92,4 +98,24 @@ public class OperationReader {
         ExtensionReader.readExtensions(node, model);
         return model;
     }
+
+    // Helpers for scanner classes
+    public static boolean methodHasOperationAnnotation(final MethodInfo method) {
+        return method.hasAnnotation(MPOpenApiConstants.OPERATION.TYPE_OPERATION);
+    }
+
+    public static boolean operationIsHidden(final MethodInfo method) {
+        AnnotationInstance operationAnnotation = method.annotation(MPOpenApiConstants.OPERATION.TYPE_OPERATION);
+        // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
+        if (operationAnnotation.value(MPOpenApiConstants.OPERATION.PROP_HIDDEN) != null
+                && operationAnnotation.value(MPOpenApiConstants.OPERATION.PROP_HIDDEN).asBoolean()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static AnnotationInstance getOperationAnnotation(final MethodInfo method) {
+        return method.annotation(MPOpenApiConstants.OPERATION.TYPE_OPERATION);
+    }
+
 }

@@ -4,10 +4,12 @@ import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -98,5 +100,17 @@ public class ExtensionReader {
                 model.addExtension(fieldName, value);
             }
         }
+    }
+
+    // helper methods for scanners
+
+    public static List<AnnotationInstance> getExtensionsAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.EXTENSIONS.TYPE_EXTENSION,
+                MPOpenApiConstants.EXTENSIONS.TYPE_EXTENSIONS);
+    }
+    
+    public static String getExtensionName(final AnnotationInstance annotation){
+        return JandexUtil.stringValue(annotation, MPOpenApiConstants.EXTENSIONS.PROP_NAME);
     }
 }

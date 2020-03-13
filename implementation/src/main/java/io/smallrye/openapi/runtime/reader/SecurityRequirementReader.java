@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -117,5 +118,12 @@ public class SecurityRequirementReader {
             }
         }
         return requirement;
+    }
+
+    // helper methods for scanners
+    public static List<AnnotationInstance> getSecurityRequirementAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.SECURITYREQUIREMENT.TYPE_SECURITY_REQUIREMENT,
+                MPOpenApiConstants.SECURITYREQUIREMENT.TYPE_SECURITY_REQUIREMENTS);
     }
 }

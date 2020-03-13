@@ -1,5 +1,7 @@
 package io.smallrye.openapi.api.constants;
 
+import java.util.function.Supplier;
+
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.callbacks.Callback;
@@ -392,18 +394,19 @@ public class MPOpenApiConstants {
         public static final String PROP_METHOD = "method";
     }
 
-    // Shared (private
+    // Shared (private)
     private static final String NAME = "name";
     private static final String EXTERNAL_DOCS = "externalDocs";
     @SuppressWarnings("squid:S00115") // Instruct SonarCloud to ignore this unconventional variable name
     private static final String $REF = "$ref";
 
     // Shared public
+    public static final String OPEN_API_VERSION = "3.0.1";
     public static final String VALUE = "value";
     public static final String REF = "ref";
     public static final String REFS = "refs";
 
-    public static final String OPEN_API_VERSION = "3.0.1";
+    public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> new String[] { "*/*" };
 
     private MPOpenApiConstants() {
     }

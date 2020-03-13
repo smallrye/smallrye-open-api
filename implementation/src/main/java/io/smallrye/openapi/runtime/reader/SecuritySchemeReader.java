@@ -5,12 +5,14 @@ import static org.eclipse.microprofile.openapi.models.security.SecurityScheme.Ty
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -287,6 +289,17 @@ public class SecuritySchemeReader {
         return SECURITY_SCHEME_IN_LOOKUP.get(node.asText());
     }
 
+    // helper methods for scanner
+    public static List<AnnotationInstance> getSecuritySchemeAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.SECURITYSCHEME.TYPE_SECURITY_SCHEME,
+                MPOpenApiConstants.SECURITYSCHEME.TYPE_SECURITY_SCHEMES);
+    }
+
+    public static String getSecuritySchemeName(AnnotationInstance annotation){
+        return JandexUtil.stringValue(annotation, MPOpenApiConstants.SECURITYSCHEME.PROP_SECURITY_SCHEME_NAME);
+    }
+    
     private static final Map<String, Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();
     private static final Map<String, In> SECURITY_SCHEME_IN_LOOKUP = new LinkedHashMap<>();
 

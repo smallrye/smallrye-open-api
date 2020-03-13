@@ -2,10 +2,12 @@ package io.smallrye.openapi.runtime.reader;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -134,6 +136,12 @@ public class RequestBodyReader {
         requestBody.setRef(JsonUtil.stringProperty(node, MPOpenApiConstants.REQUESTBODY.PROP_REF_VAR));
         ExtensionReader.readExtensions(node, requestBody);
         return requestBody;
+    }
+
+    // helper methods for scanners
+    public static List<AnnotationInstance> getRequestBodyAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.REQUESTBODY.TYPE_REQUESTBODY, null);
     }
 
 }

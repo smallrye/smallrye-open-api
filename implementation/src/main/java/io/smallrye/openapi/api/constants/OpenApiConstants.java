@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.jboss.jandex.DotName;
 
@@ -34,8 +33,6 @@ public final class OpenApiConstants {
     public static final String JAR_SUFFIX = ".jar";
     public static final String WEB_ARCHIVE_CLASS_PREFIX = "/WEB-INF/classes/";
 
-    public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> new String[] { "*/*" };
-
     public static final String PROP_SERVER = "server";
 
     public static final String PROP_OPERATION_ID = "operationId";
@@ -57,8 +54,6 @@ public final class OpenApiConstants {
     public static final String REF_PREFIX_REQUEST_BODY = "#/components/requestBodies/";
     public static final String REF_PREFIX_SCHEMA = "#/components/schemas/";
     public static final String REF_PREFIX_SECURITY_SCHEME = "#/components/securitySchemes/";
-
-    public static final String TO_RESPONSE_METHOD_NAME = "toResponse";
 
     /**
      * Constructor.

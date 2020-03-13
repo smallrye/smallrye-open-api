@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
 
@@ -215,6 +216,13 @@ public class ServerReader {
         variable.setDescription(JsonUtil.stringProperty(node, MPOpenApiConstants.SERVER_VARIABLE.PROP_DESCRIPTION));
         ExtensionReader.readExtensions(node, variable);
         return variable;
+    }
+
+    // helper methods for scanners
+    public static List<AnnotationInstance> getServerAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                MPOpenApiConstants.SERVER.TYPE_SERVER,
+                MPOpenApiConstants.SERVER.TYPE_SERVERS);
     }
 
 }

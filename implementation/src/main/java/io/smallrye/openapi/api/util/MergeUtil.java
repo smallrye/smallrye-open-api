@@ -45,9 +45,6 @@ public class MergeUtil {
         EXCLUDED_PROPERTIES.add("class");
     }
 
-    /**
-     * Constructor.
-     */
     private MergeUtil() {
     }
 
