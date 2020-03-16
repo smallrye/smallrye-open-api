@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.Extensible;
@@ -53,6 +54,7 @@ import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.contact.ContactConstant;
 import io.smallrye.openapi.runtime.io.content.ContentConstant;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
+import io.smallrye.openapi.runtime.io.definition.DefinitionWriter;
 import io.smallrye.openapi.runtime.io.discriminator.DiscriminatorConstant;
 import io.smallrye.openapi.runtime.io.encoding.EncodingConstant;
 import io.smallrye.openapi.runtime.io.example.ExampleConstant;
@@ -102,8 +104,10 @@ public class OpenApiSerializer {
      */
     public static final String serialize(OpenAPI oai, Format format) throws IOException {
         try {
-            OpenApiSerializer serializer = new OpenApiSerializer(oai);
-            JsonNode tree = serializer.serialize();
+            //            OpenApiSerializer serializer = new OpenApiSerializer(oai);
+            ObjectNode tree = JsonUtil.objectNode();
+            DefinitionWriter.writeOpenAPI(tree, oai);
+            //            JsonNode tree = serializer.serialize();
 
             ObjectMapper mapper;
             if (format == Format.JSON) {
@@ -126,6 +130,8 @@ public class OpenApiSerializer {
      */
     private JsonNode serialize() {
         ObjectNode root = JsonUtil.objectNode();
+        //        DefinitionWriter.writeOpenAPI(root, oai);
+
         this.writeOpenAPI(root, this.oai);
         return root;
     }
@@ -1266,7 +1272,11 @@ public class OpenApiSerializer {
 
     <T> void write(ObjectNode node, Map<String, T> map, NodeWriter<T> writer) {
         if (map != null) {
-            map.entrySet().forEach(entry -> writer.write(node, entry.getValue(), entry.getKey()));
+            Set<Entry<String, T>> entrySet = map.entrySet();
+            for (Entry<String, T> entry : entrySet) {
+                writer.write(node, entry.getValue(), entry.getKey());
+            }
+
         }
     }
 }

@@ -8,9 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
-import org.eclipse.microprofile.openapi.models.media.XML;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
@@ -18,14 +16,12 @@ import org.jboss.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.discriminator.DiscriminatorConstant;
+import io.smallrye.openapi.runtime.io.discriminator.DiscriminatorReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
-import io.smallrye.openapi.runtime.io.xml.XmlConstant;
+import io.smallrye.openapi.runtime.io.xml.XmlReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.SchemaFactory;
@@ -138,13 +134,13 @@ public class SchemaReader {
                     JsonUtil.booleanProperty(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES));
         }
         schema.setReadOnly(JsonUtil.booleanProperty(node, SchemaConstant.PROP_READ_ONLY));
-        schema.setXml(readXML(node.get(SchemaConstant.PROP_XML)));
+        schema.setXml(XmlReader.readXML(node.get(SchemaConstant.PROP_XML)));
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(SchemaConstant.PROP_EXTERNAL_DOCS)));
         schema.setExample(readObject(node.get(SchemaConstant.PROP_EXAMPLE)));
         schema.setOneOf(readSchemaArray(node.get(SchemaConstant.PROP_ONE_OF)));
         schema.setAnyOf(readSchemaArray(node.get(SchemaConstant.PROP_ANY_OF)));
         schema.setNot(readSchema(node.get(SchemaConstant.PROP_NOT)));
-        schema.setDiscriminator(readDiscriminator(node.get(SchemaConstant.PROP_DISCRIMINATOR)));
+        schema.setDiscriminator(DiscriminatorReader.readDiscriminator(node.get(SchemaConstant.PROP_DISCRIMINATOR)));
         schema.setNullable(JsonUtil.booleanProperty(node, SchemaConstant.PROP_NULLABLE));
         schema.setWriteOnly(JsonUtil.booleanProperty(node, SchemaConstant.PROP_WRITE_ONLY));
         schema.setDeprecated(JsonUtil.booleanProperty(node, SchemaConstant.PROP_DEPRECATED));
@@ -202,43 +198,5 @@ public class SchemaReader {
         }
 
         return models;
-    }
-
-    /**
-     * Reads a {@link XML} OpenAPI node.
-     * 
-     * @param node the json node
-     * @return XML model
-     */
-    private static XML readXML(final JsonNode node) {
-        if (node == null || !node.isObject()) {
-            return null;
-        }
-
-        XML xml = new XMLImpl();
-        xml.setName(JsonUtil.stringProperty(node, XmlConstant.PROP_NAME));
-        xml.setNamespace(JsonUtil.stringProperty(node, XmlConstant.PROP_NAMESPACE));
-        xml.setPrefix(JsonUtil.stringProperty(node, XmlConstant.PROP_PREFIX));
-        xml.setAttribute(JsonUtil.booleanProperty(node, XmlConstant.PROP_ATTRIBUTE));
-        xml.setWrapped(JsonUtil.booleanProperty(node, XmlConstant.PROP_WRAPPED));
-        ExtensionReader.readExtensions(node, xml);
-        return xml;
-    }
-
-    /**
-     * Reads a {@link Discriminator} OpenAPI node.
-     * 
-     * @param node the json node
-     * @return Discriminator model
-     */
-    private static Discriminator readDiscriminator(final JsonNode node) {
-        if (node == null || !node.isObject()) {
-            return null;
-        }
-
-        Discriminator discriminator = new DiscriminatorImpl();
-        discriminator.setPropertyName(JsonUtil.stringProperty(node, DiscriminatorConstant.PROP_PROPERTY_NAME));
-        discriminator.setMapping(JsonUtil.readStringMap(node.get(DiscriminatorConstant.PROP_MAPPING)));
-        return discriminator;
     }
 }
