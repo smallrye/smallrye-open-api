@@ -25,7 +25,8 @@ import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JaxRsConstants;
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
 
@@ -77,7 +78,7 @@ public class JandexUtil {
      * @return String value
      */
     public static String refValue(AnnotationInstance annotation, RefType refType) {
-        AnnotationValue value = annotation.value(MPOpenApiConstants.REF);
+        AnnotationValue value = annotation.value(OpenApiConstants.REF);
         if (value == null) {
             return null;
         }
@@ -302,7 +303,7 @@ public class JandexUtil {
      * @return Whether it's a "ref"
      */
     public static boolean isRef(AnnotationInstance annotation) {
-        return annotation.value(MPOpenApiConstants.REF) != null;
+        return annotation.value(OpenApiConstants.REF) != null;
     }
 
     /**
@@ -383,7 +384,7 @@ public class JandexUtil {
      * @return Name of item from ref
      */
     public static String nameFromRef(AnnotationInstance annotation) {
-        String ref = annotation.value(MPOpenApiConstants.REF).asString();
+        String ref = annotation.value(OpenApiConstants.REF).asString();
         return ModelUtil.nameFromRef(ref);
     }
 
@@ -412,7 +413,7 @@ public class JandexUtil {
         if (repeatableAnnotationName != null) {
             AnnotationInstance[] nestedArray = TypeUtil.getAnnotationValue(target,
                     repeatableAnnotationName,
-                    MPOpenApiConstants.VALUE);
+                    OpenApiConstants.VALUE);
 
             if (nestedArray != null) {
                 annotations.addAll(Arrays.asList(nestedArray));
@@ -543,7 +544,7 @@ public class JandexUtil {
         }
 
         org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = JandexUtil.enumValue(annotation,
-                MPOpenApiConstants.SCHEMA.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
+                SchemaConstant.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
 
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY);
     }
@@ -556,7 +557,7 @@ public class JandexUtil {
      * @return true if the annotation defines an implementation, otherwise false
      */
     public static boolean hasImplementation(AnnotationInstance annotation) {
-        return annotation.value(MPOpenApiConstants.SCHEMA.PROP_IMPLEMENTATION) != null;
+        return annotation.value(SchemaConstant.PROP_IMPLEMENTATION) != null;
     }
 
     /**

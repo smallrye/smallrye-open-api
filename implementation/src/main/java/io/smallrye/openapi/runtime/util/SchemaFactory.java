@@ -25,11 +25,12 @@ import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.JaxRsConstants;
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.reader.ExternalDocsReader;
+import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -72,7 +73,7 @@ public class SchemaFactory {
         LOG.debug("Processing a single @Schema annotation.");
 
         // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, MPOpenApiConstants.SCHEMA.PROP_HIDDEN);
+        Boolean isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
 
         if (Boolean.TRUE.equals(isHidden)) {
             return null;
@@ -122,7 +123,7 @@ public class SchemaFactory {
         }
 
         // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, MPOpenApiConstants.SCHEMA.PROP_HIDDEN);
+        Boolean isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
 
         if (Boolean.TRUE.equals(isHidden)) {
             return schema;
@@ -152,81 +153,81 @@ public class SchemaFactory {
         }
 
         // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_HIDDEN, defaults);
+        Boolean isHidden = readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults);
 
         if (Boolean.TRUE.equals(isHidden)) {
             return schema;
         }
 
-        schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_NOT,
+        schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, SchemaConstant.PROP_NOT,
                 type -> readClassSchema(index, type, true), defaults));
-        schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_ONE_OF,
+        schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ONE_OF,
                 type -> readClassSchemas(index, type), defaults));
-        schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_ANY_OF,
+        schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ANY_OF,
                 type -> readClassSchemas(index, type), defaults));
-        schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_ALL_OF,
+        schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ALL_OF,
                 type -> readClassSchemas(index, type), defaults));
-        schema.setTitle(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_TITLE, defaults));
-        schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MULTIPLE_OF,
+        schema.setTitle(readAttr(annotation, SchemaConstant.PROP_TITLE, defaults));
+        schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
-        schema.setMaximum(SchemaFactory.<String, BigDecimal> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MAXIMUM,
+        schema.setMaximum(SchemaFactory.<String, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MAXIMUM,
                 BigDecimal::new, defaults));
-        schema.setMinimum(SchemaFactory.<String, BigDecimal> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MINIMUM,
+        schema.setMinimum(SchemaFactory.<String, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MINIMUM,
                 BigDecimal::new, defaults));
-        schema.setExclusiveMaximum(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_EXCLUSIVE_MAXIMUM, defaults));
-        schema.setExclusiveMinimum(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_EXCLUSIVE_MINIMUM, defaults));
-        schema.setMaxLength(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MAX_LENGTH, defaults));
-        schema.setMinLength(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MIN_LENGTH, defaults));
-        schema.setPattern(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_PATTERN, defaults));
-        schema.setMaxProperties(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MAX_PROPERTIES, defaults));
-        schema.setMinProperties(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MIN_PROPERTIES, defaults));
-        schema.setRequired(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_REQUIRED_PROPERTIES, defaults));
-        schema.setDescription(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_DESCRIPTION, defaults));
-        schema.setFormat(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_FORMAT, defaults));
-        schema.setRef(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_REF, defaults));
-        schema.setNullable(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_NULLABLE, defaults));
-        schema.setReadOnly(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_READ_ONLY, defaults));
-        schema.setWriteOnly(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_WRITE_ONLY, defaults));
-        schema.setExample(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_EXAMPLE, defaults));
-        AnnotationInstance annotationInstance = JandexUtil.value(annotation, MPOpenApiConstants.SCHEMA.PROP_EXTERNAL_DOCS);
+        schema.setExclusiveMaximum(readAttr(annotation, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, defaults));
+        schema.setExclusiveMinimum(readAttr(annotation, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, defaults));
+        schema.setMaxLength(readAttr(annotation, SchemaConstant.PROP_MAX_LENGTH, defaults));
+        schema.setMinLength(readAttr(annotation, SchemaConstant.PROP_MIN_LENGTH, defaults));
+        schema.setPattern(readAttr(annotation, SchemaConstant.PROP_PATTERN, defaults));
+        schema.setMaxProperties(readAttr(annotation, SchemaConstant.PROP_MAX_PROPERTIES, defaults));
+        schema.setMinProperties(readAttr(annotation, SchemaConstant.PROP_MIN_PROPERTIES, defaults));
+        schema.setRequired(readAttr(annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
+        schema.setDescription(readAttr(annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
+        schema.setFormat(readAttr(annotation, SchemaConstant.PROP_FORMAT, defaults));
+        schema.setRef(readAttr(annotation, OpenApiConstants.REF, defaults));
+        schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
+        schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
+        schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
+        schema.setExample(readAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults));
+        AnnotationInstance annotationInstance = JandexUtil.value(annotation, SchemaConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(annotationInstance));
-        schema.setDeprecated(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_DEPRECATED, defaults));
-        schema.setType(SchemaFactory.<String, Schema.SchemaType> readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_TYPE,
+        schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
+        schema.setType(SchemaFactory.<String, Schema.SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
                 value -> JandexUtil.enumValue(value, Schema.SchemaType.class), defaults));
-        schema.setDefaultValue(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_DEFAULT_VALUE, defaults));
+        schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
                 readDiscriminator(index,
-                        JandexUtil.value(annotation, MPOpenApiConstants.SCHEMA.PROP_DISCRIMINATOR_PROPERTY),
-                        JandexUtil.value(annotation, MPOpenApiConstants.SCHEMA.PROP_DISCRIMINATOR_MAPPING)));
-        schema.setMaxItems(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MAX_ITEMS, defaults));
-        schema.setMinItems(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_MIN_ITEMS, defaults));
-        schema.setUniqueItems(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_UNIQUE_ITEMS, defaults));
+                        JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
+                        JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
+        schema.setMaxItems(readAttr(annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
+        schema.setMinItems(readAttr(annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
+        schema.setUniqueItems(readAttr(annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
 
-        List<Object> enumeration = readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_ENUMERATION, defaults);
+        List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
 
         if (enumeration != null && !enumeration.isEmpty()) {
             schema.setEnumeration(enumeration);
         }
 
         if (schema instanceof SchemaImpl) {
-            ((SchemaImpl) schema).setName(readAttr(annotation, MPOpenApiConstants.SCHEMA.PROP_NAME, defaults));
+            ((SchemaImpl) schema).setName(readAttr(annotation, SchemaConstant.PROP_NAME, defaults));
         }
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
             Schema implSchema = readClassSchema(index,
-                    JandexUtil.value(annotation, MPOpenApiConstants.SCHEMA.PROP_IMPLEMENTATION),
+                    JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     true);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(annotation)) {
             Schema implSchema = readClassSchema(index,
-                    JandexUtil.value(annotation, MPOpenApiConstants.SCHEMA.PROP_IMPLEMENTATION),
+                    JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     true);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
             Schema implSchema = readClassSchema(index,
-                    JandexUtil.value(annotation, MPOpenApiConstants.SCHEMA.PROP_IMPLEMENTATION),
+                    JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     false);
 
             if (schema.getType() == Schema.SchemaType.ARRAY && implSchema != null) {
@@ -385,7 +386,7 @@ public class SchemaFactory {
         LOG.debugv("Processing an enum {0}", enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
-        AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(MPOpenApiConstants.SCHEMA.TYPE_SCHEMA);
+        AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
         List<Object> enumeration = enumKlazz.fields()
                 .stream()
@@ -396,8 +397,8 @@ public class SchemaFactory {
 
         if (schemaAnnotation != null) {
             Map<String, Object> defaults = new HashMap<>(2);
-            defaults.put(MPOpenApiConstants.SCHEMA.PROP_TYPE, SchemaType.STRING);
-            defaults.put(MPOpenApiConstants.SCHEMA.PROP_ENUMERATION, enumeration);
+            defaults.put(SchemaConstant.PROP_TYPE, SchemaType.STRING);
+            defaults.put(SchemaConstant.PROP_ENUMERATION, enumeration);
 
             enumSchema = readSchema(index, enumSchema, schemaAnnotation, enumKlazz, defaults);
         } else {
@@ -545,9 +546,9 @@ public class SchemaFactory {
             LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
 
             for (AnnotationInstance nested : annotation) {
-                String propertyValue = JandexUtil.stringValue(nested, MPOpenApiConstants.SCHEMA.PROP_VALUE);
+                String propertyValue = JandexUtil.stringValue(nested, SchemaConstant.PROP_VALUE);
 
-                AnnotationValue schemaValue = nested.value(MPOpenApiConstants.SCHEMA.PROP_SCHEMA);
+                AnnotationValue schemaValue = nested.value(SchemaConstant.PROP_SCHEMA);
                 String schemaRef;
 
                 if (schemaValue != null) {

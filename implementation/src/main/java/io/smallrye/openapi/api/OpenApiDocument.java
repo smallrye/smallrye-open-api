@@ -3,7 +3,7 @@ package io.smallrye.openapi.api;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.info.InfoImpl;
@@ -130,7 +130,7 @@ public class OpenApiDocument {
             // Phase 5: Default empty document if model == null
             if (merged == null) {
                 merged = new OpenAPIImpl();
-                merged.setOpenapi(MPOpenApiConstants.OPEN_API_VERSION);
+                merged.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
             }
 
             // Phase 6: Provide missing required elements

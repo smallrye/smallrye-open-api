@@ -52,8 +52,8 @@ import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.util.ArchiveUtil;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
+import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * A Junit 4 test runner used to quickly run the OpenAPI tck tests directly against the

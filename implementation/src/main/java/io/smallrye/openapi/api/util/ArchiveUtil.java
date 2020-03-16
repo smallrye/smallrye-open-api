@@ -23,7 +23,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
+import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**

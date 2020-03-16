@@ -32,7 +32,7 @@ import org.jboss.logging.Logger;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -70,7 +70,7 @@ public class TypeResolver {
         int result;
 
         // Annotated elements sort to the top of the priority queue
-        if ((result = compareAnnotation(t1, t2, MPOpenApiConstants.SCHEMA.TYPE_SCHEMA)) != 0) {
+        if ((result = compareAnnotation(t1, t2, SchemaConstant.DOTNAME_SCHEMA)) != 0) {
             return result;
         }
         if ((result = compareAnnotation(t1, t2, JsonbConstants.JSONB_PROPERTY)) != 0) {
@@ -181,8 +181,8 @@ public class TypeResolver {
         String name;
 
         if ((name = TypeUtil.getAnnotationValue(target,
-                MPOpenApiConstants.SCHEMA.TYPE_SCHEMA,
-                MPOpenApiConstants.SCHEMA.PROP_NAME)) != null) {
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_NAME)) != null) {
             return name;
         }
 

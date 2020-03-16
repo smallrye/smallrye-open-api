@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
+import io.smallrye.openapi.runtime.io.Format;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -21,8 +21,8 @@ public class OpenApiStaticFile implements Closeable {
     }
 
     public OpenApiStaticFile(InputStream content, Format format) {
-        this.setContent(content);
-        this.setFormat(format);
+        this.content = content;
+        this.format = format;
     }
 
     /**

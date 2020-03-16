@@ -22,7 +22,7 @@ import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -75,7 +75,7 @@ public class IgnoreResolver {
 
             if (annotationInstance != null) {
                 Boolean isHidden = JandexUtil.booleanValue(annotationInstance,
-                        MPOpenApiConstants.SCHEMA.PROP_HIDDEN);
+                        SchemaConstant.PROP_HIDDEN);
 
                 if (isHidden != null) {
                     return isHidden;
@@ -87,7 +87,7 @@ public class IgnoreResolver {
 
         @Override
         public DotName getName() {
-            return MPOpenApiConstants.SCHEMA.TYPE_SCHEMA;
+            return SchemaConstant.DOTNAME_SCHEMA;
         }
     }
 
@@ -284,7 +284,7 @@ public class IgnoreResolver {
                     // Unless field is annotated with @Schema to explicitly un-hide it.
                     AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
                     if (schemaAnnotation != null) {
-                        Boolean boolVal = JandexUtil.booleanValue(schemaAnnotation, MPOpenApiConstants.SCHEMA.PROP_HIDDEN);
+                        Boolean boolVal = JandexUtil.booleanValue(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
                         if (boolVal == null) {
                             return true;
                         } else {

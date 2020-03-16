@@ -20,7 +20,7 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
@@ -182,7 +182,7 @@ public class ModelUtil {
         Content content = parameter.getContent();
         Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(content);
         if (mediaTypes.isEmpty()) {
-            String[] defMediaTypes = MPOpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+            String[] defMediaTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             for (String mediaTypeName : defMediaTypes) {
                 MediaType mediaType = new MediaTypeImpl();
                 mediaType.setSchema(schema);
@@ -235,7 +235,7 @@ public class ModelUtil {
             if (mediaTypes != null && mediaTypes.length > 0) {
                 requestBodyTypes = mediaTypes;
             } else {
-                requestBodyTypes = MPOpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                requestBodyTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             }
             for (String mediaTypeName : requestBodyTypes) {
                 MediaType mediaType = new MediaTypeImpl();

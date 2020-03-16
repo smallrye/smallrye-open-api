@@ -39,8 +39,8 @@ import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * @author eric.wittmann@gmail.com

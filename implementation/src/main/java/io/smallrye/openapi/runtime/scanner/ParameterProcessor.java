@@ -5,10 +5,10 @@ import static io.smallrye.openapi.api.constants.JaxRsConstants.DEFAULT_VALUE;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.HTTP_METHODS;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH_SEGMENT;
-import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER.PROP_VALUE;
-import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER.TYPE_PARAMETER;
-import static io.smallrye.openapi.api.constants.MPOpenApiConstants.PARAMETER.TYPE_PARAMETERS;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
+import static io.smallrye.openapi.runtime.io.parameter.ParameterConstant.DOTNAME_PARAMETER;
+import static io.smallrye.openapi.runtime.io.parameter.ParameterConstant.DOTNAME_PARAMETERS;
+import static io.smallrye.openapi.runtime.io.parameter.ParameterConstant.PROP_VALUE;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
@@ -65,6 +65,7 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -95,8 +96,8 @@ public class ParameterProcessor {
     private static Comparator<Parameter> parameterComparator = Comparator.comparing(Parameter::getIn)
             .thenComparing(Parameter::getName);
 
-    private static Set<DotName> openApiParameterAnnotations = new HashSet<>(Arrays.asList(TYPE_PARAMETER,
-            TYPE_PARAMETERS));
+    private static Set<DotName> openApiParameterAnnotations = new HashSet<>(
+            Arrays.asList(ParameterConstant.DOTNAME_PARAMETER, ParameterConstant.DOTNAME_PARAMETERS));
 
     private final IndexView index;
     private final Function<AnnotationInstance, Parameter> readerFunction;
@@ -876,9 +877,9 @@ public class ParameterProcessor {
     void readParameterAnnotation(AnnotationInstance annotation) {
         DotName name = annotation.name();
 
-        if (TYPE_PARAMETER.equals(name)) {
+        if (ParameterConstant.DOTNAME_PARAMETER.equals(name)) {
             readAnnotatedType(annotation, null, false);
-        } else if (TYPE_PARAMETERS.equals(name)) {
+        } else if (ParameterConstant.DOTNAME_PARAMETERS.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
@@ -922,7 +923,7 @@ public class ParameterProcessor {
             boolean overriddenParametersOnly) {
         DotName name = annotation.name();
 
-        if (TYPE_PARAMETER.equals(name) && readerFunction != null) {
+        if (ParameterConstant.DOTNAME_PARAMETER.equals(name) && readerFunction != null) {
             Parameter oaiParam = readerFunction.apply(annotation);
 
             readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
@@ -954,7 +955,7 @@ public class ParameterProcessor {
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 } else if (jaxRsParam.location == In.PATH && targetType != null
                         && PATH_SEGMENT.equals(targetType.name())) {
-                    String pathSegment = JandexUtil.value(annotation, PROP_VALUE);
+                    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
                     if (!matrixParams.containsKey(pathSegment)) {
                         matrixParams.put(pathSegment, new HashMap<>());
@@ -1085,7 +1086,7 @@ public class ParameterProcessor {
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
-            String defaultValueString = stringValue(defaultValueAnno, PROP_VALUE);
+            String defaultValueString = stringValue(defaultValueAnno, ParameterConstant.PROP_VALUE);
             defaultValue = defaultValueString;
             Type targetType = getType(target);
 
@@ -1428,7 +1429,7 @@ public class ParameterProcessor {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
-            if (TYPE_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
+            if (ParameterConstant.DOTNAME_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
                         readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
@@ -1524,9 +1525,9 @@ public class ParameterProcessor {
         if (JaxRsParameter.isParameter(annotationName)) {
             return true;
         }
-        if (TYPE_PARAMETER.equals(annotationName)) {
+        if (ParameterConstant.DOTNAME_PARAMETER.equals(annotationName)) {
             return true;
         }
-        return TYPE_PARAMETERS.equals(annotationName);
+        return ParameterConstant.DOTNAME_PARAMETERS.equals(annotationName);
     }
 }

@@ -14,9 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
-import io.smallrye.openapi.runtime.reader.DefinitionReader;
-import io.smallrye.openapi.runtime.reader.SchemaReader;
+import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 
 /**
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.

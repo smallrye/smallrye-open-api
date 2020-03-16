@@ -13,8 +13,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
-
 /**
  * @author eric.wittmann@gmail.com
  */

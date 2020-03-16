@@ -47,7 +47,7 @@ import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JaxRsConstants;
-import io.smallrye.openapi.api.constants.MPOpenApiConstants;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.RestEasyConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -61,18 +61,20 @@ import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.reader.CallbackReader;
-import io.smallrye.openapi.runtime.reader.CurrentContentTypes;
-import io.smallrye.openapi.runtime.reader.DefinitionReader;
-import io.smallrye.openapi.runtime.reader.ExtensionReader;
-import io.smallrye.openapi.runtime.reader.OperationReader;
-import io.smallrye.openapi.runtime.reader.ParameterReader;
-import io.smallrye.openapi.runtime.reader.RequestBodyReader;
-import io.smallrye.openapi.runtime.reader.ResponseReader;
-import io.smallrye.openapi.runtime.reader.SecurityRequirementReader;
-import io.smallrye.openapi.runtime.reader.SecuritySchemeReader;
-import io.smallrye.openapi.runtime.reader.ServerReader;
-import io.smallrye.openapi.runtime.reader.TagReader;
+import io.smallrye.openapi.runtime.io.CurrentContentTypes;
+import io.smallrye.openapi.runtime.io.callback.CallbackReader;
+import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
+import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.operation.OperationReader;
+import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
+import io.smallrye.openapi.runtime.io.requestbody.RequestBodyReader;
+import io.smallrye.openapi.runtime.io.response.ResponseConstant;
+import io.smallrye.openapi.runtime.io.response.ResponseReader;
+import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
+import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeReader;
+import io.smallrye.openapi.runtime.io.server.ServerReader;
+import io.smallrye.openapi.runtime.io.tag.TagConstant;
+import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.PathMaker;
@@ -159,7 +161,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      */
     private OpenAPI processApplicationClass(final AnnotationScannerContext context, ClassInfo applicationClass) {
         OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(MPOpenApiConstants.OPEN_API_VERSION);
+        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
         AnnotationInstance appPathAnno = JandexUtil.getClassAnnotation(applicationClass,
@@ -657,11 +659,11 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
     private boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation,
             List<AnnotationInstance> methodApiResponseAnnotations) {
         AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation
-                .value(MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE);
+                .value(ResponseConstant.PROP_RESPONSE_CODE);
         Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream()
                 .filter(annotationInstance -> {
                     AnnotationValue methodAnnotationValue = annotationInstance
-                            .value(MPOpenApiConstants.RESPONSE.PROP_RESPONSE_CODE);
+                            .value(ResponseConstant.PROP_RESPONSE_CODE);
                     return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
                 }).findFirst();
 
@@ -689,7 +691,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
 
         for (AnnotationInstance ta : tagAnnos) {
             if (JandexUtil.isRef(ta)) {
-                tags.add(JandexUtil.value(ta, MPOpenApiConstants.REF));
+                tags.add(JandexUtil.value(ta, OpenApiConstants.REF));
             } else {
                 Tag tag = TagReader.readTag(ta);
 
@@ -700,8 +702,8 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             }
         }
 
-        String[] refs = TypeUtil.getAnnotationValue(target, MPOpenApiConstants.TAG.TYPE_TAGS,
-                MPOpenApiConstants.REFS);
+        String[] refs = TypeUtil.getAnnotationValue(target, TagConstant.DOTNAME_TAGS,
+                OpenApiConstants.REFS);
 
         if (refs != null) {
             Arrays.stream(refs).forEach(tags::add);
@@ -724,7 +726,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 return annotationValue.asStringArray();
             }
 
-            return MPOpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+            return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
         }
 
         return null;
@@ -796,7 +798,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 String[] produces = CurrentContentTypes.getCurrentProduces();
 
                 if (produces == null || produces.length == 0) {
-                    produces = MPOpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                    produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
                 }
 
                 if (schema != null && schema.getNullable() == null && TypeUtil.isOptional(returnType)) {

@@ -30,6 +30,7 @@ import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
 public class IndexScannerTestBase {
@@ -106,8 +107,8 @@ public class IndexScannerTestBase {
 
     public static void printToConsole(OpenAPI oai) throws IOException {
         // Remember to set debug level logging.
-        LOG.debug(OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON));
-        System.out.println(OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON));
+        LOG.debug(OpenApiSerializer.serialize(oai, Format.JSON));
+        System.out.println(OpenApiSerializer.serialize(oai, Format.JSON));
     }
 
     public static String schemaToString(String entityName, Schema schema) throws IOException {
@@ -117,7 +118,7 @@ public class IndexScannerTestBase {
         ComponentsImpl comp = new ComponentsImpl();
         comp.setSchemas(map);
         oai.setComponents(comp);
-        return OpenApiSerializer.serialize(oai, OpenApiSerializer.Format.JSON);
+        return OpenApiSerializer.serialize(oai, Format.JSON);
     }
 
     public static void assertJsonEquals(String entityName, String expectedResource, Schema actual)
@@ -128,7 +129,7 @@ public class IndexScannerTestBase {
 
     public static void assertJsonEquals(String expectedResource, OpenAPI actual) throws JSONException, IOException {
         URL resourceUrl = IndexScannerTestBase.class.getResource(expectedResource);
-        JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, OpenApiSerializer.Format.JSON),
+        JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, Format.JSON),
                 true);
     }
 
