@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.io.info;
 
 import org.eclipse.microprofile.openapi.models.info.Info;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -20,7 +19,6 @@ import io.smallrye.openapi.runtime.io.license.LicenseWriter;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class InfoWriter {
-    private static final Logger LOG = Logger.getLogger(InfoWriter.class);
 
     private InfoWriter() {
     }
@@ -28,8 +26,8 @@ public class InfoWriter {
     /**
      * Writes the {@link Info} model to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the parent json node
+     * @param model the Info model
      */
     public static void writeInfo(ObjectNode parent, Info model) {
         if (model == null) {

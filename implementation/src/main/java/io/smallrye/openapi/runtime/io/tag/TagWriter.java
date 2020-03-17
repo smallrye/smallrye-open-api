@@ -28,8 +28,8 @@ public class TagWriter {
     /**
      * Writes the {@link Tag} model array to the JSON tree.
      * 
-     * @param node
-     * @param tags
+     * @param node the json node
+     * @param tags list of Tag models
      */
     public static void writeTags(ObjectNode node, List<Tag> tags) {
         if (tags == null) {
@@ -44,5 +44,4 @@ public class TagWriter {
             ExtensionWriter.writeExtensions(tagNode, tag);
         }
     }
-
 }

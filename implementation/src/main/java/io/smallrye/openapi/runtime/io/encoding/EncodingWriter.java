@@ -26,8 +26,8 @@ public class EncodingWriter {
     /**
      * Writes a map of {@link Encoding} objects to the JSON tree.
      * 
-     * @param parent
-     * @param models
+     * @param parent the parent json node
+     * @param models map of Encoding models
      */
     public static void writeEncodings(ObjectNode parent, Map<String, Encoding> models) {
         if (models == null) {

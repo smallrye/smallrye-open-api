@@ -29,8 +29,8 @@ public class LinkWriter {
     /**
      * Writes a map of {@link Link} to the JSON tree.
      * 
-     * @param parent
-     * @param links
+     * @param parent the parent json node
+     * @param links map of Link models
      */
     public static void writeLinks(ObjectNode parent, Map<String, Link> links) {
         if (links == null) {

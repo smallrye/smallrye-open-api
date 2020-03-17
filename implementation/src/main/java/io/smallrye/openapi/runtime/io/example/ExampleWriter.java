@@ -27,8 +27,8 @@ public class ExampleWriter {
     /**
      * Writes a map of {@link Example} to the JSON tree.
      * 
-     * @param parent
-     * @param examples
+     * @param parent the parent json node
+     * @param examples map of Example models
      */
     public static void writeExamples(ObjectNode parent, Map<String, Example> examples) {
         if (examples == null) {

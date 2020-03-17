@@ -30,8 +30,8 @@ public class DefinitionWriter {
     /**
      * Writes the given model.
      * 
-     * @param node
-     * @param model
+     * @param node the json node
+     * @param model the OpenAPI model
      */
     public static void writeOpenAPI(ObjectNode node, OpenAPI model) {
         JsonUtil.stringProperty(node, DefinitionConstant.PROP_OPENAPI, model.getOpenapi());

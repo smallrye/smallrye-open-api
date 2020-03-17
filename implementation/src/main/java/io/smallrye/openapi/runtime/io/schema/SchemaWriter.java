@@ -32,8 +32,8 @@ public class SchemaWriter {
     /**
      * Writes a map of {@link Schema} to the JSON tree.
      * 
-     * @param parent
-     * @param schemas
+     * @param parent the parent json node
+     * @param schemas map of Schema models
      */
     public static void writeSchemas(ObjectNode parent, Map<String, Schema> schemas) {
         writeSchemas(parent, schemas, ComponentsConstant.PROP_SCHEMAS);
@@ -58,9 +58,9 @@ public class SchemaWriter {
     /**
      * Writes a {@link Schema} to the JSON tree.
      * 
-     * @param parent
-     * @param model
-     * @param name
+     * @param parent the parent json node
+     * @param model Schema model
+     * @param name name of the node
      */
     public static void writeSchema(ObjectNode parent, Schema model, String name) {
         if (model == null) {

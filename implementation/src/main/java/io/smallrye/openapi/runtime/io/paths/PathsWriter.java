@@ -31,8 +31,8 @@ public class PathsWriter {
     /**
      * Writes a {@link Paths} to the JSON tree.
      * 
-     * @param parent
-     * @param paths
+     * @param parent the parent json node
+     * @param paths Paths model
      */
     public static void writePaths(ObjectNode parent, Paths paths) {
         if (paths == null) {
@@ -51,9 +51,9 @@ public class PathsWriter {
     /**
      * Writes a {@link PathItem} to the JSON tree.
      * 
-     * @param parent
-     * @param model
-     * @param pathName
+     * @param parent parent json node
+     * @param model PathItem model
+     * @param pathName the node name (path)
      */
     public static void writePathItem(ObjectNode parent, PathItem model, String pathName) {
         if (model == null) {

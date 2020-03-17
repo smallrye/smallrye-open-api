@@ -31,9 +31,9 @@ public class OperationWriter {
     /**
      * Writes a {@link Operation} to the JSON tree.
      * 
-     * @param parent
-     * @param model
-     * @param method
+     * @param parent the parent json node
+     * @param model the Operation model
+     * @param method the name of the node (operation method)
      */
     public static void writeOperation(ObjectNode parent, Operation model, String method) {
         if (model == null) {

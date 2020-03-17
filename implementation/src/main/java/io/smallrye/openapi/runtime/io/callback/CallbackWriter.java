@@ -29,8 +29,8 @@ public class CallbackWriter {
     /**
      * Writes a map of {@link Callback} to the JSON tree.
      * 
-     * @param parent
-     * @param callbacks
+     * @param parent the parent node
+     * @param callbacks map of callbacks
      */
     public static void writeCallbacks(ObjectNode parent, Map<String, Callback> callbacks) {
         if (callbacks == null) {
@@ -46,9 +46,9 @@ public class CallbackWriter {
     /**
      * Writes a {@link Callback} object to the JSON tree.
      * 
-     * @param parent
-     * @param model
-     * @param name
+     * @param parent the parent node
+     * @param model the callback model
+     * @param name the name of the node
      */
     private static void writeCallback(ObjectNode parent, Callback model, String name) {
         if (model == null) {

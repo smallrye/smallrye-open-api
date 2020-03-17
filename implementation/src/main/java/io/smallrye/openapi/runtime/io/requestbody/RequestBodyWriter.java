@@ -14,7 +14,8 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 /**
  * Writing the RequestBody to json
  * 
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#requestBodyObject">requestBodyObject</a>
+ * @see <a href=
+ *      "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#requestBodyObject">requestBodyObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
@@ -27,8 +28,8 @@ public class RequestBodyWriter {
     /**
      * Writes a map of {@link RequestBody} to the JSON tree.
      * 
-     * @param parent
-     * @param requestBodies
+     * @param parent the parent json node
+     * @param requestBodies map of RequestBody models
      */
     public static void writeRequestBodies(ObjectNode parent, Map<String, RequestBody> requestBodies) {
         if (requestBodies == null) {
@@ -43,8 +44,8 @@ public class RequestBodyWriter {
     /**
      * Writes a {@link RequestBody} to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the parent json node
+     * @param model RequestBody model
      */
     public static void writeRequestBody(ObjectNode parent, RequestBody model) {
         writeRequestBody(parent, model, RequestBodyConstant.PROP_REQUEST_BODY);
@@ -70,5 +71,4 @@ public class RequestBodyWriter {
         JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED, model.getRequired());
         ExtensionWriter.writeExtensions(node, model);
     }
-
 }

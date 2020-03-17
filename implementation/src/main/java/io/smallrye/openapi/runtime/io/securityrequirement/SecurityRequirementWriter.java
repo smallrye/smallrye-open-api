@@ -14,7 +14,8 @@ import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 /**
  * Writing the Security requirement to json
  * 
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object">security-requirement-object</a>
+ * @see <a href=
+ *      "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object">security-requirement-object</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
@@ -27,8 +28,8 @@ public class SecurityRequirementWriter {
     /**
      * Writes a list of {@link SecurityRequirement} to the JSON tree.
      * 
-     * @param parent
-     * @param models
+     * @param parent the parent json node
+     * @param models list of SecurityRequirement models
      */
     public static void writeSecurityRequirements(ObjectNode parent, List<SecurityRequirement> models) {
         if (models == null) {

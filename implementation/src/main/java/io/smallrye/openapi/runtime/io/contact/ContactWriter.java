@@ -24,8 +24,8 @@ public class ContactWriter {
     /**
      * Writes the {@link Contact} model to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the parent json node
+     * @param model the Contact model
      */
     public static void writeContact(ObjectNode parent, Contact model) {
         if (model == null) {

@@ -30,8 +30,8 @@ public class HeaderWriter {
     /**
      * Writes a map of {@link Header} to the JSON tree.
      * 
-     * @param parent
-     * @param headers
+     * @param parent the parent json node
+     * @param headers map of Header models
      */
     public static void writeHeaders(ObjectNode parent, Map<String, Header> headers) {
         if (headers == null) {

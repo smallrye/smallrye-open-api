@@ -11,7 +11,8 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 /**
  * Writing the Discriminator to json
  * 
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminatorObject">discriminatorObject</a>
+ * @see <a href=
+ *      "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminatorObject">discriminatorObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
@@ -24,8 +25,8 @@ public class DiscriminatorWriter {
     /**
      * Writes a {@link Discriminator} object to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the parent json node
+     * @param model the Discriminator model
      */
     public static void writeDiscriminator(ObjectNode parent, Discriminator model) {
         if (model == null) {

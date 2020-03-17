@@ -26,9 +26,9 @@ public class MediaTypeWriter {
     /**
      * Writes a {@link MediaType} to the JSON tree.
      * 
-     * @param parent
-     * @param model
-     * @param name
+     * @param parent the parent json node
+     * @param model the MediaType model
+     * @param name name of the node
      */
     public static void writeMediaType(ObjectNode parent, MediaType model, String name) {
         if (model == null) {

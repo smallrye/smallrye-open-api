@@ -31,8 +31,8 @@ public class ResponseWriter {
     /**
      * Writes a map of {@link APIResponse} to the JSON tree.
      * 
-     * @param parent
-     * @param responses
+     * @param parent the parent json node
+     * @param responses map of APIResponse models
      */
     public static void writeAPIResponses(ObjectNode parent, Map<String, APIResponse> responses) {
         if (responses == null) {
@@ -47,8 +47,8 @@ public class ResponseWriter {
     /**
      * Writes a {@link APIResponses} map to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the parent json node
+     * @param model APIResponse model
      */
     public static void writeAPIResponses(ObjectNode parent, APIResponses model) {
         if (model == null) {
@@ -83,5 +83,4 @@ public class ResponseWriter {
         LinkWriter.writeLinks(node, model.getLinks());
         ExtensionWriter.writeExtensions(node, model);
     }
-
 }

@@ -24,8 +24,8 @@ public class ContentWriter {
     /**
      * Writes a {@link Content} to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the json parent node
+     * @param model the Content model
      */
     public static void writeContent(ObjectNode parent, Content model) {
         if (model == null) {

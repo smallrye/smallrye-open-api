@@ -24,8 +24,8 @@ public class XmlWriter {
     /**
      * Writes a {@link XML} object to the JSON tree.
      * 
-     * @param parent
-     * @param model
+     * @param parent the parent json node
+     * @param model the XML model
      */
     public static void writeXML(ObjectNode parent, XML model) {
         if (model == null) {

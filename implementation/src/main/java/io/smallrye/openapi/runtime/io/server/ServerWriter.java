@@ -28,8 +28,8 @@ public class ServerWriter {
     /**
      * Writes the {@link Server} model array to the JSON tree.
      * 
-     * @param node
-     * @param servers
+     * @param node the json node
+     * @param servers list of Server models
      */
     public static void writeServers(ObjectNode node, List<Server> servers) {
         if (servers == null) {
@@ -45,8 +45,8 @@ public class ServerWriter {
     /**
      * Writes a {@link Server} model to the given JSON node.
      * 
-     * @param parent ObjectNode
-     * @param model Server
+     * @param parent parent json node
+     * @param model Server model
      */
     public static void writeServer(ObjectNode parent, Server model) {
         if (model == null) {
