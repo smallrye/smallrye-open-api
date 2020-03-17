@@ -24,15 +24,16 @@ import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
-import io.smallrye.openapi.api.constants.JaxRsConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -420,7 +421,9 @@ public class SchemaFactory {
      * @param schemaReferenceSupported
      */
     private static Schema introspectClassToSchema(IndexView index, ClassType ctype, boolean schemaReferenceSupported) {
-        if (ctype.name().equals(JaxRsConstants.RESPONSE)) {
+        AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
+
+        if (!annotationScanner.shouldIntrospectClassToSchema(ctype)) {
             return null;
         }
 

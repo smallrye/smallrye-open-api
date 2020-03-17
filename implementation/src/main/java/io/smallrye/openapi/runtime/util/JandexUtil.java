@@ -2,7 +2,6 @@ package io.smallrye.openapi.runtime.util;
 
 import static java.util.stream.Collectors.toList;
 
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -24,11 +22,10 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.constants.JaxRsConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -37,7 +34,6 @@ import io.smallrye.openapi.runtime.scanner.ParameterProcessor.JaxRsParameter;
  */
 public class JandexUtil {
 
-    private static final String JAXRS_PACKAGE = "javax.ws.rs";
     private static final Pattern COMPONENT_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9\\.\\-_]+$");
 
     /**
@@ -339,26 +335,6 @@ public class JandexUtil {
     }
 
     /**
-     * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
-     * all Class-level @Path annotations.
-     * 
-     * @param index IndexView
-     * @return Collection of ClassInfo's
-     */
-    public static Collection<ClassInfo> getJaxRsResourceClasses(IndexView index) {
-        return index.getAnnotations(JaxRsConstants.PATH)
-                .stream()
-                .map(AnnotationInstance::target)
-                .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
-                .map(AnnotationTarget::asClass)
-                .filter(classInfo -> !Modifier.isInterface(classInfo.flags()) ||
-                        index.getAllKnownImplementors(classInfo.name()).stream()
-                                .anyMatch(info -> !Modifier.isAbstract(info.flags())))
-                .distinct() // CompositeIndex instances may return duplicates
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Returns all annotations configured for a single parameter of a method.
      * 
      * @param method MethodInfo
@@ -446,41 +422,27 @@ public class JandexUtil {
 
     /**
      * Go through the method parameters looking for one that is not annotated with a jax-rs
-     * annotation. That will be the one that is the request body.
+     * annotation.That will be the one that is the request body.
      * 
      * @param method MethodInfo
      * @param extensions available extensions
+     * @param annotationScanner the current scanner
      * @return Type
      */
-    public static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions) {
+    public static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions,
+            AnnotationScanner annotationScanner) {
         List<Type> methodParams = method.parameters();
         if (methodParams.isEmpty()) {
             return null;
         }
         for (short i = 0; i < methodParams.size(); i++) {
             List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
-            if (parameterAnnotations.isEmpty() || !containsJaxRsAnnotations(parameterAnnotations, extensions)) {
+            if (parameterAnnotations.isEmpty()
+                    || !annotationScanner.containsScannerAnnotations(parameterAnnotations, extensions)) {
                 return methodParams.get(i);
             }
         }
         return null;
-    }
-
-    private static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances,
-            List<AnnotationScannerExtension> extensions) {
-        for (AnnotationInstance instance : instances) {
-            if (JaxRsParameter.isParameter(instance.name())) {
-                return true;
-            }
-            if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
-                return true;
-            }
-            for (AnnotationScannerExtension extension : extensions) {
-                if (extension.isJaxRsAnnotationExtension(instance))
-                    return true;
-            }
-        }
-        return false;
     }
 
     /**

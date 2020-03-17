@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.io;
 import java.io.IOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +18,6 @@ import io.smallrye.openapi.runtime.io.definition.DefinitionWriter;
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiSerializer {
-    private static final Logger LOG = Logger.getLogger(OpenApiSerializer.class);
 
     private OpenApiSerializer() {
     }

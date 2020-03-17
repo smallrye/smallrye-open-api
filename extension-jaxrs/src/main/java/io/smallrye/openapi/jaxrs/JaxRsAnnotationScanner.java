@@ -1,5 +1,6 @@
-package io.smallrye.openapi.runtime.scanner.spi;
+package io.smallrye.openapi.jaxrs;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,14 +42,14 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.JaxRsConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.api.constants.RestEasyConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
@@ -61,7 +62,7 @@ import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentContentTypes;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.callback.CallbackReader;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -77,8 +78,9 @@ import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.io.tag.TagConstant;
 import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.ParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.PathMaker;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -92,7 +94,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class JaxRsAnnotationScanner implements AnnotationScanner {
     private static final Logger LOG = Logger.getLogger(JaxRsAnnotationScanner.class);
-
+    private static final String JAXRS_PACKAGE = "javax.ws.rs";
     private String currentAppPath = "";
 
     private JavaSecurityHelper javaSecurityHelper;
@@ -100,6 +102,32 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
     @Override
     public String getName() {
         return "JAX-RS";
+    }
+
+    @Override
+    public boolean shouldIntrospectClassToSchema(ClassType classType) {
+        if (classType.name().equals(JaxRsConstants.RESPONSE)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+            List<AnnotationScannerExtension> extensions) {
+        for (AnnotationInstance instance : instances) {
+            if (ParameterProcessor.JaxRsParameter.isParameter(instance.name())) {
+                return true;
+            }
+            if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
+                return true;
+            }
+            for (AnnotationScannerExtension extension : extensions) {
+                if (extension.isScannerAnnotationExtension(instance))
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -116,14 +144,14 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
 
         // this can be a useful extension point to set/override the application path
         for (AnnotationScannerExtension extension : context.getExtensions()) {
-            extension.processJaxRsApplications(this, applications);
+            extension.processScannerApplications(this, applications);
         }
 
         // apply java security
         this.javaSecurityHelper = new JavaSecurityHelper(openApi);
 
         // Now find all jax-rs endpoints
-        Collection<ClassInfo> resourceClasses = JandexUtil.getJaxRsResourceClasses(context.getIndex());
+        Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context.getIndex());
         for (ClassInfo resourceClass : resourceClasses) {
             processResourceClass(context, openApi, resourceClass, null);
         }
@@ -391,7 +419,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // Figure out the current @Produces and @Consumes (if any)
         String[] currentConsumes = getMediaTypes(method, JaxRsConstants.CONSUMES);
         String[] currentProduces = getMediaTypes(method, JaxRsConstants.PRODUCES);
-        CurrentContentTypes.register(currentConsumes, currentProduces);
+        CurrentScannerInfo.register(this, currentConsumes, currentProduces);
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -569,7 +597,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 requestBodyType = JandexUtil.getMethodParameterType(method,
                         annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-                requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, context.getExtensions());
+                requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, context.getExtensions(), this);
             }
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
@@ -578,7 +606,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                     Schema schema = SchemaFactory.typeToSchema(context.getIndex(), requestBodyType, context.getExtensions());
 
                     if (schema != null) {
-                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentContentTypes.getCurrentConsumes());
+                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
                     }
                 }
 
@@ -591,15 +619,15 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         // If the request body is null, figure it out from the parameters.  Only if the
         // method declares that it @Consumes data
         if ((requestBody == null || (requestBody.getContent() == null && requestBody.getRef() == null))
-                && CurrentContentTypes.getCurrentConsumes() != null) {
+                && CurrentScannerInfo.getCurrentConsumes() != null) {
             if (params.getFormBodySchema() != null) {
                 if (requestBody == null) {
                     requestBody = new RequestBodyImpl();
                 }
                 Schema schema = params.getFormBodySchema();
-                ModelUtil.setRequestBodySchema(requestBody, schema, CurrentContentTypes.getCurrentConsumes());
+                ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
             } else {
-                Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, context.getExtensions());
+                Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, context.getExtensions(), this);
 
                 if (requestBodyType != null) {
                     Schema schema = null;
@@ -616,7 +644,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                     }
 
                     if (schema != null) {
-                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentContentTypes.getCurrentConsumes());
+                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
                     }
 
                     if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
@@ -795,7 +823,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 }
 
                 ContentImpl content = new ContentImpl();
-                String[] produces = CurrentContentTypes.getCurrentProduces();
+                String[] produces = CurrentScannerInfo.getCurrentProduces();
 
                 if (produces == null || produces.length == 0) {
                     produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
@@ -978,6 +1006,26 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             String name = ExtensionReader.getExtensionName(annotation);
             operation.addExtension(name, ExtensionReader.readExtensionValue(context, name, annotation));
         }
+    }
+
+    /**
+     * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
+     * all Class-level @Path annotations.
+     * 
+     * @param index IndexView
+     * @return Collection of ClassInfo's
+     */
+    private Collection<ClassInfo> getJaxRsResourceClasses(IndexView index) {
+        return index.getAnnotations(JaxRsConstants.PATH)
+                .stream()
+                .map(AnnotationInstance::target)
+                .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
+                .map(AnnotationTarget::asClass)
+                .filter(classInfo -> !Modifier.isInterface(classInfo.flags()) ||
+                        index.getAllKnownImplementors(classInfo.name()).stream()
+                                .anyMatch(info -> !Modifier.isAbstract(info.flags())))
+                .distinct() // CompositeIndex instances may return duplicates
+                .collect(Collectors.toList());
     }
 
 }

@@ -1,4 +1,4 @@
-package io.smallrye.openapi.api.constants;
+package io.smallrye.openapi.jaxrs;
 
 import java.util.Arrays;
 import java.util.Collections;

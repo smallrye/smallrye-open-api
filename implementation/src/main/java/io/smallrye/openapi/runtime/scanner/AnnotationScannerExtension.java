@@ -6,13 +6,12 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 
 /**
- * Extension point for supporting extensions to JAX-RS. Implement this directly or extend
- * {@link DefaultAnnotationScannerExtension}.
- *
- * @see DefaultAnnotationScannerExtension
+ * Extension point for supporting extensions to OpenAPI Scanners.
+ * Implement this directly
  */
 public interface AnnotationScannerExtension {
 
@@ -30,22 +29,23 @@ public interface AnnotationScannerExtension {
     }
 
     /**
-     * Gives a chance to extensions to process the set of jax-rs application classes.
+     * Gives a chance to extensions to process the set of scanner application classes.
      * 
      * @param scanner the scanner used for application scanning
      * @param applications the set of jax-rs application classes
      */
-    default void processJaxRsApplications(AnnotationScanner scanner, Collection<ClassInfo> applications) {
+    default void processScannerApplications(AnnotationScanner scanner, Collection<ClassInfo> applications) {
     }
 
     /**
-     * Returns true if the given annotation is a jax-rs annotation extension, such as would be in the javax.ws.rs
-     * package.
+     * Returns true if the given annotation is a scanner annotation extension,
+     * such as would be in the scanner's package.
+     * 
      * 
      * @param instance the annotation to check
      * @return true if the given annotation is a jax-rs annotation extension
      */
-    default boolean isJaxRsAnnotationExtension(AnnotationInstance instance) {
+    default boolean isScannerAnnotationExtension(AnnotationInstance instance) {
         return false;
     }
 
@@ -63,6 +63,6 @@ public interface AnnotationScannerExtension {
      * @return the extension
      */
     default Object parseExtension(String key, String value) {
-        return io.smallrye.openapi.runtime.io.JsonUtil.parseValue(value);
+        return JsonUtil.parseValue(value);
     }
 }

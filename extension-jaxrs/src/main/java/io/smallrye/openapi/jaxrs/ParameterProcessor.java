@@ -1,10 +1,6 @@
-package io.smallrye.openapi.runtime.scanner;
+package io.smallrye.openapi.jaxrs;
 
 import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
-import static io.smallrye.openapi.api.constants.JaxRsConstants.DEFAULT_VALUE;
-import static io.smallrye.openapi.api.constants.JaxRsConstants.HTTP_METHODS;
-import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH;
-import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH_SEGMENT;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
@@ -54,8 +50,6 @@ import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
-import io.smallrye.openapi.api.constants.JaxRsConstants;
-import io.smallrye.openapi.api.constants.RestEasyConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
@@ -64,6 +58,7 @@ import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
+import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -952,7 +947,7 @@ public class ParameterProcessor {
 
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 } else if (jaxRsParam.location == In.PATH && targetType != null
-                        && PATH_SEGMENT.equals(targetType.name())) {
+                        && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
                     String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
                     if (!matrixParams.containsKey(pathSegment)) {
@@ -1080,7 +1075,7 @@ public class ParameterProcessor {
      * @return the default value
      */
     static Object getDefaultValue(AnnotationTarget target) {
-        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, DEFAULT_VALUE);
+        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, JaxRsConstants.DEFAULT_VALUE);
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
@@ -1216,10 +1211,10 @@ public class ParameterProcessor {
 
         switch (target.kind()) {
             case CLASS:
-                path = target.asClass().classAnnotation(PATH);
+                path = target.asClass().classAnnotation(JaxRsConstants.PATH);
                 break;
             case METHOD:
-                path = target.asMethod().annotation(PATH);
+                path = target.asMethod().annotation(JaxRsConstants.PATH);
                 break;
             default:
                 break;
@@ -1487,10 +1482,10 @@ public class ParameterProcessor {
      */
     boolean isSubResourceLocator(MethodInfo method) {
         return method.returnType().kind() == Type.Kind.CLASS &&
-                method.hasAnnotation(PATH) &&
+                method.hasAnnotation(JaxRsConstants.PATH) &&
                 method.annotations().stream()
                         .map(AnnotationInstance::name)
-                        .noneMatch(HTTP_METHODS::contains);
+                        .noneMatch(JaxRsConstants.HTTP_METHODS::contains);
     }
 
     /**
@@ -1504,7 +1499,7 @@ public class ParameterProcessor {
         return method.annotations()
                 .stream()
                 .map(AnnotationInstance::name)
-                .anyMatch(HTTP_METHODS::contains);
+                .anyMatch(JaxRsConstants.HTTP_METHODS::contains);
     }
 
     /**

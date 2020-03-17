@@ -1,4 +1,4 @@
-package io.smallrye.openapi.runtime.scanner.spi;
+package io.smallrye.openapi.jaxrs;
 
 import java.util.ArrayList;
 import java.util.Arrays;

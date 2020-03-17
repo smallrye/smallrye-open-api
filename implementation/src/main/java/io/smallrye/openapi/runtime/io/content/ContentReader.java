@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
-import io.smallrye.openapi.runtime.io.CurrentContentTypes;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.mediatype.MediaTypeReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -56,11 +56,11 @@ public class ContentReader {
                 // If the content type is not provided in the @Content annotation, then
                 // we assume it applies to all the jax-rs method's @Consumes or @Produces
                 String[] mimeTypes = {};
-                if (direction == ContentDirection.Input && CurrentContentTypes.getCurrentConsumes() != null) {
-                    mimeTypes = CurrentContentTypes.getCurrentConsumes();
+                if (direction == ContentDirection.Input && CurrentScannerInfo.getCurrentConsumes() != null) {
+                    mimeTypes = CurrentScannerInfo.getCurrentConsumes();
                 }
-                if (direction == ContentDirection.Output && CurrentContentTypes.getCurrentProduces() != null) {
-                    mimeTypes = CurrentContentTypes.getCurrentProduces();
+                if (direction == ContentDirection.Output && CurrentScannerInfo.getCurrentProduces() != null) {
+                    mimeTypes = CurrentScannerInfo.getCurrentProduces();
                 }
                 if (direction == ContentDirection.Parameter) {
                     mimeTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();

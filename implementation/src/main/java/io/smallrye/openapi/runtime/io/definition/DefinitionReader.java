@@ -41,7 +41,7 @@ public class DefinitionReader {
      * @param annotationInstance {@literal @}OpenAPIDefinition annotation
      */
     public static void processDefinition(final AnnotationScannerContext context,
-            final OpenAPI openApi, // TODO: make this a return ?
+            final OpenAPI openApi,
             final AnnotationInstance annotationInstance) {
         LOG.debug("Processing an @OpenAPIDefinition annotation.");
 
@@ -56,7 +56,6 @@ public class DefinitionReader {
                         .readExternalDocs(annotationInstance.value(DefinitionConstant.PROP_EXTERNAL_DOCS)));
         openApi.setComponents(ComponentsReader.readComponents(context,
                 annotationInstance.value(DefinitionConstant.PROP_COMPONENTS)));
-        // Where is Paths and Extensions ?
     }
 
     /**

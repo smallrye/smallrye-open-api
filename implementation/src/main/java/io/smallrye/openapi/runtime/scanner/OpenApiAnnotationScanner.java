@@ -24,8 +24,9 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
 
 /**
- * Scans a deployment (using the archive and jandex annotation index) for JAX-RS and
- * OpenAPI annotations. These annotations, if found, are used to generate a valid
+ * Scans a deployment (using the archive and jandex annotation index) for OpenAPI annotations.
+ * Also delegate to all other scanners.
+ * These annotations, if found, are used to generate a valid
  * OpenAPI model. For reference, see:
  *
  * https://github.com/eclipse/microprofile-open-api/blob/master/spec/src/main/asciidoc/microprofile-openapi-spec.adoc#annotations
@@ -96,11 +97,11 @@ public class OpenApiAnnotationScanner {
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
-        OpenAPI oai = new OpenAPIImpl();
-        oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        OpenAPI openApi = new OpenAPIImpl();
+        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Creating a new instance of a registry which will be set on the thread context.
-        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext.getConfig(), oai,
+        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext.getConfig(), openApi,
                 annotationScannerContext.getIndex());
 
         // Register custom schemas if available
@@ -108,9 +109,9 @@ public class OpenApiAnnotationScanner {
 
         // Find all OpenAPIDefinition annotations at the package level
         LOG.debug("Scanning deployment for OpenAPI Annotations.");
-        processPackageOpenAPIDefinitions(annotationScannerContext, oai);
+        processPackageOpenAPIDefinitions(annotationScannerContext, openApi);
 
-        return oai;
+        return openApi;
     }
 
     /**
