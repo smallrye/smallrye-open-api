@@ -28,7 +28,7 @@ public class ServerVariableWriter {
     }
 
     /**
-     * Writes the {@link ServerVariables} model to the JSON tree.
+     * Writes the {@link ServerVariable} model to the JSON tree.
      * 
      * @param serverNode the json node
      * @param variables map of ServerVariable models

@@ -34,7 +34,7 @@ public class ServerVariableReader {
     }
 
     /**
-     * Reads an array of ServerVariable annotations, returning a new {@link ServerVariables} model. The
+     * Reads an array of ServerVariable annotations, returning a new {@link ServerVariable} model. The
      * annotation value is an array of ServerVariable annotations.
      * 
      * @param annotationValue an arrays of {@literal @}ServerVariable annotations
@@ -59,7 +59,7 @@ public class ServerVariableReader {
     /**
      * Reads the {@link ServerVariables} OpenAPI node.
      * 
-     * @param node
+     * @param node the json node
      * @return a Map of Variable name and ServerVariable model
      */
     public static Map<String, ServerVariable> readServerVariables(final JsonNode node) {

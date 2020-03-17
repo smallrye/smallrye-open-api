@@ -188,11 +188,12 @@ public final class JsonUtil {
     }
 
     /**
-     * Reads the node as a Java object. This is typically expected to be a literal of
+     * Reads the node as a Java object.This is typically expected to be a literal of
      * some sort, as in the case of default values and examples. The node may be anything
      * from a string to a javascript object.
      * 
-     * @param node
+     * @param node the json node
+     * @return a java object
      */
     public static Object readObject(JsonNode node) {
         if (node == null) {
@@ -252,7 +253,8 @@ public final class JsonUtil {
      * - boolean
      * - string
      *
-     * @param value
+     * @param value the value to parse
+     * @return Extension
      */
     public static Object parseValue(String value) {
         if (value == null) {

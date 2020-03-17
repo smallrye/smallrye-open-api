@@ -60,6 +60,7 @@ public interface AnnotationScannerExtension {
      *
      * @param key the name of the extension property
      * @param value the string value of the extension
+     * @return the extension
      */
     default Object parseExtension(String key, String value) {
         return io.smallrye.openapi.runtime.io.JsonUtil.parseValue(value);

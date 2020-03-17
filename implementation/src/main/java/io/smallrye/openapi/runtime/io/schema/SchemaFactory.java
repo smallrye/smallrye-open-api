@@ -50,8 +50,8 @@ public class SchemaFactory {
     /**
      * Reads a Schema annotation into a model.
      *
-     * @param index
-     * @param value
+     * @param index the index
+     * @param value the annotation value
      * @return Schema model
      */
     public static Schema readSchema(IndexView index, AnnotationValue value) {
@@ -64,8 +64,8 @@ public class SchemaFactory {
     /**
      * Reads a Schema annotation into a model.
      *
-     * @param index
-     * @param annotation
+     * @param index the index
+     * @param annotation the annotation instance
      * @return Schema model
      */
     public static Schema readSchema(IndexView index, AnnotationInstance annotation) {

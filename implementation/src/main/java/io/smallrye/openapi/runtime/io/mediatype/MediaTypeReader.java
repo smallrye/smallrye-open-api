@@ -57,8 +57,8 @@ public class MediaTypeReader {
     /**
      * Reads a {@link MediaType} OpenAPI node.
      * 
-     * @param node
-     * @return
+     * @param node the json node
+     * @return MediaType model
      */
     public static MediaType readMediaType(final JsonNode node) {
         if (node == null || !node.isObject()) {

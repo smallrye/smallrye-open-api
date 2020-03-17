@@ -6,9 +6,6 @@ import static io.smallrye.openapi.api.constants.JaxRsConstants.HTTP_METHODS;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH;
 import static io.smallrye.openapi.api.constants.JaxRsConstants.PATH_SEGMENT;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
-import static io.smallrye.openapi.runtime.io.parameter.ParameterConstant.DOTNAME_PARAMETER;
-import static io.smallrye.openapi.runtime.io.parameter.ParameterConstant.DOTNAME_PARAMETERS;
-import static io.smallrye.openapi.runtime.io.parameter.ParameterConstant.PROP_VALUE;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
@@ -363,12 +360,13 @@ public class ParameterProcessor {
     }
 
     /**
-     * Process parameter annotations for the given class and method. This method operates
+     * Process parameter annotations for the given class and method.This method operates
      * in two phases. First, class-level parameters are processed and saved in the
      * {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters
      * are only applicable to the method-level in this component.
      *
      * @param index index of classes to be used for further introspection, if necessary
+     * @param resourceClass the class info
      * @param resourceMethod the JAX-RS resource method, annotated with one of the
      *        JAX-RS HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a

@@ -485,11 +485,12 @@ public class JandexUtil {
 
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
-     * method. Returns null if not found.
+     * method.Returns null if not found.
      * 
-     * @param method
-     * @param parameterIndex
-     * @param annotationName
+     * @param method the method
+     * @param parameterIndex the parameter index
+     * @param annotationName name of annotation we are looking for
+     * @return the Annotation instance
      */
     public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {

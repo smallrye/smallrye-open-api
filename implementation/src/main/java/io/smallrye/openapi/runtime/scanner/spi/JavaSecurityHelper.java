@@ -78,6 +78,7 @@ public class JavaSecurityHelper {
      * <li>If none of a <code>PermitAll</code>, a <code>DenyAll</code>, and a
      * <code>RolesAllowed</code> annotation is present at the method-level, the
      * roles allowed will be set to the resource's <code>RolesAllowed</code>.
+     * </ul>
      * 
      * @param method the current JAX-RS method
      * @param operation the OpenAPI Operation

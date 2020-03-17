@@ -14,9 +14,9 @@ public class ObjectWriter {
     /**
      * Writes an array of strings to the parent node.
      * 
-     * @param parent
-     * @param models
-     * @param propertyName
+     * @param parent the parent json node
+     * @param models list of Strings
+     * @param propertyName the name of the node
      */
     public static void writeStringArray(ObjectNode parent, List<String> models, String propertyName) {
         if (models == null) {
@@ -31,9 +31,9 @@ public class ObjectWriter {
     /**
      * Writes an array of objects to the parent node.
      * 
-     * @param parent
-     * @param models
-     * @param propertyName
+     * @param parent the parent json node
+     * @param models list of objects
+     * @param propertyName the name of the node
      */
     public static void writeObjectArray(ObjectNode parent, List<Object> models, String propertyName) {
         if (models == null) {
@@ -48,9 +48,9 @@ public class ObjectWriter {
     /**
      * Writes a map of strings to the parent node.
      * 
-     * @param parent
-     * @param models
-     * @param propertyName
+     * @param parent the parent json node
+     * @param models map of strings
+     * @param propertyName name of the node
      */
     public static void writeStringMap(ObjectNode parent, Map<String, String> models, String propertyName) {
         if (models == null) {

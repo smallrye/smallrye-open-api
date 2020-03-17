@@ -30,8 +30,8 @@ public class FilteredIndexView implements IndexView {
     /**
      * Constructor.
      * 
-     * @param delegate
-     * @param config
+     * @param delegate the original (to be wrapped) index
+     * @param config the config
      */
     public FilteredIndexView(IndexView delegate, OpenApiConfig config) {
         this.delegate = delegate;

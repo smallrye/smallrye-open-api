@@ -138,7 +138,7 @@ public class OAuthReader {
     }
 
     /**
-     * Reads a {@link Scopes} OpenAPI node.
+     * Reads a map of OAuth scopes.
      * 
      * @param node json map
      * @return Map of name and description of the scope
