@@ -39,9 +39,11 @@ public class PathsWriter {
             return;
         }
         ObjectNode pathsNode = parent.putObject(DefinitionConstant.PROP_PATHS);
-        Set<Map.Entry<String, PathItem>> entrySet = paths.getPathItems().entrySet();
-        for (Map.Entry<String, PathItem> entry : entrySet) {
-            writePathItem(pathsNode, entry.getValue(), entry.getKey());
+        if (paths.getPathItems() != null) {
+            Set<Map.Entry<String, PathItem>> entrySet = paths.getPathItems().entrySet();
+            for (Map.Entry<String, PathItem> entry : entrySet) {
+                writePathItem(pathsNode, entry.getValue(), entry.getKey());
+            }
         }
         ExtensionWriter.writeExtensions(pathsNode, paths);
     }

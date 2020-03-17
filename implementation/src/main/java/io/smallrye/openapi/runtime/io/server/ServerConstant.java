@@ -16,6 +16,8 @@ public class ServerConstant {
     public static final DotName DOTNAME_SERVER = DotName.createSimple(Server.class.getName());
     public static final DotName DOTNAME_SERVERS = DotName.createSimple(Servers.class.getName());
 
+    public static final String PROP_SERVERS = "servers";
+    public static final String PROP_SERVER = "server";
     public static final String PROP_VARIABLES = "variables";
     public static final String PROP_DESCRIPTION = "description";
     public static final String PROP_URL = "url";

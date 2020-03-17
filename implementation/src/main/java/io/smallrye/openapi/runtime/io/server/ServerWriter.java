@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.servervariable.ServerVariableWriter;
 
@@ -35,20 +34,28 @@ public class ServerWriter {
         if (servers == null) {
             return;
         }
-        ArrayNode array = node.putArray(DefinitionConstant.PROP_SERVERS);
+        ArrayNode array = node.putArray(ServerConstant.PROP_SERVERS);
         for (Server server : servers) {
             ObjectNode serverNode = array.addObject();
-            writeServer(serverNode, server);
+            writeServerToNode(serverNode, server);
         }
     }
 
     /**
      * Writes a {@link Server} model to the given JSON node.
      * 
-     * @param node ObjectNode
+     * @param parent ObjectNode
      * @param model Server
      */
-    public static void writeServer(ObjectNode node, Server model) {
+    public static void writeServer(ObjectNode parent, Server model) {
+        if (model == null) {
+            return;
+        }
+        ObjectNode node = parent.putObject(ServerConstant.PROP_SERVER);
+        writeServerToNode(node, model);
+    }
+
+    private static void writeServerToNode(ObjectNode node, Server model) {
         JsonUtil.stringProperty(node, ServerConstant.PROP_URL, model.getUrl());
         JsonUtil.stringProperty(node, ServerConstant.PROP_DESCRIPTION, model.getDescription());
         ServerVariableWriter.writeServerVariables(node, model.getVariables());

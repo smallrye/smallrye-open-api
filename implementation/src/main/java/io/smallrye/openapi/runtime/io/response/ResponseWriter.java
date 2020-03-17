@@ -55,9 +55,11 @@ public class ResponseWriter {
         }
         ObjectNode node = parent.putObject(ResponseConstant.PROP_RESPONSES);
         writeAPIResponse(node, model.getDefaultValue(), ResponseConstant.PROP_DEFAULT);
-        Set<Map.Entry<String, APIResponse>> entrySet = model.getAPIResponses().entrySet();
-        for (Map.Entry<String, APIResponse> entry : entrySet) {
-            writeAPIResponse(node, entry.getValue(), entry.getKey());
+        if (model.getAPIResponses() != null) {
+            Set<Map.Entry<String, APIResponse>> entrySet = model.getAPIResponses().entrySet();
+            for (Map.Entry<String, APIResponse> entry : entrySet) {
+                writeAPIResponse(node, entry.getValue(), entry.getKey());
+            }
         }
     }
 

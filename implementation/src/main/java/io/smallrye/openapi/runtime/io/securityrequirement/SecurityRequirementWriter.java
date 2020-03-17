@@ -8,6 +8,7 @@ import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.smallrye.openapi.runtime.io.ObjectWriter;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 
 /**
@@ -24,29 +25,36 @@ public class SecurityRequirementWriter {
     }
 
     /**
-     * Writes the {@link SecurityRequirement} model array to the JSON tree.
+     * Writes a list of {@link SecurityRequirement} to the JSON tree.
      * 
      * @param parent
-     * @param security
+     * @param models
      */
-    public static void writeSecurityRequirements(ObjectNode parent, List<SecurityRequirement> security) {
-        if (security == null) {
+    public static void writeSecurityRequirements(ObjectNode parent, List<SecurityRequirement> models) {
+        if (models == null) {
             return;
         }
-        ArrayNode array = parent.putArray(DefinitionConstant.PROP_SECURITY);
-        for (SecurityRequirement securityRequirement : security) {
-            ObjectNode srNode = array.addObject();
-            for (Map.Entry<String, List<String>> entry : securityRequirement.getSchemes().entrySet()) {
-                String fieldName = entry.getKey();
-                List<String> values = entry.getValue();
-                ArrayNode valuesNode = srNode.putArray(fieldName);
-                if (values != null) {
-                    for (String value : values) {
-                        valuesNode.add(value);
-                    }
-                }
-            }
+        ArrayNode node = parent.putArray(DefinitionConstant.PROP_SECURITY);
+        for (SecurityRequirement securityRequirement : models) {
+            ObjectNode secNode = node.addObject();
+            writeSecurityRequirement(secNode, securityRequirement);
         }
     }
 
+    /**
+     * Writes a {@link SecurityRequirement} to the given JS node.
+     * 
+     * @param node
+     * @param model
+     */
+    private static void writeSecurityRequirement(ObjectNode node, SecurityRequirement model) {
+        if (model == null) {
+            return;
+        }
+        if (model.getSchemes() != null) {
+            for (Map.Entry<String, List<String>> entry : model.getSchemes().entrySet()) {
+                ObjectWriter.writeStringArray(node, entry.getValue(), entry.getKey());
+            }
+        }
+    }
 }

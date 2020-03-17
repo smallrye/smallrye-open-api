@@ -34,9 +34,11 @@ public class ContentWriter {
             return;
         }
         ObjectNode node = parent.putObject(ContentConstant.PROP_CONTENT);
-        Set<Map.Entry<String, MediaType>> entrySet = model.getMediaTypes().entrySet();
-        for (Map.Entry<String, MediaType> entry : entrySet) {
-            MediaTypeWriter.writeMediaType(node, entry.getValue(), entry.getKey());
+        if (model.getMediaTypes() != null) {
+            Set<Map.Entry<String, MediaType>> entrySet = model.getMediaTypes().entrySet();
+            for (Map.Entry<String, MediaType> entry : entrySet) {
+                MediaTypeWriter.writeMediaType(node, entry.getValue(), entry.getKey());
+            }
         }
     }
 

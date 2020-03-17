@@ -56,9 +56,11 @@ public class CallbackWriter {
         ObjectNode node = parent.putObject(name);
         JsonUtil.stringProperty(node, CallbackConstant.PROP_$REF, model.getRef());
 
-        Set<Map.Entry<String, PathItem>> entrySet = model.getPathItems().entrySet();
-        for (Map.Entry<String, PathItem> entry : entrySet) {
-            PathsWriter.writePathItem(node, entry.getValue(), entry.getKey());
+        if (model.getPathItems() != null) {
+            Set<Map.Entry<String, PathItem>> entrySet = model.getPathItems().entrySet();
+            for (Map.Entry<String, PathItem> entry : entrySet) {
+                PathsWriter.writePathItem(node, entry.getValue(), entry.getKey());
+            }
         }
 
         ExtensionWriter.writeExtensions(node, model);
