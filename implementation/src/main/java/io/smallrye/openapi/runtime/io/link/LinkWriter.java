@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.server.ServerWriter;
 
@@ -35,7 +36,7 @@ public class LinkWriter {
         if (links == null) {
             return;
         }
-        ObjectNode linksNode = parent.putObject(LinkConstant.PROP_LINKS);
+        ObjectNode linksNode = parent.putObject(ComponentsConstant.PROP_LINKS);
         for (String linkName : links.keySet()) {
             writeLink(linksNode, links.get(linkName), linkName);
         }

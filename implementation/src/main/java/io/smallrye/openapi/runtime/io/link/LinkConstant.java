@@ -12,15 +12,14 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  */
 public class LinkConstant implements Referenceable {
 
-    public static final String PROP_OPERATION_ID = "operationId";
-    public static final String PROP_PARAMETERS = "parameters";
-    public static final String PROP_NAME = "name";
-    public static final String PROP_OPERATION_REF = "operationRef";
-    public static final String PROP_LINKS = "links";
-    public static final String PROP_SERVER = "server";
-    public static final String PROP_EXPRESSION = "expression";
-    public static final String PROP_DESCRIPTION = "description";
-    public static final String PROP_REQUEST_BODY = "requestBody";
+    static final String PROP_OPERATION_ID = "operationId";
+    static final String PROP_PARAMETERS = "parameters";
+    static final String PROP_NAME = "name";
+    static final String PROP_OPERATION_REF = "operationRef";
+    static final String PROP_SERVER = "server";
+    static final String PROP_EXPRESSION = "expression";
+    static final String PROP_DESCRIPTION = "description";
+    static final String PROP_REQUEST_BODY = "requestBody";
 
     private LinkConstant() {
     }

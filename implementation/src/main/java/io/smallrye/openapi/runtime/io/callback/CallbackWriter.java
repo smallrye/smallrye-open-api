@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.paths.PathsWriter;
 
@@ -35,7 +36,7 @@ public class CallbackWriter {
         if (callbacks == null) {
             return;
         }
-        ObjectNode callbacksNode = parent.putObject(CallbackConstant.PROP_CALLBACKS);
+        ObjectNode callbacksNode = parent.putObject(ComponentsConstant.PROP_CALLBACKS);
         Set<Map.Entry<String, Callback>> entrySet = callbacks.entrySet();
         for (Map.Entry<String, Callback> entry : entrySet) {
             writeCallback(callbacksNode, entry.getValue(), entry.getKey());

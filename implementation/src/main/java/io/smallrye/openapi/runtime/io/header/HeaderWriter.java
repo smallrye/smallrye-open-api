@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.example.ExampleWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
@@ -36,7 +37,7 @@ public class HeaderWriter {
         if (headers == null) {
             return;
         }
-        ObjectNode headersNode = parent.putObject(HeaderConstant.PROP_HEADERS);
+        ObjectNode headersNode = parent.putObject(ComponentsConstant.PROP_HEADERS);
         for (String headerName : headers.keySet()) {
             writeHeader(headersNode, headers.get(headerName), headerName);
         }

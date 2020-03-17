@@ -12,10 +12,10 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.runtime.io.encoding.EncodingReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.SchemaFactory;
 
 /**
  * Reading the Media type object annotation and json

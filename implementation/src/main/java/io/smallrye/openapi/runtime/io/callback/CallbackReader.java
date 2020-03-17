@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.paths.PathsReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -119,7 +118,7 @@ public class CallbackReader {
         callback.setRef(JsonUtil.stringProperty(node, CallbackConstant.PROP_$REF));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (fieldName.startsWith(ExtensionConstant.EXTENSION_PROPERTY_PREFIX)
+            if (ExtensionReader.isExtensionField(fieldName)
                     || fieldName.equals(CallbackConstant.PROP_$REF)) {
                 continue;
             }

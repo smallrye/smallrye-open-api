@@ -1,4 +1,4 @@
-package io.smallrye.openapi.runtime.util;
+package io.smallrye.openapi.runtime.io.schema;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -30,10 +30,12 @@ import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
-import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}

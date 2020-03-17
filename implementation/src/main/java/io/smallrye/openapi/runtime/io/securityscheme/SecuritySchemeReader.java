@@ -22,7 +22,6 @@ import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
 import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -255,7 +254,7 @@ public class SecuritySchemeReader {
         Map<String, String> scopes = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (fieldName.startsWith(ExtensionConstant.EXTENSION_PROPERTY_PREFIX)) {
+            if (ExtensionReader.isExtensionField(fieldName)) {
                 continue;
             }
             String value = JsonUtil.stringProperty(node, fieldName);

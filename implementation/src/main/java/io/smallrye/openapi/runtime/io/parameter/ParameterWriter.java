@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.example.ExampleWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
@@ -38,7 +39,7 @@ public class ParameterWriter {
         if (parameters == null) {
             return;
         }
-        ObjectNode parametersNode = parent.putObject(ParameterConstant.PROP_PARAMETERS);
+        ObjectNode parametersNode = parent.putObject(ComponentsConstant.PROP_PARAMETERS);
         for (String parameterName : parameters.keySet()) {
             writeParameter(parametersNode, parameters.get(parameterName), parameterName);
         }
@@ -69,7 +70,7 @@ public class ParameterWriter {
         if (models == null) {
             return;
         }
-        ArrayNode node = parent.putArray(ParameterConstant.PROP_PARAMETERS);
+        ArrayNode node = parent.putArray(ComponentsConstant.PROP_PARAMETERS);
         for (Parameter model : models) {
             ObjectNode paramNode = node.addObject();
             writeParameter(paramNode, model);

@@ -18,8 +18,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.junit.Test;
 
-import io.smallrye.openapi.runtime.io.encoding.EncodingConstant;
-import io.smallrye.openapi.runtime.io.response.ResponseConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 
@@ -31,11 +29,11 @@ public class JandexUtilTests {
         ClassInfo clazz = index.getClassByName(DotName.createSimple(Implementor2.class.getName()));
         AnnotationInstance annotation = clazz.method("getData")
                 .annotation(DotName.createSimple(APIResponse.class.getName()))
-                .value(ResponseConstant.PROP_CONTENT)
+                .value("content")
                 .asNestedArray()[0]
-                        .value(EncodingConstant.PROP_ENCODING)
+                        .value("encoding")
                         .asNestedArray()[0];
-        Encoding.Style style = JandexUtil.enumValue(annotation, EncodingConstant.PROP_STYLE, Encoding.Style.class);
+        Encoding.Style style = JandexUtil.enumValue(annotation, "style", Encoding.Style.class);
         assertEquals(Encoding.Style.PIPE_DELIMITED, style);
     }
 

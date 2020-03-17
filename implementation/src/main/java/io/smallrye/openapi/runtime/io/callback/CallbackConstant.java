@@ -16,13 +16,12 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  */
 public class CallbackConstant implements Referenceable {
 
-    public static final DotName DOTNAME_CALLBACKS = DotName.createSimple(Callbacks.class.getName());
-    public static final DotName DOTNAME_CALLBACK = DotName.createSimple(Callback.class.getName());
+    static final DotName DOTNAME_CALLBACKS = DotName.createSimple(Callbacks.class.getName());
+    static final DotName DOTNAME_CALLBACK = DotName.createSimple(Callback.class.getName());
 
-    public static final String PROP_CALLBACKS = "callbacks";
-    public static final String PROP_NAME = "name";
-    public static final String PROP_OPERATIONS = "operations";
-    public static final String PROP_CALLBACK_URL_EXPRESSION = "callbackUrlExpression";
+    static final String PROP_NAME = "name";
+    static final String PROP_OPERATIONS = "operations";
+    static final String PROP_CALLBACK_URL_EXPRESSION = "callbackUrlExpression";
 
     private CallbackConstant() {
     }

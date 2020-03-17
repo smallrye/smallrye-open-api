@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 
 /**
@@ -33,7 +34,7 @@ public class ExampleWriter {
         if (examples == null) {
             return;
         }
-        ObjectNode examplesNode = parent.putObject(ExampleConstant.PROP_EXAMPLES);
+        ObjectNode examplesNode = parent.putObject(ComponentsConstant.PROP_EXAMPLES);
         for (String exampleName : examples.keySet()) {
             writeExample(examplesNode, examples.get(exampleName), exampleName);
         }

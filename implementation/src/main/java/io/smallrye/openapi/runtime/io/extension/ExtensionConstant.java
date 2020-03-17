@@ -14,13 +14,13 @@ import org.jboss.jandex.DotName;
  */
 public class ExtensionConstant {
 
-    public static final DotName DOTNAME_EXTENSIONS = DotName.createSimple(Extensions.class.getName());
-    public static final DotName DOTNAME_EXTENSION = DotName.createSimple(Extension.class.getName());
+    static final DotName DOTNAME_EXTENSIONS = DotName.createSimple(Extensions.class.getName());
+    static final DotName DOTNAME_EXTENSION = DotName.createSimple(Extension.class.getName());
 
-    public static final String PROP_NAME = "name";
-    public static final String PROP_VALUE = "value";
-    public static final String EXTENSION_PROPERTY_PREFIX = "x-";
-    public static final String PROP_PARSE_VALUE = "parseValue";
+    static final String PROP_NAME = "name";
+    static final String PROP_VALUE = "value";
+    static final String EXTENSION_PROPERTY_PREFIX = "x-";
+    static final String PROP_PARSE_VALUE = "parseValue";
 
     private ExtensionConstant() {
     }

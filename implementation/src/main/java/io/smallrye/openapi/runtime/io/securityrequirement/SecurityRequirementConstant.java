@@ -14,11 +14,11 @@ import org.jboss.jandex.DotName;
  */
 public class SecurityRequirementConstant {
 
-    public static final DotName DOTNAME_SECURITY_REQUIREMENT = DotName.createSimple(SecurityRequirement.class.getName());
-    public static final DotName DOTNAME_SECURITY_REQUIREMENTS = DotName.createSimple(SecurityRequirements.class.getName());
+    static final DotName DOTNAME_SECURITY_REQUIREMENT = DotName.createSimple(SecurityRequirement.class.getName());
+    static final DotName DOTNAME_SECURITY_REQUIREMENTS = DotName.createSimple(SecurityRequirements.class.getName());
 
-    public static final String PROP_NAME = "name";
-    public static final String PROP_SCOPES = "scopes";
+    static final String PROP_NAME = "name";
+    static final String PROP_SCOPES = "scopes";
 
     private SecurityRequirementConstant() {
     }

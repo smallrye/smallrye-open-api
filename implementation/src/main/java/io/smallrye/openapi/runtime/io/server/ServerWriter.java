@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.servervariable.ServerVariableWriter;
 
@@ -34,7 +35,7 @@ public class ServerWriter {
         if (servers == null) {
             return;
         }
-        ArrayNode array = node.putArray(ServerConstant.PROP_SERVERS);
+        ArrayNode array = node.putArray(DefinitionConstant.PROP_SERVERS);
         for (Server server : servers) {
             ObjectNode serverNode = array.addObject();
             writeServerToNode(serverNode, server);

@@ -16,17 +16,17 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  */
 public class ResponseConstant implements Referenceable {
 
-    public static final DotName DOTNAME_API_RESPONSE = DotName.createSimple(APIResponse.class.getName());
-    public static final DotName DOTNAME_API_RESPONSES = DotName.createSimple(APIResponses.class.getName());
-
-    public static final String PROP_NAME = "name";
-    public static final String PROP_HEADERS = "headers";
-    public static final String PROP_LINKS = "links";
-    public static final String PROP_DEFAULT = "default";
-    public static final String PROP_DESCRIPTION = "description";
     public static final String PROP_RESPONSE_CODE = "responseCode";
-    public static final String PROP_CONTENT = "content";
-    public static final String PROP_RESPONSES = "responses";
+
+    static final DotName DOTNAME_API_RESPONSE = DotName.createSimple(APIResponse.class.getName());
+    static final DotName DOTNAME_API_RESPONSES = DotName.createSimple(APIResponses.class.getName());
+
+    static final String PROP_NAME = "name";
+    static final String PROP_HEADERS = "headers";
+    static final String PROP_LINKS = "links";
+    static final String PROP_DEFAULT = "default";
+    static final String PROP_DESCRIPTION = "description";
+    static final String PROP_CONTENT = "content";
 
     private ResponseConstant() {
     }

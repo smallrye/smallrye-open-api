@@ -12,19 +12,19 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  */
 public class PathsConstant implements Referenceable {
 
-    public static final String PROP_DELETE = "delete";
-    public static final String PROP_PATCH = "patch";
-    public static final String PROP_PUT = "put";
-    public static final String PROP_GET = "get";
-    public static final String PROP_DESCRIPTION = "description";
-    public static final String PROP_POST = "post";
-    public static final String PROP_PARAMETERS = "parameters";
-    public static final String PROP_HEAD = "head";
-    public static final String PROP_OPTIONS = "options";
-    public static final String PROP_SERVERS = "servers";
-    public static final String PROP_METHOD = "method";
-    public static final String PROP_SUMMARY = "summary";
-    public static final String PROP_TRACE = "trace";
+    static final String PROP_DELETE = "delete";
+    static final String PROP_PATCH = "patch";
+    static final String PROP_PUT = "put";
+    static final String PROP_GET = "get";
+    static final String PROP_DESCRIPTION = "description";
+    static final String PROP_POST = "post";
+    static final String PROP_PARAMETERS = "parameters";
+    static final String PROP_HEAD = "head";
+    static final String PROP_OPTIONS = "options";
+    static final String PROP_SERVERS = "servers";
+    static final String PROP_METHOD = "method";
+    static final String PROP_SUMMARY = "summary";
+    static final String PROP_TRACE = "trace";
 
     private PathsConstant() {
     }

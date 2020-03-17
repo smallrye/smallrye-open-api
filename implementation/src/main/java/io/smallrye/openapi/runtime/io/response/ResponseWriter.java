@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.header.HeaderWriter;
@@ -37,7 +38,7 @@ public class ResponseWriter {
         if (responses == null) {
             return;
         }
-        ObjectNode responsesNode = parent.putObject(ResponseConstant.PROP_RESPONSES);
+        ObjectNode responsesNode = parent.putObject(ComponentsConstant.PROP_RESPONSES);
         for (String responseName : responses.keySet()) {
             writeAPIResponse(responsesNode, responses.get(responseName), responseName);
         }
@@ -53,7 +54,7 @@ public class ResponseWriter {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(ResponseConstant.PROP_RESPONSES);
+        ObjectNode node = parent.putObject(ComponentsConstant.PROP_RESPONSES);
         writeAPIResponse(node, model.getDefaultValue(), ResponseConstant.PROP_DEFAULT);
         if (model.getAPIResponses() != null) {
             Set<Map.Entry<String, APIResponse>> entrySet = model.getAPIResponses().entrySet();

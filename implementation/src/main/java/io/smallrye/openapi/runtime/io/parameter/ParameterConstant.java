@@ -18,23 +18,22 @@ public class ParameterConstant implements Referenceable {
 
     public static final DotName DOTNAME_PARAMETER = DotName.createSimple(Parameter.class.getName());
     public static final DotName DOTNAME_PARAMETERS = DotName.createSimple(Parameters.class.getName());
-
-    public static final String PROP_ALLOW_RESERVED = "allowReserved";
-    public static final String PROP_NAME = "name";
-    public static final String PROP_IN = "in";
-    public static final String PROP_EXAMPLE = "example";
-    public static final String PROP_DESCRIPTION = "description";
-    public static final String PROP_CONTENT = "content";
-    public static final String PROP_SCHEMA = "schema";
-    public static final String PROP_PARAMETERS = "parameters";
-    public static final String PROP_EXPLODE = "explode";
     public static final String PROP_VALUE = "value";
-    public static final String PROP_ALLOW_EMPTY_VALUE = "allowEmptyValue";
-    public static final String PROP_REQUIRED = "required";
-    public static final String PROP_DEPRECATED = "deprecated";
-    public static final String PROP_STYLE = "style";
-    public static final String PROP_EXAMPLES = "examples";
-    public static final String PROP_HIDDEN = "hidden";
+
+    static final String PROP_ALLOW_RESERVED = "allowReserved";
+    static final String PROP_NAME = "name";
+    static final String PROP_IN = "in";
+    static final String PROP_EXAMPLE = "example";
+    static final String PROP_DESCRIPTION = "description";
+    static final String PROP_CONTENT = "content";
+    static final String PROP_SCHEMA = "schema";
+    static final String PROP_EXPLODE = "explode";
+    static final String PROP_ALLOW_EMPTY_VALUE = "allowEmptyValue";
+    static final String PROP_REQUIRED = "required";
+    static final String PROP_DEPRECATED = "deprecated";
+    static final String PROP_STYLE = "style";
+    static final String PROP_EXAMPLES = "examples";
+    static final String PROP_HIDDEN = "hidden";
 
     private ParameterConstant() {
     }

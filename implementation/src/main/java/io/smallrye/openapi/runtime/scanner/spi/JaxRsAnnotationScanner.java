@@ -70,6 +70,7 @@ import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.io.requestbody.RequestBodyReader;
 import io.smallrye.openapi.runtime.io.response.ResponseConstant;
 import io.smallrye.openapi.runtime.io.response.ResponseReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
@@ -80,7 +81,6 @@ import io.smallrye.openapi.runtime.scanner.ParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.PathMaker;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
-import io.smallrye.openapi.runtime.util.SchemaFactory;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**

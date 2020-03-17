@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.operation.OperationReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
@@ -54,7 +53,7 @@ public class PathsReader {
         Paths paths = new PathsImpl();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (fieldName.startsWith(ExtensionConstant.EXTENSION_PROPERTY_PREFIX)) {
+            if (ExtensionReader.isExtensionField(fieldName)) {
                 continue;
             }
             paths.addPathItem(fieldName, readPathItem(node.get(fieldName)));

@@ -15,14 +15,14 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  */
 public class RequestBodyConstant implements Referenceable {
 
-    public static final DotName DOTNAME_REQUESTBODY = DotName.createSimple(RequestBody.class.getName());
+    static final DotName DOTNAME_REQUESTBODY = DotName.createSimple(RequestBody.class.getName());
 
-    public static final String PROP_NAME = "name";
-    public static final String PROP_REQUIRED = "required";
+    static final String PROP_NAME = "name";
+    static final String PROP_REQUIRED = "required";
 
-    public static final String PROP_DESCRIPTION = "description";
-    public static final String PROP_REQUEST_BODY = "requestBody";
-    public static final String PROP_CONTENT = "content";
+    static final String PROP_DESCRIPTION = "description";
+    static final String PROP_REQUEST_BODY = "requestBody";
+    static final String PROP_CONTENT = "content";
 
     private RequestBodyConstant() {
     }

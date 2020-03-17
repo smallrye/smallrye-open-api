@@ -10,10 +10,10 @@ package io.smallrye.openapi.runtime.io.mediatype;
  */
 public class MediaTypeConstant {
 
-    public static final String PROP_EXAMPLE = "example";
-    public static final String PROP_EXAMPLES = "examples";
-    public static final String PROP_ENCODING = "encoding";
-    public static final String PROP_SCHEMA = "schema";
+    static final String PROP_EXAMPLE = "example";
+    static final String PROP_EXAMPLES = "examples";
+    static final String PROP_ENCODING = "encoding";
+    static final String PROP_SCHEMA = "schema";
 
     private MediaTypeConstant() {
     }

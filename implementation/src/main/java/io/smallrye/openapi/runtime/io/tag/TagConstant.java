@@ -15,11 +15,11 @@ import io.smallrye.openapi.runtime.io.ExternalDocumentable;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class TagConstant implements ExternalDocumentable {
-    public static final DotName DOTNAME_TAG = DotName.createSimple(Tag.class.getName());
+    static final DotName DOTNAME_TAG = DotName.createSimple(Tag.class.getName());
     public static final DotName DOTNAME_TAGS = DotName.createSimple(Tags.class.getName());
 
-    public static final String PROP_NAME = "name";
-    public static final String PROP_DESCRIPTION = "description";
+    static final String PROP_NAME = "name";
+    static final String PROP_DESCRIPTION = "description";
 
     private TagConstant() {
     }
