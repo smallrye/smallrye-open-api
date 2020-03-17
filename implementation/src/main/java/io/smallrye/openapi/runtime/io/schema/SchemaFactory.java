@@ -338,7 +338,7 @@ public class SchemaFactory {
      * 
      * @param index the index of classes being scanned
      * @param type the implementation type of the item to scan
-     * @param extensions
+     * @param extensions list of AnnotationScannerExtensions
      * @return Schema model
      */
     public static Schema typeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {

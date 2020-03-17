@@ -57,7 +57,7 @@ public class ServerVariableReader {
     }
 
     /**
-     * Reads the {@link ServerVariables} OpenAPI node.
+     * Reads the {@link ServerVariable} OpenAPI node.
      * 
      * @param node the json node
      * @return a Map of Variable name and ServerVariable model
