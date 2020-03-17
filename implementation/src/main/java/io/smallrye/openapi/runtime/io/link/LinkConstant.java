@@ -5,7 +5,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 /**
  * Constants related to Link
  * 
- * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#linkObject
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#linkObject">linkObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

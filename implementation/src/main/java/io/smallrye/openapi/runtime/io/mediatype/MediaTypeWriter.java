@@ -13,7 +13,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaWriter;
 /**
  * Writer the Media type object to json
  * 
- * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject">mediaTypeObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

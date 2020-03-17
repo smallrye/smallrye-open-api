@@ -22,7 +22,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 /**
  * Reading the Extension annotation
  * 
- * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specificationExtensions
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specificationExtensions">specificationExtensions</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

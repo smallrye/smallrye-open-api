@@ -7,7 +7,7 @@ import org.jboss.jandex.DotName;
 /**
  * Constants related to SecurityRequirement
  * 
- * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object">security-requirement-object</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

@@ -16,7 +16,7 @@ import io.smallrye.openapi.runtime.io.server.ServerConstant;
 /**
  * Writing the ServerVariable to json
  *
- * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#serverVariableObject
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#serverVariableObject">serverVariableObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

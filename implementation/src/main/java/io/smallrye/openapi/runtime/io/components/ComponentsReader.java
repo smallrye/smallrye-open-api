@@ -23,7 +23,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 /**
  * Reading the Components annotation and json node
  * 
- * @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#componentsObject
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#componentsObject">componentsObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
