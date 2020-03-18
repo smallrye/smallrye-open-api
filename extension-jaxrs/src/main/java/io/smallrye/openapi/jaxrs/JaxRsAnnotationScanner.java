@@ -97,8 +97,6 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
     private String currentAppPath = "";
 
-    //private JavaSecurityProcessor javaSecurityProcessor;
-
     @Override
     public String getName() {
         return "JAX-RS";
