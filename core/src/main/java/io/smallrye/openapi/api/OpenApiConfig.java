@@ -6,7 +6,7 @@ import java.util.Set;
 /**
  * Accessor to OpenAPI configuration options.
  *
- * Reference: 
+ * Reference:
  * https://github.com/eclipse/microprofile-open-api/blob/master/spec/src/main/asciidoc/microprofile-openapi-spec.adoc#31-list-of-configurable-items
  *
  * @author eric.wittmann@gmail.com

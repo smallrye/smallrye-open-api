@@ -9,55 +9,20 @@
     </parent>
 
     <artifactId>smallrye-open-api</artifactId>
-
+    <packaging>pom</packaging>
     <name>SmallRye: MicroProfile OpenAPI Implementation</name>
 
-    <properties>
-        <!-- Excluded model classes for duplication checks (getters/setters treated as duplicates by Sonar) -->
-        <sonar.cpd.exclusions>src/main/java/io/smallrye/openapi/api/models/**/*.java</sonar.cpd.exclusions>
-    </properties>
 
     <dependencies>
-        <!-- MP OpenAPI Spec -->
+        <!-- The implementation only incude the JAX-RS entry point. You can add Spring extension if you want it -->
         <dependency>
-            <groupId>org.eclipse.microprofile.openapi</groupId>
-            <artifactId>microprofile-openapi-api</artifactId>
-        </dependency>
-
-        <!-- MP Config Spec -->
-        <dependency>
-            <groupId>org.eclipse.microprofile.config</groupId>
-            <artifactId>microprofile-config-api</artifactId>
-        </dependency>
-
-        <!-- Third Party Libraries -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>smallrye-open-api-core</artifactId>            
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>smallrye-open-api-jaxrs</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jandex</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-api</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     

@@ -19,29 +19,44 @@ import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
- * This helps to apply java security (@RolesAllowed etc.)
+ * This helps to apply java security (@RolesAllowed etc.).
  * 
- * Currently used by JAX-RS but should maybe move one level up ?
+ * TODO:Currently used by JAX-RS but should maybe move one level up ?
  * 
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class JavaSecurityHelper {
+public class JavaSecurityProcessor {
+    private static final ThreadLocal<JavaSecurityProcessor> current = new ThreadLocal<>();
+
+    public static void register(OpenAPI openApi) {
+        JavaSecurityProcessor registry = new JavaSecurityProcessor(openApi);
+        current.set(registry);
+    }
+
+    public static void addRolesAllowedToScopes(String[] roles) {
+        current.get().resourceRolesAllowed = roles;
+        current.get().addScopes(roles);
+    }
+
+    public static void addDeclaredRolesToScopes(String[] roles) {
+        current.get().addScopes(roles);
+    }
+
+    public static void processSecurityRoles(MethodInfo method, Operation operation) {
+        current.get().processSecurityRolesForMethodOperation(method, operation);
+    }
+
+    public static void remove() {
+        current.remove();
+    }
+
     private String currentSecurityScheme;
     private List<OAuthFlow> currentFlows;
     private String[] resourceRolesAllowed;
 
-    public JavaSecurityHelper(OpenAPI openApi) {
+    private JavaSecurityProcessor(OpenAPI openApi) {
         checkSecurityScheme(openApi);
-    }
-
-    public void addRolesAllowedToScopes(String[] roles) {
-        this.resourceRolesAllowed = roles;
-        addScopes(roles);
-    }
-
-    public void addDeclaredRolesToScopes(String[] roles) {
-        addScopes(roles);
     }
 
     /**
@@ -83,7 +98,7 @@ public class JavaSecurityHelper {
      * @param method the current JAX-RS method
      * @param operation the OpenAPI Operation
      */
-    public void processSecurityRoles(MethodInfo method, Operation operation) {
+    private void processSecurityRolesForMethodOperation(MethodInfo method, Operation operation) {
         if (this.currentSecurityScheme != null) {
             String[] rolesAllowed = TypeUtil.getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
 

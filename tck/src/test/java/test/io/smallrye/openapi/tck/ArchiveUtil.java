@@ -1,4 +1,4 @@
-package io.smallrye.openapi.api.util;
+package test.io.smallrye.openapi.tck;
 
 import java.io.File;
 import java.io.IOException;

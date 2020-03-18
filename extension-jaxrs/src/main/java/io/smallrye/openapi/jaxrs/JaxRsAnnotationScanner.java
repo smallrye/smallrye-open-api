@@ -97,7 +97,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
     private String currentAppPath = "";
 
-    private JavaSecurityHelper javaSecurityHelper;
+    //private JavaSecurityProcessor javaSecurityProcessor;
 
     @Override
     public String getName() {
@@ -106,78 +106,39 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
 
     @Override
     public boolean shouldIntrospectClassToSchema(ClassType classType) {
-        if (classType.name().equals(JaxRsConstants.RESPONSE)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
-            List<AnnotationScannerExtension> extensions) {
-        for (AnnotationInstance instance : instances) {
-            if (ParameterProcessor.JaxRsParameter.isParameter(instance.name())) {
-                return true;
-            }
-            if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
-                return true;
-            }
-            for (AnnotationScannerExtension extension : extensions) {
-                if (extension.isScannerAnnotationExtension(instance))
-                    return true;
-            }
-        }
-        return false;
+        return !classType.name().equals(JaxRsConstants.RESPONSE);
     }
 
     @Override
     public OpenAPI scan(final AnnotationScannerContext context, OpenAPI openApi) {
-        // Get all jax-rs applications and convert them to OAI models (and merge them into a single one)
+        // Get all jax-rs applications and convert them to OpenAPI models (and merge them into a single one)
+        processApplicationClasses(context, openApi);
+
+        // This needs to be here just after we have done JaxRs Application
+        boolean tagsDefined = openApi.getTags() != null && !openApi.getTags().isEmpty();
+
+        // Now find all jax-rs endpoints
+        processResourceClasses(context, openApi);
+
+        // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
+        sortTags(openApi, tagsDefined);
+
+        // Now that all paths have been created, sort them (we don't have a better way to organize them).
+        sortPaths(openApi);
+
+        return openApi;
+    }
+
+    private void processApplicationClasses(final AnnotationScannerContext context, OpenAPI openApi) {
+        // Get all jax-rs applications and convert them to OpenAPI models (and merge them into a single one)
         Collection<ClassInfo> applications = context.getIndex().getAllKnownSubclasses(JaxRsConstants.APPLICATION);
         for (ClassInfo classInfo : applications) {
             OpenAPI applicationOpenApi = processApplicationClass(context, classInfo);
             openApi = MergeUtil.merge(openApi, applicationOpenApi);
         }
 
-        // This needs to be here just after we have done JaxRs Application
-        boolean tagsDefined = openApi.getTags() != null && !openApi.getTags().isEmpty();
-
         // this can be a useful extension point to set/override the application path
-        for (AnnotationScannerExtension extension : context.getExtensions()) {
-            extension.processScannerApplications(this, applications);
-        }
-
-        // apply java security
-        this.javaSecurityHelper = new JavaSecurityHelper(openApi);
-
-        // Now find all jax-rs endpoints
-        Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context.getIndex());
-        for (ClassInfo resourceClass : resourceClasses) {
-            processResourceClass(context, openApi, resourceClass, null);
-        }
-
-        // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
-        if (!tagsDefined && openApi.getTags() != null) {
-            openApi.setTags(openApi.getTags()
-                    .stream()
-                    .sorted(Comparator.comparing(Tag::getName))
-                    .collect(Collectors.toList()));
-        }
-
-        // Now that all paths have been created, sort them (we don't have a better way to organize them).
-        Paths paths = openApi.getPaths();
-        if (paths != null) {
-            Paths sortedPaths = new PathsImpl();
-            TreeSet<String> sortedKeys = new TreeSet<>(paths.getPathItems().keySet());
-            for (String pathKey : sortedKeys) {
-                PathItem pathItem = paths.getPathItem(pathKey);
-                sortedPaths.addPathItem(pathKey, pathItem);
-            }
-            sortedPaths.setExtensions(paths.getExtensions());
-            openApi.setPaths(sortedPaths);
-        }
-
-        return openApi;
+        processScannerExtensions(context, applications);
     }
 
     /**
@@ -216,6 +177,21 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         return openApi;
     }
 
+    private void processScannerExtensions(final AnnotationScannerContext context, Collection<ClassInfo> applications) {
+        // this can be a useful extension point to set/override the application path
+        for (AnnotationScannerExtension extension : context.getExtensions()) {
+            extension.processScannerApplications(this, applications);
+        }
+    }
+
+    private void processResourceClasses(final AnnotationScannerContext context, OpenAPI openApi) {
+        // Now find all jax-rs endpoints
+        Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context.getIndex());
+        for (ClassInfo resourceClass : resourceClasses) {
+            processResourceClass(context, openApi, resourceClass, null);
+        }
+    }
+
     /**
      * Processing a single JAX-RS resource class (annotated with @Path).
      * 
@@ -233,9 +209,10 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         processSecuritySchemeAnnotation(resourceClass, openApi);
 
         // Process roles allowed and declared roles. TODO: Not jax-rs spesific
-        this.javaSecurityHelper
+        JavaSecurityProcessor.register(openApi);
+        JavaSecurityProcessor
                 .addDeclaredRolesToScopes(TypeUtil.getAnnotationValue(resourceClass, SecurityConstants.DECLARE_ROLES));
-        this.javaSecurityHelper
+        JavaSecurityProcessor
                 .addRolesAllowedToScopes(TypeUtil.getAnnotationValue(resourceClass, SecurityConstants.ROLES_ALLOWED));
 
         // From here it's JAX-RS specific (I think)
@@ -472,7 +449,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         processExtensions(context, method, operation);
 
         // Process Security Roles
-        this.javaSecurityHelper.processSecurityRoles(method, operation);
+        JavaSecurityProcessor.processSecurityRoles(method, operation);
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
         ///////////////////////////////////////////
@@ -597,7 +574,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 requestBodyType = JandexUtil.getMethodParameterType(method,
                         annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-                requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, context.getExtensions(), this);
+                requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions(), this);
             }
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
@@ -627,7 +604,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 Schema schema = params.getFormBodySchema();
                 ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
             } else {
-                Type requestBodyType = JandexUtil.getRequestBodyParameterClassType(method, context.getExtensions(), this);
+                Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions(), this);
 
                 if (requestBodyType != null) {
                     Schema schema = null;
@@ -1008,6 +985,31 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         }
     }
 
+    private void sortTags(OpenAPI openApi, boolean tagsDefined) {
+        // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
+        if (!tagsDefined && openApi.getTags() != null) {
+            openApi.setTags(openApi.getTags()
+                    .stream()
+                    .sorted(Comparator.comparing(Tag::getName))
+                    .collect(Collectors.toList()));
+        }
+    }
+
+    private void sortPaths(OpenAPI openApi) {
+        // Now that all paths have been created, sort them (we don't have a better way to organize them).
+        Paths paths = openApi.getPaths();
+        if (paths != null) {
+            Paths sortedPaths = new PathsImpl();
+            TreeSet<String> sortedKeys = new TreeSet<>(paths.getPathItems().keySet());
+            for (String pathKey : sortedKeys) {
+                PathItem pathItem = paths.getPathItem(pathKey);
+                sortedPaths.addPathItem(pathKey, pathItem);
+            }
+            sortedPaths.setExtensions(paths.getExtensions());
+            openApi.setPaths(sortedPaths);
+        }
+    }
+
     /**
      * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.
@@ -1026,6 +1028,48 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                                 .anyMatch(info -> !Modifier.isAbstract(info.flags())))
                 .distinct() // CompositeIndex instances may return duplicates
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Go through the method parameters looking for one that is not annotated with a jax-rs
+     * annotation.That will be the one that is the request body.
+     * 
+     * @param method MethodInfo
+     * @param extensions available extensions
+     * @param annotationScanner the current scanner
+     * @return Type
+     */
+    private static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions,
+            AnnotationScanner annotationScanner) {
+        List<Type> methodParams = method.parameters();
+        if (methodParams.isEmpty()) {
+            return null;
+        }
+        for (short i = 0; i < methodParams.size(); i++) {
+            List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
+            if (parameterAnnotations.isEmpty()
+                    || !containsScannerAnnotations(parameterAnnotations, extensions)) {
+                return methodParams.get(i);
+            }
+        }
+        return null;
+    }
+
+    private static boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+            List<AnnotationScannerExtension> extensions) {
+        for (AnnotationInstance instance : instances) {
+            if (ParameterProcessor.JaxRsParameter.isParameter(instance.name())) {
+                return true;
+            }
+            if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
+                return true;
+            }
+            for (AnnotationScannerExtension extension : extensions) {
+                if (extension.isScannerAnnotationExtension(instance))
+                    return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
-import io.smallrye.openapi.api.util.ArchiveUtil;
+// import io.smallrye.openapi.api.util.ArchiveUtil;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;

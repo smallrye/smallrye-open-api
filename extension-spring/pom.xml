@@ -11,4 +11,12 @@
     <artifactId>smallrye-open-api-spring</artifactId>
     
     <name>SmallRye: MicroProfile OpenAPI Spring extension</name>
+    
+    <dependencies>
+        <!-- SmallRye core implementation -->
+        <dependency>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-open-api-core</artifactId>
+        </dependency>
+    </dependencies>
 </project>

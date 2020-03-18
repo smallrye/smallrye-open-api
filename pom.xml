@@ -51,9 +51,10 @@
     </scm>
 
     <modules>
-        <module>implementation</module>
+        <module>core</module>
         <module>extension-jaxrs</module>
         <module>extension-spring</module>
+        <module>implementation</module>
         <module>tck</module>
     </modules>
 
@@ -157,18 +158,23 @@
 
             <!-- Dependencies provided by the project -->
             <dependency>
-                <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-open-api</artifactId>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>smallrye-open-api-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>smallrye-open-api-jaxrs</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>smallrye-open-api-spring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>smallrye-open-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
