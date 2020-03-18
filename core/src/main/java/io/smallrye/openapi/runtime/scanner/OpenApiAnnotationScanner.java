@@ -78,26 +78,21 @@ public class OpenApiAnnotationScanner {
      * @return OpenAPI generated from scanning annotations
      */
     public OpenAPI scan() {
-        try {
-            // First scan the MicroProfile OpenAPI Annotations. Maybe later we can load this with SPI as well, and allow other Annotation sets.
-            OpenAPI oai = scanMicroProfileOpenApiAnnotations();
+        // First scan the MicroProfile OpenAPI Annotations. Maybe later we can load this with SPI as well, and allow other Annotation sets.
+        OpenAPI oai = scanMicroProfileOpenApiAnnotations();
 
-            // Now load all entry points with SPI and scan those
-            List<OpenAPI> scans = new LinkedList<>();
-            List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
-            for (AnnotationScanner annotationScanner : annotationScanners) {
-                LOG.debug("Scanning deployment " + annotationScanner.getName() + " Annotations.");
-                CurrentScannerInfo.register(annotationScanner);
-                scans.add(annotationScanner.scan(annotationScannerContext, oai));
-            }
-
-            OpenAPI merged = MergeUtil.merge(scans);
-
-            return merged;
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-            throw new RuntimeException(npe);
+        // Now load all entry points with SPI and scan those
+        List<OpenAPI> scans = new LinkedList<>();
+        List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
+        for (AnnotationScanner annotationScanner : annotationScanners) {
+            LOG.debug("Scanning deployment " + annotationScanner.getName() + " Annotations.");
+            CurrentScannerInfo.register(annotationScanner);
+            scans.add(annotationScanner.scan(annotationScannerContext, oai));
         }
+
+        OpenAPI merged = MergeUtil.merge(scans);
+
+        return merged;
     }
 
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
