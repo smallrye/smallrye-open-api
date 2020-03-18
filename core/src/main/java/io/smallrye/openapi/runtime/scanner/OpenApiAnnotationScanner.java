@@ -17,6 +17,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
@@ -86,6 +87,7 @@ public class OpenApiAnnotationScanner {
             List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
             for (AnnotationScanner annotationScanner : annotationScanners) {
                 LOG.debug("Scanning deployment " + annotationScanner.getName() + " Annotations.");
+                CurrentScannerInfo.register(annotationScanner);
                 scans.add(annotationScanner.scan(annotationScannerContext, oai));
             }
 

@@ -10,9 +10,8 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 public class CurrentScannerInfo {
     private static final ThreadLocal<CurrentScannerInfo> current = new ThreadLocal<>();
 
-    public static void register(AnnotationScanner annotationScanner, final String[] currentConsumes,
-            final String[] currentProduces) {
-        CurrentScannerInfo registry = new CurrentScannerInfo(annotationScanner, currentConsumes, currentProduces);
+    public static void register(AnnotationScanner annotationScanner) {
+        CurrentScannerInfo registry = new CurrentScannerInfo(annotationScanner);
         current.set(registry);
     }
 
@@ -20,8 +19,16 @@ public class CurrentScannerInfo {
         return current.get().annotationScanner;
     }
 
+    public static void setCurrentConsumes(final String[] currentConsumes) {
+        current.get().currentConsumes = currentConsumes;
+    }
+
     public static String[] getCurrentConsumes() {
         return current.get().currentConsumes;
+    }
+
+    public static void setCurrentProduces(final String[] currentProduces) {
+        current.get().currentProduces = currentProduces;
     }
 
     public static String[] getCurrentProduces() {
@@ -32,14 +39,13 @@ public class CurrentScannerInfo {
         current.remove();
     }
 
-    private final String[] currentConsumes;
-    private final String[] currentProduces;
+    private String[] currentConsumes;
+    private String[] currentProduces;
     private final AnnotationScanner annotationScanner;
 
-    private CurrentScannerInfo(final AnnotationScanner annotationScanner, final String[] currentConsumes,
-            final String[] currentProduces) {
+    private CurrentScannerInfo(final AnnotationScanner annotationScanner) {
         this.annotationScanner = annotationScanner;
-        this.currentConsumes = currentConsumes;
-        this.currentProduces = currentProduces;
+        this.currentConsumes = null;
+        this.currentProduces = null;
     }
 }

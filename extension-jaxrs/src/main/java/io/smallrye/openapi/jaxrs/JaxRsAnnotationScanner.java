@@ -392,9 +392,8 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] currentConsumes = getMediaTypes(method, JaxRsConstants.CONSUMES);
-        String[] currentProduces = getMediaTypes(method, JaxRsConstants.PRODUCES);
-        CurrentScannerInfo.register(this, currentConsumes, currentProduces);
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
