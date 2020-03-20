@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Parameterizable;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
@@ -103,7 +104,7 @@ public class ParameterReader {
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, ParameterConstant.PROP_NAME);
+            String name = JandexUtil.stringValue(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -153,7 +154,7 @@ public class ParameterReader {
         }
         LOG.debug("Processing a single @Parameter annotation.");
         Parameter parameter = new ParameterImpl();
-        parameter.setName(JandexUtil.stringValue(annotationInstance, ParameterConstant.PROP_NAME));
+        parameter.setName(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_NAME));
         parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
 
@@ -164,25 +165,25 @@ public class ParameterReader {
             return parameter;
         }
 
-        parameter.setDescription(JandexUtil.stringValue(annotationInstance, ParameterConstant.PROP_DESCRIPTION));
-        parameter.setRequired(JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_REQUIRED));
-        parameter.setDeprecated(JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_DEPRECATED));
+        parameter.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
+        parameter.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED));
+        parameter.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED));
         parameter.setAllowEmptyValue(
-                JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_EMPTY_VALUE));
-        parameter.setStyle(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_STYLE,
+                JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+        parameter.setStyle(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_STYLE,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
-        parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_EXPLODE,
+        parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_EXPLODE,
                 org.eclipse.microprofile.openapi.annotations.enums.Explode.class)));
         parameter.setAllowReserved(
                 JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED));
         parameter.setSchema(
                 SchemaFactory.readSchema(context.getIndex(),
-                        annotationInstance.value(ParameterConstant.PROP_SCHEMA)));
+                        annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
-                ContentReader.readContent(context, annotationInstance.value(ParameterConstant.PROP_CONTENT),
+                ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),
                         ContentDirection.PARAMETER));
-        parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(ParameterConstant.PROP_EXAMPLES)));
-        parameter.setExample(JandexUtil.stringValue(annotationInstance, ParameterConstant.PROP_EXAMPLE));
+        parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
+        parameter.setExample(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Parameter));
         return parameter;
     }
@@ -200,19 +201,19 @@ public class ParameterReader {
         LOG.debug("Processing a single Parameter json object.");
         Parameter parameter = new ParameterImpl();
 
-        parameter.setName(JsonUtil.stringProperty(node, ParameterConstant.PROP_NAME));
+        parameter.setName(JsonUtil.stringProperty(node, Parameterizable.PROP_NAME));
         parameter.setIn(readParameterIn(node.get(ParameterConstant.PROP_IN)));
-        parameter.setDescription(JsonUtil.stringProperty(node, ParameterConstant.PROP_DESCRIPTION));
-        parameter.setRequired(JsonUtil.booleanProperty(node, ParameterConstant.PROP_REQUIRED));
-        parameter.setDeprecated(JsonUtil.booleanProperty(node, ParameterConstant.PROP_DEPRECATED));
-        parameter.setAllowEmptyValue(JsonUtil.booleanProperty(node, ParameterConstant.PROP_ALLOW_EMPTY_VALUE));
-        parameter.setStyle(readParameterStyle(node.get(ParameterConstant.PROP_STYLE)));
-        parameter.setExplode(JsonUtil.booleanProperty(node, ParameterConstant.PROP_EXPLODE));
+        parameter.setDescription(JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION));
+        parameter.setRequired(JsonUtil.booleanProperty(node, Parameterizable.PROP_REQUIRED));
+        parameter.setDeprecated(JsonUtil.booleanProperty(node, Parameterizable.PROP_DEPRECATED));
+        parameter.setAllowEmptyValue(JsonUtil.booleanProperty(node, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+        parameter.setStyle(readParameterStyle(node.get(Parameterizable.PROP_STYLE)));
+        parameter.setExplode(JsonUtil.booleanProperty(node, Parameterizable.PROP_EXPLODE));
         parameter.setAllowReserved(JsonUtil.booleanProperty(node, ParameterConstant.PROP_ALLOW_RESERVED));
-        parameter.setSchema(SchemaReader.readSchema(node.get(ParameterConstant.PROP_SCHEMA)));
-        parameter.setContent(ContentReader.readContent(node.get(ParameterConstant.PROP_CONTENT)));
-        parameter.setExamples(ExampleReader.readExamples(node.get(ParameterConstant.PROP_EXAMPLES)));
-        parameter.setExample(readObject(node.get(ParameterConstant.PROP_EXAMPLE)));
+        parameter.setSchema(SchemaReader.readSchema(node.get(Parameterizable.PROP_SCHEMA)));
+        parameter.setContent(ContentReader.readContent(node.get(Parameterizable.PROP_CONTENT)));
+        parameter.setExamples(ExampleReader.readExamples(node.get(Parameterizable.PROP_EXAMPLES)));
+        parameter.setExample(readObject(node.get(Parameterizable.PROP_EXAMPLE)));
         parameter.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         ExtensionReader.readExtensions(node, parameter);
 

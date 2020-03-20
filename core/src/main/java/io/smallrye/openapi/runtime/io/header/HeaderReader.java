@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.headers.HeaderImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Parameterizable;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
@@ -54,7 +55,7 @@ public class HeaderReader {
         Map<String, Header> headers = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, HeaderConstant.PROP_NAME);
+            String name = JandexUtil.stringValue(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -99,13 +100,13 @@ public class HeaderReader {
         LOG.debug("Processing a single @Header annotation.");
         Header header = new HeaderImpl();
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Header));
-        header.setDescription(JandexUtil.stringValue(annotationInstance, HeaderConstant.PROP_DESCRIPTION));
+        header.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
         header.setSchema(
-                SchemaFactory.readSchema(context.getIndex(), annotationInstance.value(HeaderConstant.PROP_SCHEMA)));
-        header.setRequired(JandexUtil.booleanValue(annotationInstance, HeaderConstant.PROP_REQUIRED));
-        header.setDeprecated(JandexUtil.booleanValue(annotationInstance, HeaderConstant.PROP_DEPRECATED));
+                SchemaFactory.readSchema(context.getIndex(), annotationInstance.value(Parameterizable.PROP_SCHEMA)));
+        header.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED));
+        header.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED));
         header.setAllowEmptyValue(
-                JandexUtil.booleanValue(annotationInstance, HeaderConstant.PROP_ALLOW_EMPTY_VALUE));
+                JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
         // ? Style
         // ? Explode
         // ? Example
@@ -126,16 +127,16 @@ public class HeaderReader {
         LOG.debug("Processing a single Header json node.");
         Header header = new HeaderImpl();
         header.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
-        header.setDescription(JsonUtil.stringProperty(node, HeaderConstant.PROP_DESCRIPTION));
-        header.setSchema(SchemaReader.readSchema(node.get(HeaderConstant.PROP_SCHEMA)));
-        header.setRequired(JsonUtil.booleanProperty(node, HeaderConstant.PROP_REQUIRED));
-        header.setDeprecated(JsonUtil.booleanProperty(node, HeaderConstant.PROP_DEPRECATED));
-        header.setAllowEmptyValue(JsonUtil.booleanProperty(node, HeaderConstant.PROP_ALLOW_EMPTY_VALUE));
-        header.setStyle(readHeaderStyle(node.get(HeaderConstant.PROP_STYLE)));
-        header.setExplode(JsonUtil.booleanProperty(node, HeaderConstant.PROP_EXPLODE));
-        header.setExample(readObject(node.get(HeaderConstant.PROP_EXAMPLE)));
-        header.setExamples(ExampleReader.readExamples(node.get(HeaderConstant.PROP_EXAMPLES)));
-        header.setContent(ContentReader.readContent(node.get(HeaderConstant.PROP_CONTENT)));
+        header.setDescription(JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION));
+        header.setSchema(SchemaReader.readSchema(node.get(Parameterizable.PROP_SCHEMA)));
+        header.setRequired(JsonUtil.booleanProperty(node, Parameterizable.PROP_REQUIRED));
+        header.setDeprecated(JsonUtil.booleanProperty(node, Parameterizable.PROP_DEPRECATED));
+        header.setAllowEmptyValue(JsonUtil.booleanProperty(node, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+        header.setStyle(readHeaderStyle(node.get(Parameterizable.PROP_STYLE)));
+        header.setExplode(JsonUtil.booleanProperty(node, Parameterizable.PROP_EXPLODE));
+        header.setExample(readObject(node.get(Parameterizable.PROP_EXAMPLE)));
+        header.setExamples(ExampleReader.readExamples(node.get(Parameterizable.PROP_EXAMPLES)));
+        header.setContent(ContentReader.readContent(node.get(Parameterizable.PROP_CONTENT)));
         ExtensionReader.readExtensions(node, header);
         return header;
     }

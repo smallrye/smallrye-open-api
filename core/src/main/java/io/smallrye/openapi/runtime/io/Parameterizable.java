@@ -1,15 +1,12 @@
-package io.smallrye.openapi.runtime.io.header;
+package io.smallrye.openapi.runtime.io;
 
 /**
- * Constants related to Header
- * 
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#headerObject">headerObject</a>
+ * Constants related to Parameterizable contrants
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public interface HeaderConstant {
-
+public class Parameterizable {
     public static final String PROP_NAME = "name";
     public static final String PROP_EXAMPLE = "example";
     public static final String PROP_EXAMPLES = "examples";
@@ -22,4 +19,6 @@ public interface HeaderConstant {
     public static final String PROP_DEPRECATED = "deprecated";
     public static final String PROP_STYLE = "style";
 
+    private Parameterizable() {
+    }
 }

@@ -4,8 +4,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.header.HeaderConstant;
-
 /**
  * Constants related to Parameter
  * 
@@ -15,7 +13,7 @@ import io.smallrye.openapi.runtime.io.header.HeaderConstant;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class ParameterConstant implements HeaderConstant {
+public class ParameterConstant {
 
     public static final DotName DOTNAME_PARAMETER = DotName.createSimple(Parameter.class.getName());
     public static final DotName DOTNAME_PARAMETERS = DotName.createSimple(Parameters.class.getName());
