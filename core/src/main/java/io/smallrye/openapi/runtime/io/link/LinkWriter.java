@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.server.ServerWriter;
@@ -37,8 +38,8 @@ public class LinkWriter {
             return;
         }
         ObjectNode linksNode = parent.putObject(ComponentsConstant.PROP_LINKS);
-        for (String linkName : links.keySet()) {
-            writeLink(linksNode, links.get(linkName), linkName);
+        for (Map.Entry<String, Link> entry : links.entrySet()) {
+            writeLink(linksNode, entry.getValue(), entry.getKey());
         }
     }
 
@@ -54,7 +55,7 @@ public class LinkWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, LinkConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_REF, model.getOperationRef());
         JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_ID, model.getOperationId());
         writeLinkParameters(node, model.getParameters());
@@ -75,8 +76,8 @@ public class LinkWriter {
             return;
         }
         ObjectNode node = parent.putObject(LinkConstant.PROP_PARAMETERS);
-        for (String name : parameters.keySet()) {
-            ObjectWriter.writeObject(node, name, parameters.get(name));
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            ObjectWriter.writeObject(node, entry.getKey(), entry.getValue());
         }
     }
 

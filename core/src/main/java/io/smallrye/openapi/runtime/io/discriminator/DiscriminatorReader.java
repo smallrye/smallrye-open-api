@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.io.discriminator;
 
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -18,7 +17,6 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class DiscriminatorReader {
-    private static final Logger LOG = Logger.getLogger(DiscriminatorReader.class);
 
     private DiscriminatorReader() {
     }

@@ -66,7 +66,7 @@ public class AugmentedIndexView implements IndexView {
     @Override
     public Collection<ClassInfo> getKnownDirectImplementors(DotName className) {
         validateInput(className);
-        return index.getKnownDirectSubclasses(className);
+        return index.getKnownDirectImplementors(className);
     }
 
     @Override

@@ -4,8 +4,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.annotations.tags.Tags;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.ExternalDocumentable;
-
 /**
  * Constants related to Server
  * 
@@ -14,7 +12,7 @@ import io.smallrye.openapi.runtime.io.ExternalDocumentable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class TagConstant implements ExternalDocumentable {
+public class TagConstant {
     static final DotName DOTNAME_TAG = DotName.createSimple(Tag.class.getName());
     public static final DotName DOTNAME_TAGS = DotName.createSimple(Tags.class.getName());
 

@@ -7,7 +7,7 @@ package io.smallrye.openapi.runtime.io;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public enum ContentDirection {
-    Input,
-    Output,
-    Parameter
+    INPUT,
+    OUTPUT,
+    PARAMETER
 }

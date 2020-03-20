@@ -1,7 +1,5 @@
 package io.smallrye.openapi.runtime.io.header;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to Header
  * 
@@ -10,20 +8,18 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class HeaderConstant implements Referenceable {
+public interface HeaderConstant {
 
-    static final String PROP_NAME = "name";
-    static final String PROP_EXAMPLE = "example";
-    static final String PROP_DESCRIPTION = "description";
-    static final String PROP_CONTENT = "content";
-    static final String PROP_SCHEMA = "schema";
-    static final String PROP_EXPLODE = "explode";
-    static final String PROP_ALLOW_EMPTY_VALUE = "allowEmptyValue";
-    static final String PROP_REQUIRED = "required";
-    static final String PROP_DEPRECATED = "deprecated";
-    static final String PROP_STYLE = "style";
-    static final String PROP_EXAMPLES = "examples";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_EXAMPLE = "example";
+    public static final String PROP_EXAMPLES = "examples";
+    public static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_CONTENT = "content";
+    public static final String PROP_SCHEMA = "schema";
+    public static final String PROP_EXPLODE = "explode";
+    public static final String PROP_ALLOW_EMPTY_VALUE = "allowEmptyValue";
+    public static final String PROP_REQUIRED = "required";
+    public static final String PROP_DEPRECATED = "deprecated";
+    public static final String PROP_STYLE = "style";
 
-    private HeaderConstant() {
-    }
 }

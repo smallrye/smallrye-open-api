@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.examples.ExampleImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -110,7 +111,7 @@ public class ExampleReader {
         }
         LOG.debug("Processing a single ExampleObject json.");
         Example example = new ExampleImpl();
-        example.setRef(JsonUtil.stringProperty(node, ExampleConstant.PROP_$REF));
+        example.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         example.setSummary(JsonUtil.stringProperty(node, ExampleConstant.PROP_SUMMARY));
         example.setDescription(JsonUtil.stringProperty(node, ExampleConstant.PROP_DESCRIPTION));
         example.setValue(readObject(node.get(ExampleConstant.PROP_VALUE)));

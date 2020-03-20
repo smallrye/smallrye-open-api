@@ -4,8 +4,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to Response
  * 
@@ -14,7 +12,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class ResponseConstant implements Referenceable {
+public class ResponseConstant {
 
     public static final String PROP_RESPONSE_CODE = "responseCode";
 

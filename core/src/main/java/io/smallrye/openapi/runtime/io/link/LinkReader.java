@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.links.LinkImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -113,7 +114,7 @@ public class LinkReader {
         }
         LOG.debug("Processing a single Link json node.");
         Link link = new LinkImpl();
-        link.setRef(JsonUtil.stringProperty(node, LinkConstant.PROP_$REF));
+        link.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
 
         link.setOperationRef(JsonUtil.stringProperty(node, LinkConstant.PROP_OPERATION_REF));
         link.setOperationId(JsonUtil.stringProperty(node, LinkConstant.PROP_OPERATION_ID));

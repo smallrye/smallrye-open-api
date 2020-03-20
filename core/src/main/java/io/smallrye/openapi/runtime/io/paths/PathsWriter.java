@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.models.Paths;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.operation.OperationWriter;
@@ -60,7 +61,7 @@ public class PathsWriter {
             return;
         }
         ObjectNode node = parent.putObject(pathName);
-        JsonUtil.stringProperty(node, PathsConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, PathsConstant.PROP_SUMMARY, model.getSummary());
         JsonUtil.stringProperty(node, PathsConstant.PROP_DESCRIPTION, model.getDescription());
         OperationWriter.writeOperation(node, model.getGET(), PathsConstant.PROP_GET);

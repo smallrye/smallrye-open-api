@@ -36,6 +36,7 @@ import org.jboss.jandex.WildcardType;
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
+import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 
 /**
@@ -284,7 +285,7 @@ public class TypeUtil {
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
         schema.setExample(properties.get(SchemaConstant.PROP_EXAMPLE));
-        schema.setExternalDocs((ExternalDocumentation) properties.get(SchemaConstant.PROP_EXTERNAL_DOCS));
+        schema.setExternalDocs((ExternalDocumentation) properties.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS));
     }
 
     /**
@@ -727,7 +728,7 @@ public class TypeUtil {
                 ExternalDocumentation doc = new ExternalDocumentationImpl();
                 doc.setDescription(description);
                 doc.setUrl(url);
-                properties.put(SchemaConstant.PROP_EXTERNAL_DOCS, doc);
+                properties.put(ExternalDocsConstant.PROP_EXTERNAL_DOCS, doc);
                 return this;
             }
 

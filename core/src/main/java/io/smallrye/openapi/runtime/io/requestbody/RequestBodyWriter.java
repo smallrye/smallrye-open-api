@@ -7,6 +7,7 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
@@ -36,8 +37,8 @@ public class RequestBodyWriter {
             return;
         }
         ObjectNode requestBodiesNode = parent.putObject(ComponentsConstant.PROP_REQUEST_BODIES);
-        for (String requestBodyName : requestBodies.keySet()) {
-            writeRequestBody(requestBodiesNode, requestBodies.get(requestBodyName), requestBodyName);
+        for (Map.Entry<String, RequestBody> entry : requestBodies.entrySet()) {
+            writeRequestBody(requestBodiesNode, entry.getValue(), entry.getKey());
         }
     }
 
@@ -65,7 +66,7 @@ public class RequestBodyWriter {
 
         ObjectNode node = parent.putObject(name);
 
-        JsonUtil.stringProperty(node, RequestBodyConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, RequestBodyConstant.PROP_DESCRIPTION, model.getDescription());
         ContentWriter.writeContent(node, model.getContent());
         JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED, model.getRequired());

@@ -418,31 +418,6 @@ public class JandexUtil {
         return parameter.method().parameters().get(parameter.position());
     }
 
-    //    /**
-    //     * Go through the method parameters looking for one that is not annotated with a jax-rs
-    //     * annotation.That will be the one that is the request body.
-    //     * 
-    //     * @param method MethodInfo
-    //     * @param extensions available extensions
-    //     * @param annotationScanner the current scanner
-    //     * @return Type
-    //     */
-    //    private static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions,
-    //            AnnotationScanner annotationScanner) {
-    //        List<Type> methodParams = method.parameters();
-    //        if (methodParams.isEmpty()) {
-    //            return null;
-    //        }
-    //        for (short i = 0; i < methodParams.size(); i++) {
-    //            List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
-    //            if (parameterAnnotations.isEmpty()
-    //                    || !annotationScanner.containsScannerAnnotations(parameterAnnotations, extensions)) {
-    //                return methodParams.get(i);
-    //            }
-    //        }
-    //        return null;
-    //    }
-
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
      * method.Returns null if not found.

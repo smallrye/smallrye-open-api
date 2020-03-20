@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -179,7 +180,7 @@ public class ParameterReader {
                         annotationInstance.value(ParameterConstant.PROP_SCHEMA)));
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(ParameterConstant.PROP_CONTENT),
-                        ContentDirection.Parameter));
+                        ContentDirection.PARAMETER));
         parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(ParameterConstant.PROP_EXAMPLES)));
         parameter.setExample(JandexUtil.stringValue(annotationInstance, ParameterConstant.PROP_EXAMPLE));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Parameter));
@@ -212,7 +213,7 @@ public class ParameterReader {
         parameter.setContent(ContentReader.readContent(node.get(ParameterConstant.PROP_CONTENT)));
         parameter.setExamples(ExampleReader.readExamples(node.get(ParameterConstant.PROP_EXAMPLES)));
         parameter.setExample(readObject(node.get(ParameterConstant.PROP_EXAMPLE)));
-        parameter.setRef(JsonUtil.stringProperty(node, ParameterConstant.PROP_$REF));
+        parameter.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         ExtensionReader.readExtensions(node, parameter);
 
         return parameter;

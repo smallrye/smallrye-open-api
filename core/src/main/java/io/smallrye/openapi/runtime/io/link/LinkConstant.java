@@ -1,7 +1,5 @@
 package io.smallrye.openapi.runtime.io.link;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to Link
  * 
@@ -10,7 +8,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class LinkConstant implements Referenceable {
+public class LinkConstant {
 
     static final String PROP_OPERATION_ID = "operationId";
     static final String PROP_PARAMETERS = "parameters";

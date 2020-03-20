@@ -28,7 +28,7 @@ public class ListUtil {
      */
     @SafeVarargs
     public static <T> List<T> mergeNullableLists(List<T>... lists) {
-        List<T> result = (List<T>) Arrays.stream(lists)
+        List<T> result = Arrays.stream(lists)
                 .filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());

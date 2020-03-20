@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.components.ComponentsReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.io.info.InfoReader;
 import io.smallrye.openapi.runtime.io.paths.PathsReader;
@@ -53,7 +54,7 @@ public class DefinitionReader {
                 .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY)));
         openApi.setExternalDocs(
                 ExternalDocsReader
-                        .readExternalDocs(annotationInstance.value(DefinitionConstant.PROP_EXTERNAL_DOCS)));
+                        .readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         openApi.setComponents(ComponentsReader.readComponents(context,
                 annotationInstance.value(DefinitionConstant.PROP_COMPONENTS)));
     }
@@ -75,7 +76,7 @@ public class DefinitionReader {
         openApi.setSecurity(SecurityRequirementReader
                 .readSecurityRequirements(node.get(DefinitionConstant.PROP_SECURITY)));
         openApi.setExternalDocs(
-                ExternalDocsReader.readExternalDocs(node.get(DefinitionConstant.PROP_EXTERNAL_DOCS)));
+                ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         openApi.setComponents(
                 ComponentsReader.readComponents(node.get(DefinitionConstant.PROP_COMPONENTS)));
         openApi.setPaths(PathsReader.readPaths(node.get(DefinitionConstant.PROP_PATHS)));

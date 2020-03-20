@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.headers.HeaderImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -124,7 +125,7 @@ public class HeaderReader {
         }
         LOG.debug("Processing a single Header json node.");
         Header header = new HeaderImpl();
-        header.setRef(JsonUtil.stringProperty(node, HeaderConstant.PROP_$REF));
+        header.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         header.setDescription(JsonUtil.stringProperty(node, HeaderConstant.PROP_DESCRIPTION));
         header.setSchema(SchemaReader.readSchema(node.get(HeaderConstant.PROP_SCHEMA)));
         header.setRequired(JsonUtil.booleanProperty(node, HeaderConstant.PROP_REQUIRED));

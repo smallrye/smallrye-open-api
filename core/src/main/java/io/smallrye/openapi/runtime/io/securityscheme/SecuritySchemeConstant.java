@@ -4,8 +4,6 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to SecurityScheme
  * 
@@ -15,7 +13,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class SecuritySchemeConstant implements Referenceable {
+public class SecuritySchemeConstant {
 
     static final DotName DOTNAME_SECURITY_SCHEME = DotName.createSimple(SecurityScheme.class.getName());
     static final DotName TYPE_SECURITY_SCHEMES = DotName.createSimple(SecuritySchemes.class.getName());

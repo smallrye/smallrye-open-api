@@ -19,6 +19,7 @@ import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.header.HeaderReader;
@@ -156,7 +157,7 @@ public class ResponseReader {
         response.setLinks(LinkReader.readLinks(annotationInstance.value(ResponseConstant.PROP_LINKS)));
         response.setContent(
                 ContentReader.readContent(context, annotationInstance.value(ResponseConstant.PROP_CONTENT),
-                        ContentDirection.Output));
+                        ContentDirection.OUTPUT));
         response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Response));
         return response;
     }
@@ -173,7 +174,7 @@ public class ResponseReader {
         }
         LOG.debug("Processing a single Response json object.");
         APIResponse model = new APIResponseImpl();
-        model.setRef(JsonUtil.stringProperty(node, ResponseConstant.PROP_$REF));
+        model.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         model.setDescription(JsonUtil.stringProperty(node, ResponseConstant.PROP_DESCRIPTION));
         model.setHeaders(HeaderReader.readHeaders(node.get(ResponseConstant.PROP_HEADERS)));
         model.setContent(ContentReader.readContent(node.get(ResponseConstant.PROP_CONTENT)));

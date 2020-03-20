@@ -34,9 +34,8 @@ public class EncodingWriter {
             return;
         }
         ObjectNode node = parent.putObject(EncodingConstant.PROP_ENCODING);
-        for (String name : models.keySet()) {
-            Encoding encoding = models.get(name);
-            writeEncoding(node, encoding, name);
+        for (Map.Entry<String, Encoding> entry : models.entrySet()) {
+            writeEncoding(node, entry.getValue(), entry.getKey());
         }
     }
 

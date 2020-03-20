@@ -1,7 +1,5 @@
 package io.smallrye.openapi.runtime.io.paths;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to Paths
  * 
@@ -10,7 +8,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class PathsConstant implements Referenceable {
+public class PathsConstant {
 
     static final String PROP_DELETE = "delete";
     static final String PROP_PATCH = "patch";

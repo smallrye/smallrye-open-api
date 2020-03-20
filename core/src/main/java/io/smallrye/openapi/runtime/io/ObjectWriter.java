@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ObjectWriter {
 
+    private ObjectWriter() {
+    }
+
     /**
      * Writes an array of strings to the parent node.
      * 
@@ -57,9 +60,8 @@ public class ObjectWriter {
             return;
         }
         ObjectNode node = parent.putObject(propertyName);
-        for (String name : models.keySet()) {
-            String value = models.get(name);
-            node.put(name, value);
+        for (Map.Entry<String, String> entry : models.entrySet()) {
+            node.put(entry.getKey(), entry.getValue());
         }
     }
 

@@ -3,8 +3,6 @@ package io.smallrye.openapi.runtime.io.definition;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.ExternalDocumentable;
-
 /**
  * Constants related to Open API definition.
  * 
@@ -13,7 +11,7 @@ import io.smallrye.openapi.runtime.io.ExternalDocumentable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class DefinitionConstant implements ExternalDocumentable {
+public class DefinitionConstant {
 
     public static final DotName DOTNAME_OPEN_API_DEFINITION = DotName.createSimple(OpenAPIDefinition.class.getName());
 

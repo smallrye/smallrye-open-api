@@ -11,6 +11,7 @@ import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.callback.CallbackReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.io.requestbody.RequestBodyReader;
@@ -51,7 +52,7 @@ public class OperationReader {
         operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
         operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
         operation.setExternalDocs(
-                ExternalDocsReader.readExternalDocs(annotationInstance.value(OperationConstant.PROP_EXTERNAL_DOCS)));
+                ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         operation.setParameters(ParameterReader.readParametersList(context,
                 annotationInstance.value(OperationConstant.PROP_PARAMETERS)));
         operation.setRequestBody(RequestBodyReader.readRequestBody(context,
@@ -92,7 +93,7 @@ public class OperationReader {
         model.setTags(JsonUtil.readStringArray(node.get(OperationConstant.PROP_TAGS)));
         model.setSummary(JsonUtil.stringProperty(node, OperationConstant.PROP_SUMMARY));
         model.setDescription(JsonUtil.stringProperty(node, OperationConstant.PROP_DESCRIPTION));
-        model.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(OperationConstant.PROP_EXTERNAL_DOCS)));
+        model.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         model.setOperationId(JsonUtil.stringProperty(node, OperationConstant.PROP_OPERATION_ID));
         model.setParameters(ParameterReader.readParameterList(node.get(OperationConstant.PROP_PARAMETERS)));
         model.setRequestBody(RequestBodyReader.readRequestBody(node.get(OperationConstant.PROP_REQUEST_BODY)));
@@ -114,11 +115,8 @@ public class OperationReader {
     public static boolean operationIsHidden(final MethodInfo method) {
         AnnotationInstance operationAnnotation = method.annotation(OperationConstant.DOTNAME_OPERATION);
         // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
-        if (operationAnnotation.value(OperationConstant.PROP_HIDDEN) != null
-                && operationAnnotation.value(OperationConstant.PROP_HIDDEN).asBoolean()) {
-            return true;
-        }
-        return false;
+        return operationAnnotation.value(OperationConstant.PROP_HIDDEN) != null
+                && operationAnnotation.value(OperationConstant.PROP_HIDDEN).asBoolean();
     }
 
     public static AnnotationInstance getOperationAnnotation(final MethodInfo method) {

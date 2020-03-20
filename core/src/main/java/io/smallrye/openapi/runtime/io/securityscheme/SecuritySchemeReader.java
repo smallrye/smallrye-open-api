@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.oauth.OAuthReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -122,7 +123,7 @@ public class SecuritySchemeReader {
             return null;
         }
         SecurityScheme model = new SecuritySchemeImpl();
-        model.setRef(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_$REF));
+        model.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         model.setType(readSecuritySchemeType(node.get(SecuritySchemeConstant.PROP_TYPE)));
         model.setDescription(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_DESCRIPTION));
         model.setName(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_NAME));

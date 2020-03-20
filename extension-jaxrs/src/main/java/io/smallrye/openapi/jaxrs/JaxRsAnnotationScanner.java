@@ -561,7 +561,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
 
             if (formBodyContent != null) {
                 // If form parameters were present, overlay RequestBody onto the generated form content
-                requestBody.setContent((Content) MergeUtil.mergeObjects(formBodyContent, requestBody.getContent()));
+                requestBody.setContent(MergeUtil.mergeObjects(formBodyContent, requestBody.getContent()));
             }
 
             // TODO if the method argument type is Request, don't generate a Schema!
@@ -571,7 +571,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 requestBodyType = JandexUtil.getMethodParameterType(method,
                         annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-                requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions(), this);
+                requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
             }
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
@@ -601,7 +601,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 Schema schema = params.getFormBodySchema();
                 ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
             } else {
-                Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions(), this);
+                Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
 
                 if (requestBodyType != null) {
                     Schema schema = null;
@@ -846,10 +846,6 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         return responses == null || responses.getAPIResponse(status) != null;
     }
 
-    private void setCurrentAppPath(String path) {
-        this.currentAppPath = path;
-    }
-
     /**
      * Process a certain class for OpenApiDefinition annotations.
      * TODO: Could move a level up maybe ?
@@ -1033,11 +1029,9 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      * 
      * @param method MethodInfo
      * @param extensions available extensions
-     * @param annotationScanner the current scanner
      * @return Type
      */
-    private static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions,
-            AnnotationScanner annotationScanner) {
+    private static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions) {
         List<Type> methodParams = method.parameters();
         if (methodParams.isEmpty()) {
             return null;

@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
@@ -89,10 +90,7 @@ public class OpenApiAnnotationScanner {
             CurrentScannerInfo.register(annotationScanner);
             scans.add(annotationScanner.scan(annotationScannerContext, oai));
         }
-
-        OpenAPI merged = MergeUtil.merge(scans);
-
-        return merged;
+        return MergeUtil.merge(scans);
     }
 
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
@@ -146,11 +144,13 @@ public class OpenApiAnnotationScanner {
         } else {
             try {
                 return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader())
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+                        .getDeclaredConstructor().newInstance();
+            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+                    | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 throw new RuntimeException("Failed to create instance of custom schema registry: "
                         + config.customSchemaRegistryClass(), ex);
             }
+
         }
     }
 

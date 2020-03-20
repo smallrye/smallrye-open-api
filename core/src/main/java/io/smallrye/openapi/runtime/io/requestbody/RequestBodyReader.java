@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -116,7 +117,7 @@ public class RequestBodyReader {
         requestBody
                 .setContent(ContentReader.readContent(context,
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),
-                        ContentDirection.Input));
+                        ContentDirection.INPUT));
         requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RequestBody));
         return requestBody;
@@ -136,7 +137,7 @@ public class RequestBodyReader {
         requestBody.setDescription(JsonUtil.stringProperty(node, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody.setContent(ContentReader.readContent(node.get(RequestBodyConstant.PROP_CONTENT)));
         requestBody.setRequired(JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED));
-        requestBody.setRef(JsonUtil.stringProperty(node, RequestBodyConstant.PROP_$REF));
+        requestBody.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         ExtensionReader.readExtensions(node, requestBody);
         return requestBody;
     }

@@ -3,8 +3,6 @@ package io.smallrye.openapi.runtime.io.requestbody;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to RequestBody
  * 
@@ -14,7 +12,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class RequestBodyConstant implements Referenceable {
+public class RequestBodyConstant {
 
     static final DotName DOTNAME_REQUESTBODY = DotName.createSimple(RequestBody.class.getName());
 

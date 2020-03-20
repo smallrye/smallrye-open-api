@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.io.xml;
 
 import org.eclipse.microprofile.openapi.models.media.XML;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -18,7 +17,6 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class XmlReader {
-    private static final Logger LOG = Logger.getLogger(XmlReader.class);
 
     private XmlReader() {
     }

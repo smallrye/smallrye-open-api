@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.example.ExampleWriter;
@@ -38,8 +39,8 @@ public class HeaderWriter {
             return;
         }
         ObjectNode headersNode = parent.putObject(ComponentsConstant.PROP_HEADERS);
-        for (String headerName : headers.keySet()) {
-            writeHeader(headersNode, headers.get(headerName), headerName);
+        for (Map.Entry<String, Header> entry : headers.entrySet()) {
+            writeHeader(headersNode, entry.getValue(), entry.getKey());
         }
     }
 
@@ -55,7 +56,7 @@ public class HeaderWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, HeaderConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, HeaderConstant.PROP_DESCRIPTION, model.getDescription());
         JsonUtil.booleanProperty(node, HeaderConstant.PROP_REQUIRED, model.getRequired());
         JsonUtil.booleanProperty(node, HeaderConstant.PROP_DEPRECATED, model.getDeprecated());

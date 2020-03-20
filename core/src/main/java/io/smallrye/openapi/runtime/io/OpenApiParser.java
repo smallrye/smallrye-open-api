@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -32,9 +31,8 @@ public class OpenApiParser {
      * @param url URL to OpenAPI document
      * @return OpenAPIImpl parsed from URL
      * @throws IOException URL parameter is not found
-     * @throws ParseException Failed to parse the document
      */
-    public static final OpenAPI parse(URL url) throws IOException, ParseException {
+    public static final OpenAPI parse(URL url) throws IOException {
         try {
             String fname = url.getFile();
             if (fname == null) {

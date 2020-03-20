@@ -5,7 +5,6 @@ import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 
 /**
@@ -32,7 +31,7 @@ public class ExternalDocsWriter {
         if (model == null) {
             return;
         }
-        ObjectNode node = parent.putObject(DefinitionConstant.PROP_EXTERNAL_DOCS);
+        ObjectNode node = parent.putObject(ExternalDocsConstant.PROP_EXTERNAL_DOCS);
 
         JsonUtil.stringProperty(node, ExternalDocsConstant.PROP_DESCRIPTION, model.getDescription());
         JsonUtil.stringProperty(node, ExternalDocsConstant.PROP_URL, model.getUrl());

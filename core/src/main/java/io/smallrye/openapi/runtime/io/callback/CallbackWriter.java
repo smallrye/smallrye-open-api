@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.paths.PathsWriter;
@@ -55,7 +56,7 @@ public class CallbackWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, CallbackConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
 
         if (model.getPathItems() != null) {
             Set<Map.Entry<String, PathItem>> entrySet = model.getPathItems().entrySet();

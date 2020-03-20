@@ -3,8 +3,6 @@ package io.smallrye.openapi.runtime.io.operation;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.ExternalDocumentable;
-
 /**
  * Constants related to Operation
  * 
@@ -13,7 +11,7 @@ import io.smallrye.openapi.runtime.io.ExternalDocumentable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class OperationConstant implements ExternalDocumentable {
+public class OperationConstant {
 
     static final DotName DOTNAME_OPERATION = DotName.createSimple(Operation.class.getName());
 

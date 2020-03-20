@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.example.ExampleWriter;
@@ -41,8 +42,8 @@ public class ParameterWriter {
             return;
         }
         ObjectNode parametersNode = parent.putObject(ComponentsConstant.PROP_PARAMETERS);
-        for (String parameterName : parameters.keySet()) {
-            writeParameter(parametersNode, parameters.get(parameterName), parameterName);
+        for (Map.Entry<String, Parameter> entry : parameters.entrySet()) {
+            writeParameter(parametersNode, entry.getValue(), entry.getKey());
         }
     }
 
@@ -85,7 +86,7 @@ public class ParameterWriter {
      * @param model
      */
     private static void writeParameter(ObjectNode node, Parameter model) {
-        JsonUtil.stringProperty(node, ParameterConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, ParameterConstant.PROP_NAME, model.getName());
         JsonUtil.enumProperty(node, ParameterConstant.PROP_IN, model.getIn());
         JsonUtil.stringProperty(node, ParameterConstant.PROP_DESCRIPTION, model.getDescription());

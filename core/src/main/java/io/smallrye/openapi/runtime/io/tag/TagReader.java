@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -88,7 +89,7 @@ public class TagReader {
         tag.setName(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_NAME));
         tag.setDescription(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
         tag.setExternalDocs(
-                ExternalDocsReader.readExternalDocs(annotationInstance.value(TagConstant.PROP_EXTERNAL_DOCS)));
+                ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         return tag;
     }
 
@@ -103,7 +104,7 @@ public class TagReader {
         Tag tag = new TagImpl();
         tag.setName(JsonUtil.stringProperty(node, TagConstant.PROP_NAME));
         tag.setDescription(JsonUtil.stringProperty(node, TagConstant.PROP_DESCRIPTION));
-        tag.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(TagConstant.PROP_EXTERNAL_DOCS)));
+        tag.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         ExtensionReader.readExtensions(node, tag);
         return tag;
     }

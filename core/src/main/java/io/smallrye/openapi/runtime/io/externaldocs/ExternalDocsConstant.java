@@ -10,7 +10,7 @@ package io.smallrye.openapi.runtime.io.externaldocs;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ExternalDocsConstant {
-
+    public static final String PROP_EXTERNAL_DOCS = "externalDocs";
     static final String PROP_DESCRIPTION = "description";
     static final String PROP_URL = "url";
 

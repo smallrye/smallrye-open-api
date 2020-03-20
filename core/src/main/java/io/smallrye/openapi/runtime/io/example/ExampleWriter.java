@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 
@@ -35,8 +36,8 @@ public class ExampleWriter {
             return;
         }
         ObjectNode examplesNode = parent.putObject(ComponentsConstant.PROP_EXAMPLES);
-        for (String exampleName : examples.keySet()) {
-            writeExample(examplesNode, examples.get(exampleName), exampleName);
+        for (Map.Entry<String, Example> entry : examples.entrySet()) {
+            writeExample(examplesNode, entry.getValue(), entry.getKey());
         }
     }
 
@@ -52,7 +53,7 @@ public class ExampleWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, ExampleConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, ExampleConstant.PROP_SUMMARY, model.getSummary());
         JsonUtil.stringProperty(node, ExampleConstant.PROP_DESCRIPTION, model.getDescription());
         ObjectWriter.writeObject(node, ExampleConstant.PROP_VALUE, model.getValue());

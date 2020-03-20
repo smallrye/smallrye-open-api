@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.io.extension;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -19,7 +18,6 @@ import io.smallrye.openapi.runtime.io.ObjectWriter;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ExtensionWriter {
-    private static final Logger LOG = Logger.getLogger(ExtensionWriter.class);
 
     private ExtensionWriter() {
     }

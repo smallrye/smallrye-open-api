@@ -1,7 +1,5 @@
 package io.smallrye.openapi.runtime.io.example;
 
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to Example.
  * 
@@ -10,7 +8,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class ExampleConstant implements Referenceable {
+public class ExampleConstant {
 
     static final String PROP_NAME = "name";
     static final String PROP_VALUE = "value";

@@ -3,9 +3,6 @@ package io.smallrye.openapi.runtime.io.schema;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.runtime.io.ExternalDocumentable;
-import io.smallrye.openapi.runtime.io.Referenceable;
-
 /**
  * Constants related to Schema
  * 
@@ -14,7 +11,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
-public class SchemaConstant implements Referenceable, ExternalDocumentable {
+public class SchemaConstant {
 
     public static final DotName DOTNAME_SCHEMA = DotName.createSimple(Schema.class.getName());
     public static final String PROP_DISCRIMINATOR = "discriminator";

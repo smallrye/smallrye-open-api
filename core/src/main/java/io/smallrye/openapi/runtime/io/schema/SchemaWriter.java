@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ObjectWriter;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.discriminator.DiscriminatorWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
@@ -50,8 +51,8 @@ public class SchemaWriter {
             return;
         }
         ObjectNode schemasNode = parent.putObject(propertyName);
-        for (String schemaName : schemas.keySet()) {
-            writeSchema(schemasNode, schemas.get(schemaName), schemaName);
+        for (Map.Entry<String, Schema> entry : schemas.entrySet()) {
+            writeSchema(schemasNode, entry.getValue(), entry.getKey());
         }
     }
 
@@ -77,7 +78,7 @@ public class SchemaWriter {
      * @param model
      */
     private static void writeSchema(ObjectNode node, Schema model) {
-        JsonUtil.stringProperty(node, SchemaConstant.PROP_$REF, model.getRef());
+        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
         JsonUtil.stringProperty(node, SchemaConstant.PROP_FORMAT, model.getFormat());
         JsonUtil.stringProperty(node, SchemaConstant.PROP_TITLE, model.getTitle());
         JsonUtil.stringProperty(node, SchemaConstant.PROP_DESCRIPTION, model.getDescription());
@@ -105,7 +106,7 @@ public class SchemaWriter {
             JsonUtil.booleanProperty(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES,
                     model.getAdditionalPropertiesBoolean());
         } else {
-            writeSchema(node, (Schema) model.getAdditionalPropertiesSchema(),
+            writeSchema(node, model.getAdditionalPropertiesSchema(),
                     SchemaConstant.PROP_ADDITIONAL_PROPERTIES);
         }
         JsonUtil.booleanProperty(node, SchemaConstant.PROP_READ_ONLY, model.getReadOnly());

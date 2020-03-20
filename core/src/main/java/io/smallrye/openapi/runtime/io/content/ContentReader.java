@@ -53,19 +53,7 @@ public class ContentReader {
             String contentType = JandexUtil.stringValue(nested, OpenApiConstants.PROP_MEDIA_TYPE);
             MediaType mediaTypeModel = MediaTypeReader.readMediaType(context, nested);
             if (contentType == null) {
-                // If the content type is not provided in the @Content annotation, then
-                // we assume it applies to all the jax-rs method's @Consumes or @Produces
-                String[] mimeTypes = {};
-                if (direction == ContentDirection.Input && CurrentScannerInfo.getCurrentConsumes() != null) {
-                    mimeTypes = CurrentScannerInfo.getCurrentConsumes();
-                }
-                if (direction == ContentDirection.Output && CurrentScannerInfo.getCurrentProduces() != null) {
-                    mimeTypes = CurrentScannerInfo.getCurrentProduces();
-                }
-                if (direction == ContentDirection.Parameter) {
-                    mimeTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
-                }
-                for (String mimeType : mimeTypes) {
+                for (String mimeType : getDefaultMimeTypes(direction)) {
                     content.addMediaType(mimeType, mediaTypeModel);
                 }
             } else {
@@ -91,6 +79,26 @@ public class ContentReader {
             content.addMediaType(fieldName, MediaTypeReader.readMediaType(node.get(fieldName)));
         }
         return content;
+    }
+
+    /**
+     * If the content type is not provided in the @Content annotation, then
+     * we assume it applies to all the scanner method's @Consumes or @Produces
+     * 
+     * @param direction the flow of traffic
+     * @return default mimetypes
+     */
+    private static String[] getDefaultMimeTypes(final ContentDirection direction) {
+
+        if (direction == ContentDirection.INPUT && CurrentScannerInfo.getCurrentConsumes() != null) {
+            return CurrentScannerInfo.getCurrentConsumes();
+        } else if (direction == ContentDirection.OUTPUT && CurrentScannerInfo.getCurrentProduces() != null) {
+            return CurrentScannerInfo.getCurrentProduces();
+        } else if (direction == ContentDirection.PARAMETER) {
+            return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+        } else {
+            return new String[] {};
+        }
     }
 
 }

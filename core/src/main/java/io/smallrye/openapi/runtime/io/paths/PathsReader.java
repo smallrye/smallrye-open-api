@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.operation.OperationReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
@@ -107,7 +108,7 @@ public class PathsReader {
         }
         LOG.debug("Processing PathItem json nodes.");
         PathItem pathItem = new PathItemImpl();
-        pathItem.setRef(JsonUtil.stringProperty(node, PathsConstant.PROP_$REF));
+        pathItem.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         pathItem.setSummary(JsonUtil.stringProperty(node, PathsConstant.PROP_SUMMARY));
         pathItem.setDescription(JsonUtil.stringProperty(node, PathsConstant.PROP_DESCRIPTION));
         pathItem.setGET(OperationReader.readOperation(node.get(PathsConstant.PROP_GET)));

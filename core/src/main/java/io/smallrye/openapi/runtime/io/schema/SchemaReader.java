@@ -18,8 +18,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.discriminator.DiscriminatorReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.io.xml.XmlReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -100,7 +102,7 @@ public class SchemaReader {
         String name = JsonUtil.stringProperty(node, SchemaConstant.PROP_NAME);
 
         Schema schema = new SchemaImpl(name);
-        schema.setRef(JsonUtil.stringProperty(node, SchemaConstant.PROP_$REF));
+        schema.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         schema.setFormat(JsonUtil.stringProperty(node, SchemaConstant.PROP_FORMAT));
         schema.setTitle(JsonUtil.stringProperty(node, SchemaConstant.PROP_TITLE));
         schema.setDescription(JsonUtil.stringProperty(node, SchemaConstant.PROP_DESCRIPTION));
@@ -134,7 +136,7 @@ public class SchemaReader {
         }
         schema.setReadOnly(JsonUtil.booleanProperty(node, SchemaConstant.PROP_READ_ONLY));
         schema.setXml(XmlReader.readXML(node.get(SchemaConstant.PROP_XML)));
-        schema.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(SchemaConstant.PROP_EXTERNAL_DOCS)));
+        schema.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         schema.setExample(readObject(node.get(SchemaConstant.PROP_EXAMPLE)));
         schema.setOneOf(readSchemaArray(node.get(SchemaConstant.PROP_ONE_OF)));
         schema.setAnyOf(readSchemaArray(node.get(SchemaConstant.PROP_ANY_OF)));
