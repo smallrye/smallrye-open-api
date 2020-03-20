@@ -33,10 +33,10 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * <p>
  * A depth first search is performed, with the following precedence (high to low):
  * <ol>
- * <li>Explicitly provided attributes/overrides on <tt>@Schema</tt> annotated elements.
- * Note that some attributes have special behaviours: for example, <tt>ref</tt> is mutually
- * exclusive, and <tt>implementation</tt> replaces the implementation entirely.</li>
- * <li>Unannotated fields unless property <tt>openapi.infer-unannotated-types</tt> set false</li>
+ * <li>Explicitly provided attributes/overrides on {@literal @}Schema annotated elements.
+ * Note that some attributes have special behaviours: for example, ref is mutually
+ * exclusive, and implementation replaces the implementation entirely.</li>
+ * <li>Unannotated fields unless property openapi.infer-unannotated-types set false</li>
  * <li>Inferred attributes, such as name, type, format, etc.</li>
  * </ol>
  *
