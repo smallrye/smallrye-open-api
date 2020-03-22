@@ -29,7 +29,6 @@
         <version.org.jboss.resteasy>4.5.2.Final</version.org.jboss.resteasy>
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/tck/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../tck/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        
     </properties>
 
     <licenses>
