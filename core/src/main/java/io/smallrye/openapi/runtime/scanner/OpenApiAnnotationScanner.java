@@ -139,7 +139,7 @@ public class OpenApiAnnotationScanner {
     private CustomSchemaRegistry getCustomSchemaRegistry(final OpenApiConfig config) {
         if (config == null || config.customSchemaRegistryClass() == null) {
             // Provide default implementation that does nothing
-            return (type) -> {
+            return type -> {
             };
         } else {
             try {

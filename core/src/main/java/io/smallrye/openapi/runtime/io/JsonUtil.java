@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -302,18 +303,19 @@ public final class JsonUtil {
      * @param node the json node
      * @return List of strings
      */
-    public static List<String> readStringArray(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
-        }
-        List<String> rval = new ArrayList<>(node.size());
-        ArrayNode arrayNode = (ArrayNode) node;
-        for (JsonNode arrayItem : arrayNode) {
-            if (arrayItem != null) {
-                rval.add(arrayItem.asText());
+    public static Optional<List<String>> readStringArray(final JsonNode node) {
+        if (node != null && node.isArray()) {
+
+            List<String> rval = new ArrayList<>(node.size());
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (JsonNode arrayItem : arrayNode) {
+                if (arrayItem != null) {
+                    rval.add(arrayItem.asText());
+                }
             }
+            return Optional.of(rval);
         }
-        return rval;
+        return Optional.empty();
     }
 
     /**
@@ -322,18 +324,19 @@ public final class JsonUtil {
      * @param node the json node
      * @return list of objects
      */
-    public static List<Object> readObjectArray(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
-        }
-        List<Object> rval = new ArrayList<>(node.size());
-        ArrayNode arrayNode = (ArrayNode) node;
-        for (JsonNode arrayItem : arrayNode) {
-            if (arrayItem != null) {
-                rval.add(readObject(arrayItem));
+    public static Optional<List<Object>> readObjectArray(final JsonNode node) {
+        if (node != null && node.isArray()) {
+
+            List<Object> rval = new ArrayList<>(node.size());
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (JsonNode arrayItem : arrayNode) {
+                if (arrayItem != null) {
+                    rval.add(readObject(arrayItem));
+                }
             }
+            return Optional.of(rval);
         }
-        return rval;
+        return Optional.empty();
     }
 
     /**
@@ -342,17 +345,17 @@ public final class JsonUtil {
      * @param node json map
      * @return a String-String map
      */
-    public static Map<String, String> readStringMap(JsonNode node) {
-        if (node == null || !node.isObject()) {
-            return null;
+    public static Optional<Map<String, String>> readStringMap(JsonNode node) {
+        if (node != null && node.isObject()) {
+            Map<String, String> rval = new LinkedHashMap<>();
+            for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
+                String fieldName = fieldNames.next();
+                String value = JsonUtil.stringProperty(node, fieldName);
+                rval.put(fieldName, value);
+            }
+            return Optional.of(rval);
         }
-        Map<String, String> rval = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
-            String fieldName = fieldNames.next();
-            String value = JsonUtil.stringProperty(node, fieldName);
-            rval.put(fieldName, value);
-        }
-        return rval;
+        return Optional.empty();
     }
 
 }

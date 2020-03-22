@@ -119,8 +119,8 @@ public class PathsReader {
         pathItem.setHEAD(OperationReader.readOperation(node.get(PathsConstant.PROP_HEAD)));
         pathItem.setPATCH(OperationReader.readOperation(node.get(PathsConstant.PROP_PATCH)));
         pathItem.setTRACE(OperationReader.readOperation(node.get(PathsConstant.PROP_TRACE)));
-        pathItem.setParameters(ParameterReader.readParameterList(node.get(PathsConstant.PROP_PARAMETERS)));
-        pathItem.setServers(ServerReader.readServers(node.get(PathsConstant.PROP_SERVERS)));
+        pathItem.setParameters(ParameterReader.readParameterList(node.get(PathsConstant.PROP_PARAMETERS)).orElse(null));
+        pathItem.setServers(ServerReader.readServers(node.get(PathsConstant.PROP_SERVERS)).orElse(null));
         ExtensionReader.readExtensions(node, pathItem);
         return pathItem;
     }

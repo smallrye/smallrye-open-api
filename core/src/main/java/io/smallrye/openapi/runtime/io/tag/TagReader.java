@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io.tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
@@ -42,19 +43,19 @@ public class TagReader {
      * @param annotationValue an array of {@literal @}Tag annotations
      * @return List of Tag models
      */
-    public static List<Tag> readTags(final AnnotationValue annotationValue) {
-        if (annotationValue == null) {
-            return null;
-        }
-        LOG.debug("Processing an array of @Tag annotations.");
-        AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        List<Tag> tags = new ArrayList<>();
-        for (AnnotationInstance tagAnno : nestedArray) {
-            if (!JandexUtil.isRef(tagAnno)) {
-                tags.add(readTag(tagAnno));
+    public static Optional<List<Tag>> readTags(final AnnotationValue annotationValue) {
+        if (annotationValue != null) {
+            LOG.debug("Processing an array of @Tag annotations.");
+            AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
+            List<Tag> tags = new ArrayList<>();
+            for (AnnotationInstance tagAnno : nestedArray) {
+                if (!JandexUtil.isRef(tagAnno)) {
+                    tags.add(readTag(tagAnno));
+                }
             }
+            return Optional.of(tags);
         }
-        return tags;
+        return Optional.empty();
     }
 
     /**
@@ -63,17 +64,17 @@ public class TagReader {
      * @param node the json array node
      * @return List of Tag models
      */
-    public static List<Tag> readTags(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
+    public static Optional<List<Tag>> readTags(final JsonNode node) {
+        if (node != null && node.isArray()) {
+            LOG.debug("Processing an array of Tag json nodes.");
+            ArrayNode nodes = (ArrayNode) node;
+            List<Tag> rval = new ArrayList<>(nodes.size());
+            for (JsonNode tagNode : nodes) {
+                rval.add(readTag(tagNode));
+            }
+            return Optional.of(rval);
         }
-        LOG.debug("Processing an array of Tag json nodes.");
-        ArrayNode nodes = (ArrayNode) node;
-        List<Tag> rval = new ArrayList<>(nodes.size());
-        for (JsonNode tagNode : nodes) {
-            rval.add(readTag(tagNode));
-        }
-        return rval;
+        return Optional.empty();
     }
 
     /**

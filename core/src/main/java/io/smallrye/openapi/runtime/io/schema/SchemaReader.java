@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
@@ -120,13 +121,13 @@ public class SchemaReader {
         schema.setUniqueItems(JsonUtil.booleanProperty(node, SchemaConstant.PROP_UNIQUE_ITEMS));
         schema.setMaxProperties(JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_PROPERTIES));
         schema.setMinProperties(JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_PROPERTIES));
-        schema.setRequired(JsonUtil.readStringArray(node.get(SchemaConstant.PROP_REQUIRED)));
-        schema.setEnumeration(JsonUtil.readObjectArray(node.get(SchemaConstant.PROP_ENUM)));
+        schema.setRequired(JsonUtil.readStringArray(node.get(SchemaConstant.PROP_REQUIRED)).orElse(null));
+        schema.setEnumeration(JsonUtil.readObjectArray(node.get(SchemaConstant.PROP_ENUM)).orElse(null));
         schema.setType(readSchemaType(node.get(SchemaConstant.PROP_TYPE)));
         schema.setItems(readSchema(node.get(SchemaConstant.PROP_ITEMS)));
         schema.setNot(readSchema(node.get(SchemaConstant.PROP_NOT)));
-        schema.setAllOf(readSchemaArray(node.get(SchemaConstant.PROP_ALL_OF)));
-        schema.setProperties(readSchemas(node.get(SchemaConstant.PROP_PROPERTIES)));
+        schema.setAllOf(readSchemaArray(node.get(SchemaConstant.PROP_ALL_OF)).orElse(null));
+        schema.setProperties(readSchemas(node.get(SchemaConstant.PROP_PROPERTIES)).orElse(null));
         if (node.has(SchemaConstant.PROP_ADDITIONAL_PROPERTIES)
                 && node.get(SchemaConstant.PROP_ADDITIONAL_PROPERTIES).isObject()) {
             schema.setAdditionalPropertiesSchema(readSchema(node.get(SchemaConstant.PROP_ADDITIONAL_PROPERTIES)));
@@ -138,8 +139,8 @@ public class SchemaReader {
         schema.setXml(XmlReader.readXML(node.get(SchemaConstant.PROP_XML)));
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         schema.setExample(readObject(node.get(SchemaConstant.PROP_EXAMPLE)));
-        schema.setOneOf(readSchemaArray(node.get(SchemaConstant.PROP_ONE_OF)));
-        schema.setAnyOf(readSchemaArray(node.get(SchemaConstant.PROP_ANY_OF)));
+        schema.setOneOf(readSchemaArray(node.get(SchemaConstant.PROP_ONE_OF)).orElse(null));
+        schema.setAnyOf(readSchemaArray(node.get(SchemaConstant.PROP_ANY_OF)).orElse(null));
         schema.setNot(readSchema(node.get(SchemaConstant.PROP_NOT)));
         schema.setDiscriminator(DiscriminatorReader.readDiscriminator(node.get(SchemaConstant.PROP_DISCRIMINATOR)));
         schema.setNullable(JsonUtil.booleanProperty(node, SchemaConstant.PROP_NULLABLE));
@@ -156,11 +157,11 @@ public class SchemaReader {
      * @return SchemaType enum
      */
     private static Schema.SchemaType readSchemaType(final JsonNode node) {
-        if (node == null || !node.isTextual()) {
-            return null;
+        if (node != null && node.isTextual()) {
+            String strval = node.asText();
+            return Schema.SchemaType.valueOf(strval.toUpperCase());
         }
-        String strval = node.asText();
-        return Schema.SchemaType.valueOf(strval.toUpperCase());
+        return null;
     }
 
     /**
@@ -169,16 +170,16 @@ public class SchemaReader {
      * @param node the json array
      * @return List of Schema models
      */
-    private static List<Schema> readSchemaArray(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
+    private static Optional<List<Schema>> readSchemaArray(final JsonNode node) {
+        if (node != null && node.isArray()) {
+            List<Schema> rval = new ArrayList<>(node.size());
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (JsonNode arrayItem : arrayNode) {
+                rval.add(readSchema(arrayItem));
+            }
+            return Optional.of(rval);
         }
-        List<Schema> rval = new ArrayList<>(node.size());
-        ArrayNode arrayNode = (ArrayNode) node;
-        for (JsonNode arrayItem : arrayNode) {
-            rval.add(readSchema(arrayItem));
-        }
-        return rval;
+        return Optional.empty();
     }
 
     /**
@@ -187,17 +188,16 @@ public class SchemaReader {
      * @param node map of schema json nodes
      * @return Map of Schema model
      */
-    public static Map<String, Schema> readSchemas(final JsonNode node) {
-        if (node == null || !node.isObject()) {
-            return null;
+    public static Optional<Map<String, Schema>> readSchemas(final JsonNode node) {
+        if (node != null && node.isObject()) {
+            Map<String, Schema> models = new LinkedHashMap<>();
+            for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
+                String fieldName = fieldNames.next();
+                JsonNode childNode = node.get(fieldName);
+                models.put(fieldName, readSchema(childNode));
+            }
+            return Optional.of(models);
         }
-        Map<String, Schema> models = new LinkedHashMap<>();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
-            String fieldName = fieldNames.next();
-            JsonNode childNode = node.get(fieldName);
-            models.put(fieldName, readSchema(childNode));
-        }
-
-        return models;
+        return Optional.empty();
     }
 }

@@ -347,7 +347,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         if (subResourceClass != null) {
             final String originalAppPath = this.currentAppPath;
 
-            Function<AnnotationInstance, Parameter> reader = (t) -> {
+            Function<AnnotationInstance, Parameter> reader = t -> {
                 return ParameterReader.readParameter(context, t);
             };
 
@@ -392,8 +392,8 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         LOG.debugf("Processing jax-rs method: {0}", method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES));
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES));
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES).orElse(null));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -412,8 +412,8 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             operation.setTags(new ArrayList<>(tags));
         }
 
-        // Process @Parameter annotations. TODO: this still mix Jax-rs and OpenAPI
-        Function<AnnotationInstance, Parameter> reader = (t) -> {
+        // Process @Parameter annotations.
+        Function<AnnotationInstance, Parameter> reader = t -> {
             return ParameterReader.readParameter(context, t);
         };
         ParameterProcessor.ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method,
@@ -714,7 +714,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         return tags;
     }
 
-    static String[] getMediaTypes(MethodInfo resourceMethod, DotName annotationName) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, DotName annotationName) {
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
         if (annotation == null) {
@@ -725,13 +725,13 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
-                return annotationValue.asStringArray();
+                return Optional.of(annotationValue.asStringArray());
             }
 
-            return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+            return Optional.of(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**

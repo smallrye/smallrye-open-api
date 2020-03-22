@@ -47,11 +47,11 @@ public class DefinitionReader {
         LOG.debug("Processing an @OpenAPIDefinition annotation.");
 
         openApi.setInfo(InfoReader.readInfo(annotationInstance.value(DefinitionConstant.PROP_INFO)));
-        openApi.setTags(TagReader.readTags(annotationInstance.value(DefinitionConstant.PROP_TAGS)));
+        openApi.setTags(TagReader.readTags(annotationInstance.value(DefinitionConstant.PROP_TAGS)).orElse(null));
         openApi.setServers(
-                ServerReader.readServers(annotationInstance.value(DefinitionConstant.PROP_SERVERS)));
+                ServerReader.readServers(annotationInstance.value(DefinitionConstant.PROP_SERVERS)).orElse(null));
         openApi.setSecurity(SecurityRequirementReader
-                .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY)));
+                .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY)).orElse(null));
         openApi.setExternalDocs(
                 ExternalDocsReader
                         .readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
@@ -71,10 +71,10 @@ public class DefinitionReader {
 
         openApi.setOpenapi(JsonUtil.stringProperty(node, DefinitionConstant.PROP_OPENAPI));
         openApi.setInfo(InfoReader.readInfo(node.get(DefinitionConstant.PROP_INFO)));
-        openApi.setTags(TagReader.readTags(node.get(DefinitionConstant.PROP_TAGS)));
-        openApi.setServers(ServerReader.readServers(node.get(DefinitionConstant.PROP_SERVERS)));
+        openApi.setTags(TagReader.readTags(node.get(DefinitionConstant.PROP_TAGS)).orElse(null));
+        openApi.setServers(ServerReader.readServers(node.get(DefinitionConstant.PROP_SERVERS)).orElse(null));
         openApi.setSecurity(SecurityRequirementReader
-                .readSecurityRequirements(node.get(DefinitionConstant.PROP_SECURITY)));
+                .readSecurityRequirements(node.get(DefinitionConstant.PROP_SECURITY)).orElse(null));
         openApi.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         openApi.setComponents(

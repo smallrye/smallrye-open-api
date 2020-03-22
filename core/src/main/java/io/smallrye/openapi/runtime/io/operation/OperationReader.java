@@ -54,13 +54,13 @@ public class OperationReader {
         operation.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         operation.setParameters(ParameterReader.readParametersList(context,
-                annotationInstance.value(OperationConstant.PROP_PARAMETERS)));
+                annotationInstance.value(OperationConstant.PROP_PARAMETERS)).orElse(null));
         operation.setRequestBody(RequestBodyReader.readRequestBody(context,
                 annotationInstance.value(OperationConstant.PROP_REQUEST_BODY)));
         operation.setResponses(ResponseReader.readResponses(context,
                 annotationInstance.value(OperationConstant.PROP_RESPONSES)));
         operation.setSecurity(SecurityRequirementReader
-                .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY)));
+                .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY)).orElse(null));
         operation.setExtensions(
                 ExtensionReader.readExtensions(context,
                         annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
@@ -90,19 +90,19 @@ public class OperationReader {
         }
         LOG.debug("Processing a single Operation json object.");
         Operation model = new OperationImpl();
-        model.setTags(JsonUtil.readStringArray(node.get(OperationConstant.PROP_TAGS)));
+        model.setTags(JsonUtil.readStringArray(node.get(OperationConstant.PROP_TAGS)).orElse(null));
         model.setSummary(JsonUtil.stringProperty(node, OperationConstant.PROP_SUMMARY));
         model.setDescription(JsonUtil.stringProperty(node, OperationConstant.PROP_DESCRIPTION));
         model.setExternalDocs(ExternalDocsReader.readExternalDocs(node.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         model.setOperationId(JsonUtil.stringProperty(node, OperationConstant.PROP_OPERATION_ID));
-        model.setParameters(ParameterReader.readParameterList(node.get(OperationConstant.PROP_PARAMETERS)));
+        model.setParameters(ParameterReader.readParameterList(node.get(OperationConstant.PROP_PARAMETERS)).orElse(null));
         model.setRequestBody(RequestBodyReader.readRequestBody(node.get(OperationConstant.PROP_REQUEST_BODY)));
         model.setResponses(ResponseReader.readResponses(node.get(OperationConstant.PROP_RESPONSES)));
         model.setCallbacks(CallbackReader.readCallbacks(node.get(OperationConstant.PROP_CALLBACKS)));
         model.setDeprecated(JsonUtil.booleanProperty(node, OperationConstant.PROP_DEPRECATED));
         model.setSecurity(
-                SecurityRequirementReader.readSecurityRequirements(node.get(OperationConstant.PROP_SECURITY)));
-        model.setServers(ServerReader.readServers(node.get(OperationConstant.PROP_SERVERS)));
+                SecurityRequirementReader.readSecurityRequirements(node.get(OperationConstant.PROP_SECURITY)).orElse(null));
+        model.setServers(ServerReader.readServers(node.get(OperationConstant.PROP_SERVERS)).orElse(null));
         ExtensionReader.readExtensions(node, model);
         return model;
     }

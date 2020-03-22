@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io.securityrequirement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.AnnotationInstance;
@@ -39,20 +40,20 @@ public class SecurityRequirementReader {
      * @param annotationValue Array of {@literal @}SecurityRequirement annotations
      * @return List of SecurityRequirement models
      */
-    public static List<SecurityRequirement> readSecurityRequirements(final AnnotationValue annotationValue) {
-        if (annotationValue == null) {
-            return null;
-        }
-        LOG.debug("Processing an array of @SecurityRequirement annotations.");
-        AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        List<SecurityRequirement> requirements = new ArrayList<>();
-        for (AnnotationInstance requirementAnno : nestedArray) {
-            SecurityRequirement requirement = readSecurityRequirement(requirementAnno);
-            if (requirement != null) {
-                requirements.add(requirement);
+    public static Optional<List<SecurityRequirement>> readSecurityRequirements(final AnnotationValue annotationValue) {
+        if (annotationValue != null) {
+            LOG.debug("Processing an array of @SecurityRequirement annotations.");
+            AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
+            List<SecurityRequirement> requirements = new ArrayList<>();
+            for (AnnotationInstance requirementAnno : nestedArray) {
+                SecurityRequirement requirement = readSecurityRequirement(requirementAnno);
+                if (requirement != null) {
+                    requirements.add(requirement);
+                }
             }
+            return Optional.of(requirements);
         }
-        return requirements;
+        return Optional.empty();
     }
 
     /**
@@ -61,17 +62,17 @@ public class SecurityRequirementReader {
      * @param node the json array
      * @return List of SecurityRequirement models
      */
-    public static List<SecurityRequirement> readSecurityRequirements(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
+    public static Optional<List<SecurityRequirement>> readSecurityRequirements(final JsonNode node) {
+        if (node != null && node.isArray()) {
+            LOG.debug("Processing a json array of SecurityRequirement.");
+            List<SecurityRequirement> requirements = new ArrayList<>(node.size());
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (JsonNode arrayItem : arrayNode) {
+                requirements.add(readSecurityRequirement(arrayItem));
+            }
+            return Optional.of(requirements);
         }
-        LOG.debug("Processing a json array of SecurityRequirement.");
-        List<SecurityRequirement> requirements = new ArrayList<>(node.size());
-        ArrayNode arrayNode = (ArrayNode) node;
-        for (JsonNode arrayItem : arrayNode) {
-            requirements.add(readSecurityRequirement(arrayItem));
-        }
-        return requirements;
+        return Optional.empty();
     }
 
     /**
@@ -103,21 +104,22 @@ public class SecurityRequirementReader {
      * @return SecurityRequirement model
      */
     private static SecurityRequirement readSecurityRequirement(final JsonNode node) {
-        if (node == null || !node.isObject()) {
-            return null;
-        }
-        SecurityRequirement requirement = new SecurityRequirementImpl();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
-            String fieldName = fieldNames.next();
-            JsonNode scopesNode = node.get(fieldName);
-            List<String> scopes = JsonUtil.readStringArray(scopesNode);
-            if (scopes == null) {
-                requirement.addScheme(fieldName);
-            } else {
-                requirement.addScheme(fieldName, scopes);
+        if (node != null && node.isObject()) {
+
+            SecurityRequirement requirement = new SecurityRequirementImpl();
+            for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
+                String fieldName = fieldNames.next();
+                JsonNode scopesNode = node.get(fieldName);
+                Optional<List<String>> maybeScopes = JsonUtil.readStringArray(scopesNode);
+                if (maybeScopes.isPresent()) {
+                    requirement.addScheme(fieldName, maybeScopes.get());
+                } else {
+                    requirement.addScheme(fieldName);
+                }
             }
+            return requirement;
         }
-        return requirement;
+        return null;
     }
 
     // helper methods for scanners

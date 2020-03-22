@@ -145,7 +145,6 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
     @Override
     public void setParameters(List<Parameter> parameters) {
         this.parameters = ModelUtil.replace(parameters, ArrayList<Parameter>::new);
-        ;
     }
 
     /**

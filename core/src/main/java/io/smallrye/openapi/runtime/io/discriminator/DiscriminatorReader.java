@@ -34,7 +34,7 @@ public class DiscriminatorReader {
 
         Discriminator discriminator = new DiscriminatorImpl();
         discriminator.setPropertyName(JsonUtil.stringProperty(node, DiscriminatorConstant.PROP_PROPERTY_NAME));
-        discriminator.setMapping(JsonUtil.readStringMap(node.get(DiscriminatorConstant.PROP_MAPPING)));
+        discriminator.setMapping(JsonUtil.readStringMap(node.get(DiscriminatorConstant.PROP_MAPPING)).orElse(null));
         return discriminator;
     }
 }

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -52,21 +53,22 @@ public class ParameterReader {
      * @param annotationValue Map of {@literal @}Parameter annotations
      * @return List of Parameter model
      */
-    public static List<Parameter> readParametersList(final AnnotationScannerContext context,
+    public static Optional<List<Parameter>> readParametersList(final AnnotationScannerContext context,
             final AnnotationValue annotationValue) {
-        if (annotationValue == null) {
-            return null;
-        }
-        LOG.debug("Processing a list of @Parameter annotations.");
-        List<Parameter> parameters = new ArrayList<>();
-        AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        for (AnnotationInstance nested : nestedArray) {
-            Parameter parameter = readParameter(context, nested);
-            if (parameter != null) {
-                parameters.add(parameter);
+        if (annotationValue != null) {
+
+            LOG.debug("Processing a list of @Parameter annotations.");
+            List<Parameter> parameters = new ArrayList<>();
+            AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
+            for (AnnotationInstance nested : nestedArray) {
+                Parameter parameter = readParameter(context, nested);
+                if (parameter != null) {
+                    parameters.add(parameter);
+                }
             }
+            return Optional.of(parameters);
         }
-        return parameters;
+        return Optional.empty();
     }
 
     /**
@@ -75,17 +77,17 @@ public class ParameterReader {
      * @param node json list
      * @return List of Parameter model
      */
-    public static List<Parameter> readParameterList(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
+    public static Optional<List<Parameter>> readParameterList(final JsonNode node) {
+        if (node != null && node.isArray()) {
+            LOG.debug("Processing a json list of Parameter.");
+            List<Parameter> params = new ArrayList<>();
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (JsonNode paramNode : arrayNode) {
+                params.add(ParameterReader.readParameter(paramNode));
+            }
+            return Optional.of(params);
         }
-        LOG.debug("Processing a json list of Parameter.");
-        List<Parameter> params = new ArrayList<>();
-        ArrayNode arrayNode = (ArrayNode) node;
-        for (JsonNode paramNode : arrayNode) {
-            params.add(ParameterReader.readParameter(paramNode));
-        }
-        return params;
+        return Optional.empty();
     }
 
     /**
@@ -173,7 +175,7 @@ public class ParameterReader {
         parameter.setStyle(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_STYLE,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
         parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_EXPLODE,
-                org.eclipse.microprofile.openapi.annotations.enums.Explode.class)));
+                org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
         parameter.setAllowReserved(
                 JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED));
         parameter.setSchema(
@@ -225,14 +227,14 @@ public class ParameterReader {
      * 
      * @param enumValue
      */
-    private static Boolean readExplode(Explode enumValue) {
+    private static Optional<Boolean> readExplode(Explode enumValue) {
         if (enumValue == Explode.TRUE) {
-            return Boolean.TRUE;
+            return Optional.of(Boolean.TRUE);
         }
         if (enumValue == Explode.FALSE) {
-            return Boolean.FALSE;
+            return Optional.of(Boolean.FALSE);
         }
-        return null;
+        return Optional.empty();
     }
 
     /**

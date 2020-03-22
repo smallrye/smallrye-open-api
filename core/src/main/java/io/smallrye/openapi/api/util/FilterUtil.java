@@ -319,10 +319,8 @@ public class FilterUtil {
      * @param model
      */
     private static void filterLink(OASFilter filter, Link model) {
-        if (model != null) {
-            if (model.getServer() != null && filter.filterServer(model.getServer()) == null) {
-                model.setServer(null);
-            }
+        if (model != null && model.getServer() != null && filter.filterServer(model.getServer()) == null) {
+            model.setServer(null);
         }
     }
 

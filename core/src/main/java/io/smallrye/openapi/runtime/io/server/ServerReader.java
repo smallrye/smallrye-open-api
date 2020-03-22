@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.io.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.jboss.jandex.AnnotationInstance;
@@ -38,17 +39,17 @@ public class ServerReader {
      * @param annotationValue an Array of {@literal @}Server annotations
      * @return a List of Server models
      */
-    public static List<Server> readServers(final AnnotationValue annotationValue) {
-        if (annotationValue == null) {
-            return null;
+    public static Optional<List<Server>> readServers(final AnnotationValue annotationValue) {
+        if (annotationValue != null) {
+            LOG.debug("Processing an array of @Server annotations.");
+            AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
+            List<Server> servers = new ArrayList<>();
+            for (AnnotationInstance serverAnno : nestedArray) {
+                servers.add(readServer(serverAnno));
+            }
+            return Optional.of(servers);
         }
-        LOG.debug("Processing an array of @Server annotations.");
-        AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        List<Server> servers = new ArrayList<>();
-        for (AnnotationInstance serverAnno : nestedArray) {
-            servers.add(readServer(serverAnno));
-        }
-        return servers;
+        return Optional.empty();
     }
 
     /**
@@ -57,17 +58,17 @@ public class ServerReader {
      * @param node the json array
      * @return a List of Server models
      */
-    public static List<Server> readServers(final JsonNode node) {
-        if (node == null || !node.isArray()) {
-            return null;
+    public static Optional<List<Server>> readServers(final JsonNode node) {
+        if (node != null && node.isArray()) {
+            LOG.debug("Processing an array of Server json nodes.");
+            ArrayNode nodes = (ArrayNode) node;
+            List<Server> rval = new ArrayList<>(nodes.size());
+            for (JsonNode serverNode : nodes) {
+                rval.add(readServer(serverNode));
+            }
+            return Optional.of(rval);
         }
-        LOG.debug("Processing an array of Server json nodes.");
-        ArrayNode nodes = (ArrayNode) node;
-        List<Server> rval = new ArrayList<>(nodes.size());
-        for (JsonNode serverNode : nodes) {
-            rval.add(readServer(serverNode));
-        }
-        return rval;
+        return Optional.empty();
     }
 
     /**
@@ -77,10 +78,10 @@ public class ServerReader {
      * @return a Server model
      */
     public static Server readServer(final AnnotationValue annotationValue) {
-        if (annotationValue == null) {
-            return null;
+        if (annotationValue != null) {
+            return readServer(annotationValue.asNested());
         }
-        return readServer(annotationValue.asNested());
+        return null;
     }
 
     /**
@@ -90,15 +91,16 @@ public class ServerReader {
      * @return Server model
      */
     public static Server readServer(final AnnotationInstance annotationInstance) {
-        if (annotationInstance == null) {
-            return null;
+        if (annotationInstance != null) {
+            LOG.debug("Processing a single @Server annotation.");
+            Server server = new ServerImpl();
+            server.setUrl(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_URL));
+            server.setDescription(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
+            server.setVariables(
+                    ServerVariableReader.readServerVariables(annotationInstance.value(ServerConstant.PROP_VARIABLES)));
+            return server;
         }
-        LOG.debug("Processing a single @Server annotation.");
-        Server server = new ServerImpl();
-        server.setUrl(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_URL));
-        server.setDescription(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
-        server.setVariables(ServerVariableReader.readServerVariables(annotationInstance.value(ServerConstant.PROP_VARIABLES)));
-        return server;
+        return null;
     }
 
     /**
@@ -108,17 +110,16 @@ public class ServerReader {
      * @return a List of Server models
      */
     public static Server readServer(final JsonNode node) {
-        if (node == null || !node.isObject()) {
-            return null;
+        if (node != null && node.isObject()) {
+            LOG.debug("Processing a single Server json node.");
+            Server server = new ServerImpl();
+            server.setUrl(JsonUtil.stringProperty(node, ServerConstant.PROP_URL));
+            server.setDescription(JsonUtil.stringProperty(node, ServerConstant.PROP_DESCRIPTION));
+            server.setVariables(ServerVariableReader.readServerVariables(node.get(ServerConstant.PROP_VARIABLES)));
+            ExtensionReader.readExtensions(node, server);
+            return server;
         }
-        LOG.debug("Processing a single Server json node.");
-
-        Server server = new ServerImpl();
-        server.setUrl(JsonUtil.stringProperty(node, ServerConstant.PROP_URL));
-        server.setDescription(JsonUtil.stringProperty(node, ServerConstant.PROP_DESCRIPTION));
-        server.setVariables(ServerVariableReader.readServerVariables(node.get(ServerConstant.PROP_VARIABLES)));
-        ExtensionReader.readExtensions(node, server);
-        return server;
+        return null;
     }
 
     // helper methods for scanners

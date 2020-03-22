@@ -89,7 +89,7 @@ public class ComponentsReader {
         components.setRequestBodies(
                 RequestBodyReader.readRequestBodies(node.get(ComponentsConstant.PROP_REQUEST_BODIES)));
         components.setResponses(ResponseReader.readResponsesMap(node.get(ComponentsConstant.PROP_RESPONSES)));
-        components.setSchemas(SchemaReader.readSchemas(node.get(ComponentsConstant.PROP_SCHEMAS)));
+        components.setSchemas(SchemaReader.readSchemas(node.get(ComponentsConstant.PROP_SCHEMAS)).orElse(null));
         components.setSecuritySchemes(
                 SecuritySchemeReader.readSecuritySchemes(node.get(ComponentsConstant.PROP_SECURITY_SCHEMES)));
         ExtensionReader.readExtensions(node, components);
