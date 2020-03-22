@@ -347,9 +347,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         if (subResourceClass != null) {
             final String originalAppPath = this.currentAppPath;
 
-            Function<AnnotationInstance, Parameter> reader = t -> {
-                return ParameterReader.readParameter(context, t);
-            };
+            Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
             ParameterProcessor.ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method,
                     reader, context.getExtensions());
@@ -413,9 +411,8 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         }
 
         // Process @Parameter annotations.
-        Function<AnnotationInstance, Parameter> reader = t -> {
-            return ParameterReader.readParameter(context, t);
-        };
+        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+
         ParameterProcessor.ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method,
                 reader, context.getExtensions());
         operation.setParameters(params.getOperationParameters());

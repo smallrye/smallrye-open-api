@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -167,13 +168,12 @@ public class JandexUtil {
      * @param propertyName String
      * @return Boolean value
      */
-    public static Boolean booleanValue(AnnotationInstance annotation, String propertyName) {
+    public static Optional<Boolean> booleanValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        } else {
-            return value.asBoolean();
+        if (value != null) {
+            return Optional.of(value.asBoolean());
         }
+        return Optional.empty();
     }
 
     /**
@@ -237,13 +237,12 @@ public class JandexUtil {
      * @param propertyName String
      * @return List of Strings
      */
-    public static List<String> stringListValue(AnnotationInstance annotation, String propertyName) {
+    public static Optional<List<String>> stringListValue(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        } else {
-            return new ArrayList<>(Arrays.asList(value.asStringArray()));
+        if (value != null) {
+            return Optional.of(new ArrayList<>(Arrays.asList(value.asStringArray())));
         }
+        return Optional.empty();
     }
 
     /**

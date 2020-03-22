@@ -91,8 +91,9 @@ public class EncodingReader {
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(JandexUtil.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
-        encoding.setExplode(JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_EXPLODE));
-        encoding.setAllowReserved(JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED));
+        encoding.setExplode(JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_EXPLODE).orElse(null));
+        encoding.setAllowReserved(
+                JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED).orElse(null));
         encoding.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(EncodingConstant.PROP_HEADERS)));
         return encoding;
@@ -113,8 +114,8 @@ public class EncodingReader {
         encoding.setContentType(JsonUtil.stringProperty(node, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setHeaders(HeaderReader.readHeaders(node.get(EncodingConstant.PROP_HEADERS)));
         encoding.setStyle(readEncodingStyle(node.get(EncodingConstant.PROP_STYLE)));
-        encoding.setExplode(JsonUtil.booleanProperty(node, EncodingConstant.PROP_EXPLODE));
-        encoding.setAllowReserved(JsonUtil.booleanProperty(node, EncodingConstant.PROP_ALLOW_RESERVED));
+        encoding.setExplode(JsonUtil.booleanProperty(node, EncodingConstant.PROP_EXPLODE).orElse(null));
+        encoding.setAllowReserved(JsonUtil.booleanProperty(node, EncodingConstant.PROP_ALLOW_RESERVED).orElse(null));
         ExtensionReader.readExtensions(node, encoding);
         return encoding;
     }

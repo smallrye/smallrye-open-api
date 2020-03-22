@@ -161,23 +161,23 @@ public class ParameterReader {
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
 
         // Params can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_HIDDEN);
-        if (Boolean.TRUE.equals(isHidden)) {
+        Optional<Boolean> isHidden = JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_HIDDEN);
+        if (isHidden.isPresent() && isHidden.get()) {
             ParameterImpl.setHidden(parameter, true);
             return parameter;
         }
 
         parameter.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
-        parameter.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED));
-        parameter.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED));
+        parameter.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
+        parameter.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
         parameter.setAllowEmptyValue(
-                JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+                JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
         parameter.setStyle(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_STYLE,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
         parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_EXPLODE,
                 org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
         parameter.setAllowReserved(
-                JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED));
+                JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
         parameter.setSchema(
                 SchemaFactory.readSchema(context.getIndex(),
                         annotationInstance.value(Parameterizable.PROP_SCHEMA)));
@@ -206,12 +206,12 @@ public class ParameterReader {
         parameter.setName(JsonUtil.stringProperty(node, Parameterizable.PROP_NAME));
         parameter.setIn(readParameterIn(node.get(ParameterConstant.PROP_IN)));
         parameter.setDescription(JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION));
-        parameter.setRequired(JsonUtil.booleanProperty(node, Parameterizable.PROP_REQUIRED));
-        parameter.setDeprecated(JsonUtil.booleanProperty(node, Parameterizable.PROP_DEPRECATED));
-        parameter.setAllowEmptyValue(JsonUtil.booleanProperty(node, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+        parameter.setRequired(JsonUtil.booleanProperty(node, Parameterizable.PROP_REQUIRED).orElse(null));
+        parameter.setDeprecated(JsonUtil.booleanProperty(node, Parameterizable.PROP_DEPRECATED).orElse(null));
+        parameter.setAllowEmptyValue(JsonUtil.booleanProperty(node, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
         parameter.setStyle(readParameterStyle(node.get(Parameterizable.PROP_STYLE)));
-        parameter.setExplode(JsonUtil.booleanProperty(node, Parameterizable.PROP_EXPLODE));
-        parameter.setAllowReserved(JsonUtil.booleanProperty(node, ParameterConstant.PROP_ALLOW_RESERVED));
+        parameter.setExplode(JsonUtil.booleanProperty(node, Parameterizable.PROP_EXPLODE).orElse(null));
+        parameter.setAllowReserved(JsonUtil.booleanProperty(node, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
         parameter.setSchema(SchemaReader.readSchema(node.get(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(ContentReader.readContent(node.get(Parameterizable.PROP_CONTENT)));
         parameter.setExamples(ExampleReader.readExamples(node.get(Parameterizable.PROP_EXAMPLES)));

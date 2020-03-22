@@ -37,9 +37,7 @@ public class ServersUtil {
         // Now the PathItem and Operation servers
         Map<String, PathItem> pathItems = oai.getPaths().getPathItems();
         if (pathItems != null) {
-            pathItems.entrySet().forEach(entry -> {
-                configureServers(config, entry.getKey(), entry.getValue());
-            });
+            pathItems.entrySet().forEach(entry -> configureServers(config, entry.getKey(), entry.getValue()));
         }
     }
 

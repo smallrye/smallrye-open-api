@@ -72,16 +72,9 @@ public class IgnoreResolver {
         @Override
         public boolean shouldIgnore(AnnotationTarget target, PathEntry parentPathEntry) {
             AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
-
             if (annotationInstance != null) {
-                Boolean isHidden = JandexUtil.booleanValue(annotationInstance,
-                        SchemaConstant.PROP_HIDDEN);
-
-                if (isHidden != null) {
-                    return isHidden;
-                }
+                return JandexUtil.booleanValue(annotationInstance, SchemaConstant.PROP_HIDDEN).orElse(false);
             }
-
             return false;
         }
 
@@ -216,7 +209,7 @@ public class IgnoreResolver {
      * Handler for @{@link JsonIgnoreType}
      */
     private final class JsonIgnoreTypeHandler implements IgnoreAnnotationHandler {
-        private Set<DotName> ignoredTypes = new LinkedHashSet<>();
+        private final Set<DotName> ignoredTypes = new LinkedHashSet<>();
 
         @Override
         public boolean shouldIgnore(AnnotationTarget target, DataObjectDeque.PathEntry parentPathEntry) {
@@ -284,12 +277,7 @@ public class IgnoreResolver {
                     // Unless field is annotated with @Schema to explicitly un-hide it.
                     AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
                     if (schemaAnnotation != null) {
-                        Boolean boolVal = JandexUtil.booleanValue(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
-                        if (boolVal == null) {
-                            return true;
-                        } else {
-                            return boolVal;
-                        }
+                        return JandexUtil.booleanValue(schemaAnnotation, SchemaConstant.PROP_HIDDEN).orElse(true);
                     }
                     return true;
                 }

@@ -84,13 +84,13 @@ public class SecurityRequirementReader {
     public static SecurityRequirement readSecurityRequirement(AnnotationInstance annotationInstance) {
         String name = JandexUtil.stringValue(annotationInstance, SecurityRequirementConstant.PROP_NAME);
         if (name != null) {
-            List<String> scopes = JandexUtil.stringListValue(annotationInstance,
+            Optional<List<String>> maybeScopes = JandexUtil.stringListValue(annotationInstance,
                     SecurityRequirementConstant.PROP_SCOPES);
             SecurityRequirement requirement = new SecurityRequirementImpl();
-            if (scopes == null) {
-                requirement.addScheme(name);
+            if (maybeScopes.isPresent()) {
+                requirement.addScheme(name, maybeScopes.get());
             } else {
-                requirement.addScheme(name, scopes);
+                requirement.addScheme(name);
             }
             return requirement;
         }

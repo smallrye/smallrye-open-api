@@ -95,12 +95,12 @@ public final class JsonUtil {
      * @param propertyName Property to extract
      * @return Boolean containing the value extracted
      */
-    public static Boolean booleanProperty(JsonNode node, String propertyName) {
+    public static Optional<Boolean> booleanProperty(JsonNode node, String propertyName) {
         JsonNode propertyNode = node.get(propertyName);
         if (propertyNode != null) {
-            return propertyNode.asBoolean();
+            return Optional.of(propertyNode.asBoolean());
         }
-        return null;
+        return Optional.empty();
     }
 
     /**

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -77,9 +78,9 @@ public class SchemaFactory {
         LOG.debug("Processing a single @Schema annotation.");
 
         // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
+        Optional<Boolean> isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
 
-        if (Boolean.TRUE.equals(isHidden)) {
+        if (isHidden.isPresent() && isHidden.get()) {
             return null;
         }
 
@@ -127,9 +128,9 @@ public class SchemaFactory {
         }
 
         // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
+        Optional<Boolean> isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
 
-        if (Boolean.TRUE.equals(isHidden)) {
+        if (isHidden.isPresent() && isHidden.get()) {
             return schema;
         }
 

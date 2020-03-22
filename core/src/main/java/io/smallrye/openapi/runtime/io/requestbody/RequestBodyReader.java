@@ -118,7 +118,7 @@ public class RequestBodyReader {
                 .setContent(ContentReader.readContent(context,
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),
                         ContentDirection.INPUT));
-        requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED));
+        requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED).orElse(null));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RequestBody));
         return requestBody;
     }
@@ -136,7 +136,7 @@ public class RequestBodyReader {
         RequestBody requestBody = new RequestBodyImpl();
         requestBody.setDescription(JsonUtil.stringProperty(node, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody.setContent(ContentReader.readContent(node.get(RequestBodyConstant.PROP_CONTENT)));
-        requestBody.setRequired(JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED));
+        requestBody.setRequired(JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED).orElse(null));
         requestBody.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         ExtensionReader.readExtensions(node, requestBody);
         return requestBody;

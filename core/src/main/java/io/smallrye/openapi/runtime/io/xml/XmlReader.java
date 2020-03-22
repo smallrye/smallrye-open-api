@@ -36,8 +36,8 @@ public class XmlReader {
         xml.setName(JsonUtil.stringProperty(node, XmlConstant.PROP_NAME));
         xml.setNamespace(JsonUtil.stringProperty(node, XmlConstant.PROP_NAMESPACE));
         xml.setPrefix(JsonUtil.stringProperty(node, XmlConstant.PROP_PREFIX));
-        xml.setAttribute(JsonUtil.booleanProperty(node, XmlConstant.PROP_ATTRIBUTE));
-        xml.setWrapped(JsonUtil.booleanProperty(node, XmlConstant.PROP_WRAPPED));
+        xml.setAttribute(JsonUtil.booleanProperty(node, XmlConstant.PROP_ATTRIBUTE).orElse(null));
+        xml.setWrapped(JsonUtil.booleanProperty(node, XmlConstant.PROP_WRAPPED).orElse(null));
         ExtensionReader.readExtensions(node, xml);
         return xml;
     }

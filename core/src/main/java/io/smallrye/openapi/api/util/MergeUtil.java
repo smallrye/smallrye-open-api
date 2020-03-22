@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.Constructible;
@@ -136,7 +137,7 @@ public class MergeUtil {
                     try {
                         List values1 = (List) descriptor.getReadMethod().invoke(object1);
                         List values2 = (List) descriptor.getReadMethod().invoke(object2);
-                        List newValues = mergeLists(values1, values2);
+                        List newValues = mergeLists(values1, values2).orElse(null);
                         writeMethod.invoke(object1, newValues);
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         throw new RuntimeException(e);
@@ -243,41 +244,41 @@ public class MergeUtil {
      * @param values2
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static List mergeLists(List values1, List values2) {
+    private static Optional<List> mergeLists(List values1, List values2) {
         if (values1 == null && values2 == null) {
-            return null;
+            return Optional.empty();
         }
         if (values1 != null && values2 == null) {
-            return values1;
+            return Optional.of(values1);
         }
         if (values1 == null && values2 != null) {
-            return values2;
+            return Optional.of(values2);
         }
 
         if (values1.get(0) instanceof String) {
-            return mergeStringLists(values1, values2);
+            return Optional.of(mergeStringLists(values1, values2));
         }
 
         if (values1.get(0) instanceof Tag) {
-            return mergeTagLists(values1, values2);
+            return Optional.of(mergeTagLists(values1, values2));
         }
 
         if (values1.get(0) instanceof Server) {
-            return mergeServerLists(values1, values2);
+            return Optional.of(mergeServerLists(values1, values2));
         }
 
         if (values1.get(0) instanceof SecurityRequirement) {
-            return mergeSecurityRequirementLists(values1, values2);
+            return Optional.of(mergeSecurityRequirementLists(values1, values2));
         }
 
         if (values1.get(0) instanceof Parameter) {
-            return mergeParameterLists(values1, values2);
+            return Optional.of(mergeParameterLists(values1, values2));
         }
 
         List merged = new ArrayList<>(values1.size() + values2.size());
         merged.addAll(values1);
         merged.addAll(values2);
-        return merged;
+        return Optional.of(merged);
     }
 
     /**

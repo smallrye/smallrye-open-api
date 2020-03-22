@@ -17,8 +17,8 @@ import org.jboss.logging.Logger;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class DataObjectDeque {
+    private static final Logger LOG = Logger.getLogger(DataObjectDeque.class);
 
-    private final Logger LOG = Logger.getLogger(DataObjectDeque.class);
     private final Deque<PathEntry> path = new ArrayDeque<>();
     private final AugmentedIndexView index;
 

@@ -456,8 +456,8 @@ public class FilterUtil {
         if (model != null) {
             Schema ap = model.getAdditionalPropertiesSchema();
             if (ap != null) {
-                filterSchema(filter, (Schema) ap);
-                if (filter.filterSchema((Schema) ap) == null) {
+                filterSchema(filter, ap);
+                if (filter.filterSchema(ap) == null) {
                     model.setAdditionalPropertiesSchema((Schema) null);
                 }
             }

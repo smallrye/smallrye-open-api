@@ -94,7 +94,7 @@ public class ServerVariableReader {
         variable.setDescription(
                 JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
         variable.setEnumeration(
-                JandexUtil.stringListValue(annotationInstance, ServerVariableConstant.PROP_ENUMERATION));
+                JandexUtil.stringListValue(annotationInstance, ServerVariableConstant.PROP_ENUMERATION).orElse(null));
         variable.setDefaultValue(
                 JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
         return variable;

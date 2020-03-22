@@ -19,6 +19,9 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
  */
 public class OpenApiProcessor {
 
+    private OpenApiProcessor() {
+    }
+
     /**
      * Parse the static file content and return the resulting model. Note that this
      * method does NOT close the resources in the static file. The caller is
@@ -73,7 +76,7 @@ public class OpenApiProcessor {
         try {
             Class<?> c = loader.loadClass(readerClassName);
             OASModelReader reader = (OASModelReader) c.newInstance();
-            return (OpenAPIImpl) reader.buildModel();
+            return reader.buildModel();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

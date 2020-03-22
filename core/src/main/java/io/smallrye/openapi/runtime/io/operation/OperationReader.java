@@ -69,7 +69,7 @@ public class OperationReader {
         // Operation Id ??
         operation.setOperationId(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_OPERATION_ID));
         // Deprecated ??
-        operation.setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED));
+        operation.setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
 
         // Below is not used ?
         // Tags ?
@@ -99,7 +99,7 @@ public class OperationReader {
         model.setRequestBody(RequestBodyReader.readRequestBody(node.get(OperationConstant.PROP_REQUEST_BODY)));
         model.setResponses(ResponseReader.readResponses(node.get(OperationConstant.PROP_RESPONSES)));
         model.setCallbacks(CallbackReader.readCallbacks(node.get(OperationConstant.PROP_CALLBACKS)));
-        model.setDeprecated(JsonUtil.booleanProperty(node, OperationConstant.PROP_DEPRECATED));
+        model.setDeprecated(JsonUtil.booleanProperty(node, OperationConstant.PROP_DEPRECATED).orElse(null));
         model.setSecurity(
                 SecurityRequirementReader.readSecurityRequirements(node.get(OperationConstant.PROP_SECURITY)).orElse(null));
         model.setServers(ServerReader.readServers(node.get(OperationConstant.PROP_SERVERS)).orElse(null));
