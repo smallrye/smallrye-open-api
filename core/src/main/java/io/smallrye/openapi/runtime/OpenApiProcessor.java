@@ -8,7 +8,6 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 

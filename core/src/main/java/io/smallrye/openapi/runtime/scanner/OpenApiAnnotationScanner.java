@@ -80,7 +80,7 @@ public class OpenApiAnnotationScanner {
      */
     public OpenAPI scan() {
         // First scan the MicroProfile OpenAPI Annotations. Maybe later we can load this with SPI as well, and allow other Annotation sets.
-        OpenAPI oai = scanMicroProfileOpenApiAnnotations();
+        OpenAPI openApi = scanMicroProfileOpenApiAnnotations();
 
         // Now load all entry points with SPI and scan those
         List<OpenAPI> scans = new LinkedList<>();
@@ -88,7 +88,7 @@ public class OpenApiAnnotationScanner {
         for (AnnotationScanner annotationScanner : annotationScanners) {
             LOG.debug("Scanning deployment " + annotationScanner.getName() + " Annotations.");
             CurrentScannerInfo.register(annotationScanner);
-            scans.add(annotationScanner.scan(annotationScannerContext, oai));
+            scans.add(annotationScanner.scan(annotationScannerContext, openApi));
         }
         return MergeUtil.merge(scans);
     }

@@ -430,7 +430,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         processResponse(context, method, operation, exceptionAnnotationMap);
 
         // Process @SecurityRequirement annotations
-        processSecurityReuirementAnnotation(resourceClass, method, operation);
+        processSecurityRequirementAnnotation(resourceClass, method, operation);
 
         // Process @Callback annotations
         /////////////////////////////////////////
@@ -922,7 +922,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
      * @param method the method
      * @param operation the operation to add them to
      */
-    private void processSecurityReuirementAnnotation(final ClassInfo resourceClass, final MethodInfo method,
+    private void processSecurityRequirementAnnotation(final ClassInfo resourceClass, final MethodInfo method,
             Operation operation) {
 
         List<AnnotationInstance> securityRequirementAnnotations = SecurityRequirementReader
