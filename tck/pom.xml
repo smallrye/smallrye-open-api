@@ -12,14 +12,16 @@
         <!-- Project Dependencies -->
         <dependency>
             <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-open-api</artifactId>
-            <scope>test</scope>
+            <artifactId>smallrye-open-api-core</artifactId>
+            <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
         </dependency>
         <dependency>
-            <groupId>org.jboss.shrinkwrap</groupId>
-            <artifactId>shrinkwrap-api</artifactId>
-            <scope>test</scope>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-open-api-jaxrs</artifactId>
+            <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
         </dependency>
+        
+        
 
         <!-- SmallRye Config -->
         <dependency>
@@ -29,6 +31,11 @@
         </dependency>
 
         <!-- Test Only -->
+        <dependency>
+            <groupId>org.jboss.shrinkwrap</groupId>
+            <artifactId>shrinkwrap-api</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>

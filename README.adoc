@@ -19,7 +19,10 @@ mvn clean install
 
 === Project structure
 
-* link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification.
+* link:core[] - The core OpenAPI code, independent of entry point dependencies.
+* link:extension-jaxrs[] - The JAX-RS entry point. This module depends on JAX-RS and core.
+* link:extension-spring[] - The Spring entry point. This module depends on Spring and core.
+* link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
 * link:tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
 
 === Links

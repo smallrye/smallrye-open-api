@@ -36,8 +36,8 @@ import com.sun.net.httpserver.HttpServer;
 
 import io.restassured.RestAssured;
 import io.smallrye.openapi.api.OpenApiDocument;
+import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer.Format;
 
 /**
  * Base class for all Tck tests.
