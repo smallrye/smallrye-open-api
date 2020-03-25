@@ -138,7 +138,6 @@
 										"contentType": "application/xml",
 										"headers": {
 											"Header-1": {
-												"$ref": "#/components/headers/FooHeader",
 												"description": "Description of the header here.",
 												"required": true,
 												"deprecated": true,
@@ -156,7 +155,10 @@
 													"Header-1-Example-2": {}
 												},
 												"content": {}
-											}
+											},
+                                            "Header-2": {
+												"$ref": "#/components/headers/FooHeader"
+                                            }
 										},
 										"style": "deepObject",
 										"explode": true,
@@ -198,7 +200,6 @@
 						"description": "Successful response.",
 						"headers": {
 							"Header-1": {
-								"$ref": "#/components/headers/FooHeader",
 								"description": "Description of the header here.",
 								"required": true,
 								"deprecated": true,
