@@ -132,7 +132,9 @@
 										"contentType": "application/xml",
 										"headers": {
 											"Header-1": {
-												"$ref": "#/components/headers/FooHeader",
+												"$ref": "#/components/headers/FooHeader"
+											},
+											"Header-2": {
 												"description": "Description of the header here.",
 												"required": true,
 												"deprecated": true,
@@ -146,8 +148,8 @@
 													"foo": "baz"
 												},
 												"examples": {
-													"Header-1-Example-1": {},
-													"Header-1-Example-2": {}
+													"Header-2-Example-1": {},
+													"Header-2-Example-2": {}
 												},
 												"content": {}
 											}
@@ -192,7 +194,6 @@
 						"description": "Successful response.",
 						"headers": {
 							"Header-1": {
-								"$ref": "#/components/headers/FooHeader",
 								"description": "Description of the header here.",
 								"required": true,
 								"deprecated": true,

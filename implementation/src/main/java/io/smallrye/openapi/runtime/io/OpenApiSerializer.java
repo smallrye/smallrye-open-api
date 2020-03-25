@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
@@ -918,19 +919,23 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED, model.getRequired());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_DEPRECATED, model.getDeprecated());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
-        JsonUtil.enumProperty(node, OpenApiConstants.PROP_STYLE, model.getStyle());
-        JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXPLODE, model.getExplode());
-        writeSchema(node, model.getSchema(), OpenApiConstants.PROP_SCHEMA);
-        writeObject(node, OpenApiConstants.PROP_EXAMPLE, model.getExample());
-        writeExamples(node, model.getExamples());
-        writeContent(node, model.getContent());
-        writeExtensions(node, model);
 
+        if (StringUtils.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
+            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_REQUIRED, model.getRequired());
+            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_DEPRECATED, model.getDeprecated());
+            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
+            JsonUtil.enumProperty(node, OpenApiConstants.PROP_STYLE, model.getStyle());
+            JsonUtil.booleanProperty(node, OpenApiConstants.PROP_EXPLODE, model.getExplode());
+
+            writeSchema(node, model.getSchema(), OpenApiConstants.PROP_SCHEMA);
+            writeObject(node, OpenApiConstants.PROP_EXAMPLE, model.getExample());
+            writeExamples(node, model.getExamples());
+            writeContent(node, model.getContent());
+            writeExtensions(node, model);
+        }
     }
 
     /**
