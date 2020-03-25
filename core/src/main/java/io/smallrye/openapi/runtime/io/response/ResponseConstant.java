@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.io.response;
 
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.jandex.DotName;
 
@@ -14,10 +15,12 @@ import org.jboss.jandex.DotName;
  */
 public class ResponseConstant {
 
-    public static final String PROP_RESPONSE_CODE = "responseCode";
+    static final String PROP_RESPONSE_CODE = "responseCode";
+    static final String PROP_RESPONSE_DESCRIPTION = "responseDescription";
 
     static final DotName DOTNAME_API_RESPONSE = DotName.createSimple(APIResponse.class.getName());
     static final DotName DOTNAME_API_RESPONSES = DotName.createSimple(APIResponses.class.getName());
+    static final DotName DOTNAME_API_RESPONSE_SCHEMA = DotName.createSimple(APIResponseSchema.class.getName());
 
     static final String PROP_NAME = "name";
     static final String PROP_HEADERS = "headers";
@@ -25,6 +28,7 @@ public class ResponseConstant {
     static final String PROP_DEFAULT = "default";
     static final String PROP_DESCRIPTION = "description";
     static final String PROP_CONTENT = "content";
+    static final String PROP_VALUE = "value";
 
     private ResponseConstant() {
     }
