@@ -40,36 +40,37 @@ import org.jboss.jandex.DotName;
  */
 public class JaxRsConstants {
 
-    public static final DotName APPLICATION = DotName.createSimple(Application.class.getName());
-    public static final DotName APPLICATION_PATH = DotName.createSimple(ApplicationPath.class.getName());
-    public static final DotName PATH = DotName.createSimple(Path.class.getName());
-    public static final DotName PRODUCES = DotName.createSimple(Produces.class.getName());
-    public static final DotName CONSUMES = DotName.createSimple(Consumes.class.getName());
-    public static final DotName EXCEPTION_MAPPER = DotName.createSimple(ExceptionMapper.class.getName());
-    public static final DotName QUERY_PARAM = DotName.createSimple(QueryParam.class.getName());
-    public static final DotName FORM_PARAM = DotName.createSimple(FormParam.class.getName());
-    public static final DotName COOKIE_PARAM = DotName.createSimple(CookieParam.class.getName());
-    public static final DotName PATH_PARAM = DotName.createSimple(PathParam.class.getName());
-    public static final DotName HEADER_PARAM = DotName.createSimple(HeaderParam.class.getName());
-    public static final DotName MATRIX_PARAM = DotName.createSimple(MatrixParam.class.getName());
-    public static final DotName BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
-    public static final DotName ASYNC_RESPONSE = DotName.createSimple(AsyncResponse.class.getName());
-    public static final DotName DEFAULT_VALUE = DotName.createSimple(DefaultValue.class.getName());
-    public static final DotName RESPONSE = DotName.createSimple(Response.class.getName());
-    public static final DotName PATH_SEGMENT = DotName.createSimple(PathSegment.class.getName());
+    static final DotName APPLICATION = DotName.createSimple(Application.class.getName());
+    static final DotName APPLICATION_PATH = DotName.createSimple(ApplicationPath.class.getName());
+    static final DotName PATH = DotName.createSimple(Path.class.getName());
+    static final DotName PRODUCES = DotName.createSimple(Produces.class.getName());
+    static final DotName CONSUMES = DotName.createSimple(Consumes.class.getName());
+    static final DotName EXCEPTION_MAPPER = DotName.createSimple(ExceptionMapper.class.getName());
+    static final DotName QUERY_PARAM = DotName.createSimple(QueryParam.class.getName());
+    static final DotName FORM_PARAM = DotName.createSimple(FormParam.class.getName());
+    static final DotName COOKIE_PARAM = DotName.createSimple(CookieParam.class.getName());
+    static final DotName PATH_PARAM = DotName.createSimple(PathParam.class.getName());
+    static final DotName HEADER_PARAM = DotName.createSimple(HeaderParam.class.getName());
+    static final DotName MATRIX_PARAM = DotName.createSimple(MatrixParam.class.getName());
+    static final DotName BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
+    static final DotName ASYNC_RESPONSE = DotName.createSimple(AsyncResponse.class.getName());
+    static final DotName DEFAULT_VALUE = DotName.createSimple(DefaultValue.class.getName());
+    static final DotName RESPONSE = DotName.createSimple(Response.class.getName());
+    static final DotName PATH_SEGMENT = DotName.createSimple(PathSegment.class.getName());
 
-    public static final DotName GET = DotName.createSimple(GET.class.getName());
-    public static final DotName PUT = DotName.createSimple(PUT.class.getName());
-    public static final DotName POST = DotName.createSimple(POST.class.getName());
-    public static final DotName DELETE = DotName.createSimple(DELETE.class.getName());
-    public static final DotName HEAD = DotName.createSimple(HEAD.class.getName());
-    public static final DotName OPTIONS = DotName.createSimple(OPTIONS.class.getName());
-    public static final DotName PATCH = DotName.createSimple(PATCH.class.getName());
+    static final DotName GET = DotName.createSimple(GET.class.getName());
+    static final DotName PUT = DotName.createSimple(PUT.class.getName());
+    static final DotName POST = DotName.createSimple(POST.class.getName());
+    static final DotName DELETE = DotName.createSimple(DELETE.class.getName());
+    static final DotName HEAD = DotName.createSimple(HEAD.class.getName());
+    static final DotName OPTIONS = DotName.createSimple(OPTIONS.class.getName());
+    static final DotName PATCH = DotName.createSimple(PATCH.class.getName());
 
-    public static final String TO_RESPONSE_METHOD_NAME = "toResponse";
+    static final String TO_RESPONSE_METHOD_NAME = "toResponse";
 
-    public static final Set<DotName> HTTP_METHODS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(GET,
+    static final Set<DotName> HTTP_METHODS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(
+                    GET,
                     PUT,
                     POST,
                     DELETE,

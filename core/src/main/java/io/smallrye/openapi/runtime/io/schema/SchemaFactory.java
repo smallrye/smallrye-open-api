@@ -425,7 +425,7 @@ public class SchemaFactory {
     private static Schema introspectClassToSchema(IndexView index, ClassType ctype, boolean schemaReferenceSupported) {
         AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
 
-        if (!annotationScanner.shouldIntrospectClassToSchema(ctype)) {
+        if (annotationScanner.isScannerInternalResponse(ctype)) {
             return null;
         }
 

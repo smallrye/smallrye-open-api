@@ -1,4 +1,4 @@
-package io.smallrye.openapi.jaxrs;
+package io.smallrye.openapi.runtime.scanner.processor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +20,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * This helps to apply java security (@RolesAllowed etc.).
- * 
- * TODO:Currently used by JAX-RS but should maybe move one level up ?
  * 
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  * @author Phillip Kruger (phillip.kruger@redhat.com)

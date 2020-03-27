@@ -11,6 +11,26 @@
     <artifactId>smallrye-open-api-jaxrs</artifactId>
     
     <name>SmallRye: MicroProfile OpenAPI JAX-RS extension</name>
+    <properties>
+        <version.org.jboss.resteasy>4.5.3.Final</version.org.jboss.resteasy>    
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-core-spi</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+              <groupId>org.jboss.resteasy</groupId>
+              <artifactId>resteasy-multipart-provider</artifactId>
+              <version>${version.org.jboss.resteasy}</version>
+              <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <dependencies>
         <!-- SmallRye core implementation -->
@@ -68,6 +88,16 @@
             <scope>test</scope>
             <type>pom</type>
         </dependency>
+        
+        <!-- Depend on core tests -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>smallrye-open-api-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+  
     </dependencies>
     
     <build>

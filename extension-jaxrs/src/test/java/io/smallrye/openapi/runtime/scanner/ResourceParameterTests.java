@@ -42,7 +42,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource;
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
+public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     /*
      * Test case derived from original example in Smallrye OpenAPI issue #25.

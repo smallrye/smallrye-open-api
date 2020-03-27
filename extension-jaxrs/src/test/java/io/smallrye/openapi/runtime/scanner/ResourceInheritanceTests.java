@@ -28,7 +28,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ResourceInheritanceTests extends OpenApiDataObjectScannerTestBase {
+public class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
 
     /*
      * Test case derived from original example linked from Smallrye OpenAPI

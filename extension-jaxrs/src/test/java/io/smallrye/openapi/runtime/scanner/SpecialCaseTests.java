@@ -12,7 +12,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.SpecialCaseTestContaine
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class SpecialCaseTests extends OpenApiDataObjectScannerTestBase {
+public class SpecialCaseTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     public void testCollection_SimpleTerminalType() throws IOException, JSONException {
