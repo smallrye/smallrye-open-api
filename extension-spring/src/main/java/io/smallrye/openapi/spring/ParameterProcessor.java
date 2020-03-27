@@ -63,22 +63,15 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
- *
- * Note, {@link javax.ws.rs.PathParam PathParam} targets of
- * {@link javax.ws.rs.core.PathSegment PathSegment} are not currently supported.
- *
- * @author Michael Edgar {@literal <michael@xlate.io>}
- *
+ * Copied from JAX-RS.
+ * This still needs work. As we add test cases we will clean this up
+ * 
+ * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class ParameterProcessor {
 
     private static final Logger LOG = Logger.getLogger(ParameterProcessor.class);
 
-    /**
-     * Pattern to describe a path template parameter with a regular expression pattern restriction.
-     * 
-     * See JAX-RS {@link javax.ws.rs.Path Path} JavaDoc for explanation.
-     */
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
             .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}");
 
@@ -91,12 +84,13 @@ public class ParameterProcessor {
 
     /**
      * Collection of parameters scanned at the current level. This map contains
-     * all parameter types except for form parameters and JAX-RS {@link javax.ws.rs.MatrixParam MatrixParam}s.
+     * all parameter types except for form parameters and Spring MatrixParam.
      */
     private Map<ParameterContextKey, ParameterContext> params = new HashMap<>();
 
     /**
-     * Collection of JAX-RS {@link javax.ws.rs.FormParam FormParam}s found during scanning.
+     * Collection of Spring FormParam found during scanning.
+     * Does Spring have this ?
      * These annotations will be used as schema properties for a generated schema used in the
      * MP-OAI {@link org.eclipse.microprofile.openapi.models.responses.APIResponse APIResponse}
      * if a value has not be provided by the application.
@@ -109,7 +103,7 @@ public class ParameterProcessor {
     private String formMediaType;
 
     /**
-     * Collection of JAX-RS {@link javax.ws.rs.MatrixParam MatrixParam}s found during scanning.
+     * Collection of Spring MatrixParam found during scanning.
      * These annotations will be used as schema properties for the schema of a path parameter
      * having {@link Parameter#setStyle style} of {@link Style#MATRIX}.
      */
@@ -119,8 +113,8 @@ public class ParameterProcessor {
 
     /**
      * Used for collecting and merging any scanned {@link Parameter} annotations
-     * with the JAX-RS *Param annotations. After scanning, this object may
-     * contain either the MP-OAI annotation information, the JAX-RS annotation
+     * with the Spring Mapping annotations. After scanning, this object may
+     * contain either the MP-OAI annotation information, the Spring annotation
      * information, or both.
      *
      * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -131,7 +125,7 @@ public class ParameterProcessor {
         Style style;
         Parameter oaiParam;
         SpringParameter springParam;
-        Object jaxRsDefaultValue;
+        Object springDefaultValue;
         AnnotationTarget target;
         Type targetType;
 
@@ -204,8 +198,8 @@ public class ParameterProcessor {
      *
      * @param index index of classes to be used for further introspection, if necessary
      * @param resourceClass the class info
-     * @param resourceMethod the JAX-RS resource method, annotated with one of the
-     *        JAX-RS HTTP annotations
+     * @param resourceMethod the Spring resource method, annotated with one of the
+     *        Spring HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
      * @param extensions scanner extensions
@@ -224,7 +218,7 @@ public class ParameterProcessor {
         ClassInfo resourceMethodClass = resourceMethod.declaringClass();
 
         /*
-         * Phase I - Read class fields, constructors, "setter" methods not annotated with JAX-RS
+         * Phase I - Read class fields, constructors, "setter" methods not annotated with Spring
          * HTTP method. Check both the class declaring the method as well as the resource
          * class, if different.
          */
@@ -259,7 +253,7 @@ public class ParameterProcessor {
         // Clear Path-level parameters discovered and allows for processing operation-level parameters
         processor.reset();
 
-        // Phase II - Read method argument @Parameter and JAX-RS *Param annotations
+        // Phase II - Read method argument @Parameter and Spring Mapping annotations
         resourceMethod.annotations()
                 .stream()
                 .filter(a -> !a.target().equals(resourceMethod))
@@ -395,7 +389,7 @@ public class ParameterProcessor {
     }
 
     /**
-     * Performs the final merging of JAX-RS parameters with MP-OAI parameters to produce the list
+     * Performs the final merging of Spring parameters with MP-OAI parameters to produce the list
      * of {@link Parameter}s found while scanning the current level (class or method).
      *
      * @return list of {@link Parameter}s
@@ -497,7 +491,7 @@ public class ParameterProcessor {
                         });
 
                 if (param.getSchema().getDefaultValue() == null) {
-                    param.getSchema().setDefaultValue(context.jaxRsDefaultValue);
+                    param.getSchema().setDefaultValue(context.springDefaultValue);
                 }
             }
 
@@ -519,12 +513,7 @@ public class ParameterProcessor {
     /**
      * Create a {@link Content} and use the scanned {@link javax.ws.rs.FormParam}s
      * as the properties. The media type will be defaulted to
-     * 'application/x-www-form-urlencoded' or set to 'multipart/form-data' if a
-     * RESTEasy {@link org.jboss.resteasy.annotations.providers.multipart.MultipartForm MultipartForm}
-     * annotation was used to wrap the {@link javax.ws.rs.FormParam}s. The encoding values
-     * for the {@link Content} will be set to the value of any
-     * {@link org.jboss.resteasy.annotations.providers.multipart.PartType PartType}
-     * annotations found for each parameter.
+     * 'application/x-www-form-urlencoded'
      *
      * @return generated form content
      */
@@ -546,7 +535,7 @@ public class ParameterProcessor {
             mediaType.setEncoding(encodings);
         }
 
-        // TODO: Do this for Spring
+        // TODO: Do this for Spring ?
         //String mediaTypeName = formMediaType != null ? formMediaType : APPLICATION_FORM_URLENCODED;
         //content.addMediaType(mediaTypeName, mediaType);
 
@@ -621,7 +610,7 @@ public class ParameterProcessor {
         if (paramIn == null) {
             /*
              * Per @Parameter JavaDoc, ignored when empty string (i.e., unspecified).
-             * This may occur when @Parameter is specified without a matching JAX-RS
+             * This may occur when @Parameter is specified without a matching Spring
              * parameter annotation.
              */
             return true;
@@ -712,7 +701,7 @@ public class ParameterProcessor {
 
     /**
      * Read a single annotation that is either {@link @Parameter} or
-     * one of the JAX-RS *Param annotations. The results are stored in the
+     * one of the Spring Mapping annotations. The results are stored in the
      * private {@link #params} collection, depending on the type of parameter.
      *
      * @param annotation a parameter annotation to be read and processed
@@ -723,7 +712,7 @@ public class ParameterProcessor {
 
     /**
      * Read a single annotation that is either {@link @Parameter} or
-     * one of the JAX-RS *Param annotations. The results are stored in the
+     * one of the Spring Mapping annotations. The results are stored in the
      * private {@link #params} collection. When overriddenParametersOnly is true,
      * new parameters not already known in {@link #params} will be ignored.
      *
@@ -745,16 +734,16 @@ public class ParameterProcessor {
                     annotation.target(),
                     overriddenParametersOnly);
         } else {
-            SpringParameter jaxRsParam = SpringParameter.forName(name);
+            SpringParameter springParam = SpringParameter.forName(name);
 
-            if (jaxRsParam != null) {
+            if (springParam != null) {
                 AnnotationTarget target = annotation.target();
                 Type targetType = getType(target);
 
-                if (jaxRsParam.style == Style.FORM) {
+                if (springParam.style == Style.FORM) {
                     // Store the @FormParam for later processing
                     formParams.put(paramName(annotation), annotation);
-                } else if (jaxRsParam.style == Style.MATRIX) {
+                } else if (springParam.style == Style.MATRIX) {
                     // Store the @MatrixParam for later processing
                     String pathSegment = beanParamAnnotation != null
                             ? lastPathSegmentOf(beanParamAnnotation.target())
@@ -765,23 +754,25 @@ public class ParameterProcessor {
                     }
 
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
-                    //}else if (jaxRsParam.location == In.PATH && targetType != null
+                    // Do this in Spring ?
+                    //}else if (springParam.location == In.PATH && targetType != null
                     //      && SpringConstants.PATH_SEGMENT.equals(targetType.name())) {
                     //  String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
                     //  if (!matrixParams.containsKey(pathSegment)) {
                     //      matrixParams.put(pathSegment, new HashMap<>());
                     //  }
-                } else if (jaxRsParam.location != null) {
-                    readParameter(new ParameterContextKey(paramName(annotation), jaxRsParam.location, jaxRsParam.defaultStyle),
+                } else if (springParam.location != null) {
+                    readParameter(
+                            new ParameterContextKey(paramName(annotation), springParam.location, springParam.defaultStyle),
                             null,
-                            jaxRsParam,
+                            springParam,
                             getDefaultValue(target),
                             target,
                             overriddenParametersOnly);
                 } else if (target != null) {
                     // This is a @BeanParam or a RESTEasy @MultipartForm
-                    setMediaType(jaxRsParam);
+                    setMediaType(springParam);
 
                     if (TypeUtil.isOptional(targetType)) {
                         targetType = TypeUtil.getOptionalType(targetType);
@@ -828,7 +819,7 @@ public class ParameterProcessor {
      * Set this {@link ParameterProcessor}'s formMediaType if it has not already
      * been set and the value is explicitly known for the parameter type.
      *
-     * @param jaxRsParam parameter to check for a form media type
+     * @param springParam parameter to check for a form media type
      *
      */
     private void setMediaType(SpringParameter springParam) {
@@ -886,11 +877,11 @@ public class ParameterProcessor {
     }
 
     /**
-     * Scan and parse a JAX-RS {@link javax.ws.rs.DefaultValue DefaultValue} annotation.
+     * Scan and parse a Spring DefaultValue property on the mapping annotation.
      * If the target is a Java primitive, the value will be parsed into an equivalent
      * wrapper object.
      *
-     * @param target target annotated with {@link javax.ws.rs.DefaultValue @DefaultValue}
+     * @param target target annotated with a Spring mapping
      * @return the default value
      */
     static Object getDefaultValue(AnnotationTarget target) {
@@ -1006,7 +997,7 @@ public class ParameterProcessor {
      * Concatenate the method's path with the path of its declaring
      * class.
      *
-     * @param method the method annotated with {@link javax.ws.rs.Path Path}
+     * @param method the method annotated with a Spring mapping
      */
     static String methodPath(MethodInfo method) {
         String methodPath = pathOf(method);
@@ -1020,11 +1011,11 @@ public class ParameterProcessor {
     }
 
     /**
-     * Reads the {@link javax.ws.rs.Path @Path} annotation present on the
+     * Reads the Spring mapping annotations present on the
      * target and strips leading and trailing slashes.
      *
      * @param target target object
-     * @return value of the {@link javax.ws.rs.Path @Path} without
+     * @return value of the Spring mapping annotation without
      *         leading/trailing slashes.
      */
     static String pathOf(AnnotationTarget target) {
@@ -1115,7 +1106,7 @@ public class ParameterProcessor {
     }
 
     /**
-     * Merges MP-OAI {@link Parameter}s and JAX-RS parameters for the same {@link In} and name,
+     * Merges MP-OAI {@link Parameter}s and Spring parameters for the same {@link In} and name,
      * and {@link Style}. When overriddenParametersOnly is true, new parameters not already known
      * in {@link #params} will be ignored.
      * 
@@ -1124,14 +1115,14 @@ public class ParameterProcessor {
      * <ul>
      * <li>the name of the parameter specified by application
      * <li>location, given by {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
-     * or implied by the type of JAX-RS annotation used on the target
+     * or implied by the type of Spring annotation used on the target
      * <li>style, the parameter's style, either specified by the application or implied by the parameter's location
      * </ul>
      *
      * @param key the key for the parameter being processed
      * @param oaiParam scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
-     * @param jaxRsParam Meta detail about the JAX-RS *Param being processed, if found.
-     * @param jaxRsDefaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
+     * @param springParam Meta detail about the Spring Mapping being processed, if found.
+     * @param springDefaultValue value read from the mapping defaultValue property
      *        annotation.
      * @param target target of the annotation
      * @param overriddenParametersOnly
@@ -1139,11 +1130,11 @@ public class ParameterProcessor {
     void readParameter(ParameterContextKey key,
             Parameter oaiParam,
             SpringParameter springParam,
-            Object jaxRsDefaultValue,
+            Object springDefaultValue,
             AnnotationTarget target,
             boolean overriddenParametersOnly) {
 
-        //TODO: Test to ensure @Parameter attributes override JAX-RS for the same parameter
+        //TODO: Test to ensure @Parameter attributes override Spring for the same parameter
         //      (unless @Parameter was already specified at a "lower" level)
 
         ParameterContext context = getParameterContext(key, target);
@@ -1182,7 +1173,7 @@ public class ParameterProcessor {
 
         if (context.springParam == null) {
             context.springParam = springParam;
-            context.jaxRsDefaultValue = jaxRsDefaultValue;
+            context.springDefaultValue = springDefaultValue;
         }
 
         if (context.target == null || context.target.kind() == Kind.METHOD) {
@@ -1276,10 +1267,10 @@ public class ParameterProcessor {
 
     /**
      * Determines if the annotation is a property parameter. Annotation targets
-     * must be annotated with a JAX-RS parameter annotation or
+     * must be annotated with a Spring parameter annotation or
      * {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}.
      *
-     * Method targets must not be annotated with one of the JAX-RS HTTP method annotations and
+     * Method targets must not be annotated with one of the Spring HTTP method annotations and
      * the method must have a single argument.
      *
      * @param annotation
@@ -1315,12 +1306,12 @@ public class ParameterProcessor {
     }
 
     /**
-     * Determines if the given method is a JAX-RS sub-resource locator method
+     * Determines if the given method is a Spring sub-resource locator method
      * annotated by {@code @Path} but NOT annotated with one of the HTTP method
      * annotations.
      *
      * @param method method to check
-     * @return true if the method is JAX-RS sub-resource locator, false otherwise
+     * @return true if the method is Spring sub-resource locator, false otherwise
      */
     boolean isSubResourceLocator(MethodInfo method) {
         return method.returnType().kind() == Type.Kind.CLASS &&
@@ -1331,11 +1322,11 @@ public class ParameterProcessor {
     }
 
     /**
-     * Determines if the given method is a JAX-RS resource method annotated by one
+     * Determines if the given method is a Spring resource method annotated by one
      * of the HTTP method annotations.
      *
      * @param method method to check
-     * @return true if the method is annotated with a JAX-RS HTTP method annotation, false otherwise
+     * @return true if the method is annotated with a Spring HTTP method annotation, false otherwise
      */
     static boolean isResourceMethod(MethodInfo method) {
         return method.annotations()

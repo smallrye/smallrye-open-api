@@ -150,8 +150,8 @@ public interface AnnotationScanner {
     /**
      * Process Java security (roles allowed and declared roles)
      * 
-     * @param openApi
-     * @param resourceClass
+     * @param openApi the OpenAPI Model
+     * @param resourceClass the Class being scanned
      */
     default void processJavaSecurity(ClassInfo resourceClass, OpenAPI openApi) {
         JavaSecurityProcessor.register(openApi);
@@ -417,8 +417,9 @@ public interface AnnotationScanner {
     /**
      * Add api response to api responses using the annotation information
      *
+     * @param context The current scanning context
      * @param apiResponseAnnotation The api response annotation
-     * @param operation the method operation
+     * @param operation The method operation
      */
     default void addApiReponseFromAnnotation(final AnnotationScannerContext context, AnnotationInstance apiResponseAnnotation,
             Operation operation) {

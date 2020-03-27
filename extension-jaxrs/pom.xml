@@ -12,7 +12,7 @@
     
     <name>SmallRye: MicroProfile OpenAPI JAX-RS extension</name>
     <properties>
-        <version.org.jboss.resteasy>4.5.2.Final</version.org.jboss.resteasy>    
+        <version.org.jboss.resteasy>4.5.3.Final</version.org.jboss.resteasy>    
     </properties>
     
     <dependencyManagement>

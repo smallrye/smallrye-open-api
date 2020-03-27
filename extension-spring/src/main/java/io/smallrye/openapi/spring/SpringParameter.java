@@ -5,7 +5,7 @@ import org.jboss.jandex.DotName;
 
 /**
  * Meta information for the Spring Parameter annotations relating them
- * to the {@link In} and {@link Style} attributes of {@link Parameter}s.
+ * to the In and Style attributes of Parameters.
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */

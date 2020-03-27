@@ -10,12 +10,12 @@ import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 
 /**
  * Result object returned to the annotation scanner. Parameters are split
- * between those that apply at the {@link PathItem} level and those that apply
- * at the {@link Operation} level, except for form parameters which only apply
+ * between those that apply at the PathItem level and those that apply
+ * at the Operation level, except for form parameters which only apply
  * to the operation.
  *
  * This object includes the class and method path which may have been modified
- * from the values specified by {@link javax.ws.rs.Path Path} annotations to
+ * from the values specified by JAX-RS Path or Spring Mapping annotations to
  * support the linkage of matrix parameters.
  *
  * @author Michael Edgar {@literal <michael@xlate.io>}
