@@ -16,7 +16,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class KitchenSinkTest extends OpenApiDataObjectScannerTestBase {
+public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
 
     private static final Logger LOG = Logger.getLogger(KitchenSinkTest.class);
 

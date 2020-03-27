@@ -20,7 +20,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.TransientFieldExample;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class IgnoreTests extends OpenApiDataObjectScannerTestBase {
+public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Always ignore nominated properties when given class is used.
     @Test

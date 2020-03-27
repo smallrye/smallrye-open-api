@@ -10,7 +10,7 @@ import org.junit.BeforeClass;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class OpenApiDataObjectScannerTestBase extends IndexScannerTestBase {
+public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
 
     protected static Index index;
 

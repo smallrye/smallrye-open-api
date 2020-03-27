@@ -1,10 +1,10 @@
-package io.smallrye.openapi.jaxrs;
+package io.smallrye.openapi.spring;
 
 import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
-import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.jboss.jandex.AnnotationTarget.Kind.CLASS;
+import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -48,7 +48,6 @@ import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
@@ -131,7 +130,7 @@ public class ParameterProcessor {
         In location;
         Style style;
         Parameter oaiParam;
-        JaxRsParameter jaxRsParam;
+        SpringParameter springParam;
         Object jaxRsDefaultValue;
         AnnotationTarget target;
         Type targetType;
@@ -424,7 +423,7 @@ public class ParameterProcessor {
                         generated.name = segmentName;
                         generated.location = In.PATH;
                         generated.style = Style.MATRIX;
-                        generated.jaxRsParam = JaxRsParameter.MATRIX_PARAM;
+                        generated.springParam = SpringParameter.MATRIX_PARAM;
                         generated.target = null;
                         generated.targetType = null;
                         generated.oaiParam = new ParameterImpl();
@@ -473,8 +472,8 @@ public class ParameterProcessor {
                 param.setRequired(true);
             }
 
-            if (param.getStyle() == null && context.jaxRsParam != null) {
-                param.setStyle(context.jaxRsParam.style);
+            if (param.getStyle() == null && context.springParam != null) {
+                param.setStyle(context.springParam.style);
             }
 
             if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
@@ -547,8 +546,9 @@ public class ParameterProcessor {
             mediaType.setEncoding(encodings);
         }
 
-        String mediaTypeName = formMediaType != null ? formMediaType : APPLICATION_FORM_URLENCODED;
-        content.addMediaType(mediaTypeName, mediaType);
+        // TODO: Do this for Spring
+        //String mediaTypeName = formMediaType != null ? formMediaType : APPLICATION_FORM_URLENCODED;
+        //content.addMediaType(mediaTypeName, mediaType);
 
         return content;
     }
@@ -568,7 +568,7 @@ public class ParameterProcessor {
         for (Entry<String, AnnotationInstance> param : params.entrySet()) {
             String paramName = param.getKey();
             AnnotationTarget paramTarget = param.getValue().target();
-            addEncoding(encodings, paramName, paramTarget);
+
             Type paramType = getType(paramTarget);
             Schema paramSchema = SchemaFactory.typeToSchema(index, paramType, extensions);
             Object defaultValue = getDefaultValue(paramTarget);
@@ -596,30 +596,6 @@ public class ParameterProcessor {
                 paramSchema = mergeObjects(schema.getProperties().get(paramName), paramSchema);
             }
             schema.addProperty(paramName, paramSchema);
-        }
-    }
-
-    /**
-     * Determine if the paramTarget is annotated with the RestEasy
-     * {@link org.jboss.resteasy.annotations.providers.multipart.PartType @PartType}
-     * annotation and add the value to the encodings map.
-     *
-     * @param encodings map of encodings applicable to the current {@link MediaType} being processed
-     * @param paramName name of the current form parameter being mapped to a schema property
-     * @param paramTarget the target annotated with {@link javax.ws.rs.FormParam FormParam}
-     *
-     */
-    static void addEncoding(Map<String, Encoding> encodings, String paramName, AnnotationTarget paramTarget) {
-        if (paramTarget == null) {
-            return;
-        }
-
-        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, RestEasyConstants.PART_TYPE);
-
-        if (type != null) {
-            Encoding encoding = new EncodingImpl();
-            encoding.setContentType(type.value().asString());
-            encodings.put(paramName, encoding);
         }
     }
 
@@ -769,7 +745,7 @@ public class ParameterProcessor {
                     annotation.target(),
                     overriddenParametersOnly);
         } else {
-            JaxRsParameter jaxRsParam = JaxRsParameter.forName(name);
+            SpringParameter jaxRsParam = SpringParameter.forName(name);
 
             if (jaxRsParam != null) {
                 AnnotationTarget target = annotation.target();
@@ -789,13 +765,13 @@ public class ParameterProcessor {
                     }
 
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
-                } else if (jaxRsParam.location == In.PATH && targetType != null
-                        && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
-                    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
+                    //}else if (jaxRsParam.location == In.PATH && targetType != null
+                    //      && SpringConstants.PATH_SEGMENT.equals(targetType.name())) {
+                    //  String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
-                    if (!matrixParams.containsKey(pathSegment)) {
-                        matrixParams.put(pathSegment, new HashMap<>());
-                    }
+                    //  if (!matrixParams.containsKey(pathSegment)) {
+                    //      matrixParams.put(pathSegment, new HashMap<>());
+                    //  }
                 } else if (jaxRsParam.location != null) {
                     readParameter(new ParameterContextKey(paramName(annotation), jaxRsParam.location, jaxRsParam.defaultStyle),
                             null,
@@ -855,9 +831,9 @@ public class ParameterProcessor {
      * @param jaxRsParam parameter to check for a form media type
      *
      */
-    private void setMediaType(JaxRsParameter jaxRsParam) {
-        if (jaxRsParam.mediaType != null && this.formMediaType == null) {
-            formMediaType = jaxRsParam.mediaType;
+    private void setMediaType(SpringParameter springParam) {
+        if (springParam.mediaType != null && this.formMediaType == null) {
+            formMediaType = springParam.mediaType;
         }
     }
 
@@ -918,24 +894,26 @@ public class ParameterProcessor {
      * @return the default value
      */
     static Object getDefaultValue(AnnotationTarget target) {
-        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, JaxRsConstants.DEFAULT_VALUE);
+        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, SpringConstants.QUERY_PARAM);
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
-            String defaultValueString = stringValue(defaultValueAnno, ParameterConstant.PROP_VALUE);
-            defaultValue = defaultValueString;
-            Type targetType = getType(target);
+            AnnotationValue value = defaultValueAnno.value("defaultValue");
+            if (value != null && !value.asString().isEmpty()) {
+                String defaultValueString = value.asString();
+                defaultValue = defaultValueString;
+                Type targetType = getType(target);
 
-            if (targetType != null && targetType.kind() == Type.Kind.PRIMITIVE) {
-                Primitive primitive = targetType.asPrimitiveType().primitive();
-                Object primitiveValue = primitiveToObject(primitive, defaultValueString);
+                if (targetType != null && targetType.kind() == Type.Kind.PRIMITIVE) {
+                    Primitive primitive = targetType.asPrimitiveType().primitive();
+                    Object primitiveValue = primitiveToObject(primitive, defaultValueString);
 
-                if (primitiveValue != null) {
-                    defaultValue = primitiveValue;
+                    if (primitiveValue != null) {
+                        defaultValue = primitiveValue;
+                    }
                 }
             }
         }
-
         return defaultValue;
     }
 
@@ -1051,21 +1029,26 @@ public class ParameterProcessor {
      */
     static String pathOf(AnnotationTarget target) {
         AnnotationInstance path = null;
+        Set<DotName> paths = SpringConstants.HTTP_METHODS;
 
-        switch (target.kind()) {
-            case CLASS:
-                path = target.asClass().classAnnotation(JaxRsConstants.PATH);
-                break;
-            case METHOD:
-                path = target.asMethod().annotation(JaxRsConstants.PATH);
-                break;
-            default:
-                break;
+        if (target.kind().equals(CLASS)) {
+            for (DotName possiblePath : paths) {
+                AnnotationInstance classAnnotation = target.asClass().classAnnotation(possiblePath);
+                if (classAnnotation != null && classAnnotation.value() != null) {
+                    path = classAnnotation;
+                }
+            }
+        } else if (target.kind().equals(METHOD)) {
+            for (DotName possiblePath : paths) {
+                AnnotationInstance methodAnnotation = target.asMethod().annotation(possiblePath);
+                if (methodAnnotation != null && methodAnnotation.value() != null) {
+                    path = methodAnnotation;
+                }
+            }
         }
 
         if (path != null) {
-            String pathValue = path.value().asString();
-
+            String pathValue = requestMappingValuesToPath(path);
             if (pathValue.startsWith("/")) {
                 pathValue = pathValue.substring(1);
             }
@@ -1078,6 +1061,22 @@ public class ParameterProcessor {
         }
 
         return "";
+    }
+
+    /**
+     * Creates a String path from the RequestMapping value
+     * 
+     * @param requestMappingAnnotation
+     * @return
+     */
+    static String requestMappingValuesToPath(AnnotationInstance requestMappingAnnotation) {
+        StringBuilder sb = new StringBuilder();
+        AnnotationValue value = requestMappingAnnotation.value();
+        String[] parts = value.asStringArray();
+        for (String part : parts) {
+            sb.append(part);
+        }
+        return sb.toString();
     }
 
     /**
@@ -1139,7 +1138,7 @@ public class ParameterProcessor {
      */
     void readParameter(ParameterContextKey key,
             Parameter oaiParam,
-            JaxRsParameter jaxRsParam,
+            SpringParameter springParam,
             Object jaxRsDefaultValue,
             AnnotationTarget target,
             boolean overriddenParametersOnly) {
@@ -1181,8 +1180,8 @@ public class ParameterProcessor {
 
         context.oaiParam = MergeUtil.mergeObjects(context.oaiParam, oaiParam);
 
-        if (context.jaxRsParam == null) {
-            context.jaxRsParam = jaxRsParam;
+        if (context.springParam == null) {
+            context.springParam = springParam;
             context.jaxRsDefaultValue = jaxRsDefaultValue;
         }
 
@@ -1265,7 +1264,7 @@ public class ParameterProcessor {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
             DotName name = entry.getKey();
 
-            if (ParameterConstant.DOTNAME_PARAMETER.equals(name) || JaxRsParameter.isParameter(name)) {
+            if (ParameterConstant.DOTNAME_PARAMETER.equals(name) || SpringParameter.isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
                         readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
@@ -1325,10 +1324,10 @@ public class ParameterProcessor {
      */
     boolean isSubResourceLocator(MethodInfo method) {
         return method.returnType().kind() == Type.Kind.CLASS &&
-                method.hasAnnotation(JaxRsConstants.PATH) &&
+                isResourceMethod(method) &&
                 method.annotations().stream()
                         .map(AnnotationInstance::name)
-                        .noneMatch(JaxRsConstants.HTTP_METHODS::contains);
+                        .noneMatch(SpringConstants.HTTP_METHODS::contains);
     }
 
     /**
@@ -1342,7 +1341,7 @@ public class ParameterProcessor {
         return method.annotations()
                 .stream()
                 .map(AnnotationInstance::name)
-                .anyMatch(JaxRsConstants.HTTP_METHODS::contains);
+                .anyMatch(SpringConstants.HTTP_METHODS::contains);
     }
 
     /**
@@ -1358,7 +1357,7 @@ public class ParameterProcessor {
     }
 
     static boolean isParameter(DotName annotationName) {
-        if (JaxRsParameter.isParameter(annotationName)) {
+        if (SpringParameter.isParameter(annotationName)) {
             return true;
         }
         if (ParameterConstant.DOTNAME_PARAMETER.equals(annotationName)) {

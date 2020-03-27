@@ -20,7 +20,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContaine
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class ExpectationTests extends OpenApiDataObjectScannerTestBase {
+public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
 
     /**
      * Unresolvable type parameter.

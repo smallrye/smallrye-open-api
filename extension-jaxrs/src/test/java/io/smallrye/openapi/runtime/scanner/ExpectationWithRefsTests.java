@@ -20,7 +20,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContaine
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ExpectationWithRefsTests extends OpenApiDataObjectScannerTestBase {
+public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
 
     OpenAPIImpl oai;
     SchemaRegistry registry;

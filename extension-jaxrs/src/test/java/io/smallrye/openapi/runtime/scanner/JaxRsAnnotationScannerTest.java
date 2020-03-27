@@ -45,7 +45,7 @@ import io.smallrye.openapi.runtime.io.OpenApiParser;
 /**
  * @author eric.wittmann@gmail.com
  */
-public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBase {
+public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * Test method for {@link PathMaker#makePath(java.lang.String[])}.
@@ -237,6 +237,25 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
         OpenAPI result = doc.get();
         printToConsole(result);
         assertJsonEquals("resource.tags.ordergiven.staticfile.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicJaxRsDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicJaxRsDefinitionScanning.json", result);
     }
 
     @Path("/tags1")

@@ -19,7 +19,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParamete
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class NestedSchemaReferenceTests extends OpenApiDataObjectScannerTestBase {
+public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     public void testNestedSchemasAddedToRegistry() throws IOException, JSONException {

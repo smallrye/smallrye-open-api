@@ -12,11 +12,59 @@
     
     <name>SmallRye: MicroProfile OpenAPI Spring extension</name>
     
+    <properties>
+        <version.spring>5.2.4.RELEASE</version.spring>
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${version.spring}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <!-- SmallRye core implementation -->
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-core</artifactId>
+        </dependency>
+        
+        <!-- Test Only Dependencies -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+            <scope>test</scope>
+        </dependency>
+        
+        
+        <!-- Depend on core tests -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>smallrye-open-api-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     
