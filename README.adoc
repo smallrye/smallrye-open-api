@@ -1,6 +1,6 @@
 :microprofile-open-api: https://github.com/eclipse/microprofile-open-api/
 
-image:https://github.com/smallrye/smallrye-open-api/workflows/SmallRye%20Build/badge.svg?branch=master[https://github.com/smallrye/smallrye-open-api/actions?query=workflow%3A%22SmallRye+Build%22]
+image:https://github.com/smallrye/smallrye-open-api/workflows/SmallRye%20Build/badge.svg?branch=master[link=https://github.com/smallrye/smallrye-open-api/actions?query=workflow%3A%22SmallRye+Build%22]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-open-api&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-open-api"]
 image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
