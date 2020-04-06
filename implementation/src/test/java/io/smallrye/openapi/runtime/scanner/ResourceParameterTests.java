@@ -24,9 +24,13 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -45,6 +49,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -411,5 +416,80 @@ public class ResourceParameterTests extends OpenApiDataObjectScannerTestBase {
 
     static class Seed {
 
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #239.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/239
+     *
+     */
+    @Test
+    public void testBeanParamMultipartFormInheritance() throws IOException, JSONException {
+        Index i = indexOf(BeanParamMultipartFormInheritanceResource.class,
+                MultipartFormVerify.class,
+                MultipartFormUploadIconForm.class,
+                BeanParamBase.class,
+                BeanParamImpl.class,
+                BeanParamAddon.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("params.beanparam-multipartform-inherited.json", result);
+    }
+
+    static class MultipartFormVerify {
+        @FormParam("token")
+        public String token;
+        @FormParam("os")
+        public String os;
+    }
+
+    static class MultipartFormUploadIconForm extends MultipartFormVerify {
+        @FormParam("icon")
+        public byte[] icon;
+    }
+
+    static class BeanParamBase implements BeanParamAddon {
+        @QueryParam("qc1")
+        String qc1;
+
+        @Override
+        public void setHeaderParam1(String value) {
+        }
+    }
+
+    static interface BeanParamAddon {
+        @HeaderParam("hi1")
+        void setHeaderParam1(String value);
+    }
+
+    static class BeanParamImpl extends BeanParamBase implements BeanParamAddon {
+        @CookieParam("cc1")
+        String cc1;
+    }
+
+    @Path("/")
+    static class BeanParamMultipartFormInheritanceResource {
+        @POST
+        @Path("/uploadIcon")
+        @Consumes(MediaType.MULTIPART_FORM_DATA)
+        public Response uploadUserAvatar(@MultipartForm MultipartFormUploadIconForm form) {
+            return null;
+        }
+
+        @GET
+        @Path("/beanparambase")
+        public Response getWithBeanParams(@BeanParam BeanParamBase params) {
+            return null;
+        }
+
+        @GET
+        @Path("/beanparamimpl")
+        public Response getWithBeanParams(@BeanParam BeanParamImpl params) {
+            return null;
+        }
     }
 }
