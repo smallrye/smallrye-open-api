@@ -270,7 +270,6 @@
 				},
 				"callbacks": {
 					"Callback-1": {
-						"$ref": "#/components/callbacks/CallbackOne",
 						"PathItem-1": {
 							"$ref": "#/paths/fooItem"
 						},

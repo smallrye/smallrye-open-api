@@ -1109,9 +1109,13 @@ public class OpenApiSerializer {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
-        write(node, model.getPathItems(), this::writePathItem);
-        writeExtensions(node, model);
+
+        if (StringUtils.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
+        } else {
+            write(node, model.getPathItems(), this::writePathItem);
+            writeExtensions(node, model);
+        }
     }
 
     /**

@@ -186,6 +186,7 @@ paths:
       callbacks:
         Callback-1:
           $ref: '#/components/callbacks/CallbackOne'
+        Callback-2:
           PathItem-1:
             $ref: '#/paths/fooItem'
           x-callback-1: x-callback-1-value

@@ -5,9 +5,9 @@
       "get": {
         "callbacks": {
           "myRefCallback": {
-            "$ref": "#/components/callbacks/SomeCallback",
             "x-vendor-1": 1,
-            "x-vendor-2": 2
+            "x-vendor-2": 2,
+            "x-vendor-3": 3
           },
           "myWebhook": {
             "$request.body#/url": {
