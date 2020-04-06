@@ -229,22 +229,7 @@ public class ParameterProcessor {
          * HTTP method. Check both the class declaring the method as well as the resource
          * class, if different.
          */
-        AugmentedIndexView augmentedIndex = new AugmentedIndexView(index);
-        List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, resourceMethodClass, null).keySet());
-        /*
-         * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
-         */
-        Collections.reverse(ancestors);
-
-        ancestors.forEach(c -> {
-            c.interfaceTypes()
-                    .stream()
-                    .map(augmentedIndex::getClass)
-                    .filter(Objects::nonNull)
-                    .forEach(iface -> processor.readParameters(iface, null, false));
-
-            processor.readParameters(c, null, false);
-        });
+        processor.readParametersInherited(resourceMethodClass, null, false);
 
         if (!resourceClass.equals(resourceMethodClass)) {
             /*
@@ -264,18 +249,7 @@ public class ParameterProcessor {
         resourceMethod.annotations()
                 .stream()
                 .filter(a -> !a.target().equals(resourceMethod))
-                // TODO: Replace 'forEach' below with ".forEach(processor::readAnnotatedType);" once @Parameters no longer need to be supported on method arguments
-                .forEach(annotation -> {
-                    /*
-                     * This condition exists to support @Parameters wrapper annotation
-                     * on method parameters until (if?) the MP-OAI TCK is changed.
-                     */
-                    if (openApiParameterAnnotations.contains(annotation.name())) {
-                        processor.readParameterAnnotation(annotation);
-                    } else {
-                        processor.readAnnotatedType(annotation);
-                    }
-                });
+                .forEach(processor::readAnnotatedType);
 
         // Phase III - Read method @Parameter(s) annotations
         resourceMethod.annotations()
@@ -753,7 +727,7 @@ public class ParameterProcessor {
      *
      * @param annotation a parameter annotation to be read and processed
      * @param beanParamAnnotation
-     * @param overriddenParametersOnly
+     * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     void readAnnotatedType(AnnotationInstance annotation, AnnotationInstance beanParamAnnotation,
             boolean overriddenParametersOnly) {
@@ -813,7 +787,7 @@ public class ParameterProcessor {
 
                     if (targetType != null) {
                         ClassInfo beanParam = index.getClassByName(targetType.name());
-                        readParameters(beanParam, annotation, overriddenParametersOnly);
+                        readParametersInherited(beanParam, annotation, overriddenParametersOnly);
                     }
                 }
             }
@@ -1135,7 +1109,7 @@ public class ParameterProcessor {
      * @param jaxRsDefaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
      *        annotation.
      * @param target target of the annotation
-     * @param overriddenParametersOnly
+     * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     void readParameter(ParameterContextKey key,
             Parameter oaiParam,
@@ -1255,11 +1229,38 @@ public class ParameterProcessor {
     }
 
     /**
+     * Scans for class level parameters on the given class argument and its ancestors.
+     *
+     * @param clazz the class to be scanned for parameters.
+     * @param beanParamAnnotation the bean parameter annotation to be used for path derivation
+     * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
+     */
+    void readParametersInherited(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
+        AugmentedIndexView augmentedIndex = new AugmentedIndexView(index);
+        List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, clazz, null).keySet());
+        /*
+         * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
+         */
+        Collections.reverse(ancestors);
+
+        ancestors.forEach(c -> {
+            c.interfaceTypes()
+                    .stream()
+                    .map(augmentedIndex::getClass)
+                    .filter(Objects::nonNull)
+                    .forEach(iface -> readParameters(iface, beanParamAnnotation, overriddenParametersOnly));
+
+            readParameters(c, beanParamAnnotation, overriddenParametersOnly);
+        });
+    }
+
+    /**
      * Scans for class level parameters. This method is used for both resource class
      * annotation scanning and {@link javax.ws.rs.BeanParam @BeanParam} target type scanning.
      *
      * @param clazz the class to be scanned for parameters.
-     * @param beanParamAnnotation
+     * @param beanParamAnnotation the bean parameter annotation to be used for path derivation
+     * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
         for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
