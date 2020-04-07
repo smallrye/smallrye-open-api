@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
@@ -907,6 +906,11 @@ public class OpenApiSerializer {
         }
     }
 
+    private boolean isNotEmpty(String stringVal) {
+        final String EMPTY_STRING = "";
+        return stringVal != null && !stringVal.trim().equals(EMPTY_STRING);
+    }
+
     /**
      * Writes a {@link RequestBody} object to the JSON tree.
      * 
@@ -920,7 +924,7 @@ public class OpenApiSerializer {
         }
         ObjectNode node = parent.putObject(name);
 
-        if (StringUtils.isNotEmpty(model.getRef())) {
+        if (isNotEmpty(model.getRef())) {
             JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
         } else {
             JsonUtil.stringProperty(node, OpenApiConstants.PROP_DESCRIPTION, model.getDescription());
@@ -1110,7 +1114,7 @@ public class OpenApiSerializer {
         }
         ObjectNode node = parent.putObject(name);
 
-        if (StringUtils.isNotEmpty(model.getRef())) {
+        if (isNotEmpty(model.getRef())) {
             JsonUtil.stringProperty(node, OpenApiConstants.PROP_$REF, model.getRef());
         } else {
             write(node, model.getPathItems(), this::writePathItem);
