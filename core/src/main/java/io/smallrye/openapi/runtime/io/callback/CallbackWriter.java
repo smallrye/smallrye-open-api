@@ -13,6 +13,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.paths.PathsWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Callback to json
@@ -56,16 +57,18 @@ public class CallbackWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
 
-        if (model.getPathItems() != null) {
-            Set<Map.Entry<String, PathItem>> entrySet = model.getPathItems().entrySet();
-            for (Map.Entry<String, PathItem> entry : entrySet) {
-                PathsWriter.writePathItem(node, entry.getValue(), entry.getKey());
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            if (model.getPathItems() != null) {
+                Set<Map.Entry<String, PathItem>> entrySet = model.getPathItems().entrySet();
+                for (Map.Entry<String, PathItem> entry : entrySet) {
+                    PathsWriter.writePathItem(node, entry.getValue(), entry.getKey());
+                }
             }
+
+            ExtensionWriter.writeExtensions(node, model);
         }
-
-        ExtensionWriter.writeExtensions(node, model);
     }
-
 }

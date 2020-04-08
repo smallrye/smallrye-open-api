@@ -15,6 +15,7 @@ import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.example.ExampleWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.schema.SchemaWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Header to json
@@ -57,18 +58,21 @@ public class HeaderWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.booleanProperty(node, Parameterizable.PROP_REQUIRED, model.getRequired());
-        JsonUtil.booleanProperty(node, Parameterizable.PROP_DEPRECATED, model.getDeprecated());
-        JsonUtil.booleanProperty(node, Parameterizable.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
-        JsonUtil.enumProperty(node, Parameterizable.PROP_STYLE, model.getStyle());
-        JsonUtil.booleanProperty(node, Parameterizable.PROP_EXPLODE, model.getExplode());
-        SchemaWriter.writeSchema(node, model.getSchema(), Parameterizable.PROP_SCHEMA);
-        ObjectWriter.writeObject(node, Parameterizable.PROP_EXAMPLE, model.getExample());
-        ExampleWriter.writeExamples(node, model.getExamples());
-        ContentWriter.writeContent(node, model.getContent());
-        ExtensionWriter.writeExtensions(node, model);
 
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION, model.getDescription());
+            JsonUtil.booleanProperty(node, Parameterizable.PROP_REQUIRED, model.getRequired());
+            JsonUtil.booleanProperty(node, Parameterizable.PROP_DEPRECATED, model.getDeprecated());
+            JsonUtil.booleanProperty(node, Parameterizable.PROP_ALLOW_EMPTY_VALUE, model.getAllowEmptyValue());
+            JsonUtil.enumProperty(node, Parameterizable.PROP_STYLE, model.getStyle());
+            JsonUtil.booleanProperty(node, Parameterizable.PROP_EXPLODE, model.getExplode());
+            SchemaWriter.writeSchema(node, model.getSchema(), Parameterizable.PROP_SCHEMA);
+            ObjectWriter.writeObject(node, Parameterizable.PROP_EXAMPLE, model.getExample());
+            ExampleWriter.writeExamples(node, model.getExamples());
+            ContentWriter.writeContent(node, model.getContent());
+            ExtensionWriter.writeExtensions(node, model);
+        }
     }
 }
