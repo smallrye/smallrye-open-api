@@ -1,6 +1,6 @@
 :microprofile-open-api: https://github.com/eclipse/microprofile-open-api/
 
-image:https://semaphoreci.com/api/v1/smallrye/smallrye-open-api/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-open-api"]
+image:https://github.com/smallrye/smallrye-open-api/workflows/SmallRye%20Build/badge.svg?branch=master[link=https://github.com/smallrye/smallrye-open-api/actions?query=workflow%3A%22SmallRye+Build%22]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-open-api&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-open-api"]
 image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
@@ -19,7 +19,10 @@ mvn clean install
 
 === Project structure
 
-* link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification.
+* link:core[] - The core OpenAPI code, independent of entry point dependencies.
+* link:extension-jaxrs[] - The JAX-RS entry point. This module depends on JAX-RS and core.
+* link:extension-spring[] - The Spring entry point. This module depends on Spring and core.
+* link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
 * link:tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
 
 === Links

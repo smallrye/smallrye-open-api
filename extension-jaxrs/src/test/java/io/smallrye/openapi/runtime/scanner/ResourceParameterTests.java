@@ -1,0 +1,480 @@
+package io.smallrye.openapi.runtime.scanner;
+
+import java.io.IOException;
+import java.net.URI;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Set;
+
+import javax.ws.rs.BeanParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.jandex.Index;
+import org.jboss.jandex.IndexView;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.json.JSONException;
+import org.junit.Test;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import io.smallrye.openapi.api.OpenApiConfig;
+import test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource;
+
+/**
+ * @author Michael Edgar {@literal <michael@xlate.io>}
+ */
+public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
+
+    /*
+     * Test case derived from original example in Smallrye OpenAPI issue #25.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/25
+     *
+     */
+    @Test
+    public void testParameterResource() throws IOException, JSONException {
+        Index i = indexOf(ParameterResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.simpleSchema.json", result);
+    }
+
+    /*
+     * Test case derived from original example in Smallrye OpenAPI issue #165.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/165
+     *
+     */
+    @Test
+    public void testPrimitiveArraySchema() throws IOException, JSONException {
+        Index i = indexOf(PrimitiveArraySchemaTestResource.class,
+                PrimitiveArraySchemaTestResource.PrimitiveArrayTestObject.class);
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(i, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.primitive-array-schema.json", result);
+    }
+
+    @Path("/v1")
+    static class PrimitiveArraySchemaTestResource {
+        @Schema(name = "PrimitiveArrayTestObject", description = "the REST response class")
+        static class PrimitiveArrayTestObject {
+            @Schema(required = true, description = "a packed data array")
+            private double[] data;
+
+            @Schema(implementation = double.class, type = SchemaType.ARRAY)
+            // Type is intentionally different than annotation implementation type
+            private float[] data2;
+        }
+
+        @GET
+        @Operation(summary = "Get an object containing a primitive array")
+        @APIResponses({
+                @APIResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PrimitiveArrayTestObject.class))) })
+        public PrimitiveArrayTestObject getResponse() {
+            return new PrimitiveArrayTestObject();
+        }
+    }
+
+    /*************************************************************************/
+
+    @Test
+    public void testPrimitiveArrayParameter() throws IOException, JSONException {
+        Index i = indexOf(PrimitiveArrayParameterTestResource.class);
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(i, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.primitive-array-param.json", result);
+    }
+
+    @Path("/v1")
+    static class PrimitiveArrayParameterTestResource {
+        @POST
+        @Consumes("application/json")
+        @Produces("application/json")
+        @Operation(summary = "Convert an array of doubles to an array of floats")
+        @APIResponses({
+                @APIResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = float[].class))) })
+        public float[] doubleToFloat(@SuppressWarnings("unused") double[] input) {
+            return new float[0];
+        }
+    }
+
+    /*************************************************************************/
+
+    @Test
+    public void testPrimitiveArrayPolymorphism() throws IOException, JSONException {
+        Index i = indexOf(PrimitiveArrayPolymorphismTestResource.class);
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(i, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.primitive-array-polymorphism.json", result);
+    }
+
+    @Path("/v1")
+    static class PrimitiveArrayPolymorphismTestResource {
+        @POST
+        @Consumes("application/json")
+        @Produces("application/json")
+        @Operation(summary = "Convert an array of integer types to an array of floating point types")
+        @RequestBody(content = @Content(schema = @Schema(anyOf = { int[].class, long[].class })))
+        @APIResponses({
+                @APIResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(oneOf = {
+                        float[].class, double[].class }))) })
+        public Object intToFloat(@SuppressWarnings("unused") Object input) {
+            return null;
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in Smallrye OpenAPI issue #201.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/201
+     *
+     */
+    @Test
+    public void testSchemaImplementationType() throws IOException, JSONException {
+        Index i = indexOf(SchemaImplementationTypeResource.class,
+                SchemaImplementationTypeResource.GreetingMessage.class,
+                SchemaImplementationTypeResource.SimpleString.class);
+
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(i, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.string-implementation-wrapped.json", result);
+    }
+
+    @Path("/hello")
+    static class SchemaImplementationTypeResource {
+        static class GreetingMessage {
+            @Schema(description = "Used to send a message")
+            private final SimpleString message;
+
+            @Schema(implementation = String.class, description = "Simply a string", required = false)
+            private SimpleString optionalMessage;
+
+            public GreetingMessage(@JsonProperty SimpleString message) {
+                this.message = message;
+            }
+
+            public SimpleString getMessage() {
+                return message;
+            }
+
+            public SimpleString getOptionalMessage() {
+                return optionalMessage;
+            }
+        }
+
+        @Schema(implementation = String.class, title = "A Simple String")
+        static class SimpleString {
+            @Schema(hidden = true)
+            private final String value;
+
+            public SimpleString(String value) {
+                this.value = value;
+            }
+
+            @JsonValue
+            public String getValue() {
+                return value;
+            }
+        }
+
+        @SuppressWarnings("unused")
+        @POST
+        @Consumes("application/json")
+        @Produces("application/json")
+        public Response doPost(GreetingMessage message) {
+            return Response.created(URI.create("http://example.com")).build();
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived for Smallrye OpenAPI issue #233.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/233
+     *
+     */
+    @Test
+    public void testTimeResource() throws IOException, JSONException {
+        Index i = indexOf(TimeTestResource.class, TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.time.json", result);
+    }
+
+    @Path("/times")
+    @Produces(MediaType.TEXT_PLAIN)
+    static class TimeTestResource {
+
+        static class UTC {
+            @Schema(description = "Current time at offset '00:00'")
+            OffsetTime utc = OffsetTime.now(ZoneId.of("UTC"));
+        }
+
+        @Path("local")
+        @GET
+        public LocalTime getLocalTime() {
+            return LocalTime.now();
+        }
+
+        @Path("zoned")
+        @GET
+        public OffsetTime getZonedTime(@QueryParam("zoneId") String zoneId) {
+            return OffsetTime.now(ZoneId.of(zoneId));
+        }
+
+        @Path("utc")
+        @GET
+        public UTC getUTC() {
+            return new UTC();
+        }
+
+        @Path("utc")
+        @POST
+        public OffsetTime toUTC(@QueryParam("local") LocalTime local, @QueryParam("offsetId") String offsetId) {
+            return OffsetTime.of(local, ZoneOffset.of(offsetId));
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #237.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/237
+     *
+     */
+    @Test
+    public void testTypeVariableResponse() throws IOException, JSONException {
+        Index i = indexOf(TypeVariableResponseTestResource.class,
+                TypeVariableResponseTestResource.Dto.class);
+        OpenApiConfig config = emptyConfig();
+        IndexView filtered = new FilteredIndexView(i, config);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.parameters.type-variable.json", result);
+    }
+
+    @Path("/variable-types")
+    @SuppressWarnings("unused")
+    static class TypeVariableResponseTestResource<TEST extends TypeVariableResponseTestResource.Dto> {
+        static class Dto {
+            String id;
+        }
+
+        @GET
+        public List<TEST> getAll() {
+            return null;
+        }
+
+        @GET
+        @Path("{id}")
+        public TEST getOne(@PathParam("id") String id) {
+            return null;
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #248.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/248
+     *
+     */
+    @Test
+    public void testResponseTypeUnindexed() throws IOException, JSONException {
+        // Index is intentionally missing ResponseTypeUnindexedTestResource$ThirdPartyType
+        Index i = indexOf(ResponseTypeUnindexedTestResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.unknown-type.empty-schema.json", result);
+    }
+
+    @Path("/unindexed")
+    static class ResponseTypeUnindexedTestResource {
+        // This type will not be in the Jandex index, nor does it implement Map or List.
+        static class ThirdPartyType {
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public ThirdPartyType hello() {
+            return null;
+        }
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test cases derived from original example in SmallRye OpenAPI issue #260.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/260
+     *
+     */
+    @Test
+    public void testGenericSetResponseWithSetIndexed() throws IOException, JSONException {
+        Index i = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.generic-collection.set-indexed.json", result);
+    }
+
+    @Test
+    public void testGenericSetResponseWithSetUnindexed() throws IOException, JSONException {
+        Index i = indexOf(FruitResource.class, Fruit.class, Seed.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.generic-collection.set-unindexed.json", result);
+    }
+
+    @Path("/fruits")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @SuppressWarnings("unused")
+    static class FruitResource {
+        @GET
+        public Set<Fruit> list() {
+            return null;
+        }
+
+        @POST
+        public Set<Fruit> add(Fruit fruit) {
+            return null;
+        }
+
+        @DELETE
+        public Set<Fruit> delete(Fruit fruit) {
+            return null;
+        }
+    }
+
+    static class Fruit {
+        String description;
+        String name;
+        List<Seed> seeds;
+    }
+
+    static class Seed {
+
+    }
+
+    /*************************************************************************/
+
+    /*
+     * Test case derived from original example in SmallRye OpenAPI issue #239.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/239
+     *
+     */
+    @Test
+    public void testBeanParamMultipartFormInheritance() throws IOException, JSONException {
+        Index i = indexOf(BeanParamMultipartFormInheritanceResource.class,
+                MultipartFormVerify.class,
+                MultipartFormUploadIconForm.class,
+                BeanParamBase.class,
+                BeanParamImpl.class,
+                BeanParamAddon.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("params.beanparam-multipartform-inherited.json", result);
+    }
+
+    static class MultipartFormVerify {
+        @FormParam("token")
+        public String token;
+        @FormParam("os")
+        public String os;
+    }
+
+    static class MultipartFormUploadIconForm extends MultipartFormVerify {
+        @FormParam("icon")
+        public byte[] icon;
+    }
+
+    static class BeanParamBase implements BeanParamAddon {
+        @QueryParam("qc1")
+        String qc1;
+
+        @Override
+        public void setHeaderParam1(String value) {
+        }
+    }
+
+    static interface BeanParamAddon {
+        @HeaderParam("hi1")
+        void setHeaderParam1(String value);
+    }
+
+    static class BeanParamImpl extends BeanParamBase implements BeanParamAddon {
+        @CookieParam("cc1")
+        String cc1;
+    }
+
+    @Path("/")
+    static class BeanParamMultipartFormInheritanceResource {
+        @POST
+        @Path("/uploadIcon")
+        @Consumes(MediaType.MULTIPART_FORM_DATA)
+        public Response uploadUserAvatar(@MultipartForm MultipartFormUploadIconForm form) {
+            return null;
+        }
+
+        @GET
+        @Path("/beanparambase")
+        public Response getWithBeanParams(@BeanParam BeanParamBase params) {
+            return null;
+        }
+
+        @GET
+        @Path("/beanparamimpl")
+        public Response getWithBeanParams(@BeanParam BeanParamImpl params) {
+            return null;
+        }
+    }
+}
