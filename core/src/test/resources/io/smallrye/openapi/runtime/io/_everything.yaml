@@ -248,7 +248,6 @@ components:
     Header-2: {}
   securitySchemes:
     basic_auth:
-      $ref: n/a
       type: http
       description: Basic HTTP auth.
       name: Basic Auth
