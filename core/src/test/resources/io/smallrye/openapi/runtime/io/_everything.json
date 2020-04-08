@@ -96,7 +96,6 @@
 				"operationId": "getAllFoos",
 				"parameters": [
 					{
-						"$ref": "#/components/parameters/Param1",
 						"name": "Param1",
 						"in": "query",
 						"description": "Param description here.",
@@ -176,7 +175,10 @@
 								"x-mediaType-2": "x-mediaType-2-value"
 							}
 						}
-					}
+					},
+                    {
+                        "$ref": "#/components/parameters/Param2"
+                    }
 				],
 				"requestBody": {
 					"$ref": "#/components/requestBodies/FooRequestBody",
