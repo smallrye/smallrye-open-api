@@ -211,7 +211,6 @@
 						"$ref": "#/components/responses/DefaultResponse"
 					},
 					"200": {
-						"$ref": "#/components/responses/OKResponse",
 						"description": "Successful response.",
 						"headers": {
 							"Header-1": {

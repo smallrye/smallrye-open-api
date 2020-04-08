@@ -15,6 +15,7 @@ import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.header.HeaderWriter;
 import io.smallrye.openapi.runtime.io.link.LinkWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the APIResponse to json
@@ -77,11 +78,15 @@ public class ResponseWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, ResponseConstant.PROP_DESCRIPTION, model.getDescription());
-        HeaderWriter.writeHeaders(node, model.getHeaders());
-        ContentWriter.writeContent(node, model.getContent());
-        LinkWriter.writeLinks(node, model.getLinks());
-        ExtensionWriter.writeExtensions(node, model);
+
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.stringProperty(node, ResponseConstant.PROP_DESCRIPTION, model.getDescription());
+            HeaderWriter.writeHeaders(node, model.getHeaders());
+            ContentWriter.writeContent(node, model.getContent());
+            LinkWriter.writeLinks(node, model.getLinks());
+            ExtensionWriter.writeExtensions(node, model);
+        }
     }
 }
