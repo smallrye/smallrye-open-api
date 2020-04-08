@@ -11,6 +11,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.content.ContentWriter;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the RequestBody to json
@@ -66,10 +67,13 @@ public class RequestBodyWriter {
 
         ObjectNode node = parent.putObject(name);
 
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, RequestBodyConstant.PROP_DESCRIPTION, model.getDescription());
-        ContentWriter.writeContent(node, model.getContent());
-        JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED, model.getRequired());
-        ExtensionWriter.writeExtensions(node, model);
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.stringProperty(node, RequestBodyConstant.PROP_DESCRIPTION, model.getDescription());
+            ContentWriter.writeContent(node, model.getContent());
+            JsonUtil.booleanProperty(node, RequestBodyConstant.PROP_REQUIRED, model.getRequired());
+            ExtensionWriter.writeExtensions(node, model);
+        }
     }
 }

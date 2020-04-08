@@ -125,7 +125,6 @@ paths:
             x-mediaType-2: x-mediaType-2-value
       - $ref: '#/components/parameters/Param2'
       requestBody:
-        $ref: '#/components/requestBodies/FooRequestBody'
         description: Description of the request body.
         content:
           application/json: {}

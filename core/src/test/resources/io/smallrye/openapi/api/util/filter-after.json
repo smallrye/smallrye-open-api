@@ -175,7 +175,6 @@
                     }
 				],
 				"requestBody": {
-					"$ref": "#/components/requestBodies/FooRequestBody",
 					"description": "Description of the request body.",
 					"content": {
 						"application/json": {},
@@ -230,6 +229,7 @@
 								"parameters": {
 								},
 								"requestBody": {
+                                    "$ref": "#/components/requestBodies/FooRequestBody"
 								},
 								"description": "Description of link 1.",
 								"server": {
