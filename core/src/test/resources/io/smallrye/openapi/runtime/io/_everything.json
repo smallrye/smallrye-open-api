@@ -112,7 +112,6 @@
 						"example": "yarr!",
 						"examples": {
 							"Example-1": {
-								"$ref": "#/components/examples/Example-1",
 								"summary": "Summary of Example",
 								"description": "Description of example 1!",
 								"value": "foo",
