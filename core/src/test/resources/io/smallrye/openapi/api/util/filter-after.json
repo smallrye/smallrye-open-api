@@ -224,7 +224,6 @@
 						},
 						"links": {
 							"Link-1": {
-								"$ref": "#/components/links/LinkOne",
 								"operationRef": "OPERATION-REF",
 								"operationId": "OP-ID",
 								"parameters": {
