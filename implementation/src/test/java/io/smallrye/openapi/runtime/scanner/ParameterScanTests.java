@@ -226,6 +226,11 @@ public class ParameterScanTests extends IndexScannerTestBase {
                 ParamNameOverrideTestResource.class);
     }
 
+    @Test
+    public void testCommonTargetMethodParameter() throws IOException, JSONException {
+        test("params.common-annotation-target-method.json", CommonTargetMethodParameterResource.class);
+    }
+
     /***************** Test models and resources below. ***********************/
 
     public static class Widget {
@@ -821,6 +826,21 @@ public class ParameterScanTests extends IndexScannerTestBase {
         public String echo(
                 @Parameter(name = "Path1", in = ParameterIn.PATH, style = ParameterStyle.SIMPLE, description = "The name 'Path1' will not be used instead of 'p1'") @PathParam("p1") String p1) {
             return p1;
+        }
+    }
+
+    @Path("/common-target-method")
+    static class CommonTargetMethodParameterResource {
+        @DefaultValue("10")
+        @QueryParam("limit")
+        @Parameter(description = "Description of the limit query parameter")
+        public void setLimit(int limit) {
+        }
+
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        public String[] getRecords() {
+            return null;
         }
     }
 }
