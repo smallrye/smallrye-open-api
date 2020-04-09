@@ -1201,7 +1201,10 @@ public class ParameterProcessor {
         ParameterContext context = params.get(key);
 
         if (context == null) {
-            context = params.values().stream().filter(c -> haveSameAnnotatedTarget(c, target, key.name))
+            context = params
+                    .values()
+                    .stream()
+                    .filter(c -> haveSameAnnotatedTarget(c, target, key.name))
                     .findFirst()
                     .orElse(null);
         }
@@ -1227,14 +1230,7 @@ public class ParameterProcessor {
         boolean nameMatches = Objects.equals(context.name, name);
 
         if (target.equals(context.target)) {
-            /*
-             * If the annotations have the same (non-method) target or the same name with a common
-             * method target, it's the same parameter.
-             * 
-             * This covers the situation where a @Parameter annotation was missing either
-             * 'name' or 'location' attributes (or both).
-             */
-            return nameMatches || target.kind() != Kind.METHOD;
+            return true;
         }
 
         if (nameMatches && target.kind() == Kind.METHOD && context.target.kind() == Kind.METHOD_PARAMETER) {
