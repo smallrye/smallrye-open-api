@@ -395,6 +395,15 @@ public interface AnnotationScanner {
         }
     }
 
+    /**
+     * Derives a default HTTP status code for the provided REST endpoint implementation
+     * method using the rules defined by
+     * {@link org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema#responseCode()
+     * APIResponseSchema#responseCode()}.
+     *
+     * @param method the endpoint method
+     * @return the derived HTTP status
+     */
     default int getDefaultStatus(final MethodInfo method) {
         final int status;
 

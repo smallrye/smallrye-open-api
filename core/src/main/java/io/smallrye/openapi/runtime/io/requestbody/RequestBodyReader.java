@@ -130,6 +130,13 @@ public class RequestBodyReader {
         return requestBody;
     }
 
+    /**
+     * Reads a RequestBodySchema annotation into a model.
+     * 
+     * @param context the scanning context
+     * @param annotation {@literal @}RequestBodySchema annotation
+     * @return RequestBody model
+     */
     public static RequestBody readRequestBodySchema(final AnnotationScannerContext context,
             AnnotationInstance annotation) {
         if (annotation == null || CurrentScannerInfo.getCurrentConsumes() == null) {
