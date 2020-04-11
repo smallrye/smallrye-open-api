@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-parent</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>smallrye-open-api-spring</artifactId>
-    
+
     <name>SmallRye: MicroProfile OpenAPI Spring extension</name>
-    
+
     <properties>
         <version.spring>5.2.5.RELEASE</version.spring>
     </properties>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -32,14 +32,14 @@
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-core</artifactId>
         </dependency>
-        
-        <!-- Test Only Dependencies -->
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
-        
+
+        <!-- Test Only Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -56,8 +56,8 @@
             <version>2.5</version>
             <scope>test</scope>
         </dependency>
-        
-        
+
+
         <!-- Depend on core tests -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -67,7 +67,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <profiles>
         <profile>
             <id>coverage</id>

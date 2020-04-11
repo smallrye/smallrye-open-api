@@ -33,7 +33,6 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
@@ -55,7 +54,6 @@ import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.operation.OperationReader;
 import io.smallrye.openapi.runtime.io.requestbody.RequestBodyReader;
-import io.smallrye.openapi.runtime.io.response.ResponseConstant;
 import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
@@ -92,6 +90,8 @@ public interface AnnotationScanner {
     public boolean isMultipartOutput(Type returnType);
 
     public boolean isMultipartInput(Type inputType);
+
+    public String getReasonPhrase(int statusCode);
 
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions);
@@ -277,6 +277,10 @@ public interface AnnotationScanner {
         for (AnnotationInstance annotation : apiResponseAnnotations) {
             addApiReponseFromAnnotation(context, annotation, operation);
         }
+
+        AnnotationInstance responseSchemaAnnotation = ResponseReader.getResponseSchemaAnnotation(method);
+        addApiReponseSchemaFromAnnotation(context, responseSchemaAnnotation, method, operation);
+
         /*
          * If there is no response from annotations, try to create one from the method return value.
          * Do not generate a response if the app has used an empty @ApiResponses annotation. This
@@ -327,20 +331,11 @@ public interface AnnotationScanner {
 
         Type returnType = method.returnType();
         APIResponse response = null;
-        String code = "200";
-        String description = "OK";
+        final int status = getDefaultStatus(method);
+        final String code = String.valueOf(status);
+        final String description = getReasonPhrase(status);
 
         if (returnType.kind() == Type.Kind.VOID) {
-            boolean asyncResponse = isAsyncResponse(method);
-
-            if (isPostMethod(method)) {
-                code = "201";
-                description = "Created";
-            } else if (!asyncResponse) {
-                code = "204";
-                description = "No Content";
-            }
-
             if (generateResponse(code, operation)) {
                 response = new APIResponseImpl().description(description);
             }
@@ -401,6 +396,33 @@ public interface AnnotationScanner {
     }
 
     /**
+     * Derives a default HTTP status code for the provided REST endpoint implementation
+     * method using the rules defined by
+     * {@link org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema#responseCode()
+     * APIResponseSchema#responseCode()}.
+     *
+     * @param method the endpoint method
+     * @return the derived HTTP status
+     */
+    default int getDefaultStatus(final MethodInfo method) {
+        final int status;
+
+        if (method.returnType().kind() == Type.Kind.VOID) {
+            if (isPostMethod(method)) {
+                status = 201; // Created
+            } else if (!isAsyncResponse(method)) {
+                status = 204; // No Content
+            } else {
+                status = 200; // OK
+            }
+        } else {
+            status = 200; // OK
+        }
+
+        return status;
+    }
+
+    /**
      * Determine if the default response information should be generated.
      * It should be done when no responses have been declared or if the default
      * response already exists and is missing information (e.g. content).
@@ -433,6 +455,41 @@ public interface AnnotationScanner {
     }
 
     /**
+     * Add api response to api responses using the annotation information
+     * 
+     * @param annotation The APIResponseSchema annotation
+     * @param operation the method operation
+     */
+    default void addApiReponseSchemaFromAnnotation(AnnotationScannerContext context,
+            AnnotationInstance annotation,
+            MethodInfo method,
+            Operation operation) {
+
+        if (annotation == null) {
+            return;
+        }
+
+        String responseCode = ResponseReader.getResponseName(annotation);
+        final int status;
+
+        if (responseCode != null && responseCode.matches("\\d{3}")) {
+            status = Integer.parseInt(responseCode);
+        } else {
+            status = getDefaultStatus(method);
+            responseCode = String.valueOf(status);
+        }
+
+        APIResponse response = ResponseReader.readResponseSchema(context, annotation);
+
+        if (response.getDescription() == null) {
+            response.setDescription(getReasonPhrase(status));
+        }
+
+        APIResponses responses = ModelUtil.responses(operation);
+        responses.addAPIResponse(responseCode, response);
+    }
+
+    /**
      * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the
      * method.
      * If the response code already exists then ignore the exception mapper annotation.
@@ -443,16 +500,15 @@ public interface AnnotationScanner {
      */
     default boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation,
             List<AnnotationInstance> methodApiResponseAnnotations) {
-        AnnotationValue exMapperResponseCode = exMapperApiResponseAnnotation
-                .value(ResponseConstant.PROP_RESPONSE_CODE);
-        Optional<AnnotationInstance> apiResponseWithSameCode = methodApiResponseAnnotations.stream()
-                .filter(annotationInstance -> {
-                    AnnotationValue methodAnnotationValue = annotationInstance
-                            .value(ResponseConstant.PROP_RESPONSE_CODE);
-                    return (methodAnnotationValue != null && methodAnnotationValue.equals(exMapperResponseCode));
-                }).findFirst();
 
-        return apiResponseWithSameCode.isPresent();
+        String exMapperResponseCode = ResponseReader.getResponseName(exMapperApiResponseAnnotation);
+
+        return methodApiResponseAnnotations.stream()
+                .map(ResponseReader::getResponseName)
+                .filter(Objects::nonNull)
+                .filter(code -> code.equals(exMapperResponseCode))
+                .findFirst()
+                .isPresent();
     }
 
     /**
@@ -673,6 +729,11 @@ public interface AnnotationScanner {
                     requestBody.setRequired(Boolean.FALSE);
                 }
             }
+        }
+
+        if (requestBody == null) {
+            requestBody = RequestBodyReader.readRequestBodySchema(context,
+                    RequestBodyReader.getRequestBodySchemaAnnotation(method));
         }
 
         // If the request body is null, figure it out from the parameters.  Only if the

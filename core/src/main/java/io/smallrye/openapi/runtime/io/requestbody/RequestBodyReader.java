@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.models.media.Content;
+import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -13,14 +15,19 @@ import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.smallrye.openapi.api.models.media.ContentImpl;
+import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the RequestBody annotation
@@ -124,6 +131,36 @@ public class RequestBodyReader {
     }
 
     /**
+     * Reads a RequestBodySchema annotation into a model.
+     * 
+     * @param context the scanning context
+     * @param annotation {@literal @}RequestBodySchema annotation
+     * @return RequestBody model
+     */
+    public static RequestBody readRequestBodySchema(final AnnotationScannerContext context,
+            AnnotationInstance annotation) {
+        if (annotation == null || CurrentScannerInfo.getCurrentConsumes() == null) {
+            // Only generate the RequestBody if the endpoint declares an @Consumes media type
+            return null;
+        }
+        LOG.debug("Processing a single @RequestBodySchema annotation.");
+        Content content = new ContentImpl();
+
+        for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {
+            MediaType type = new MediaTypeImpl();
+            type.setSchema(SchemaFactory.typeToSchema(context.getIndex(),
+                    JandexUtil.value(annotation, RequestBodyConstant.PROP_VALUE),
+                    context.getExtensions()));
+            content.addMediaType(mediaType, type);
+        }
+
+        RequestBody requestBody = new RequestBodyImpl();
+        requestBody.setContent(content);
+
+        return requestBody;
+    }
+
+    /**
      * Reads a {@link RequestBody} OpenAPI node.
      * 
      * @param node the json object
@@ -148,4 +185,7 @@ public class RequestBodyReader {
                 RequestBodyConstant.DOTNAME_REQUESTBODY, null);
     }
 
+    public static AnnotationInstance getRequestBodySchemaAnnotation(final AnnotationTarget target) {
+        return TypeUtil.getAnnotation(target, RequestBodyConstant.DOTNAME_REQUEST_BODY_SCHEMA);
+    }
 }

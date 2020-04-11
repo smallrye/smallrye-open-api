@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.models.media.Content;
+import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.jboss.jandex.AnnotationInstance;
@@ -15,15 +17,19 @@ import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.smallrye.openapi.api.models.media.ContentImpl;
+import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.header.HeaderReader;
 import io.smallrye.openapi.runtime.io.link.LinkReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -149,7 +155,7 @@ public class ResponseReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Response annotation.");
+        LOG.debug("Processing a single @APIResponse annotation.");
         APIResponse response = new APIResponseImpl();
         response.setDescription(JandexUtil.stringValue(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
         response.setHeaders(
@@ -159,6 +165,36 @@ public class ResponseReader {
                 ContentReader.readContent(context, annotationInstance.value(ResponseConstant.PROP_CONTENT),
                         ContentDirection.OUTPUT));
         response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Response));
+        return response;
+    }
+
+    /**
+     * Reads a APIResponseSchema annotation into a model.
+     *
+     * @param context the scanning context
+     * @param annotation {@literal @}APIResponseSchema annotation
+     * @return APIResponse model
+     */
+    public static APIResponse readResponseSchema(final AnnotationScannerContext context,
+            final AnnotationInstance annotation) {
+        if (annotation == null || CurrentScannerInfo.getCurrentProduces() == null) {
+            // Only generate the APIResponse if the endpoint declares an @Produces media type
+            return null;
+        }
+        LOG.debug("Processing a single @APIResponseSchema annotation.");
+        Content content = new ContentImpl();
+
+        for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
+            MediaType type = new MediaTypeImpl();
+            type.setSchema(SchemaFactory.typeToSchema(context.getIndex(),
+                    JandexUtil.value(annotation, ResponseConstant.PROP_VALUE),
+                    context.getExtensions()));
+            content.addMediaType(mediaType, type);
+        }
+
+        APIResponse response = new APIResponseImpl();
+        response.setContent(content);
+
         return response;
     }
 
@@ -206,6 +242,10 @@ public class ResponseReader {
 
     public static AnnotationInstance getResponsesAnnotation(final MethodInfo method) {
         return method.annotation(ResponseConstant.DOTNAME_API_RESPONSES);
+    }
+
+    public static AnnotationInstance getResponseSchemaAnnotation(final MethodInfo method) {
+        return method.annotation(ResponseConstant.DOTNAME_API_RESPONSE_SCHEMA);
     }
 
     public static String getResponseName(AnnotationInstance annotation) {
