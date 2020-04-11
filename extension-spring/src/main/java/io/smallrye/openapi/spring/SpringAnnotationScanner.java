@@ -21,6 +21,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
+import org.springframework.http.HttpStatus;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -40,7 +41,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * Scanner that scan Spring entry points.
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class SpringAnnotationScanner implements AnnotationScanner {
@@ -82,6 +83,12 @@ public class SpringAnnotationScanner implements AnnotationScanner {
     }
 
     @Override
+    public String getReasonPhrase(int statusCode) {
+        HttpStatus status = HttpStatus.resolve(statusCode);
+        return status != null ? status.getReasonPhrase() : null;
+    }
+
+    @Override
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
@@ -118,7 +125,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
     /**
      * Find and process all Spring Controllers
      * TODO: Also support Controller annotations ?
-     * 
+     *
      * @param context the scanning context
      * @param openApi the openAPI model
      */
@@ -148,7 +155,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
      * Processes a Spring Controller and creates an {@link OpenAPI} model. Performs
      * annotation scanning and other processing. Returns a model unique to that single Spring
      * controller.
-     * 
+     *
      * @param context the scanning context
      * @param controllerClass the Spring REST controller
      */
@@ -189,7 +196,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     /**
      * Process the Spring controller Operation methods
-     * 
+     *
      * @param context the scanning context
      * @param resourceClass the class containing the methods
      * @param openApi the OpenApi model being processed
@@ -231,7 +238,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     /**
      * Process a single Spring method to produce an OpenAPI Operation.
-     * 
+     *
      * @param openApi
      * @param resourceClass
      * @param method
