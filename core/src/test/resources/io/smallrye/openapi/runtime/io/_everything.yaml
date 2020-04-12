@@ -83,8 +83,7 @@ paths:
         url: https://example.com/#get
       operationId: getAllFoos
       parameters:
-      - $ref: '#/components/parameters/Param1'
-        name: Param1
+      - name: Param1
         in: query
         description: Param description here.
         required: true
@@ -98,7 +97,6 @@ paths:
         example: yarr!
         examples:
           Example-1:
-            $ref: '#/components/examples/Example-1'
             summary: Summary of Example
             description: Description of example 1!
             value: foo
@@ -125,8 +123,8 @@ paths:
                 allowReserved: false
             x-mediaType-1: x-mediaType-1-value
             x-mediaType-2: x-mediaType-2-value
+      - $ref: '#/components/parameters/Param2'
       requestBody:
-        $ref: '#/components/requestBodies/FooRequestBody'
         description: Description of the request body.
         content:
           application/json: {}
@@ -142,11 +140,9 @@ paths:
         default:
           $ref: '#/components/responses/DefaultResponse'
         "200":
-          $ref: '#/components/responses/OKResponse'
           description: Successful response.
           headers:
             Header-1:
-              $ref: '#/components/headers/FooHeader'
               description: Description of the header here.
               required: true
               deprecated: true
@@ -170,7 +166,6 @@ paths:
             text/plain: {}
           links:
             Link-1:
-              $ref: '#/components/links/LinkOne'
               operationRef: OPERATION-REF
               operationId: OP-ID
               parameters: {}
@@ -187,6 +182,7 @@ paths:
       callbacks:
         Callback-1:
           $ref: '#/components/callbacks/CallbackOne'
+        Callback-2:
           PathItem-1:
             $ref: '#/paths/fooItem'
           x-callback-1: x-callback-1-value
@@ -252,7 +248,6 @@ components:
     Header-2: {}
   securitySchemes:
     basic_auth:
-      $ref: n/a
       type: http
       description: Basic HTTP auth.
       name: Basic Auth

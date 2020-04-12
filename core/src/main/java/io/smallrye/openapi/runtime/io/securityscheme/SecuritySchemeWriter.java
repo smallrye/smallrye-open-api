@@ -11,6 +11,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.oauth.OAuthWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Security Scheme to json
@@ -54,16 +55,20 @@ public class SecuritySchemeWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
-        JsonUtil.enumProperty(node, SecuritySchemeConstant.PROP_TYPE, model.getType());
-        JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_DESCRIPTION, model.getDescription());
-        JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_NAME, model.getName());
-        JsonUtil.enumProperty(node, SecuritySchemeConstant.PROP_IN, model.getIn());
-        JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_SCHEME, model.getScheme());
-        JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_BEARER_FORMAT, model.getBearerFormat());
-        OAuthWriter.writeOAuthFlows(node, model.getFlows());
-        JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL, model.getOpenIdConnectUrl());
-        ExtensionWriter.writeExtensions(node, model);
+
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.enumProperty(node, SecuritySchemeConstant.PROP_TYPE, model.getType());
+            JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_DESCRIPTION, model.getDescription());
+            JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_NAME, model.getName());
+            JsonUtil.enumProperty(node, SecuritySchemeConstant.PROP_IN, model.getIn());
+            JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_SCHEME, model.getScheme());
+            JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_BEARER_FORMAT, model.getBearerFormat());
+            OAuthWriter.writeOAuthFlows(node, model.getFlows());
+            JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL, model.getOpenIdConnectUrl());
+            ExtensionWriter.writeExtensions(node, model);
+        }
     }
 
 }

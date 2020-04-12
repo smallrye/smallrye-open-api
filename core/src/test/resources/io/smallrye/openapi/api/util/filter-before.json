@@ -95,7 +95,6 @@
 				"operationId": "getAllFoos",
 				"parameters": [
 					{
-						"$ref": "#/components/parameters/Param1",
 						"name": "Param1",
 						"in": "query",
 						"description": "Param description here.",
@@ -111,7 +110,6 @@
 						"example": "yarr!",
 						"examples": {
 							"Example-1": {
-								"$ref": "#/components/examples/Example-1",
 								"summary": "Summary of Example",
 								"description": "Description of example 1!",
 								"value": "foo",
@@ -137,7 +135,6 @@
 										"contentType": "application/xml",
 										"headers": {
 											"Header-1": {
-												"$ref": "#/components/headers/FooHeader",
 												"description": "Description of the header here.",
 												"required": true,
 												"deprecated": true,
@@ -153,6 +150,25 @@
 												"examples": {
 													"Header-1-Example-1": {},
 													"Header-1-Example-2": {}
+												},
+												"content": {}
+											},
+											"Header-2": {
+												"description": "Description of the header here.",
+												"required": true,
+												"deprecated": true,
+												"allowEmptyValue": true,
+												"style": "simple",
+												"explode": false,
+												"schema": {
+													"$ref": "#/components/schemas/SomeOtherSchema"
+												},
+												"example": {
+													"foo": "baz"
+												},
+												"examples": {
+													"Header-2-Example-1": {},
+													"Header-2-Example-2": {}
 												},
 												"content": {}
 											}
@@ -174,10 +190,12 @@
 								"x-mediaType-2": "x-mediaType-2-value"
 							}
 						}
-					}
+					},
+                    {
+						"$ref": "#/components/parameters/Param2"
+                    }
 				],
 				"requestBody": {
-					"$ref": "#/components/requestBodies/FooRequestBody",
 					"description": "Description of the request body.",
 					"content": {
 						"application/json": {},
@@ -193,11 +211,9 @@
 						"$ref": "#/components/responses/DefaultResponse"
 					},
 					"200": {
-						"$ref": "#/components/responses/OKResponse",
 						"description": "Successful response.",
 						"headers": {
 							"Header-1": {
-								"$ref": "#/components/headers/FooHeader",
 								"description": "Description of the header here.",
 								"required": true,
 								"deprecated": true,
@@ -228,12 +244,12 @@
 						},
 						"links": {
 							"Link-1": {
-								"$ref": "#/components/links/LinkOne",
 								"operationRef": "OPERATION-REF",
 								"operationId": "OP-ID",
 								"parameters": {
 								},
 								"requestBody": {
+                                    "$ref": "#/components/requestBodies/FooRequestBody"
 								},
 								"description": "Description of link 1.",
 								"server": {
@@ -253,7 +269,6 @@
 				},
 				"callbacks": {
 					"Callback-1": {
-						"$ref": "#/components/callbacks/CallbackOne",
 						"PathItem-1": {
 							"$ref": "#/paths/fooItem"
 						},
@@ -340,7 +355,6 @@
 		},
 		"securitySchemes": {
 			"basic_auth": {
-				"$ref": "n/a",
 				"type": "http",
 				"description": "Basic HTTP auth.",
 				"name": "Basic Auth",

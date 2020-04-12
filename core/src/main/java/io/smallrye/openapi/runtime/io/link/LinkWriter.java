@@ -13,6 +13,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 import io.smallrye.openapi.runtime.io.server.ServerWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Link to json
@@ -55,14 +56,18 @@ public class LinkWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_REF, model.getOperationRef());
-        JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_ID, model.getOperationId());
-        writeLinkParameters(node, model.getParameters());
-        ObjectWriter.writeObject(node, LinkConstant.PROP_REQUEST_BODY, model.getRequestBody());
-        JsonUtil.stringProperty(node, LinkConstant.PROP_DESCRIPTION, model.getDescription());
-        ServerWriter.writeServer(node, model.getServer());
-        ExtensionWriter.writeExtensions(node, model);
+
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_REF, model.getOperationRef());
+            JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_ID, model.getOperationId());
+            writeLinkParameters(node, model.getParameters());
+            ObjectWriter.writeObject(node, LinkConstant.PROP_REQUEST_BODY, model.getRequestBody());
+            JsonUtil.stringProperty(node, LinkConstant.PROP_DESCRIPTION, model.getDescription());
+            ServerWriter.writeServer(node, model.getServer());
+            ExtensionWriter.writeExtensions(node, model);
+        }
     }
 
     /**

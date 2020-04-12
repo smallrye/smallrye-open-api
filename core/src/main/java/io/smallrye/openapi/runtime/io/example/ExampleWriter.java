@@ -11,6 +11,7 @@ import io.smallrye.openapi.runtime.io.ObjectWriter;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.components.ComponentsConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
+import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Example to json
@@ -53,11 +54,15 @@ public class ExampleWriter {
             return;
         }
         ObjectNode node = parent.putObject(name);
-        JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
-        JsonUtil.stringProperty(node, ExampleConstant.PROP_SUMMARY, model.getSummary());
-        JsonUtil.stringProperty(node, ExampleConstant.PROP_DESCRIPTION, model.getDescription());
-        ObjectWriter.writeObject(node, ExampleConstant.PROP_VALUE, model.getValue());
-        JsonUtil.stringProperty(node, ExampleConstant.PROP_EXTERNAL_VALUE, model.getExternalValue());
-        ExtensionWriter.writeExtensions(node, model);
+
+        if (StringUtil.isNotEmpty(model.getRef())) {
+            JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+        } else {
+            JsonUtil.stringProperty(node, ExampleConstant.PROP_SUMMARY, model.getSummary());
+            JsonUtil.stringProperty(node, ExampleConstant.PROP_DESCRIPTION, model.getDescription());
+            ObjectWriter.writeObject(node, ExampleConstant.PROP_VALUE, model.getValue());
+            JsonUtil.stringProperty(node, ExampleConstant.PROP_EXTERNAL_VALUE, model.getExternalValue());
+            ExtensionWriter.writeExtensions(node, model);
+        }
     }
 }
