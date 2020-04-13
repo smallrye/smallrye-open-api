@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import javax.validation.constraints.Max;
@@ -491,7 +492,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @Produces(MediaType.APPLICATION_JSON)
         @RequestBody(content = @Content(schema = @Schema(requiredProperties = { "f3" }), encoding = {
                 @Encoding(name = "formField1", contentType = "text/x-custom-type") }))
-        public CompletionStage<Widget> upd(@MultipartForm Bean form,
+        public CompletableFuture<Widget> upd(@MultipartForm Bean form,
                 @FormParam("f3") @DefaultValue("3") int formField3,
                 @org.jboss.resteasy.annotations.jaxrs.FormParam @NotNull String formField4) {
             return null;

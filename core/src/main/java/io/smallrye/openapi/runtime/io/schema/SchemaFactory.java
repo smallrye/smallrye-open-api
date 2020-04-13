@@ -368,7 +368,7 @@ public class SchemaFactory {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            Type asyncType = resolveAsyncType(type, extensions);
+            Type asyncType = resolveAsyncType(index, type, extensions);
             schema = schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
         }
 
@@ -501,12 +501,13 @@ public class SchemaFactory {
                 .collect(Collectors.toList());
     }
 
-    private static Type resolveAsyncType(Type type, List<AnnotationScannerExtension> extensions) {
+    static Type resolveAsyncType(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
-            if (pType.name().equals(JDKConstants.COMPLETION_STAGE_NAME)
-                    && pType.arguments().size() == 1)
+            if (pType.arguments().size() == 1
+                    && TypeUtil.isA(index, type, JDKConstants.COMPLETION_STAGE_TYPE)) {
                 return pType.arguments().get(0);
+            }
         }
         for (AnnotationScannerExtension extension : extensions) {
             Type asyncType = extension.resolveAsyncType(type);
