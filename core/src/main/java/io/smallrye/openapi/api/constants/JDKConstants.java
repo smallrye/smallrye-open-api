@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.Type;
 
 /**
  * Constants from the JDK
@@ -32,6 +33,8 @@ public class JDKConstants {
                     DOTNAME_OPTIONAL_DOUBLE,
                     DOTNAME_OPTIONAL_INT,
                     DOTNAME_OPTIONAL_LONG)));
+
+    public static final Type COMPLETION_STAGE_TYPE = Type.create(COMPLETION_STAGE_NAME, Type.Kind.CLASS);
 
     private JDKConstants() {
     }

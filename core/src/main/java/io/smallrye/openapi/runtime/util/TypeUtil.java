@@ -209,6 +209,10 @@ public class TypeUtil {
         index(indexer, java.util.concurrent.PriorityBlockingQueue.class);
         index(indexer, java.util.concurrent.SynchronousQueue.class);
 
+        // CompletionStage and implementation
+        index(indexer, java.util.concurrent.CompletionStage.class);
+        index(indexer, java.util.concurrent.CompletableFuture.class);
+
         jdkIndex = indexer.complete();
     }
 
