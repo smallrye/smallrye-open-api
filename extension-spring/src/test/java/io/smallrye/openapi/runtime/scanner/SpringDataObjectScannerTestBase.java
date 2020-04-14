@@ -1,7 +1,10 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.LogManager;
+
 import org.jboss.jandex.Index;
-import org.jboss.jandex.Indexer;
 import org.junit.BeforeClass;
 
 /**
@@ -11,16 +14,27 @@ import org.junit.BeforeClass;
  */
 public class SpringDataObjectScannerTestBase extends IndexScannerTestBase {
 
+    static {
+        //if ( Boolean.getBoolean("trace")) {
+        InputStream stream = SpringDataObjectScannerTestBase.class.getClassLoader().getResourceAsStream("logging.properties");
+        try {
+            LogManager.getLogManager().readConfiguration(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //}
+    }
+
     protected static Index index;
 
     @BeforeClass
     public static void createIndex() {
-        Indexer indexer = new Indexer();
+        //     Indexer indexer = new Indexer();
 
-        // Test samples
-        indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
+        //     // Test samples
+        //     indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
 
-        index = indexer.complete();
+        //     index = indexer.complete();
     }
 
 }

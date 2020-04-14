@@ -20,6 +20,7 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
+import org.jboss.jandex.Type.Kind;
 import org.jboss.logging.Logger;
 import org.springframework.http.HttpStatus;
 
@@ -67,7 +68,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     @Override
     public boolean isScannerInternalResponse(Type returnType) {
-        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY);
+        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY) && returnType.kind() != Kind.PARAMETERIZED_TYPE;
     }
 
     @Override
@@ -167,14 +168,13 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RequestMapping info and save it for later
-        AnnotationInstance requestMappingAnnotation = JandexUtil.getClassAnnotation(controllerClass,
-                SpringConstants.REQUEST_MAPPING);
-
-        if (requestMappingAnnotation != null) {
-            this.currentAppPath = ParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation);
-        } else {
-            this.currentAppPath = "/";
-        }
+        // AnnotationInstance requestMappingAnnotation = JandexUtil.getClassAnnotation(controllerClass,
+        //         SpringConstants.REQUEST_MAPPING);
+        // if (requestMappingAnnotation != null) {
+        //     this.currentAppPath = ParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation);
+        // } else {
+        //     this.currentAppPath = "/";
+        // }
 
         // Process @OpenAPIDefinition annotation
         processDefinitionAnnotation(context, controllerClass, openApi);
@@ -216,7 +216,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             SpringConstants.HTTP_METHODS
                     .stream()
                     .filter(methodInfo::hasAnnotation)
-                    .map(this::toHttpMethod)
+                    .map((dotname) -> toHttpMethod(dotname, methodInfo))
                     .map(PathItem.HttpMethod::valueOf)
                     .forEach(httpMethod -> {
                         resourceCount.incrementAndGet();
@@ -230,7 +230,20 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         }
     }
 
-    private String toHttpMethod(DotName dotname) {
+    private String toHttpMethod(DotName dotname, MethodInfo methodInfo) {
+        // @RequestMapping can also occur at the method level. 
+        // @GetMapping et al are "nice" forms of that one.
+        if (dotname.equals(SpringConstants.REQUEST_MAPPING)) {
+            AnnotationInstance requestMapping = methodInfo.annotation(dotname);
+            AnnotationValue httpMethod = requestMapping.value("method");
+            if (httpMethod == null) {
+                // TODO: throw unsupported annotation something, or assume (the annotation itself has no default)
+                LOG.warn(methodInfo.name() + " does not define a method value (RequestMethod)");
+                return "GET";
+            }
+            return httpMethod.asEnumArray()[0];
+        }
+
         String className = dotname.withoutPackagePrefix();
         className = className.replace("Mapping", "");
         return className.toUpperCase();
@@ -254,7 +267,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
 
-        LOG.error("Processing Spring method: " + method.toString());
+        LOG.debug("Processing Spring method: " + method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));

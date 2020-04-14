@@ -43,6 +43,7 @@ public class SpringConstants {
 
     static final Set<DotName> HTTP_METHODS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(
+                    REQUEST_MAPPING,
                     GET_MAPPING,
                     PUT_MAPPING,
                     POST_MAPPING,
