@@ -54,6 +54,10 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         return "Spring";
     }
 
+    public boolean isWrapperType(Type type) {
+        return type.name().equals(SpringConstants.RESPONSE_ENTITY) && type.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
+    }
+
     @Override
     public boolean isAsyncResponse(final MethodInfo method) {
         // TODO: Implement this.
@@ -62,12 +66,18 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
+        // TODO: Also check for @RequestMapping(method = RequestMethod.POST)
         return method.hasAnnotation(SpringConstants.POST_MAPPING);
     }
 
     @Override
     public boolean isScannerInternalResponse(Type returnType) {
-        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY);
+        // If it's Response Entity that does not have a valid type, then stop
+        if (returnType.name().equals(SpringConstants.RESPONSE_ENTITY)
+                && !returnType.kind().equals(Type.Kind.PARAMETERIZED_TYPE)) {
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -347,9 +347,14 @@ public class SchemaFactory {
     public static Schema typeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
 
+        AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
+
         if (TypeUtil.isOptional(type)) {
             // Recurse using the optional's type
             return typeToSchema(index, TypeUtil.getOptionalType(type), extensions);
+        } else if (annotationScanner.isWrapperType(type)) {
+            // Recurse using the wrapped type
+            return typeToSchema(index, annotationScanner.unwrapType(type), extensions);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
