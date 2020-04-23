@@ -96,6 +96,18 @@ public interface AnnotationScanner {
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions);
 
+    // For wrapped type (other than Optional) - default no others
+    default boolean isWrapperType(Type type) {
+        return false;
+    }
+
+    default Type unwrapType(Type type) {
+        if (isWrapperType(type)) {
+            return type.asParameterizedType().arguments().get(0);
+        }
+        return null;
+    }
+
     /**
      * Process a certain class for OpenApiDefinition annotations.
      * 
