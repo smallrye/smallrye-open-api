@@ -105,7 +105,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             if (SpringParameter.isParameter(instance.name())) {
                 return true;
             }
-            if (instance.name().toString().startsWith(SPRING_PACKAGE)) {
+            if (instance.name().toString().startsWith(SPRING_PACKAGE) && !instance.name().equals(SpringConstants.REQUEST_BODY)) {
                 return true;
             }
             for (AnnotationScannerExtension extension : extensions) {
@@ -134,7 +134,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     /**
      * Find and process all Spring Controllers
-     * TODO: Also support Controller annotations ?
+     * TODO: Also support org.springframework.stereotype.Controller annotations ?
      *
      * @param context the scanning context
      * @param openApi the openAPI model
@@ -270,6 +270,8 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
         CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
 
+        
+        
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
         if (!maybeOperation.isPresent()) {
@@ -336,7 +338,8 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         for (DotName annotationName : annotationNames) {
             AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
-            if (annotation == null) {
+            
+            if (annotation == null || annotation.value(property.name())==null) {
                 annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), SpringConstants.REQUEST_MAPPING);
             }
 

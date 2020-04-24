@@ -22,8 +22,9 @@ public class SpringConstants {
     static final DotName DELETE_MAPPING = DotName.createSimple("org.springframework.web.bind.annotation.DeleteMapping");
     // What about HEAD and OPTIONS ?
     static final DotName PATCH_MAPPING = DotName.createSimple("org.springframework.web.bind.annotation.PatchMapping");
-    // TODO: Also support @RequestMapping(method=GET)
-
+    
+    static final DotName REQUEST_BODY = DotName.createSimple("org.springframework.web.bind.annotation.RequestBody");
+    
     static final DotName RESPONSE_ENTITY = DotName.createSimple("org.springframework.http.ResponseEntity");
     static final DotName MUTIPART_FILE = DotName.createSimple("org.springframework.web.multipart.MultipartFile");
 

@@ -26,7 +26,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
  */
 @RestController
 @RequestMapping(value = "/greeting", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-public class GreetingController {
+public class GreetingGetController {
 
     // 1) Basic path var test
     @GetMapping("/helloPathVariable/{name}")
