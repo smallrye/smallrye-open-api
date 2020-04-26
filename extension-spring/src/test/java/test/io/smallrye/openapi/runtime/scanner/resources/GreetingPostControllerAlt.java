@@ -1,6 +1,10 @@
 package test.io.smallrye.openapi.runtime.scanner.resources;
 
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,15 +51,15 @@ public class GreetingPostControllerAlt {
     //}
 
     // 5) ResponseEntity without a type specified
-    //@GetMapping("/helloPathVariableWithResponse/{name}")
-    //@APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    //public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
-    //    return ResponseEntity.ok(new Greeting("Hello " + name));
-    //}
+    @RequestMapping(value = "/greetWithResponse", method = RequestMethod.POST)
+    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
+    public ResponseEntity greetWithResponse(@RequestBody Greeting greeting) {
+        return ResponseEntity.ok(greeting);
+    }
 
     // 6) ResponseEntity with a type specified (No JaxRS comparison)
-    //@GetMapping("/helloPathVariableWithResponseTyped/{name}")
-    //public ResponseEntity<Greeting> helloPathVariableWithResponseTyped(@PathVariable(name = "name") String name) {
-    //    return ResponseEntity.ok(new Greeting("Hello " + name));
-    //}
+    @RequestMapping(value = "/greetWithResponseTyped", method = RequestMethod.POST)
+    public ResponseEntity<Greeting> greetWithResponseTyped(@RequestBody Greeting greeting) {
+        return ResponseEntity.ok(greeting);
+    }
 }

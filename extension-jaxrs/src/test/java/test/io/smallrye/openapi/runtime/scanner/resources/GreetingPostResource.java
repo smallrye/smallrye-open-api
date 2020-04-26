@@ -5,6 +5,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
@@ -47,20 +52,20 @@ public class GreetingPostResource {
     //        return new Greeting("Hello " + name);
     //    }
     //
-    //    // 5) Response where you do not have a type.
-    //    @GET
-    //    @Path("/helloPathVariableWithResponse/{name}")
-    //    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting"))) // TODO: Why is not working to just do implementation ?
-    //    public Response helloPathVariableWithResponse(@PathParam("name") String name) {
-    //        return Response.ok(new Greeting("Hello " + name)).build();
-    //    }
-    //
-    //    // 6) ResponseEntity with a type specified (No JaxRS comparison) (repeat of above as there is not wrapped type return
-    //    @GET
-    //    @Path("/helloPathVariableWithResponseTyped/{name}")
-    //    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting"))) // TODO: Why is not working to just do implementation ?
-    //    public Response helloPathVariableWithResponseTyped(@PathParam("name") String name) {
-    //        return Response.ok(new Greeting("Hello " + name)).build();
-    //    }
+    // 5) Response where you do not have a type.
+    @POST
+    @Path("/greetWithResponse")
+    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting"))) // TODO: Why is not working to just do implementation ?
+    public Response greetWithResponse(Greeting greeting) {
+        return Response.ok(greeting).build();
+    }
+
+    // 6) Response with a type specified (No JaxRS comparison) (repeat of above as there is not wrapped type return
+    @POST
+    @Path("/greetWithResponseTyped")
+    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting"))) // TODO: Why is not working to just do implementation ?
+    public Response greetWithResponseTyped(Greeting greeting) {
+        return Response.ok(greeting).build();
+    }
 
 }

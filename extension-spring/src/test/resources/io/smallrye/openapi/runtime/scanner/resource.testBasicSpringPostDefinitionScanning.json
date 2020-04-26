@@ -25,6 +25,56 @@
           }
         }
       }
+    },
+    "/greeting/greetWithResponse" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Greeting"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/greetWithResponseTyped" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Greeting"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
