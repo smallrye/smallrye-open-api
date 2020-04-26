@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -105,7 +104,8 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             if (SpringParameter.isParameter(instance.name())) {
                 return true;
             }
-            if (instance.name().toString().startsWith(SPRING_PACKAGE) && !instance.name().equals(SpringConstants.REQUEST_BODY)) {
+            if (instance.name().toString().startsWith(SPRING_PACKAGE)
+                    && !instance.name().equals(SpringConstants.REQUEST_BODY)) {
                 return true;
             }
             for (AnnotationScannerExtension extension : extensions) {
@@ -221,22 +221,35 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         Set<String> tagRefs = processTags(resourceClass, openApi, false);
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
-            final AtomicInteger resourceCount = new AtomicInteger(0);
-
-            SpringConstants.HTTP_METHODS
-                    .stream()
-                    .filter(methodInfo::hasAnnotation)
-                    .map(this::toHttpMethod)
-                    .map(PathItem.HttpMethod::valueOf)
-                    .forEach(httpMethod -> {
-                        resourceCount.incrementAndGet();
+            if (methodInfo.annotations().size() > 0) {
+                // Try @XXXMapping annotations
+                for (DotName validMethodAnnotations : SpringConstants.HTTP_METHODS) {
+                    if (methodInfo.hasAnnotation(validMethodAnnotations)) {
+                        String toHttpMethod = toHttpMethod(validMethodAnnotations);
+                        PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(toHttpMethod);
                         processControllerMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
                                 locatorPathParameters);
-                    });
 
-            //            if (resourceCount.get() == 0 && methodInfo.hasAnnotation(JaxRsConstants.PATH)) {
-            //                processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters);
-            //            }
+                    }
+                }
+
+                // Try @RequestMapping
+                if (methodInfo.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
+                    AnnotationInstance requestMappingAnnotation = methodInfo.annotation(SpringConstants.REQUEST_MAPPING);
+                    AnnotationValue methodValue = requestMappingAnnotation.value("method");
+                    if (methodValue != null) {
+                        String[] enumArray = methodValue.asEnumArray();
+                        for (String enumValue : enumArray) {
+                            if (enumValue != null) {
+                                PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(enumValue.toUpperCase());
+                                processControllerMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
+                                        locatorPathParameters);
+                            }
+                        }
+                    }
+                }
+
+            }
         }
     }
 
@@ -264,7 +277,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
 
-        LOG.error("Processing Spring method: " + method.toString());
+        LOG.debug("Processing Spring method: " + method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));

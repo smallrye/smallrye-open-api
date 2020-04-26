@@ -56,9 +56,7 @@ import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
-import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -215,38 +213,38 @@ public class ParameterProcessor {
         ResourceParameters parameters = new ResourceParameters();
         ParameterProcessor processor = new ParameterProcessor(index, reader, extensions);
 
-        ClassInfo resourceMethodClass = resourceMethod.declaringClass();
+        //ClassInfo resourceMethodClass = resourceMethod.declaringClass();
 
         /*
          * Phase I - Read class fields, constructors, "setter" methods not annotated with Spring
          * HTTP method. Check both the class declaring the method as well as the resource
          * class, if different.
          */
-        AugmentedIndexView augmentedIndex = new AugmentedIndexView(index);
-        List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, resourceMethodClass, null).keySet());
+        //AugmentedIndexView augmentedIndex = new AugmentedIndexView(index);
+        //List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, resourceMethodClass, null).keySet());
         /*
          * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
          */
-        Collections.reverse(ancestors);
+        //Collections.reverse(ancestors);
 
-        ancestors.forEach(c -> {
-            c.interfaceTypes()
-                    .stream()
-                    .map(augmentedIndex::getClass)
-                    .filter(Objects::nonNull)
-                    .forEach(iface -> processor.readParameters(iface, null, false));
+        //        ancestors.forEach(c -> {
+        //            c.interfaceTypes()
+        //                    .stream()
+        //                    .map(augmentedIndex::getClass)
+        //                    .filter(Objects::nonNull)
+        //                    .forEach(iface -> processor.readParameters(iface, null, false));
+        //
+        //            processor.readParameters(c, null, false);
+        //        });
 
-            processor.readParameters(c, null, false);
-        });
-
-        if (!resourceClass.equals(resourceMethodClass)) {
-            /*
-             * The resource class may be a subclass/implementor of the resource method class. Scanning
-             * the resource class after the method's class allows for parameter details to be overridden
-             * by annotations in the subclass.
-             */
-            processor.readParameters(resourceClass, null, true);
-        }
+        //if (!resourceClass.equals(resourceMethodClass)) {
+        /*
+         * The resource class may be a subclass/implementor of the resource method class. Scanning
+         * the resource class after the method's class allows for parameter details to be overridden
+         * by annotations in the subclass.
+         */
+        //processor.readParameters(resourceClass, null, true);
+        //}
 
         parameters.setPathItemParameters(processor.getParameters(resourceMethod));
 
@@ -756,12 +754,12 @@ public class ParameterProcessor {
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                     // Do this in Spring ?
                     //}else if (springParam.location == In.PATH && targetType != null
-                    //      && SpringConstants.PATH_SEGMENT.equals(targetType.name())) {
-                    //  String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
+                    //      && SpringConstants.REQUEST_MAPPING.equals(targetType.name())) {
+                    //    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
-                    //  if (!matrixParams.containsKey(pathSegment)) {
-                    //      matrixParams.put(pathSegment, new HashMap<>());
-                    //  }
+                    //    if (!matrixParams.containsKey(pathSegment)) {
+                    //        matrixParams.put(pathSegment, new HashMap<>());
+                    //   }
                 } else if (springParam.location != null) {
                     readParameter(
                             new ParameterContextKey(paramName(annotation), springParam.location, springParam.defaultStyle),
@@ -1035,6 +1033,11 @@ public class ParameterProcessor {
                 if (methodAnnotation != null && methodAnnotation.value() != null) {
                     path = methodAnnotation;
                 }
+            }
+            // Also support @RequestMapping
+            AnnotationInstance methodAnnotation = target.asMethod().annotation(SpringConstants.REQUEST_MAPPING);
+            if (methodAnnotation != null && methodAnnotation.value() != null) {
+                path = methodAnnotation;
             }
         }
 

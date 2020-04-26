@@ -1,14 +1,15 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Indexer;
 import org.json.JSONException;
 import org.junit.Test;
 
-
 /**
  * Basic tests mostly to compare with Spring
+ * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
