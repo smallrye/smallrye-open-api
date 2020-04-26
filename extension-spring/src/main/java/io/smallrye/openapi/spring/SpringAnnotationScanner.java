@@ -283,8 +283,6 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
         CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
 
-        
-        
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
         if (!maybeOperation.isPresent()) {
@@ -351,8 +349,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         for (DotName annotationName : annotationNames) {
             AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
-            
-            if (annotation == null || annotation.value(property.name())==null) {
+            if (annotation == null || annotation.value(property.name()) == null) {
                 annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), SpringConstants.REQUEST_MAPPING);
             }
 
