@@ -28,7 +28,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 @Path("/greeting")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class GreetingResource {
+public class GreetingGetResource {
 
     // 1) Basic path var test
     @GET

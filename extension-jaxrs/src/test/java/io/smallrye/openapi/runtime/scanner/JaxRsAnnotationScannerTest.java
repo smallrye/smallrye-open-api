@@ -239,25 +239,6 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         assertJsonEquals("resource.tags.ordergiven.staticfile.json", result);
     }
 
-    /**
-     * This test a basic, no OpenApi annotations, hello world service
-     * 
-     * @throws IOException
-     * @throws JSONException
-     */
-    @Test
-    public void testBasicJaxRsDefinitionScanning() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingResource.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicJaxRsDefinitionScanning.json", result);
-    }
-
     @Path("/tags1")
     @Tag(name = "tag3", description = "TAG3 from TagTestResource1")
     @SuppressWarnings("unused")
