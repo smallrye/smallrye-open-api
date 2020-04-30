@@ -25,6 +25,7 @@ import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
+import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
@@ -373,8 +374,7 @@ public class SchemaFactory {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            Type asyncType = resolveAsyncType(index, type, extensions);
-            schema = schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+            schema = otherTypeToSchema(index, type, extensions);
         }
 
         return schema;
@@ -506,11 +506,27 @@ public class SchemaFactory {
                 .collect(Collectors.toList());
     }
 
+    private static Schema otherTypeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
+        if (TypeUtil.isA(index, type, MutinyConstants.MULTI_TYPE)) {
+            // Treat as an Array
+            Schema schema = new SchemaImpl().type(SchemaType.ARRAY);
+            Type componentType = type.asParameterizedType().arguments().get(0);
+
+            // Recurse using the type of the array elements
+            schema.items(typeToSchema(index, componentType, extensions));
+            return schema;
+        } else {
+            Type asyncType = resolveAsyncType(index, type, extensions);
+            return schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+        }
+    }
+
     static Type resolveAsyncType(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
-            if (pType.arguments().size() == 1
-                    && TypeUtil.isA(index, type, JDKConstants.COMPLETION_STAGE_TYPE)) {
+            if (pType.arguments().size() == 1 &&
+                    (TypeUtil.isA(index, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
+                            TypeUtil.isA(index, type, MutinyConstants.UNI_TYPE))) {
                 return pType.arguments().get(0);
             }
         }
