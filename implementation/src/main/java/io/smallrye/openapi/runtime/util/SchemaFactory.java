@@ -354,8 +354,7 @@ public class SchemaFactory {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            Type asyncType = resolveAsyncType(type, extensions);
-            schema = schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+            schema = otherTypeToSchema(index, type, extensions);
         }
 
         return schema;
@@ -484,12 +483,29 @@ public class SchemaFactory {
                 .collect(Collectors.toList());
     }
 
-    private static Type resolveAsyncType(Type type, List<AnnotationScannerExtension> extensions) {
+    private static Schema otherTypeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
+        if (TypeUtil.isA(index, type, OpenApiConstants.MUTINY_MULTI_TYPE)) {
+            // Treat as an Array
+            Schema schema = new SchemaImpl().type(SchemaType.ARRAY);
+            Type componentType = type.asParameterizedType().arguments().get(0);
+
+            // Recurse using the type of the array elements
+            schema.items(typeToSchema(index, componentType, extensions));
+            return schema;
+        } else {
+            Type asyncType = resolveAsyncType(index, type, extensions);
+            return schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+        }
+    }
+
+    static Type resolveAsyncType(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
-            if (pType.name().equals(OpenApiConstants.COMPLETION_STAGE_NAME)
-                    && pType.arguments().size() == 1)
+            if (pType.arguments().size() == 1 &&
+                    (TypeUtil.isA(index, type, OpenApiConstants.COMPLETION_STAGE_TYPE) ||
+                            TypeUtil.isA(index, type, OpenApiConstants.MUTINY_UNI_TYPE))) {
                 return pType.arguments().get(0);
+            }
         }
         for (AnnotationScannerExtension extension : extensions) {
             Type asyncType = extension.resolveAsyncType(type);

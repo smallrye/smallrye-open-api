@@ -69,6 +69,7 @@ import org.eclipse.microprofile.openapi.annotations.servers.Servers;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.annotations.tags.Tags;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.Type;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -346,6 +347,10 @@ public final class OpenApiConstants {
                     DOTNAME_OPTIONAL_LONG)));
 
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
+    public static final Type COMPLETION_STAGE_TYPE = Type.create(COMPLETION_STAGE_NAME, Type.Kind.CLASS);
+
+    public static final Type MUTINY_UNI_TYPE = Type.create(DotName.createSimple("io.smallrye.mutiny.Uni"), Type.Kind.CLASS);
+    public static final Type MUTINY_MULTI_TYPE = Type.create(DotName.createSimple("io.smallrye.mutiny.Multi"), Type.Kind.CLASS);
 
     public static final DotName DOTNAME_JSONB_PROPERTY = DotName
             .createSimple("javax.json.bind.annotation.JsonbProperty");
