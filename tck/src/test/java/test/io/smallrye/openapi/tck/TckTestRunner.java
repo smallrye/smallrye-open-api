@@ -131,7 +131,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
                     return archive;
                 }
             }
-            throw new Exception("No @Deployment archive found for test.");
+            throw TckMessages.msg.missingDeploymentArchive();
         } catch (Exception e) {
             throw new InitializationError(e);
         }

@@ -122,7 +122,7 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
         try {
             Class<? extends Constructible> implClass = registry.get(clazz);
             if (implClass == null) {
-                throw new IllegalArgumentException("Class '" + clazz.getName() + "' is not Constructible.");
+                throw SpiMessages.msg.classNotConstructible(clazz.getName());
             }
             return (T) implClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {

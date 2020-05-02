@@ -8,12 +8,12 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import io.smallrye.openapi.api.models.servers.ServerImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.servervariable.ServerVariableReader;
@@ -28,7 +28,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ServerReader {
-    private static final Logger LOG = Logger.getLogger(ServerReader.class);
 
     private ServerReader() {
     }
@@ -41,7 +40,7 @@ public class ServerReader {
      */
     public static Optional<List<Server>> readServers(final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            LOG.debug("Processing an array of @Server annotations.");
+            IoLogging.log.annotationsArray("@Server");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Server> servers = new ArrayList<>();
             for (AnnotationInstance serverAnno : nestedArray) {
@@ -60,7 +59,7 @@ public class ServerReader {
      */
     public static Optional<List<Server>> readServers(final JsonNode node) {
         if (node != null && node.isArray()) {
-            LOG.debug("Processing an array of Server json nodes.");
+            IoLogging.log.jsonArray("Server");
             ArrayNode nodes = (ArrayNode) node;
             List<Server> rval = new ArrayList<>(nodes.size());
             for (JsonNode serverNode : nodes) {
@@ -92,7 +91,7 @@ public class ServerReader {
      */
     public static Server readServer(final AnnotationInstance annotationInstance) {
         if (annotationInstance != null) {
-            LOG.debug("Processing a single @Server annotation.");
+            IoLogging.log.singleAnnotation("@Server");
             Server server = new ServerImpl();
             server.setUrl(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_URL));
             server.setDescription(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
@@ -111,7 +110,7 @@ public class ServerReader {
      */
     public static Server readServer(final JsonNode node) {
         if (node != null && node.isObject()) {
-            LOG.debug("Processing a single Server json node.");
+            IoLogging.log.singleJsonNode("Server");
             Server server = new ServerImpl();
             server.setUrl(JsonUtil.stringProperty(node, ServerConstant.PROP_URL));
             server.setDescription(JsonUtil.stringProperty(node, ServerConstant.PROP_DESCRIPTION));

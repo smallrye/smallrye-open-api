@@ -18,7 +18,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
@@ -32,7 +31,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class IgnoreResolver {
 
-    private static final Logger LOG = Logger.getLogger(IgnoreResolver.class);
     private final Map<DotName, IgnoreAnnotationHandler> IGNORE_ANNOTATION_MAP = new LinkedHashMap<>();
     private final AugmentedIndexView index;
 
@@ -246,14 +244,14 @@ public class IgnoreResolver {
             ClassInfo classInfo = index.getClass(classType);
 
             if (ignoredTypes.contains(classInfo.name())) {
-                LOG.debugv("Ignoring type that is member of ignore set: {0}", classInfo.name());
+                DataObjectLogging.log.ignoringType(classInfo.name());
                 return true;
             }
 
             AnnotationInstance annotationInstance = TypeUtil.getAnnotation(classInfo, getName());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 // Add the ignored field or class name
-                LOG.debugv("Ignoring type and adding to ignore set: {0}", classInfo.name());
+                DataObjectLogging.log.ignoringTypeAndAddingToSet(classInfo.name());
                 ignoredTypes.add(classInfo.name());
                 return true;
             }

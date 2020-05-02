@@ -9,11 +9,11 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.links.Link;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.links.LinkImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -29,7 +29,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class LinkReader {
-    private static final Logger LOG = Logger.getLogger(LinkReader.class);
 
     private LinkReader() {
     }
@@ -44,7 +43,7 @@ public class LinkReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @Link annotations.");
+        IoLogging.log.annotationsMap("@Link");
         Map<String, Link> links = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -69,7 +68,7 @@ public class LinkReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a map of Link json nodes.");
+        IoLogging.log.jsonNodeMap("Link");
         Map<String, Link> links = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -90,7 +89,7 @@ public class LinkReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Link annotation.");
+        IoLogging.log.singleAnnotation("@Link");
         Link link = new LinkImpl();
         link.setOperationRef(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_OPERATION_REF));
         link.setOperationId(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_OPERATION_ID));
@@ -112,7 +111,7 @@ public class LinkReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Link json node.");
+        IoLogging.log.singleJsonNode("Link");
         Link link = new LinkImpl();
         link.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
 

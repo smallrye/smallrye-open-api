@@ -8,12 +8,12 @@ import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
@@ -29,7 +29,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class OAuthReader {
-    private static final Logger LOG = Logger.getLogger(OAuthReader.class);
 
     private OAuthReader() {
     }
@@ -44,7 +43,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a single @OAuthFlows annotation.");
+        IoLogging.log.singleAnnotation("@OAuthFlows");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlows flows = new OAuthFlowsImpl();
         flows.setImplicit(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_IMPLICIT)));
@@ -64,7 +63,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single OAuthFlows json object.");
+        IoLogging.log.singleJsonObject("OAuthFlows");
         OAuthFlows flows = new OAuthFlowsImpl();
         flows.setImplicit(readOAuthFlow(node.get(SecuritySchemeConstant.PROP_IMPLICIT)));
         flows.setPassword(readOAuthFlow(node.get(SecuritySchemeConstant.PROP_PASSWORD)));
@@ -84,7 +83,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a single @OAuthFlow annotation.");
+        IoLogging.log.singleAnnotation("@OAuthFlow");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlow flow = new OAuthFlowImpl();
         flow.setAuthorizationUrl(JandexUtil.stringValue(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
@@ -104,7 +103,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single OAuthFlow json object.");
+        IoLogging.log.singleJsonObject("OAuthFlow");
         OAuthFlow flow = new OAuthFlowImpl();
         flow.setAuthorizationUrl(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
         flow.setTokenUrl(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_TOKEN_URL));
@@ -124,7 +123,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a list of @OAuthScope annotations.");
+        IoLogging.log.annotationsList("@OAuthScope");
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, String> scopes = new LinkedHashMap<>();
         for (AnnotationInstance nested : nestedArray) {
@@ -147,7 +146,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a json map of OAuthScope.");
+        IoLogging.log.jsonMap("OAuthScope");
         Map<String, String> scopes = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();

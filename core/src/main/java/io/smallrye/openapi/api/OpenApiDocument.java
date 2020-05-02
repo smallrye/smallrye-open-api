@@ -45,7 +45,7 @@ public class OpenApiDocument {
     public OpenAPI get() {
         synchronized (INSTANCE) {
             if (model == null) {
-                throw new IllegalStateException("Model not initialized yet");
+                throw ApiMessages.msg.modelNotInitialized();
             }
             return model;
         }
@@ -112,7 +112,7 @@ public class OpenApiDocument {
             }
             // Check all the required parts are set
             if (config == null) {
-                throw new IllegalStateException("OpenApiConfig must be set before init");
+                throw ApiMessages.msg.configMustBeSet();
             }
 
             // Phase 1: Use OASModelReader
@@ -178,7 +178,7 @@ public class OpenApiDocument {
     }
 
     private void modelAlreadyInitialized() {
-        throw new IllegalStateException("Model already initialized");
+        throw ApiMessages.msg.modelAlreadyInitialized();
     }
 
     private void clear() {

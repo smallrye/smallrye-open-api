@@ -83,6 +83,6 @@ public class AugmentedIndexView implements IndexView {
 
     private <T> void validateInput(T input) {
         if (input == null)
-            throw new RuntimeException("Input parameter can not be null");
+            throw DataObjectMessages.msg.notNull();
     }
 }

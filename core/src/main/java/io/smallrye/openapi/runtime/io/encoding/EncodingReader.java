@@ -8,11 +8,11 @@ import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.Encoding.Style;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.media.EncodingImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.header.HeaderReader;
@@ -28,7 +28,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class EncodingReader {
-    private static final Logger LOG = Logger.getLogger(EncodingReader.class);
 
     private EncodingReader() {
     }
@@ -45,7 +44,7 @@ public class EncodingReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @Encoding annotations.");
+        IoLogging.log.annotationsMap("@Encoding");
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
@@ -67,7 +66,7 @@ public class EncodingReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a map of Encoding json node.");
+        IoLogging.log.jsonNodeMap("Encoding");
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String name = fieldNames.next();
@@ -87,7 +86,7 @@ public class EncodingReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Encoding annotation.");
+        IoLogging.log.singleAnnotation("@Encoding");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(JandexUtil.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
@@ -109,7 +108,7 @@ public class EncodingReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Encoding json node.");
+        IoLogging.log.singleJsonNode("Encoding");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(JsonUtil.stringProperty(node, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setHeaders(HeaderReader.readHeaders(node.get(EncodingConstant.PROP_HEADERS)));

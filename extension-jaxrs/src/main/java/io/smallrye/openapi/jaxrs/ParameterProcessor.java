@@ -45,7 +45,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
@@ -72,8 +71,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  *
  */
 public class ParameterProcessor {
-
-    private static final Logger LOG = Logger.getLogger(ParameterProcessor.class);
 
     /**
      * Pattern to describe a path template parameter with a regular expression pattern restriction.
@@ -347,7 +344,7 @@ public class ParameterProcessor {
                     if (insertIndex > -1) {
                         path.insert(insertIndex, matrixRef);
                     } else {
-                        LOG.warnf("Matrix parameter references missing path segment: %s", segmentName);
+                        JaxRsLogging.log.missingPathSegment(segmentName);
                     }
                 });
 
@@ -424,7 +421,7 @@ public class ParameterProcessor {
         }
 
         // Convert ParameterContext entries to MP-OAI Parameters
-        params.values().stream().forEach(context -> {
+        params.values().forEach(context -> {
             Parameter param;
 
             if (context.oaiParam == null) {
@@ -943,7 +940,7 @@ public class ParameterProcessor {
                     break;
             }
         } catch (@SuppressWarnings("unused") Exception e) {
-            LOG.warnf("Value '%s' is not a valid %s default", stringValue, primitive.name().toLowerCase());
+            JaxRsLogging.log.invalidDefault(stringValue, primitive.name().toLowerCase());
         }
 
         return value;

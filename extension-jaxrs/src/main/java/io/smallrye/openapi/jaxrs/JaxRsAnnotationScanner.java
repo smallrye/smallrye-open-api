@@ -27,7 +27,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -54,7 +53,6 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class JaxRsAnnotationScanner implements AnnotationScanner {
-    private static final Logger LOG = Logger.getLogger(JaxRsAnnotationScanner.class);
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
     private String currentAppPath = "";
 
@@ -208,7 +206,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             OpenAPI openApi,
             ClassInfo resourceClass,
             List<Parameter> locatorPathParameters) {
-        LOG.debug("Processing a JAX-RS resource class: " + resourceClass.simpleName());
+        JaxRsLogging.log.processingClass(resourceClass.simpleName());
 
         // Process @SecurityScheme annotations.
         processSecuritySchemeAnnotation(resourceClass, openApi);
@@ -362,7 +360,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             List<Parameter> locatorPathParameters,
             Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
 
-        LOG.debugf("Processing JaxRs method: {0}", method.toString());
+        JaxRsLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES).orElse(null));

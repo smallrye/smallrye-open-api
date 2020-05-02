@@ -27,7 +27,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.TypeVariable;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
@@ -41,7 +40,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class TypeResolver {
 
-    private static final Logger LOG = Logger.getLogger(TypeResolver.class);
     private static final Type BOOLEAN_TYPE = Type.create(DotName.createSimple(Boolean.class.getName()), Type.Kind.CLASS);
 
     private final Deque<Map<String, Type>> resolutionStack;
@@ -630,8 +628,7 @@ public class TypeResolver {
         List<Type> arguments = parameterizedType.arguments();
 
         if (arguments.size() != typeVariables.size()) {
-            LOG.errorv("Unanticipated mismatch between type arguments and type variables \n" +
-                    "Args: {0}\n Vars:{1}", arguments, typeVariables);
+            DataObjectLogging.log.classNotAvailable(typeVariables, arguments);
         }
 
         Map<String, Type> resolutionMap = new LinkedHashMap<>();

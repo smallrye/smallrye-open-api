@@ -3,32 +3,31 @@ package io.smallrye.openapi.runtime.io.contact;
 import org.eclipse.microprofile.openapi.models.info.Contact;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.info.ContactImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * This reads the Contact from annotations or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#contactObject">contactObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ContactReader {
-    private static final Logger LOG = Logger.getLogger(ContactReader.class);
 
     private ContactReader() {
     }
 
     /**
      * Reads an Contact annotation.
-     * 
+     *
      * @param annotationValue the {@literal @}Contact annotation
      * @return Contact model
      */
@@ -36,7 +35,7 @@ public class ContactReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a @Contact annotation.");
+        IoLogging.log.singleAnnotation("@Contact");
         AnnotationInstance nested = annotationValue.asNested();
         Contact contact = new ContactImpl();
         contact.setName(JandexUtil.stringValue(nested, ContactConstant.PROP_NAME));
@@ -47,7 +46,7 @@ public class ContactReader {
 
     /**
      * Reads an {@link Contact} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Contact model
      */
@@ -55,7 +54,7 @@ public class ContactReader {
         if (node == null) {
             return null;
         }
-        LOG.debug("Processing a Contact json node.");
+        IoLogging.log.singleJsonNode("Contact");
         Contact contact = new ContactImpl();
         contact.setName(JsonUtil.stringProperty(node, ContactConstant.PROP_NAME));
         contact.setUrl(JsonUtil.stringProperty(node, ContactConstant.PROP_URL));

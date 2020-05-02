@@ -533,7 +533,7 @@ public class TypeUtil {
                 wrapperType = Short.class;
                 break;
             default:
-                throw new IllegalArgumentException("Unknown primitive: " + primitive);
+                throw UtilMessages.msg.unknownPrimitive(primitive);
         }
 
         return DotName.createSimple(wrapperType.getName()).equals(wrapped.name());

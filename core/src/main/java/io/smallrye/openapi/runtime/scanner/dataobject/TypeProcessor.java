@@ -14,7 +14,6 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
@@ -28,7 +27,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class TypeProcessor {
-    private static final Logger LOG = Logger.getLogger(TypeProcessor.class);
 
     private final Schema schema;
     private final AugmentedIndexView index;
@@ -70,7 +68,7 @@ public class TypeProcessor {
         }
 
         if (type.kind() == Type.Kind.ARRAY) {
-            LOG.debugv("Processing an array {0}", type);
+            DataObjectLogging.log.processingArray(type);
             ArrayType arrayType = type.asArrayType();
 
             // Array-type schema
@@ -146,19 +144,19 @@ public class TypeProcessor {
         } else {
             // If the type is not in Jandex then we don't have easy access to it.
             // Future work could consider separate code to traverse classes reachable from this classloader.
-            LOG.debugv("Encountered type not in Jandex index that is not well-known type. Will not traverse it: {0}", type);
+            DataObjectLogging.log.typeNotInJandexIndex(type);
         }
 
         return type;
     }
 
     private Type readParameterizedType(ParameterizedType pType) {
-        LOG.debugv("Processing parameterized type {0}", pType);
+        DataObjectLogging.log.processingParametrizedType(pType);
         Type typeRead = pType;
 
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
-            LOG.debugv("Processing Java Collection. Will treat as an array.");
+            DataObjectLogging.log.processingTypeAs("Java Collection", "Array");
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
 
@@ -175,7 +173,7 @@ public class TypeProcessor {
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
-            LOG.debugv("Processing Map. Will treat as an object.");
+            DataObjectLogging.log.processingTypeAs("Map", "object");
             schema.type(Schema.SchemaType.OBJECT);
 
             if (pType.arguments().size() == 2) {
@@ -209,7 +207,7 @@ public class TypeProcessor {
             }
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
-                LOG.debugv("Processing an enum {0}", valueType);
+                DataObjectLogging.log.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(index, valueType);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
@@ -226,17 +224,17 @@ public class TypeProcessor {
         // Type variable (e.g. A in Foo<A>)
         Type resolvedType = typeResolver.getResolvedType(fieldType);
 
-        LOG.debugv("Resolved type {0} -> {1}", fieldType, resolvedType);
+        DataObjectLogging.log.resolvedType(fieldType, resolvedType);
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
-            LOG.debugv("Is a terminal type {0}", resolvedType);
+            DataObjectLogging.log.terminalType(resolvedType);
             TypeUtil.applyTypeAttributes(resolvedType, schema);
         } else {
-            LOG.debugv("Attempting to do TYPE_VARIABLE substitution: {0} -> {1}", fieldType, resolvedType);
+            DataObjectLogging.log.typeVarSubstitution(fieldType, resolvedType);
             if (index.containsClass(resolvedType)) {
                 // Add resolved type to stack.
                 objectStack.push(annotationTarget, parentPathEntry, resolvedType, schema);
             } else {
-                LOG.debugv("Class for type {0} not available", resolvedType);
+                DataObjectLogging.log.classNotAvailable(resolvedType);
             }
         }
         return resolvedType;

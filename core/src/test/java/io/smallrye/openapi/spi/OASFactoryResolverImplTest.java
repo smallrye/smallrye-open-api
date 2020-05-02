@@ -86,7 +86,7 @@ public class OASFactoryResolverImplTest {
             OASFactory.createObject(c);
             Assert.fail("Expected a runtime error.");
         } catch (RuntimeException e) {
-            Assert.assertEquals("Class 'java.lang.String' is not Constructible.", e.getMessage());
+            Assert.assertEquals("SROAP09000: Class 'java.lang.String' is not Constructible.", e.getMessage());
         }
     }
 
