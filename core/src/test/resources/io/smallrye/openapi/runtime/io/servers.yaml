@@ -1,11 +1,11 @@
 ---
 openapi: 3.0.0
 servers:
-- url: https://development.gigantic-server.com/v1
+- url: "https://development.gigantic-server.com/v1"
   description: Development server
-- url: https://staging.gigantic-server.com/v1
+- url: "https://staging.gigantic-server.com/v1"
   description: Staging server
-- url: https://{username}.gigantic-server.com:{port}/{basePath}
+- url: "https://{username}.gigantic-server.com:{port}/{basePath}"
   description: The production API server
   variables:
     username:
