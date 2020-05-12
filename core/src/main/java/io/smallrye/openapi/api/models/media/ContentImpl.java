@@ -6,13 +6,14 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 
+import io.smallrye.openapi.api.models.MapModel;
 import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Content} OpenAPI model interface.
  */
-public class ContentImpl implements Content, ModelImpl {
+public class ContentImpl implements Content, ModelImpl, MapModel<MediaType> {
 
     private Map<String, MediaType> mediaTypes;
 
@@ -50,4 +51,42 @@ public class ContentImpl implements Content, ModelImpl {
         this.mediaTypes = ModelUtil.replace(mediaTypes, LinkedHashMap<String, MediaType>::new);
     }
 
+    // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1
+
+    @Override
+    public Map<String, MediaType> getMap() {
+        return this.mediaTypes;
+    }
+
+    @Override
+    public void setMap(Map<String, MediaType> map) {
+        this.mediaTypes = map;
+    }
+
+    @Override
+    public MediaType get(Object key) {
+        return MapModel.super.get(key);
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return MapModel.super.containsKey(key);
+    }
+
+    @Override
+    public MediaType put(String key, MediaType value) {
+        return MapModel.super.put(key, value);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends MediaType> m) {
+        MapModel.super.putAll(m);
+    }
+
+    @Override
+    public MediaType remove(Object key) {
+        return MapModel.super.remove(key);
+    }
+
+    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1 
 }
