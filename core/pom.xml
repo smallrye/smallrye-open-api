@@ -51,7 +51,7 @@
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
         </dependency>
-        
+
         <!-- Test Only Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -61,6 +61,12 @@
         <dependency>
             <groupId>io.smallrye.config</groupId>
             <artifactId>smallrye-config</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Required for SmallRye Config -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
