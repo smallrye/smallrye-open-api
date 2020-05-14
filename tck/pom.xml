@@ -132,6 +132,7 @@
                     <systemPropertyVariables>
                         <smallrye.openapi.server.port>${smallrye.openapi.server.port}</smallrye.openapi.server.port>
                     </systemPropertyVariables>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>
 
