@@ -78,10 +78,10 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
         return this.scopes;
     }
 
-    /**
+    /*
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#setScopes(java.util.Map)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0
+    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
     public void setScopes(Map<String, String> scopes) {
         //this.scopes = ModelUtil.replace(scopes, LinkedHashMap<String, String>::new);
         if (scopes == null) {
@@ -91,10 +91,10 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
         }
     }
 
-    /**
+    /*
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#addScope(java.lang.String, java.lang.String)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0
+    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
     public OAuthFlow addScope(String scope, String description) {
         // this.scopes = ModelUtil.add(scope, description, this.scopes, LinkedHashMap<String, String>::new);
         if (scope == null) {
@@ -107,10 +107,10 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
         return this;
     }
 
-    /**
+    /*
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#removeScope(java.lang.String)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0
+    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
     public void removeScope(String scope) {
         ModelUtil.remove(this.scopes, scope);
     }

@@ -409,9 +409,7 @@ public interface AnnotationScanner {
 
     /**
      * Derives a default HTTP status code for the provided REST endpoint implementation
-     * method using the rules defined by
-     * {@link org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema#responseCode()
-     * APIResponseSchema#responseCode()}.
+     * method using the rules defined by {@literal @}APIResponseSchema#responseCode().
      *
      * @param method the endpoint method
      * @return the derived HTTP status
@@ -469,7 +467,9 @@ public interface AnnotationScanner {
     /**
      * Add api response to api responses using the annotation information
      * 
+     * @param context the scanning context
      * @param annotation The APIResponseSchema annotation
+     * @param method the current method
      * @param operation the method operation
      */
     default void addApiReponseSchemaFromAnnotation(AnnotationScannerContext context,
