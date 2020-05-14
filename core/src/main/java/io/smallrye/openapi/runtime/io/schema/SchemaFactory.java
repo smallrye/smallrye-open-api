@@ -193,12 +193,13 @@ public class SchemaFactory {
         schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        schema.setExample(readAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults));
         AnnotationInstance annotationInstance = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(annotationInstance));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
-        schema.setType(SchemaFactory.<String, Schema.SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
-                value -> JandexUtil.enumValue(value, Schema.SchemaType.class), defaults));
+        final SchemaType schemaType = SchemaFactory.<String, SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
+                value -> JandexUtil.enumValue(value, SchemaType.class), defaults);
+        schema.setType(schemaType);
+        schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schemaType));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
                 readDiscriminator(index,
@@ -272,6 +273,30 @@ public class SchemaFactory {
         }
 
         return (T) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
+            SchemaType schemaType) {
+        return (T) readAttr(annotation, propertyName, value -> {
+            if (!(value instanceof String)) {
+                return value;
+            }
+            String stringValue = (String) value;
+            switch (schemaType) {
+                case INTEGER:
+                    return Integer.parseInt(stringValue);
+                case NUMBER:
+                    return Double.parseDouble(stringValue);
+                case BOOLEAN:
+                    return Boolean.parseBoolean(stringValue);
+                default:
+                case STRING:
+                case OBJECT:
+                case ARRAY: // TODO figure out how to parse array type
+                    return stringValue;
+            }
+        }, defaults);
     }
 
     /**
