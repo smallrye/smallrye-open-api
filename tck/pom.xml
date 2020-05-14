@@ -22,13 +22,17 @@
             <artifactId>smallrye-open-api-jaxrs</artifactId>
             <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
         </dependency>
-        
-        
 
         <!-- SmallRye Config -->
         <dependency>
             <groupId>io.smallrye.config</groupId>
             <artifactId>smallrye-config</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Required for SmallRye Config -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
             <scope>test</scope>
         </dependency>
 

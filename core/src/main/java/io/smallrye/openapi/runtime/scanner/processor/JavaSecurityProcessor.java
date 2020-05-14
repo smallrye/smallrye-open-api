@@ -2,7 +2,6 @@ package io.smallrye.openapi.runtime.scanner.processor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +14,7 @@ import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.jboss.jandex.MethodInfo;
 
 import io.smallrye.openapi.api.constants.SecurityConstants;
+import io.smallrye.openapi.api.models.security.ScopesImpl;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -72,10 +72,16 @@ public class JavaSecurityProcessor {
         }
 
         this.currentFlows.forEach(flow -> {
+            // TODO: Replace ScopesImpl with Map for MicroProfile OpenAPI 2.0
+            // if (flow.getScopes() == null) {
+            //     flow.setScopes(new LinkedHashMap<>());
+            // }
+            // Arrays.stream(roles).forEach(role -> flow.addScope(role, role + " role"));
+
             if (flow.getScopes() == null) {
-                flow.setScopes(new LinkedHashMap<>());
+                flow.setScopes(new ScopesImpl());
             }
-            Arrays.stream(roles).forEach(role -> flow.addScope(role, role + " role"));
+            Arrays.stream(roles).forEach(role -> flow.getScopes().addScope(role, role + " role"));
         });
     }
 

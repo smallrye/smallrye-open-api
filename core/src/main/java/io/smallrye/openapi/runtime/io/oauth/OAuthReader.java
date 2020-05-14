@@ -1,11 +1,10 @@
 package io.smallrye.openapi.runtime.io.oauth;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
+import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.logging.Logger;
@@ -14,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
+import io.smallrye.openapi.api.models.security.ScopesImpl;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
@@ -120,13 +120,15 @@ public class OAuthReader {
      * @param annotationValue {@literal @}OAuthScope annotation
      * @return Map of name and description of the scope
      */
-    private static Map<String, String> readOAuthScopes(final AnnotationValue annotationValue) {
+    // TODO: Update return type and remove warning suppression for MicroProfile OpenAPI 2.0
+    @SuppressWarnings("deprecation")
+    private static Scopes readOAuthScopes(final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
         LOG.debug("Processing a list of @OAuthScope annotations.");
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        Map<String, String> scopes = new LinkedHashMap<>();
+        Scopes scopes = new ScopesImpl();
         for (AnnotationInstance nested : nestedArray) {
             String name = JandexUtil.stringValue(nested, SecuritySchemeConstant.PROP_NAME);
             if (name != null) {
@@ -143,12 +145,14 @@ public class OAuthReader {
      * @param node json map
      * @return Map of name and description of the scope
      */
-    public static Map<String, String> readOAuthScopes(final JsonNode node) {
+    // TODO: Update return type and remove warning suppression for MicroProfile OpenAPI 2.0
+    @SuppressWarnings("deprecation")
+    public static Scopes readOAuthScopes(final JsonNode node) {
         if (node == null || !node.isObject()) {
             return null;
         }
         LOG.debug("Processing a json map of OAuthScope.");
-        Map<String, String> scopes = new LinkedHashMap<>();
+        Scopes scopes = new ScopesImpl();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (ExtensionReader.isExtensionField(fieldName)) {
