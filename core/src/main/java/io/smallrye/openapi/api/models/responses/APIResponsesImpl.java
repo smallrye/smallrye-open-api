@@ -7,13 +7,14 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
+import io.smallrye.openapi.api.models.MapModel;
 import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link APIResponses} OpenAPI model interface.
  */
-public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements APIResponses, ModelImpl {
+public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements APIResponses, ModelImpl, MapModel<APIResponse> {
 
     private Map<String, APIResponse> apiResponses;
 
@@ -65,4 +66,42 @@ public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements AP
         }
     }
 
+    // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1
+
+    @Override
+    public Map<String, APIResponse> getMap() {
+        return this.apiResponses;
+    }
+
+    @Override
+    public void setMap(Map<String, APIResponse> map) {
+        this.apiResponses = map;
+    }
+
+    @Override
+    public APIResponse get(Object key) {
+        return MapModel.super.get(key);
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return MapModel.super.containsKey(key);
+    }
+
+    @Override
+    public APIResponse put(String key, APIResponse value) {
+        return MapModel.super.put(key, value);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends APIResponse> m) {
+        MapModel.super.putAll(m);
+    }
+
+    @Override
+    public APIResponse remove(Object key) {
+        return MapModel.super.remove(key);
+    }
+
+    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1 
 }
