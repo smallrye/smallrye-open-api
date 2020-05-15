@@ -1,0 +1,41 @@
+name: SmallRye Build
+
+on:
+  push:
+    branches: 
+      - 1.1.x
+    paths-ignore:
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+      - 'NOTICE'
+      - 'README*'
+  pull_request:
+    branches:
+      - 1.1.x
+    paths-ignore:
+      - '.gitignore'
+      - 'CODEOWNERS'
+      - 'LICENSE'
+      - 'NOTICE'
+      - 'README*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [8]
+    name: build with jdk ${{matrix.java}}
+
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
+
+      - uses: actions/setup-java@v1.3.0
+        name: set up jdk ${{matrix.java}}
+        with:
+          java-version: ${{matrix.java}}
+
+      - name: build with maven
+        run: mvn -B formatter:validate verify --file pom.xml
