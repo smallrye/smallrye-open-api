@@ -77,10 +77,10 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
         }
     }
 
-    /**
+    /*
      * @see org.eclipse.microprofile.openapi.models.servers.Server#addVariable(java.lang.String, ServerVariable)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0
+    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
     public Server addVariable(String variableName, ServerVariable variable) {
         //this.variables = ModelUtil.add(variableName, variable, this.variables, LinkedHashMap<String, ServerVariable>::new);
         if (variableName == null) {
@@ -93,10 +93,10 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
         return this;
     }
 
-    /**
+    /*
      * @see org.eclipse.microprofile.openapi.models.servers.Server#removeVariable(java.lang.String)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0
+    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
     public void removeVariable(String variableName) {
         ModelUtil.remove(this.variables, variableName);
     }

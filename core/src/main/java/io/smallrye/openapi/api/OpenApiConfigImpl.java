@@ -3,6 +3,7 @@ package io.smallrye.openapi.api;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -24,10 +25,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String modelReader;
     private String filter;
     private Boolean scanDisable;
-    private Set<String> scanPackages;
-    private Set<String> scanClasses;
-    private Set<String> scanExcludePackages;
-    private Set<String> scanExcludeClasses;
+    private Pattern scanPackages;
+    private Pattern scanClasses;
+    private Pattern scanExcludePackages;
+    private Pattern scanExcludeClasses;
     private Set<String> servers;
     private Boolean scanDependenciesDisable;
     private Set<String> scanDependenciesJars;
@@ -90,10 +91,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanPackages()
      */
     @Override
-    public Set<String> scanPackages() {
+    public Pattern scanPackages() {
         if (scanPackages == null) {
-            String packages = getStringConfigValue(OASConfig.SCAN_PACKAGES);
-            scanPackages = asCsvSet(packages);
+            scanPackages = patternOf(OASConfig.SCAN_PACKAGES);
         }
         return scanPackages;
     }
@@ -102,10 +102,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanClasses()
      */
     @Override
-    public Set<String> scanClasses() {
+    public Pattern scanClasses() {
         if (scanClasses == null) {
-            String classes = getStringConfigValue(OASConfig.SCAN_CLASSES);
-            scanClasses = asCsvSet(classes);
+            scanClasses = patternOf(OASConfig.SCAN_CLASSES);
         }
         return scanClasses;
     }
@@ -114,11 +113,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanExcludePackages()
      */
     @Override
-    public Set<String> scanExcludePackages() {
+    public Pattern scanExcludePackages() {
         if (scanExcludePackages == null) {
-            String packages = getStringConfigValue(OASConfig.SCAN_EXCLUDE_PACKAGES);
-            scanExcludePackages = asCsvSet(packages);
-            scanExcludePackages.addAll(OpenApiConstants.NEVER_SCAN_PACKAGES);
+            scanExcludePackages = patternOf(OASConfig.SCAN_EXCLUDE_PACKAGES);
         }
         return scanExcludePackages;
     }
@@ -127,11 +124,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanExcludeClasses()
      */
     @Override
-    public Set<String> scanExcludeClasses() {
+    public Pattern scanExcludeClasses() {
         if (scanExcludeClasses == null) {
-            String classes = getStringConfigValue(OASConfig.SCAN_EXCLUDE_CLASSES);
-            scanExcludeClasses = asCsvSet(classes);
-            scanExcludeClasses.addAll(OpenApiConstants.NEVER_SCAN_CLASSES);
+            scanExcludeClasses = patternOf(OASConfig.SCAN_EXCLUDE_CLASSES);
         }
         return scanExcludeClasses;
     }
@@ -235,6 +230,24 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      */
     String getStringConfigValue(String key) {
         return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v.trim()) ? null : v).orElse(null);
+    }
+
+    Pattern patternOf(String key) {
+        String configValue = getStringConfigValue(key);
+        Pattern pattern;
+
+        if (configValue != null && (configValue.startsWith("^") || configValue.endsWith("$"))) {
+            pattern = Pattern.compile(configValue);
+        } else {
+            Set<String> literals = asCsvSet(configValue);
+            if (literals.isEmpty()) {
+                return Pattern.compile("", Pattern.LITERAL);
+            } else {
+                pattern = Pattern.compile("(" + literals.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
+            }
+        }
+
+        return pattern;
     }
 
     private static Set<String> asCsvSet(String items) {
