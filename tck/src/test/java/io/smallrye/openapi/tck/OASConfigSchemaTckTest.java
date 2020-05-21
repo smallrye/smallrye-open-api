@@ -16,15 +16,13 @@
 
 package io.smallrye.openapi.tck;
 
-import org.eclipse.microprofile.openapi.tck.OASConfigSchemaTest;
-
-import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 @TckTest
-public class OASConfigSchemaTckTest extends BaseTckTest<OASConfigSchemaTest> {
+//TODO Enable OASConfigSchemaTest for MicroProfile OpenAPI 2.0
+public class OASConfigSchemaTckTest /* extends BaseTckTest<OASConfigSchemaTest> */ {
 
 }

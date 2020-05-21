@@ -246,7 +246,18 @@ public class ParameterProcessor {
         resourceMethod.annotations()
                 .stream()
                 .filter(a -> !a.target().equals(resourceMethod))
-                .forEach(processor::readAnnotatedType);
+                // TODO: Replace 'forEach' below with ".forEach(processor::readAnnotatedType);" once @Parameters no longer need to be supported on method arguments
+                .forEach(annotation -> {
+                    /*
+                     * This condition exists to support @Parameters wrapper annotation
+                     * on method parameters until (if?) the MP-OAI TCK is changed.
+                     */
+                    if (openApiParameterAnnotations.contains(annotation.name())) {
+                        processor.readParameterAnnotation(annotation);
+                    } else {
+                        processor.readAnnotatedType(annotation);
+                    }
+                });
 
         // Phase III - Read method @Parameter(s) annotations
         resourceMethod.annotations()

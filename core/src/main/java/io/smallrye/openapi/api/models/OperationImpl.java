@@ -39,7 +39,9 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public List<String> getTags() {
-        return ModelUtil.unmodifiableList(this.tags);
+        //TODO Return immutable map
+        //return ModelUtil.unmodifiableList(this.tags);
+        return this.tags;
     }
 
     /**

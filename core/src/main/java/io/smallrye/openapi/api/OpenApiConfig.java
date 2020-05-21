@@ -2,6 +2,7 @@ package io.smallrye.openapi.api;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Accessor to OpenAPI configuration options.
@@ -19,13 +20,13 @@ public interface OpenApiConfig {
 
     public boolean scanDisable();
 
-    public Set<String> scanPackages();
+    public Pattern scanPackages();
 
-    public Set<String> scanClasses();
+    public Pattern scanClasses();
 
-    public Set<String> scanExcludePackages();
+    public Pattern scanExcludePackages();
 
-    public Set<String> scanExcludeClasses();
+    public Pattern scanExcludeClasses();
 
     public Set<String> servers();
 
