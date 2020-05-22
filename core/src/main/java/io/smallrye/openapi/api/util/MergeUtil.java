@@ -25,7 +25,6 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.ModelImpl;
 
@@ -39,7 +38,6 @@ import io.smallrye.openapi.api.models.ModelImpl;
  * @author eric.wittmann@gmail.com
  */
 public class MergeUtil {
-    private static final Logger LOG = Logger.getLogger(MergeUtil.class);
 
     private static final Set<String> EXCLUDED_PROPERTIES = new HashSet<>();
     static {
@@ -114,7 +112,7 @@ public class MergeUtil {
         try {
             descriptors = Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors();
         } catch (IntrospectionException e) {
-            LOG.error("Failed to introspect BeanInfo for: " + object1.getClass(), e);
+            UtilLogging.log.failedToIntrospectBeanInfo(object1.getClass(), e);
         }
 
         for (PropertyDescriptor descriptor : descriptors) {

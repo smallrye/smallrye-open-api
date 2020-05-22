@@ -13,13 +13,13 @@ import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Parameterizable;
 import io.smallrye.openapi.runtime.io.Referenceable;
@@ -41,7 +41,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ParameterReader {
-    private static final Logger LOG = Logger.getLogger(ParameterReader.class);
 
     private ParameterReader() {
     }
@@ -56,8 +55,7 @@ public class ParameterReader {
     public static Optional<List<Parameter>> readParametersList(final AnnotationScannerContext context,
             final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-
-            LOG.debug("Processing a list of @Parameter annotations.");
+            IoLogging.log.annotationsList("@Parameter");
             List<Parameter> parameters = new ArrayList<>();
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             for (AnnotationInstance nested : nestedArray) {
@@ -79,7 +77,7 @@ public class ParameterReader {
      */
     public static Optional<List<Parameter>> readParameterList(final JsonNode node) {
         if (node != null && node.isArray()) {
-            LOG.debug("Processing a json list of Parameter.");
+            IoLogging.log.jsonList("Parameter");
             List<Parameter> params = new ArrayList<>();
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode paramNode : arrayNode) {
@@ -102,7 +100,7 @@ public class ParameterReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @Parameter annotations.");
+        IoLogging.log.annotationsMap("@Parameter");
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -130,7 +128,7 @@ public class ParameterReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a json map of Parameters.");
+        IoLogging.log.jsonMap("Parameters");
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -154,7 +152,7 @@ public class ParameterReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Parameter annotation.");
+        IoLogging.log.singleAnnotation("@Parameter");
         Parameter parameter = new ParameterImpl();
         parameter.setName(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_NAME));
         parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
@@ -200,7 +198,7 @@ public class ParameterReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Parameter json object.");
+        IoLogging.log.singleJsonObject("Parameter");
         Parameter parameter = new ParameterImpl();
 
         parameter.setName(JsonUtil.stringProperty(node, Parameterizable.PROP_NAME));

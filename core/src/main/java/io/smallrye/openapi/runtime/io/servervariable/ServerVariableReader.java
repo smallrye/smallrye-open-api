@@ -9,11 +9,11 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -28,7 +28,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ServerVariableReader {
-    private static final Logger LOG = Logger.getLogger(ServerVariableReader.class);
 
     private ServerVariableReader() {
     }
@@ -44,7 +43,7 @@ public class ServerVariableReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing an array of @ServerVariable annotations.");
+        IoLogging.log.annotationsArray("@ServerVariable");
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (AnnotationInstance serverVariableAnno : nestedArray) {
@@ -66,7 +65,7 @@ public class ServerVariableReader {
         if (node == null) {
             return null;
         }
-        LOG.debug("Processing a map of ServerVariable json node.");
+        IoLogging.log.jsonNodeMap("ServerVariable");
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (Iterator<String> iterator = node.fieldNames(); iterator.hasNext();) {
             String fieldName = iterator.next();
@@ -89,7 +88,7 @@ public class ServerVariableReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @ServerVariable annotation.");
+        IoLogging.log.singleAnnotation("@ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
         variable.setDescription(
                 JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
@@ -110,7 +109,7 @@ public class ServerVariableReader {
         if (node == null) {
             return null;
         }
-        LOG.debug("Processing a single ServerVariable json node.");
+        IoLogging.log.singleJsonNode("ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
         JsonNode enumNode = node.get(ServerVariableConstant.PROP_ENUM);
         if (enumNode != null && enumNode.isArray()) {

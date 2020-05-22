@@ -22,6 +22,18 @@
             <artifactId>smallrye-open-api-jaxrs</artifactId>
             <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
         </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+        </dependency>
 
         <!-- SmallRye Config -->
         <dependency>

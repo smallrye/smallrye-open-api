@@ -11,7 +11,6 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
@@ -28,7 +27,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class AnnotationTargetProcessor implements RequirementHandler {
-    private static final Logger LOG = Logger.getLogger(AnnotationTargetProcessor.class);
 
     private final AugmentedIndexView index;
     private final DataObjectDeque objectStack;
@@ -183,7 +181,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private Schema readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation, Type postProcessedField) {
-        LOG.debugv("Processing @Schema annotation {0} on a field {1}", annotation, propertyKey);
+        DataObjectLogging.log.processingFieldAnnotation(annotation, propertyKey);
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.

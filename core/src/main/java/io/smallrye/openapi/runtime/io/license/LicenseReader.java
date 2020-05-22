@@ -3,11 +3,11 @@ package io.smallrye.openapi.runtime.io.license;
 import org.eclipse.microprofile.openapi.models.info.License;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.info.LicenseImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -21,7 +21,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class LicenseReader {
-    private static final Logger LOG = Logger.getLogger(LicenseReader.class);
 
     private LicenseReader() {
     }
@@ -36,7 +35,7 @@ public class LicenseReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a @License annotation.");
+        IoLogging.log.singleAnnotation("@License");
         AnnotationInstance nested = annotationValue.asNested();
         License license = new LicenseImpl();
         license.setName(JandexUtil.stringValue(nested, LicenseConstant.PROP_NAME));
@@ -54,7 +53,7 @@ public class LicenseReader {
         if (node == null) {
             return null;
         }
-        LOG.debug("Processing a License json node.");
+        IoLogging.log.singleJsonNode("License");
         License license = new LicenseImpl();
         license.setName(JsonUtil.stringProperty(node, LicenseConstant.PROP_NAME));
         license.setUrl(JsonUtil.stringProperty(node, LicenseConstant.PROP_URL));

@@ -9,12 +9,12 @@ import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import io.smallrye.openapi.api.models.tags.TagImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
@@ -31,7 +31,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class TagReader {
-    private static final Logger LOG = Logger.getLogger(TagReader.class);
 
     private TagReader() {
     }
@@ -45,7 +44,7 @@ public class TagReader {
      */
     public static Optional<List<Tag>> readTags(final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            LOG.debug("Processing an array of @Tag annotations.");
+            IoLogging.log.annotationsArray("@Tag");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Tag> tags = new ArrayList<>();
             for (AnnotationInstance tagAnno : nestedArray) {
@@ -66,7 +65,7 @@ public class TagReader {
      */
     public static Optional<List<Tag>> readTags(final JsonNode node) {
         if (node != null && node.isArray()) {
-            LOG.debug("Processing an array of Tag json nodes.");
+            IoLogging.log.jsonArray("Tag");
             ArrayNode nodes = (ArrayNode) node;
             List<Tag> rval = new ArrayList<>(nodes.size());
             for (JsonNode tagNode : nodes) {
@@ -85,7 +84,7 @@ public class TagReader {
      */
     public static Tag readTag(final AnnotationInstance annotationInstance) {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
-        LOG.debug("Processing a single @Tag annotation.");
+        IoLogging.log.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
         tag.setName(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_NAME));
         tag.setDescription(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
@@ -101,7 +100,7 @@ public class TagReader {
      * @return Tag model
      */
     private static Tag readTag(final JsonNode node) {
-        LOG.debug("Processing a single Tag json node.");
+        IoLogging.log.singleJsonNode("Tag");
         Tag tag = new TagImpl();
         tag.setName(JsonUtil.stringProperty(node, TagConstant.PROP_NAME));
         tag.setDescription(JsonUtil.stringProperty(node, TagConstant.PROP_DESCRIPTION));

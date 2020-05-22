@@ -3,11 +3,11 @@ package io.smallrye.openapi.runtime.io.components;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.ComponentsImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.callback.CallbackReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -30,7 +30,6 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ComponentsReader {
-    private static final Logger LOG = Logger.getLogger(ComponentsReader.class);
 
     private ComponentsReader() {
     }
@@ -47,7 +46,7 @@ public class ComponentsReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a @Components annotation.");
+        IoLogging.log.singleAnnotation("@Components");
         AnnotationInstance nested = annotationValue.asNested();
         Components components = new ComponentsImpl();
         // TODO for EVERY item below, handle the case where the annotation is ref-only.  then strip the ref path and use the final segment as the name
@@ -79,7 +78,7 @@ public class ComponentsReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a Components json node.");
+        IoLogging.log.singleJsonNode("Components");
         Components components = new ComponentsImpl();
         components.setCallbacks(CallbackReader.readCallbacks(node.get(ComponentsConstant.PROP_CALLBACKS)));
         components.setExamples(ExampleReader.readExamples(node.get(ComponentsConstant.PROP_EXAMPLES)));
