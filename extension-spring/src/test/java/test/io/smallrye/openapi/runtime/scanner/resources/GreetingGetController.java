@@ -20,7 +20,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 /**
  * Spring.
  * Some basic test, comparing with what we get in the JAX-RS version.
- * See the GreetingController in the JAX-RS test
+ * See the GreetingGetResource in the JAX-RS test
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */

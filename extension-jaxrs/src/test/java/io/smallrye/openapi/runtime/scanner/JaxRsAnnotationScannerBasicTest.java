@@ -20,7 +20,7 @@ public class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestB
      * @throws IOException
      * @throws JSONException
      */
-    //@Test
+    @Test
     public void testBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingGetResource.class");
@@ -50,6 +50,25 @@ public class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestB
 
         printToConsole(result);
         assertJsonEquals("resource.testBasicJaxRsPostDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world PUT service
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicJaxRsPutDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPutResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicJaxRsPutDefinitionScanning.json", result);
     }
 
 }
