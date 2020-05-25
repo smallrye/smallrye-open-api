@@ -20,7 +20,7 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      * @throws IOException
      * @throws JSONException
      */
-    //@Test
+    @Test
     public void testBasicGetSpringDefinitionScanning() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingGetController.class");
@@ -41,7 +41,7 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      * @throws IOException
      * @throws JSONException
      */
-    //@Test
+    @Test
     public void testBasicSpringDefinitionScanningAlt() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingGetControllerAlt.class");
@@ -60,7 +60,7 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      * @throws IOException
      * @throws JSONException
      */
-    //@Test
+    @Test
     public void testBasicPostSpringDefinitionScanning() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPostController.class");
@@ -79,7 +79,7 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      * @throws IOException
      * @throws JSONException
      */
-    //@Test
+    @Test
     public void testBasicPostSpringDefinitionScanningAlt() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPostControllerAlt.class");
@@ -109,5 +109,62 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
 
         printToConsole(result);
         assertJsonEquals("resource.testBasicSpringPutDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicPutSpringDefinitionScanningAlt() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPutControllerAlt.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicSpringPutDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicDeleteSpringDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingDeleteController.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicSpringDeleteDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicDeleteSpringDefinitionScanningAlt() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingDeleteControllerAlt.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicSpringDeleteDefinitionScanning.json", result);
     }
 }

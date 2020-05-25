@@ -75,6 +75,11 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
     }
 
     @Override
+    public boolean isDeleteMethod(final MethodInfo method) {
+        return method.hasAnnotation(JaxRsConstants.DELETE);
+    }
+
+    @Override
     public boolean isScannerInternalResponse(Type returnType) {
         return returnType.name().equals(JaxRsConstants.RESPONSE);
     }

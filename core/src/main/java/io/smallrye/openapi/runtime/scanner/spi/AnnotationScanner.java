@@ -36,6 +36,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -84,6 +85,8 @@ public interface AnnotationScanner {
     public boolean isAsyncResponse(final MethodInfo method);
 
     public boolean isPostMethod(final MethodInfo method);
+
+    public boolean isDeleteMethod(final MethodInfo method);
 
     public boolean isScannerInternalResponse(Type returnType);
 
@@ -347,7 +350,7 @@ public interface AnnotationScanner {
         final String code = String.valueOf(status);
         final String description = getReasonPhrase(status);
 
-        if (returnType.kind() == Type.Kind.VOID) {
+        if (isVoidResponse(method)) {
             if (generateResponse(code, operation)) {
                 response = new APIResponseImpl().description(description);
             }
@@ -417,9 +420,11 @@ public interface AnnotationScanner {
     default int getDefaultStatus(final MethodInfo method) {
         final int status;
 
-        if (method.returnType().kind() == Type.Kind.VOID) {
+        if (isVoidResponse(method)) {
             if (isPostMethod(method)) {
                 status = 201; // Created
+            } else if (isDeleteMethod(method)) {
+                status = 204; // No Content (Maybe this should be 202 Accepted ?)
             } else if (!isAsyncResponse(method)) {
                 status = 204; // No Content
             } else {
@@ -430,6 +435,23 @@ public interface AnnotationScanner {
         }
 
         return status;
+    }
+
+    default boolean isVoidResponse(final MethodInfo method) {
+        if (method.returnType().kind().equals(Type.Kind.VOID)) {
+            return true;
+        }
+        if (isWrapperType(method.returnType())) {
+            ParameterizedType parameterizedType = method.returnType().asParameterizedType();
+            List<Type> arguments = parameterizedType.arguments();
+            for (Type argument : arguments) {
+                if (argument.kind().equals(Type.Kind.VOID) || (argument.kind().equals(Type.Kind.CLASS)
+                        && argument.name().equals(DotName.createSimple(Void.class.getName())))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

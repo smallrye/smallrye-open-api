@@ -71,4 +71,22 @@ public class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestB
         assertJsonEquals("resource.testBasicJaxRsPutDefinitionScanning.json", result);
     }
 
+    /**
+     * This test a basic, no OpenApi annotations, hello world DELETE service
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicJaxRsDeleteDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingDeleteResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicJaxRsDeleteDefinitionScanning.json", result);
+    }
 }
