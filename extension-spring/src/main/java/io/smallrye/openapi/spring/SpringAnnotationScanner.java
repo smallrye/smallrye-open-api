@@ -1,6 +1,7 @@
 package io.smallrye.openapi.spring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -63,8 +65,19 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        // TODO: Also check for @RequestMapping(method = RequestMethod.POST)
+        if (hasRequestMappingMethod(method, RequestMethod.POST)) {
+            return true;
+        }
         return method.hasAnnotation(SpringConstants.POST_MAPPING);
+
+    }
+
+    @Override
+    public boolean isDeleteMethod(final MethodInfo method) {
+        if (hasRequestMappingMethod(method, RequestMethod.DELETE)) {
+            return true;
+        }
+        return method.hasAnnotation(SpringConstants.DELETE_MAPPING);
     }
 
     @Override
@@ -125,6 +138,16 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         sortPaths(openApi);
 
         return openApi;
+    }
+
+    private boolean hasRequestMappingMethod(final MethodInfo method, final RequestMethod requestMethod) {
+        if (method.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
+            AnnotationInstance annotation = method.annotation(SpringConstants.REQUEST_MAPPING);
+            AnnotationValue value = annotation.value("method");
+            return value != null && value.asEnumArray().length > 0
+                    && Arrays.asList(value.asEnumArray()).contains(requestMethod.name());
+        }
+        return false;
     }
 
     /**

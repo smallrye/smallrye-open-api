@@ -61,7 +61,7 @@ public class GreetingGetResource {
     // 5) Response where you do not have a type.
     @GET
     @Path("/helloPathVariableWithResponse/{name}")
-    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting"))) // TODO: Why is not working to just do implementation ?
+    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public Response helloPathVariableWithResponse(@PathParam("name") String name) {
         return Response.ok(new Greeting("Hello " + name)).build();
     }
@@ -69,7 +69,7 @@ public class GreetingGetResource {
     // 6) ResponseEntity with a type specified (No JaxRS comparison) (repeat of above as there is not wrapped type return
     @GET
     @Path("/helloPathVariableWithResponseTyped/{name}")
-    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting"))) // TODO: Why is not working to just do implementation ?
+    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public Response helloPathVariableWithResponseTyped(@PathParam("name") String name) {
         return Response.ok(new Greeting("Hello " + name)).build();
     }
