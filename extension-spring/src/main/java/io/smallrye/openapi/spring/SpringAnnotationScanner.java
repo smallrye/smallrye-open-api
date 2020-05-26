@@ -1,6 +1,7 @@
 package io.smallrye.openapi.spring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -143,7 +144,8 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         if (method.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
             AnnotationInstance annotation = method.annotation(SpringConstants.REQUEST_MAPPING);
             AnnotationValue value = annotation.value("method");
-            return value != null && value.asString().equals(requestMethod.name());
+            return value != null && value.asEnumArray().length > 0
+                    && Arrays.asList(value.asEnumArray()).contains(requestMethod.name());
         }
         return false;
     }

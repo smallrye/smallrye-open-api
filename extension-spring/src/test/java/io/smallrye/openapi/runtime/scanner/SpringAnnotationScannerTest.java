@@ -3,9 +3,19 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Indexer;
+import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.Test;
+
+import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerAlt;
 
 /**
  * Basic Spring annotation scanning
@@ -22,10 +32,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicGetSpringDefinitionScanning() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingGetController.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingGetController.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -43,10 +51,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicSpringDefinitionScanningAlt() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingGetControllerAlt.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingGetControllerAlt.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -62,10 +68,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicPostSpringDefinitionScanning() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPostController.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingPostController.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -81,10 +85,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicPostSpringDefinitionScanningAlt() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPostControllerAlt.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingPostControllerAlt.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -100,10 +102,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicPutSpringDefinitionScanning() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPutController.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingPutController.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -119,10 +119,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicPutSpringDefinitionScanningAlt() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPutControllerAlt.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingPutControllerAlt.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -138,10 +136,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicDeleteSpringDefinitionScanning() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingDeleteController.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingDeleteController.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -157,10 +153,8 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
      */
     @Test
     public void testBasicDeleteSpringDefinitionScanningAlt() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingDeleteControllerAlt.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index i = indexOf(GreetingDeleteControllerAlt.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
