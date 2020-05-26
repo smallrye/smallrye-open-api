@@ -1398,15 +1398,17 @@ public class ParameterProcessor {
     }
 
     boolean haveSameAnnotatedTarget(ParameterContext context, AnnotationTarget target, String name) {
-        boolean nameMatches = Objects.equals(context.name, name);
+        /*
+         * Consider names to match if one is unspecified or they are equal.
+         */
+        boolean nameMatches = (context.name == null || name == null || Objects.equals(context.name, name));
 
         if (target.equals(context.target)) {
             /*
-             * This logic formerly also required that the parameter names matched
-             * (nameMatches == true) or that the kind of the target was not a
-             * method.
+             * The name must match for annotations on a method because it is
+             * ambiguous which parameters is being referenced.
              */
-            return true;
+            return nameMatches || target.kind() != Kind.METHOD;
         }
 
         if (nameMatches && target.kind() == Kind.METHOD && context.target.kind() == Kind.METHOD_PARAMETER) {
