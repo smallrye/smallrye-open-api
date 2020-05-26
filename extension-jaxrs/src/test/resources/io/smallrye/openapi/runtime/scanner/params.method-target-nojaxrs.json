@@ -1,0 +1,171 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/policies": {
+      "get": {
+        "summary": "Return all policies for a given account",
+        "parameters": [
+          {
+            "name": "filter:op[description]",
+            "in": "query",
+            "description": "Operations used with the filter",
+            "schema": {
+              "default": "equal",
+              "enum": [
+                "equal",
+                "like",
+                "ilike",
+                "not_equal"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter:op[name]",
+            "in": "query",
+            "description": "Operations used with the filter",
+            "schema": {
+              "default": "equal",
+              "enum": [
+                "equal",
+                "like",
+                "ilike",
+                "not_equal"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[description]",
+            "in": "query",
+            "description": "Filtering policies by the description depending on the Filter operator used.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[is_enabled]",
+            "in": "query",
+            "description": "Filtering policies by the is_enabled field.Defaults to true if no operand is given.",
+            "schema": {
+              "default": "true",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[name]",
+            "in": "query",
+            "description": "Filtering policies by the name depending on the Filter operator used.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page, if not specified uses 10. NO_LIMIT can be used to specify an unlimited page, when specified it ignores the offset",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Page number, starts 0, if not specified uses 0.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sortColumn",
+            "in": "query",
+            "description": "Column to sort the results by",
+            "schema": {
+              "enum": [
+                "name",
+                "description",
+                "is_enabled",
+                "mtime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort direction used",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad parameter for sorting was passed"
+          },
+          "404": {
+            "description": "No policies found for customer"
+          },
+          "403": {
+            "description": "Individual permissions missing to complete action"
+          },
+          "200": {
+            "description": "Policies found",
+            "headers": {
+              "TotalCount": {
+                "description": "Total number of items found",
+                "style": "simple",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PagedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "links": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}

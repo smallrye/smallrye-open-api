@@ -48,7 +48,8 @@ public class FilteredIndexView implements IndexView {
      * Returns true if the class name should be included in the index (is either included or
      * not excluded).
      * 
-     * @param className
+     * @param className the name of the class
+     * @return true if the inclusion/exclusion configuration allows scanning of the class name
      */
     public boolean accepts(DotName className) {
         final boolean accept;
