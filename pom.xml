@@ -54,6 +54,7 @@
         <module>extension-spring</module>
         <module>implementation</module>
         <module>tck</module>
+        <module>ui</module>
     </modules>
 
     <repositories>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>io.smallrye</groupId>
+        <artifactId>smallrye-open-api-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>smallrye-open-api-ui</artifactId>
+
+    <name>SmallRye: MicroProfile OpenAPI UI</name>
+    
+    <properties>
+        <swagger-ui.version>3.25.4</swagger-ui.version>
+        <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
+        <path.swagger-ui>openapi-ui</path.swagger-ui>
+    
+    </properties>
+    
+    <build>            
+        <!-- Copy all web content files META-INF folder, and push it though a filter to replace maven properties -->
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/webapp</directory>
+                <targetPath>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.html</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/webapp</directory>
+                <targetPath>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</targetPath>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.html</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        
+        <plugins>
+            <!-- So we don't have to keep a version of these javascript libs in our repo -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                        <execution>
+                            <id>install-swagger-ui-css</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>wget</goal>
+                            </goals>
+                            <configuration>
+                                <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui.css</url>
+                                <unpack>false</unpack>
+                                <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
+                                <md5>8db32e4681a17f1b67d7ae8ca54724eb</md5>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>install-swagger-ui</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>wget</goal>
+                            </goals>
+                            <configuration>
+                                <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-bundle.js</url>
+                                <unpack>false</unpack>
+                                <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
+                                <md5>682d09920497189c4b932282073d410a</md5>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>install-swagger-ui-standalone-preset</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>wget</goal>
+                            </goals>
+                            <configuration>
+                                <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-standalone-preset.js</url>
+                                <unpack>false</unpack>
+                                <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
+                                <md5>712a66a4b241c48f863ec7cab192b126</md5>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>install-swagger-ui-theme</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>wget</goal>
+                            </goals>
+                            <configuration>
+                                <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-feeling-blue.css</url>
+                                <unpack>false</unpack>
+                                <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
+                                <md5>043718e5194b38bcbec6f28e4aeaf614</md5>
+                            </configuration>
+                        </execution>
+                        
+                </executions>
+            </plugin>
+        </plugins>
+        
+    </build>
+</project>

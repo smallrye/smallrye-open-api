@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>SmallRye OpenAPI (v${project.version})</title>
+    <link rel="stylesheet" type="text/css" href="swagger-ui.css" >
+    <link rel="stylesheet" type="text/css" href="theme-feeling-blue.css" >
+    
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+      html
+      {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+
+      *,
+      *:before,
+      *:after
+      {
+        box-sizing: inherit;
+      }
+
+      body
+      {
+        margin:0;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="swagger-ui-bundle.js"> </script>
+    <script src="swagger-ui-standalone-preset.js"> </script>
+    <script>
+    const documentpath = '/openapi';
+    window.onload = function() {
+      // Begin Swagger UI call region
+      const ui = SwaggerUIBundle({
+        url: documentpath,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      })
+      // End Swagger UI call region
+
+      window.ui = ui
+      
+      document.getElementsByClassName("link")[0].innerHTML = "<img src='logo.png' alt='SmallRye OpenAPI' height='44' align='middle'>";
+    }
+  </script>
+  </body>
+</html>
