@@ -191,7 +191,7 @@ public class SchemaRegistry {
             try {
                 schema = OpenApiParser.parseSchema(jsonSchema);
             } catch (Exception e) {
-                LOG.warnf("Configured schema for %s could not be parsed", className);
+                LOG.warnf("Configured schema for %s could not be parsed: %s", className, e.getMessage());
                 return;
             }
 
