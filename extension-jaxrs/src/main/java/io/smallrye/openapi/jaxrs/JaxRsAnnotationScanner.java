@@ -138,6 +138,11 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         return openApi;
     }
 
+    @Override
+    public void setCurrentAppPath(String path) {
+        this.currentAppPath = path;
+    }
+
     /**
      * Find and process all JAX-RS applications
      * 

@@ -140,6 +140,11 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         return openApi;
     }
 
+    @Override
+    public void setCurrentAppPath(String path) {
+        this.currentAppPath = path;
+    }
+
     private boolean hasRequestMappingMethod(final MethodInfo method, final RequestMethod requestMethod) {
         if (method.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
             AnnotationInstance annotation = method.annotation(SpringConstants.REQUEST_MAPPING);

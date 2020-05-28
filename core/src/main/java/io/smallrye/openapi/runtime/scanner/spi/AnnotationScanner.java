@@ -99,6 +99,9 @@ public interface AnnotationScanner {
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions);
 
+    // Allow runtimes to set the path
+    public void setCurrentAppPath(String path);
+
     // For wrapped type (other than Optional) - default no others
     default boolean isWrapperType(Type type) {
         return false;
