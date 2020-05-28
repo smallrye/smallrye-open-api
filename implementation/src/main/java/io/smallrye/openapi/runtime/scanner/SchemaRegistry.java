@@ -20,10 +20,12 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.TypeVariable;
 import org.jboss.jandex.WildcardType;
+import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -35,6 +37,8 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author eric.wittmann@gmail.com
  */
 public class SchemaRegistry {
+
+    private static final Logger LOG = Logger.getLogger(SchemaRegistry.class);
 
     // Initial value is null
     private static ThreadLocal<SchemaRegistry> current = new ThreadLocal<>();
@@ -131,7 +135,7 @@ public class SchemaRegistry {
         } else if (registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
-            schema = registry.register(key, schema);
+            schema = registry.register(key, schema, null);
         }
 
         return schema;
@@ -178,6 +182,23 @@ public class SchemaRegistry {
                 this.names.addAll(schemas.keySet());
             }
         }
+
+        config.getSchemas().entrySet().forEach(entry -> {
+            String className = entry.getKey();
+            String jsonSchema = entry.getValue();
+            SchemaImpl schema;
+
+            try {
+                schema = OpenApiParser.parseSchema(jsonSchema);
+            } catch (Exception e) {
+                LOG.warnf("Configured schema for %s could not be parsed: %s", className, e.getMessage());
+                return;
+            }
+
+            Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
+            this.register(new TypeKey(type), schema, schema.getName());
+            LOG.infof("Configured schema for %s has been registered", className);
+        });
     }
 
     /**
@@ -199,7 +220,7 @@ public class SchemaRegistry {
             remove(key);
         }
 
-        return register(key, schema);
+        return register(key, schema, null);
     }
 
     /**
@@ -218,17 +239,18 @@ public class SchemaRegistry {
      *        {@link Schema} to add to the registry
      * @return a reference to the newly registered {@link Schema}
      */
-    private Schema register(TypeKey key, Schema schema) {
+    private Schema register(TypeKey key, Schema schema, String schemaName) {
         /*
          * We cannot use the 'name' on the SchemaImpl because it may be a
          * property name rather then a schema name.
          */
-        AnnotationTarget targetSchema = index.getClassByName(key.type.name());
-        AnnotationInstance schemaAnnotation = targetSchema != null ? getSchemaAnnotation(targetSchema) : null;
-        String schemaName = null;
+        if (schemaName == null) {
+            AnnotationTarget targetSchema = index.getClassByName(key.type.name());
+            AnnotationInstance schemaAnnotation = targetSchema != null ? getSchemaAnnotation(targetSchema) : null;
 
-        if (schemaAnnotation != null) {
-            schemaName = JandexUtil.stringValue(schemaAnnotation, OpenApiConstants.PROP_NAME);
+            if (schemaAnnotation != null) {
+                schemaName = JandexUtil.stringValue(schemaAnnotation, OpenApiConstants.PROP_NAME);
+            }
         }
 
         String nameBase = schemaName != null ? schemaName : key.defaultName();

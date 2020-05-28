@@ -1,0 +1,41 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/current-time": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/time-bean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "timestamp": {
+        "format": "date-time",
+        "description": "An instant in time",
+        "type": "string"
+      },
+      "time-bean": {
+        "type": "object",
+        "properties": {
+          "now": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "this$0": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

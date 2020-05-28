@@ -18,8 +18,11 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -135,6 +138,35 @@ public class OpenApiAnnotationScannerTest extends OpenApiDataObjectScannerTestBa
 
         printToConsole(result);
         assertJsonEquals("resource.testRequestBodyComponentGeneration.json", result);
+    }
+
+    @Test
+    public void testConfiguredSchemaRegistration() throws IOException, JSONException {
+        @org.eclipse.microprofile.openapi.annotations.media.Schema(name = "time-bean")
+        class TimeBean {
+            @SuppressWarnings("unused")
+            Instant now;
+        }
+        @Path("current-time")
+        class TimeResource {
+            @GET
+            @Produces("application/json")
+            public TimeBean getCurrentTime() {
+                return null;
+            }
+        }
+        Index index = indexOf(TimeBean.class, TimeResource.class);
+        Map<String, Object> config = new HashMap<>();
+        config.put("mp.openapi.schema." + Instant.class.getName(), "{"
+                + "\"name\":\"timestamp\","
+                + "\"type\":\"string\","
+                + "\"format\":\"date-time\","
+                + "\"description\":\"An instant in time\""
+                + "}");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(config), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.schema-config-in-components.json", result);
     }
 
     @Test
