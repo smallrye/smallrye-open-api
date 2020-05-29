@@ -294,7 +294,7 @@ public class SchemaFactory {
                 return value;
             }
             String stringValue = ((String) value);
-            if(schemaType != SchemaType.STRING) {
+            if (schemaType != SchemaType.STRING) {
                 return JsonUtil.parseValue(stringValue);
             }
             return stringValue;
