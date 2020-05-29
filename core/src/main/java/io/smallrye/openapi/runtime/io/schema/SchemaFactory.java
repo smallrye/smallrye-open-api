@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -275,27 +276,28 @@ public class SchemaFactory {
         return (T) value;
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Reads the attribute named by propertyName from annotation, and parses it to identified type. If no value was specified,
+     * an optional default value is retrieved from the defaults map using the propertyName as
+     * they key. Array-typed annotation values will be converted to List.
+     *
+     * @param <T> the type of the annotation attribute value
+     * @param annotation the annotation to read
+     * @param propertyName the name of the attribute to read
+     * @param defaults map of default values
+     * @return the annotation attribute value, a default value, or null
+     */
     static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
             SchemaType schemaType) {
         return (T) readAttr(annotation, propertyName, value -> {
             if (!(value instanceof String)) {
                 return value;
             }
-            String stringValue = (String) value;
-            switch (schemaType) {
-                case INTEGER:
-                    return Integer.parseInt(stringValue);
-                case NUMBER:
-                    return Double.parseDouble(stringValue);
-                case BOOLEAN:
-                    return Boolean.parseBoolean(stringValue);
-                default:
-                case STRING:
-                case OBJECT:
-                case ARRAY: // TODO figure out how to parse array type
-                    return stringValue;
+            String stringValue = ((String) value);
+            if(schemaType != SchemaType.STRING) {
+                return JsonUtil.parseValue(stringValue);
             }
+            return stringValue;
         }, defaults);
     }
 
