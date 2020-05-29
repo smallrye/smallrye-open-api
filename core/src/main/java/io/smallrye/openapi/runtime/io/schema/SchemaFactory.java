@@ -285,6 +285,7 @@ public class SchemaFactory {
      * @param annotation the annotation to read
      * @param propertyName the name of the attribute to read
      * @param defaults map of default values
+     * @param schemaType related schema type for this attribute
      * @return the annotation attribute value, a default value, or null
      */
     static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
