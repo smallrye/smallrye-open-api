@@ -16,7 +16,6 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
@@ -61,7 +60,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class OpenApiDataObjectScanner {
 
-    private static final Logger LOG = Logger.getLogger(OpenApiDataObjectScanner.class);
     // Object
     public static final Type OBJECT_TYPE = Type.create(DotName.createSimple(java.lang.Object.class.getName()), Type.Kind.CLASS);
     // Collection (list-type things)
@@ -172,7 +170,7 @@ public class OpenApiDataObjectScanner {
      * @return the OAI schema
      */
     Schema process() {
-        LOG.debugv("Starting processing with root: {0}", rootClassType.name());
+        ScannerLogging.log.startProcessing(rootClassType.name());
 
         // If top level item is simple
         if (TypeUtil.isTerminalType(rootClassType)) {
@@ -230,7 +228,7 @@ public class OpenApiDataObjectScanner {
                 continue;
             }
 
-            LOG.debugv("Getting all fields for: {0} in class: {1}", currentType, currentClass);
+            ScannerLogging.log.gettingFields(currentType, currentClass);
 
             // Get all fields *including* inherited.
             Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, currentType, currentClass);

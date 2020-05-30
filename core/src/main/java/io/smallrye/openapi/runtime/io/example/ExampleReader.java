@@ -9,11 +9,11 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.examples.Example;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.examples.ExampleImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -21,21 +21,20 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Example annotation
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#exampleObject">exampleObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ExampleReader {
-    private static final Logger LOG = Logger.getLogger(ExampleReader.class);
 
     private ExampleReader() {
     }
 
     /**
      * Reads a map of Example annotations.
-     * 
+     *
      * @param annotationValue map of {@literal @}ExampleObject annotations
      * @return Map of Example model
      */
@@ -43,7 +42,7 @@ public class ExampleReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @ExampleObject annotations.");
+        IoLogging.log.annotationsMap("@ExampleObject");
         Map<String, Example> examples = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -60,7 +59,7 @@ public class ExampleReader {
 
     /**
      * Reads the {@link Example} OpenAPI nodes.
-     * 
+     *
      * @param node map of json nodes
      * @return Map of Example model
      */
@@ -80,7 +79,7 @@ public class ExampleReader {
 
     /**
      * Reads a Example annotation into a model.
-     * 
+     *
      * @param annotationInstance {@literal @}ExampleObject annotation
      * @return Example model
      */
@@ -88,7 +87,7 @@ public class ExampleReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @ExampleObject annotation.");
+        IoLogging.log.singleAnnotation("@ExampleObject");
         Example example = new ExampleImpl();
         example.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Example));
         example.setSummary(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_SUMMARY));
@@ -101,7 +100,7 @@ public class ExampleReader {
 
     /**
      * Reads a {@link Example} OpenAPI node.
-     * 
+     *
      * @param node the example json node
      * @return Example model
      */
@@ -109,7 +108,7 @@ public class ExampleReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single ExampleObject json.");
+        IoLogging.log.singleJsonNode("ExampleObject");
         Example example = new ExampleImpl();
         example.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         example.setSummary(JsonUtil.stringProperty(node, ExampleConstant.PROP_SUMMARY));

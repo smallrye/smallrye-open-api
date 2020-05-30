@@ -9,12 +9,12 @@ import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -28,7 +28,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class SecurityRequirementReader {
-    private static final Logger LOG = Logger.getLogger(SecurityRequirementReader.class);
 
     private SecurityRequirementReader() {
     }
@@ -42,7 +41,7 @@ public class SecurityRequirementReader {
      */
     public static Optional<List<SecurityRequirement>> readSecurityRequirements(final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            LOG.debug("Processing an array of @SecurityRequirement annotations.");
+            IoLogging.log.annotationsArray("@SecurityRequirement");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<SecurityRequirement> requirements = new ArrayList<>();
             for (AnnotationInstance requirementAnno : nestedArray) {
@@ -64,7 +63,7 @@ public class SecurityRequirementReader {
      */
     public static Optional<List<SecurityRequirement>> readSecurityRequirements(final JsonNode node) {
         if (node != null && node.isArray()) {
-            LOG.debug("Processing a json array of SecurityRequirement.");
+            IoLogging.log.jsonArray("SecurityRequirement");
             List<SecurityRequirement> requirements = new ArrayList<>(node.size());
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode arrayItem : arrayNode) {

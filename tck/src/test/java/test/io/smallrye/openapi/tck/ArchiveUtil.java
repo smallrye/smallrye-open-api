@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.logging.Logger;
@@ -24,6 +25,7 @@ import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
+import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**
@@ -104,7 +106,7 @@ public class ArchiveUtil {
      */
     public static IndexView archiveToIndex(OpenApiConfig config, Archive<?> archive) {
         if (archive == null) {
-            throw new RuntimeException("Archive was null!");
+            throw TckMessages.msg.nullArchive();
         }
 
         Indexer indexer = new Indexer();
@@ -132,14 +134,15 @@ public class ArchiveUtil {
      * @param archive
      */
     private static void indexArchive(OpenApiConfig config, Indexer indexer, Archive<?> archive) {
+        FilteredIndexView filter = new FilteredIndexView(null, config);
         Map<ArchivePath, Node> c = archive.getContent();
         try {
             for (Map.Entry<ArchivePath, Node> each : c.entrySet()) {
                 ArchivePath archivePath = each.getKey();
                 if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX)
-                        && acceptClassForScanning(config, archivePath.get())) {
+                        && acceptClassForScanning(filter, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        LOG.debugv("Indexing asset: {0} from archive: {1}", archivePath.get(), archive.getName());
+                        TckLogging.log.indexing(archivePath.get(), archive.getName());
                         indexer.index(contentStream);
                     }
                     continue;
@@ -185,51 +188,21 @@ public class ArchiveUtil {
      * @param config
      * @param archivePath
      */
-    private static boolean acceptClassForScanning(OpenApiConfig config, String archivePath) {
+    private static boolean acceptClassForScanning(FilteredIndexView filter, String archivePath) {
         if (archivePath == null) {
             return false;
-        }
-
-        Set<String> scanClasses = config.scanClasses();
-        Set<String> scanPackages = config.scanPackages();
-        Set<String> scanExcludeClasses = config.scanExcludeClasses();
-        Set<String> scanExcludePackages = config.scanExcludePackages();
-        if (scanClasses.isEmpty() && scanPackages.isEmpty() && scanExcludeClasses.isEmpty() && scanExcludePackages.isEmpty()) {
-            return true;
         }
 
         if (archivePath.startsWith(OpenApiConstants.WEB_ARCHIVE_CLASS_PREFIX)) {
             archivePath = archivePath.substring(OpenApiConstants.WEB_ARCHIVE_CLASS_PREFIX.length());
         }
+
         String fqcn = archivePath.replaceAll("/", ".").substring(0, archivePath.lastIndexOf(OpenApiConstants.CLASS_SUFFIX));
-        String packageName = "";
+
         if (fqcn.startsWith(".")) {
             fqcn = fqcn.substring(1);
         }
-        if (fqcn.contains(".")) {
-            int idx = fqcn.lastIndexOf(".");
-            packageName = fqcn.substring(0, idx);
-        }
 
-        boolean accept;
-        // Includes
-        if (scanClasses.isEmpty() && scanPackages.isEmpty()) {
-            accept = true;
-        } else if (!scanClasses.isEmpty() && scanPackages.isEmpty()) {
-            accept = scanClasses.contains(fqcn);
-        } else if (scanClasses.isEmpty() && !scanPackages.isEmpty()) {
-            accept = scanPackages.contains(packageName);
-        } else {
-            accept = scanClasses.contains(fqcn) || scanPackages.contains(packageName);
-        }
-        // Excludes override includes
-        if (!scanExcludeClasses.isEmpty() && scanExcludeClasses.contains(fqcn)) {
-            accept = false;
-        }
-        if (!scanExcludePackages.isEmpty() && scanExcludePackages.contains(packageName)) {
-            accept = false;
-        }
-        return accept;
+        return filter.accepts(DotName.createSimple(fqcn));
     }
-
 }

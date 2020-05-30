@@ -12,7 +12,6 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.IndexView;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -36,8 +35,6 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiAnnotationScanner {
-
-    private static final Logger LOG = Logger.getLogger(OpenApiAnnotationScanner.class);
 
     private final AnnotationScannerContext annotationScannerContext;
     private final AnnotationScannerFactory annotationScannerFactory = new AnnotationScannerFactory();
@@ -86,7 +83,7 @@ public class OpenApiAnnotationScanner {
         List<OpenAPI> scans = new LinkedList<>();
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
-            LOG.debug("Scanning deployment " + annotationScanner.getName() + " Annotations.");
+            ScannerLogging.log.scanning(annotationScanner.getName());
             CurrentScannerInfo.register(annotationScanner);
             scans.add(annotationScanner.scan(annotationScannerContext, openApi));
         }
@@ -107,7 +104,7 @@ public class OpenApiAnnotationScanner {
         getCustomSchemaRegistry(annotationScannerContext.getConfig()).registerCustomSchemas(schemaRegistry);
 
         // Find all OpenAPIDefinition annotations at the package level
-        LOG.debug("Scanning deployment for OpenAPI Annotations.");
+        ScannerLogging.log.scanning("OpenAPI");
         processPackageOpenAPIDefinitions(annotationScannerContext, openApi);
 
         return openApi;
@@ -147,8 +144,7 @@ public class OpenApiAnnotationScanner {
                         .getDeclaredConstructor().newInstance();
             } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
                     | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new RuntimeException("Failed to create instance of custom schema registry: "
-                        + config.customSchemaRegistryClass(), ex);
+                throw ScannerMessages.msg.failedCreateInstance(config.customSchemaRegistryClass(), ex);
             }
 
         }

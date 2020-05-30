@@ -9,7 +9,6 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 /**
  * Deque for exploring object graph.
@@ -17,7 +16,6 @@ import org.jboss.logging.Logger;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class DataObjectDeque {
-    private static final Logger LOG = Logger.getLogger(DataObjectDeque.class);
 
     private final Deque<PathEntry> path = new ArrayDeque<>();
     private final AugmentedIndexView index;
@@ -90,14 +88,14 @@ public class DataObjectDeque {
         ClassInfo klazzInfo = entry.getClazz();
         if (parentPathEntry.hasParent(entry)) {
             // Cycle detected, don't push path.
-            LOG.debugv("Possible cycle was detected at: {0}. Will not search further.", klazzInfo);
-            LOG.debugv("Path: {0}", entry.toStringWithGraph());
+            DataObjectLogging.log.possibleCycle(klazzInfo);
+            DataObjectLogging.log.path(entry.toStringWithGraph());
             if (schema.getDescription() == null) {
                 schema.description("Cyclic reference to " + klazzInfo.name());
             }
         } else {
             // Push path to be inspected later.
-            LOG.debugv("Adding child node to path: {0}", klazzInfo);
+            DataObjectLogging.log.addingChildNode(klazzInfo);
             path.push(entry);
         }
     }
@@ -248,7 +246,7 @@ public class DataObjectDeque {
     private static <T> void validateInput(T... input) {
         for (T t : input) {
             if (t == null)
-                throw new RuntimeException("Input parameter can not be null");
+                throw DataObjectMessages.msg.notNull();
         }
     }
 }

@@ -8,13 +8,14 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
+import io.smallrye.openapi.api.models.MapModel;
 import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * An implementation of the {@link Callback} OpenAPI model interface.
  */
-public class CallbackImpl extends ExtensibleImpl<Callback> implements Callback, ModelImpl {
+public class CallbackImpl extends ExtensibleImpl<Callback> implements Callback, ModelImpl, MapModel<PathItem> {
 
     private String ref;
     private Map<String, PathItem> pathItems;
@@ -81,4 +82,42 @@ public class CallbackImpl extends ExtensibleImpl<Callback> implements Callback, 
         this.pathItems = ModelUtil.replace(items, LinkedHashMap<String, PathItem>::new);
     }
 
+    // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1
+
+    @Override
+    public Map<String, PathItem> getMap() {
+        return this.pathItems;
+    }
+
+    @Override
+    public void setMap(Map<String, PathItem> map) {
+        this.pathItems = map;
+    }
+
+    @Override
+    public PathItem get(Object key) {
+        return MapModel.super.get(key);
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return MapModel.super.containsKey(key);
+    }
+
+    @Override
+    public PathItem put(String key, PathItem value) {
+        return MapModel.super.put(key, value);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends PathItem> m) {
+        MapModel.super.putAll(m);
+    }
+
+    @Override
+    public PathItem remove(Object key) {
+        return MapModel.super.remove(key);
+    }
+
+    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1
 }

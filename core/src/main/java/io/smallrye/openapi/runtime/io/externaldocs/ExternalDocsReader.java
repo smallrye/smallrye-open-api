@@ -3,11 +3,11 @@ package io.smallrye.openapi.runtime.io.externaldocs;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -22,7 +22,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class ExternalDocsReader {
-    private static final Logger LOG = Logger.getLogger(ExternalDocsReader.class);
 
     private ExternalDocsReader() {
     }
@@ -50,7 +49,7 @@ public class ExternalDocsReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing an @ExternalDocumentation annotation.");
+        IoLogging.log.annotation("@ExternalDocumentation");
         ExternalDocumentation externalDoc = new ExternalDocumentationImpl();
         externalDoc.setDescription(
                 JandexUtil.stringValue(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));

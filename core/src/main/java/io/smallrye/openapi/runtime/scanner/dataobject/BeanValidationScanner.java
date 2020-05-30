@@ -16,13 +16,11 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 public class BeanValidationScanner {
-    private static final Logger LOG = Logger.getLogger(BeanValidationScanner.class);
 
     public interface RequirementHandler {
         void setRequired(AnnotationTarget target, String propertyKey);
@@ -193,7 +191,7 @@ public class BeanValidationScanner {
                     schema.setExclusiveMaximum(Boolean.TRUE);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                LOG.debugv("Annotation value has invalid format: {0}", decimalValue);
+                DataObjectLogging.log.invalidAnnotationFormat(decimalValue);
             }
         }
     }
@@ -212,7 +210,7 @@ public class BeanValidationScanner {
                     schema.setExclusiveMinimum(Boolean.TRUE);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                LOG.debugv("Annotation value has invalid format: {0}", decimalValue);
+                DataObjectLogging.log.invalidAnnotationFormat(decimalValue);
             }
         }
 

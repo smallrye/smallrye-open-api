@@ -9,11 +9,11 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.headers.Header;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.headers.HeaderImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Parameterizable;
 import io.smallrye.openapi.runtime.io.Referenceable;
@@ -34,7 +34,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class HeaderReader {
-    private static final Logger LOG = Logger.getLogger(HeaderReader.class);
 
     private HeaderReader() {
     }
@@ -51,7 +50,7 @@ public class HeaderReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @Header annotations.");
+        IoLogging.log.annotationsMap("@Header");
         Map<String, Header> headers = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -76,7 +75,7 @@ public class HeaderReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a json map of Headers.");
+        IoLogging.log.jsonNodeMap("Headers");
         Map<String, Header> headers = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -97,7 +96,7 @@ public class HeaderReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Header annotation.");
+        IoLogging.log.singleAnnotation("@Header");
         Header header = new HeaderImpl();
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Header));
         header.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
@@ -124,7 +123,7 @@ public class HeaderReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Header json node.");
+        IoLogging.log.singleJsonNode("Header");
         Header header = new HeaderImpl();
         header.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         header.setDescription(JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION));

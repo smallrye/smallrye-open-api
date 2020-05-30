@@ -4,11 +4,11 @@ import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
 
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.jboss.jandex.AnnotationInstance;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.encoding.EncodingReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -26,7 +26,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class MediaTypeReader {
-    private static final Logger LOG = Logger.getLogger(MediaTypeReader.class);
 
     private MediaTypeReader() {
     }
@@ -43,7 +42,7 @@ public class MediaTypeReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Content annotation as a MediaType.");
+        IoLogging.log.singleAnnotationAs("@Content", "MediaType");
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setExamples(ExampleReader.readExamples(annotationInstance.value(MediaTypeConstant.PROP_EXAMPLES)));
         mediaType.setExample(JandexUtil.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE));
@@ -64,7 +63,7 @@ public class MediaTypeReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Content json node.");
+        IoLogging.log.singleJsonNode("Content");
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setSchema(SchemaReader.readSchema(node.get(MediaTypeConstant.PROP_SCHEMA)));
         mediaType.setExample(readObject(node.get(MediaTypeConstant.PROP_EXAMPLE)));

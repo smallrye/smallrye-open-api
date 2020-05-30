@@ -3,10 +3,10 @@ package io.smallrye.openapi.runtime.io.definition;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.components.ComponentsReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -29,7 +29,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class DefinitionReader {
-    private static final Logger LOG = Logger.getLogger(DefinitionReader.class);
 
     private DefinitionReader() {
     }
@@ -44,7 +43,7 @@ public class DefinitionReader {
     public static void processDefinition(final AnnotationScannerContext context,
             final OpenAPI openApi,
             final AnnotationInstance annotationInstance) {
-        LOG.debug("Processing an @OpenAPIDefinition annotation.");
+        IoLogging.log.annotation("@OpenAPIDefinition");
 
         openApi.setInfo(InfoReader.readInfo(annotationInstance.value(DefinitionConstant.PROP_INFO)));
         openApi.setTags(TagReader.readTags(annotationInstance.value(DefinitionConstant.PROP_TAGS)).orElse(null));
@@ -67,7 +66,7 @@ public class DefinitionReader {
      */
     public static void processDefinition(final OpenAPI openApi,
             final JsonNode node) {
-        LOG.debug("Processing an OpenAPIDefinition json node.");
+        IoLogging.log.jsonNode("OpenAPIDefinition");
 
         openApi.setOpenapi(JsonUtil.stringProperty(node, DefinitionConstant.PROP_OPENAPI));
         openApi.setInfo(InfoReader.readInfo(node.get(DefinitionConstant.PROP_INFO)));

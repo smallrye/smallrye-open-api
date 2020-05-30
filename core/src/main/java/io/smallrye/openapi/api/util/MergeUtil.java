@@ -25,7 +25,6 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.ModelImpl;
 
@@ -39,7 +38,6 @@ import io.smallrye.openapi.api.models.ModelImpl;
  * @author eric.wittmann@gmail.com
  */
 public class MergeUtil {
-    private static final Logger LOG = Logger.getLogger(MergeUtil.class);
 
     private static final Set<String> EXCLUDED_PROPERTIES = new HashSet<>();
     static {
@@ -114,7 +112,7 @@ public class MergeUtil {
         try {
             descriptors = Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors();
         } catch (IntrospectionException e) {
-            LOG.error("Failed to introspect BeanInfo for: " + object1.getClass(), e);
+            UtilLogging.log.failedToIntrospectBeanInfo(object1.getClass(), e);
         }
 
         for (PropertyDescriptor descriptor : descriptors) {
@@ -124,7 +122,18 @@ public class MergeUtil {
             Class ptype = descriptor.getPropertyType();
             Method writeMethod = descriptor.getWriteMethod();
             if (writeMethod != null) {
-                if (Map.class.isAssignableFrom(ptype)) {
+                if (Constructible.class.isAssignableFrom(ptype)) {
+                    try {
+                        Object val1 = descriptor.getReadMethod().invoke(object1);
+                        Object val2 = descriptor.getReadMethod().invoke(object2);
+                        Object newValue = mergeObjects(val1, val2);
+                        if (newValue != null) {
+                            writeMethod.invoke(object1, newValue);
+                        }
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (Map.class.isAssignableFrom(ptype)) {
                     try {
                         Map values1 = (Map) descriptor.getReadMethod().invoke(object1);
                         Map values2 = (Map) descriptor.getReadMethod().invoke(object2);
@@ -139,17 +148,6 @@ public class MergeUtil {
                         List values2 = (List) descriptor.getReadMethod().invoke(object2);
                         List newValues = mergeLists(values1, values2).orElse(null);
                         writeMethod.invoke(object1, newValues);
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (Constructible.class.isAssignableFrom(ptype)) {
-                    try {
-                        Object val1 = descriptor.getReadMethod().invoke(object1);
-                        Object val2 = descriptor.getReadMethod().invoke(object2);
-                        Object newValue = mergeObjects(val1, val2);
-                        if (newValue != null) {
-                            writeMethod.invoke(object1, newValue);
-                        }
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
@@ -201,7 +199,7 @@ public class MergeUtil {
                 if (pval1 instanceof Map) {
                     values1.put(key, mergeMaps((Map) pval1, (Map) pval2));
                 } else if (pval1 instanceof List) {
-                    values1.put(key, mergeLists((List) pval1, (List) pval2));
+                    values1.put(key, mergeLists((List) pval1, (List) pval2).orElse(null));
                 } else if (pval1 instanceof Constructible) {
                     values1.put(key, mergeObjects(pval1, pval2));
                 } else {

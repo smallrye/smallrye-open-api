@@ -5,7 +5,6 @@ import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,7 +19,6 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.TypeVariable;
 import org.jboss.jandex.WildcardType;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -38,8 +36,6 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author eric.wittmann@gmail.com
  */
 public class SchemaRegistry {
-
-    private static final Logger LOG = Logger.getLogger(SchemaRegistry.class);
 
     // Initial value is null
     private static final ThreadLocal<SchemaRegistry> current = new ThreadLocal<>();
@@ -192,13 +188,13 @@ public class SchemaRegistry {
             try {
                 schema = OpenApiParser.parseSchema(jsonSchema);
             } catch (Exception e) {
-                LOG.warnf("Configured schema for %s could not be parsed", className);
+                ScannerLogging.log.errorParsingSchema(className);
                 return;
             }
 
             Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
             this.register(new TypeKey(type), schema, ((SchemaImpl) schema).getName());
-            LOG.infof("Configured schema for %s has been registered", className);
+            ScannerLogging.log.configSchemaRegistered(className);
         });
     }
 
@@ -288,7 +284,7 @@ public class SchemaRegistry {
         GeneratedSchemaInfo info = registry.get(key);
 
         if (info == null) {
-            throw new NoSuchElementException("Class schema not registered: " + key.type.name());
+            throw ScannerMessages.msg.notRegistered(key.type.name());
         }
 
         return info.schemaRef;
