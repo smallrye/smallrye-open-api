@@ -37,10 +37,9 @@ import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.PathMaker;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -52,9 +51,8 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class JaxRsAnnotationScanner implements AnnotationScanner {
+public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
-    private String currentAppPath = "";
 
     @Override
     public String getName() {
@@ -138,11 +136,6 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         return openApi;
     }
 
-    @Override
-    public void setCurrentAppPath(String path) {
-        this.currentAppPath = path;
-    }
-
     /**
      * Find and process all JAX-RS applications
      * 
@@ -152,13 +145,14 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
     private void processApplicationClasses(final AnnotationScannerContext context, OpenAPI openApi) {
         // Get all JaxRs applications and convert them to OpenAPI models (and merge them into a single one)
         Collection<ClassInfo> applications = context.getIndex().getAllKnownSubclasses(JaxRsConstants.APPLICATION);
+
+        // this can be a useful extension point to set/override the application path
+        processScannerExtensions(context, applications);
+
         for (ClassInfo classInfo : applications) {
             OpenAPI applicationOpenApi = processApplicationClass(context, classInfo);
             openApi = MergeUtil.merge(openApi, applicationOpenApi);
         }
-
-        // this can be a useful extension point to set/override the application path
-        processScannerExtensions(context, applications);
     }
 
     /**
@@ -335,7 +329,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method,
                     reader, context.getExtensions());
 
-            this.currentAppPath = PathMaker.makePath(this.currentAppPath, params.getOperationPath());
+            this.currentAppPath = super.makePath(params.getOperationPath());
 
             /*
              * Combine parameters passed previously with all of those from the current resource class and
@@ -424,7 +418,7 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
         setOperationOnPathItem(methodType, pathItem, operation);
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = PathMaker.makePath(this.currentAppPath, params.getOperationPath());
+        String path = super.makePath(params.getOperationPath());
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
@@ -436,94 +430,6 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
     }
-
-    //    /**
-    //     * Process the request body
-    //     * 
-    //     * @param context the current scanning context
-    //     * @param method the resource method
-    //     * @param params the params
-    //     * @return RequestBody model
-    //     */
-    //    private RequestBody processRequestBody(final AnnotationScannerContext context, final MethodInfo method,
-    //            ResourceParameters params) {
-    //        RequestBody requestBody = null;
-    //
-    //        List<AnnotationInstance> requestBodyAnnotations = RequestBodyReader.getRequestBodyAnnotations(method);
-    //        for (AnnotationInstance annotation : requestBodyAnnotations) {
-    //            requestBody = RequestBodyReader.readRequestBody(context, annotation);
-    //            Content formBodyContent = params.getFormBodyContent();
-    //
-    //            if (formBodyContent != null) {
-    //                // If form parameters were present, overlay RequestBody onto the generated form content
-    //                requestBody.setContent(MergeUtil.mergeObjects(formBodyContent, requestBody.getContent()));
-    //            }
-    //
-    //            // TODO if the method argument type is Request, don't generate a Schema!
-    //
-    //            Type requestBodyType = null;
-    //            if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
-    //                requestBodyType = JandexUtil.getMethodParameterType(method,
-    //                        annotation.target().asMethodParameter().position());
-    //            } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-    //                requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
-    //            }
-    //
-    //            // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
-    //            if (requestBodyType != null && requestBody.getRef() == null) {
-    //                if (!ModelUtil.requestBodyHasSchema(requestBody)) {
-    //                    Schema schema = SchemaFactory.typeToSchema(context.getIndex(), requestBodyType, context.getExtensions());
-    //
-    //                    if (schema != null) {
-    //                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
-    //                    }
-    //                }
-    //
-    //                if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
-    //                    requestBody.setRequired(Boolean.FALSE);
-    //                }
-    //            }
-    //        }
-    //
-    //        // If the request body is null, figure it out from the parameters.  Only if the
-    //        // method declares that it @Consumes data
-    //        if ((requestBody == null || (requestBody.getContent() == null && requestBody.getRef() == null))
-    //                && CurrentScannerInfo.getCurrentConsumes() != null) {
-    //            if (params.getFormBodySchema() != null) {
-    //                if (requestBody == null) {
-    //                    requestBody = new RequestBodyImpl();
-    //                }
-    //                Schema schema = params.getFormBodySchema();
-    //                ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
-    //            } else {
-    //                Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
-    //
-    //                if (requestBodyType != null) {
-    //                    Schema schema = null;
-    //
-    //                    if (RestEasyConstants.MULTIPART_INPUTS.contains(requestBodyType.name())) {
-    //                        schema = new SchemaImpl();
-    //                        schema.setType(Schema.SchemaType.OBJECT);
-    //                    } else {
-    //                        schema = SchemaFactory.typeToSchema(context.getIndex(), requestBodyType, context.getExtensions());
-    //                    }
-    //
-    //                    if (requestBody == null) {
-    //                        requestBody = new RequestBodyImpl();
-    //                    }
-    //
-    //                    if (schema != null) {
-    //                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
-    //                    }
-    //
-    //                    if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
-    //                        requestBody.setRequired(Boolean.FALSE);
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        return requestBody;
-    //    }
 
     static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, DotName annotationName) {
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
@@ -564,28 +470,4 @@ public class JaxRsAnnotationScanner implements AnnotationScanner {
                 .distinct() // CompositeIndex instances may return duplicates
                 .collect(Collectors.toList());
     }
-
-    //    /**
-    //     * Go through the method parameters looking for one that is not annotated with a jax-rs
-    //     * annotation.That will be the one that is the request body.
-    //     * 
-    //     * @param method MethodInfo
-    //     * @param extensions available extensions
-    //     * @return Type
-    //     */
-    //    private static Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions) {
-    //        List<Type> methodParams = method.parameters();
-    //        if (methodParams.isEmpty()) {
-    //            return null;
-    //        }
-    //        for (short i = 0; i < methodParams.size(); i++) {
-    //            List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
-    //            if (parameterAnnotations.isEmpty()
-    //                    || !containsScannerAnnotations(parameterAnnotations, extensions)) {
-    //                return methodParams.get(i);
-    //            }
-    //        }
-    //        return null;
-    //    }
-
 }
