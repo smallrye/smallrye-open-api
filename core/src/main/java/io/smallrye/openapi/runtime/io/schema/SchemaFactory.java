@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -192,12 +193,13 @@ public class SchemaFactory {
         schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        schema.setExample(readAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults));
         AnnotationInstance annotationInstance = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(annotationInstance));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
-        schema.setType(SchemaFactory.<String, Schema.SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
-                value -> JandexUtil.enumValue(value, Schema.SchemaType.class), defaults));
+        final SchemaType schemaType = SchemaFactory.<String, SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
+                value -> JandexUtil.enumValue(value, SchemaType.class), defaults);
+        schema.setType(schemaType);
+        schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schemaType));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
                 readDiscriminator(index,
@@ -271,6 +273,32 @@ public class SchemaFactory {
         }
 
         return (T) value;
+    }
+
+    /**
+     * Reads the attribute named by propertyName from annotation, and parses it to identified type. If no value was specified,
+     * an optional default value is retrieved from the defaults map using the propertyName as
+     * they key. Array-typed annotation values will be converted to List.
+     *
+     * @param <T> the type of the annotation attribute value
+     * @param annotation the annotation to read
+     * @param propertyName the name of the attribute to read
+     * @param defaults map of default values
+     * @param schemaType related schema type for this attribute
+     * @return the annotation attribute value, a default value, or null
+     */
+    static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
+            SchemaType schemaType) {
+        return (T) readAttr(annotation, propertyName, value -> {
+            if (!(value instanceof String)) {
+                return value;
+            }
+            String stringValue = ((String) value);
+            if (schemaType != SchemaType.STRING) {
+                return JsonUtil.parseValue(stringValue);
+            }
+            return stringValue;
+        }, defaults);
     }
 
     /**
