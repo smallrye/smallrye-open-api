@@ -32,7 +32,7 @@ public interface AnnotationScannerExtension {
      * Gives a chance to extensions to process the set of scanner application classes.
      * 
      * @param scanner the scanner used for application scanning
-     * @param applications the set of jax-rs application classes
+     * @param applications the set of rest application classes
      */
     default void processScannerApplications(AnnotationScanner scanner, Collection<ClassInfo> applications) {
     }
