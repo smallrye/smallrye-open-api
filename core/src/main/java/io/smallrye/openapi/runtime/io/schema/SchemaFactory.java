@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -32,6 +31,7 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
