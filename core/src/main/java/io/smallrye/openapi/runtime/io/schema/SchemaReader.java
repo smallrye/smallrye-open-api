@@ -12,12 +12,12 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.discriminator.DiscriminatorReader;
@@ -37,7 +37,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class SchemaReader {
-    private static final Logger LOG = Logger.getLogger(SchemaReader.class);
 
     private SchemaReader() {
     }
@@ -54,7 +53,7 @@ public class SchemaReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @Schema annotations.");
+        IoLogging.log.annotationsMap("@Schema");
         Map<String, Schema> map = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -99,7 +98,7 @@ public class SchemaReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a Schema from json.");
+        IoLogging.log.singleJsonObject("Schema");
         String name = JsonUtil.stringProperty(node, SchemaConstant.PROP_NAME);
 
         Schema schema = new SchemaImpl(name);

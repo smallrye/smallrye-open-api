@@ -23,14 +23,15 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
+import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -45,8 +46,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class SchemaFactory {
-
-    private static final Logger LOG = Logger.getLogger(SchemaFactory.class);
 
     private SchemaFactory() {
     }
@@ -76,7 +75,7 @@ public class SchemaFactory {
         if (annotation == null) {
             return null;
         }
-        LOG.debug("Processing a single @Schema annotation.");
+        IoLogging.log.singleAnnotation("@Schema");
 
         // Schemas can be hidden. Skip if that's the case.
         Optional<Boolean> isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
@@ -375,9 +374,14 @@ public class SchemaFactory {
     public static Schema typeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
 
+        AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
+
         if (TypeUtil.isOptional(type)) {
             // Recurse using the optional's type
             return typeToSchema(index, TypeUtil.getOptionalType(type), extensions);
+        } else if (annotationScanner.isWrapperType(type)) {
+            // Recurse using the wrapped type
+            return typeToSchema(index, annotationScanner.unwrapType(type), extensions);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
@@ -396,8 +400,7 @@ public class SchemaFactory {
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            Type asyncType = resolveAsyncType(index, type, extensions);
-            schema = schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+            schema = otherTypeToSchema(index, type, extensions);
         }
 
         return schema;
@@ -416,7 +419,7 @@ public class SchemaFactory {
      * @see java.lang.reflect.Field#isEnumConstant()
      */
     public static Schema enumToSchema(IndexView index, Type enumType) {
-        LOG.debugv("Processing an enum {0}", enumType);
+        IoLogging.log.enumProcessing(enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
@@ -522,18 +525,34 @@ public class SchemaFactory {
      * @param types the implementation types of the items to scan, never null
      */
     private static List<Schema> readClassSchemas(IndexView index, Type[] types) {
-        LOG.debug("Processing a list of schema Class annotations.");
+        IoLogging.log.annotationsList("schema Class");
 
         return Arrays.stream(types)
                 .map(type -> readClassSchema(index, type, true))
                 .collect(Collectors.toList());
     }
 
+    private static Schema otherTypeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
+        if (TypeUtil.isA(index, type, MutinyConstants.MULTI_TYPE)) {
+            // Treat as an Array
+            Schema schema = new SchemaImpl().type(SchemaType.ARRAY);
+            Type componentType = type.asParameterizedType().arguments().get(0);
+
+            // Recurse using the type of the array elements
+            schema.items(typeToSchema(index, componentType, extensions));
+            return schema;
+        } else {
+            Type asyncType = resolveAsyncType(index, type, extensions);
+            return schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+        }
+    }
+
     static Type resolveAsyncType(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
-            if (pType.arguments().size() == 1
-                    && TypeUtil.isA(index, type, JDKConstants.COMPLETION_STAGE_TYPE)) {
+            if (pType.arguments().size() == 1 &&
+                    (TypeUtil.isA(index, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
+                            TypeUtil.isA(index, type, MutinyConstants.UNI_TYPE))) {
                 return pType.arguments().get(0);
             }
         }
@@ -579,7 +598,7 @@ public class SchemaFactory {
         }
 
         if (annotation != null) {
-            LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
+            IoLogging.log.annotationsList("@DiscriminatorMapping");
 
             for (AnnotationInstance nested : annotation) {
                 String propertyValue = JandexUtil.stringValue(nested, SchemaConstant.PROP_VALUE);

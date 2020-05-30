@@ -9,11 +9,11 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -30,7 +30,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class CallbackReader {
-    private static final Logger LOG = Logger.getLogger(CallbackReader.class);
 
     private CallbackReader() {
     }
@@ -47,7 +46,7 @@ public class CallbackReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @Callback annotations.");
+        IoLogging.log.annotationsMap("@Callback");
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -72,7 +71,7 @@ public class CallbackReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a json map of Callback nodes.");
+        IoLogging.log.jsonNodeMap("Callback");
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -95,7 +94,7 @@ public class CallbackReader {
         if (annotation == null) {
             return null;
         }
-        LOG.debug("Processing a single @Callback annotation.");
+        IoLogging.log.singleAnnotation("@Callback");
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.Callback));
         String expression = JandexUtil.stringValue(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
@@ -114,7 +113,7 @@ public class CallbackReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Callback json node.");
+        IoLogging.log.singleJsonNode("Callback");
         Callback callback = new CallbackImpl();
         callback.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {

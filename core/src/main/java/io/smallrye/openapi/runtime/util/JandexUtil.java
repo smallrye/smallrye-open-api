@@ -87,7 +87,7 @@ public class JandexUtil {
         if (refType != null) {
             ref = "#/components/" + refType.componentPath + "/" + ref;
         } else {
-            throw new NullPointerException("RefType must not be null");
+            throw UtilMessages.msg.refTypeNotNull();
         }
 
         return ref;

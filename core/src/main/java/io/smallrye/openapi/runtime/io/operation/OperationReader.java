@@ -3,11 +3,11 @@ package io.smallrye.openapi.runtime.io.operation;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.MethodInfo;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.OperationImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.callback.CallbackReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -30,7 +30,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class OperationReader {
-    private static final Logger LOG = Logger.getLogger(OperationReader.class);
 
     private OperationReader() {
     }
@@ -47,7 +46,7 @@ public class OperationReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @Operation annotation.");
+        IoLogging.log.singleAnnotation("@Operation");
         Operation operation = new OperationImpl();
         operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
         operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
@@ -88,7 +87,7 @@ public class OperationReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single Operation json object.");
+        IoLogging.log.singleJsonObject("Operation");
         Operation model = new OperationImpl();
         model.setTags(JsonUtil.readStringArray(node.get(OperationConstant.PROP_TAGS)).orElse(null));
         model.setSummary(JsonUtil.stringProperty(node, OperationConstant.PROP_SUMMARY));

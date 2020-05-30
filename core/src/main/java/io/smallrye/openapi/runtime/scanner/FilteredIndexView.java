@@ -1,7 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -22,10 +23,10 @@ public class FilteredIndexView implements IndexView {
 
     private final IndexView delegate;
 
-    private final Set<String> scanClasses;
-    private final Set<String> scanPackages;
-    private final Set<String> scanExcludeClasses;
-    private final Set<String> scanExcludePackages;
+    private final Pattern scanClasses;
+    private final Pattern scanPackages;
+    private final Pattern scanExcludeClasses;
+    private final Pattern scanExcludePackages;
 
     /**
      * Constructor.
@@ -47,32 +48,152 @@ public class FilteredIndexView implements IndexView {
      * Returns true if the class name should be included in the index (is either included or
      * not excluded).
      * 
-     * @param className
+     * @param className the name of the class
+     * @return true if the inclusion/exclusion configuration allows scanning of the class name
      */
-    private boolean accepts(DotName className) {
-        String fqcn = className.toString();
-        int index = fqcn.lastIndexOf('.');
-        String packageName = index > -1 ? fqcn.substring(0, index) : "";
-        boolean accept;
-        // Includes
-        if (scanClasses.isEmpty() && scanPackages.isEmpty()) {
-            accept = true;
-        } else if (!scanClasses.isEmpty() && scanPackages.isEmpty()) {
-            accept = scanClasses.contains(fqcn);
-        } else if (scanClasses.isEmpty() && !scanPackages.isEmpty()) {
-            accept = scanPackages.contains(packageName);
-        } else {
-            accept = scanClasses.contains(fqcn) || scanPackages.contains(packageName);
-        }
-        // Excludes override includes
-        if (!scanExcludeClasses.isEmpty() && scanExcludeClasses.contains(fqcn)) {
-            accept = false;
-        }
-        if (!scanExcludePackages.isEmpty() && scanExcludePackages.contains(packageName)) {
-            accept = false;
-        }
-        return accept;
+    public boolean accepts(DotName className) {
+        final boolean accept;
+        final MatchHandler match = new MatchHandler(className);
 
+        if (match.isQualifiedNameExcluded()) {
+            /*
+             * A FQCN or pattern that *fully* matched the FQCN was given in
+             * `mp.openapi.scan.exclude.classes`.
+             */
+            accept = false;
+        } else if (match.isQualifiedNameIncluded()) {
+            /*
+             * A FQCN or pattern that *fully* matched the FQCN was given in
+             * `mp.openapi.scan.classes`.
+             */
+            accept = true;
+        } else if (match.isSimpleNameExcluded()) {
+            /*
+             * A pattern or partial class name was given in `mp.openapi.scan.exclude.classes`
+             * where the matching part of the configuration ends with the simple class name
+             * *AND* no match exists for the simple class name in `mp.openapi.scan.classes`
+             * with a more complete package specified.
+             */
+            accept = false;
+        } else if (match.isSimpleNameIncluded()) {
+            /*
+             * A pattern or partial class name was given in `mp.openapi.scan.classes`
+             * where the matching part of the configuration ends with the simple class name
+             */
+            accept = true;
+        } else if (match.isPackageExcluded()) {
+            /*
+             * A package or package pattern given in `mp.openapi.scan.exclude.packages`
+             * matches the start of the FQCN's package and a more complete match in
+             * `mp.openapi.scan.packages` was not given.
+             */
+            accept = false;
+        } else if (match.isPackageIncluded()) {
+            /*
+             * A package or package pattern given in `mp.openapi.scan.packages`
+             * matches the start of the FQCN's package.
+             */
+            accept = true;
+        } else if (match.isImpliedInclusion()) {
+            /*
+             * No value has been specified for either `mp.openapi.scan.classes`
+             * or `mp.openapi.scan.packages`.
+             */
+            accept = true;
+        } else {
+            /*
+             * A value is specified for `mp.openapi.scan.classes` or `mp.openapi.scan.packages`
+             * which does not match this FQCN in any way.
+             */
+            accept = false;
+        }
+
+        return accept;
+    }
+
+    class MatchHandler {
+        final DotName className;
+        final String fqcn;
+        final String simpleName;
+        final String packageName;
+
+        final String classExclGroup;
+        final String classInclGroup;
+        final String pkgExclGroup;
+        final String pkgInclGroup;
+
+        public MatchHandler(DotName className) {
+            this.className = className;
+            this.fqcn = className.toString();
+            this.simpleName = className.withoutPackagePrefix();
+            final int index = fqcn.lastIndexOf('.');
+            this.packageName = index > -1 ? fqcn.substring(0, index) : "";
+
+            this.classExclGroup = matchingGroup(fqcn, scanExcludeClasses);
+            this.classInclGroup = matchingGroup(fqcn, scanClasses);
+            this.pkgExclGroup = matchingGroup(packageName, scanExcludePackages);
+            this.pkgInclGroup = matchingGroup(packageName, scanPackages);
+        }
+
+        public boolean isQualifiedNameExcluded() {
+            return fqcn.equals(classExclGroup);
+        }
+
+        public boolean isQualifiedNameIncluded() {
+            return fqcn.equals(classInclGroup);
+        }
+
+        public boolean isSimpleNameExcluded() {
+            if (classExclGroup.endsWith(simpleName)) {
+                if (isSimpleNameIncluded()) {
+                    return classExclGroup.length() >= classInclGroup.length();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public boolean isSimpleNameIncluded() {
+            return classInclGroup.endsWith(simpleName);
+        }
+
+        public boolean isPackageExcluded() {
+            if (pkgExclGroup.isEmpty()) {
+                return false;
+            }
+            if (packageName.equals(pkgExclGroup)) {
+                return true;
+            }
+            if (packageName.startsWith(pkgExclGroup)) {
+                if (isPackageIncluded()) {
+                    return (pkgExclGroup.length() >= pkgInclGroup.length());
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public boolean isPackageIncluded() {
+            if (pkgInclGroup.isEmpty()) {
+                return false;
+            }
+            if (packageName.equals(pkgInclGroup)) {
+                return true;
+            }
+            return packageName.startsWith(pkgInclGroup);
+        }
+
+        public boolean isImpliedInclusion() {
+            return scanClasses.pattern().isEmpty() && scanPackages.pattern().isEmpty();
+        }
+    }
+
+    String matchingGroup(String value, Pattern pattern) {
+        if (pattern.pattern().isEmpty() || value.isEmpty()) {
+            return "";
+        }
+        Matcher m = pattern.matcher(value);
+        return m.find() ? m.group() : "";
     }
 
     /**

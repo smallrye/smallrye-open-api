@@ -1,0 +1,43 @@
+# This document is intended to establish the ranges for message IDs in the various sub-projects.
+
+# Range     = owner
+
+00000-00999 = smallrye-open-api [io.smallrye.openapi.api] (messages)
+
+01000-01999 = smallrye-open-api [io.smallrye.openapi.api.util] (logging)
+
+02000-02999 = smallrye-open-api [io.smallrye.openapi.runtime.io] (logging)
+
+03000-03999 = smallrye-open-api [io.smallrye.openapi.runtime.io] (messages)
+
+04000-04999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner] (logging)
+
+05000-05999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner] (messages)
+
+06000-06999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner.dataobject] (logging)
+
+07000-07999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner.dataobject] (messages)
+
+08000-08999 = smallrye-open-api [io.smallrye.openapi.runtime.util] (messages)
+
+09000-09999 = smallrye-open-api [io.smallrye.openapi.spi] (messages)
+
+10000-10999 = smallrye-open-api [io.smallrye.openapi.jaxrs] (logging)
+
+11000-11999 = smallrye-open-api [io.smallrye.openapi.spring] (logging)
+
+12000-12999 = smallrye-open-api [io.smallrye.openapi.tck] (logging)
+
+13000-13999 = smallrye-open-api [io.smallrye.openapi.tck] (messages)
+
+14000-14999 =
+
+15000-15999 =
+
+16000-16999 =
+
+17000-17999 =
+
+18000-18999 =
+
+19000-19999 =

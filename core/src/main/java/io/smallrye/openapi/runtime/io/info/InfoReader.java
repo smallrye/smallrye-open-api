@@ -3,11 +3,11 @@ package io.smallrye.openapi.runtime.io.info;
 import org.eclipse.microprofile.openapi.models.info.Info;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.info.InfoImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.contact.ContactReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -23,7 +23,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class InfoReader {
-    private static final Logger LOG = Logger.getLogger(InfoReader.class);
 
     private InfoReader() {
     }
@@ -38,7 +37,7 @@ public class InfoReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing an @Info annotation.");
+        IoLogging.log.annotation("@Info");
         AnnotationInstance nested = annotationValue.asNested();
 
         Info info = new InfoImpl();
@@ -61,7 +60,7 @@ public class InfoReader {
         if (node == null) {
             return null;
         }
-        LOG.debug("Processing an Info json node.");
+        IoLogging.log.singleJsonNode("Info");
 
         Info info = new InfoImpl();
         info.setTitle(JsonUtil.stringProperty(node, InfoConstant.PROP_TITLE));

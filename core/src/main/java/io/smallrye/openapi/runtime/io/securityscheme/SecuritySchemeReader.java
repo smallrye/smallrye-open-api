@@ -12,11 +12,11 @@ import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -33,7 +33,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class SecuritySchemeReader {
-    private static final Logger LOG = Logger.getLogger(SecuritySchemeReader.class);
 
     private SecuritySchemeReader() {
     }
@@ -48,7 +47,7 @@ public class SecuritySchemeReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @SecurityScheme annotations.");
+        IoLogging.log.annotationsMap("@SecurityScheme");
         Map<String, SecurityScheme> securitySchemes = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -93,7 +92,7 @@ public class SecuritySchemeReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @SecurityScheme annotation.");
+        IoLogging.log.singleAnnotation("@SecurityScheme");
         SecurityScheme securityScheme = new SecuritySchemeImpl();
         securityScheme
                 .setType(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, Type.class));

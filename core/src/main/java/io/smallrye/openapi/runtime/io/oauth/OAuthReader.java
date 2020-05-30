@@ -1,19 +1,19 @@
 package io.smallrye.openapi.runtime.io.oauth;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
+import org.eclipse.microprofile.openapi.models.security.Scopes;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
+import io.smallrye.openapi.api.models.security.ScopesImpl;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
@@ -29,7 +29,6 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class OAuthReader {
-    private static final Logger LOG = Logger.getLogger(OAuthReader.class);
 
     private OAuthReader() {
     }
@@ -44,7 +43,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a single @OAuthFlows annotation.");
+        IoLogging.log.singleAnnotation("@OAuthFlows");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlows flows = new OAuthFlowsImpl();
         flows.setImplicit(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_IMPLICIT)));
@@ -64,7 +63,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single OAuthFlows json object.");
+        IoLogging.log.singleJsonObject("OAuthFlows");
         OAuthFlows flows = new OAuthFlowsImpl();
         flows.setImplicit(readOAuthFlow(node.get(SecuritySchemeConstant.PROP_IMPLICIT)));
         flows.setPassword(readOAuthFlow(node.get(SecuritySchemeConstant.PROP_PASSWORD)));
@@ -84,7 +83,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a single @OAuthFlow annotation.");
+        IoLogging.log.singleAnnotation("@OAuthFlow");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlow flow = new OAuthFlowImpl();
         flow.setAuthorizationUrl(JandexUtil.stringValue(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
@@ -104,7 +103,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a single OAuthFlow json object.");
+        IoLogging.log.singleJsonObject("OAuthFlow");
         OAuthFlow flow = new OAuthFlowImpl();
         flow.setAuthorizationUrl(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
         flow.setTokenUrl(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_TOKEN_URL));
@@ -120,13 +119,15 @@ public class OAuthReader {
      * @param annotationValue {@literal @}OAuthScope annotation
      * @return Map of name and description of the scope
      */
-    private static Map<String, String> readOAuthScopes(final AnnotationValue annotationValue) {
+    // TODO: Update return type and remove warning suppression for MicroProfile OpenAPI 2.0
+    @SuppressWarnings("deprecation")
+    private static Scopes readOAuthScopes(final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a list of @OAuthScope annotations.");
+        IoLogging.log.annotationsList("@OAuthScope");
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        Map<String, String> scopes = new LinkedHashMap<>();
+        Scopes scopes = new ScopesImpl();
         for (AnnotationInstance nested : nestedArray) {
             String name = JandexUtil.stringValue(nested, SecuritySchemeConstant.PROP_NAME);
             if (name != null) {
@@ -143,12 +144,16 @@ public class OAuthReader {
      * @param node json map
      * @return Map of name and description of the scope
      */
-    public static Map<String, String> readOAuthScopes(final JsonNode node) {
+    // TODO: Update return type and remove warning suppression for MicroProfile OpenAPI 2.0
+    @SuppressWarnings("deprecation")
+    public static Scopes readOAuthScopes(final JsonNode node) {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a json map of OAuthScope.");
-        Map<String, String> scopes = new LinkedHashMap<>();
+
+        IoLogging.log.jsonMap("OAuthScope");
+        Scopes scopes = new ScopesImpl();
+
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (ExtensionReader.isExtensionField(fieldName)) {
