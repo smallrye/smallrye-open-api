@@ -26,6 +26,13 @@
                   "form-param2": {
                     "type": "string",
                     "maxLength": 10
+                  },
+                  "qualifiers": {
+                    "uniqueItems": true,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 }
               }

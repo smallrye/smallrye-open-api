@@ -21,6 +21,7 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ITERABLE_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.OBJECT_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
@@ -176,6 +177,10 @@ public class TypeProcessor {
             LOG.debugv("Processing Java Collection. Will treat as an array.");
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
+
+            if (TypeUtil.isA(index, pType, SET_TYPE)) {
+                schema.setUniqueItems(Boolean.TRUE);
+            }
 
             // Should only have one arg for collection.
             Type arg = pType.arguments().get(0);
