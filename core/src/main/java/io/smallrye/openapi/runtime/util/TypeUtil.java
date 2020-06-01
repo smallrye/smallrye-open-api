@@ -10,9 +10,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -337,7 +339,10 @@ public class TypeUtil {
     }
 
     static ClassInfo getClassInfo(IndexView appIndex, Type type) {
-        DotName className = getName(type);
+        return getClassInfo(appIndex, getName(type));
+    }
+
+    static ClassInfo getClassInfo(IndexView appIndex, DotName className) {
         ClassInfo clazz = appIndex.getClassByName(className);
         if (clazz == null) {
             clazz = jdkIndex.getClassByName(className);
@@ -369,37 +374,39 @@ public class TypeUtil {
         // First, look in Jandex, as target might not be in our classloader
         ClassInfo subJandexKlazz = getClassInfo(index, testSubject);
 
-        if (subJandexKlazz != null) {
-            return subJandexKlazz.interfaceNames().contains(getName(testObject)) || hasSuper(index, subJandexKlazz, testObject);
+        if (subJandexKlazz != null && superTypes(index, subJandexKlazz).contains(getName(testObject))) {
+            return true;
         }
 
         return isAssignableFrom(testSubject.name(), testObject.name());
     }
 
-    private static boolean hasSuper(IndexView index, ClassInfo testSubject, Type testObject) {
-        Type superKlazzType = testSubject.superClassType();
+    private static Set<DotName> superTypes(IndexView index, ClassInfo testSubject) {
+        Set<DotName> superTypes = new HashSet<>();
 
-        while (superKlazzType != null) {
-            if (getName(superKlazzType).equals(getName(testObject))) {
-                return true;
-            }
-            if (DOTNAME_OBJECT.equals(getName(superKlazzType))) {
-                return false;
-            }
+        testSubject.interfaceNames().forEach(iface -> {
+            superTypes.add(iface);
 
-            ClassInfo superKlazz = getClassInfo(index, superKlazzType);
+            ClassInfo superIFace = getClassInfo(index, iface);
+
+            if (superIFace != null) {
+                superTypes.addAll(superTypes(index, superIFace));
+            }
+        });
+
+        Type superType = testSubject.superClassType();
+
+        if (superType != null) {
+            superTypes.add(getName(superType));
+
+            ClassInfo superKlazz = getClassInfo(index, superType);
 
             if (superKlazz != null) {
-                if (superKlazz.interfaceNames().contains(getName(testObject))) {
-                    return true;
-                }
-            } else {
-                return isAssignableFrom(testSubject.name(), testObject.name());
+                superTypes.addAll(superTypes(index, superKlazz));
             }
-
-            superKlazzType = superKlazz.superClassType();
         }
-        return false;
+
+        return superTypes;
     }
 
     public static boolean isTerminalType(Type type) {
