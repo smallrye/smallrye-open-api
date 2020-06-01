@@ -115,7 +115,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Pattern scanExcludePackages() {
         if (scanExcludePackages == null) {
-            scanExcludePackages = patternOf(OASConfig.SCAN_EXCLUDE_PACKAGES);
+            scanExcludePackages = patternOf(OASConfig.SCAN_EXCLUDE_PACKAGES, OpenApiConstants.NEVER_SCAN_PACKAGES);
         }
         return scanExcludePackages;
     }
@@ -126,7 +126,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Pattern scanExcludeClasses() {
         if (scanExcludeClasses == null) {
-            scanExcludeClasses = patternOf(OASConfig.SCAN_EXCLUDE_CLASSES);
+            scanExcludeClasses = patternOf(OASConfig.SCAN_EXCLUDE_CLASSES, OpenApiConstants.NEVER_SCAN_CLASSES);
         }
         return scanExcludeClasses;
     }
@@ -233,6 +233,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     }
 
     Pattern patternOf(String key) {
+        return patternOf(key, null);
+    }
+
+    Pattern patternOf(String key, Set<String> buildIn) {
         String configValue = getStringConfigValue(key);
         Pattern pattern;
 
@@ -240,6 +244,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             pattern = Pattern.compile(configValue);
         } else {
             Set<String> literals = asCsvSet(configValue);
+            if (buildIn != null && !buildIn.isEmpty()) {
+                literals.addAll(buildIn);
+            }
             if (literals.isEmpty()) {
                 return Pattern.compile("", Pattern.LITERAL);
             } else {
