@@ -334,7 +334,8 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @POST
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public Widget update(@FormParam("form-param2") @Size(max = 10) String formParam2) {
+        public Widget update(@FormParam("form-param2") @Size(max = 10) String formParam2,
+                @FormParam("qualifiers") java.util.SortedSet<String> qualifiers) {
             return null;
         }
     }
