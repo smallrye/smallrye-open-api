@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,14 +79,13 @@ public class OpenApiAnnotationScanner {
         OpenAPI openApi = scanMicroProfileOpenApiAnnotations();
 
         // Now load all entry points with SPI and scan those
-        List<OpenAPI> scans = new LinkedList<>();
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
             ScannerLogging.log.scanning(annotationScanner.getName());
             CurrentScannerInfo.register(annotationScanner);
-            scans.add(annotationScanner.scan(annotationScannerContext, openApi));
+            openApi = annotationScanner.scan(annotationScannerContext, openApi);
         }
-        return MergeUtil.merge(scans);
+        return openApi;
     }
 
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
