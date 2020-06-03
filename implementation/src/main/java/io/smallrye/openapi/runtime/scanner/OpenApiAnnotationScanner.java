@@ -25,9 +25,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -141,6 +143,7 @@ public class OpenApiAnnotationScanner {
     private String currentAppPath = "";
     private String[] currentConsumes;
     private String[] currentProduces;
+    private Deque<SubResourceLocator> subResourceStack = new LinkedList<>();
 
     private String currentSecurityScheme;
     private List<OAuthFlow> currentFlows;
@@ -561,14 +564,26 @@ public class OpenApiAnnotationScanner {
             return;
         }
 
+        SubResourceLocator locator = new SubResourceLocator(resourceClass, method);
         ClassInfo subResourceClass = index.getClassByName(methodReturnType.name());
 
-        if (subResourceClass != null) {
-            final String originalAppPath = this.currentAppPath;
+        // Do not allow the same resource locator method to be used twice (sign of infinite recursion)
+        if (subResourceClass != null && !subResourceStack.contains(locator)) {
             ResourceParameters params = ParameterProcessor.process(index, resourceClass, method, this::readParameter,
                     extensions);
 
-            this.currentAppPath = makePath(this.currentAppPath, params.getOperationPath());
+            final String originalAppPath = this.currentAppPath;
+            final String subResourcePath;
+
+            if (this.subResourceStack.isEmpty()) {
+                subResourcePath = params.getFullOperationPath();
+            } else {
+                // If we are already processing a sub-resource, ignore any @Path information from the current class
+                subResourcePath = params.getOperationPath();
+            }
+
+            this.currentAppPath = makePath(this.currentAppPath, subResourcePath);
+            this.subResourceStack.push(locator);
 
             /*
              * Combine parameters passed previously with all of those from the current resource class and
@@ -580,6 +595,7 @@ public class OpenApiAnnotationScanner {
                             params.getPathItemParameters(),
                             params.getOperationParameters()));
 
+            this.subResourceStack.pop();
             this.currentAppPath = originalAppPath;
         }
     }
@@ -854,7 +870,14 @@ public class OpenApiAnnotationScanner {
         }
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = makePath(this.currentAppPath, params.getOperationPath());
+        final String path;
+
+        if (this.subResourceStack.isEmpty()) {
+            path = makePath(this.currentAppPath, params.getFullOperationPath());
+        } else {
+            // When processing a sub-resource tree, ignore any @Path information from the current class
+            path = makePath(this.currentAppPath, params.getOperationPath());
+        }
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
@@ -2255,6 +2278,30 @@ public class OpenApiAnnotationScanner {
         Input,
         Output,
         Parameter
+    }
+
+    static class SubResourceLocator {
+        final ClassInfo clazz;
+        final MethodInfo method;
+
+        SubResourceLocator(ClassInfo clazz, MethodInfo method) {
+            this.clazz = clazz;
+            this.method = method;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof SubResourceLocator) {
+                SubResourceLocator other = (SubResourceLocator) o;
+                return Objects.equals(this.clazz, other.clazz) && Objects.equals(this.method, other.method);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clazz, method);
+        }
     }
 
     public void setCurrentAppPath(String path) {
