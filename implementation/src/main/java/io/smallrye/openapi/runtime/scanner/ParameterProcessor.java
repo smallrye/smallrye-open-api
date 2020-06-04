@@ -168,6 +168,10 @@ public class ParameterProcessor {
         }
 
         public String getOperationPath() {
+            return operationPath;
+        }
+
+        public String getFullOperationPath() {
             return pathItemPath + operationPath;
         }
 
