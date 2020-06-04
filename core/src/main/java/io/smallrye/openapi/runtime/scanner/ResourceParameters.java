@@ -38,6 +38,10 @@ public class ResourceParameters {
     }
 
     public String getOperationPath() {
+        return operationPath;
+    }
+
+    public String getFullOperationPath() {
         return pathItemPath + operationPath;
     }
 

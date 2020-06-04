@@ -2,7 +2,9 @@ package io.smallrye.openapi.jaxrs;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +55,8 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
+
+    private Deque<JaxRsSubResourceLocator> subResourceStack = new LinkedList<>();
 
     @Override
     public String getName() {
@@ -319,17 +323,28 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             return;
         }
 
+        JaxRsSubResourceLocator locator = new JaxRsSubResourceLocator(resourceClass, method);
         ClassInfo subResourceClass = context.getIndex().getClassByName(methodReturnType.name());
 
-        if (subResourceClass != null) {
-            final String originalAppPath = this.currentAppPath;
-
+        // Do not allow the same resource locator method to be used twice (sign of infinite recursion)
+        if (subResourceClass != null && !this.subResourceStack.contains(locator)) {
             Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
             ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method,
                     reader, context.getExtensions());
 
-            this.currentAppPath = super.makePath(params.getOperationPath());
+            final String originalAppPath = this.currentAppPath;
+            final String subResourcePath;
+
+            if (this.subResourceStack.isEmpty()) {
+                subResourcePath = params.getFullOperationPath();
+            } else {
+                // If we are already processing a sub-resource, ignore any @Path information from the current class
+                subResourcePath = params.getOperationPath();
+            }
+
+            this.currentAppPath = super.makePath(subResourcePath);
+            this.subResourceStack.push(locator);
 
             /*
              * Combine parameters passed previously with all of those from the current resource class and
@@ -341,6 +356,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                             params.getPathItemParameters(),
                             params.getOperationParameters()));
 
+            this.subResourceStack.pop();
             this.currentAppPath = originalAppPath;
         }
     }
@@ -418,7 +434,14 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         setOperationOnPathItem(methodType, pathItem, operation);
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = super.makePath(params.getOperationPath());
+        final String path;
+
+        if (this.subResourceStack.isEmpty()) {
+            path = super.makePath(params.getFullOperationPath());
+        } else {
+            // When processing a sub-resource tree, ignore any @Path information from the current class
+            path = super.makePath(params.getOperationPath());
+        }
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
