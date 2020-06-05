@@ -56,6 +56,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -500,6 +501,9 @@ public class ParameterScanTests extends IndexScannerTestBase {
             @DefaultValue("default2")
             @PartType("text/plain")
             String formField2;
+
+            @FormParam("data")
+            private InputPart data;
         }
 
         @POST
