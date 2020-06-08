@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
@@ -189,7 +190,7 @@ public class OpenApiDataObjectScanner {
         // If top level item is not indexed
         if (rootClassInfo == null && objectStack.isEmpty()) {
             // If there's something on the objectStack stack then pre-scanning may have found something.
-            return null;
+            return new SchemaImpl().type(SchemaType.OBJECT);
         }
 
         // Create root node.
