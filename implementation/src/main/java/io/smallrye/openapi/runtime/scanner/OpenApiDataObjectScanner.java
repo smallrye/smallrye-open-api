@@ -200,7 +200,7 @@ public class OpenApiDataObjectScanner {
         // If top level item is not indexed
         if (rootClassInfo == null && objectStack.isEmpty()) {
             // If there's something on the objectStack stack then pre-scanning may have found something.
-            return null;
+            return new SchemaImpl().type(Schema.SchemaType.OBJECT);
         }
 
         // Create root node.

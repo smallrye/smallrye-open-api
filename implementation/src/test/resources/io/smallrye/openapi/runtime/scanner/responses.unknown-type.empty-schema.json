@@ -8,7 +8,9 @@
             "description": "OK",
             "content": {
               "text/plain": {
-                
+                "schema": {
+                  "type": "object"
+                }
               }
             }
           }
