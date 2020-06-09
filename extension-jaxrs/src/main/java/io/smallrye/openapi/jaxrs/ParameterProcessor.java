@@ -651,7 +651,7 @@ public class ParameterProcessor {
         if (paramIn == Parameter.In.HEADER && paramName != null) {
             switch (paramName.toUpperCase()) {
                 case "ACCEPT":
-                case "AUTHORIZATION":
+                //case "AUTHORIZATION":
                 case "CONTENT-TYPE":
                     return true;
                 default:
