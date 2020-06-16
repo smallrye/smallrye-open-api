@@ -167,8 +167,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public boolean scanDependenciesDisable() {
         if (scanDependenciesDisable == null) {
-            scanDependenciesDisable = getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class)
-                    .orElse(false);
+            scanDependenciesDisable = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, Boolean.class)
+                    .orElse(getConfig().getOptionalValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class)
+                            .orElse(false));
         }
         return scanDependenciesDisable;
     }
@@ -179,7 +181,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Set<String> scanDependenciesJars() {
         if (scanDependenciesJars == null) {
-            String classes = getStringConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS);
+            String classes = getStringConfigValue(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS);
+            if (classes == null) {
+                classes = getStringConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS);
+            }
             scanDependenciesJars = asCsvSet(classes);
         }
         return scanDependenciesJars;
@@ -188,8 +193,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public boolean schemaReferencesEnable() {
         if (schemaReferencesEnable == null) {
-            schemaReferencesEnable = getConfig().getOptionalValue(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.class)
-                    .orElse(true);
+            schemaReferencesEnable = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, Boolean.class)
+                    .orElse(getConfig().getOptionalValue(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.class)
+                            .orElse(true));
         }
         return schemaReferencesEnable;
     }
@@ -197,7 +204,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String customSchemaRegistryClass() {
         if (customSchemaRegistryClass == null) {
-            customSchemaRegistryClass = getStringConfigValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS);
+            customSchemaRegistryClass = getStringConfigValue(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS);
+            if (customSchemaRegistryClass == null) {
+                customSchemaRegistryClass = getStringConfigValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS);
+            }
         }
         return customSchemaRegistryClass;
     }
@@ -205,8 +215,9 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public boolean applicationPathDisable() {
         if (applicationPathDisable == null) {
-            applicationPathDisable = getConfig().getOptionalValue(OpenApiConstants.APP_PATH_DISABLE, Boolean.class)
-                    .orElse(false);
+            applicationPathDisable = getConfig().getOptionalValue(OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, Boolean.class)
+                    .orElse(getConfig().getOptionalValue(OpenApiConstants.APP_PATH_DISABLE, Boolean.class)
+                            .orElse(false));
         }
         return applicationPathDisable;
     }
