@@ -70,6 +70,12 @@ public class TypeUtil {
     private static final TypeWithFormat DATE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE).build();
     private static final TypeWithFormat DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE_TIME)
             .build();
+    private static final TypeWithFormat DURATION_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DURATION)
+            .example("PT32S")
+            .build();
+    private static final TypeWithFormat PERIOD_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.PERIOD)
+            .example("P1M")
+            .build();
     private static final TypeWithFormat TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.TIME)
             .externalDocumentation("As defined by 'full-time' in RFC3339",
                     "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14")
@@ -130,6 +136,10 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(java.time.LocalDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.ZonedDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.OffsetDateTime.class.getName()), DATE_TIME_FORMAT);
+
+        // Duration
+        TYPE_MAP.put(DotName.createSimple(java.time.Duration.class.getName()), DURATION_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.Period.class.getName()), PERIOD_FORMAT);
 
         // Time
         TYPE_MAP.put(DotName.createSimple(java.time.LocalTime.class.getName()), TIME_LOCAL_FORMAT);
@@ -776,6 +786,8 @@ public class TypeUtil {
         static final String BYTE = "byte";
         static final String DATE = "date";
         static final String DATE_TIME = "date-time";
+        static final String DURATION = "duration";
+        static final String PERIOD = "period";
         static final String URI = "uri";
         static final String UUID = "uuid";
         static final String TIME = "time";
