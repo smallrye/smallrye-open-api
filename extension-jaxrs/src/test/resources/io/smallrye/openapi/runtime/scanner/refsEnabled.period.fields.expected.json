@@ -33,15 +33,15 @@
           "arrayListOfV": {
             "type": "array",
             "items": {
-              "format": "period",
+              "format": "duration",
               "type": "string",
-              "example" : "P1M"
+              "example" : "P1D"
             }
           },
           "genericFieldK": {
-            "format": "period",
+            "format": "duration",
             "type": "string",
-            "example" : "P1M"
+            "example" : "P1D"
           },
           "mapOfKToFoo": {
             "type": "object",
@@ -52,9 +52,9 @@
           "mapOfKV": {
             "type": "object",
             "additionalProperties": {
-              "format": "period",
+              "format": "duration",
               "type": "string",
-              "example" : "P1M"
+              "example" : "P1D"
             }
           }
         }
