@@ -172,7 +172,7 @@ public class IndexScannerTestBase {
 
     public static OpenApiConfig nestingSupportConfig() {
         Map<String, Object> config = new HashMap<>(2);
-        config.put(OpenApiConstants.SCHEMA_REFERENCES_ENABLE, Boolean.TRUE);
+        config.put(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, Boolean.TRUE);
         return dynamicConfig(config);
     }
 
