@@ -11,7 +11,6 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -20,6 +19,7 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
+import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.content.ContentReader;
@@ -39,7 +39,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
 public class RequestBodyReader {
-    private static final Logger LOG = Logger.getLogger(RequestBodyReader.class);
 
     private RequestBodyReader() {
     }
@@ -56,7 +55,7 @@ public class RequestBodyReader {
         if (annotationValue == null) {
             return null;
         }
-        LOG.debug("Processing a map of @RequestBody annotations.");
+        IoLogging.log.annotationsMap("@RequestBody");
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -81,7 +80,7 @@ public class RequestBodyReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        LOG.debug("Processing a json map of RequestBody.");
+        IoLogging.log.jsonMap("RequestBody");
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -118,7 +117,7 @@ public class RequestBodyReader {
         if (annotationInstance == null) {
             return null;
         }
-        LOG.debug("Processing a single @RequestBody annotation.");
+        IoLogging.log.singleAnnotation("@RequestBody");
         RequestBody requestBody = new RequestBodyImpl();
         requestBody.setDescription(JandexUtil.stringValue(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody
@@ -143,7 +142,7 @@ public class RequestBodyReader {
             // Only generate the RequestBody if the endpoint declares an @Consumes media type
             return null;
         }
-        LOG.debug("Processing a single @RequestBodySchema annotation.");
+        IoLogging.log.singleAnnotation("@RequestBodySchema");
         Content content = new ContentImpl();
 
         for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {

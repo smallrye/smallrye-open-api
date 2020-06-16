@@ -31,7 +31,6 @@ import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 import org.json.JSONException;
-import org.junit.Assert;
 import org.junit.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -46,30 +45,6 @@ import io.smallrye.openapi.runtime.io.OpenApiParser;
  * @author eric.wittmann@gmail.com
  */
 public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
-
-    /**
-     * Test method for {@link PathMaker#makePath(java.lang.String[])}.
-     */
-    @Test
-    public void testMakePath() {
-        String path = PathMaker.makePath("", "", "");
-        Assert.assertEquals("/", path);
-
-        path = PathMaker.makePath("/", "/");
-        Assert.assertEquals("/", path);
-
-        path = PathMaker.makePath("", "/bookings");
-        Assert.assertEquals("/bookings", path);
-
-        path = PathMaker.makePath("/api", "/bookings");
-        Assert.assertEquals("/api/bookings", path);
-
-        path = PathMaker.makePath("api", "bookings");
-        Assert.assertEquals("/api/bookings", path);
-
-        path = PathMaker.makePath("/", "/bookings", "{id}");
-        Assert.assertEquals("/bookings/{id}", path);
-    }
 
     @Test
     public void testHiddenOperationNotPresent() throws IOException, JSONException {

@@ -27,7 +27,10 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [ "formField4", "f3" ],
+                "required": [
+                  "formField4",
+                  "f3"
+                ],
                 "properties": {
                   "formField1": {
                     "type": "string",
@@ -45,6 +48,9 @@
                   "formField4": {
                     "type": "string",
                     "nullable": false
+                  },
+                  "data": {
+                    "type": "object"
                   }
                 }
               },

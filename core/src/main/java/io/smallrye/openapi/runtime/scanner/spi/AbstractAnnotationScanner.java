@@ -1,13 +1,21 @@
-package io.smallrye.openapi.runtime.scanner;
+package io.smallrye.openapi.runtime.scanner.spi;
 
 /**
- * Help with making a valid path
+ * Abstract base class for annotation scanners
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class PathMaker {
+public abstract class AbstractAnnotationScanner implements AnnotationScanner {
+    protected String currentAppPath = EMPTY;
+    private String contextRoot = EMPTY;
 
-    private PathMaker() {
+    @Override
+    public void setContextRoot(String path) {
+        this.contextRoot = path;
+    }
+
+    protected String makePath(String operationPath) {
+        return createPathFromSegments(this.contextRoot, this.currentAppPath, operationPath);
     }
 
     /**
@@ -16,7 +24,7 @@ public class PathMaker {
      * @param segments String paths
      * @return Path built from the segments
      */
-    public static String makePath(String... segments) {
+    static String createPathFromSegments(String... segments) {
         StringBuilder builder = new StringBuilder();
         for (String segment : segments) {
             if (segment.startsWith("/")) {
@@ -37,4 +45,6 @@ public class PathMaker {
         }
         return rval;
     }
+
+    private static final String EMPTY = "";
 }

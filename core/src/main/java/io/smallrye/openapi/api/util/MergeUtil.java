@@ -6,11 +6,9 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +23,6 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.ModelImpl;
 
@@ -39,7 +36,6 @@ import io.smallrye.openapi.api.models.ModelImpl;
  * @author eric.wittmann@gmail.com
  */
 public class MergeUtil {
-    private static final Logger LOG = Logger.getLogger(MergeUtil.class);
 
     private static final Set<String> EXCLUDED_PROPERTIES = new HashSet<>();
     static {
@@ -52,36 +48,12 @@ public class MergeUtil {
     /**
      * Merges documents and returns the result.
      * 
-     * @param documents OpenAPI instance
-     * @return Merged OpenAPI instance
+     * @param document1 OpenAPIImpl instance
+     * @param document2 OpenAPIImpl instance
+     * @return Merged OpenAPIImpl instance
      */
-    public static final OpenAPI merge(OpenAPI... documents) {
-        if (documents == null || documents.length == 0) {
-            return null;
-        }
-        return merge(Arrays.asList(documents));
-    }
-
-    /**
-     * Merges documents and returns the result.
-     * 
-     * @param documents OpenAPI instance
-     * @return Merged OpenAPI instance
-     */
-    public static final OpenAPI merge(List<OpenAPI> documents) {
-        if (documents == null || documents.isEmpty()) {
-            return null;
-        }
-
-        LinkedList<OpenAPI> documentList = new LinkedList<>(documents);
-        OpenAPI oai = documentList.pop();
-
-        if (!documentList.isEmpty()) {
-            for (OpenAPI document : documents) {
-                oai = mergeObjects(oai, document);
-            }
-        }
-        return oai;
+    public static final OpenAPI merge(OpenAPI document1, OpenAPI document2) {
+        return mergeObjects(document1, document2);
     }
 
     /**
@@ -114,7 +86,7 @@ public class MergeUtil {
         try {
             descriptors = Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors();
         } catch (IntrospectionException e) {
-            LOG.error("Failed to introspect BeanInfo for: " + object1.getClass(), e);
+            UtilLogging.log.failedToIntrospectBeanInfo(object1.getClass(), e);
         }
 
         for (PropertyDescriptor descriptor : descriptors) {

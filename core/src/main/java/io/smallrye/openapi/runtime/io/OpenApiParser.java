@@ -36,18 +36,17 @@ public class OpenApiParser {
         try {
             String fname = url.getFile();
             if (fname == null) {
-                throw new IOException("No file name for URL: " + url.toURI().toString());
+                throw IoMessages.msg.noFileName(url.toURI().toString());
             }
             int lidx = fname.lastIndexOf('.');
             if (lidx == -1 || lidx >= fname.length()) {
-                throw new IOException("Invalid file name for URL: " + url.toURI().toString());
+                throw IoMessages.msg.invalidFileName(url.toURI().toString());
             }
             String ext = fname.substring(lidx + 1);
             boolean isJson = ext.equalsIgnoreCase("json");
             boolean isYaml = ext.equalsIgnoreCase("yaml") || ext.equalsIgnoreCase("yml");
             if (!isJson && !isYaml) {
-                throw new IOException(
-                        "Invalid file extension for URL (expected json, yaml, or yml): " + url.toURI().toString());
+                throw IoMessages.msg.invalidFileExtension(url.toURI().toString());
             }
 
             try (InputStream stream = url.openStream()) {

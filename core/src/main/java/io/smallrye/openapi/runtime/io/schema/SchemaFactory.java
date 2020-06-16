@@ -22,7 +22,6 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
@@ -31,6 +30,8 @@ import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
+import io.smallrye.openapi.runtime.io.IoLogging;
+import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -45,8 +46,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class SchemaFactory {
-
-    private static final Logger LOG = Logger.getLogger(SchemaFactory.class);
 
     private SchemaFactory() {
     }
@@ -76,7 +75,7 @@ public class SchemaFactory {
         if (annotation == null) {
             return null;
         }
-        LOG.debug("Processing a single @Schema annotation.");
+        IoLogging.log.singleAnnotation("@Schema");
 
         // Schemas can be hidden. Skip if that's the case.
         Optional<Boolean> isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
@@ -194,12 +193,13 @@ public class SchemaFactory {
         schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        schema.setExample(readAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults));
         AnnotationInstance annotationInstance = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(annotationInstance));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
-        schema.setType(SchemaFactory.<String, Schema.SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
-                value -> JandexUtil.enumValue(value, Schema.SchemaType.class), defaults));
+        final SchemaType schemaType = SchemaFactory.<String, SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
+                value -> JandexUtil.enumValue(value, SchemaType.class), defaults);
+        schema.setType(schemaType);
+        schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schemaType));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
                 readDiscriminator(index,
@@ -273,6 +273,32 @@ public class SchemaFactory {
         }
 
         return (T) value;
+    }
+
+    /**
+     * Reads the attribute named by propertyName from annotation, and parses it to identified type. If no value was specified,
+     * an optional default value is retrieved from the defaults map using the propertyName as
+     * they key. Array-typed annotation values will be converted to List.
+     *
+     * @param <T> the type of the annotation attribute value
+     * @param annotation the annotation to read
+     * @param propertyName the name of the attribute to read
+     * @param defaults map of default values
+     * @param schemaType related schema type for this attribute
+     * @return the annotation attribute value, a default value, or null
+     */
+    static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
+            SchemaType schemaType) {
+        return (T) readAttr(annotation, propertyName, value -> {
+            if (!(value instanceof String)) {
+                return value;
+            }
+            String stringValue = ((String) value);
+            if (schemaType != SchemaType.STRING) {
+                return JsonUtil.parseValue(stringValue);
+            }
+            return stringValue;
+        }, defaults);
     }
 
     /**
@@ -393,7 +419,7 @@ public class SchemaFactory {
      * @see java.lang.reflect.Field#isEnumConstant()
      */
     public static Schema enumToSchema(IndexView index, Type enumType) {
-        LOG.debugv("Processing an enum {0}", enumType);
+        IoLogging.log.enumProcessing(enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
@@ -499,7 +525,7 @@ public class SchemaFactory {
      * @param types the implementation types of the items to scan, never null
      */
     private static List<Schema> readClassSchemas(IndexView index, Type[] types) {
-        LOG.debug("Processing a list of schema Class annotations.");
+        IoLogging.log.annotationsList("schema Class");
 
         return Arrays.stream(types)
                 .map(type -> readClassSchema(index, type, true))
@@ -572,7 +598,7 @@ public class SchemaFactory {
         }
 
         if (annotation != null) {
-            LOG.debug("Processing a list of @DiscriminatorMapping annotations.");
+            IoLogging.log.annotationsList("@DiscriminatorMapping");
 
             for (AnnotationInstance nested : annotation) {
                 String propertyValue = JandexUtil.stringValue(nested, SchemaConstant.PROP_VALUE);

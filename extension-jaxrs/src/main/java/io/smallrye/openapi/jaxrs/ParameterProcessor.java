@@ -45,7 +45,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.EncodingImpl;
@@ -72,8 +71,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  *
  */
 public class ParameterProcessor {
-
-    private static final Logger LOG = Logger.getLogger(ParameterProcessor.class);
 
     /**
      * Pattern to describe a path template parameter with a regular expression pattern restriction.
@@ -358,7 +355,7 @@ public class ParameterProcessor {
                     if (insertIndex > -1) {
                         path.insert(insertIndex, matrixRef);
                     } else {
-                        LOG.warnf("Matrix parameter references missing path segment: %s", segmentName);
+                        JaxRsLogging.log.missingPathSegment(segmentName);
                     }
                 });
 
@@ -435,7 +432,7 @@ public class ParameterProcessor {
         }
 
         // Convert ParameterContext entries to MP-OAI Parameters
-        params.values().stream().forEach(context -> {
+        params.values().forEach(context -> {
             Parameter param;
 
             if (context.oaiParam == null) {
@@ -954,7 +951,7 @@ public class ParameterProcessor {
                     break;
             }
         } catch (@SuppressWarnings("unused") Exception e) {
-            LOG.warnf("Value '%s' is not a valid %s default", stringValue, primitive.name().toLowerCase());
+            JaxRsLogging.log.invalidDefault(stringValue, primitive.name().toLowerCase());
         }
 
         return value;
@@ -1222,15 +1219,17 @@ public class ParameterProcessor {
     }
 
     boolean haveSameAnnotatedTarget(ParameterContext context, AnnotationTarget target, String name) {
-        boolean nameMatches = Objects.equals(context.name, name);
+        /*
+         * Consider names to match if one is unspecified or they are equal.
+         */
+        boolean nameMatches = (context.name == null || name == null || Objects.equals(context.name, name));
 
         if (target.equals(context.target)) {
             /*
-             * This logic formerly also required that the parameter names matched
-             * (nameMatches == true) or that the kind of the target was not a
-             * method.
+             * The name must match for annotations on a method because it is
+             * ambiguous which parameters is being referenced.
              */
-            return true;
+            return nameMatches || target.kind() != Kind.METHOD;
         }
 
         if (nameMatches && target.kind() == Kind.METHOD && context.target.kind() == Kind.METHOD_PARAMETER) {

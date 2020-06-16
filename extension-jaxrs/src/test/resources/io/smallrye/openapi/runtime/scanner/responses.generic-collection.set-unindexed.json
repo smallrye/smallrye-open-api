@@ -10,6 +10,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "uniqueItems": true,
                   "items": {
                     "$ref": "#/components/schemas/Fruit"
                   }
@@ -36,6 +37,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "uniqueItems": true,
                   "items": {
                     "$ref": "#/components/schemas/Fruit"
                   }
@@ -62,6 +64,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "uniqueItems": true,
                   "items": {
                     "$ref": "#/components/schemas/Fruit"
                   }

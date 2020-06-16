@@ -1,0 +1,19 @@
+= SmallRye OpenAPI UI
+
+This allows you you add Swagger UI with your project. 
+
+The UI will be available under `/openapi-ui`.
+
+To include it in your project (replace xyz with the latest version):
+
+[source,xml]
+----
+    <dependency>
+        <groupId>io.smallrye</groupId>
+        <artifactId>smallrye-open-api-ui</artifactId>
+        <version>xyz</version>
+        <scope>runtime</scope>
+    </dependency>
+----
+
+This expects the endpoint at `/openapi`.

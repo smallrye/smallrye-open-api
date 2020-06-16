@@ -106,7 +106,7 @@ public class ArchiveUtil {
      */
     public static IndexView archiveToIndex(OpenApiConfig config, Archive<?> archive) {
         if (archive == null) {
-            throw new RuntimeException("Archive was null!");
+            throw TckMessages.msg.nullArchive();
         }
 
         Indexer indexer = new Indexer();
@@ -142,7 +142,7 @@ public class ArchiveUtil {
                 if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX)
                         && acceptClassForScanning(filter, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        LOG.debugv("Indexing asset: {0} from archive: {1}", archivePath.get(), archive.getName());
+                        TckLogging.log.indexing(archivePath.get(), archive.getName());
                         indexer.index(contentStream);
                     }
                     continue;

@@ -36,7 +36,7 @@ public class SubresourceScanTests extends IndexScannerTestBase {
     @Test
     public void testResteasyMultipartInput() throws IOException, JSONException {
         test("resource.subresources-with-params.json",
-                MainTestResource.class, Sub1TestResource.class, Sub2TestResource.class);
+                MainTestResource.class, Sub1TestResource.class, Sub2TestResource.class, RecursiveLocatorResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -118,6 +118,26 @@ public class SubresourceScanTests extends IndexScannerTestBase {
         @Path("{subsubid}")
         public String getSub2(@PathParam("subsubid") String subsubid) {
             return null;
+        }
+    }
+
+    @Path("/recursion")
+    @SuppressWarnings("unused")
+    static class RecursiveLocatorResource {
+        @GET
+        @Path("fetch")
+        public String get() {
+            return null;
+        }
+
+        @Path("alternate1")
+        public RecursiveLocatorResource getLocator1() {
+            return this;
+        }
+
+        @Path("alternate2")
+        public RecursiveLocatorResource getLocator2() {
+            return this;
         }
     }
 }

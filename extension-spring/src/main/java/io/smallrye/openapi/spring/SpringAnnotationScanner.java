@@ -1,6 +1,7 @@
 package io.smallrye.openapi.spring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +20,8 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
-import org.jboss.logging.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -30,10 +31,9 @@ import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.PathMaker;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -43,10 +43,8 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class SpringAnnotationScanner implements AnnotationScanner {
-    private static final Logger LOG = Logger.getLogger(SpringAnnotationScanner.class);
+public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     private static final String SPRING_PACKAGE = "org.springframework.web";
-    private String currentAppPath = "";
 
     @Override
     public String getName() {
@@ -65,18 +63,26 @@ public class SpringAnnotationScanner implements AnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        // TODO: Also check for @RequestMapping(method = RequestMethod.POST)
+        if (hasRequestMappingMethod(method, RequestMethod.POST)) {
+            return true;
+        }
         return method.hasAnnotation(SpringConstants.POST_MAPPING);
+
+    }
+
+    @Override
+    public boolean isDeleteMethod(final MethodInfo method) {
+        if (hasRequestMappingMethod(method, RequestMethod.DELETE)) {
+            return true;
+        }
+        return method.hasAnnotation(SpringConstants.DELETE_MAPPING);
     }
 
     @Override
     public boolean isScannerInternalResponse(Type returnType) {
         // If it's Response Entity that does not have a valid type, then stop
-        if (returnType.name().equals(SpringConstants.RESPONSE_ENTITY)
-                && !returnType.kind().equals(Type.Kind.PARAMETERIZED_TYPE)) {
-            return true;
-        }
-        return false;
+        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY)
+                && !returnType.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
     }
 
     @Override
@@ -132,6 +138,16 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         return openApi;
     }
 
+    private boolean hasRequestMappingMethod(final MethodInfo method, final RequestMethod requestMethod) {
+        if (method.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
+            AnnotationInstance annotation = method.annotation(SpringConstants.REQUEST_MAPPING);
+            AnnotationValue value = annotation.value("method");
+            return value != null && value.asEnumArray().length > 0
+                    && Arrays.asList(value.asEnumArray()).contains(requestMethod.name());
+        }
+        return false;
+    }
+
     /**
      * Find and process all Spring Controllers
      * TODO: Also support org.springframework.stereotype.Controller annotations ?
@@ -148,17 +164,18 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             if (annotationInstance.target().kind().equals(AnnotationTarget.Kind.CLASS)) {
                 ClassInfo classInfo = annotationInstance.target().asClass();
                 applications.add(classInfo);
-                OpenAPI applicationOpenApi = processControllerClass(context, classInfo);
-                openApi = MergeUtil.merge(openApi, applicationOpenApi);
-
             } else {
-                LOG.warn("Ignoring " + SpringConstants.REST_CONTROLLER.withoutPackagePrefix()
-                        + " annotation that is not on a class");
+                SpringLogging.log.ignoringAnnotation(SpringConstants.REST_CONTROLLER.withoutPackagePrefix());
             }
         }
 
         // this can be a useful extension point to set/override the application path
         processScannerExtensions(context, applications);
+
+        for (ClassInfo controller : applications) {
+            OpenAPI applicationOpenApi = processControllerClass(context, controller);
+            openApi = MergeUtil.merge(openApi, applicationOpenApi);
+        }
     }
 
     /**
@@ -171,7 +188,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
      */
     private OpenAPI processControllerClass(final AnnotationScannerContext context, ClassInfo controllerClass) {
 
-        LOG.debug("Processing a Spring REST Controller class: " + controllerClass.simpleName());
+        SpringLogging.log.processingController(controllerClass.simpleName());
 
         OpenAPI openApi = new OpenAPIImpl();
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
@@ -277,7 +294,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
 
-        LOG.debug("Processing Spring method: " + method.toString());
+        SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
@@ -330,7 +347,7 @@ public class SpringAnnotationScanner implements AnnotationScanner {
         setOperationOnPathItem(methodType, pathItem, operation);
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = PathMaker.makePath(this.currentAppPath, params.getOperationPath());
+        String path = super.makePath(params.getOperationPath());
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
