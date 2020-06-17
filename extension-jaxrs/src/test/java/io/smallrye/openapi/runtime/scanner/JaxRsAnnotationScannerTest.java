@@ -142,10 +142,10 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
             @Override
             public <T> T getValue(String propertyName, Class<T> propertyType) {
-                if (OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
+                if (OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
                     return (T) MyCustomSchemaRegistry.class.getName();
                 }
-                if (OpenApiConstants.SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
+                if (OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
                     return (T) Boolean.TRUE;
                 }
                 return null;
@@ -153,10 +153,10 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
             @Override
             public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-                if (OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
+                if (OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
                     return (Optional<T>) Optional.of(MyCustomSchemaRegistry.class.getName());
                 }
-                if (OpenApiConstants.SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
+                if (OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
                     return (Optional<T>) Optional.of(Boolean.TRUE);
                 }
                 return Optional.empty();
@@ -164,8 +164,8 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
             @Override
             public Iterable<String> getPropertyNames() {
-                return Arrays.asList(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS,
-                        OpenApiConstants.SCHEMA_REFERENCES_ENABLE);
+                return Arrays.asList(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS,
+                        OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE);
             }
 
             @Override

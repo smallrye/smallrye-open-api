@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.eclipse.microprofile.openapi.OASConfig;
 import org.jboss.jandex.DotName;
 
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -14,11 +15,28 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
  * @author eric.wittmann@gmail.com
  */
 public final class OpenApiConstants {
-    public static final String SCAN_DEPENDENCIES_DISABLE = "mp.openapi.extensions.scan-dependencies.disable";
-    public static final String SCAN_DEPENDENCIES_JARS = "mp.openapi.extensions.scan-dependencies.jars";
-    public static final String SCHEMA_REFERENCES_ENABLE = "mp.openapi.extensions.schema-references.enable";
-    public static final String CUSTOM_SCHEMA_REGISTRY_CLASS = "mp.openapi.extensions.custom-schema-registry.class";
-    public static final String APP_PATH_DISABLE = "mp.openapi.extensions.application-path.disable";
+    public static final String VENDOR_NAME = "smallrye.";
+    public static final String SUFFIX_SCAN_DEPENDENCIES_DISABLE = "scan-dependencies.disable";
+    public static final String SUFFIX_SCAN_DEPENDENCIES_JARS = "scan-dependencies.jars";
+    public static final String SUFFIX_SCHEMA_REFERENCES_ENABLE = "schema-references.enable";
+    public static final String SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS = "custom-schema-registry.class";
+    public static final String SUFFIX_APP_PATH_DISABLE = "application-path.disable";
+
+    public static final String SCAN_DEPENDENCIES_DISABLE = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCAN_DEPENDENCIES_DISABLE;
+    public static final String SCAN_DEPENDENCIES_JARS = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCAN_DEPENDENCIES_JARS;
+    public static final String SCHEMA_REFERENCES_ENABLE = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCHEMA_REFERENCES_ENABLE;
+    public static final String CUSTOM_SCHEMA_REGISTRY_CLASS = OASConfig.EXTENSIONS_PREFIX + SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS;
+    public static final String APP_PATH_DISABLE = OASConfig.EXTENSIONS_PREFIX + SUFFIX_APP_PATH_DISABLE;
+
+    public static final String SMALLRYE_SCAN_DEPENDENCIES_DISABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
+            + SUFFIX_SCAN_DEPENDENCIES_DISABLE;
+    public static final String SMALLRYE_SCAN_DEPENDENCIES_JARS = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
+            + SUFFIX_SCAN_DEPENDENCIES_JARS;
+    public static final String SMALLRYE_SCHEMA_REFERENCES_ENABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
+            + SUFFIX_SCHEMA_REFERENCES_ENABLE;
+    public static final String SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
+            + SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS;
+    public static final String SMALLRYE_APP_PATH_DISABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + SUFFIX_APP_PATH_DISABLE;
 
     /**
      * Set of classes which should never be scanned, regardless of user configuration.

@@ -116,4 +116,14 @@ public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
         testAssertion(GenericTypeTestContainer.class, "overriddenNames",
                 "refsEnabled.generic.fields.overriddenNames.expected.json");
     }
+
+    @Test
+    public void durationContainer() throws IOException, JSONException {
+        testAssertion(GenericTypeTestContainer.class, "durationContainer", "refsEnabled.duration.fields.expected.json");
+    }
+
+    @Test
+    public void periodContainer() throws IOException, JSONException {
+        testAssertion(GenericTypeTestContainer.class, "periodContainer", "refsEnabled.period.fields.expected.json");
+    }
 }
