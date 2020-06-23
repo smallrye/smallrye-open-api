@@ -20,14 +20,14 @@ public class RequestBodyConstant {
     static final DotName DOTNAME_REQUEST_BODY_SCHEMA = DotName
             .createSimple("org.eclipse.microprofile.openapi.annotations.parameters.RequestBodySchema");
 
-    static final String PROP_NAME = "name";
-    static final String PROP_REQUIRED = "required";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_REQUIRED = "required";
 
-    static final String PROP_DESCRIPTION = "description";
-    static final String PROP_REQUEST_BODY = "requestBody";
-    static final String PROP_CONTENT = "content";
+    public static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_REQUEST_BODY = "requestBody";
+    public static final String PROP_CONTENT = "content";
 
-    static final String PROP_VALUE = "value";
+    public static final String PROP_VALUE = "value";
 
     private RequestBodyConstant() {
     }

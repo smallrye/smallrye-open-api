@@ -10,9 +10,9 @@ package io.smallrye.openapi.runtime.io.contact;
  */
 public class ContactConstant {
 
-    static final String PROP_NAME = "name";
-    static final String PROP_EMAIL = "email";
-    static final String PROP_URL = "url";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_EMAIL = "email";
+    public static final String PROP_URL = "url";
 
     private ContactConstant() {
     }

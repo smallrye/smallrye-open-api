@@ -32,12 +32,12 @@ public class SecuritySchemeConstant {
     @SuppressWarnings(value = "squid:S2068")
     public static final String PROP_PASSWORD = "password";
 
-    static final String PROP_IN = "in";
-    static final String PROP_SCHEME = "scheme";
-    static final String PROP_OPEN_ID_CONNECT_URL = "openIdConnectUrl";
-    static final String PROP_SECURITY_SCHEME_NAME = "securitySchemeName";
-    static final String PROP_TYPE = "type";
-    static final String PROP_API_KEY_NAME = "apiKeyName";
+    public static final String PROP_IN = "in";
+    public static final String PROP_SCHEME = "scheme";
+    public static final String PROP_OPEN_ID_CONNECT_URL = "openIdConnectUrl";
+    public static final String PROP_SECURITY_SCHEME_NAME = "securitySchemeName";
+    public static final String PROP_TYPE = "type";
+    public static final String PROP_API_KEY_NAME = "apiKeyName";
 
     private SecuritySchemeConstant() {
     }

@@ -14,8 +14,8 @@ import org.jboss.jandex.DotName;
  */
 public class ResponseConstant {
 
-    static final String PROP_RESPONSE_CODE = "responseCode";
-    static final String PROP_RESPONSE_DESCRIPTION = "responseDescription";
+    public static final String PROP_RESPONSE_CODE = "responseCode";
+    public static final String PROP_RESPONSE_DESCRIPTION = "responseDescription";
 
     static final DotName DOTNAME_API_RESPONSE = DotName.createSimple(APIResponse.class.getName());
     static final DotName DOTNAME_API_RESPONSES = DotName.createSimple(APIResponses.class.getName());
@@ -24,13 +24,13 @@ public class ResponseConstant {
     static final DotName DOTNAME_API_RESPONSE_SCHEMA = DotName
             .createSimple("org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema");
 
-    static final String PROP_NAME = "name";
-    static final String PROP_HEADERS = "headers";
-    static final String PROP_LINKS = "links";
-    static final String PROP_DEFAULT = "default";
-    static final String PROP_DESCRIPTION = "description";
-    static final String PROP_CONTENT = "content";
-    static final String PROP_VALUE = "value";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_HEADERS = "headers";
+    public static final String PROP_LINKS = "links";
+    public static final String PROP_DEFAULT = "default";
+    public static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_CONTENT = "content";
+    public static final String PROP_VALUE = "value";
 
     private ResponseConstant() {
     }

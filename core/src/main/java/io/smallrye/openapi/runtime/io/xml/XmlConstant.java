@@ -10,11 +10,11 @@ package io.smallrye.openapi.runtime.io.xml;
  */
 public class XmlConstant {
 
-    static final String PROP_NAME = "name";
-    static final String PROP_PREFIX = "prefix";
-    static final String PROP_NAMESPACE = "namespace";
-    static final String PROP_WRAPPED = "wrapped";
-    static final String PROP_ATTRIBUTE = "attribute";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_PREFIX = "prefix";
+    public static final String PROP_NAMESPACE = "namespace";
+    public static final String PROP_WRAPPED = "wrapped";
+    public static final String PROP_ATTRIBUTE = "attribute";
 
     private XmlConstant() {
     }

@@ -17,11 +17,11 @@ public class ParameterConstant {
 
     public static final DotName DOTNAME_PARAMETER = DotName.createSimple(Parameter.class.getName());
     public static final DotName DOTNAME_PARAMETERS = DotName.createSimple(Parameters.class.getName());
-    public static final String PROP_VALUE = "value";
+    public public static final String PROP_VALUE = "value";
 
-    static final String PROP_ALLOW_RESERVED = "allowReserved";
-    static final String PROP_IN = "in";
-    static final String PROP_HIDDEN = "hidden";
+    public static final String PROP_ALLOW_RESERVED = "allowReserved";
+    public static final String PROP_IN = "in";
+    public static final String PROP_HIDDEN = "hidden";
 
     private ParameterConstant() {
     }

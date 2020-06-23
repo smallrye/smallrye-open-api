@@ -8,7 +8,7 @@ package io.smallrye.openapi.runtime.io.content;
  */
 public class ContentConstant {
 
-    static final String PROP_CONTENT = "content";
+    public static final String PROP_CONTENT = "content";
 
     private ContentConstant() {
     }
