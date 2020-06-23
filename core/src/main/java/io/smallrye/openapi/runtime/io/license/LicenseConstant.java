@@ -10,8 +10,8 @@ package io.smallrye.openapi.runtime.io.license;
  */
 public class LicenseConstant {
 
-    static final String PROP_NAME = "name";
-    static final String PROP_URL = "url";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_URL = "url";
 
     private LicenseConstant() {
     }

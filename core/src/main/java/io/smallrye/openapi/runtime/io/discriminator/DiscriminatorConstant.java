@@ -11,8 +11,8 @@ package io.smallrye.openapi.runtime.io.discriminator;
  */
 public class DiscriminatorConstant {
 
-    static final String PROP_MAPPING = "mapping";
-    static final String PROP_PROPERTY_NAME = "propertyName";
+    public static final String PROP_MAPPING = "mapping";
+    public static final String PROP_PROPERTY_NAME = "propertyName";
 
     private DiscriminatorConstant() {
     }

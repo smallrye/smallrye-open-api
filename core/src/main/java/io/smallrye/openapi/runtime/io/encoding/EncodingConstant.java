@@ -10,13 +10,13 @@ package io.smallrye.openapi.runtime.io.encoding;
  */
 public class EncodingConstant {
 
-    static final String PROP_ALLOW_RESERVED = "allowReserved";
-    static final String PROP_NAME = "name";
-    static final String PROP_CONTENT_TYPE = "contentType";
-    static final String PROP_HEADERS = "headers";
-    static final String PROP_EXPLODE = "explode";
-    static final String PROP_STYLE = "style";
-    static final String PROP_ENCODING = "encoding";
+    public static final String PROP_ALLOW_RESERVED = "allowReserved";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_CONTENT_TYPE = "contentType";
+    public static final String PROP_HEADERS = "headers";
+    public static final String PROP_EXPLODE = "explode";
+    public static final String PROP_STYLE = "style";
+    public static final String PROP_ENCODING = "encoding";
 
     private EncodingConstant() {
     }

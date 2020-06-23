@@ -15,19 +15,19 @@ public class OperationConstant {
 
     static final DotName DOTNAME_OPERATION = DotName.createSimple(Operation.class.getName());
 
-    static final String PROP_OPERATION_ID = "operationId";
-    static final String PROP_TAGS = "tags";
-    static final String PROP_EXTENSIONS = "extensions";
-    static final String PROP_DESCRIPTION = "description";
-    static final String PROP_SECURITY = "security";
-    static final String PROP_REQUEST_BODY = "requestBody";
-    static final String PROP_PARAMETERS = "parameters";
-    static final String PROP_SERVERS = "servers";
-    static final String PROP_SUMMARY = "summary";
-    static final String PROP_DEPRECATED = "deprecated";
-    static final String PROP_CALLBACKS = "callbacks";
-    static final String PROP_HIDDEN = "hidden";
-    static final String PROP_RESPONSES = "responses";
+    public static final String PROP_OPERATION_ID = "operationId";
+    public static final String PROP_TAGS = "tags";
+    public static final String PROP_EXTENSIONS = "extensions";
+    public static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_SECURITY = "security";
+    public static final String PROP_REQUEST_BODY = "requestBody";
+    public static final String PROP_PARAMETERS = "parameters";
+    public static final String PROP_SERVERS = "servers";
+    public static final String PROP_SUMMARY = "summary";
+    public static final String PROP_DEPRECATED = "deprecated";
+    public static final String PROP_CALLBACKS = "callbacks";
+    public static final String PROP_HIDDEN = "hidden";
+    public static final String PROP_RESPONSES = "responses";
 
     private OperationConstant() {
     }
