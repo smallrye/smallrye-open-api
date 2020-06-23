@@ -17,7 +17,7 @@ public class ParameterConstant {
 
     public static final DotName DOTNAME_PARAMETER = DotName.createSimple(Parameter.class.getName());
     public static final DotName DOTNAME_PARAMETERS = DotName.createSimple(Parameters.class.getName());
-    public public static final String PROP_VALUE = "value";
+    public static final String PROP_VALUE = "value";
 
     public static final String PROP_ALLOW_RESERVED = "allowReserved";
     public static final String PROP_IN = "in";
