@@ -38,7 +38,7 @@ public class ExtensionReader {
      * an array of Extension annotations. These must be read and converted into a Map.
      * 
      * @param context the scanning context
-     * @param annotationValue map of {@literal @}Extention annotations
+     * @param annotationValue map of {@literal @}Extension annotations
      * @return Map of Objects
      */
     public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
@@ -50,6 +50,24 @@ public class ExtensionReader {
         Map<String, Object> e = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
+            String extName = JandexUtil.stringValue(annotation, ExtensionConstant.PROP_NAME);
+            e.put(extName, readExtensionValue(context, extName, annotation));
+        }
+        return e;
+    }
+
+    /**
+     * Reads a List of Extension annotations. These must be read and converted into a Map.
+     *
+     * @param context the scanning context
+     * @param extensions List of {@literal @}Extension annotations
+     * @return Map of Objects
+     */
+    public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
+            final List<AnnotationInstance> extensions) {
+        IoLogging.log.annotationsMap("@Extension");
+        Map<String, Object> e = new LinkedHashMap<>();
+        for (AnnotationInstance annotation : extensions) {
             String extName = JandexUtil.stringValue(annotation, ExtensionConstant.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
