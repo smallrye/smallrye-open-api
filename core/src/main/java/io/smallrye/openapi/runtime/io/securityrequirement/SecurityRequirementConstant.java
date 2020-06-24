@@ -18,8 +18,8 @@ public class SecurityRequirementConstant {
     static final DotName DOTNAME_SECURITY_REQUIREMENT = DotName.createSimple(SecurityRequirement.class.getName());
     static final DotName DOTNAME_SECURITY_REQUIREMENTS = DotName.createSimple(SecurityRequirements.class.getName());
 
-    static final String PROP_NAME = "name";
-    static final String PROP_SCOPES = "scopes";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_SCOPES = "scopes";
 
     private SecurityRequirementConstant() {
     }

@@ -10,11 +10,11 @@ package io.smallrye.openapi.runtime.io.example;
  */
 public class ExampleConstant {
 
-    static final String PROP_NAME = "name";
-    static final String PROP_VALUE = "value";
-    static final String PROP_SUMMARY = "summary";
-    static final String PROP_EXTERNAL_VALUE = "externalValue";
-    static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_VALUE = "value";
+    public static final String PROP_SUMMARY = "summary";
+    public static final String PROP_EXTERNAL_VALUE = "externalValue";
+    public static final String PROP_DESCRIPTION = "description";
 
     private ExampleConstant() {
     }
