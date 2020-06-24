@@ -275,6 +275,9 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public void setIn(In in) {
+        if (in == In.PATH) {
+            this.required = true;
+        }
         this.in = in;
     }
 
