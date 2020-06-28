@@ -29,6 +29,9 @@ import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.MatrixParam;
+
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
  * 
@@ -71,6 +74,15 @@ public class ExtensionsTest extends BaseTckTest<ExtensionsTest.ExtensionsTestArq
             vr.body(operation + ".x-operation-extension-1", equalTo("Operation extension wrapper value (1)."));
             vr.body(operation + ".x-operation-extension-2", equalTo("Operation extension wrapper value (2)."));
             vr.body(operation + ".x-type-extension", nullValue());
+        }
+
+        @RunAsClient
+        @Test(dataProvider = "formatProvider")
+        public void testPathParamExtensions(String type) {
+            ValidatableResponse vr = this.callEndpoint(type);
+            String operation = "paths.'/extensions/pathParamExtension/{param}'.get";
+            vr.body(operation + ".x-parameter-extension", nullValue());
+            vr.body(operation + ".parameters[0].x-parameter-extension", equalTo("Parameter extension value."));
         }
     }
 }

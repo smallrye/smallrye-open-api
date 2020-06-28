@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,6 +69,8 @@ import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
+
+import static org.jboss.jandex.AnnotationTarget.Kind.METHOD_PARAMETER;
 
 /**
  * This represent a scanner
@@ -627,8 +630,10 @@ public interface AnnotationScanner {
             extensionAnnotations.addAll(ExtensionReader.getExtensionsAnnotations(method.declaringClass()));
         }
         for (AnnotationInstance annotation : extensionAnnotations) {
-            String name = ExtensionReader.getExtensionName(annotation);
-            operation.addExtension(name, ExtensionReader.readExtensionValue(context, name, annotation));
+            if (annotation.target() == null || !METHOD_PARAMETER.equals(annotation.target().kind())) {
+                String name = ExtensionReader.getExtensionName(annotation);
+                operation.addExtension(name, ExtensionReader.readExtensionValue(context, name, annotation));
+            }
         }
     }
 
@@ -745,7 +750,7 @@ public interface AnnotationScanner {
             // TODO if the method argument type is Request, don't generate a Schema!
 
             Type requestBodyType = null;
-            if (annotation.target().kind() == AnnotationTarget.Kind.METHOD_PARAMETER) {
+            if (annotation.target().kind() == METHOD_PARAMETER) {
                 requestBodyType = JandexUtil.getMethodParameterType(method,
                         annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
