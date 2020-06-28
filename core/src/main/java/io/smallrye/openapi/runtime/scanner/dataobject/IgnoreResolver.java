@@ -1,12 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
@@ -63,6 +58,10 @@ public class IgnoreResolver {
         return false;
     }
 
+    public ClassInfo getClassInfoFromIndex(Type type) {
+        return this.index.getClass(type);
+    }
+
     /**
      * Handler for OAS hidden @{@link Schema}
      */
@@ -107,6 +106,9 @@ public class IgnoreResolver {
             if (declaringClassIgnore(target)) {
                 return true;
             }
+            if (superClassIgnore(target)) {
+                return true;
+            }
 
             return nestingPropertyIgnore(parentPathEntry.getAnnotationTarget(), propertyName(target));
         }
@@ -129,6 +131,46 @@ public class IgnoreResolver {
         private boolean declaringClassIgnore(AnnotationTarget target) {
             AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(TypeUtil.getDeclaringClass(target), getName());
             return shouldIgnoreTarget(declaringClassJIP, propertyName(target));
+        }
+
+        /**
+         * Super class ignore
+         *
+         * <pre>
+         * <code>
+         *  &#64;JsonIgnoreProperties("ignoreMe")
+         *  class A {
+         *    String ignoreMe;
+         *    getIgnoreMe() {
+         *        ...
+         *    }
+         *  }
+         *
+         *  class B extends A {
+         *      &#64;Override
+         *      getIgnoreMe() {
+         *          ...
+         *      }
+         *  }
+         * </code>
+         * </pre>
+         *
+         * @param target
+         * @return
+         */
+        private boolean superClassIgnore(AnnotationTarget target) {
+            ClassInfo declaringClass = TypeUtil.getDeclaringClass(target);
+            AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(declaringClass, getName());
+            // if overridden by subclass than superclass ignores are not merged
+            if (declaringClassJIP != null) {
+                return false;
+            }
+            ClassInfo superclassInfo = getClassInfoFromIndex(declaringClass.superClassType());
+            if (superclassInfo != null) {
+                AnnotationInstance superClassJIP = TypeUtil.getAnnotation(superclassInfo, getName());
+                return shouldIgnoreTarget(superClassJIP, propertyName(target));
+            }
+            return false;
         }
 
         /**
