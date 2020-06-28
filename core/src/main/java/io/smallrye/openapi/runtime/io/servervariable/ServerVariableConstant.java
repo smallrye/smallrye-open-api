@@ -11,13 +11,13 @@ package io.smallrye.openapi.runtime.io.servervariable;
  */
 public class ServerVariableConstant {
 
-    static final String PROP_ENUM = "enum";
-    static final String PROP_NAME = "name";
-    static final String PROP_DEFAULT_VALUE = "defaultValue";
-    static final String PROP_DEFAULT = "default";
-    static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_ENUM = "enum";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_DEFAULT_VALUE = "defaultValue";
+    public static final String PROP_DEFAULT = "default";
+    public static final String PROP_DESCRIPTION = "description";
     // for annotations (reserved words in Java)
-    static final String PROP_ENUMERATION = "enumeration";
+    public static final String PROP_ENUMERATION = "enumeration";
 
     private ServerVariableConstant() {
     }

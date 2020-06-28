@@ -16,8 +16,8 @@ public class TagConstant {
     static final DotName DOTNAME_TAG = DotName.createSimple(Tag.class.getName());
     public static final DotName DOTNAME_TAGS = DotName.createSimple(Tags.class.getName());
 
-    static final String PROP_NAME = "name";
-    static final String PROP_DESCRIPTION = "description";
+    public static final String PROP_NAME = "name";
+    public static final String PROP_DESCRIPTION = "description";
 
     private TagConstant() {
     }
