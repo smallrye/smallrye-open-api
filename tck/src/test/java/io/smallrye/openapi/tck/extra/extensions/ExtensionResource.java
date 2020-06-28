@@ -16,12 +16,11 @@
 
 package io.smallrye.openapi.tck.extra.extensions;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -30,6 +29,11 @@ import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
 @Consumes("application/json")
 @Extension(name = "x-type-extension", value = "Type extension value.")
 public class ExtensionResource {
+
+    static class Bean {
+        @DefaultValue("BEAN1")
+        String dontCare;
+    }
 
     @GET
     @Path("/typeExtension")
@@ -54,4 +58,11 @@ public class ExtensionResource {
         return "Operation wrapper extension value.";
     }
 
+    @GET
+    @Path("pathParamExtension/{param}")
+    public String getParamWithExtension(
+            @BeanParam Bean bean,
+            @PathParam("param") @Extension(name = "x-parameter-extension", value = "Parameter extension value.") String param) {
+        return "Path param extension value.";
+    }
 }

@@ -25,6 +25,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
@@ -83,6 +85,7 @@ public class ParameterProcessor {
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(
             Arrays.asList(ParameterConstant.DOTNAME_PARAMETER, ParameterConstant.DOTNAME_PARAMETERS));
 
+    private final AnnotationScannerContext scannerContext;
     private final IndexView index;
     private final Function<AnnotationInstance, Parameter> readerFunction;
     private final List<AnnotationScannerExtension> extensions;
@@ -186,10 +189,11 @@ public class ParameterProcessor {
         }
     }
 
-    private ParameterProcessor(IndexView index,
+    private ParameterProcessor(AnnotationScannerContext scannerContext,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
-        this.index = index;
+        this.scannerContext = scannerContext;
+        this.index = scannerContext.getIndex();
         this.readerFunction = reader;
         this.extensions = extensions;
     }
@@ -200,7 +204,7 @@ public class ParameterProcessor {
      * {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters
      * are only applicable to the method-level in this component.
      *
-     * @param index index of classes to be used for further introspection, if necessary
+     * @param context the AnnotationScannerContext
      * @param resourceClass the class info
      * @param resourceMethod the JAX-RS resource method, annotated with one of the
      *        JAX-RS HTTP annotations
@@ -210,14 +214,13 @@ public class ParameterProcessor {
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
-    public static ResourceParameters process(IndexView index,
+    public static ResourceParameters process(AnnotationScannerContext context,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
-
         ResourceParameters parameters = new ResourceParameters();
-        ParameterProcessor processor = new ParameterProcessor(index, reader, extensions);
+        ParameterProcessor processor = new ParameterProcessor(context, reader, extensions);
 
         ClassInfo resourceMethodClass = resourceMethod.declaringClass();
 
@@ -466,6 +469,12 @@ public class ParameterProcessor {
 
             if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
                 param.setDeprecated(Boolean.TRUE);
+            }
+
+            List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context.target);
+
+            if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
+                param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
             }
 
             if (param.getSchema() != null) {
