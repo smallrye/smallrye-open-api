@@ -3,24 +3,24 @@ openapi: 3.0.0
 info:
   title: Sample Pet Store App
   description: This is a sample server for a pet store.
-  termsOfService: "http://example.com/terms/"
+  termsOfService: http://example.com/terms/
   contact:
     name: API Support
-    url: "http://www.example.com/support"
+    url: http://www.example.com/support
     email: support@example.com
     x-email: x-email-value
   license:
     name: Apache 2.0
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
     x-license: x-license-value
   version: 1.0.1
   x-version: x-version-value
 externalDocs:
   description: Find more info here
-  url: "https://swagger.io"
+  url: https://swagger.io
   x-externalDocs: x-externalDocs-value
 servers:
-- url: "urn:server1"
+- url: urn:server1
   description: Server 1 description.
   variables:
     Variable1:
@@ -49,14 +49,14 @@ servers:
   x-variables-object:
     prop1: value1
     prop2: value2
-- url: "urn:server2"
+- url: urn:server2
   description: Server 2 description.
 security:
 - api_key: []
 - basic_auth: []
 - oauth2_auth:
-  - "write:foo"
-  - "read:foo"
+  - write:foo
+  - read:foo
 tags:
 - name: tag-1
   description: Tag 1 description.
@@ -66,10 +66,10 @@ tags:
   description: Tag 2 description.
   externalDocs:
     description: Find more info here
-    url: "https://example.com"
+    url: https://example.com
 paths:
   /foo:
-    $ref: "#/paths/self"
+    $ref: '#/paths/self'
     summary: A summary
     description: Some description here.
     get:
@@ -80,7 +80,7 @@ paths:
       description: Operation description here.
       externalDocs:
         description: Find more info on GET here
-        url: "https://example.com/#get"
+        url: https://example.com/#get
       operationId: getAllFoos
       parameters:
       - name: Param1
@@ -88,7 +88,7 @@ paths:
         description: Param description here.
         required: true
         schema:
-          $ref: "#/components/schemas/MySchema"
+          $ref: '#/components/schemas/MySchema'
         allowEmptyValue: true
         deprecated: false
         style: simple
@@ -102,11 +102,11 @@ paths:
             value: foo
             externalValue: foo-bar
           Example-2:
-            $ref: "#/components/examples/Example-2"
+            $ref: '#/components/examples/Example-2'
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MySchema27"
+              $ref: '#/components/schemas/MySchema27'
             example:
               p1: v1
               p2: true
@@ -123,7 +123,7 @@ paths:
                 allowReserved: false
             x-mediaType-1: x-mediaType-1-value
             x-mediaType-2: x-mediaType-2-value
-      - $ref: "#/components/parameters/Param2"
+      - $ref: '#/components/parameters/Param2'
       requestBody:
         description: Description of the request body.
         content:
@@ -138,7 +138,7 @@ paths:
         - baz
       responses:
         default:
-          $ref: "#/components/responses/DefaultResponse"
+          $ref: '#/components/responses/DefaultResponse'
         "200":
           description: Successful response.
           headers:
@@ -150,7 +150,7 @@ paths:
               style: simple
               explode: false
               schema:
-                $ref: "#/components/schemas/SomeOtherSchema"
+                $ref: '#/components/schemas/SomeOtherSchema'
               example:
                 foo: baz
               examples:
@@ -160,7 +160,7 @@ paths:
               x-header-1: x-header-1-value
               x-header-2: 179
             Header-2:
-              $ref: "#/components/headers/BarHeader"
+              $ref: '#/components/headers/BarHeader'
           content:
             application/json: {}
             text/plain: {}
@@ -172,19 +172,19 @@ paths:
               requestBody: {}
               description: Description of link 1.
               server:
-                url: "urn:server-1"
+                url: urn:server-1
               x-link-1: x-link-1-value
               x-link-2: true
             Link-2:
-              $ref: "#/components/links/LinkTwo"
+              $ref: '#/components/links/LinkTwo'
         "404":
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
       callbacks:
         Callback-1:
-          $ref: "#/components/callbacks/CallbackOne"
+          $ref: '#/components/callbacks/CallbackOne'
         Callback-2:
           PathItem-1:
-            $ref: "#/paths/fooItem"
+            $ref: '#/paths/fooItem'
           x-callback-1: x-callback-1-value
           x-callback-2: 17
       deprecated: true
@@ -192,8 +192,8 @@ paths:
       - api_key: []
       - basic_auth: []
       servers:
-      - url: "urn:server1"
-      - url: "urn:server2"
+      - url: urn:server1
+      - url: urn:server2
       x-operation-1: true
       x-operation-2:
         hello: world
@@ -219,7 +219,7 @@ paths:
     trace:
       operationId: traceAllFoos
   /foo/{fooId}:
-    $ref: "#/paths/OtherPathItem"
+    $ref: '#/paths/OtherPathItem'
   x-paths-extension-1: paths extension value
   x-paths-extension-2:
   - array
@@ -256,9 +256,9 @@ components:
       bearerFormat: bearer-format-value
       flows:
         implicit:
-          authorizationUrl: "urn:auth-url"
-          tokenUrl: "urn:token-url"
-          refreshUrl: "urn:refresh-url"
+          authorizationUrl: urn:auth-url
+          tokenUrl: urn:token-url
+          refreshUrl: urn:refresh-url
           scopes:
             read:foo: read access to foos
             write:foo: write access to foos
@@ -270,7 +270,7 @@ components:
         authorizationCode: {}
         x-flows-ext-1: flows-ext-value
         x-flows-ext-2: false
-      openIdConnectUrl: "urn:open-id-connect/url"
+      openIdConnectUrl: urn:open-id-connect/url
       x-scheme-ext-1: -1023873
     oauth:
       type: oauth2
