@@ -272,4 +272,19 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             @Tag(name = "tag1") })
     static class TagTestApp extends Application {
     }
+
+    @Test
+    public void testEmptySecurityRequirements() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+
+        // Test samples
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/EmptySecurityRequirementsResource.class");
+
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testEmptySecurityRequirements.json", result);
+    }
 }
