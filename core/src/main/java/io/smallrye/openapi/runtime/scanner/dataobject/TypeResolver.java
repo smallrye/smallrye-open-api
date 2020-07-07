@@ -324,6 +324,27 @@ public class TypeResolver {
         return current;
     }
 
+    /**
+     * Resolve a parameterized type against this {@link TypeResolver}'s resolution stack.
+     * If any of the type's arguments are wild card types, the resolution will fall back
+     * to the basic {@link #getResolvedType(Type)} method, resolving none of
+     * the arguments.
+     *
+     * @param type type to resolve
+     * @return resolved type (if found)
+     */
+    public Type getResolvedType(ParameterizedType type) {
+        if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
+            return ParameterizedType.create(type.name(),
+                    type.arguments().stream()
+                            .map(this::getResolvedType)
+                            .toArray(Type[]::new),
+                    null);
+        }
+
+        return getResolvedType((Type) type);
+    }
+
     public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, Type leaf, ClassInfo leafKlazz) {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();

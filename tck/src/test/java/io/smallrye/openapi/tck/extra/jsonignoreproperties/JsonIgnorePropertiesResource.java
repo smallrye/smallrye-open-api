@@ -16,22 +16,20 @@
 
 package io.smallrye.openapi.tck.extra.jsonignoreproperties;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.restassured.assertion.BodyMatcher;
-import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
-import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
-import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author eric.wittmann@gmail.com
  */
 @Path("/jsonignoreproperties")
 @Consumes("application/json")
+@SuppressWarnings("unused")
 public class JsonIgnorePropertiesResource {
 
     @POST

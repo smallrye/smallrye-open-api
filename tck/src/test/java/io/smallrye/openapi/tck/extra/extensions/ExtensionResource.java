@@ -20,7 +20,6 @@ import javax.ws.rs.*;
 
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -58,6 +57,7 @@ public class ExtensionResource {
         return "Operation wrapper extension value.";
     }
 
+    @SuppressWarnings("unused")
     @GET
     @Path("pathParamExtension/{param}")
     public String getParamWithExtension(

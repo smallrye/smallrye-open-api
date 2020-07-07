@@ -29,9 +29,6 @@ import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.MatrixParam;
-
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
  * 
