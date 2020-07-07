@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
-import java.lang.annotation.Annotation;
+import static org.jboss.jandex.AnnotationTarget.Kind.METHOD_PARAMETER;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,8 +70,6 @@ import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
-
-import static org.jboss.jandex.AnnotationTarget.Kind.METHOD_PARAMETER;
 
 /**
  * This represent a scanner

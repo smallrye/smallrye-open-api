@@ -15,17 +15,18 @@
  */
 package io.smallrye.openapi.tck.extra;
 
-import io.restassured.response.ValidatableResponse;
+import static org.hamcrest.Matchers.*;
+
 import org.eclipse.microprofile.openapi.tck.AppTestBase;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
+
+import io.restassured.response.ValidatableResponse;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
-
-import static org.hamcrest.Matchers.*;
 
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup

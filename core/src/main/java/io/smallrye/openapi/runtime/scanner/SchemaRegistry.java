@@ -17,6 +17,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
+import org.jboss.jandex.Type.Kind;
 import org.jboss.jandex.TypeVariable;
 import org.jboss.jandex.WildcardType;
 
@@ -107,7 +108,13 @@ public class SchemaRegistry {
      *         to the schema registered for the given Type
      */
     public static Schema checkRegistration(Type type, TypeResolver resolver, Schema schema) {
-        Type resolvedType = resolver.getResolvedType(type);
+        Type resolvedType;
+
+        if (type.kind() == Kind.PARAMETERIZED_TYPE) {
+            resolvedType = resolver.getResolvedType(type.asParameterizedType());
+        } else {
+            resolvedType = resolver.getResolvedType(type);
+        }
 
         switch (resolvedType.kind()) {
             case CLASS:
