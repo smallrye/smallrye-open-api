@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -134,6 +135,14 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
         }
     }
 
+    static class POJO extends BaseModel {
+        private String name;
+        public String getName() { return  name; }
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
     static class KingCrimson extends BaseModel {
         public enum Status {
             unknown,
@@ -260,7 +269,7 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
 
     }
 
-    static class Result<T extends BaseModel> {
+    static class Result<T> {
         private T result;
         private Message error;
         private Integer status;
@@ -277,7 +286,7 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
             return result;
         }
 
-        public static class ResultBuilder<T extends BaseModel> {
+        public static class ResultBuilder<T> {
             private Integer status;
             private Message error = new Message();
             private T result;
@@ -398,6 +407,15 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
                 @QueryParam("offset") int offset,
                 @QueryParam("orderby") List<String> orderBy) {
             return super.getAll1();
+        }
+
+        @GET
+        @Path("/noooooooo")
+        public Result<List<POJO>> getList() {
+            return new Result.ResultBuilder<List<POJO>>()
+                    .status(200)
+                    .result(new ArrayList<>())
+                    .build();
         }
 
         @POST

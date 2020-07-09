@@ -126,6 +126,22 @@
         }
       }
     },
+    "/v1/kingcrimson/noooooooo": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/magma": {
       "get": {
         "parameters": [
@@ -349,6 +365,14 @@
   },
   "components": {
     "schemas": {
+      "POJO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "Magma": {
         "type": "object",
         "properties": {
@@ -427,6 +451,27 @@
           },
           "result": {
             "$ref": "#/components/schemas/ListKingCrimson"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "ListPOJO" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/POJO"
+        }
+      },
+      "ResultList": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ListPOJO"
           },
           "status": {
             "format": "int32",
