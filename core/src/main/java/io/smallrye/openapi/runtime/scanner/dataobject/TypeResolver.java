@@ -396,13 +396,22 @@ public class TypeResolver {
         return !Modifier.isStatic(field.flags());
     }
 
+    /**
+     * Determine if the target should be exposed in the API or ignored. Explicitly un-hiding a property
+     * via the <code>@Schema</code> annotation overrides configuration to ignore the same property
+     * higher up the class/interface hierarchy.
+     * 
+     * @param target the field or method to be checked for ignoring or exposure in the API
+     * @param reference an annotated member (field or method) that referenced the type of target's declaring class
+     * @param ignoreResolver resolver to determine if the field is ignored
+     */
     private void processVisibility(AnnotationTarget target, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
         if (this.exposed || this.ignored) {
             // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
             return;
         }
 
-        if (this.isUnhidden() && !this.ignored) {
+        if (this.isUnhidden(target)) {
             // @Schema with hidden = false and not already ignored by a member lower in the class hierarchy
             this.exposed = true;
             return;
@@ -422,17 +431,21 @@ public class TypeResolver {
         }
     }
 
-    boolean isUnhidden() {
-        for (AnnotationTarget target : Arrays.asList(this.field, this.readMethod, this.writeMethod)) {
-            if (target != null) {
-                AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
+    /**
+     * Determines whether the target is explicit set to hidden = false via the <code>@Schema</code>
+     * annotation.
+     * 
+     * @return true if the field is un-hidden, false otherwise
+     */
+    boolean isUnhidden(AnnotationTarget target) {
+        if (target != null) {
+            AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
 
-                if (schemaAnnotation != null) {
-                    Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
+            if (schemaAnnotation != null) {
+                Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
 
-                    if (hidden != null && !hidden.booleanValue()) {
-                        return true;
-                    }
+                if (hidden != null && !hidden.booleanValue()) {
+                    return true;
                 }
             }
         }
@@ -450,6 +463,8 @@ public class TypeResolver {
      * @param properties current map of properties discovered
      * @param field the field to scan
      * @param stack type resolution stack for parameterized types
+     * @param reference an annotated member (field or method) that referenced the type of field's declaring class
+     * @param ignoreResolver resolver to determine if the field is ignored
      */
     private static void scanField(Map<String, TypeResolver> properties, FieldInfo field, Deque<Map<String, Type>> stack,
             AnnotationTarget reference, IgnoreResolver ignoreResolver) {
@@ -480,8 +495,10 @@ public class TypeResolver {
      * conventions for getter or setter methods.
      *
      * @param properties current map of properties discovered
-     * @param field the method to scan
+     * @param method the method to scan
      * @param stack type resolution stack for parameterized types
+     * @param reference an annotated member (field or method) that referenced the type of method's declaring class
+     * @param ignoreResolver resolver to determine if the field is ignored
      */
     private static void scanMethod(Map<String, TypeResolver> properties, MethodInfo method, Deque<Map<String, Type>> stack,
             AnnotationTarget reference, IgnoreResolver ignoreResolver) {

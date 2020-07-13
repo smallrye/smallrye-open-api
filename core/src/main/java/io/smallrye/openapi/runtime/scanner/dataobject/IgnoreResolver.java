@@ -180,8 +180,8 @@ public class IgnoreResolver {
             if (jipAnnotation == null || jipAnnotation.value() == null) {
                 return Visibility.UNSET;
             }
-            String[] jipValues = jipAnnotation.value().asStringArray();
-            if (Arrays.stream(jipValues).anyMatch(v -> v.equals(targetName))) {
+
+            if (Arrays.asList(jipAnnotation.value().asStringArray()).contains(targetName)) {
                 return Visibility.IGNORED;
             } else {
                 return Visibility.EXPOSED;
@@ -202,10 +202,8 @@ public class IgnoreResolver {
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
             AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
-            if (annotationInstance != null) {
-                if (valueAsBooleanOrTrue(annotationInstance)) {
-                    return Visibility.IGNORED;
-                }
+            if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
+                return Visibility.IGNORED;
             }
             return Visibility.UNSET;
         }
@@ -293,7 +291,7 @@ public class IgnoreResolver {
                     AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
                     if (schemaAnnotation != null) {
                         Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
-                        if (hidden != null && !hidden.booleanValue()) {
+                        if (hidden != null && !hidden) {
                             return Visibility.EXPOSED;
                         }
                     }
