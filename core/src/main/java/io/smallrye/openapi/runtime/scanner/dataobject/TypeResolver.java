@@ -411,14 +411,14 @@ public class TypeResolver {
         IgnoreResolver.Visibility visibility = ignoreResolver.isIgnore(target, reference);
 
         switch (visibility) {
-        case EXPOSED:
-            this.exposed = true;
-            break;
-        case IGNORED:
-            this.ignored = true;
-            break;
-        default:
-            break;
+            case EXPOSED:
+                this.exposed = true;
+                break;
+            case IGNORED:
+                this.ignored = true;
+                break;
+            default:
+                break;
         }
     }
 
@@ -451,7 +451,8 @@ public class TypeResolver {
      * @param field the field to scan
      * @param stack type resolution stack for parameterized types
      */
-    private static void scanField(Map<String, TypeResolver> properties, FieldInfo field, Deque<Map<String, Type>> stack, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
+    private static void scanField(Map<String, TypeResolver> properties, FieldInfo field, Deque<Map<String, Type>> stack,
+            AnnotationTarget reference, IgnoreResolver ignoreResolver) {
         String propertyName = field.name();
         final TypeResolver resolver;
 
@@ -482,7 +483,8 @@ public class TypeResolver {
      * @param field the method to scan
      * @param stack type resolution stack for parameterized types
      */
-    private static void scanMethod(Map<String, TypeResolver> properties, MethodInfo method, Deque<Map<String, Type>> stack, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
+    private static void scanMethod(Map<String, TypeResolver> properties, MethodInfo method, Deque<Map<String, Type>> stack,
+            AnnotationTarget reference, IgnoreResolver ignoreResolver) {
         Type returnType = method.returnType();
         Type propertyType = null;
 

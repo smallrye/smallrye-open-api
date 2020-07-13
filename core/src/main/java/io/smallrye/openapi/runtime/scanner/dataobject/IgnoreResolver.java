@@ -52,7 +52,7 @@ public class IgnoreResolver {
     public Visibility isIgnore(AnnotationTarget annotationTarget, AnnotationTarget reference) {
         for (IgnoreAnnotationHandler handler : ignoreHandlers) {
             Visibility v = handler.shouldIgnore(annotationTarget, reference);
-            
+
             if (v != Visibility.UNSET) {
                 return v;
             }
