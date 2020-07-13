@@ -76,7 +76,7 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
         return this;
     }
 
-    /*
+    /**
      * @see org.eclipse.microprofile.openapi.models.servers.Server#removeVariable(java.lang.String)
      */
     @Override

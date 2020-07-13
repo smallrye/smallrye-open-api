@@ -217,6 +217,15 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.PathItem#TRACE(org.eclipse.microprofile.openapi.models.Operation)
+     */
+    @Override
+    public PathItem TRACE(Operation trace) {
+        this.trace = trace;
+        return this;
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getOperations()
      */
     @Override
@@ -250,6 +259,15 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.PathItem#servers(java.util.List)
+     */
+    @Override
+    public PathItem servers(List<Server> servers) {
+        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
+        return this;
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#addServer(org.eclipse.microprofile.openapi.models.servers.Server)
      */
     @Override
@@ -280,6 +298,15 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     @Override
     public void setParameters(List<Parameter> parameters) {
         this.parameters = ModelUtil.replace(parameters, ArrayList<Parameter>::new);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.PathItem#parameters(java.util.List)
+     */
+    @Override
+    public PathItem parameters(List<Parameter> parameters) {
+        this.parameters = ModelUtil.replace(parameters, ArrayList<Parameter>::new);
+        return this;
     }
 
     /**

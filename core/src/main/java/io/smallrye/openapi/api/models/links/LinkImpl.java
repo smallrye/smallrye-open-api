@@ -124,6 +124,15 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.links.Link#parameters(java.util.Map)
+     */
+    @Override
+    public Link parameters(Map<String, Object> parameters) {
+        this.parameters = ModelUtil.replace(parameters, LinkedHashMap<String, Object>::new);
+        return this;
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.links.Link#addParameter(java.lang.String, java.lang.Object)
      */
     @Override

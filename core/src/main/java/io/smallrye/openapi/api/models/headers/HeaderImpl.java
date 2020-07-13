@@ -178,6 +178,15 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.headers.Header#examples(java.util.Map)
+     */
+    @Override
+    public Header examples(Map<String, Example> examples) {
+        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
+        return this;
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.headers.Header#addExample(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.examples.Example)
      */

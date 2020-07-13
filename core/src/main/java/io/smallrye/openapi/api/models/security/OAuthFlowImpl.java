@@ -99,4 +99,5 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
     public void removeScope(String scope) {
         ModelUtil.remove(this.scopes, scope);
     }
+
 }

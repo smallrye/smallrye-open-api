@@ -55,6 +55,15 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.media.MediaType#examples(java.util.Map)
+     */
+    @Override
+    public MediaType examples(Map<String, Example> examples) {
+        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
+        return this;
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.media.MediaType#addExample(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.examples.Example)
      */
@@ -102,6 +111,15 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
     @Override
     public void setEncoding(Map<String, Encoding> encoding) {
         this.encoding = ModelUtil.replace(encoding, LinkedHashMap<String, Encoding>::new);
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.media.MediaType#encoding(java.util.Map)
+     */
+    @Override
+    public MediaType encoding(Map<String, Encoding> encoding) {
+        this.encoding = ModelUtil.replace(encoding, LinkedHashMap<String, Encoding>::new);
+        return this;
     }
 
     /**
