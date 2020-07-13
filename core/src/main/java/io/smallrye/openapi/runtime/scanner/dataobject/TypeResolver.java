@@ -47,6 +47,8 @@ public class TypeResolver {
     private FieldInfo field;
     private MethodInfo readMethod;
     private MethodInfo writeMethod;
+    private boolean ignored = false;
+    private boolean exposed = false;
     private Type leaf;
 
     /**
@@ -293,6 +295,10 @@ public class TypeResolver {
         return getResolvedType(leaf);
     }
 
+    public boolean isIgnored() {
+        return ignored;
+    }
+
     /**
      * Resolve a type against this {@link TypeResolver}'s resolution stack
      *
@@ -345,7 +351,8 @@ public class TypeResolver {
         return getResolvedType((Type) type);
     }
 
-    public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, Type leaf, ClassInfo leafKlazz) {
+    public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, IgnoreResolver ignoreResolver, Type leaf,
+            ClassInfo leafKlazz, AnnotationTarget reference) {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
@@ -362,20 +369,20 @@ public class TypeResolver {
             // Store all field properties
             currentClass.fields()
                     .stream()
-                    .filter(field -> acceptField(field))
-                    .forEach(field -> scanField(properties, field, stack));
+                    .filter(TypeResolver::acceptField)
+                    .forEach(field -> scanField(properties, field, stack, reference, ignoreResolver));
 
             currentClass.methods()
                     .stream()
-                    .filter(method -> acceptMethod(method))
-                    .forEach(method -> scanMethod(properties, method, stack));
+                    .filter(TypeResolver::acceptMethod)
+                    .forEach(method -> scanMethod(properties, method, stack, reference, ignoreResolver));
 
             currentClass.interfaceTypes()
                     .stream()
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> clazz.methods().stream())
-                    .forEach(method -> scanMethod(properties, method, stack));
+                    .forEach(method -> scanMethod(properties, method, stack, reference, ignoreResolver));
         }
 
         return sorted(properties, chain.keySet());
@@ -389,6 +396,50 @@ public class TypeResolver {
         return !Modifier.isStatic(field.flags());
     }
 
+    private void processVisibility(AnnotationTarget target, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
+        if (this.exposed || this.ignored) {
+            // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
+            return;
+        }
+
+        if (this.isUnhidden() && !this.ignored) {
+            // @Schema with hidden = false and not already ignored by a member lower in the class hierarchy
+            this.exposed = true;
+            return;
+        }
+
+        IgnoreResolver.Visibility visibility = ignoreResolver.isIgnore(target, reference);
+
+        switch (visibility) {
+        case EXPOSED:
+            this.exposed = true;
+            break;
+        case IGNORED:
+            this.ignored = true;
+            break;
+        default:
+            break;
+        }
+    }
+
+    boolean isUnhidden() {
+        for (AnnotationTarget target : Arrays.asList(this.field, this.readMethod, this.writeMethod)) {
+            if (target != null) {
+                AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
+
+                if (schemaAnnotation != null) {
+                    Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
+
+                    if (hidden != null && !hidden.booleanValue()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Determines if a field is a bean property. This is the case if (1) no field having the same name
      * has yet be scanned earlier (lower) in the inheritance chain or (2) if getter/setter methods were
@@ -400,12 +451,13 @@ public class TypeResolver {
      * @param field the field to scan
      * @param stack type resolution stack for parameterized types
      */
-    private static void scanField(Map<String, TypeResolver> properties, FieldInfo field, Deque<Map<String, Type>> stack) {
+    private static void scanField(Map<String, TypeResolver> properties, FieldInfo field, Deque<Map<String, Type>> stack, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
         String propertyName = field.name();
+        final TypeResolver resolver;
 
         // Consider only using fields that are public?
         if (properties.containsKey(propertyName)) {
-            TypeResolver resolver = properties.get(propertyName);
+            resolver = properties.get(propertyName);
 
             if (resolver.getField() == null && (Modifier.isPublic(field.flags()) || Modifier.isProtected(field.flags()))) {
                 /*
@@ -415,9 +467,11 @@ public class TypeResolver {
                 resolver.setField(field);
             }
         } else {
-            TypeResolver resolver = new TypeResolver(propertyName, field, new ArrayDeque<>(stack));
+            resolver = new TypeResolver(propertyName, field, new ArrayDeque<>(stack));
             properties.put(propertyName, resolver);
         }
+
+        resolver.processVisibility(field, reference, ignoreResolver);
     }
 
     /**
@@ -428,7 +482,7 @@ public class TypeResolver {
      * @param field the method to scan
      * @param stack type resolution stack for parameterized types
      */
-    private static void scanMethod(Map<String, TypeResolver> properties, MethodInfo method, Deque<Map<String, Type>> stack) {
+    private static void scanMethod(Map<String, TypeResolver> properties, MethodInfo method, Deque<Map<String, Type>> stack, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
         Type returnType = method.returnType();
         Type propertyType = null;
 
@@ -439,7 +493,10 @@ public class TypeResolver {
         }
 
         if (propertyType != null) {
-            updateTypeResolvers(properties, stack, method, propertyType);
+            TypeResolver resolver = updateTypeResolvers(properties, stack, method, propertyType);
+            if (resolver != null) {
+                resolver.processVisibility(method, reference, ignoreResolver);
+            }
         }
     }
 
@@ -454,7 +511,7 @@ public class TypeResolver {
      * @param method the method to add/update in properties
      * @param propertyType the type of the property associated with the method
      */
-    private static void updateTypeResolvers(Map<String, TypeResolver> properties,
+    private static TypeResolver updateTypeResolvers(Map<String, TypeResolver> properties,
             Deque<Map<String, Type>> stack,
             MethodInfo method,
             Type propertyType) {
@@ -471,7 +528,7 @@ public class TypeResolver {
 
         if (methodName.length() == nameStart) {
             // The method's name is "get", "set", or "is" without the property name
-            return;
+            return null;
         }
 
         propertyName = Character.toLowerCase(methodName.charAt(nameStart)) + methodName.substring(nameStart + 1);
@@ -482,7 +539,7 @@ public class TypeResolver {
 
             // Only store the accessor/mutator methods if the type of property matches
             if (!TypeUtil.equalTypes(resolver.getUnresolvedType(), propertyType)) {
-                return;
+                return resolver;
             }
         } else {
             resolver = new TypeResolver(propertyName, null, new ArrayDeque<>(stack));
@@ -498,6 +555,8 @@ public class TypeResolver {
                 resolver.setReadMethod(method);
             }
         }
+
+        return resolver;
     }
 
     /**
