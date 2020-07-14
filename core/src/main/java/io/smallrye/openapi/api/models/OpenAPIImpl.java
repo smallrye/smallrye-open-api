@@ -93,15 +93,6 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.OpenAPI#servers(java.util.List)
-     */
-    @Override
-    public OpenAPI servers(List<Server> servers) {
-        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.OpenAPI#addServer(org.eclipse.microprofile.openapi.models.servers.Server)
      */
     @Override
@@ -168,15 +159,6 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.OpenAPI#tags(java.util.List)
-     */
-    @Override
-    public OpenAPI tags(List<Tag> tags) {
-        this.tags = ModelUtil.replace(tags, ArrayList<Tag>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.OpenAPI#addTag(org.eclipse.microprofile.openapi.models.tags.Tag)
      */
     @Override
@@ -227,15 +209,6 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     @Override
     public void setPaths(Paths paths) {
         this.paths = paths;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.OpenAPI#paths(org.eclipse.microprofile.openapi.models.Paths)
-     */
-    @Override
-    public OpenAPI paths(Paths paths) {
-        this.paths = paths;
-        return this;
     }
 
     /**

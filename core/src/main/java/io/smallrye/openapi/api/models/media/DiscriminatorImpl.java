@@ -50,15 +50,6 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#mapping(java.util.Map)
-     */
-    @Override
-    public Discriminator mapping(Map<String, String> mapping) {
-        ModelUtil.replace(mapping, LinkedHashMap<String, String>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Discriminator#getMapping()
      */
     @Override

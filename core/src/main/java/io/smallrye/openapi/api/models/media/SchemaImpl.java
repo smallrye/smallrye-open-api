@@ -160,15 +160,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#enumeration(java.util.List)
-     */
-    @Override
-    public Schema enumeration(List<Object> enumeration) {
-        this.enumeration = ModelUtil.replace(enumeration, ArrayList<Object>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#addEnumeration(java.lang.Object)
      */
     @Override
@@ -410,15 +401,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#required(java.util.List)
-     */
-    @Override
-    public Schema required(List<String> required) {
-        this.required = ModelUtil.replace(required, ArrayList<String>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#addRequired(java.lang.String)
      */
     @Override
@@ -481,15 +463,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setProperties(Map<String, Schema> properties) {
         this.properties = ModelUtil.replace(properties, LinkedHashMap<String, Schema>::new);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#properties(java.util.Map)
-     */
-    @Override
-    public Schema properties(Map<String, Schema> properties) {
-        this.properties = ModelUtil.replace(properties, LinkedHashMap<String, Schema>::new);
-        return this;
     }
 
     /**
@@ -715,15 +688,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#allOf(java.util.List)
-     */
-    @Override
-    public Schema allOf(List<Schema> allOf) {
-        this.allOf = ModelUtil.replace(allOf, ArrayList<Schema>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#addAllOf(org.eclipse.microprofile.openapi.models.media.Schema)
      */
     @Override
@@ -757,15 +721,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#anyOf(java.util.List)
-     */
-    @Override
-    public Schema anyOf(List<Schema> anyOf) {
-        this.anyOf = ModelUtil.replace(anyOf, ArrayList<Schema>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#addAnyOf(org.eclipse.microprofile.openapi.models.media.Schema)
      */
     @Override
@@ -796,15 +751,6 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setOneOf(List<Schema> oneOf) {
         this.oneOf = ModelUtil.replace(oneOf, ArrayList<Schema>::new);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#oneOf(java.util.List)
-     */
-    @Override
-    public Schema oneOf(List<Schema> oneOf) {
-        this.oneOf = ModelUtil.replace(oneOf, ArrayList<Schema>::new);
-        return this;
     }
 
     /**

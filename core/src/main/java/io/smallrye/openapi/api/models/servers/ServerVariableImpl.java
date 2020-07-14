@@ -35,15 +35,6 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#enumeration(java.util.List)
-     */
-    @Override
-    public ServerVariable enumeration(List<String> enumeration) {
-        this.enumeration = ModelUtil.replace(enumeration, ArrayList<String>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.servers.ServerVariable#addEnumeration(java.lang.String)
      */
     @Override

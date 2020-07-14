@@ -48,15 +48,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#schemas(java.util.Map)
-     */
-    @Override
-    public Components schemas(Map<String, Schema> schemas) {
-        this.schemas = ModelUtil.replace(schemas, LinkedHashMap<String, Schema>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.Components#addSchema(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.media.Schema)
      */
@@ -159,15 +150,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#examples(java.util.Map)
-     */
-    @Override
-    public Components examples(Map<String, Example> examples) {
-        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.Components#addExample(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.examples.Example)
      */
@@ -199,15 +181,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     @Override
     public void setRequestBodies(Map<String, RequestBody> requestBodies) {
         this.requestBodies = ModelUtil.replace(requestBodies, LinkedHashMap<String, RequestBody>::new);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#requestBodies(java.util.Map)
-     */
-    @Override
-    public Components requestBodies(Map<String, RequestBody> requestBodies) {
-        this.requestBodies = ModelUtil.replace(requestBodies, LinkedHashMap<String, RequestBody>::new);
-        return this;
     }
 
     /**
@@ -245,15 +218,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#headers(java.util.Map)
-     */
-    @Override
-    public Components headers(Map<String, Header> headers) {
-        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.Components#addHeader(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.headers.Header)
      */
@@ -285,15 +249,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     @Override
     public void setSecuritySchemes(Map<String, SecurityScheme> securitySchemes) {
         this.securitySchemes = ModelUtil.replace(securitySchemes, LinkedHashMap<String, SecurityScheme>::new);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#securitySchemes(java.util.Map)
-     */
-    @Override
-    public Components securitySchemes(Map<String, SecurityScheme> securitySchemes) {
-        this.securitySchemes = ModelUtil.replace(securitySchemes, LinkedHashMap<String, SecurityScheme>::new);
-        return this;
     }
 
     /**
@@ -332,15 +287,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.Components#links(java.util.Map)
-     */
-    @Override
-    public Components links(Map<String, Link> links) {
-        this.links = ModelUtil.replace(links, LinkedHashMap<String, Link>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.Components#addLink(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.links.Link)
      */
@@ -372,15 +318,6 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     @Override
     public void setCallbacks(Map<String, Callback> callbacks) {
         this.callbacks = ModelUtil.replace(callbacks, LinkedHashMap<String, Callback>::new);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.Components#callbacks(java.util.Map)
-     */
-    @Override
-    public Components callbacks(Map<String, Callback> callbacks) {
-        this.callbacks = ModelUtil.replace(callbacks, LinkedHashMap<String, Callback>::new);
-        return this;
     }
 
     /**

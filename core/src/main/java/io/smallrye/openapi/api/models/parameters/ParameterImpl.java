@@ -213,15 +213,6 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#examples(java.util.Map)
-     */
-    @Override
-    public Parameter examples(Map<String, Example> examples) {
-        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.parameters.Parameter#addExample(java.lang.String,
      *      org.eclipse.microprofile.openapi.models.examples.Example)
      */

@@ -48,15 +48,6 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#headers(java.util.Map)
-     */
-    @Override
-    public Encoding headers(Map<String, Header> headers) {
-        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
-        return this;
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Encoding#removeHeader(java.lang.String)
      */
     @Override
@@ -78,15 +69,6 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
     @Override
     public void setHeaders(Map<String, Header> headers) {
         this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Encoding#style(org.eclipse.microprofile.openapi.models.media.Encoding.Style)
-     */
-    @Override
-    public Encoding style(Style style) {
-        this.style = style;
-        return this;
     }
 
     /**
