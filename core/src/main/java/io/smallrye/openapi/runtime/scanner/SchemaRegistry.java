@@ -351,16 +351,16 @@ public class SchemaRegistry {
         static void appendParameterNames(StringBuilder name, ParameterizedType type) {
             for (Type param : type.asParameterizedType().arguments()) {
                 switch (param.kind()) {
-                case PARAMETERIZED_TYPE:
-                    name.append(param.name().local());
-                    appendParameterNames(name, param.asParameterizedType());
-                    break;
-                case WILDCARD_TYPE:
-                    name.append(wildcardName(param.asWildcardType()));
-                    break;
-                default:
-                    name.append(param.name().local());
-                    break;
+                    case PARAMETERIZED_TYPE:
+                        name.append(param.name().local());
+                        appendParameterNames(name, param.asParameterizedType());
+                        break;
+                    case WILDCARD_TYPE:
+                        name.append(wildcardName(param.asWildcardType()));
+                        break;
+                    default:
+                        name.append(param.name().local());
+                        break;
                 }
             }
         }
