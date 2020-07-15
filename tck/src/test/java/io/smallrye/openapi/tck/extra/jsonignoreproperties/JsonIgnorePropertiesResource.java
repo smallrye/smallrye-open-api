@@ -25,7 +25,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * @author eric.wittmann@gmail.com
+ *
  */
 @Path("/jsonignoreproperties")
 @Consumes("application/json")
@@ -38,16 +38,19 @@ public class JsonIgnorePropertiesResource {
         return "Type extension value.";
     }
 
-    private class IgnoreProps {
+    static class IgnoreProps {
         private DirectIgnore directIgnore;
         private InheritIgnore inheritIgnore;
+        private ThirdLevelIgnore thirdLevelIgnore;
         private InheritIgnoreOverride inheritIgnoreOverride;
+        private NestedOverride nestedOverride;
     }
 
     @JsonIgnoreProperties("ignoreMe")
-    private static class DirectIgnore {
+    static class DirectIgnore {
         private String ignoreMe;
         private String dontIgnoreMe;
+        private String ignoreMeNested;
 
         public String getIgnoreMe() {
             return ignoreMe;
@@ -64,9 +67,17 @@ public class JsonIgnorePropertiesResource {
         public void setDontIgnoreMe(String dontIgnoreMe) {
             this.dontIgnoreMe = dontIgnoreMe;
         }
+
+        public String getIgnoreMeNested() {
+            return ignoreMeNested;
+        }
+
+        public void setIgnoreMeNested(String ignoreMeNested) {
+            this.ignoreMeNested = ignoreMeNested;
+        }
     }
 
-    private static class InheritIgnore extends DirectIgnore {
+    static class InheritIgnore extends DirectIgnore {
 
         @Override
         public String getIgnoreMe() {
@@ -86,11 +97,53 @@ public class JsonIgnorePropertiesResource {
         @Override
         public void setDontIgnoreMe(String dontIgnoreMe) {
             super.setDontIgnoreMe(dontIgnoreMe);
+        }
+
+        @Override
+        public String getIgnoreMeNested() {
+            return super.getIgnoreMeNested();
+        }
+
+        @Override
+        public void setIgnoreMeNested(String ignoreMeNested) {
+            super.setIgnoreMeNested(ignoreMeNested);
+        }
+    }
+
+    static class ThirdLevelIgnore extends InheritIgnore {
+        @Override
+        public String getIgnoreMe() {
+            return super.getIgnoreMe();
+        }
+
+        @Override
+        public void setIgnoreMe(String ignoreMe) {
+            super.setIgnoreMe(ignoreMe);
+        }
+
+        @Override
+        public String getDontIgnoreMe() {
+            return super.getDontIgnoreMe();
+        }
+
+        @Override
+        public void setDontIgnoreMe(String dontIgnoreMe) {
+            super.setDontIgnoreMe(dontIgnoreMe);
+        }
+
+        @Override
+        public String getIgnoreMeNested() {
+            return super.getIgnoreMeNested();
+        }
+
+        @Override
+        public void setIgnoreMeNested(String ignoreMeNested) {
+            super.setIgnoreMeNested(ignoreMeNested);
         }
     }
 
     @JsonIgnoreProperties("dontIgnoreMe")
-    private static class InheritIgnoreOverride extends DirectIgnore {
+    static class InheritIgnoreOverride extends DirectIgnore {
         @Override
         public String getIgnoreMe() {
             return super.getIgnoreMe();
@@ -109,6 +162,29 @@ public class JsonIgnorePropertiesResource {
         @Override
         public void setDontIgnoreMe(String dontIgnoreMe) {
             super.setDontIgnoreMe(dontIgnoreMe);
+        }
+
+        @Override
+        public String getIgnoreMeNested() {
+            return super.getIgnoreMeNested();
+        }
+
+        @Override
+        public void setIgnoreMeNested(String ignoreMeNested) {
+            super.setIgnoreMeNested(ignoreMeNested);
+        }
+    }
+
+    static class NestedOverride {
+        @JsonIgnoreProperties({ "ignoreMeNested" })
+        private DirectIgnore nested = new DirectIgnore();
+
+        public DirectIgnore getNested() {
+            return nested;
+        }
+
+        public void setNested(DirectIgnore nested) {
+            this.nested = nested;
         }
     }
 }

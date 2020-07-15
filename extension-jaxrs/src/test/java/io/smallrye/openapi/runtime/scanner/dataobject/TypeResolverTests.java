@@ -38,7 +38,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
         ClassInfo leafKlazz = index.getClassByName(componentize(Cat.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         TypeResolver resolver = properties.get("type");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -57,7 +58,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
         ClassInfo leafKlazz = index.getClassByName(componentize(Cat.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.FIELD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -73,7 +75,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
         ClassInfo leafKlazz = index.getClassByName(componentize(Dog.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         assertEquals(5, properties.size());
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
@@ -93,7 +96,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
         ClassInfo leafKlazz = index.getClassByName(componentize(Lizard.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
 
         TypeResolver resolver = properties.get("scaleColor");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
@@ -112,7 +116,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         AugmentedIndexView index = new AugmentedIndexView(indexOf(MySchema.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(MySchema.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("field1", iter.next().getKey());
@@ -142,7 +147,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         AugmentedIndexView index = new AugmentedIndexView(indexOf(JacksonPropertyOrderDefault.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderDefault.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("comment", iter.next().getValue().getPropertyName());
@@ -154,7 +160,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         AugmentedIndexView index = new AugmentedIndexView(indexOf(JacksonPropertyOrderCustomName.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderCustomName.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("theName", iter.next().getValue().getPropertyName());
@@ -167,7 +174,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         AugmentedIndexView index = new AugmentedIndexView(indexOf(JaxbCustomPropertyOrder.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JaxbCustomPropertyOrder.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, leaf, leafKlazz);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("theName", iter.next().getValue().getPropertyName());

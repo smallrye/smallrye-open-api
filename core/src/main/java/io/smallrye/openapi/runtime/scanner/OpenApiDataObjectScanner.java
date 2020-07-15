@@ -209,10 +209,8 @@ public class OpenApiDataObjectScanner {
 
     // Scan depth first.
     private void depthFirstGraphSearch() {
-        DataObjectDeque.PathEntry currentPathEntry;
-
         while (!objectStack.isEmpty()) {
-            currentPathEntry = objectStack.pop();
+            DataObjectDeque.PathEntry currentPathEntry = objectStack.pop();
 
             ClassInfo currentClass = currentPathEntry.getClazz();
             Schema currentSchema = currentPathEntry.getSchema();
@@ -234,17 +232,18 @@ public class OpenApiDataObjectScanner {
 
             ScannerLogging.log.gettingFields(currentType, currentClass);
 
+            // reference will be the field or method that declaring the current class type being scanned
+            AnnotationTarget reference = currentPathEntry.getAnnotationTarget();
+
             // Get all fields *including* inherited.
-            Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, currentType, currentClass);
+            Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, ignoreResolver, currentType, currentClass,
+                    reference);
 
             // Handle fields
-            for (Map.Entry<String, TypeResolver> entry : properties.entrySet()) {
-                TypeResolver resolver = entry.getValue();
-                // Ignore static fields and fields annotated with ignore.
-                if (!ignoreResolver.isIgnore(resolver.getAnnotationTarget(), currentPathEntry)) {
-                    AnnotationTargetProcessor.process(index, objectStack, resolver, currentPathEntry);
-                }
-            }
+            properties.values()
+                    .stream()
+                    .filter(resolver -> !resolver.isIgnored())
+                    .forEach(resolver -> AnnotationTargetProcessor.process(index, objectStack, resolver, currentPathEntry));
         }
     }
 
@@ -259,7 +258,8 @@ public class OpenApiDataObjectScanner {
     }
 
     private void resolveSpecial(DataObjectDeque.PathEntry root, Type type) {
-        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(index, type, rootClassInfo);
+        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(index, ignoreResolver, type, rootClassInfo,
+                root.getAnnotationTarget());
         rootSchema = preProcessSpecial(type, fieldResolution.values().iterator().next(), root);
     }
 

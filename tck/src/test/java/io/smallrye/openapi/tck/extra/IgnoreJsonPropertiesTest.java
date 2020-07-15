@@ -15,7 +15,8 @@
  */
 package io.smallrye.openapi.tck.extra;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 import org.eclipse.microprofile.openapi.tck.AppTestBase;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -25,6 +26,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 import io.restassured.response.ValidatableResponse;
+import io.smallrye.openapi.tck.extra.jsonignoreproperties.JsonIgnorePropertiesUpstreamBehaviourTest;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
@@ -43,31 +45,75 @@ public class IgnoreJsonPropertiesTest extends BaseTckTest<IgnoreJsonPropertiesTe
                     .addAsManifestResource("openapi.yaml", "openapi.yaml");
         }
 
+        /**
+         * @see io.smallrye.openapi.tck.extra.jsonignoreproperties.JsonIgnorePropertiesUpstreamBehaviourTest#testDirectAnnotation()
+         * @param type
+         */
         @RunAsClient
         @Test(dataProvider = "formatProvider")
         public void testDirectIgnore(String type) {
             ValidatableResponse vr = this.callEndpoint(type);
             String schemaPath = "components.schemas.DirectIgnore.properties";
+            vr.body(schemaPath + ".ignoreMeNested", notNullValue());
             vr.body(schemaPath + ".dontIgnoreMe", notNullValue());
             vr.body(schemaPath + ".ignoreMe", nullValue());
         }
 
+        /**
+         * @see JsonIgnorePropertiesUpstreamBehaviourTest#testInheritedAnnotation()
+         * @param type
+         */
         @RunAsClient
         @Test(dataProvider = "formatProvider")
         public void testInheritedIgnore(String type) {
             ValidatableResponse vr = this.callEndpoint(type);
             String schemaPath = "components.schemas.InheritIgnore.properties";
+            vr.body(schemaPath + ".ignoreMeNested", notNullValue());
             vr.body(schemaPath + ".dontIgnoreMe", notNullValue());
             vr.body(schemaPath + ".ignoreMe", nullValue());
         }
 
+        /**
+         * @see JsonIgnorePropertiesUpstreamBehaviourTest#testInheritedAnnotationThirdLevel()
+         * @param type
+         */
+        @RunAsClient
+        @Test(dataProvider = "formatProvider")
+        public void testInheritedIgnoreThirdLevel(String type) {
+            ValidatableResponse vr = this.callEndpoint(type);
+            String schemaPath = "components.schemas.ThirdLevelIgnore.properties";
+            vr.body(schemaPath + ".ignoreMeNested", notNullValue());
+            vr.body(schemaPath + ".dontIgnoreMe", notNullValue());
+            vr.body(schemaPath + ".ignoreMe", nullValue());
+        }
+
+        /**
+         * @see JsonIgnorePropertiesUpstreamBehaviourTest#testInheritedAnnotationOverride()
+         * @param type
+         */
         @RunAsClient
         @Test(dataProvider = "formatProvider")
         public void testInheritedIgnoreOverride(String type) {
             ValidatableResponse vr = this.callEndpoint(type);
             String schemaPath = "components.schemas.InheritIgnoreOverride.properties";
+            vr.body(schemaPath + ".ignoreMeNested", notNullValue());
             vr.body(schemaPath + ".dontIgnoreMe", nullValue());
             vr.body(schemaPath + ".ignoreMe", notNullValue());
         }
+
+        /**
+         * @see JsonIgnorePropertiesUpstreamBehaviourTest#testInheritedAnnotationNestedOverride()
+         * @param type
+         */
+        @RunAsClient
+        @Test(dataProvider = "formatProvider")
+        public void testInheritedIgnoreOverrideNested(String type) {
+            ValidatableResponse vr = this.callEndpoint(type);
+            String schemaPath = "components.schemas.NestedOverride.nested.properties";
+            vr.body(schemaPath + ".ignoreMeNested", nullValue());
+            vr.body(schemaPath + ".dontIgnoreMe", nullValue());
+            vr.body(schemaPath + ".ignoreMe", nullValue());
+        }
+
     }
 }
