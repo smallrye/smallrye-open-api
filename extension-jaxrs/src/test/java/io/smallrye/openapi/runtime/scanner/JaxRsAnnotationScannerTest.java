@@ -40,6 +40,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
+import test.io.smallrye.openapi.runtime.scanner.resources.EmptySecurityRequirementsResource;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -275,12 +276,8 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     public void testEmptySecurityRequirements() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-
-        // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/EmptySecurityRequirementsResource.class");
-
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), indexer.complete());
+        Index index = indexOf(EmptySecurityRequirementsResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
 

@@ -17,6 +17,7 @@ import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the Security from annotations or json
@@ -119,6 +120,11 @@ public class SecurityRequirementReader {
             return requirement;
         }
         return null;
+    }
+
+    // helper methods for scanners
+    public static AnnotationInstance getSecurityRequirementsAnnotation(final AnnotationTarget target) {
+        return TypeUtil.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
     }
 
     // helper methods for scanners
