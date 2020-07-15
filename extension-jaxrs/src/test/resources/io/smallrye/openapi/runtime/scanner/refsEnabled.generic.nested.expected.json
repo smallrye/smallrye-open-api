@@ -17,7 +17,7 @@
           }
         }
       },
-      "KustomPairKustomPairInteger": {
+      "KustomPairKustomPairStringStringInteger": {
         "type": "object",
         "required": [
           "bar",

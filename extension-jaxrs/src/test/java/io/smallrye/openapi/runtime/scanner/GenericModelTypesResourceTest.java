@@ -58,6 +58,7 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
                 ResidentsResource.class,
                 Result.class,
                 ResultList.class,
+                POJO.class,
                 List.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
         OpenAPI result = scanner.scan();

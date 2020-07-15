@@ -244,6 +244,19 @@ public class SchemaRegistry {
      * @return a reference to the newly registered {@link Schema}
      */
     private Schema register(TypeKey key, Schema schema, String schemaName) {
+        String name = deriveName(key, schemaName);
+        Schema schemaRef = new SchemaImpl();
+        schemaRef.setRef(OpenApiConstants.REF_PREFIX_SCHEMA + name);
+
+        registry.put(key, new GeneratedSchemaInfo(name, schema, schemaRef));
+        names.add(name);
+
+        ModelUtil.components(oai).addSchema(name, schema);
+
+        return schemaRef;
+    }
+
+    String deriveName(TypeKey key, String schemaName) {
         /*
          * We cannot use the 'name' on the SchemaImpl because it may be a
          * property name rather then a schema name.
@@ -264,15 +277,7 @@ public class SchemaRegistry {
             name = nameBase + idx++;
         }
 
-        Schema schemaRef = new SchemaImpl();
-        schemaRef.setRef(OpenApiConstants.REF_PREFIX_SCHEMA + name);
-
-        registry.put(key, new GeneratedSchemaInfo(name, schema, schemaRef));
-        names.add(name);
-
-        ModelUtil.components(oai).addSchema(name, schema);
-
-        return schemaRef;
+        return name;
     }
 
     public Schema lookupRef(Type instanceType) {
@@ -331,13 +336,7 @@ public class SchemaRegistry {
 
             switch (type.kind()) {
                 case PARAMETERIZED_TYPE:
-                    for (Type param : type.asParameterizedType().arguments()) {
-                        if (param.kind() == Type.Kind.WILDCARD_TYPE) {
-                            name.append(wildcardName(param.asWildcardType()));
-                        } else {
-                            name.append(param.name().local());
-                        }
-                    }
+                    appendParameterNames(name, type.asParameterizedType());
                     break;
                 case WILDCARD_TYPE:
                     name.append(wildcardName(type.asWildcardType()));
@@ -347,6 +346,23 @@ public class SchemaRegistry {
             }
 
             return name.toString();
+        }
+
+        static void appendParameterNames(StringBuilder name, ParameterizedType type) {
+            for (Type param : type.asParameterizedType().arguments()) {
+                switch (param.kind()) {
+                case PARAMETERIZED_TYPE:
+                    name.append(param.name().local());
+                    appendParameterNames(name, param.asParameterizedType());
+                    break;
+                case WILDCARD_TYPE:
+                    name.append(wildcardName(param.asWildcardType()));
+                    break;
+                default:
+                    name.append(param.name().local());
+                    break;
+                }
+            }
         }
 
         static String wildcardName(WildcardType type) {
