@@ -1,0 +1,22 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "/public": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  }
+}

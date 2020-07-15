@@ -40,6 +40,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
+import test.io.smallrye.openapi.runtime.scanner.resources.EmptySecurityRequirementsResource;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -271,5 +272,16 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             @Tag(name = "tag3"),
             @Tag(name = "tag1") })
     static class TagTestApp extends Application {
+    }
+
+    @Test
+    public void testEmptySecurityRequirements() throws IOException, JSONException {
+        Index index = indexOf(EmptySecurityRequirementsResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testEmptySecurityRequirements.json", result);
     }
 }

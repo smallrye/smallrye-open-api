@@ -560,16 +560,48 @@ public interface AnnotationScanner {
     default void processSecurityRequirementAnnotation(final ClassInfo resourceClass, final MethodInfo method,
             Operation operation) {
 
-        List<AnnotationInstance> securityRequirementAnnotations = SecurityRequirementReader
-                .getSecurityRequirementAnnotations(method);
-        securityRequirementAnnotations.addAll(SecurityRequirementReader.getSecurityRequirementAnnotations(resourceClass));
+        List<AnnotationInstance> requirements;
 
-        for (AnnotationInstance annotation : securityRequirementAnnotations) {
-            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(annotation);
-            if (requirement != null) {
-                operation.addSecurityRequirement(requirement);
+        if (isEmptySecurityRequirements(method)) {
+            operation.setSecurity(new ArrayList<>(0));
+        } else {
+            requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(method);
+
+            if (requirements.isEmpty()) {
+                if (isEmptySecurityRequirements(resourceClass)) {
+                    operation.setSecurity(new ArrayList<>(0));
+                } else {
+                    requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(resourceClass);
+                }
+            }
+
+            for (AnnotationInstance annotation : requirements) {
+                SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(annotation);
+                if (requirement != null) {
+                    operation.addSecurityRequirement(requirement);
+                }
             }
         }
+    }
+
+    /**
+     * Determines whether the target is annotated with an empty <code>@SecurityRequirements</code>
+     * annotation.
+     * 
+     * @param target
+     * @return true if an empty annotation is present, otherwise false
+     */
+    default boolean isEmptySecurityRequirements(AnnotationTarget target) {
+        AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(target);
+
+        if (securityRequirements != null) {
+            AnnotationInstance[] values = JandexUtil.value(securityRequirements, "value");
+            if (values == null || values.length == 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
