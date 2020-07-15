@@ -201,7 +201,7 @@
           }
         }
       },
-      "KustomPairFuzzInteger": {
+      "KustomPairFuzzStringObjectInteger": {
         "required": [
           "bar",
           "foo"
@@ -224,7 +224,7 @@
           }
         }
       },
-      "FuzzKustomPairDouble": {
+      "FuzzKustomPairFuzzStringObjectIntegerDouble": {
         "type": "object",
         "properties": {
           "qAgain": {
@@ -241,13 +241,13 @@
             "type": "number"
           },
           "tAgain2": {
-            "$ref": "#/components/schemas/KustomPairFuzzInteger"
+            "$ref": "#/components/schemas/KustomPairFuzzStringObjectInteger"
           },
           "tAgain4": {
-            "$ref": "#/components/schemas/KustomPairFuzzInteger"
+            "$ref": "#/components/schemas/KustomPairFuzzStringObjectInteger"
           },
           "tValue": {
-            "$ref": "#/components/schemas/KustomPairFuzzInteger"
+            "$ref": "#/components/schemas/KustomPairFuzzStringObjectInteger"
           }
         }
       },
@@ -311,7 +311,7 @@
           }
         }
       },
-      "KustomPairKustomPairInteger": {
+      "KustomPairKustomPairStringStringInteger": {
         "required": [
           "bar",
           "foo"
@@ -444,7 +444,7 @@
             }
           },
           "complexNesting": {
-            "$ref": "#/components/schemas/FuzzKustomPairDouble"
+            "$ref": "#/components/schemas/FuzzKustomPairFuzzStringObjectIntegerDouble"
           },
           "creditCardMap": {
             "type": "object",
@@ -475,7 +475,7 @@
             }
           },
           "nesting": {
-            "$ref": "#/components/schemas/KustomPairKustomPairInteger"
+            "$ref": "#/components/schemas/KustomPairKustomPairStringStringInteger"
           },
           "password": {
             "type": "string",

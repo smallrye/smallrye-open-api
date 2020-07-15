@@ -29,11 +29,7 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
 
     @Test
     public void testParameterizedNameCollisionsUseSequence() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Container.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
-        Index index = indexer.complete();
-
+        Index index = indexOf(Container.class, Nestable.class);
         OpenAPIImpl oai = new OpenAPIImpl();
         SchemaRegistry registry = SchemaRegistry.newInstance(emptyConfig(), oai, index);
 
@@ -48,9 +44,9 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         Schema s2 = registry.register(n2.type(), new SchemaImpl());
         Schema s3 = registry.register(n3.type(), new SchemaImpl());
 
-        assertEquals("#/components/schemas/NestableStringNestable", s1.getRef());
-        assertEquals("#/components/schemas/NestableStringNestable1", s2.getRef());
-        assertEquals("#/components/schemas/NestableStringNestable2", s3.getRef());
+        assertEquals("#/components/schemas/NestableStringNestableStringString", s1.getRef());
+        assertEquals("#/components/schemas/NestableStringNestableStringObject", s2.getRef());
+        assertEquals("#/components/schemas/NestableStringNestableStringNestableStringObject", s3.getRef());
     }
 
     @Test

@@ -68,6 +68,12 @@ public class TypeProcessor {
             type = TypeUtil.resolveWildcard(type.asWildcardType());
         }
 
+        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
+                type.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE) {
+            // Resolve type variable to real variable.
+            type = resolveTypeVariable(schema, type, false);
+        }
+
         if (type.kind() == Type.Kind.ARRAY) {
             DataObjectLogging.log.processingArray(type);
             ArrayType arrayType = type.asArrayType();
@@ -116,12 +122,6 @@ public class TypeProcessor {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             // Parameterized type (e.g. Foo<A, B>)
             return readParameterizedType(type.asParameterizedType());
-        }
-
-        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
-                type.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE) {
-            // Resolve type variable to real variable.
-            return resolveTypeVariable(schema, type);
         }
 
         // Raw Collection
@@ -205,7 +205,7 @@ public class TypeProcessor {
         if (valueType.kind() == Type.Kind.TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.WILDCARD_TYPE) {
-            Type resolved = resolveTypeVariable(propsSchema, valueType);
+            Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
@@ -225,23 +225,19 @@ public class TypeProcessor {
         return propsSchema;
     }
 
-    private Type resolveTypeVariable(Schema schema, Type fieldType) {
+    private Type resolveTypeVariable(Schema schema, Type fieldType, boolean pushToStack) {
         // Type variable (e.g. A in Foo<A>)
         Type resolvedType = typeResolver.getResolvedType(fieldType);
-
         DataObjectLogging.log.resolvedType(fieldType, resolvedType);
+
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
             DataObjectLogging.log.terminalType(resolvedType);
             TypeUtil.applyTypeAttributes(resolvedType, schema);
-        } else {
-            DataObjectLogging.log.typeVarSubstitution(fieldType, resolvedType);
-            if (index.containsClass(resolvedType)) {
-                // Add resolved type to stack.
-                objectStack.push(annotationTarget, parentPathEntry, resolvedType, schema);
-            } else {
-                DataObjectLogging.log.classNotAvailable(resolvedType);
-            }
+        } else if (pushToStack) {
+            // Add resolved type to stack.
+            objectStack.push(annotationTarget, parentPathEntry, resolvedType, schema);
         }
+
         return resolvedType;
     }
 

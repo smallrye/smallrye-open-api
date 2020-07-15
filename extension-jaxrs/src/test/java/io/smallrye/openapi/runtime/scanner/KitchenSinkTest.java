@@ -39,7 +39,7 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
     }
 
     /**
-     * Test parameterised type as a top-level entity (i.e. not just a bare class).
+     * Test parameterized type as a top-level entity (i.e. not just a bare class).
      *
      * @see org.jboss.jandex.ParameterizedType
      */
