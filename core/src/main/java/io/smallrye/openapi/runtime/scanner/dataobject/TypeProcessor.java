@@ -64,6 +64,7 @@ public class TypeProcessor {
     public Type processType() {
         // If it's a terminal type.
         if (isTerminalType(type)) {
+            SchemaRegistry.checkRegistration(type, typeResolver, schema);
             return type;
         }
 
@@ -93,7 +94,7 @@ public class TypeProcessor {
                 pushToStack(type, arrSchema);
             }
 
-            arrSchema = SchemaRegistry.checkRegistration(arrayType.component(), typeResolver, arrSchema);
+            arrSchema = SchemaRegistry.registerReference(arrayType.component(), typeResolver, arrSchema);
 
             while (arrayType.dimensions() > 1) {
                 Schema parentArrSchema = new SchemaImpl();
@@ -119,6 +120,7 @@ public class TypeProcessor {
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
             MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, cl, type));
+            pushToStack(type);
             return STRING_TYPE;
         }
 
@@ -211,18 +213,19 @@ public class TypeProcessor {
             Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
-                propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
+                propsSchema = SchemaRegistry.registerReference(valueType, typeResolver, propsSchema);
             }
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
                 DataObjectLogging.log.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(index, cl, valueType);
+                pushToStack(valueType);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 pushToStack(valueType, propsSchema);
             }
 
-            propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
+            propsSchema = SchemaRegistry.registerReference(valueType, typeResolver, propsSchema);
         }
 
         return propsSchema;

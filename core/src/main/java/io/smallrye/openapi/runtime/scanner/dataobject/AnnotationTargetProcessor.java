@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.FieldInfo;
@@ -112,7 +113,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
      * <li>A schema containing only the attributes scanned or derived from the {@link #annotationTarget} which will include
      * attributes
      * of the {@link #entityType} if it is not able to be registered via
-     * {@link SchemaRegistry#checkRegistration(Type, TypeResolver, Schema) checkRegistration}.
+     * {@link SchemaRegistry#registerReference(Type, TypeResolver, Schema) checkRegistration}.
      * </li>
      * </ol>
      * 
@@ -145,7 +146,15 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
             Type registrationType = TypeUtil.isOptional(entityType) ? fieldType : entityType;
-            registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, typeResolver, typeSchema);
+
+            if (typeSchema.getType() != SchemaType.ARRAY) {
+                // Only register a reference to the type schema. The full schema will be added by subsequent
+                // items on the stack (if not already present in the registry).
+                registeredTypeSchema = SchemaRegistry.registerReference(registrationType, typeResolver, typeSchema);
+            } else {
+                // Allow registration of arrays since we may not encounter a List<CurrentType> again.
+                registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, typeResolver, typeSchema);
+            }
         }
 
         Schema fieldSchema;

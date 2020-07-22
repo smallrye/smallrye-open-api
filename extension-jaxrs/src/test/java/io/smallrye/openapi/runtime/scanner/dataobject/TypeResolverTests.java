@@ -32,7 +32,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedMethodOverridesParentSchema() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Feline.class,
                 Cat.class));
 
@@ -52,7 +52,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedFieldsOverridesInterfaceSchema() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Feline.class,
                 Cat.class));
 
@@ -69,7 +69,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedInterfaceMethodOverridesImplMethod() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Canine.class,
                 Dog.class));
 
@@ -90,7 +90,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedInterfaceMethodOverridesStaticField() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Reptile.class,
                 Lizard.class));
 
@@ -113,7 +113,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testBareInterface() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(MySchema.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(MySchema.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(MySchema.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -144,7 +144,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testJacksonPropertyOrderDefault() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(JacksonPropertyOrderDefault.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderDefault.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderDefault.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -157,7 +157,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testJacksonPropertyOrderCustomName() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(JacksonPropertyOrderCustomName.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderCustomName.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderCustomName.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -171,7 +171,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testJaxbCustomPropertyOrder() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(JaxbCustomPropertyOrder.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JaxbCustomPropertyOrder.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JaxbCustomPropertyOrder.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,

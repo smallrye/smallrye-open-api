@@ -294,9 +294,9 @@ public class SchemaFactory {
      * @param schemaType related schema type for this attribute
      * @return the annotation attribute value, a default value, or null
      */
-    static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
+    static Object parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
             SchemaType schemaType) {
-        return (T) readAttr(annotation, propertyName, value -> {
+        return readAttr(annotation, propertyName, value -> {
             if (!(value instanceof String)) {
                 return value;
             }
@@ -471,7 +471,7 @@ public class SchemaFactory {
 
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.has(ctype)) {
+        if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype)) {
             return schemaRegistry.lookupRef(ctype);
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, cl, ctype);
@@ -491,7 +491,7 @@ public class SchemaFactory {
      * @param schema a schema
      * @return a reference to the registered schema or the input schema when registration is not allowed/possible
      */
-    static Schema schemaRegistration(IndexView index, Type type, Schema schema) {
+    public static Schema schemaRegistration(IndexView index, Type type, Schema schema) {
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
         if (allowRegistration(index, schemaRegistry, type, schema)) {
@@ -524,7 +524,7 @@ public class SchemaFactory {
          * in the registry. Such a situation may occur if a downstream process
          * registered the schema now being checked.
          */
-        return !registry.has(type) || !registry.lookupRef(type).equals(schema);
+        return !registry.hasSchema(type) || !registry.lookupRef(type).equals(schema);
     }
 
     /**
