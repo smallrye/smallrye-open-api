@@ -201,6 +201,7 @@
                     <localCheckout>true</localCheckout>
                     <remoteTagging>false</remoteTagging>
                     <arguments>-DskipTests ${release.arguments}</arguments>
+                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
                 </configuration>
             </plugin>
             <plugin>
