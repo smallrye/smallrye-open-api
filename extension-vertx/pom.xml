@@ -8,7 +8,7 @@
         <version>2.0.4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>extension-vertx</artifactId>
+    <artifactId>smallrye-open-api-vertx</artifactId>
 
     <name>SmallRye: OpenAPI extension - Vert.x</name>
 
