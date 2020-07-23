@@ -51,6 +51,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         return "Spring";
     }
 
+    @Override
     public boolean isWrapperType(Type type) {
         return type.name().equals(SpringConstants.RESPONSE_ENTITY) && type.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
     }
@@ -263,6 +264,8 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                                         locatorPathParameters);
                             }
                         }
+                    } else {
+                        // TODO: Default ?
                     }
                 }
 

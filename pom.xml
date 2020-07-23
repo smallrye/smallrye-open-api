@@ -13,7 +13,7 @@
     <version>2.0.4-SNAPSHOT</version>
 
     <packaging>pom</packaging>
-    <name>SmallRye: MicroProfile OpenAPI Parent</name>
+    <name>SmallRye: OpenAPI Parent</name>
     <url>http://smallrye.io</url>
 
     <properties>
@@ -52,6 +52,7 @@
         <module>core</module>
         <module>extension-jaxrs</module>
         <module>extension-spring</module>
+        <module>extension-vertx</module>
         <module>implementation</module>
         <module>tck</module>
         <module>ui</module>

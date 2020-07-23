@@ -30,7 +30,7 @@
 
 13000-13999 = smallrye-open-api [io.smallrye.openapi.tck] (messages)
 
-14000-14999 =
+14000-14999 = smallrye-open-api [io.smallrye.openapi.vertx] (logging)
 
 15000-15999 =
 

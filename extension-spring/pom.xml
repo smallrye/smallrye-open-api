@@ -10,7 +10,7 @@
 
     <artifactId>smallrye-open-api-spring</artifactId>
 
-    <name>SmallRye: MicroProfile OpenAPI Spring extension</name>
+    <name>SmallRye: OpenAPI extension - Spring </name>
 
     <properties>
         <version.spring>5.2.5.RELEASE</version.spring>

@@ -1,0 +1,22 @@
+{
+  "openapi" : "3.0.1",
+  "paths" : {
+    "/greeting/greet/{id}" : {
+      "delete" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    }
+  }
+}

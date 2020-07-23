@@ -56,7 +56,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private static final String JAXRS_PACKAGE = "javax.ws.rs";
 
-    private Deque<JaxRsSubResourceLocator> subResourceStack = new LinkedList<>();
+    private final Deque<JaxRsSubResourceLocator> subResourceStack = new LinkedList<>();
 
     @Override
     public String getName() {

@@ -33,8 +33,6 @@ public class SpringConstants {
     static final DotName PATH_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.PathVariable");
     static final DotName HEADER_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.RequestHeader");
     static final DotName MATRIX_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.MatrixVariable");
-    //static final DotName BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
-    //static final DotName FORM_PARAM = DotName.createSimple(FormParam.class.getName());
 
     public static final Set<DotName> MULTIPART_OUTPUTS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(MUTIPART_FILE)));
