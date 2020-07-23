@@ -1,6 +1,14 @@
 package test.io.smallrye.openapi.runtime.scanner.resources;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
+
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
@@ -26,33 +34,27 @@ public class GreetingGetRoute {
     }
 
     // 2) Basic path var test
-    //@GetMapping("/hellosPathVariable/{name}")
-    //public List<Greeting> hellosPathVariable(@PathVariable(name = "name") String name) {
-    //   return Arrays.asList(new Greeting("Hello " + name));
-    //}
+    @Route(path = "/hellosPathVariable/:name", methods = HttpMethod.GET)
+    public List<Greeting> hellosPathVariable(@Param("name") String name) {
+        return Arrays.asList(new Greeting("Hello " + name));
+    }
 
     // 3) Basic path var with Optional test
-    //@GetMapping("/helloOptional/{name}")
-    //public Optional<Greeting> helloOptional(@PathVariable(name = "name") String name) {
-    //    return Optional.of(new Greeting("Hello " + name));
-    //}
+    @Route(path = "/helloOptional/:name", methods = HttpMethod.GET)
+    public Optional<Greeting> helloOptional(@Param("name") String name) {
+        return Optional.of(new Greeting("Hello " + name));
+    }
 
     // 4) Basic request param test
-    //@GetMapping("/helloRequestParam")
-    //public Greeting helloRequestParam(@RequestParam(value = "name", required = false) String name) {
-    //    return new Greeting("Hello " + name);
-    //}
+    @Route(path = "/helloRequestParam", methods = HttpMethod.GET)
+    public Greeting helloRequestParam(@Param("name") String name) {
+        return new Greeting("Hello " + name);
+    }
 
-    // 5) ResponseEntity without a type specified
-    //@GetMapping("/helloPathVariableWithResponse/{name}")
-    //@APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    //public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
-    //    return ResponseEntity.ok(new Greeting("Hello " + name));
-    //}
-
-    // 6) ResponseEntity with a type specified (No JaxRS comparison)
-    //@GetMapping("/helloPathVariableWithResponseTyped/{name}")
-    //public ResponseEntity<Greeting> helloPathVariableWithResponseTyped(@PathVariable(name = "name") String name) {
-    //    return ResponseEntity.ok(new Greeting("Hello " + name));
-    //}
+    // 5) Void, so without a type specified
+    @Route(path = "/helloPathVariableWithResponse/:name", methods = HttpMethod.GET)
+    @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
+    public void helloPathVariableWithResponse(@Param("name") String name) {
+        // 
+    }
 }

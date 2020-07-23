@@ -19,7 +19,6 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
-import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -51,11 +50,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
-    public boolean isWrapperType(Type type) {
-        return type.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
-    }
-
-    @Override
     public boolean isAsyncResponse(final MethodInfo method) {
         // TODO: Implement this.
         return false;
@@ -67,7 +61,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             return true;
         }
         return false;
-
     }
 
     @Override
@@ -76,34 +69,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean isScannerInternalResponse(Type returnType) {
-        // If it's Response Entity that does not have a valid type, then stop
-        //        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY)
-        //                && !returnType.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
-        return false;
-    }
-
-    @Override
-    public boolean isMultipartOutput(Type returnType) {
-        // TODO: Implement this.
-        return false; //SpringConstants.MULTIPART_OUTPUTS.contains(returnType.name());
-    }
-
-    @Override
-    public boolean isMultipartInput(Type inputType) {
-        // TODO: Implement this.
-        return false; //SpringConstants.MULTIPART_INPUTS.contains(inputType.name());
-    }
-
-    @Override
-    public String getReasonPhrase(int statusCode) {
-        // TODO: Implement this
-        //HttpStatus status = HttpStatus.resolve(statusCode);
-        //return status != null ? status.getReasonPhrase() : null;
-        return "OK";
     }
 
     @Override
