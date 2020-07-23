@@ -10,7 +10,7 @@
     
     <artifactId>smallrye-open-api-jaxrs</artifactId>
     
-    <name>SmallRye: MicroProfile OpenAPI JAX-RS extension</name>
+    <name>SmallRye: OpenAPI extension - JAX-RS</name>
     <properties>
         <version.org.jboss.resteasy>4.5.5.Final</version.org.jboss.resteasy>    
     </properties>

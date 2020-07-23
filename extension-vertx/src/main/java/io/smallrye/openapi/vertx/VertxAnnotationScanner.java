@@ -1,4 +1,4 @@
-package io.smallrye.openapi.spring;
+package io.smallrye.openapi.vertx;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +20,6 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -37,23 +35,24 @@ import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.vertx.core.http.HttpMethod;
 
 /**
- * Scanner that scan Spring entry points.
+ * Scanner that scan Vertx routes.
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class SpringAnnotationScanner extends AbstractAnnotationScanner {
-    private static final String SPRING_PACKAGE = "org.springframework.web";
+public class VertxAnnotationScanner extends AbstractAnnotationScanner {
+    private static final String VERTX_PACKAGE = "io.vertx.ext.web";
 
     @Override
     public String getName() {
-        return "Spring";
+        return "Vert.x";
     }
 
     @Override
     public boolean isWrapperType(Type type) {
-        return type.name().equals(SpringConstants.RESPONSE_ENTITY) && type.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
+        return type.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
     }
 
     @Override
@@ -64,55 +63,57 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        if (hasRequestMappingMethod(method, RequestMethod.POST)) {
+        if (hasRouteMethod(method, HttpMethod.POST)) {
             return true;
         }
-        return method.hasAnnotation(SpringConstants.POST_MAPPING);
+        return false;
 
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        if (hasRequestMappingMethod(method, RequestMethod.DELETE)) {
+        if (hasRouteMethod(method, HttpMethod.DELETE)) {
             return true;
         }
-        return method.hasAnnotation(SpringConstants.DELETE_MAPPING);
+        return false;
     }
 
     @Override
     public boolean isScannerInternalResponse(Type returnType) {
         // If it's Response Entity that does not have a valid type, then stop
-        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY)
-                && !returnType.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
+        //        return returnType.name().equals(SpringConstants.RESPONSE_ENTITY)
+        //                && !returnType.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
+        return false;
     }
 
     @Override
     public boolean isMultipartOutput(Type returnType) {
-        // TODO: Check this
-        return SpringConstants.MULTIPART_OUTPUTS.contains(returnType.name());
+        // TODO: Implement this.
+        return false; //SpringConstants.MULTIPART_OUTPUTS.contains(returnType.name());
     }
 
     @Override
     public boolean isMultipartInput(Type inputType) {
-        // TODO: Check this
-        return SpringConstants.MULTIPART_INPUTS.contains(inputType.name());
+        // TODO: Implement this.
+        return false; //SpringConstants.MULTIPART_INPUTS.contains(inputType.name());
     }
 
     @Override
     public String getReasonPhrase(int statusCode) {
-        HttpStatus status = HttpStatus.resolve(statusCode);
-        return status != null ? status.getReasonPhrase() : null;
+        // TODO: Implement this
+        //HttpStatus status = HttpStatus.resolve(statusCode);
+        //return status != null ? status.getReasonPhrase() : null;
+        return "OK";
     }
 
     @Override
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
-            if (SpringParameter.isParameter(instance.name())) {
+            if (VertxParameter.isParameter(instance.name())) {
                 return true;
             }
-            if (instance.name().toString().startsWith(SPRING_PACKAGE)
-                    && !instance.name().equals(SpringConstants.REQUEST_BODY)) {
+            if (instance.name().toString().startsWith(VERTX_PACKAGE)) {
                 return true;
             }
             for (AnnotationScannerExtension extension : extensions) {
@@ -125,8 +126,8 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public OpenAPI scan(final AnnotationScannerContext context, OpenAPI openApi) {
-        // Get all Spring controllers and convert them to OpenAPI models (and merge them into a single one)
-        processControllerClasses(context, openApi);
+        // Get all Vert.x routes and convert them to OpenAPI models (and merge them into a single one)
+        processRoutes(context, openApi);
 
         boolean tagsDefined = openApi.getTags() != null && !openApi.getTags().isEmpty();
 
@@ -139,34 +140,33 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         return openApi;
     }
 
-    private boolean hasRequestMappingMethod(final MethodInfo method, final RequestMethod requestMethod) {
-        if (method.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
-            AnnotationInstance annotation = method.annotation(SpringConstants.REQUEST_MAPPING);
-            AnnotationValue value = annotation.value("method");
+    private boolean hasRouteMethod(final MethodInfo method, final HttpMethod httpMethod) {
+        if (method.hasAnnotation(VertxConstants.ROUTE)) {
+            AnnotationInstance annotation = method.annotation(VertxConstants.ROUTE);
+            AnnotationValue value = annotation.value("methods");
             return value != null && value.asEnumArray().length > 0
-                    && Arrays.asList(value.asEnumArray()).contains(requestMethod.name());
+                    && Arrays.asList(value.asEnumArray()).contains(httpMethod.name());
         }
         return false;
     }
 
     /**
-     * Find and process all Spring Controllers
-     * TODO: Also support org.springframework.stereotype.Controller annotations ?
+     * Find and process all Vert.x Routes
      *
      * @param context the scanning context
      * @param openApi the openAPI model
      */
-    private void processControllerClasses(final AnnotationScannerContext context, OpenAPI openApi) {
-        // Get all Spring controllers and convert them to OpenAPI models (and merge them into a single one)
-        Collection<AnnotationInstance> controllerAnnotations = context.getIndex()
-                .getAnnotations(SpringConstants.REST_CONTROLLER);
+    private void processRoutes(final AnnotationScannerContext context, OpenAPI openApi) {
+        // Get all Vert.x routes and convert them to OpenAPI models (and merge them into a single one)
+        Collection<AnnotationInstance> routeAnnotations = context.getIndex()
+                .getAnnotations(VertxConstants.ROUTE);
         List<ClassInfo> applications = new ArrayList<>();
-        for (AnnotationInstance annotationInstance : controllerAnnotations) {
-            if (annotationInstance.target().kind().equals(AnnotationTarget.Kind.CLASS)) {
-                ClassInfo classInfo = annotationInstance.target().asClass();
+        for (AnnotationInstance annotationInstance : routeAnnotations) {
+            if (annotationInstance.target().kind().equals(AnnotationTarget.Kind.METHOD)) {
+                ClassInfo classInfo = annotationInstance.target().asMethod().declaringClass();
                 applications.add(classInfo);
             } else {
-                SpringLogging.log.ignoringAnnotation(SpringConstants.REST_CONTROLLER.withoutPackagePrefix());
+                VertxLogging.log.ignoringAnnotation(VertxConstants.ROUTE.withoutPackagePrefix());
             }
         }
 
@@ -174,63 +174,62 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processScannerExtensions(context, applications);
 
         for (ClassInfo controller : applications) {
-            OpenAPI applicationOpenApi = processControllerClass(context, controller);
+            OpenAPI applicationOpenApi = processRouteClass(context, controller);
             openApi = MergeUtil.merge(openApi, applicationOpenApi);
         }
     }
 
     /**
-     * Processes a Spring Controller and creates an {@link OpenAPI} model. Performs
-     * annotation scanning and other processing. Returns a model unique to that single Spring
-     * controller.
+     * Processes a Class that contains routes and creates an {@link OpenAPI} model. Performs
+     * annotation scanning and other processing. Returns a model unique to that single Class.
      *
      * @param context the scanning context
-     * @param controllerClass the Spring REST controller
+     * @param routeClass the class containing the Vert.x route
      */
-    private OpenAPI processControllerClass(final AnnotationScannerContext context, ClassInfo controllerClass) {
+    private OpenAPI processRouteClass(final AnnotationScannerContext context, ClassInfo routeClass) {
 
-        SpringLogging.log.processingController(controllerClass.simpleName());
+        VertxLogging.log.processingRouteClass(routeClass.simpleName());
 
         OpenAPI openApi = new OpenAPIImpl();
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
-        // Get the @RequestMapping info and save it for later
-        AnnotationInstance requestMappingAnnotation = JandexUtil.getClassAnnotation(controllerClass,
-                SpringConstants.REQUEST_MAPPING);
+        // Get the @RouteBase info and save it for later
+        AnnotationInstance routeBaseAnnotation = JandexUtil.getClassAnnotation(routeClass,
+                VertxConstants.ROUTE_BASE);
 
-        if (requestMappingAnnotation != null) {
-            this.currentAppPath = ParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation);
+        if (routeBaseAnnotation != null) {
+            this.currentAppPath = routeBaseAnnotation.value("path").asString(); // TODO: Check if there and check for :
         } else {
             this.currentAppPath = "/";
         }
 
         // Process @OpenAPIDefinition annotation
-        processDefinitionAnnotation(context, controllerClass, openApi);
+        processDefinitionAnnotation(context, routeClass, openApi);
 
         // Process @SecurityScheme annotations
-        processSecuritySchemeAnnotation(controllerClass, openApi);
+        processSecuritySchemeAnnotation(routeClass, openApi);
 
         // Process @Server annotations
-        processServerAnnotation(controllerClass, openApi);
+        processServerAnnotation(routeClass, openApi);
 
         // Process Java security
-        processJavaSecurity(controllerClass, openApi);
+        processJavaSecurity(routeClass, openApi);
 
         // Now find and process the operation methods
-        processControllerMethods(context, controllerClass, openApi, null);
+        processRouteMethods(context, routeClass, openApi, null);
 
         return openApi;
     }
 
     /**
-     * Process the Spring controller Operation methods
+     * Process the Vert.x Route Operation methods
      *
      * @param context the scanning context
      * @param resourceClass the class containing the methods
      * @param openApi the OpenApi model being processed
      * @param locatorPathParameters path parameters
      */
-    private void processControllerMethods(final AnnotationScannerContext context,
+    private void processRouteMethods(final AnnotationScannerContext context,
             final ClassInfo resourceClass,
             OpenAPI openApi,
             List<Parameter> locatorPathParameters) {
@@ -240,32 +239,21 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
             if (methodInfo.annotations().size() > 0) {
-                // Try @XXXMapping annotations
-                for (DotName validMethodAnnotations : SpringConstants.HTTP_METHODS) {
-                    if (methodInfo.hasAnnotation(validMethodAnnotations)) {
-                        String toHttpMethod = toHttpMethod(validMethodAnnotations);
-                        PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(toHttpMethod);
-                        processControllerMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
-                                locatorPathParameters);
-
-                    }
-                }
-
-                // Try @RequestMapping
-                if (methodInfo.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
-                    AnnotationInstance requestMappingAnnotation = methodInfo.annotation(SpringConstants.REQUEST_MAPPING);
-                    AnnotationValue methodValue = requestMappingAnnotation.value("method");
+                // Try @Route annotations
+                if (methodInfo.hasAnnotation(VertxConstants.ROUTE)) {
+                    AnnotationInstance requestMappingAnnotation = methodInfo.annotation(VertxConstants.ROUTE);
+                    AnnotationValue methodValue = requestMappingAnnotation.value("methods");
                     if (methodValue != null) {
                         String[] enumArray = methodValue.asEnumArray();
                         for (String enumValue : enumArray) {
                             if (enumValue != null) {
                                 PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(enumValue.toUpperCase());
-                                processControllerMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
+                                processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
                                         locatorPathParameters);
                             }
                         }
                     } else {
-                        // TODO: Default ?
+                        // TODO: Default ? Look at RouteBase
                     }
                 }
 
@@ -273,14 +261,8 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    private String toHttpMethod(DotName dotname) {
-        String className = dotname.withoutPackagePrefix();
-        className = className.replace("Mapping", "");
-        return className.toUpperCase();
-    }
-
     /**
-     * Process a single Spring method to produce an OpenAPI Operation.
+     * Process a single Vert.x method to produce an OpenAPI Operation.
      *
      * @param openApi
      * @param resourceClass
@@ -289,7 +271,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
      * @param resourceTags
      * @param locatorPathParameters
      */
-    private void processControllerMethod(final AnnotationScannerContext context,
+    private void processRouteMethod(final AnnotationScannerContext context,
             final ClassInfo resourceClass,
             final MethodInfo method,
             final PathItem.HttpMethod methodType,
@@ -297,7 +279,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
 
-        SpringLogging.log.processingMethod(method.toString());
+        VertxLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
@@ -316,6 +298,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+
         ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method, reader,
                 context.getExtensions());
         operation.setParameters(params.getOperationParameters());
@@ -364,25 +347,24 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property) {
-        Set<DotName> annotationNames = SpringConstants.HTTP_METHODS;
+        DotName annotationName = VertxConstants.ROUTE;
 
-        for (DotName annotationName : annotationNames) {
-            AnnotationInstance annotation = resourceMethod.annotation(annotationName);
+        AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
-            if (annotation == null || annotation.value(property.name()) == null) {
-                annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), SpringConstants.REQUEST_MAPPING);
-            }
-
-            if (annotation != null) {
-                AnnotationValue annotationValue = annotation.value(property.name());
-
-                if (annotationValue != null) {
-                    return Optional.of(annotationValue.asStringArray());
-                }
-
-                return Optional.of(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
-            }
+        if (annotation == null || annotation.value(property.name()) == null) {
+            annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
         }
+
+        if (annotation != null) {
+            AnnotationValue annotationValue = annotation.value(property.name());
+
+            if (annotationValue != null) {
+                return Optional.of(annotationValue.asStringArray());
+            }
+
+            return Optional.of(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
+        }
+
         return Optional.empty();
     }
 

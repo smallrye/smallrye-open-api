@@ -10,7 +10,7 @@
     
     <artifactId>smallrye-open-api-ui</artifactId>
 
-    <name>SmallRye: MicroProfile OpenAPI UI</name>
+    <name>SmallRye: OpenAPI UI</name>
     
     <properties>
         <swagger-ui.version>3.25.4</swagger-ui.version>

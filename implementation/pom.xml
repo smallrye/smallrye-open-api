@@ -10,7 +10,7 @@
 
     <artifactId>smallrye-open-api</artifactId>
     <packaging>pom</packaging>
-    <name>SmallRye: MicroProfile OpenAPI Implementation</name>
+    <name>SmallRye: OpenAPI Implementation</name>
 
     <dependencies>
         <!-- The implementation only incude the JAX-RS entry point. You can add Spring extension if you want it -->
