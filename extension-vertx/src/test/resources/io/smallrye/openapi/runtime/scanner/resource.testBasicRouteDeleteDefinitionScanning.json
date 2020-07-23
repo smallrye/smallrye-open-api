@@ -17,40 +17,6 @@
           }
         }
       }
-    },
-    "/greeting/greetWithResponse/{id}" : {
-      "delete" : {
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          }
-        }
-      }
-    },
-    "/greeting/greetWithResponseTyped/{id}" : {
-      "delete" : {
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          }
-        }
-      }
     }
   }
 }

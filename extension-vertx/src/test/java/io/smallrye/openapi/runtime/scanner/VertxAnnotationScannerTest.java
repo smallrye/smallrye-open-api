@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.junit.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteRoute;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetRoute;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostRoute;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutRoute;
@@ -76,15 +77,15 @@ public class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
      * @throws IOException
      * @throws JSONException
      */
-    //    @Test
-    //    public void testBasicDeleteRouteDefinitionScanning() throws IOException, JSONException {
-    //        Index i = indexOf(GreetingDeleteController.class, Greeting.class);
-    //        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
-    //
-    //        OpenAPI result = scanner.scan();
-    //
-    //        printToConsole(result);
-    //        assertJsonEquals("resource.testBasicRouteDeleteDefinitionScanning.json", result);
-    //    }
+    @Test
+    public void testBasicDeleteRouteDefinitionScanning() throws IOException, JSONException {
+        Index i = indexOf(GreetingDeleteRoute.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicRouteDeleteDefinitionScanning.json", result);
+    }
 
 }
