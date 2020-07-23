@@ -244,71 +244,86 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
 
-        VertxLogging.log.processingMethod(method.toString());
+        if (shouldScan(method)) {
 
-        // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
+            VertxLogging.log.processingMethod(method.toString());
 
-        // Process any @Operation annotation
-        Optional<Operation> maybeOperation = processOperation(context, method);
-        if (!maybeOperation.isPresent()) {
-            return; // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
+            // Figure out the current @Produces and @Consumes (if any)
+            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
+            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
+
+            // Process any @Operation annotation
+            Optional<Operation> maybeOperation = processOperation(context, method);
+            if (!maybeOperation.isPresent()) {
+                return; // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
+            }
+            final Operation operation = maybeOperation.get();
+
+            // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
+            processOperationTags(method, openApi, resourceTags, operation);
+
+            // Process @Parameter annotations.
+            PathItem pathItem = new PathItemImpl();
+            Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+
+            ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method, reader,
+                    context.getExtensions());
+            operation.setParameters(params.getOperationParameters());
+
+            pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
+
+            // Process any @RequestBody annotation (note: the @RequestBody annotation can be found on a method argument *or* on the method)
+            RequestBody requestBody = processRequestBody(context, method, params);
+            if (requestBody != null) {
+                operation.setRequestBody(requestBody);
+            }
+
+            // Process @APIResponse annotations
+            processResponse(context, method, operation, null);
+
+            // Process @SecurityRequirement annotations
+            processSecurityRequirementAnnotation(resourceClass, method, operation);
+
+            // Process @Callback annotations
+            processCallback(context, method, operation);
+
+            // Process @Server annotations
+            processServerAnnotation(method, operation);
+
+            // Process @Extension annotations
+            processExtensions(context, method, operation);
+
+            // Process Security Roles
+            JavaSecurityProcessor.processSecurityRoles(method, operation);
+
+            // Now set the operation on the PathItem as appropriate based on the Http method type
+            setOperationOnPathItem(methodType, pathItem, operation);
+
+            // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
+            String path = super.makePath(params.getOperationPath());
+
+            // Get or create a PathItem to hold the operation
+            PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
+
+            if (existingPath == null) {
+                ModelUtil.paths(openApi).addPathItem(path, pathItem);
+            } else {
+                // Changes applied to 'existingPath', no need to re-assign or add to OAI.
+                MergeUtil.mergeObjects(existingPath, pathItem);
+            }
         }
-        final Operation operation = maybeOperation.get();
+    }
 
-        // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-        processOperationTags(method, openApi, resourceTags, operation);
-
-        // Process @Parameter annotations.
-        PathItem pathItem = new PathItemImpl();
-        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-
-        ResourceParameters params = ParameterProcessor.process(context.getIndex(), resourceClass, method, reader,
-                context.getExtensions());
-        operation.setParameters(params.getOperationParameters());
-
-        pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
-
-        // Process any @RequestBody annotation (note: the @RequestBody annotation can be found on a method argument *or* on the method)
-        RequestBody requestBody = processRequestBody(context, method, params);
-        if (requestBody != null) {
-            operation.setRequestBody(requestBody);
+    static boolean shouldScan(MethodInfo resourceMethod) {
+        DotName annotationName = VertxConstants.ROUTE;
+        AnnotationInstance annotation = resourceMethod.annotation(annotationName);
+        if (annotation != null && annotation.value("type") != null) {
+            AnnotationValue annotationValue = annotation.value("type");
+            if (annotationValue.asEnum().equals("FAILURE")) {
+                return false;
+            }
         }
-
-        // Process @APIResponse annotations
-        processResponse(context, method, operation, null);
-
-        // Process @SecurityRequirement annotations
-        processSecurityRequirementAnnotation(resourceClass, method, operation);
-
-        // Process @Callback annotations
-        processCallback(context, method, operation);
-
-        // Process @Server annotations
-        processServerAnnotation(method, operation);
-
-        // Process @Extension annotations
-        processExtensions(context, method, operation);
-
-        // Process Security Roles
-        JavaSecurityProcessor.processSecurityRoles(method, operation);
-
-        // Now set the operation on the PathItem as appropriate based on the Http method type
-        setOperationOnPathItem(methodType, pathItem, operation);
-
-        // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = super.makePath(params.getOperationPath());
-
-        // Get or create a PathItem to hold the operation
-        PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
-
-        if (existingPath == null) {
-            ModelUtil.paths(openApi).addPathItem(path, pathItem);
-        } else {
-            // Changes applied to 'existingPath', no need to re-assign or add to OAI.
-            MergeUtil.mergeObjects(existingPath, pathItem);
-        }
+        return true;
     }
 
     static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property) {

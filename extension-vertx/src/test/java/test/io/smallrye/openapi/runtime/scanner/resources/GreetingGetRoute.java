@@ -57,4 +57,10 @@ public class GreetingGetRoute {
     public void helloPathVariableWithResponse(@Param("name") String name) {
         // 
     }
+
+    // 6) Failure should not end up the schema
+    @Route(path = "/helloFailure/:name", methods = HttpMethod.GET, type = Route.HandlerType.FAILURE)
+    public Greeting helloFailure(@Param("name") String name) {
+        return new Greeting("Hello " + name);
+    }
 }
