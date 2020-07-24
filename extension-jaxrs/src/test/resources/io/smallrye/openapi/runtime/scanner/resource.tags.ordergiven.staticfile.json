@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.1",
+  "openapi" : "3.0.3",
   "info": {
     "title" : "Tag order in static file",
     "version" : "1.0.0-static"

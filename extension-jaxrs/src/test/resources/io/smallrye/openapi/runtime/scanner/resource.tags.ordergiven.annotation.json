@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.1",
+  "openapi" : "3.0.3",
   "info": {
     "title" : "Testing user-specified tag order",
     "version" : "1.0.0"
