@@ -1,0 +1,170 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Generated API",
+    "version" : "1.0",
+    "license" : {
+            "name" : "Apache License 2.0"
+    }    
+  },
+  "paths" : {
+    "/greeting/helloOptional/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariable/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariableWithResponse/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariableWithResponseTyped/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloRequestParam" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/hellosPathVariable/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Greeting"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

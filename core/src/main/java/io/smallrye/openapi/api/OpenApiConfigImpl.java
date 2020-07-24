@@ -21,6 +21,15 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 public class OpenApiConfigImpl implements OpenApiConfig {
 
     private static final String VERSION = OASConfig.EXTENSIONS_PREFIX + "openapi";
+    private static final String INFO_TITLE = OASConfig.EXTENSIONS_PREFIX + "info.title";
+    private static final String INFO_VERSION = OASConfig.EXTENSIONS_PREFIX + "info.version";
+    private static final String INFO_DESCRIPTION = OASConfig.EXTENSIONS_PREFIX + "info.description";
+    private static final String INFO_TERMS = OASConfig.EXTENSIONS_PREFIX + "info.termsOfService";
+    private static final String INFO_CONTACT_EMAIL = OASConfig.EXTENSIONS_PREFIX + "info.contact.email";
+    private static final String INFO_CONTACT_NAME = OASConfig.EXTENSIONS_PREFIX + "info.contact.name";
+    private static final String INFO_CONTACT_URL = OASConfig.EXTENSIONS_PREFIX + "info.contact.url";
+    private static final String INFO_LICENSE_NAME = OASConfig.EXTENSIONS_PREFIX + "info.license.name";
+    private static final String INFO_LICENSE_URL = OASConfig.EXTENSIONS_PREFIX + "info.license.url";
 
     private Config config;
 
@@ -39,6 +48,15 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Boolean applicationPathDisable;
     private Map<String, String> schemas;
     private String version;
+    private String infoTitle;
+    private String infoVersion;
+    private String infoDescription;
+    private String infoTermsOfService;
+    private String infoContactEmail;
+    private String infoContactName;
+    private String infoContactUrl;
+    private String infoLicenseName;
+    private String infoLicenseUrl;
 
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
@@ -248,6 +266,78 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             version = getStringConfigValue(VERSION);
         }
         return version;
+    }
+
+    @Override
+    public String getInfoTitle() {
+        if (infoTitle == null) {
+            infoTitle = getStringConfigValue(INFO_TITLE);
+        }
+        return infoTitle;
+    }
+
+    @Override
+    public String getInfoVersion() {
+        if (infoVersion == null) {
+            infoVersion = getStringConfigValue(INFO_VERSION);
+        }
+        return infoVersion;
+    }
+
+    @Override
+    public String getInfoDescription() {
+        if (infoDescription == null) {
+            infoDescription = getStringConfigValue(INFO_DESCRIPTION);
+        }
+        return infoDescription;
+    }
+
+    @Override
+    public String getInfoTermsOfService() {
+        if (infoTermsOfService == null) {
+            infoTermsOfService = getStringConfigValue(INFO_TERMS);
+        }
+        return infoTermsOfService;
+    }
+
+    @Override
+    public String getInfoContactEmail() {
+        if (infoContactEmail == null) {
+            infoContactEmail = getStringConfigValue(INFO_CONTACT_EMAIL);
+        }
+        return infoContactEmail;
+    }
+
+    @Override
+    public String getInfoContactName() {
+        if (infoContactName == null) {
+            infoContactName = getStringConfigValue(INFO_CONTACT_NAME);
+        }
+        return infoContactName;
+    }
+
+    @Override
+    public String getInfoContactUrl() {
+        if (infoContactUrl == null) {
+            infoContactUrl = getStringConfigValue(INFO_CONTACT_URL);
+        }
+        return infoContactUrl;
+    }
+
+    @Override
+    public String getInfoLicenseName() {
+        if (infoLicenseName == null) {
+            infoLicenseName = getStringConfigValue(INFO_LICENSE_NAME);
+        }
+        return infoLicenseName;
+    }
+
+    @Override
+    public String getInfoLicenseUrl() {
+        if (infoLicenseUrl == null) {
+            infoLicenseUrl = getStringConfigValue(INFO_LICENSE_URL);
+        }
+        return infoLicenseUrl;
     }
 
     /**

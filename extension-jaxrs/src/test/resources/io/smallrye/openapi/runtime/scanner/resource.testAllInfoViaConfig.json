@@ -1,0 +1,178 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "My own awesome REST service",
+    "description" : "This service is awesome",
+    "termsOfService" : "The terms is also awesome",
+    "contact" : {
+      "name" : "Phillip Kruger",
+      "url" : "https://www.phillip-kruger.com",
+      "email" : "phillip.kruger@redhat.com"
+    },
+    "license" : {
+      "name" : "Apache License 2.0",
+      "url" : "https://choosealicense.com/licenses/apache-2.0/"
+    },
+    "version" : "1.2.3"
+  },
+  "paths" : {
+    "/greeting/helloOptional/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariable/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariableWithResponse/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariableWithResponseTyped/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloRequestParam" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/hellosPathVariable/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Greeting"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

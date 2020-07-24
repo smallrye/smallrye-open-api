@@ -11,6 +11,8 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.models.info.ContactImpl;
+import io.smallrye.openapi.api.models.info.LicenseImpl;
 import io.smallrye.openapi.api.models.servers.ServerImpl;
 
 /**
@@ -41,9 +43,44 @@ public class ConfigUtil {
     }
 
     protected static final void configureInfo(OpenApiConfig config, OpenAPI oai) {
-        //if (merged.getInfo() == null) {
-        //merged.setInfo(new InfoImpl());
-        //}
+        if (config.getInfoTitle() != null) {
+            oai.getInfo().setTitle(config.getInfoTitle());
+        }
+        if (config.getInfoVersion() != null) {
+            oai.getInfo().setVersion(config.getInfoVersion());
+        }
+        if (config.getInfoDescription() != null) {
+            oai.getInfo().setDescription(config.getInfoDescription());
+        }
+        if (config.getInfoTermsOfService() != null) {
+            oai.getInfo().setTermsOfService(config.getInfoTermsOfService());
+        }
+
+        // Contact
+        if (oai.getInfo().getContact() == null && (config.getInfoContactEmail() != null || config.getInfoContactName() != null
+                || config.getInfoContactUrl() != null)) {
+            oai.getInfo().setContact(new ContactImpl());
+        }
+        if (config.getInfoContactEmail() != null) {
+            oai.getInfo().getContact().setEmail(config.getInfoContactEmail());
+        }
+        if (config.getInfoContactName() != null) {
+            oai.getInfo().getContact().setName(config.getInfoContactName());
+        }
+        if (config.getInfoContactUrl() != null) {
+            oai.getInfo().getContact().setUrl(config.getInfoContactUrl());
+        }
+
+        // License
+        if (oai.getInfo().getLicense() == null && (config.getInfoLicenseName() != null || config.getInfoLicenseUrl() != null)) {
+            oai.getInfo().setLicense(new LicenseImpl());
+        }
+        if (config.getInfoLicenseName() != null) {
+            oai.getInfo().getLicense().setName(config.getInfoLicenseName());
+        }
+        if (config.getInfoLicenseUrl() != null) {
+            oai.getInfo().getLicense().setUrl(config.getInfoLicenseUrl());
+        }
     }
 
     protected static final void configureServers(OpenApiConfig config, OpenAPI oai) {
