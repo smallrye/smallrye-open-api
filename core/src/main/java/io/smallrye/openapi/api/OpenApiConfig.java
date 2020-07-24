@@ -45,4 +45,8 @@ public interface OpenApiConfig {
     public boolean applicationPathDisable();
 
     public Map<String, String> getSchemas();
+
+    // Here we extend this in SmallRye with some more configure options (mp.openapi.extensions)
+
+    public String getOpenApiVersion();
 }

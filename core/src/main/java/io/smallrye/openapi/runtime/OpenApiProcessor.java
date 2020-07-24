@@ -6,12 +6,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.OASModelReader;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
@@ -25,6 +28,12 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 public class OpenApiProcessor {
 
     private OpenApiProcessor() {
+    }
+
+    public static OpenAPI bootstrap(IndexView index) {
+        Config config = ConfigProvider.getConfig();
+        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        return bootstrap(openApiConfig, index);
     }
 
     public static OpenAPI bootstrap(OpenApiConfig config, IndexView index) {

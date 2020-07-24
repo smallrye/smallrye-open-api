@@ -20,6 +20,8 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  */
 public class OpenApiConfigImpl implements OpenApiConfig {
 
+    private static final String VERSION = OASConfig.EXTENSIONS_PREFIX + "openapi";
+
     private Config config;
 
     private String modelReader;
@@ -36,6 +38,11 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String customSchemaRegistryClass;
     private Boolean applicationPathDisable;
     private Map<String, String> schemas;
+    private String version;
+
+    public static OpenApiConfig fromConfig(Config config) {
+        return new OpenApiConfigImpl(config);
+    }
 
     /**
      * Constructor.
@@ -233,6 +240,14 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                             name -> config.getValue(name, String.class)));
         }
         return schemas;
+    }
+
+    @Override
+    public String getOpenApiVersion() {
+        if (version == null) {
+            version = getStringConfigValue(VERSION);
+        }
+        return version;
     }
 
     /**

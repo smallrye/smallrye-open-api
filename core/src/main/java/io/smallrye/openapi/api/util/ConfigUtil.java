@@ -10,19 +10,43 @@ import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.servers.ServerImpl;
 
 /**
- * Used to configure server information from config properties.
+ * Used to configure server information and some more from config properties.
  *
  * @author eric.wittmann@gmail.com
  */
-public class ServersUtil {
+public class ConfigUtil {
 
-    private ServersUtil() {
+    private ConfigUtil() {
     }
 
-    public static final void configureServers(OpenApiConfig config, OpenAPI oai) {
+    public static final void applyConfig(OpenApiConfig config, OpenAPI oai) {
+        // From the spec
+        configureServers(config, oai);
+        // Our own extension
+        configureVersion(config, oai);
+        configureInfo(config, oai);
+    }
+
+    protected static final void configureVersion(OpenApiConfig config, OpenAPI oai) {
+        String versionInConfig = config.getOpenApiVersion();
+        if (versionInConfig != null && !versionInConfig.isEmpty()) {
+            oai.setOpenapi(versionInConfig);
+        } else if (oai.getOpenapi() == null || oai.getOpenapi().isEmpty()) {
+            oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        }
+    }
+
+    protected static final void configureInfo(OpenApiConfig config, OpenAPI oai) {
+        //if (merged.getInfo() == null) {
+        //merged.setInfo(new InfoImpl());
+        //}
+    }
+
+    protected static final void configureServers(OpenApiConfig config, OpenAPI oai) {
         // Start with the global servers.
         Set<String> servers = config.servers();
         if (servers != null && !servers.isEmpty()) {
