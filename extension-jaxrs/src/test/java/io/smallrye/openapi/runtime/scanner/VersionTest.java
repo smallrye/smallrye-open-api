@@ -25,7 +25,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
  */
 public class VersionTest extends JaxRsDataObjectScannerTestBase {
 
-    private static final String VERSION_PROPERTY = "mp.openapi.extensions.openapi";
+    private static final String VERSION_PROPERTY = "mp.openapi.extensions.smallrye.openapi";
 
     /**
      * This test a basic that set the version by providing a schema document

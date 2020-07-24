@@ -22,15 +22,15 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
  */
 public class ConfigTest extends JaxRsDataObjectScannerTestBase {
 
-    private static final String TITLE = "mp.openapi.extensions.info.title";
-    private static final String VERSION = "mp.openapi.extensions.info.version";
-    private static final String DESCRIPTION = "mp.openapi.extensions.info.description";
-    private static final String TERMS = "mp.openapi.extensions.info.termsOfService";
-    private static final String CONTACT_EMAIL = "mp.openapi.extensions.info.contact.email";
-    private static final String CONTACT_NAME = "mp.openapi.extensions.info.contact.name";
-    private static final String CONTACT_URL = "mp.openapi.extensions.info.contact.url";
-    private static final String LICENSE_NAME = "mp.openapi.extensions.info.license.name";
-    private static final String LICENSE_URL = "mp.openapi.extensions.info.license.url";
+    private static final String TITLE = "mp.openapi.extensions.smallrye.info.title";
+    private static final String VERSION = "mp.openapi.extensions.smallrye.info.version";
+    private static final String DESCRIPTION = "mp.openapi.extensions.smallrye.info.description";
+    private static final String TERMS = "mp.openapi.extensions.smallrye.info.termsOfService";
+    private static final String CONTACT_EMAIL = "mp.openapi.extensions.smallrye.info.contact.email";
+    private static final String CONTACT_NAME = "mp.openapi.extensions.smallrye.info.contact.name";
+    private static final String CONTACT_URL = "mp.openapi.extensions.smallrye.info.contact.url";
+    private static final String LICENSE_NAME = "mp.openapi.extensions.smallrye.info.license.name";
+    private static final String LICENSE_URL = "mp.openapi.extensions.smallrye.info.license.url";
 
     @Test
     public void testSettingJustTitle() throws IOException, JSONException {

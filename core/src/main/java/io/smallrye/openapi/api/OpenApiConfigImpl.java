@@ -20,17 +20,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  */
 public class OpenApiConfigImpl implements OpenApiConfig {
 
-    private static final String VERSION = OASConfig.EXTENSIONS_PREFIX + "openapi";
-    private static final String INFO_TITLE = OASConfig.EXTENSIONS_PREFIX + "info.title";
-    private static final String INFO_VERSION = OASConfig.EXTENSIONS_PREFIX + "info.version";
-    private static final String INFO_DESCRIPTION = OASConfig.EXTENSIONS_PREFIX + "info.description";
-    private static final String INFO_TERMS = OASConfig.EXTENSIONS_PREFIX + "info.termsOfService";
-    private static final String INFO_CONTACT_EMAIL = OASConfig.EXTENSIONS_PREFIX + "info.contact.email";
-    private static final String INFO_CONTACT_NAME = OASConfig.EXTENSIONS_PREFIX + "info.contact.name";
-    private static final String INFO_CONTACT_URL = OASConfig.EXTENSIONS_PREFIX + "info.contact.url";
-    private static final String INFO_LICENSE_NAME = OASConfig.EXTENSIONS_PREFIX + "info.license.name";
-    private static final String INFO_LICENSE_URL = OASConfig.EXTENSIONS_PREFIX + "info.license.url";
-
     private Config config;
 
     private String modelReader;
@@ -263,7 +252,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getOpenApiVersion() {
         if (version == null) {
-            version = getStringConfigValue(VERSION);
+            version = getStringConfigValue(OpenApiConstants.VERSION);
         }
         return version;
     }
@@ -271,7 +260,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoTitle() {
         if (infoTitle == null) {
-            infoTitle = getStringConfigValue(INFO_TITLE);
+            infoTitle = getStringConfigValue(OpenApiConstants.INFO_TITLE);
         }
         return infoTitle;
     }
@@ -279,7 +268,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoVersion() {
         if (infoVersion == null) {
-            infoVersion = getStringConfigValue(INFO_VERSION);
+            infoVersion = getStringConfigValue(OpenApiConstants.INFO_VERSION);
         }
         return infoVersion;
     }
@@ -287,7 +276,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoDescription() {
         if (infoDescription == null) {
-            infoDescription = getStringConfigValue(INFO_DESCRIPTION);
+            infoDescription = getStringConfigValue(OpenApiConstants.INFO_DESCRIPTION);
         }
         return infoDescription;
     }
@@ -295,7 +284,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoTermsOfService() {
         if (infoTermsOfService == null) {
-            infoTermsOfService = getStringConfigValue(INFO_TERMS);
+            infoTermsOfService = getStringConfigValue(OpenApiConstants.INFO_TERMS);
         }
         return infoTermsOfService;
     }
@@ -303,7 +292,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoContactEmail() {
         if (infoContactEmail == null) {
-            infoContactEmail = getStringConfigValue(INFO_CONTACT_EMAIL);
+            infoContactEmail = getStringConfigValue(OpenApiConstants.INFO_CONTACT_EMAIL);
         }
         return infoContactEmail;
     }
@@ -311,7 +300,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoContactName() {
         if (infoContactName == null) {
-            infoContactName = getStringConfigValue(INFO_CONTACT_NAME);
+            infoContactName = getStringConfigValue(OpenApiConstants.INFO_CONTACT_NAME);
         }
         return infoContactName;
     }
@@ -319,7 +308,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoContactUrl() {
         if (infoContactUrl == null) {
-            infoContactUrl = getStringConfigValue(INFO_CONTACT_URL);
+            infoContactUrl = getStringConfigValue(OpenApiConstants.INFO_CONTACT_URL);
         }
         return infoContactUrl;
     }
@@ -327,7 +316,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoLicenseName() {
         if (infoLicenseName == null) {
-            infoLicenseName = getStringConfigValue(INFO_LICENSE_NAME);
+            infoLicenseName = getStringConfigValue(OpenApiConstants.INFO_LICENSE_NAME);
         }
         return infoLicenseName;
     }
@@ -335,7 +324,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public String getInfoLicenseUrl() {
         if (infoLicenseUrl == null) {
-            infoLicenseUrl = getStringConfigValue(INFO_LICENSE_URL);
+            infoLicenseUrl = getStringConfigValue(OpenApiConstants.INFO_LICENSE_URL);
         }
         return infoLicenseUrl;
     }
