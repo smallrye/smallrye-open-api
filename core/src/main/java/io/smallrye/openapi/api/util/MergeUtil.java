@@ -40,6 +40,7 @@ public class MergeUtil {
     private static final Set<String> EXCLUDED_PROPERTIES = new HashSet<>();
     static {
         EXCLUDED_PROPERTIES.add("class");
+        EXCLUDED_PROPERTIES.add("openapi");
     }
 
     private MergeUtil() {

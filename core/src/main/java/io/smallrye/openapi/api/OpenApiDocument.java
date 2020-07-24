@@ -134,6 +134,9 @@ public class OpenApiDocument {
             }
 
             // Phase 6: Provide missing required elements
+            if (merged.getOpenapi() == null || merged.getOpenapi().isEmpty()) {
+                merged.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+            }
             if (merged.getPaths() == null) {
                 merged.setPaths(new PathsImpl());
             }
