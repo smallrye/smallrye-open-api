@@ -1,5 +1,9 @@
 {
   "openapi" : "3.0.3",
+  "info" : {
+    "title" : "My Awesome Service",
+    "version" : "1.0"
+  },
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {

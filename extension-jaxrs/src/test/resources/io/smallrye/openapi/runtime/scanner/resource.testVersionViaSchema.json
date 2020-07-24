@@ -1,5 +1,9 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.0.2",
+  "info" : {
+    "title" : "Generated API",
+    "version" : "1.0"
+  },
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {

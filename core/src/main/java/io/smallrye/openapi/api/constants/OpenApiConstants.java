@@ -38,6 +38,17 @@ public final class OpenApiConstants {
             + SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS;
     public static final String SMALLRYE_APP_PATH_DISABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + SUFFIX_APP_PATH_DISABLE;
 
+    public static final String VERSION = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "openapi";
+    public static final String INFO_TITLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.title";
+    public static final String INFO_VERSION = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.version";
+    public static final String INFO_DESCRIPTION = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.description";
+    public static final String INFO_TERMS = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.termsOfService";
+    public static final String INFO_CONTACT_EMAIL = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.contact.email";
+    public static final String INFO_CONTACT_NAME = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.contact.name";
+    public static final String INFO_CONTACT_URL = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.contact.url";
+    public static final String INFO_LICENSE_NAME = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.license.name";
+    public static final String INFO_LICENSE_URL = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.license.url";
+
     /**
      * Set of classes which should never be scanned, regardless of user configuration.
      */
@@ -79,7 +90,7 @@ public final class OpenApiConstants {
     public static final String VALUE = "value";
     public static final String REFS = "refs";
     // Shared public
-    public static final String OPEN_API_VERSION = "3.0.1";
+    public static final String OPEN_API_VERSION = "3.0.3";
     public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> new String[] { "*/*" };
     // Used by both Jax-rs and openapi
     public static final String REF = "ref";

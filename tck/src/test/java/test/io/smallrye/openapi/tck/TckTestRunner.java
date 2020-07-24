@@ -91,18 +91,11 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
             IndexView index = ArchiveUtil.archiveToIndex(config, archive);
             OpenApiStaticFile staticFile = ArchiveUtil.archiveToStaticFile(archive);
 
-            // Reset and then initialize the OpenApiDocument for this test.
-            OpenApiDocument.INSTANCE.reset();
-            OpenApiDocument.INSTANCE.config(config);
-            OpenApiDocument.INSTANCE.modelFromStaticFile(OpenApiProcessor.modelFromStaticFile(staticFile));
-            OpenApiDocument.INSTANCE.modelFromAnnotations(OpenApiProcessor.modelFromAnnotations(config, index));
-            OpenApiDocument.INSTANCE.modelFromReader(OpenApiProcessor.modelFromReader(config, getContextClassLoader()));
-            OpenApiDocument.INSTANCE.filter(OpenApiProcessor.getFilter(config, getContextClassLoader()));
-            OpenApiDocument.INSTANCE.initialize();
+            OpenAPI openAPI = OpenApiProcessor.bootstrap(config, index, getContextClassLoader(), staticFile);
 
-            Assert.assertNotNull("Generated OAI document must not be null.", OpenApiDocument.INSTANCE.get());
+            Assert.assertNotNull("Generated OAI document must not be null.", openAPI);
 
-            OPEN_API_DOCS.put(testClass, OpenApiDocument.INSTANCE.get());
+            OPEN_API_DOCS.put(testClass, openAPI);
 
             // Output the /openapi content to a file for debugging purposes
             File parent = new File("target", "TckTestRunner");

@@ -36,6 +36,20 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String customSchemaRegistryClass;
     private Boolean applicationPathDisable;
     private Map<String, String> schemas;
+    private String version;
+    private String infoTitle;
+    private String infoVersion;
+    private String infoDescription;
+    private String infoTermsOfService;
+    private String infoContactEmail;
+    private String infoContactName;
+    private String infoContactUrl;
+    private String infoLicenseName;
+    private String infoLicenseUrl;
+
+    public static OpenApiConfig fromConfig(Config config) {
+        return new OpenApiConfigImpl(config);
+    }
 
     /**
      * Constructor.
@@ -233,6 +247,86 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                             name -> config.getValue(name, String.class)));
         }
         return schemas;
+    }
+
+    @Override
+    public String getOpenApiVersion() {
+        if (version == null) {
+            version = getStringConfigValue(OpenApiConstants.VERSION);
+        }
+        return version;
+    }
+
+    @Override
+    public String getInfoTitle() {
+        if (infoTitle == null) {
+            infoTitle = getStringConfigValue(OpenApiConstants.INFO_TITLE);
+        }
+        return infoTitle;
+    }
+
+    @Override
+    public String getInfoVersion() {
+        if (infoVersion == null) {
+            infoVersion = getStringConfigValue(OpenApiConstants.INFO_VERSION);
+        }
+        return infoVersion;
+    }
+
+    @Override
+    public String getInfoDescription() {
+        if (infoDescription == null) {
+            infoDescription = getStringConfigValue(OpenApiConstants.INFO_DESCRIPTION);
+        }
+        return infoDescription;
+    }
+
+    @Override
+    public String getInfoTermsOfService() {
+        if (infoTermsOfService == null) {
+            infoTermsOfService = getStringConfigValue(OpenApiConstants.INFO_TERMS);
+        }
+        return infoTermsOfService;
+    }
+
+    @Override
+    public String getInfoContactEmail() {
+        if (infoContactEmail == null) {
+            infoContactEmail = getStringConfigValue(OpenApiConstants.INFO_CONTACT_EMAIL);
+        }
+        return infoContactEmail;
+    }
+
+    @Override
+    public String getInfoContactName() {
+        if (infoContactName == null) {
+            infoContactName = getStringConfigValue(OpenApiConstants.INFO_CONTACT_NAME);
+        }
+        return infoContactName;
+    }
+
+    @Override
+    public String getInfoContactUrl() {
+        if (infoContactUrl == null) {
+            infoContactUrl = getStringConfigValue(OpenApiConstants.INFO_CONTACT_URL);
+        }
+        return infoContactUrl;
+    }
+
+    @Override
+    public String getInfoLicenseName() {
+        if (infoLicenseName == null) {
+            infoLicenseName = getStringConfigValue(OpenApiConstants.INFO_LICENSE_NAME);
+        }
+        return infoLicenseName;
+    }
+
+    @Override
+    public String getInfoLicenseUrl() {
+        if (infoLicenseUrl == null) {
+            infoLicenseUrl = getStringConfigValue(OpenApiConstants.INFO_LICENSE_URL);
+        }
+        return infoLicenseUrl;
     }
 
     /**

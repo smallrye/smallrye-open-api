@@ -1,5 +1,12 @@
 {
   "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Generated API",
+    "version" : "1.0",
+    "contact" : {
+            "email" : "phillip.kruger@redhat.com"
+    }    
+  },
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {

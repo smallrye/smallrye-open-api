@@ -7,9 +7,9 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.info.InfoImpl;
+import io.smallrye.openapi.api.util.ConfigUtil;
 import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.api.util.ServersUtil;
 
 /**
  * Holds the final OpenAPI document produced during the startup of the app.
@@ -133,7 +133,7 @@ public class OpenApiDocument {
                 merged.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
             }
 
-            // Phase 6: Provide missing required elements
+            // Phase 6: Provide missing required elements using defaults
             if (merged.getPaths() == null) {
                 merged.setPaths(new PathsImpl());
             }
@@ -148,7 +148,7 @@ public class OpenApiDocument {
             }
 
             // Phase 7: Use Config values to add Servers (global, pathItem, operation)
-            ServersUtil.configureServers(config, merged);
+            ConfigUtil.applyConfig(config, merged);
 
             model = merged;
             clear();

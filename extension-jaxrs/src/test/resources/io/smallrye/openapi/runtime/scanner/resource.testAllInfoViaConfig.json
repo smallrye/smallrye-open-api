@@ -1,5 +1,20 @@
 {
   "openapi" : "3.0.3",
+  "info" : {
+    "title" : "My own awesome REST service",
+    "description" : "This service is awesome",
+    "termsOfService" : "The terms is also awesome",
+    "contact" : {
+      "name" : "Phillip Kruger",
+      "url" : "https://www.phillip-kruger.com",
+      "email" : "phillip.kruger@redhat.com"
+    },
+    "license" : {
+      "name" : "Apache License 2.0",
+      "url" : "https://choosealicense.com/licenses/apache-2.0/"
+    },
+    "version" : "1.2.3"
+  },
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {
