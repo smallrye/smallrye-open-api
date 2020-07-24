@@ -1,8 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.lang.reflect.InvocationTargetException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +13,7 @@ import org.jboss.jandex.IndexView;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
@@ -45,8 +44,9 @@ public class OpenApiAnnotationScanner {
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
-        this(config, index, Collections.singletonList(new AnnotationScannerExtension() {
-        }));
+        this(config, ClassLoaderUtil.getDefaultClassLoader(), index,
+                Collections.singletonList(new AnnotationScannerExtension() {
+                }));
     }
 
     /**
@@ -57,6 +57,29 @@ public class OpenApiAnnotationScanner {
      * @param extensions A set of extensions to scanning
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions) {
+        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, extensions);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index) {
+        this(config, loader, index, Collections.singletonList(new AnnotationScannerExtension() {
+        }));
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
+     * @param extensions A set of extensions to scanning
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
+            List<AnnotationScannerExtension> extensions) {
         FilteredIndexView filteredIndexView;
 
         if (index instanceof FilteredIndexView) {
@@ -65,7 +88,7 @@ public class OpenApiAnnotationScanner {
             filteredIndexView = new FilteredIndexView(index, config);
         }
 
-        this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, extensions, config);
+        this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, config);
     }
 
     /**
@@ -138,7 +161,8 @@ public class OpenApiAnnotationScanner {
             };
         } else {
             try {
-                return (CustomSchemaRegistry) Class.forName(config.customSchemaRegistryClass(), true, getContextClassLoader())
+                return (CustomSchemaRegistry) Class
+                        .forName(config.customSchemaRegistryClass(), true, annotationScannerContext.getClassLoader())
                         .getDeclaredConstructor().newInstance();
             } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
                     | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -146,13 +170,5 @@ public class OpenApiAnnotationScanner {
             }
 
         }
-    }
-
-    private static ClassLoader getContextClassLoader() {
-        if (System.getSecurityManager() == null) {
-            return Thread.currentThread().getContextClassLoader();
-        }
-        return AccessController
-                .doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
     }
 }

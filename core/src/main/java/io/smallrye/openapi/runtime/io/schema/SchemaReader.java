@@ -68,7 +68,7 @@ public class SchemaReader {
              * {@link org.eclipse.microprofile.openapi.annotations.Components}.
              */
             if (name != null) {
-                map.put(name, SchemaFactory.readSchema(context.getIndex(), nested));
+                map.put(name, SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(), nested));
             } /*-
               //For consideration - be more lenient and attempt to use the name from the implementation's @Schema?
               else {

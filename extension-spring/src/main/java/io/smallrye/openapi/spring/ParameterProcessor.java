@@ -74,6 +74,7 @@ public class ParameterProcessor {
             Arrays.asList(ParameterConstant.DOTNAME_PARAMETER, ParameterConstant.DOTNAME_PARAMETERS));
 
     private final IndexView index;
+    private final ClassLoader cl;
     private final Function<AnnotationInstance, Parameter> readerFunction;
     private final List<AnnotationScannerExtension> extensions;
 
@@ -178,9 +179,11 @@ public class ParameterProcessor {
     }
 
     private ParameterProcessor(IndexView index,
+            ClassLoader cl,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         this.index = index;
+        this.cl = cl;
         this.readerFunction = reader;
         this.extensions = extensions;
     }
@@ -192,6 +195,7 @@ public class ParameterProcessor {
      * are only applicable to the method-level in this component.
      *
      * @param index index of classes to be used for further introspection, if necessary
+     * @param cl the classloader
      * @param resourceClass the class info
      * @param resourceMethod the Spring resource method, annotated with one of the
      *        Spring HTTP annotations
@@ -202,13 +206,14 @@ public class ParameterProcessor {
      *         object
      */
     public static ResourceParameters process(IndexView index,
+            ClassLoader cl,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
         ResourceParameters parameters = new ResourceParameters();
-        ParameterProcessor processor = new ParameterProcessor(index, reader, extensions);
+        ParameterProcessor processor = new ParameterProcessor(index, cl, reader, extensions);
 
         //ClassInfo resourceMethodClass = resourceMethod.declaringClass();
 
@@ -466,7 +471,7 @@ public class ParameterProcessor {
             }
 
             if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
-                Schema schema = SchemaFactory.typeToSchema(index, context.targetType, extensions);
+                Schema schema = SchemaFactory.typeToSchema(index, cl, context.targetType, extensions);
                 ModelUtil.setParameterSchema(param, schema);
             }
 
@@ -554,7 +559,7 @@ public class ParameterProcessor {
             AnnotationTarget paramTarget = param.getValue().target();
 
             Type paramType = getType(paramTarget);
-            Schema paramSchema = SchemaFactory.typeToSchema(index, paramType, extensions);
+            Schema paramSchema = SchemaFactory.typeToSchema(index, cl, paramType, extensions);
             Object defaultValue = getDefaultValue(paramTarget);
 
             if (paramSchema.getDefaultValue() == null) {

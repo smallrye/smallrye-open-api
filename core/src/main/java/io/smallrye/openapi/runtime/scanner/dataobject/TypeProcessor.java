@@ -31,6 +31,7 @@ public class TypeProcessor {
 
     private final Schema schema;
     private final AugmentedIndexView index;
+    private final ClassLoader cl;
     private final AnnotationTarget annotationTarget;
     private final DataObjectDeque objectStack;
     private final TypeResolver typeResolver;
@@ -40,6 +41,7 @@ public class TypeProcessor {
     private Type type;
 
     public TypeProcessor(AugmentedIndexView index,
+            ClassLoader cl,
             DataObjectDeque objectStack,
             DataObjectDeque.PathEntry parentPathEntry, TypeResolver typeResolver,
             Type type,
@@ -51,6 +53,7 @@ public class TypeProcessor {
         this.type = type;
         this.schema = schema;
         this.index = index;
+        this.cl = cl;
         this.annotationTarget = annotationTarget;
     }
 
@@ -115,7 +118,7 @@ public class TypeProcessor {
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
-            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, type));
+            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, cl, type));
             return STRING_TYPE;
         }
 
@@ -161,7 +164,7 @@ public class TypeProcessor {
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
 
-            if (TypeUtil.isA(index, pType, SET_TYPE)) {
+            if (TypeUtil.isA(index, cl, pType, SET_TYPE)) {
                 schema.setUniqueItems(Boolean.TRUE);
             }
 
@@ -213,7 +216,7 @@ public class TypeProcessor {
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
                 DataObjectLogging.log.processingEnum(type);
-                propsSchema = SchemaFactory.enumToSchema(index, valueType);
+                propsSchema = SchemaFactory.enumToSchema(index, cl, valueType);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 pushToStack(valueType, propsSchema);
@@ -250,6 +253,6 @@ public class TypeProcessor {
     }
 
     private boolean isA(Type testSubject, Type test) {
-        return TypeUtil.isA(index, testSubject, test);
+        return TypeUtil.isA(index, cl, testSubject, test);
     }
 }

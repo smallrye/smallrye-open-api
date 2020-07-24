@@ -54,24 +54,26 @@ public class SchemaFactory {
      * Reads a Schema annotation into a model.
      *
      * @param index the index
+     * @param cl the classLoader to use
      * @param value the annotation value
      * @return Schema model
      */
-    public static Schema readSchema(IndexView index, AnnotationValue value) {
+    public static Schema readSchema(IndexView index, ClassLoader cl, AnnotationValue value) {
         if (value == null) {
             return null;
         }
-        return readSchema(index, value.asNested());
+        return readSchema(index, cl, value.asNested());
     }
 
     /**
      * Reads a Schema annotation into a model.
      *
      * @param index the index
+     * @param cl the classLoader to use
      * @param annotation the annotation instance
      * @return Schema model
      */
-    public static Schema readSchema(IndexView index, AnnotationInstance annotation) {
+    public static Schema readSchema(IndexView index, ClassLoader cl, AnnotationInstance annotation) {
         if (annotation == null) {
             return null;
         }
@@ -84,7 +86,7 @@ public class SchemaFactory {
             return null;
         }
 
-        return readSchema(index, new SchemaImpl(), annotation, Collections.emptyMap());
+        return readSchema(index, cl, new SchemaImpl(), annotation, Collections.emptyMap());
     }
 
     /**
@@ -93,16 +95,18 @@ public class SchemaFactory {
      * registration will be replaced.
      * 
      * @param index application class index
+     * @param cl the classLoader to use
      * @param schema schema model to populate
      * @param annotation schema annotation to read
      * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
      */
     public static Schema readSchema(IndexView index,
+            ClassLoader cl,
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz) {
-        return readSchema(index, schema, annotation, clazz, Collections.emptyMap());
+        return readSchema(index, cl, schema, annotation, clazz, Collections.emptyMap());
     }
 
     /**
@@ -111,6 +115,7 @@ public class SchemaFactory {
      * registration will be replaced.
      * 
      * @param index application class index
+     * @param cl the classLoader to use
      * @param schema schema model to populate
      * @param annotation schema annotation to read
      * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
@@ -118,6 +123,7 @@ public class SchemaFactory {
      * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
      */
     static Schema readSchema(IndexView index,
+            ClassLoader cl,
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz,
@@ -134,7 +140,7 @@ public class SchemaFactory {
             return schema;
         }
 
-        schema = readSchema(index, schema, annotation, defaults);
+        schema = readSchema(index, cl, schema, annotation, defaults);
         ClassType clazzType = (ClassType) Type.create(clazz.name(), Type.Kind.CLASS);
 
         /*
@@ -150,6 +156,7 @@ public class SchemaFactory {
     }
 
     public static Schema readSchema(IndexView index,
+            ClassLoader cl,
             Schema schema,
             AnnotationInstance annotation,
             Map<String, Object> defaults) {
@@ -165,13 +172,13 @@ public class SchemaFactory {
         }
 
         schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, SchemaConstant.PROP_NOT,
-                type -> readClassSchema(index, type, true), defaults));
+                type -> readClassSchema(index, cl, type, true), defaults));
         schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ONE_OF,
-                type -> readClassSchemas(index, type), defaults));
+                type -> readClassSchemas(index, cl, type), defaults));
         schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ANY_OF,
-                type -> readClassSchemas(index, type), defaults));
+                type -> readClassSchemas(index, cl, type), defaults));
         schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ALL_OF,
-                type -> readClassSchemas(index, type), defaults));
+                type -> readClassSchemas(index, cl, type), defaults));
         schema.setTitle(readAttr(annotation, SchemaConstant.PROP_TITLE, defaults));
         schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
@@ -202,7 +209,7 @@ public class SchemaFactory {
         schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schemaType));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
-                readDiscriminator(index,
+                readDiscriminator(index, cl,
                         JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
                         JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
         schema.setMaxItems(readAttr(annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
@@ -220,19 +227,19 @@ public class SchemaFactory {
         }
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
-            Schema implSchema = readClassSchema(index,
+            Schema implSchema = readClassSchema(index, cl,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     true);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(annotation)) {
-            Schema implSchema = readClassSchema(index,
+            Schema implSchema = readClassSchema(index, cl,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     true);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            Schema implSchema = readClassSchema(index,
+            Schema implSchema = readClassSchema(index, cl,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     false);
 
@@ -337,7 +344,7 @@ public class SchemaFactory {
      * @param type the implementation type of the item to scan
      * @param schemaReferenceSupported
      */
-    static Schema readClassSchema(IndexView index, Type type, boolean schemaReferenceSupported) {
+    static Schema readClassSchema(IndexView index, ClassLoader cl, Type type, boolean schemaReferenceSupported) {
         if (type == null) {
             return null;
         }
@@ -350,15 +357,16 @@ public class SchemaFactory {
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.items(readClassSchema(index, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
+                schema.items(
+                        readClassSchema(index, cl, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
             } else {
                 // Recurse using the type of the array elements
-                schema.items(readClassSchema(index, componentType, schemaReferenceSupported));
+                schema.items(readClassSchema(index, cl, componentType, schemaReferenceSupported));
             }
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = introspectClassToSchema(index, type.asClassType(), schemaReferenceSupported);
+            schema = introspectClassToSchema(index, cl, type.asClassType(), schemaReferenceSupported);
         }
         return schema;
     }
@@ -371,17 +379,17 @@ public class SchemaFactory {
      * @param extensions list of AnnotationScannerExtensions
      * @return Schema model
      */
-    public static Schema typeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
+    public static Schema typeToSchema(IndexView index, ClassLoader cl, Type type, List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
 
         AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
 
         if (TypeUtil.isOptional(type)) {
             // Recurse using the optional's type
-            return typeToSchema(index, TypeUtil.getOptionalType(type), extensions);
+            return typeToSchema(index, cl, TypeUtil.getOptionalType(type), extensions);
         } else if (annotationScanner.isWrapperType(type)) {
             // Recurse using the wrapped type
-            return typeToSchema(index, annotationScanner.unwrapType(type), extensions);
+            return typeToSchema(index, cl, annotationScanner.unwrapType(type), extensions);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
@@ -390,17 +398,17 @@ public class SchemaFactory {
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.items(typeToSchema(index, ArrayType.create(componentType, dimensions - 1), extensions));
+                schema.items(typeToSchema(index, cl, ArrayType.create(componentType, dimensions - 1), extensions));
             } else {
                 // Recurse using the type of the array elements
-                schema.items(typeToSchema(index, componentType, extensions));
+                schema.items(typeToSchema(index, cl, componentType, extensions));
             }
         } else if (type.kind() == Type.Kind.CLASS) {
-            schema = introspectClassToSchema(index, type.asClassType(), true);
+            schema = introspectClassToSchema(index, cl, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = otherTypeToSchema(index, type, extensions);
+            schema = otherTypeToSchema(index, cl, type, extensions);
         }
 
         return schema;
@@ -418,7 +426,7 @@ public class SchemaFactory {
      *
      * @see java.lang.reflect.Field#isEnumConstant()
      */
-    public static Schema enumToSchema(IndexView index, Type enumType) {
+    public static Schema enumToSchema(IndexView index, ClassLoader cl, Type enumType) {
         IoLogging.log.enumProcessing(enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
@@ -436,7 +444,7 @@ public class SchemaFactory {
             defaults.put(SchemaConstant.PROP_TYPE, SchemaType.STRING);
             defaults.put(SchemaConstant.PROP_ENUMERATION, enumeration);
 
-            enumSchema = readSchema(index, enumSchema, schemaAnnotation, enumKlazz, defaults);
+            enumSchema = readSchema(index, cl, enumSchema, schemaAnnotation, enumKlazz, defaults);
         } else {
             enumSchema.setType(SchemaType.STRING);
             enumSchema.setEnumeration(enumeration);
@@ -453,7 +461,8 @@ public class SchemaFactory {
      * @param ctype
      * @param schemaReferenceSupported
      */
-    private static Schema introspectClassToSchema(IndexView index, ClassType ctype, boolean schemaReferenceSupported) {
+    private static Schema introspectClassToSchema(IndexView index, ClassLoader cl, ClassType ctype,
+            boolean schemaReferenceSupported) {
         AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
 
         if (annotationScanner.isScannerInternalResponse(ctype)) {
@@ -465,7 +474,7 @@ public class SchemaFactory {
         if (schemaReferenceSupported && schemaRegistry.has(ctype)) {
             return schemaRegistry.lookupRef(ctype);
         } else {
-            Schema schema = OpenApiDataObjectScanner.process(index, ctype);
+            Schema schema = OpenApiDataObjectScanner.process(index, cl, ctype);
             if (schemaReferenceSupported) {
                 return schemaRegistration(index, ctype, schema);
             } else {
@@ -524,35 +533,36 @@ public class SchemaFactory {
      * @param index the index of classes being scanned
      * @param types the implementation types of the items to scan, never null
      */
-    private static List<Schema> readClassSchemas(IndexView index, Type[] types) {
+    private static List<Schema> readClassSchemas(IndexView index, ClassLoader cl, Type[] types) {
         IoLogging.log.annotationsList("schema Class");
 
         return Arrays.stream(types)
-                .map(type -> readClassSchema(index, type, true))
+                .map(type -> readClassSchema(index, cl, type, true))
                 .collect(Collectors.toList());
     }
 
-    private static Schema otherTypeToSchema(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
-        if (TypeUtil.isA(index, type, MutinyConstants.MULTI_TYPE)) {
+    private static Schema otherTypeToSchema(IndexView index, ClassLoader cl, Type type,
+            List<AnnotationScannerExtension> extensions) {
+        if (TypeUtil.isA(index, cl, type, MutinyConstants.MULTI_TYPE)) {
             // Treat as an Array
             Schema schema = new SchemaImpl().type(SchemaType.ARRAY);
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements
-            schema.items(typeToSchema(index, componentType, extensions));
+            schema.items(typeToSchema(index, cl, componentType, extensions));
             return schema;
         } else {
-            Type asyncType = resolveAsyncType(index, type, extensions);
-            return schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, asyncType));
+            Type asyncType = resolveAsyncType(index, cl, type, extensions);
+            return schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, cl, asyncType));
         }
     }
 
-    static Type resolveAsyncType(IndexView index, Type type, List<AnnotationScannerExtension> extensions) {
+    static Type resolveAsyncType(IndexView index, ClassLoader cl, Type type, List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
             if (pType.arguments().size() == 1 &&
-                    (TypeUtil.isA(index, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
-                            TypeUtil.isA(index, type, MutinyConstants.UNI_TYPE))) {
+                    (TypeUtil.isA(index, cl, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
+                            TypeUtil.isA(index, cl, type, MutinyConstants.UNI_TYPE))) {
                 return pType.arguments().get(0);
             }
         }
@@ -579,6 +589,7 @@ public class SchemaFactory {
      *        discriminatorMapping}
      */
     private static Discriminator readDiscriminator(IndexView index,
+            ClassLoader cl,
             String propertyName,
             AnnotationInstance[] annotation) {
 
@@ -608,7 +619,7 @@ public class SchemaFactory {
 
                 if (schemaValue != null) {
                     ClassType schemaType = schemaValue.asClass().asClassType();
-                    Schema schema = introspectClassToSchema(index, schemaType, true);
+                    Schema schema = introspectClassToSchema(index, cl, schemaType, true);
                     schemaRef = schema != null ? schema.getRef() : null;
                 } else {
                     schemaRef = null;

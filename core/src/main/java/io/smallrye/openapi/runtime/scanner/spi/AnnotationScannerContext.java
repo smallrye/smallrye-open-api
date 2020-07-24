@@ -15,10 +15,13 @@ public class AnnotationScannerContext {
     private final FilteredIndexView index;
     private final List<AnnotationScannerExtension> extensions;
     private final OpenApiConfig config;
+    private final ClassLoader classLoader;
 
-    public AnnotationScannerContext(FilteredIndexView index, List<AnnotationScannerExtension> extensions,
+    public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
+            List<AnnotationScannerExtension> extensions,
             OpenApiConfig config) {
         this.index = index;
+        this.classLoader = classLoader;
         this.extensions = extensions;
         this.config = config;
     }
@@ -35,4 +38,7 @@ public class AnnotationScannerContext {
         return config;
     }
 
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
 }

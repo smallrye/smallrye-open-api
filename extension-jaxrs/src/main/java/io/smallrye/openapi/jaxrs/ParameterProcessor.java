@@ -87,6 +87,7 @@ public class ParameterProcessor {
 
     private final AnnotationScannerContext scannerContext;
     private final IndexView index;
+    private final ClassLoader cl;
     private final Function<AnnotationInstance, Parameter> readerFunction;
     private final List<AnnotationScannerExtension> extensions;
 
@@ -194,6 +195,7 @@ public class ParameterProcessor {
             List<AnnotationScannerExtension> extensions) {
         this.scannerContext = scannerContext;
         this.index = scannerContext.getIndex();
+        this.cl = scannerContext.getClassLoader();
         this.readerFunction = reader;
         this.extensions = extensions;
     }
@@ -463,7 +465,7 @@ public class ParameterProcessor {
             }
 
             if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
-                Schema schema = SchemaFactory.typeToSchema(index, context.targetType, extensions);
+                Schema schema = SchemaFactory.typeToSchema(index, cl, context.targetType, extensions);
                 ModelUtil.setParameterSchema(param, schema);
             }
 
@@ -561,7 +563,7 @@ public class ParameterProcessor {
             AnnotationTarget paramTarget = param.getValue().target();
             addEncoding(encodings, paramName, paramTarget);
             Type paramType = getType(paramTarget);
-            Schema paramSchema = SchemaFactory.typeToSchema(index, paramType, extensions);
+            Schema paramSchema = SchemaFactory.typeToSchema(index, cl, paramType, extensions);
             Object defaultValue = getDefaultValue(paramTarget);
 
             if (paramSchema.getDefaultValue() == null) {

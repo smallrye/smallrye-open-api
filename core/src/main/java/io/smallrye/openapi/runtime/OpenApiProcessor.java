@@ -16,6 +16,7 @@ import org.jboss.jandex.IndexView;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
@@ -37,12 +38,12 @@ public class OpenApiProcessor {
     }
 
     public static OpenAPI bootstrap(OpenApiConfig config, IndexView index) {
-        ClassLoader defaultClassLoader = getDefaultClassLoader();
+        ClassLoader defaultClassLoader = ClassLoaderUtil.getDefaultClassLoader();
         return bootstrap(config, index, defaultClassLoader);
     }
 
     public static OpenAPI bootstrap(OpenApiConfig config, IndexView index, OpenApiStaticFile... staticFiles) {
-        ClassLoader defaultClassLoader = getDefaultClassLoader();
+        ClassLoader defaultClassLoader = ClassLoaderUtil.getDefaultClassLoader();
         return bootstrap(config, index, defaultClassLoader, staticFiles);
     }
 
@@ -67,7 +68,7 @@ public class OpenApiProcessor {
         }
         // Scan annotations
         if (index != null) {
-            OpenApiDocument.INSTANCE.modelFromAnnotations(OpenApiProcessor.modelFromAnnotations(config, index));
+            OpenApiDocument.INSTANCE.modelFromAnnotations(OpenApiProcessor.modelFromAnnotations(config, classLoader, index));
         }
         // Filter and model
         if (classLoader != null) {
@@ -109,11 +110,25 @@ public class OpenApiProcessor {
      * @return OpenAPIImpl generated from annotations
      */
     public static OpenAPI modelFromAnnotations(OpenApiConfig config, IndexView index) {
+        return modelFromAnnotations(config, ClassLoaderUtil.getDefaultClassLoader(), index);
+    }
+
+    /**
+     * Create an {@link OpenAPI} model by scanning the deployment for relevant JAX-RS and
+     * OpenAPI annotations. If scanning is disabled, this method returns null. If scanning
+     * is enabled but no relevant annotations are found, an empty OpenAPI model is returned.
+     * 
+     * @param config OpenApiConfig
+     * @param loader ClassLoader
+     * @param index IndexView of Archive
+     * @return OpenAPIImpl generated from annotations
+     */
+    public static OpenAPI modelFromAnnotations(OpenApiConfig config, ClassLoader loader, IndexView index) {
         if (config.scanDisable()) {
             return null;
         }
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, loader, index);
         return scanner.scan();
     }
 
@@ -182,13 +197,5 @@ public class OpenApiProcessor {
             apiStaticFiles.add(new OpenApiStaticFile(staticStream, format));
         }
         return apiStaticFiles;
-    }
-
-    private static ClassLoader getDefaultClassLoader() {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        if (loader != null) {
-            return loader;
-        }
-        return OpenApiProcessor.class.getClassLoader();
     }
 }

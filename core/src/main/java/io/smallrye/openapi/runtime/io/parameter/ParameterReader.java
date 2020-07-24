@@ -178,6 +178,7 @@ public class ParameterReader {
                 JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
         parameter.setSchema(
                 SchemaFactory.readSchema(context.getIndex(),
+                        context.getClassLoader(),
                         annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),
