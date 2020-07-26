@@ -160,6 +160,14 @@ public class JandexUtil {
         }
     }
 
+    public static Optional<String> optionalStringValue(AnnotationInstance annotation, String propertyName) {
+        String value = stringValue(annotation, propertyName);
+        if (value == null) {
+            return Optional.empty();
+        }
+        return Optional.of(value);
+    }
+
     /**
      * Reads a Boolean property value from the given annotation instance. If no value is found
      * this will return null.

@@ -108,6 +108,10 @@ public interface AnnotationScanner {
         return false;
     }
 
+    default boolean isScannerInternalParameter(Type parameterType) {
+        return false;
+    }
+
     // For wrapped type (other than Optional) - default no others
     default boolean isWrapperType(Type type) {
         return false;
@@ -283,15 +287,15 @@ public interface AnnotationScanner {
      * @return Maybe an Operation model
      */
     default Optional<Operation> processOperation(final AnnotationScannerContext context, final MethodInfo method) {
-        if (OperationReader.methodHasOperationAnnotation(method)) {
-            if (OperationReader.operationIsHidden(method)) {
-                return Optional.empty();
-            }
-            AnnotationInstance operationAnnotation = OperationReader.getOperationAnnotation(method);
-            return Optional.of(OperationReader.readOperation(context, operationAnnotation));
-        } else {
-            return Optional.of(new OperationImpl());
+        if (OperationReader.operationIsHidden(method)) {
+            return Optional.empty();
         }
+        AnnotationInstance operationAnnotation = OperationReader.getOperationAnnotation(method);
+        Operation operation = OperationReader.readOperation(context, operationAnnotation, method);
+        if (operation == null) {
+            operation = new OperationImpl();
+        }
+        return Optional.of(operation);
     }
 
     default void processResponse(final AnnotationScannerContext context, final MethodInfo method, Operation operation,
@@ -828,7 +832,7 @@ public interface AnnotationScanner {
             } else {
                 Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
 
-                if (requestBodyType != null) {
+                if (requestBodyType != null && !isScannerInternalParameter(requestBodyType)) {
                     Schema schema = null;
 
                     if (isMultipartInput(requestBodyType)) {

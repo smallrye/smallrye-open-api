@@ -13,7 +13,11 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.RouteBase;
+import io.quarkus.vertx.web.RoutingExchange;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.ext.web.RoutingContext;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
 /**
@@ -29,38 +33,51 @@ public class GreetingGetRoute {
 
     // 1) Basic path var test
     @Route(path = "/helloPathVariable/:name", methods = HttpMethod.GET)
-    public Greeting helloPathVariable(@Param("name") String name) {
+    public Greeting helloPathVariable(RoutingContext context, @Param("name") String name) {
         return new Greeting("Hello " + name);
     }
 
     // 2) Basic path var test
     @Route(path = "/hellosPathVariable/:name", methods = HttpMethod.GET)
-    public List<Greeting> hellosPathVariable(@Param("name") String name) {
+    public List<Greeting> hellosPathVariable(RoutingExchange routingExchange, @Param("name") String name) {
         return Arrays.asList(new Greeting("Hello " + name));
     }
 
     // 3) Basic path var with Optional test
     @Route(path = "/helloOptional/:name", methods = HttpMethod.GET)
-    public Optional<Greeting> helloOptional(@Param("name") String name) {
+    public Optional<Greeting> helloOptional(HttpServerRequest httpServerRequest, @Param("name") String name) {
         return Optional.of(new Greeting("Hello " + name));
     }
 
     // 4) Basic request param test
     @Route(path = "/helloRequestParam", methods = HttpMethod.GET)
-    public Greeting helloRequestParam(@Param("name") String name) {
+    public Greeting helloRequestParam(HttpServerResponse httpServerResponse, @Param("name") String name) {
         return new Greeting("Hello " + name);
     }
 
     // 5) Void, so without a type specified
     @Route(path = "/helloPathVariableWithResponse/:name", methods = HttpMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public void helloPathVariableWithResponse(@Param("name") String name) {
+    public void helloPathVariableWithResponse(io.vertx.reactivex.core.http.HttpServerRequest httpServerRequest,
+            @Param("name") String name) {
         // 
     }
 
     // 6) Failure should not end up the schema
     @Route(path = "/helloFailure/:name", methods = HttpMethod.GET, type = Route.HandlerType.FAILURE)
     public Greeting helloFailure(@Param("name") String name) {
+        return new Greeting("Hello " + name);
+    }
+
+    // 7) Default GET
+    @Route(path = "/defaultGet/:name")
+    public Greeting helloDefault(@Param("name") String name) {
+        return new Greeting("Hello " + name);
+    }
+
+    // 8) Default path
+    @Route
+    public Greeting helloPath(@Param("name") String name) {
         return new Greeting("Hello " + name);
     }
 }
