@@ -690,7 +690,7 @@ public class ParameterProcessor {
 
         AnnotationInstance routeAnnotation = resourceMethod.annotation(VertxConstants.ROUTE);
         AnnotationValue pathValue = routeAnnotation.value("path");
-        String path = null;
+        String path = resourceMethod.name(); // default to methodName
         if (pathValue != null) {
             path = pathValue.asString();
         }
@@ -972,7 +972,7 @@ public class ParameterProcessor {
      */
     static String pathOf(AnnotationTarget target) {
         AnnotationInstance path = null;
-
+        String defaultPathValue = null;
         if (target.kind().equals(CLASS)) {
             DotName possiblePath = VertxConstants.ROUTE_BASE;
             AnnotationInstance classAnnotation = target.asClass().classAnnotation(possiblePath);
@@ -980,37 +980,39 @@ public class ParameterProcessor {
                 path = classAnnotation;
             }
         } else if (target.kind().equals(METHOD)) {
+            defaultPathValue = target.asMethod().name();
             DotName possiblePath = VertxConstants.ROUTE;
             AnnotationInstance methodAnnotation = target.asMethod().annotation(possiblePath);
-            if (methodAnnotation != null && methodAnnotation.value("path") != null) {
+            if (methodAnnotation != null) {
                 path = methodAnnotation;
             }
         }
 
         if (path != null) {
-            String pathValue = routePathValuesToPath(path);
-
-            if (pathValue.startsWith("/")) {
-                pathValue = pathValue.substring(1);
-            }
-
-            if (pathValue.endsWith("/")) {
-                pathValue = pathValue.substring(0, pathValue.length() - 1);
-            }
-
-            // Replace :var with {var}
-            if (pathValue.contains(":")) {
-                List<String> parts = Arrays.asList(pathValue.split("/"));
-                List<String> partsConverted = new ArrayList<>();
-                for (String part : parts) {
-                    if (part.startsWith(":")) {
-                        part = "{" + part.substring(1) + "}";
-                    }
-                    partsConverted.add(part);
+            String pathValue = routePathValuesToPath(path, defaultPathValue);
+            if (pathValue != null) {
+                if (pathValue.startsWith("/")) {
+                    pathValue = pathValue.substring(1);
                 }
-                pathValue = String.join("/", partsConverted.toArray(new String[] {}));
+
+                if (pathValue.endsWith("/")) {
+                    pathValue = pathValue.substring(0, pathValue.length() - 1);
+                }
+
+                // Replace :var with {var}
+                if (pathValue.contains(":")) {
+                    List<String> parts = Arrays.asList(pathValue.split("/"));
+                    List<String> partsConverted = new ArrayList<>();
+                    for (String part : parts) {
+                        if (part.startsWith(":")) {
+                            part = "{" + part.substring(1) + "}";
+                        }
+                        partsConverted.add(part);
+                    }
+                    pathValue = String.join("/", partsConverted.toArray(new String[] {}));
+                }
+                return pathValue;
             }
-            return pathValue;
         }
 
         return "";
@@ -1022,9 +1024,12 @@ public class ParameterProcessor {
      * @param routeAnnotation
      * @return
      */
-    static String routePathValuesToPath(AnnotationInstance routeAnnotation) {
+    static String routePathValuesToPath(AnnotationInstance routeAnnotation, String defaultValue) {
         AnnotationValue value = routeAnnotation.value("path");
-        return value.asString();
+        if (value != null) {
+            return value.asString();
+        }
+        return defaultValue;
     }
 
     /**

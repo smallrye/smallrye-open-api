@@ -78,7 +78,11 @@ public class OpenApiProcessor {
 
         OpenApiDocument.INSTANCE.initialize();
 
-        return OpenApiDocument.INSTANCE.get();
+        OpenAPI openAPI = OpenApiDocument.INSTANCE.get();
+
+        OpenApiDocument.INSTANCE.reset();
+
+        return openAPI;
     }
 
     /**

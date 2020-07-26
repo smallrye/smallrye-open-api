@@ -19,6 +19,7 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -78,7 +79,8 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             if (VertxParameter.isParameter(instance.name())) {
                 return true;
             }
-            if (instance.name().toString().startsWith(VERTX_PACKAGE)) {
+            if (instance.name().toString().startsWith(VERTX_PACKAGE)
+                    && !instance.name().equals(VertxConstants.REQUEST_BODY)) {
                 return true;
             }
             for (AnnotationScannerExtension extension : extensions) {
@@ -87,6 +89,11 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isScannerInternalParameter(Type parameterType) {
+        return VertxConstants.INTERNAL_PARAMETERS.contains(parameterType.name());
     }
 
     @Override
@@ -218,10 +225,13 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                             }
                         }
                     } else {
-                        // TODO: Default ? Look at RouteBase
+                        // Default to GET
+                        processRouteMethod(context, resourceClass, methodInfo, PathItem.HttpMethod.GET, openApi, tagRefs,
+                                locatorPathParameters);
                     }
+                } else {
+                    // TODO: Default ? Look at RouteBase
                 }
-
             }
         }
     }

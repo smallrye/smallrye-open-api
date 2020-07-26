@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.MethodInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -62,6 +63,12 @@ public class PathsReader {
         return paths;
     }
 
+    public static PathItem readPathItem(final AnnotationScannerContext context,
+            final AnnotationValue annotationValue) {
+
+        return readPathItem(context, annotationValue, null);
+    }
+
     /**
      * Reads the PathItem.
      * Also used in CallbackOperation
@@ -71,7 +78,8 @@ public class PathsReader {
      * @return PathItem model
      */
     public static PathItem readPathItem(final AnnotationScannerContext context,
-            final AnnotationValue annotationValue) {
+            final AnnotationValue annotationValue,
+            final MethodInfo methodInfo) {
         if (annotationValue == null) {
             return null;
         }
@@ -80,10 +88,10 @@ public class PathsReader {
         PathItem pathItem = new PathItemImpl();
         for (AnnotationInstance operationAnno : nestedArray) {
             String method = JandexUtil.stringValue(operationAnno, PathsConstant.PROP_METHOD);
-            Operation operation = OperationReader.readOperation(context, operationAnno);
             if (method == null) {
                 continue;
             }
+            Operation operation = OperationReader.readOperation(context, operationAnno, methodInfo);
             try {
                 PropertyDescriptor descriptor = new PropertyDescriptor(method.toUpperCase(), pathItem.getClass());
                 Method mutator = descriptor.getWriteMethod();

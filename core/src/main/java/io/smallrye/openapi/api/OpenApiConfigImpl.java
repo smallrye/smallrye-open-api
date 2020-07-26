@@ -46,6 +46,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String infoContactUrl;
     private String infoLicenseName;
     private String infoLicenseUrl;
+    private OperationIdStrategy operationIdStrategy;
 
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
@@ -327,6 +328,17 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             infoLicenseUrl = getStringConfigValue(OpenApiConstants.INFO_LICENSE_URL);
         }
         return infoLicenseUrl;
+    }
+
+    @Override
+    public OperationIdStrategy getOperationIdStrategy() {
+        if (operationIdStrategy == null) {
+            String strategy = getStringConfigValue(OpenApiConstants.OPERATION_ID_STRAGEGY);
+            if (strategy != null) {
+                return OperationIdStrategy.valueOf(strategy);
+            }
+        }
+        return null;
     }
 
     /**

@@ -103,7 +103,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
                 parent.mkdir();
             }
             File file = new File(parent, testClass.getName() + ".json");
-            String content = OpenApiSerializer.serialize(OpenApiDocument.INSTANCE.get(), Format.JSON);
+            String content = OpenApiSerializer.serialize(openAPI, Format.JSON);
             try (FileWriter writer = new FileWriter(file)) {
                 IOUtils.write(content, writer);
             }

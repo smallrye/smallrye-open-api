@@ -6,6 +6,7 @@ import org.jboss.jandex.MethodInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
@@ -38,43 +39,45 @@ public class OperationReader {
      * Reads a single Operation annotation.
      * 
      * @param context the scanning context
-     * @param annotationInstance {@literal @}CallbackOperation annotation
+     * @param methodInfo the method
      * @return Operation model
      */
     public static Operation readOperation(final AnnotationScannerContext context,
-            final AnnotationInstance annotationInstance) {
-        if (annotationInstance == null) {
+            final AnnotationInstance annotationInstance,
+            final MethodInfo methodInfo) {
+
+        if (annotationInstance != null) {
+            IoLogging.log.singleAnnotation("@Operation");
+            Operation operation = new OperationImpl();
+            operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
+            operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
+            operation.setExternalDocs(
+                    ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+            operation.setParameters(ParameterReader.readParametersList(context,
+                    annotationInstance.value(OperationConstant.PROP_PARAMETERS)).orElse(null));
+            operation.setRequestBody(RequestBodyReader.readRequestBody(context,
+                    annotationInstance.value(OperationConstant.PROP_REQUEST_BODY)));
+            operation.setResponses(ResponseReader.readResponses(context,
+                    annotationInstance.value(OperationConstant.PROP_RESPONSES)));
+            operation.setSecurity(SecurityRequirementReader
+                    .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY)).orElse(null));
+            operation.setExtensions(
+                    ExtensionReader.readExtensions(context,
+                            annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
+
+            operation.setOperationId(JandexUtil.optionalStringValue(annotationInstance, OperationConstant.PROP_OPERATION_ID)
+                    .orElse(getOperationId(context, methodInfo)));
+            operation
+                    .setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
+
+            return operation;
+        } else if (shouldDoAutoGenerate(context)) {
+            Operation operation = new OperationImpl();
+            operation.setOperationId(getOperationId(context, methodInfo));
+            return operation;
+        } else {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Operation");
-        Operation operation = new OperationImpl();
-        operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
-        operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
-        operation.setExternalDocs(
-                ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
-        operation.setParameters(ParameterReader.readParametersList(context,
-                annotationInstance.value(OperationConstant.PROP_PARAMETERS)).orElse(null));
-        operation.setRequestBody(RequestBodyReader.readRequestBody(context,
-                annotationInstance.value(OperationConstant.PROP_REQUEST_BODY)));
-        operation.setResponses(ResponseReader.readResponses(context,
-                annotationInstance.value(OperationConstant.PROP_RESPONSES)));
-        operation.setSecurity(SecurityRequirementReader
-                .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY)).orElse(null));
-        operation.setExtensions(
-                ExtensionReader.readExtensions(context,
-                        annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
-
-        // Below is only used in Jax-rs ??
-        // Operation Id ??
-        operation.setOperationId(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_OPERATION_ID));
-        // Deprecated ??
-        operation.setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
-
-        // Below is not used ?
-        // Tags ?
-        // Callbacks
-        // Servers
-        return operation;
     }
 
     /**
@@ -107,19 +110,53 @@ public class OperationReader {
     }
 
     // Helpers for scanner classes
-    public static boolean methodHasOperationAnnotation(final MethodInfo method) {
-        return method.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
-    }
-
     public static boolean operationIsHidden(final MethodInfo method) {
         AnnotationInstance operationAnnotation = method.annotation(OperationConstant.DOTNAME_OPERATION);
-        // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
-        return operationAnnotation.value(OperationConstant.PROP_HIDDEN) != null
-                && operationAnnotation.value(OperationConstant.PROP_HIDDEN).asBoolean();
+        if (operationAnnotation != null) {
+            // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
+            return operationAnnotation.value(OperationConstant.PROP_HIDDEN) != null
+                    && operationAnnotation.value(OperationConstant.PROP_HIDDEN).asBoolean();
+        }
+        return false;
     }
 
     public static AnnotationInstance getOperationAnnotation(final MethodInfo method) {
         return method.annotation(OperationConstant.DOTNAME_OPERATION);
     }
 
+    /**
+     * This might (depending on config) auto generate a operation Id from the method and class names.
+     * Or not.
+     * 
+     * @return an operation id, maybe
+     */
+    private static String getOperationId(final AnnotationScannerContext context,
+            final MethodInfo method) {
+        if (shouldDoAutoGenerate(context) && method != null) {
+            OpenApiConfig.OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
+            switch (operationIdStrategy) {
+                case METHOD:
+                    return method.name();
+                case CLASS_METHOD:
+                    return method.declaringClass().name().withoutPackagePrefix() + "_" + method.name();
+                case PACKAGE_CLASS_METHOD:
+                    return method.declaringClass().name() + "_" + method.name();
+                default:
+                    return null;
+            }
+        }
+        return null;
+
+    }
+
+    private static boolean shouldDoAutoGenerate(final AnnotationScannerContext context) {
+        // Try from config
+        OpenApiConfig config = context.getConfig();
+        OpenApiConfig.OperationIdStrategy operationIdStrategy = config.getOperationIdStrategy();
+        return operationIdStrategy != null;
+    }
+
+    private static boolean methodHasOperationAnnotation(final MethodInfo method) {
+        return method.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
+    }
 }

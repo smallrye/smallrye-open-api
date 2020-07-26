@@ -1,59 +1,17 @@
 {
   "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Generated API",
+    "version" : "1.0"
+  },
   "paths" : {
-    "/greeting/defaultGet/{name}" : {
-      "get" : {
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Greeting"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/greeting/helloOptional/{name}" : {
       "get" : {
+        "operationId" : "helloOptional",
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
           "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Greeting"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/greeting/helloPath" : {
-      "get" : {
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "query",
           "schema" : {
             "type" : "string"
           }
@@ -74,6 +32,7 @@
     },
     "/greeting/helloPathVariable/{name}" : {
       "get" : {
+        "operationId" : "helloPathVariable",
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
@@ -98,6 +57,32 @@
     },
     "/greeting/helloPathVariableWithResponse/{name}" : {
       "get" : {
+        "operationId" : "helloPathVariableWithResponse",        
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariableWithResponseTyped/{name}" : {
+      "get" : {
+        "operationId" : "helloPathVariableWithResponseTyped",        
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
@@ -122,6 +107,7 @@
     },
     "/greeting/helloRequestParam" : {
       "get" : {
+        "operationId" : "helloRequestParam",        
         "parameters" : [ {
           "name" : "name",
           "in" : "query",
@@ -145,6 +131,7 @@
     },
     "/greeting/hellosPathVariable/{name}" : {
       "get" : {
+        "operationId" : "hellosPathVariable",        
         "parameters" : [ {
           "name" : "name",
           "in" : "path",

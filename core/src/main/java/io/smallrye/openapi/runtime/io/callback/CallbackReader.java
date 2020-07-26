@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.MethodInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -82,15 +83,22 @@ public class CallbackReader {
         return callbacks;
     }
 
+    public static Callback readCallback(final AnnotationScannerContext context,
+            final AnnotationInstance annotation) {
+        return readCallback(context, annotation, null);
+    }
+
     /**
      * Reads a Callback annotation into a model.
      * 
      * @param annotation the {@literal @}Callback annotation
      * @param context the scanner context
+     * @param methodInfo the method
      * @return Callback model
      */
     public static Callback readCallback(final AnnotationScannerContext context,
-            final AnnotationInstance annotation) {
+            final AnnotationInstance annotation,
+            final MethodInfo methodInfo) {
         if (annotation == null) {
             return null;
         }
@@ -99,7 +107,7 @@ public class CallbackReader {
         callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.Callback));
         String expression = JandexUtil.stringValue(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
-                PathsReader.readPathItem(context, annotation.value(CallbackConstant.PROP_OPERATIONS)));
+                PathsReader.readPathItem(context, annotation.value(CallbackConstant.PROP_OPERATIONS), null));
         return callback;
     }
 

@@ -66,4 +66,13 @@ public interface OpenApiConfig {
     public String getInfoLicenseName();
 
     public String getInfoLicenseUrl();
+
+    public OperationIdStrategy getOperationIdStrategy();
+
+    enum OperationIdStrategy {
+        METHOD,
+        CLASS_METHOD,
+        PACKAGE_CLASS_METHOD
+    }
+
 }
