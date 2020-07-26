@@ -186,6 +186,7 @@ public class ResponseReader {
         for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
             MediaType type = new MediaTypeImpl();
             type.setSchema(SchemaFactory.typeToSchema(context.getIndex(),
+                    context.getClassLoader(),
                     JandexUtil.value(annotation, ResponseConstant.PROP_VALUE),
                     context.getExtensions()));
             content.addMediaType(mediaType, type);

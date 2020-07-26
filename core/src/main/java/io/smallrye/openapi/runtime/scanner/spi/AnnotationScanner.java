@@ -380,7 +380,8 @@ public interface AnnotationScanner {
                     schema = new SchemaImpl();
                     schema.setType(Schema.SchemaType.OBJECT);
                 } else {
-                    schema = SchemaFactory.typeToSchema(context.getIndex(), returnType, context.getExtensions());
+                    schema = SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), returnType,
+                            context.getExtensions());
                 }
 
                 Content content = new ContentImpl();
@@ -795,7 +796,8 @@ public interface AnnotationScanner {
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
             if (requestBodyType != null && requestBody.getRef() == null) {
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
-                    Schema schema = SchemaFactory.typeToSchema(context.getIndex(), requestBodyType, context.getExtensions());
+                    Schema schema = SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), requestBodyType,
+                            context.getExtensions());
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
@@ -833,7 +835,8 @@ public interface AnnotationScanner {
                         schema = new SchemaImpl();
                         schema.setType(Schema.SchemaType.OBJECT);
                     } else {
-                        schema = SchemaFactory.typeToSchema(context.getIndex(), requestBodyType, context.getExtensions());
+                        schema = SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), requestBodyType,
+                                context.getExtensions());
                     }
 
                     if (requestBody == null) {

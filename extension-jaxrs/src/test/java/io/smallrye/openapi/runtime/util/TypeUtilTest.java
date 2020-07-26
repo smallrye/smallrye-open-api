@@ -13,6 +13,7 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.Type;
 import org.junit.Test;
 
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 
@@ -27,7 +28,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(subjectClass, Collection.class);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertTrue(result);
     }
 
@@ -36,7 +37,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertTrue(result);
     }
 
@@ -45,7 +46,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(Collection.class);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertTrue(result);
     }
 
@@ -54,7 +55,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = CustomCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertTrue(result);
     }
 
@@ -63,7 +64,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = CustomMap.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertFalse(result);
     }
 
@@ -72,7 +73,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ChildCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertTrue(result);
     }
 
@@ -81,7 +82,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = UnrelatedType.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertFalse(result);
     }
 
@@ -90,7 +91,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = int.class;
         Index index = indexOf();
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.PRIMITIVE);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertFalse(result);
     }
 
@@ -100,7 +101,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final DotName subjectName = DotName.createSimple(subjectClass.getName());
         Index index = indexOf();
         Type testSubject = Type.create(subjectName, Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertFalse(result);
     }
 
@@ -109,7 +110,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = Object.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, TYPE_COLLECTION);
         assertFalse(result);
     }
 
@@ -120,7 +121,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
         Index index = indexOf(subjectClass);
         ClassInfo subjectInfo = index.getClassByName(subjectName);
         Type testSubject = subjectInfo.field("theMap").type();
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_MAP);
+        boolean result = isA(index, testSubject, TYPE_MAP);
         assertTrue(result);
     }
 
@@ -129,8 +130,12 @@ public class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = TestEnum.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = TypeUtil.isA(index, testSubject, TYPE_ENUM);
+        boolean result = isA(index, testSubject, TYPE_ENUM);
         assertTrue(result);
+    }
+
+    private boolean isA(Index index, Type testSubject, Type testObject) {
+        return TypeUtil.isA(index, ClassLoaderUtil.getDefaultClassLoader(), testSubject, testObject);
     }
 
     static class ArrayCollection extends ArrayList<String> {

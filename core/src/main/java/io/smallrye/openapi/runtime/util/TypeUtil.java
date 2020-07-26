@@ -337,14 +337,14 @@ public class TypeUtil {
         return OBJECT_FORMAT;
     }
 
-    static Class<?> getClass(DotName name) throws ClassNotFoundException {
-        return Class.forName(name.toString(), true, Thread.currentThread().getContextClassLoader());
+    private static Class<?> getClass(DotName name, ClassLoader cl) throws ClassNotFoundException {
+        return Class.forName(name.toString(), true, cl);
     }
 
-    static boolean isAssignableFrom(DotName subject, DotName object) {
+    private static boolean isAssignableFrom(DotName subject, DotName object, ClassLoader cl) {
         try {
-            Class<?> subjectKlazz = TypeUtil.getClass(subject);
-            Class<?> objectKlazz = TypeUtil.getClass(object);
+            Class<?> subjectKlazz = TypeUtil.getClass(subject, cl);
+            Class<?> objectKlazz = TypeUtil.getClass(object, cl);
             return objectKlazz.isAssignableFrom(subjectKlazz);
         } catch (@SuppressWarnings("unused") ClassNotFoundException nfe) {
             return false;
@@ -375,7 +375,7 @@ public class TypeUtil {
      * @param testObject type to test against
      * @return true if is of type
      */
-    public static boolean isA(IndexView index, Type testSubject, Type testObject) {
+    public static boolean isA(IndexView index, ClassLoader cl, Type testSubject, Type testObject) {
         // The types may be the same -- short circuit looking in the index
         if (getName(testSubject).equals(getName(testObject))) {
             return true;
@@ -391,7 +391,7 @@ public class TypeUtil {
             return true;
         }
 
-        return isAssignableFrom(testSubject.name(), testObject.name());
+        return isAssignableFrom(testSubject.name(), testObject.name(), cl);
     }
 
     private static Set<DotName> superTypes(IndexView index, ClassInfo testSubject) {

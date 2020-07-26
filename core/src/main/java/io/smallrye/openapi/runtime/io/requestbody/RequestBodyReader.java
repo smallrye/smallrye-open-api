@@ -148,6 +148,7 @@ public class RequestBodyReader {
         for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {
             MediaType type = new MediaTypeImpl();
             type.setSchema(SchemaFactory.typeToSchema(context.getIndex(),
+                    context.getClassLoader(),
                     JandexUtil.value(annotation, RequestBodyConstant.PROP_VALUE),
                     context.getExtensions()));
             content.addMediaType(mediaType, type);

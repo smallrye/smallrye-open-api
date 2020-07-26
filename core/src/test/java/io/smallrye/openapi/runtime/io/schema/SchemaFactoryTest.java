@@ -11,6 +11,7 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.junit.Test;
 
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 
 public class SchemaFactoryTest extends IndexScannerTestBase {
@@ -22,7 +23,8 @@ public class SchemaFactoryTest extends IndexScannerTestBase {
         Type target = ParameterizedType.create(DotName.createSimple(CompletableFuture.class.getName()),
                 new Type[] { STRING_TYPE },
                 null);
-        Type result = SchemaFactory.resolveAsyncType(index, target, Collections.emptyList());
+        Type result = SchemaFactory.resolveAsyncType(index, ClassLoaderUtil.getDefaultClassLoader(), target,
+                Collections.emptyList());
         assertEquals(STRING_TYPE, result);
     }
 
