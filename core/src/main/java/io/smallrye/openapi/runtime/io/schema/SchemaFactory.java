@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -215,6 +216,21 @@ public class SchemaFactory {
         schema.setMaxItems(readAttr(annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
         schema.setMinItems(readAttr(annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
+
+        schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(annotation,
+                SchemaConstant.PROP_PROPERTIES, properties -> {
+                    if (properties == null || properties.length == 0) {
+                        return null;
+                    }
+                    Map<String, Schema> propertySchemas = new LinkedHashMap<>(properties.length);
+                    for (AnnotationInstance propAnnotation : properties) {
+                        String key = JandexUtil.value(propAnnotation, SchemaConstant.PROP_NAME);
+                        Schema value = readSchema(index, cl, propAnnotation);
+                        propertySchemas.put(key, value);
+                    }
+
+                    return propertySchemas;
+                }, defaults));
 
         List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
 

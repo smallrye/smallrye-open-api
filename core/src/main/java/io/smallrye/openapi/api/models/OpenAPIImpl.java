@@ -6,7 +6,6 @@ import java.util.List;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.info.Info;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
@@ -226,15 +225,5 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     @Override
     public void setComponents(Components components) {
         this.components = components;
-    }
-
-    @Override
-    // TODO: Remove method for MicroProfile OpenAPI 2.0
-    public OpenAPI path(String name, PathItem path) {
-        if (this.paths == null) {
-            this.paths = new PathsImpl();
-        }
-        this.paths.addPathItem(name, path);
-        return this;
     }
 }

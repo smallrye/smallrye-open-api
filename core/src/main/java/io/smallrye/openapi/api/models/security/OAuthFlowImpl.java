@@ -1,9 +1,9 @@
 package io.smallrye.openapi.api.models.security;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
-import org.eclipse.microprofile.openapi.models.security.Scopes;
 
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
@@ -17,8 +17,7 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
     private String authorizationUrl;
     private String tokenUrl;
     private String refreshUrl;
-    // TODO: Update type MicroProfile OpenAPI 2.0
-    private Scopes scopes;
+    private Map<String, String> scopes;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#getAuthorizationUrl()
@@ -72,52 +71,32 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#getScopes()
      */
     @Override
-    // TODO: Update return type MicroProfile OpenAPI 2.0
-    public Scopes getScopes() {
-        //return ModelUtil.unmodifiableMap(this.scopes);
-        return this.scopes;
+    public Map<String, String> getScopes() {
+        return ModelUtil.unmodifiableMap(this.scopes);
     }
 
     /*
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#setScopes(java.util.Map)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
+    @Override
     public void setScopes(Map<String, String> scopes) {
-        //this.scopes = ModelUtil.replace(scopes, LinkedHashMap<String, String>::new);
-        if (scopes == null) {
-            this.scopes = null;
-        } else {
-            this.scopes = new ScopesImpl(scopes);
-        }
+        this.scopes = ModelUtil.replace(scopes, LinkedHashMap<String, String>::new);
     }
 
     /*
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#addScope(java.lang.String, java.lang.String)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
+    @Override
     public OAuthFlow addScope(String scope, String description) {
-        // this.scopes = ModelUtil.add(scope, description, this.scopes, LinkedHashMap<String, String>::new);
-        if (scope == null) {
-            return this;
-        }
-        if (this.scopes == null) {
-            this.scopes = new ScopesImpl();
-        }
-        scopes.addScope(scope, description);
+        this.scopes = ModelUtil.add(scope, description, this.scopes, LinkedHashMap<String, String>::new);
         return this;
     }
 
     /*
      * @see org.eclipse.microprofile.openapi.models.security.OAuthFlow#removeScope(java.lang.String)
      */
-    // TODO: @Override for MicroProfile OpenAPI 2.0 (and restore JavaDoc comment)
+    @Override
     public void removeScope(String scope) {
         ModelUtil.remove(this.scopes, scope);
-    }
-
-    @Override
-    // TODO: Remove method for MicroProfile OpenAPI 2.0
-    public void setScopes(Scopes scopes) {
-        this.scopes = scopes;
     }
 }

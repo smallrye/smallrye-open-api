@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.io.requestbody;
 
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBodySchema;
 import org.jboss.jandex.DotName;
 
 /**
@@ -15,10 +16,7 @@ import org.jboss.jandex.DotName;
 public class RequestBodyConstant {
 
     static final DotName DOTNAME_REQUESTBODY = DotName.createSimple(RequestBody.class.getName());
-    // TODO: Use class/import for MicroProfile OpenAPI 2.0
-    //static final DotName DOTNAME_REQUEST_BODY_SCHEMA = DotName.createSimple(RequestBodySchema.class.getName());
-    static final DotName DOTNAME_REQUEST_BODY_SCHEMA = DotName
-            .createSimple("org.eclipse.microprofile.openapi.annotations.parameters.RequestBodySchema");
+    static final DotName DOTNAME_REQUEST_BODY_SCHEMA = DotName.createSimple(RequestBodySchema.class.getName());
 
     public static final String PROP_NAME = "name";
     public static final String PROP_REQUIRED = "required";
