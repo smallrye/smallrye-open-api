@@ -231,6 +231,11 @@ public class OpenApiDataObjectScanner {
             Schema currentSchema = currentPathEntry.getSchema();
             Type currentType = currentPathEntry.getClazzType();
 
+            if (SchemaRegistry.hasSchema(currentType, null)) {
+                // This type has already been scanned and registered, don't do it again!
+                continue;
+            }
+
             // First, handle class annotations (re-assign since readKlass may return new schema)
             currentSchema = readKlass(currentClass, currentType, currentSchema);
             currentPathEntry.setSchema(currentSchema);
@@ -238,9 +243,10 @@ public class OpenApiDataObjectScanner {
             if (currentSchema.getType() == null) {
                 // If not schema has yet been set, consider this an "object"
                 currentSchema.setType(Schema.SchemaType.OBJECT);
+            } else {
+                // Ignore the returned ref, the currentSchema will be further modified with added properties
+                SchemaFactory.schemaRegistration(index, currentType, currentSchema);
             }
-
-            SchemaFactory.schemaRegistration(index, currentType, currentSchema);
 
             if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
                 // Only 'object' type schemas should have properties of their own

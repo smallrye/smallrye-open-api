@@ -471,7 +471,7 @@ public class SchemaFactory {
 
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype)) {
+        if (schemaReferenceSupported && schemaRegistry.hasRef(ctype)) {
             return schemaRegistry.lookupRef(ctype);
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, cl, ctype);
@@ -496,6 +496,8 @@ public class SchemaFactory {
 
         if (allowRegistration(index, schemaRegistry, type, schema)) {
             schema = schemaRegistry.register(type, schema);
+        } else if (schemaRegistry != null && schemaRegistry.hasRef(type)) {
+            schema = schemaRegistry.lookupRef(type);
         }
 
         return schema;
@@ -519,12 +521,9 @@ public class SchemaFactory {
         }
 
         /*
-         * Only register if the type is not already registered or the schema
-         * being registered is not the same as an existing reference already
-         * in the registry. Such a situation may occur if a downstream process
-         * registered the schema now being checked.
+         * Only register if the type is not already registered
          */
-        return !registry.hasSchema(type) || !registry.lookupRef(type).equals(schema);
+        return !registry.hasSchema(type);
     }
 
     /**

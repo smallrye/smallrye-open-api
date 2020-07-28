@@ -186,6 +186,36 @@ public class SchemaRegistry {
     }
 
     /**
+     * Convenience method to check if the current thread's <code>SchemaRegistry</code>
+     * contains a schema for the given type (which may require type resolution using resolver).
+     * 
+     * @param type
+     * @param resolver
+     * @return true when schema references are enabled and the type is present in the registry, otherwise false
+     */
+    public static boolean hasSchema(Type type, TypeResolver resolver) {
+        SchemaRegistry registry = currentInstance();
+
+        if (registry == null || !registry.schemaReferenceSupported()) {
+            return false;
+        }
+
+        Type resolvedType;
+
+        if (resolver != null) {
+            if (type.kind() == Kind.PARAMETERIZED_TYPE) {
+                resolvedType = resolver.getResolvedType(type.asParameterizedType());
+            } else {
+                resolvedType = resolver.getResolvedType(type);
+            }
+        } else {
+            resolvedType = type;
+        }
+
+        return registry.hasSchema(resolvedType);
+    }
+
+    /**
      * Information about a single generated schema.
      *
      * @author eric.wittmann@gmail.com
