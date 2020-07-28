@@ -15,8 +15,8 @@ import java.util.ServiceLoader;
 public class AnnotationScannerFactory {
     private final Map<String, AnnotationScanner> loadedScanners = new HashMap<>();
 
-    public AnnotationScannerFactory() {
-        ServiceLoader<AnnotationScanner> loader = ServiceLoader.load(AnnotationScanner.class);
+    public AnnotationScannerFactory(ClassLoader cl) {
+        ServiceLoader<AnnotationScanner> loader = ServiceLoader.load(AnnotationScanner.class, cl);
         Iterator<AnnotationScanner> scannerIterator = loader.iterator();
         while (scannerIterator.hasNext()) {
             AnnotationScanner scanner = scannerIterator.next();
