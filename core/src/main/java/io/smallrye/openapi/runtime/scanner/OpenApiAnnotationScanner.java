@@ -35,7 +35,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
 public class OpenApiAnnotationScanner {
 
     private final AnnotationScannerContext annotationScannerContext;
-    private final AnnotationScannerFactory annotationScannerFactory = new AnnotationScannerFactory();
+    private final AnnotationScannerFactory annotationScannerFactory;
 
     /**
      * Constructor.
@@ -89,6 +89,7 @@ public class OpenApiAnnotationScanner {
         }
 
         this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, config);
+        this.annotationScannerFactory = new AnnotationScannerFactory(loader);
     }
 
     /**
