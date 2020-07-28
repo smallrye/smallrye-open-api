@@ -58,18 +58,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        if (hasRouteMethod(method, HttpMethod.POST)) {
-            return true;
-        }
-        return false;
+        return hasRouteMethod(method, HttpMethod.POST);
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        if (hasRouteMethod(method, HttpMethod.DELETE)) {
-            return true;
-        }
-        return false;
+        return hasRouteMethod(method, HttpMethod.DELETE);
     }
 
     @Override
@@ -225,9 +219,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                             }
                         }
                     } else {
-                        // Default to GET
-                        processRouteMethod(context, resourceClass, methodInfo, PathItem.HttpMethod.GET, openApi, tagRefs,
-                                locatorPathParameters);
+                        // Default to ALL
+                        PathItem.HttpMethod[] all = PathItem.HttpMethod.values();
+                        for (PathItem.HttpMethod httpMethod : all) {
+                            processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
+                                    locatorPathParameters);
+                        }
                     }
                 } else {
                     // TODO: Default ? Look at RouteBase
