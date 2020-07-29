@@ -43,15 +43,13 @@ public class InterfaceInheritanceTest extends IndexScannerTestBase {
     }
 
     static interface ImmutableEntity {
-        @Schema(example = "0", required = true,
-            description = "When the entity was created as a Unix timestamp. For create operations, this will not need to be defined.")
+        @Schema(example = "0", required = true, description = "When the entity was created as a Unix timestamp. For create operations, this will not need to be defined.")
         @JsonProperty("created")
         @NotNull
         @Min(0L)
         Instant getCreated();
 
-        @Schema(required = true,
-            description = "The id of the entity that created this entity. For create operations, this will not need to be defined and will come from the larger security context.")
+        @Schema(required = true, description = "The id of the entity that created this entity. For create operations, this will not need to be defined and will come from the larger security context.")
         @JsonProperty("creator")
         @NotNull
         @Size(min = 37, max = 37)
@@ -62,7 +60,6 @@ public class InterfaceInheritanceTest extends IndexScannerTestBase {
         @NotNull
         @Size(min = 37, max = 37)
         UUID getId();
-
 
         @Schema(required = true, description = "Display name of this entity.")
         @JsonProperty("name")
@@ -105,19 +102,16 @@ public class InterfaceInheritanceTest extends IndexScannerTestBase {
         @GET
         @Path("/{fid}/notes/{nid}")
         @APIResponses(value = {
-            @APIResponse(responseCode = "200", description = "OK",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Note.class))),
-            @APIResponse(responseCode = "404", description = "Not Found - The `Fruit` or `Note` could not be found.")
+                @APIResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Note.class))),
+                @APIResponse(responseCode = "404", description = "Not Found - The `Fruit` or `Note` could not be found.")
         })
-        public Response getNote(@PathParam("fid") final String fid, @PathParam("nid") final String nid)
-        {
+        public Response getNote(@PathParam("fid") final String fid, @PathParam("nid") final String nid) {
             return Response.ok().entity("magic!").build();
         }
 
         @GET
         @Produces(MediaType.TEXT_PLAIN)
-        public String hello()
-        {
+        public String hello() {
             return "hello";
         }
     }
