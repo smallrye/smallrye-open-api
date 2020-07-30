@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -377,7 +378,7 @@ public class TypeResolver {
                     .filter(TypeResolver::acceptMethod)
                     .forEach(method -> scanMethod(properties, method, stack, reference, ignoreResolver));
 
-            currentClass.interfaceTypes()
+            interfaces(index, currentClass)
                     .stream()
                     .map(index::getClass)
                     .filter(Objects::nonNull)
@@ -394,6 +395,29 @@ public class TypeResolver {
 
     private static boolean acceptField(FieldInfo field) {
         return !Modifier.isStatic(field.flags());
+    }
+
+    /**
+     * Retrieve the unique <code>Type</code>s that the given <code>ClassInfo</code>
+     * implements.
+     * 
+     * @param index
+     * @param klass
+     * @return the <code>Set</code> of interfaces
+     * 
+     */
+    private static Set<Type> interfaces(AugmentedIndexView index, ClassInfo klass) {
+        Set<Type> interfaces = new LinkedHashSet<>();
+
+        for (Type type : klass.interfaceTypes()) {
+            interfaces.add(type);
+
+            if (index.containsClass(type)) {
+                interfaces.addAll(interfaces(index, index.getClass(type)));
+            }
+        }
+
+        return interfaces;
     }
 
     /**
