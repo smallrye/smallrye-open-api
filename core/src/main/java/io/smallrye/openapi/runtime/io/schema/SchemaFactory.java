@@ -489,6 +489,9 @@ public class SchemaFactory {
 
         if (schemaReferenceSupported && schemaRegistry.hasRef(ctype)) {
             return schemaRegistry.lookupRef(ctype);
+        } else if (!schemaReferenceSupported && schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
+            // Clone the schema from the registry using mergeObjects
+            return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, cl, ctype);
             if (schemaReferenceSupported) {

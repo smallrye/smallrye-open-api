@@ -369,6 +369,10 @@ public class SchemaRegistry {
         return hasRef(new TypeKey(instanceType));
     }
 
+    public Schema lookupSchema(Type instanceType) {
+        return lookupSchema(new TypeKey(instanceType));
+    }
+
     public boolean hasSchema(Type instanceType) {
         return hasSchema(new TypeKey(instanceType));
     }
@@ -385,6 +389,16 @@ public class SchemaRegistry {
         }
 
         return info.schemaRef;
+    }
+
+    private Schema lookupSchema(TypeKey key) {
+        GeneratedSchemaInfo info = registry.get(key);
+
+        if (info == null) {
+            throw ScannerMessages.msg.notRegistered(key.type.name());
+        }
+
+        return info.schema;
     }
 
     private boolean hasRef(TypeKey key) {
