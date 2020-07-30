@@ -20,7 +20,14 @@ public class AugmentedIndexView implements IndexView {
 
     private final IndexView index;
 
-    public AugmentedIndexView(IndexView index) {
+    public static AugmentedIndexView augment(IndexView index) {
+        if (index instanceof AugmentedIndexView) {
+            return (AugmentedIndexView) index;
+        }
+        return new AugmentedIndexView(index);
+    }
+
+    private AugmentedIndexView(IndexView index) {
         validateInput(index);
         this.index = index;
     }

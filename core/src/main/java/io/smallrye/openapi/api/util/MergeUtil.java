@@ -227,6 +227,10 @@ public class MergeUtil {
         if (values1 == null && values2 != null) {
             return Optional.of(values2);
         }
+        if (values1.equals(values2)) {
+            // Do not merge identical lists
+            return Optional.of(values1);
+        }
 
         if (values1.get(0) instanceof String) {
             return Optional.of(mergeStringLists(values1, values2));

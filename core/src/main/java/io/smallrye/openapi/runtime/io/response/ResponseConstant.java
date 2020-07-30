@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.io.response;
 
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.jandex.DotName;
 
@@ -19,10 +20,7 @@ public class ResponseConstant {
 
     static final DotName DOTNAME_API_RESPONSE = DotName.createSimple(APIResponse.class.getName());
     static final DotName DOTNAME_API_RESPONSES = DotName.createSimple(APIResponses.class.getName());
-    // TODO: Use class/import for MicroProfile OpenAPI 2.0
-    //static final DotName DOTNAME_API_RESPONSE_SCHEMA = DotName.createSimple(APIResponseSchema.class.getName());
-    static final DotName DOTNAME_API_RESPONSE_SCHEMA = DotName
-            .createSimple("org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema");
+    static final DotName DOTNAME_API_RESPONSE_SCHEMA = DotName.createSimple(APIResponseSchema.class.getName());
 
     public static final String PROP_NAME = "name";
     public static final String PROP_HEADERS = "headers";

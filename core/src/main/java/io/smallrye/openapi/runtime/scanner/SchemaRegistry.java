@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -90,7 +91,7 @@ public class SchemaRegistry {
      * </ul>
      *
      * If eligible, schema references are enabled by MP Config property
-     * <code>mp.openapi.extensions.schema-references.enable</code>, and the
+     * <code>mp.openapi.extensions.smallrye.schema-references.enable</code>, and the
      * resolved type is available in the registry's {@link IndexView} then the
      * schema can be registered.
      *
@@ -108,6 +109,45 @@ public class SchemaRegistry {
      *         to the schema registered for the given Type
      */
     public static Schema checkRegistration(Type type, TypeResolver resolver, Schema schema) {
+        return register(type, resolver, schema, (registry, key) -> registry.register(key, schema, null));
+    }
+
+    /**
+     * Attempt to register ONLY a reference to entityType using the typeResolver.
+     * The eligible kinds of types are
+     *
+     * <ul>
+     * <li>{@link org.jboss.jandex.Type.Kind#CLASS CLASS}
+     * <li>{@link org.jboss.jandex.Type.Kind#PARAMETERIZED_TYPE
+     * PARAMETERIZED_TYPE}
+     * <li>{@link org.jboss.jandex.Type.Kind#TYPE_VARIABLE TYPE_VARIABLE}
+     * <li>{@link org.jboss.jandex.Type.Kind#WILDCARD_TYPE WILDCARD_TYPE}
+     * </ul>
+     *
+     * If eligible, schema references are enabled by MP Config property
+     * <code>mp.openapi.extensions.smallrye.schema-references.enable</code>, and the
+     * resolved type is available in the registry's {@link IndexView} then the
+     * schema reference can be registered.
+     *
+     * Only if the type has not already been registered earlier will it be
+     * added.
+     *
+     * @param type
+     *        the {@link Type} the {@link Schema} applies to
+     * @param resolver
+     *        a {@link TypeResolver} that will be used to resolve
+     *        parameterized and wildcard types
+     * @param schema
+     *        {@link Schema} to add to the registry
+     * @return the same schema if not eligible for registration, or a reference
+     *         to the schema registered for the given Type
+     */
+    public static Schema registerReference(Type type, TypeResolver resolver, Schema schema) {
+        return register(type, resolver, schema, (registry, key) -> registry.registerReference(key));
+    }
+
+    static Schema register(Type type, TypeResolver resolver, Schema schema,
+            BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
         Type resolvedType;
 
         if (type.kind() == Kind.PARAMETERIZED_TYPE) {
@@ -134,15 +174,45 @@ public class SchemaRegistry {
 
         TypeKey key = new TypeKey(resolvedType);
 
-        if (registry.has(key)) {
+        if (registry.hasRef(key)) {
             schema = registry.lookupRef(key);
         } else if (registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
-            schema = registry.register(key, schema, null);
+            schema = registrationAction.apply(registry, key);
         }
 
         return schema;
+    }
+
+    /**
+     * Convenience method to check if the current thread's <code>SchemaRegistry</code>
+     * contains a schema for the given type (which may require type resolution using resolver).
+     * 
+     * @param type
+     * @param resolver
+     * @return true when schema references are enabled and the type is present in the registry, otherwise false
+     */
+    public static boolean hasSchema(Type type, TypeResolver resolver) {
+        SchemaRegistry registry = currentInstance();
+
+        if (registry == null || !registry.schemaReferenceSupported()) {
+            return false;
+        }
+
+        Type resolvedType;
+
+        if (resolver != null) {
+            if (type.kind() == Kind.PARAMETERIZED_TYPE) {
+                resolvedType = resolver.getResolvedType(type.asParameterizedType());
+            } else {
+                resolvedType = resolver.getResolvedType(type);
+            }
+        } else {
+            resolvedType = type;
+        }
+
+        return registry.hasSchema(resolvedType);
     }
 
     /**
@@ -219,12 +289,23 @@ public class SchemaRegistry {
     public Schema register(Type entityType, Schema schema) {
         TypeKey key = new TypeKey(entityType);
 
-        if (has(key)) {
+        if (hasRef(key)) {
             // This is a replacement registration
             remove(key);
         }
 
         return register(key, schema, null);
+    }
+
+    private Schema registerReference(TypeKey key) {
+        String name = deriveName(key, null);
+        Schema schemaRef = new SchemaImpl();
+        schemaRef.setRef(OpenApiConstants.REF_PREFIX_SCHEMA + name);
+
+        registry.put(key, new GeneratedSchemaInfo(name, null, schemaRef));
+        names.add(name);
+
+        return schemaRef;
     }
 
     /**
@@ -284,8 +365,16 @@ public class SchemaRegistry {
         return lookupRef(new TypeKey(instanceType));
     }
 
-    public boolean has(Type instanceType) {
-        return has(new TypeKey(instanceType));
+    public boolean hasRef(Type instanceType) {
+        return hasRef(new TypeKey(instanceType));
+    }
+
+    public Schema lookupSchema(Type instanceType) {
+        return lookupSchema(new TypeKey(instanceType));
+    }
+
+    public boolean hasSchema(Type instanceType) {
+        return hasSchema(new TypeKey(instanceType));
     }
 
     public boolean schemaReferenceSupported() {
@@ -302,8 +391,22 @@ public class SchemaRegistry {
         return info.schemaRef;
     }
 
-    private boolean has(TypeKey key) {
+    private Schema lookupSchema(TypeKey key) {
+        GeneratedSchemaInfo info = registry.get(key);
+
+        if (info == null) {
+            throw ScannerMessages.msg.notRegistered(key.type.name());
+        }
+
+        return info.schema;
+    }
+
+    private boolean hasRef(TypeKey key) {
         return registry.containsKey(key);
+    }
+
+    private boolean hasSchema(TypeKey key) {
+        return registry.containsKey(key) && registry.get(key).schema != null;
     }
 
     private void remove(TypeKey key) {

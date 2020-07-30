@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -216,6 +217,21 @@ public class SchemaFactory {
         schema.setMinItems(readAttr(annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
 
+        schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(annotation,
+                SchemaConstant.PROP_PROPERTIES, properties -> {
+                    if (properties == null || properties.length == 0) {
+                        return null;
+                    }
+                    Map<String, Schema> propertySchemas = new LinkedHashMap<>(properties.length);
+                    for (AnnotationInstance propAnnotation : properties) {
+                        String key = JandexUtil.value(propAnnotation, SchemaConstant.PROP_NAME);
+                        Schema value = readSchema(index, cl, propAnnotation);
+                        propertySchemas.put(key, value);
+                    }
+
+                    return propertySchemas;
+                }, defaults));
+
         List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
 
         if (enumeration != null && !enumeration.isEmpty()) {
@@ -294,9 +310,9 @@ public class SchemaFactory {
      * @param schemaType related schema type for this attribute
      * @return the annotation attribute value, a default value, or null
      */
-    static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
+    static Object parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
             SchemaType schemaType) {
-        return (T) readAttr(annotation, propertyName, value -> {
+        return readAttr(annotation, propertyName, value -> {
             if (!(value instanceof String)) {
                 return value;
             }
@@ -471,8 +487,11 @@ public class SchemaFactory {
 
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.has(ctype)) {
+        if (schemaReferenceSupported && schemaRegistry.hasRef(ctype)) {
             return schemaRegistry.lookupRef(ctype);
+        } else if (!schemaReferenceSupported && schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
+            // Clone the schema from the registry using mergeObjects
+            return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
         } else {
             Schema schema = OpenApiDataObjectScanner.process(index, cl, ctype);
             if (schemaReferenceSupported) {
@@ -491,11 +510,13 @@ public class SchemaFactory {
      * @param schema a schema
      * @return a reference to the registered schema or the input schema when registration is not allowed/possible
      */
-    static Schema schemaRegistration(IndexView index, Type type, Schema schema) {
+    public static Schema schemaRegistration(IndexView index, Type type, Schema schema) {
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
         if (allowRegistration(index, schemaRegistry, type, schema)) {
             schema = schemaRegistry.register(type, schema);
+        } else if (schemaRegistry != null && schemaRegistry.hasRef(type)) {
+            schema = schemaRegistry.lookupRef(type);
         }
 
         return schema;
@@ -519,12 +540,9 @@ public class SchemaFactory {
         }
 
         /*
-         * Only register if the type is not already registered or the schema
-         * being registered is not the same as an existing reference already
-         * in the registry. Such a situation may occur if a downstream process
-         * registered the schema now being checked.
+         * Only register if the type is not already registered
          */
-        return !registry.has(type) || !registry.lookupRef(type).equals(schema);
+        return !registry.hasSchema(type);
     }
 
     /**

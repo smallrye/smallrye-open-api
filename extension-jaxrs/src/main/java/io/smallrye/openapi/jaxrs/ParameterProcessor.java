@@ -1258,7 +1258,7 @@ public class ParameterProcessor {
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     void readParametersInherited(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
-        AugmentedIndexView augmentedIndex = new AugmentedIndexView(index);
+        AugmentedIndexView augmentedIndex = AugmentedIndexView.augment(index);
         List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, clazz, null).keySet());
         /*
          * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
