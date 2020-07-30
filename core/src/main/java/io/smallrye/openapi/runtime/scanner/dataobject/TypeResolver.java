@@ -402,7 +402,7 @@ public class TypeResolver {
      * implements.
      * 
      * @param index
-     * @param klazz
+     * @param klass
      * @return the <code>Set</code> of interfaces
      * 
      */
