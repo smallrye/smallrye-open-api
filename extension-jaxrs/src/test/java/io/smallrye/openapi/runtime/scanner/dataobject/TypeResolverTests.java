@@ -198,8 +198,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getReadMethod(), property.getAnnotationTarget());
         assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
-                                                     SchemaConstant.DOTNAME_SCHEMA,
-                                                     SchemaConstant.PROP_TITLE));
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_TITLE));
     }
 
     @Test
@@ -215,8 +215,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getWriteMethod(), property.getAnnotationTarget());
         assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
-                                                     SchemaConstant.DOTNAME_SCHEMA,
-                                                     SchemaConstant.PROP_TITLE));
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_TITLE));
     }
 
     /* Test models and resources below. */
