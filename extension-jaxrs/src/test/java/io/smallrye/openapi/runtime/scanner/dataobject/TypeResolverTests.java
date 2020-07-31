@@ -187,7 +187,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testNonJavaBeansPropertyAccessor() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanAccessorProperty.class));
+        AugmentedIndexView index = new AugmentedIndexView(indexOf(NonJavaBeanAccessorProperty.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanAccessorProperty.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -198,13 +198,13 @@ public class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getReadMethod(), property.getAnnotationTarget());
         assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
-                                                     SchemaConstant.DOTNAME_SCHEMA,
-                                                     SchemaConstant.PROP_TITLE));
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_TITLE));
     }
 
     @Test
     public void testNonJavaBeansPropertyMutator() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanMutatorProperty.class));
+        AugmentedIndexView index = new AugmentedIndexView(indexOf(NonJavaBeanMutatorProperty.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanMutatorProperty.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -215,8 +215,8 @@ public class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getWriteMethod(), property.getAnnotationTarget());
         assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
-                                                     SchemaConstant.DOTNAME_SCHEMA,
-                                                     SchemaConstant.PROP_TITLE));
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_TITLE));
     }
 
     /* Test models and resources below. */

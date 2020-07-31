@@ -646,7 +646,8 @@ public class TypeResolver {
             return false;
         }
 
-        return METHOD_PREFIX_SET.equals(methodNamePrefix(method)) || TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
+        return METHOD_PREFIX_SET.equals(methodNamePrefix(method))
+                || TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
     }
 
     private static String methodNamePrefix(MethodInfo method) {
