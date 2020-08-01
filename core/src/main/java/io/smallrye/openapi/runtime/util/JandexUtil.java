@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -446,6 +447,13 @@ public class JandexUtil {
         return null;
     }
 
+    public static List<AnnotationValue> schemaDisplayValues(AnnotationInstance annotation) {
+        return annotation.values()
+                .stream()
+                .filter(value -> !SchemaConstant.PROPERTIES_NONDISPLAY.contains(value.name()))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Returns true if the given @Schema annotation is a simple class schema. This means that
      * the annotation only has one field defined, and that field is "implementation".
@@ -454,7 +462,7 @@ public class JandexUtil {
      * @return Is it a simple class @Schema
      */
     public static boolean isSimpleClassSchema(AnnotationInstance annotation) {
-        return annotation.values().size() == 1 && hasImplementation(annotation);
+        return schemaDisplayValues(annotation).isEmpty() && hasImplementation(annotation);
     }
 
     /**
@@ -466,7 +474,8 @@ public class JandexUtil {
      * @return Is it a simple array @Schema
      */
     public static boolean isSimpleArraySchema(AnnotationInstance annotation) {
-        if (annotation.values().size() != 2) {
+        // May only have 'type' display property
+        if (schemaDisplayValues(annotation).size() != 1) {
             return false;
         }
 

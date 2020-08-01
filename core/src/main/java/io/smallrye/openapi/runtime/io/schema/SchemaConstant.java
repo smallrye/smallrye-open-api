@@ -1,5 +1,9 @@
 package io.smallrye.openapi.runtime.io.schema;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.DotName;
 
@@ -64,6 +68,10 @@ public class SchemaConstant {
     public static final String PROP_REQUIRED_PROPERTIES = "requiredProperties";
     public static final String PROP_PROPERTIES = "properties";
     public static final String PROP_NOT = "not";
+
+    public static final List<String> PROPERTIES_NONDISPLAY = Collections.unmodifiableList(Arrays.asList(PROP_IMPLEMENTATION,
+            PROP_NAME,
+            PROP_REQUIRED));
 
     private SchemaConstant() {
     }
