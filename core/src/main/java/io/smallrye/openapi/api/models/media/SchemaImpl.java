@@ -23,7 +23,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
 
     private String $ref;
     private String format;
-    private String name;
+    private final String name;
     private String title;
     private String description;
     private Object defaultValue;
@@ -60,20 +60,20 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     private Boolean writeOnly;
     private Boolean deprecated;
 
-    public SchemaImpl() {
-
+    public static boolean isNamed(Schema schema) {
+        return schema instanceof SchemaImpl && ((SchemaImpl) schema).name != null;
     }
 
     public SchemaImpl(String name) {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
+    public SchemaImpl() {
+        this(null);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getName() {
+        return name;
     }
 
     /**
