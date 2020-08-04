@@ -42,6 +42,9 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 public class TypeResolver {
 
     private static final Type BOOLEAN_TYPE = Type.create(DotName.createSimple(Boolean.class.getName()), Type.Kind.CLASS);
+    static final String METHOD_PREFIX_GET = "get";
+    static final String METHOD_PREFIX_IS = "is";
+    static final String METHOD_PREFIX_SET = "set";
 
     private final Deque<Map<String, Type>> resolutionStack;
     private final String propertyName;
@@ -92,7 +95,7 @@ public class TypeResolver {
         if (t2.kind() == Kind.FIELD) {
             return +1;
         }
-        if (t1.asMethod().name().startsWith("get") && !t2.asMethod().name().startsWith("get")) {
+        if (isAccessor(t1.asMethod()) && !isAccessor(t2.asMethod())) {
             return -1;
         }
 
@@ -558,23 +561,23 @@ public class TypeResolver {
             Deque<Map<String, Type>> stack,
             MethodInfo method,
             Type propertyType) {
-        String methodName = method.name();
-        boolean isWriteMethod = isMutator(method);
-        String propertyName;
-        int nameStart;
 
-        if (isWriteMethod) {
-            nameStart = 3;
-        } else {
-            nameStart = methodName.startsWith("is") ? 2 : 3;
-        }
+        final String methodName = method.name();
+        final int nameStart = methodNamePrefix(method).length();
+        final boolean isWriteMethod = isMutator(method);
+        final String propertyName;
 
         if (methodName.length() == nameStart) {
             // The method's name is "get", "set", or "is" without the property name
             return null;
         }
 
-        propertyName = Character.toLowerCase(methodName.charAt(nameStart)) + methodName.substring(nameStart + 1);
+        if (nameStart > 0) {
+            propertyName = Character.toLowerCase(methodName.charAt(nameStart)) + methodName.substring(nameStart + 1);
+        } else {
+            propertyName = methodName;
+        }
+
         TypeResolver resolver;
 
         if (properties.containsKey(propertyName)) {
@@ -617,13 +620,16 @@ public class TypeResolver {
             return false;
         }
 
-        String methodName = method.name();
+        String namePrefix = methodNamePrefix(method);
 
-        if (methodName.startsWith("get")) {
+        if (METHOD_PREFIX_GET.equals(namePrefix)) {
+            return true;
+        }
+        if (METHOD_PREFIX_IS.equals(namePrefix) && TypeUtil.equalTypes(returnType, BOOLEAN_TYPE)) {
             return true;
         }
 
-        return methodName.startsWith("is") && TypeUtil.equalTypes(returnType, BOOLEAN_TYPE);
+        return TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
     }
 
     /**
@@ -640,7 +646,26 @@ public class TypeResolver {
             return false;
         }
 
-        return method.name().startsWith("set");
+        return METHOD_PREFIX_SET.equals(methodNamePrefix(method))
+                || TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
+    }
+
+    private static String methodNamePrefix(MethodInfo method) {
+        String methodName = method.name();
+
+        if (methodName.startsWith(METHOD_PREFIX_GET)) {
+            return METHOD_PREFIX_GET;
+        }
+
+        if (methodName.startsWith(METHOD_PREFIX_IS)) {
+            return METHOD_PREFIX_IS;
+        }
+
+        if (methodName.startsWith(METHOD_PREFIX_SET)) {
+            return METHOD_PREFIX_SET;
+        }
+
+        return "";
     }
 
     private static boolean isHigherPriority(MethodInfo newMethod, MethodInfo oldMethod) {
