@@ -554,7 +554,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
         @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
         @APIResponse(responseCode = "404", description = "No policies found for customer")
         @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
-        @APIResponse(responseCode = "200", description = "Policies found", content = @Content(schema = @Schema(implementation = PagedResponse.class)), headers = @Header(name = "TotalCount", description = "Total number of items found", schema = @Schema(type = SchemaType.INTEGER)))
+        @APIResponse(responseCode = "200", description = "Policies found", content = @Content(schema = @Schema(implementation = PagedResponse.class, name = "ignored")), headers = @Header(name = "TotalCount", description = "Total number of items found", schema = @Schema(type = SchemaType.INTEGER)))
         public Response getPoliciesForCustomer() {
             return null;
         }
