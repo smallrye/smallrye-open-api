@@ -22,6 +22,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.junit.Test;
 
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -182,6 +183,40 @@ public class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("comment2ActuallyFirst", iter.next().getValue().getPropertyName());
         assertEquals("comment", iter.next().getValue().getPropertyName());
         assertEquals("name2", iter.next().getValue().getPropertyName());
+    }
+
+    @Test
+    public void testNonJavaBeansPropertyAccessor() {
+        AugmentedIndexView index = new AugmentedIndexView(indexOf(NonJavaBeanAccessorProperty.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanAccessorProperty.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(1, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+        TypeResolver property = iter.next().getValue();
+        assertEquals("name", property.getPropertyName());
+        assertEquals(property.getReadMethod(), property.getAnnotationTarget());
+        assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_TITLE));
+    }
+
+    @Test
+    public void testNonJavaBeansPropertyMutator() {
+        AugmentedIndexView index = new AugmentedIndexView(indexOf(NonJavaBeanMutatorProperty.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanMutatorProperty.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(1, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+        TypeResolver property = iter.next().getValue();
+        assertEquals("name", property.getPropertyName());
+        assertEquals(property.getWriteMethod(), property.getAnnotationTarget());
+        assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
+                SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_TITLE));
     }
 
     /* Test models and resources below. */
@@ -377,6 +412,62 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
         public String getComment2() {
             return comment2;
+        }
+    }
+
+    static class NonJavaBeanAccessorProperty {
+        String name;
+
+        @Schema(title = "Name of the property")
+        String name() {
+            return name;
+        }
+
+        // Should be skipped
+        String anotherValue() {
+            return null;
+        }
+
+        // Should be skipped
+        String get() {
+            return name;
+        }
+
+        // Should be skipped
+        String isNotAnAccessor() {
+            return null;
+        }
+
+        void name(String name) {
+            this.name = name;
+        }
+    }
+
+    static class NonJavaBeanMutatorProperty {
+        String name;
+
+        String name() {
+            return name;
+        }
+
+        // Should be skipped
+        void anotherValue(String value) {
+            return;
+        }
+
+        // Should be skipped
+        String get() {
+            return name;
+        }
+
+        // Should be skipped
+        String isNotAnAccessor() {
+            return null;
+        }
+
+        @Schema(title = "Name of the property")
+        void name(String name) {
+            this.name = name;
         }
     }
 }
