@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -62,31 +61,21 @@ public class SchemaFactory {
         if (value == null) {
             return null;
         }
-        return readSchema(index, cl, value.asNested());
-    }
 
-    /**
-     * Reads a Schema annotation into a model.
-     *
-     * @param index the index
-     * @param cl the classLoader to use
-     * @param annotation the annotation instance
-     * @return Schema model
-     */
-    public static Schema readSchema(IndexView index, ClassLoader cl, AnnotationInstance annotation) {
-        if (annotation == null) {
+        AnnotationInstance schemaAnnotation = value.asNested();
+
+        if (schemaAnnotation == null) {
             return null;
         }
+
         IoLogging.log.singleAnnotation("@Schema");
 
         // Schemas can be hidden. Skip if that's the case.
-        Optional<Boolean> isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
-
-        if (isHidden.isPresent() && isHidden.get()) {
+        if (Boolean.TRUE.equals(JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
             return null;
         }
 
-        return readSchema(index, cl, new SchemaImpl(), annotation, Collections.emptyMap());
+        return readSchema(index, cl, new SchemaImpl(), schemaAnnotation, Collections.emptyMap());
     }
 
     /**
@@ -134,9 +123,9 @@ public class SchemaFactory {
         }
 
         // Schemas can be hidden. Skip if that's the case.
-        Optional<Boolean> isHidden = JandexUtil.booleanValue(annotation, SchemaConstant.PROP_HIDDEN);
+        Boolean isHidden = readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults);
 
-        if (isHidden.isPresent() && isHidden.get()) {
+        if (Boolean.TRUE.equals(isHidden)) {
             return schema;
         }
 
@@ -222,19 +211,17 @@ public class SchemaFactory {
             schema.setEnumeration(enumeration);
         }
 
-        if (schema instanceof SchemaImpl) {
-            ((SchemaImpl) schema).setName(readAttr(annotation, SchemaConstant.PROP_NAME, defaults));
-        }
+        boolean namedComponent = SchemaImpl.isNamed(schema);
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
             Schema implSchema = readClassSchema(index, cl,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
-                    true);
+                    !namedComponent);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(annotation)) {
             Schema implSchema = readClassSchema(index, cl,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
-                    true);
+                    !namedComponent);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
@@ -294,9 +281,9 @@ public class SchemaFactory {
      * @param schemaType related schema type for this attribute
      * @return the annotation attribute value, a default value, or null
      */
-    static <T> T parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
+    static Object parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
             SchemaType schemaType) {
-        return (T) readAttr(annotation, propertyName, value -> {
+        return readAttr(annotation, propertyName, value -> {
             if (!(value instanceof String)) {
                 return value;
             }

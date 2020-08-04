@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io.schema;
 import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,22 +69,9 @@ public class SchemaReader {
              * {@link org.eclipse.microprofile.openapi.annotations.Components}.
              */
             if (name != null) {
-                map.put(name, SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(), nested));
-            } /*-
-              //For consideration - be more lenient and attempt to use the name from the implementation's @Schema?
-              else {
-                if (JandexUtil.isSimpleClassSchema(nested)) {
-                    Schema schema = SchemaFactory.readClassSchema(index, nested.value(OpenApiConstants.PROP_IMPLEMENTATION), false);
-              
-                    if (schema instanceof SchemaImpl) {
-                        name = ((SchemaImpl) schema).getName();
-              
-                        if (name != null) {
-                            map.put(name, schema);
-                        }
-                    }
-                }
-              }*/
+                map.put(name, SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(), new SchemaImpl(name),
+                        nested, Collections.emptyMap()));
+            }
         }
         return map;
     }
