@@ -135,8 +135,8 @@ public class ParameterProcessor {
         In location;
         Style style;
         Parameter oaiParam;
-        JaxRsParameter jaxRsParam;
-        Object jaxRsDefaultValue;
+        JaxRsParameter frameworkParam;
+        Object defaultValue;
         AnnotationTarget target;
         Type targetType;
 
@@ -386,7 +386,7 @@ public class ParameterProcessor {
     }
 
     /**
-     * Performs the final merging of JAX-RS parameters with MP-OAI parameters to produce the list
+     * Performs the final merging of framework parameters with MP-OAI parameters to produce the list
      * of {@link Parameter}s found while scanning the current level (class or method).
      *
      * @return list of {@link Parameter}s
@@ -414,7 +414,7 @@ public class ParameterProcessor {
                         generated.name = segmentName;
                         generated.location = In.PATH;
                         generated.style = Style.MATRIX;
-                        generated.jaxRsParam = JaxRsParameter.MATRIX_PARAM;
+                        generated.frameworkParam = JaxRsParameter.MATRIX_PARAM;
                         generated.target = null;
                         generated.targetType = null;
                         generated.oaiParam = new ParameterImpl();
@@ -463,8 +463,8 @@ public class ParameterProcessor {
                 param.setRequired(true);
             }
 
-            if (param.getStyle() == null && context.jaxRsParam != null) {
-                param.setStyle(context.jaxRsParam.style);
+            if (param.getStyle() == null && context.frameworkParam != null) {
+                param.setStyle(context.frameworkParam.style);
             }
 
             if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
@@ -494,7 +494,7 @@ public class ParameterProcessor {
                         });
 
                 if (param.getSchema().getDefaultValue() == null) {
-                    param.getSchema().setDefaultValue(context.jaxRsDefaultValue);
+                    param.getSchema().setDefaultValue(context.defaultValue);
                 }
             }
 
@@ -641,7 +641,7 @@ public class ParameterProcessor {
         if (paramIn == null) {
             /*
              * Per @Parameter JavaDoc, ignored when empty string (i.e., unspecified).
-             * This may occur when @Parameter is specified without a matching JAX-RS
+             * This may occur when @Parameter is specified without a matching framework
              * parameter annotation.
              */
             return true;
@@ -732,7 +732,7 @@ public class ParameterProcessor {
 
     /**
      * Read a single annotation that is either {@link @Parameter} or
-     * one of the JAX-RS *Param annotations. The results are stored in the
+     * one of the framework parameter annotations. The results are stored in the
      * private {@link #params} collection, depending on the type of parameter.
      *
      * @param annotation a parameter annotation to be read and processed
@@ -743,7 +743,7 @@ public class ParameterProcessor {
 
     /**
      * Read a single annotation that is either {@link @Parameter} or
-     * one of the JAX-RS *Param annotations. The results are stored in the
+     * one of the framework parameter annotations. The results are stored in the
      * private {@link #params} collection. When overriddenParametersOnly is true,
      * new parameters not already known in {@link #params} will be ignored.
      *
@@ -765,16 +765,16 @@ public class ParameterProcessor {
                     annotation.target(),
                     overriddenParametersOnly);
         } else {
-            JaxRsParameter jaxRsParam = JaxRsParameter.forName(name);
+            JaxRsParameter frameworkParam = JaxRsParameter.forName(name);
 
-            if (jaxRsParam != null) {
+            if (frameworkParam != null) {
                 AnnotationTarget target = annotation.target();
                 Type targetType = getType(target);
 
-                if (jaxRsParam.style == Style.FORM) {
+                if (frameworkParam.style == Style.FORM) {
                     // Store the @FormParam for later processing
                     formParams.put(paramName(annotation), annotation);
-                } else if (jaxRsParam.style == Style.MATRIX) {
+                } else if (frameworkParam.style == Style.MATRIX) {
                     // Store the @MatrixParam for later processing
                     String pathSegment = beanParamAnnotation != null
                             ? lastPathSegmentOf(beanParamAnnotation.target())
@@ -785,23 +785,23 @@ public class ParameterProcessor {
                     }
 
                     matrixParams.get(pathSegment).put(paramName(annotation), annotation);
-                } else if (jaxRsParam.location == In.PATH && targetType != null
+                } else if (frameworkParam.location == In.PATH && targetType != null
                         && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
                     String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
                     if (!matrixParams.containsKey(pathSegment)) {
                         matrixParams.put(pathSegment, new HashMap<>());
                     }
-                } else if (jaxRsParam.location != null) {
-                    readParameter(new ParameterContextKey(paramName(annotation), jaxRsParam.location, jaxRsParam.defaultStyle),
+                } else if (frameworkParam.location != null) {
+                    readParameter(new ParameterContextKey(paramName(annotation), frameworkParam.location, frameworkParam.defaultStyle),
                             null,
-                            jaxRsParam,
+                            frameworkParam,
                             getDefaultValue(target),
                             target,
                             overriddenParametersOnly);
                 } else if (target != null) {
                     // This is a @BeanParam or a RESTEasy @MultipartForm
-                    setMediaType(jaxRsParam);
+                    setMediaType(frameworkParam);
 
                     if (TypeUtil.isOptional(targetType)) {
                         targetType = TypeUtil.getOptionalType(targetType);
@@ -848,12 +848,12 @@ public class ParameterProcessor {
      * Set this {@link ParameterProcessor}'s formMediaType if it has not already
      * been set and the value is explicitly known for the parameter type.
      *
-     * @param jaxRsParam parameter to check for a form media type
+     * @param frameworkParam parameter to check for a form media type
      *
      */
-    private void setMediaType(JaxRsParameter jaxRsParam) {
-        if (jaxRsParam.mediaType != null && this.formMediaType == null) {
-            formMediaType = jaxRsParam.mediaType;
+    private void setMediaType(JaxRsParameter frameworkParam) {
+        if (frameworkParam.mediaType != null && this.formMediaType == null) {
+            formMediaType = frameworkParam.mediaType;
         }
     }
 
@@ -931,7 +931,6 @@ public class ParameterProcessor {
                 }
             }
         }
-
         return defaultValue;
     }
 
@@ -1127,16 +1126,16 @@ public class ParameterProcessor {
      *
      * @param key the key for the parameter being processed
      * @param oaiParam scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
-     * @param jaxRsParam Meta detail about the JAX-RS *Param being processed, if found.
-     * @param jaxRsDefaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
+     * @param frameworkParam Meta detail about the JAX-RS *Param being processed, if found.
+     * @param defaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
      *        annotation.
      * @param target target of the annotation
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     void readParameter(ParameterContextKey key,
             Parameter oaiParam,
-            JaxRsParameter jaxRsParam,
-            Object jaxRsDefaultValue,
+            JaxRsParameter frameworkParam,
+            Object defaultValue,
             AnnotationTarget target,
             boolean overriddenParametersOnly) {
 
@@ -1177,9 +1176,9 @@ public class ParameterProcessor {
 
         context.oaiParam = MergeUtil.mergeObjects(context.oaiParam, oaiParam);
 
-        if (context.jaxRsParam == null) {
-            context.jaxRsParam = jaxRsParam;
-            context.jaxRsDefaultValue = jaxRsDefaultValue;
+        if (context.frameworkParam == null) {
+            context.frameworkParam = frameworkParam;
+            context.defaultValue = defaultValue;
         }
 
         if (context.target == null || context.target.kind() == Kind.METHOD) {

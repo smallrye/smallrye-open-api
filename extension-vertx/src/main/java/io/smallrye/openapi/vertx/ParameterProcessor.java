@@ -123,8 +123,8 @@ public class ParameterProcessor {
         In location;
         Style style;
         Parameter oaiParam;
-        VertxParameter vertxParam;
-        Object vertxDefaultValue;
+        VertxParameter frameworkParam;
+        Object defaultValue;
         AnnotationTarget target;
         Type targetType;
 
@@ -412,7 +412,7 @@ public class ParameterProcessor {
         }
 
         // Convert ParameterContext entries to MP-OAI Parameters
-        params.values().stream().forEach(context -> {
+        params.values().forEach(context -> {
             Parameter param;
 
             if (context.oaiParam == null) {
@@ -435,8 +435,8 @@ public class ParameterProcessor {
                 param.setRequired(true);
             }
 
-            if (param.getStyle() == null && context.vertxParam != null) {
-                param.setStyle(context.vertxParam.style);
+            if (param.getStyle() == null && context.frameworkParam != null) {
+                param.setStyle(context.frameworkParam.style);
             }
 
             if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
@@ -460,7 +460,7 @@ public class ParameterProcessor {
                         });
 
                 if (param.getSchema().getDefaultValue() == null) {
-                    param.getSchema().setDefaultValue(context.vertxDefaultValue);
+                    param.getSchema().setDefaultValue(context.defaultValue);
                 }
             }
 
@@ -721,16 +721,16 @@ public class ParameterProcessor {
 
     }
 
-    private void readAnnotatedType(VertxParameter vertxParameter, AnnotationInstance annotation, MethodInfo resourceMethod,
+    private void readAnnotatedType(VertxParameter frameworkParam, AnnotationInstance annotation, MethodInfo resourceMethod,
             AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
-        if (vertxParameter != null) {
+        if (frameworkParam != null) {
             AnnotationTarget target = annotation.target();
             Type targetType = getType(target);
 
-            if (vertxParameter.style == Style.FORM) {
+            if (frameworkParam.style == Style.FORM) {
                 // Store the @FormParam for later processing
                 formParams.put(paramName(annotation), annotation);
-            } else if (vertxParameter.style == Style.MATRIX) {
+            } else if (frameworkParam.style == Style.MATRIX) {
                 // Store the @MatrixParam for later processing
                 String pathSegment = beanParamAnnotation != null
                         ? lastPathSegmentOf(beanParamAnnotation.target())
@@ -742,24 +742,22 @@ public class ParameterProcessor {
 
                 matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 // Do this in Vert.x ?
-                //}else if (vertxParam.location == In.PATH && targetType != null
+                //}else if (frameworkParam.location == In.PATH && targetType != null
                 //      && VertxConstants.REQUEST_MAPPING.equals(targetType.name())) {
                 //    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
 
                 //    if (!matrixParams.containsKey(pathSegment)) {
                 //        matrixParams.put(pathSegment, new HashMap<>());
                 //   }
-            } else if (vertxParameter.location != null) {
-                readParameter(
-                        new ParameterContextKey(paramName(annotation), vertxParameter.location,
-                                vertxParameter.defaultStyle),
+            } else if (frameworkParam.location != null) {
+                readParameter(new ParameterContextKey(paramName(annotation), frameworkParam.location, frameworkParam.defaultStyle),
                         null,
-                        vertxParameter,
+                        frameworkParam,
                         target,
                         overriddenParametersOnly);
             } else if (target != null) {
                 // This is a @BeanParam or a RESTEasy @MultipartForm
-                setMediaType(vertxParameter);
+                setMediaType(frameworkParam);
 
                 if (TypeUtil.isOptional(targetType)) {
                     targetType = TypeUtil.getOptionalType(targetType);
@@ -805,12 +803,12 @@ public class ParameterProcessor {
      * Set this {@link ParameterProcessor}'s formMediaType if it has not already
      * been set and the value is explicitly known for the parameter type.
      *
-     * @param vertxParam parameter to check for a form media type
+     * @param frameworkParam parameter to check for a form media type
      *
      */
-    private void setMediaType(VertxParameter vertxParam) {
-        if (vertxParam.mediaType != null && this.formMediaType == null) {
-            formMediaType = vertxParam.mediaType;
+    private void setMediaType(VertxParameter frameworkParam) {
+        if (frameworkParam.mediaType != null && this.formMediaType == null) {
+            formMediaType = frameworkParam.mediaType;
         }
     }
 
@@ -1085,13 +1083,13 @@ public class ParameterProcessor {
      *
      * @param key the key for the parameter being processed
      * @param oaiParam scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
-     * @param vertxParam Meta detail about the Vert.x route being processed, if found.
+     * @param frameworkParam Meta detail about the Vert.x route being processed, if found.
      * @param target target of the annotation
      * @param overriddenParametersOnly
      */
     void readParameter(ParameterContextKey key,
             Parameter oaiParam,
-            VertxParameter vertxParam,
+            VertxParameter frameworkParam,
             AnnotationTarget target,
             boolean overriddenParametersOnly) {
 
@@ -1132,8 +1130,8 @@ public class ParameterProcessor {
 
         context.oaiParam = MergeUtil.mergeObjects(context.oaiParam, oaiParam);
 
-        if (context.vertxParam == null) {
-            context.vertxParam = vertxParam;
+        if (context.frameworkParam == null) {
+            context.frameworkParam = frameworkParam;
         }
 
         if (context.target == null || context.target.kind() == Kind.METHOD) {
