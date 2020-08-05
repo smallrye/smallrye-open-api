@@ -63,17 +63,17 @@ public class OpenApiProcessor {
         // Load all static files
         if (staticFiles != null && staticFiles.length > 0) {
             for (OpenApiStaticFile staticFile : staticFiles) {
-                OpenApiDocument.INSTANCE.modelFromStaticFile(OpenApiProcessor.modelFromStaticFile(staticFile));
+                OpenApiDocument.INSTANCE.modelFromStaticFile(modelFromStaticFile(staticFile));
             }
         }
         // Scan annotations
-        if (index != null) {
-            OpenApiDocument.INSTANCE.modelFromAnnotations(OpenApiProcessor.modelFromAnnotations(config, classLoader, index));
+        if (config != null && index != null) {
+            OpenApiDocument.INSTANCE.modelFromAnnotations(modelFromAnnotations(config, classLoader, index));
         }
         // Filter and model
-        if (classLoader != null) {
-            OpenApiDocument.INSTANCE.modelFromReader(OpenApiProcessor.modelFromReader(config, classLoader));
-            OpenApiDocument.INSTANCE.filter(OpenApiProcessor.getFilter(config, classLoader));
+        if (config != null && classLoader != null) {
+            OpenApiDocument.INSTANCE.modelFromReader(modelFromReader(config, classLoader));
+            OpenApiDocument.INSTANCE.filter(getFilter(config, classLoader));
         }
 
         OpenApiDocument.INSTANCE.initialize();
@@ -100,7 +100,7 @@ public class OpenApiProcessor {
         try {
             return OpenApiParser.parse(staticFile.getContent(), staticFile.getFormat());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new OpenApiRuntimeException(e);
         }
     }
 
@@ -139,7 +139,7 @@ public class OpenApiProcessor {
     /**
      * Instantiate the configured {@link OASModelReader} and invoke it. If no reader is configured,
      * then return null. If a class is configured but there is an error either instantiating or invoking
-     * it, a {@link RuntimeException} is thrown.
+     * it, a {@link OpenApiRuntimeException} is thrown.
      * 
      * @param config OpenApiConfig
      * @param loader ClassLoader
@@ -156,7 +156,7 @@ public class OpenApiProcessor {
             return reader.buildModel();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e);
+            throw new OpenApiRuntimeException(e);
         }
     }
 
@@ -177,7 +177,7 @@ public class OpenApiProcessor {
             return (OASFilter) c.getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e);
+            throw new OpenApiRuntimeException(e);
         }
     }
 
