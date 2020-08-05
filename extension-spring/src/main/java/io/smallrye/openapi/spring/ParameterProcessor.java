@@ -62,13 +62,17 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 /**
  * Copied from JAX-RS.
  * This still needs work. As we add test cases we will clean this up
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class ParameterProcessor {
 
+    /**
+     * Sonar validation is disabled on this expression because there is no danger of denial of
+     * service attacks input derived from the developer of the host application.
+     */
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
-            .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}");
+            .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}"); //NOSONAR
 
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(
             Arrays.asList(ParameterConstant.DOTNAME_PARAMETER, ParameterConstant.DOTNAME_PARAMETERS));
@@ -376,7 +380,7 @@ public class ParameterProcessor {
     /**
      * Determines if the parameter is eligible to have a pattern constraint
      * applied to its schema.
-     * 
+     *
      * @param param the parameter
      * @return true if the parameter may have the patter applied, otherwise false
      */
@@ -646,7 +650,7 @@ public class ParameterProcessor {
 
     /**
      * Check if the given parameter name is present as a path segment in the resourcePath.
-     * 
+     *
      * @param paramName name of parameter
      * @param paramStyle style of parameter, e.g. simple or matrix
      * @param resourcePath resource path/URL
@@ -790,7 +794,7 @@ public class ParameterProcessor {
     /**
      * Retrieves either the provided parameter {@link Parameter.Style}, the default
      * style of the parameter based on the <code>in</code> attribute, or null if <code>in</code> is not defined.
-     * 
+     *
      * @param param the {@link Parameter}
      * @return the param's style, the default style defined based on <code>in</code>, or null if <code>in</code> is not defined.
      */
@@ -947,7 +951,7 @@ public class ParameterProcessor {
     /**
      * Retrieves the last path segment of the full path associated with the target. If
      * the last path segment contains a path variable name, returns the variable name.
-     * 
+     *
      * @param target
      * @return the last path segment of the target, or null if no path is defined
      */
@@ -1061,7 +1065,7 @@ public class ParameterProcessor {
 
     /**
      * Creates a String path from the RequestMapping value
-     * 
+     *
      * @param requestMappingAnnotation
      * @return
      */
@@ -1114,9 +1118,9 @@ public class ParameterProcessor {
      * Merges MP-OAI {@link Parameter}s and Spring parameters for the same {@link In} and name,
      * and {@link Style}. When overriddenParametersOnly is true, new parameters not already known
      * in {@link #params} will be ignored.
-     * 
+     *
      * The given {@link ParameterContextKey key} contains:
-     * 
+     *
      * <ul>
      * <li>the name of the parameter specified by application
      * <li>location, given by {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
