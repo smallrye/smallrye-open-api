@@ -243,8 +243,8 @@ public class DataObjectDeque {
         }
     }
 
-    private static <T> void validateInput(T... input) {
-        for (T t : input) {
+    private static void validateInput(Object... input) {
+        for (Object t : input) {
             if (t == null)
                 throw DataObjectMessages.msg.notNull();
         }

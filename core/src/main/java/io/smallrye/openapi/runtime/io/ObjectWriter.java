@@ -96,12 +96,12 @@ public class ObjectWriter {
             node.put(key, (Long) value);
         } else if (value instanceof List) {
             ArrayNode array = node.putArray(key);
-            List<Object> values = (List<Object>) value;
-            for (Object valueItem : values) {
+            for (Object valueItem : List.class.cast(value)) {
                 addObject(array, valueItem);
             }
         } else if (value instanceof Map) {
             ObjectNode objNode = node.putObject(key);
+            @SuppressWarnings("unchecked")
             Map<String, Object> values = (Map<String, Object>) value;
             for (Map.Entry<String, Object> entry : values.entrySet()) {
                 String propertyName = entry.getKey();
@@ -133,12 +133,12 @@ public class ObjectWriter {
             node.add((Long) value);
         } else if (value instanceof List) {
             ArrayNode array = node.addArray();
-            List<Object> values = (List<Object>) value;
-            for (Object valueItem : values) {
+            for (Object valueItem : List.class.cast(value)) {
                 addObject(array, valueItem);
             }
         } else if (value instanceof Map) {
             ObjectNode objNode = node.addObject();
+            @SuppressWarnings("unchecked")
             Map<String, Object> values = (Map<String, Object>) value;
             for (Map.Entry<String, Object> entry : values.entrySet()) {
                 String propertyName = entry.getKey();

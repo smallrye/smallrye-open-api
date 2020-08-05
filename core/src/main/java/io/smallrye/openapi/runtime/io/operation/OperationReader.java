@@ -155,8 +155,4 @@ public class OperationReader {
         OpenApiConfig.OperationIdStrategy operationIdStrategy = config.getOperationIdStrategy();
         return operationIdStrategy != null;
     }
-
-    private static boolean methodHasOperationAnnotation(final MethodInfo method) {
-        return method.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
-    }
 }
