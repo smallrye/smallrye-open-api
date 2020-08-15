@@ -199,7 +199,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                 SpringConstants.REQUEST_MAPPING);
 
         if (requestMappingAnnotation != null) {
-            this.currentAppPath = ParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation);
+            this.currentAppPath = SpringParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation);
         } else {
             this.currentAppPath = "/";
         }
@@ -316,7 +316,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-        ResourceParameters params = ParameterProcessor.process(context, resourceClass,
+        ResourceParameters params = SpringParameterProcessor.process(context, resourceClass,
                 method, reader,
                 context.getExtensions());
         operation.setParameters(params.getOperationParameters());

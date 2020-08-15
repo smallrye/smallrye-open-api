@@ -33,7 +33,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class ParameterProcessor extends AbstractParameterProcessor {
+public class SpringParameterProcessor extends AbstractParameterProcessor {
 
     /**
      * Sonar validation is disabled on this expression because there is no danger of denial of
@@ -42,7 +42,7 @@ public class ParameterProcessor extends AbstractParameterProcessor {
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
             .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}"); //NOSONAR
 
-    private ParameterProcessor(AnnotationScannerContext scannerContext,
+    private SpringParameterProcessor(AnnotationScannerContext scannerContext,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         super(scannerContext, reader, extensions);
@@ -71,7 +71,7 @@ public class ParameterProcessor extends AbstractParameterProcessor {
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
-        ParameterProcessor processor = new ParameterProcessor(context, reader, extensions);
+        SpringParameterProcessor processor = new SpringParameterProcessor(context, reader, extensions);
         return processor.process(resourceClass, resourceMethod, reader);
     }
 

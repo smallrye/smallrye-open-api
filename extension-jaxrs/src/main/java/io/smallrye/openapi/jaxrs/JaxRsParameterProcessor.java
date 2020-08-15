@@ -35,7 +35,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Michael Edgar {@literal <michael@xlate.io>}
  *
  */
-public class ParameterProcessor extends AbstractParameterProcessor {
+public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     /**
      * Pattern to describe a path template parameter with a regular expression pattern restriction.
@@ -48,7 +48,7 @@ public class ParameterProcessor extends AbstractParameterProcessor {
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
             .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}"); //NOSONAR
 
-    private ParameterProcessor(AnnotationScannerContext scannerContext,
+    private JaxRsParameterProcessor(AnnotationScannerContext scannerContext,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         super(scannerContext, reader, extensions);
@@ -76,7 +76,7 @@ public class ParameterProcessor extends AbstractParameterProcessor {
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
-        ParameterProcessor processor = new ParameterProcessor(context, reader, extensions);
+        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, reader, extensions);
         return processor.process(resourceClass, resourceMethod, reader);
     }
 
