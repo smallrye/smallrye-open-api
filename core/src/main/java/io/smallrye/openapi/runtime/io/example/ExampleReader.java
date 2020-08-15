@@ -42,7 +42,7 @@ public class ExampleReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@ExampleObject");
+        IoLogging.logger.annotationsMap("@ExampleObject");
         Map<String, Example> examples = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -87,9 +87,9 @@ public class ExampleReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@ExampleObject");
+        IoLogging.logger.singleAnnotation("@ExampleObject");
         Example example = new ExampleImpl();
-        example.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Example));
+        example.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.EXAMPLE));
         example.setSummary(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_SUMMARY));
         example.setDescription(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
         example.setValue(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_VALUE));
@@ -108,7 +108,7 @@ public class ExampleReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("ExampleObject");
+        IoLogging.logger.singleJsonNode("ExampleObject");
         Example example = new ExampleImpl();
         example.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         example.setSummary(JsonUtil.stringProperty(node, ExampleConstant.PROP_SUMMARY));

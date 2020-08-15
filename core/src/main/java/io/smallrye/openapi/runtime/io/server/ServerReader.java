@@ -40,7 +40,7 @@ public class ServerReader {
      */
     public static Optional<List<Server>> readServers(final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            IoLogging.log.annotationsArray("@Server");
+            IoLogging.logger.annotationsArray("@Server");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Server> servers = new ArrayList<>();
             for (AnnotationInstance serverAnno : nestedArray) {
@@ -59,7 +59,7 @@ public class ServerReader {
      */
     public static Optional<List<Server>> readServers(final JsonNode node) {
         if (node != null && node.isArray()) {
-            IoLogging.log.jsonArray("Server");
+            IoLogging.logger.jsonArray("Server");
             ArrayNode nodes = (ArrayNode) node;
             List<Server> rval = new ArrayList<>(nodes.size());
             for (JsonNode serverNode : nodes) {
@@ -91,7 +91,7 @@ public class ServerReader {
      */
     public static Server readServer(final AnnotationInstance annotationInstance) {
         if (annotationInstance != null) {
-            IoLogging.log.singleAnnotation("@Server");
+            IoLogging.logger.singleAnnotation("@Server");
             Server server = new ServerImpl();
             server.setUrl(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_URL));
             server.setDescription(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
@@ -110,7 +110,7 @@ public class ServerReader {
      */
     public static Server readServer(final JsonNode node) {
         if (node != null && node.isObject()) {
-            IoLogging.log.singleJsonNode("Server");
+            IoLogging.logger.singleJsonNode("Server");
             Server server = new ServerImpl();
             server.setUrl(JsonUtil.stringProperty(node, ServerConstant.PROP_URL));
             server.setDescription(JsonUtil.stringProperty(node, ServerConstant.PROP_DESCRIPTION));

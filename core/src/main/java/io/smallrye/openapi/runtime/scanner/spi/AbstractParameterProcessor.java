@@ -126,9 +126,6 @@ public abstract class AbstractParameterProcessor {
         public AnnotationTarget target;
         public Type targetType;
 
-        public ParameterContext() {
-        }
-
         @Override
         public String toString() {
             return "name: " + name + "; in: " + location + "; target: " + target;

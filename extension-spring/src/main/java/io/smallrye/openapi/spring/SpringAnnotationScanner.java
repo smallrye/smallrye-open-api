@@ -300,8 +300,8 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES).orElse(null));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -364,18 +364,18 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property) {
         Set<DotName> annotationNames = SpringConstants.HTTP_METHODS;
 
         for (DotName annotationName : annotationNames) {
             AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
-            if (annotation == null || annotation.value(property.name()) == null) {
+            if (annotation == null || annotation.value(property) == null) {
                 annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), SpringConstants.REQUEST_MAPPING);
             }
 
             if (annotation != null) {
-                AnnotationValue annotationValue = annotation.value(property.name());
+                AnnotationValue annotationValue = annotation.value(property);
 
                 if (annotationValue != null) {
                     return Optional.of(annotationValue.asStringArray());
@@ -385,10 +385,5 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             }
         }
         return Optional.empty();
-    }
-
-    enum MediaTypeProperty {
-        consumes,
-        produces
     }
 }

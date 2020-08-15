@@ -1,5 +1,6 @@
 package io.smallrye.openapi.spi;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,13 +120,17 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
         if (clazz == null) {
             throw new NullPointerException();
         }
+
+        Class<? extends Constructible> implClass = registry.get(clazz);
+
+        if (implClass == null) {
+            throw SpiMessages.msg.classNotConstructible(clazz.getName());
+        }
+
         try {
-            Class<? extends Constructible> implClass = registry.get(clazz);
-            if (implClass == null) {
-                throw SpiMessages.msg.classNotConstructible(clazz.getName());
-            }
-            return (T) implClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return (T) implClass.getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException(e);
         }
     }

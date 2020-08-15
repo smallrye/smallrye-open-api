@@ -47,7 +47,7 @@ public class OperationReader {
             final MethodInfo methodInfo) {
 
         if (annotationInstance != null) {
-            IoLogging.log.singleAnnotation("@Operation");
+            IoLogging.logger.singleAnnotation("@Operation");
             Operation operation = new OperationImpl();
             operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
             operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
@@ -90,7 +90,7 @@ public class OperationReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("Operation");
+        IoLogging.logger.singleJsonObject("Operation");
         Operation model = new OperationImpl();
         model.setTags(JsonUtil.readStringArray(node.get(OperationConstant.PROP_TAGS)).orElse(null));
         model.setSummary(JsonUtil.stringProperty(node, OperationConstant.PROP_SUMMARY));

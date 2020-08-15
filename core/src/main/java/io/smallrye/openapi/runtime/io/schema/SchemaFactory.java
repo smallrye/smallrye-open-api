@@ -65,14 +65,7 @@ public class SchemaFactory {
 
         AnnotationInstance schemaAnnotation = value.asNested();
 
-        if (schemaAnnotation == null) {
-            return null;
-        }
-
-        IoLogging.log.singleAnnotation("@Schema");
-
-        // Schemas can be hidden. Skip if that's the case.
-        if (Boolean.TRUE.equals(JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
+        if (isAnnotationMissingOrHidden(schemaAnnotation, Collections.emptyMap())) {
             return null;
         }
 
@@ -119,14 +112,7 @@ public class SchemaFactory {
             ClassInfo clazz,
             Map<String, Object> defaults) {
 
-        if (annotation == null) {
-            return schema;
-        }
-
-        // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults);
-
-        if (Boolean.TRUE.equals(isHidden)) {
+        if (isAnnotationMissingOrHidden(annotation, defaults)) {
             return schema;
         }
 
@@ -150,14 +136,8 @@ public class SchemaFactory {
             Schema schema,
             AnnotationInstance annotation,
             Map<String, Object> defaults) {
-        if (annotation == null) {
-            return schema;
-        }
 
-        // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults);
-
-        if (Boolean.TRUE.equals(isHidden)) {
+        if (isAnnotationMissingOrHidden(annotation, defaults)) {
             return schema;
         }
 
@@ -259,6 +239,15 @@ public class SchemaFactory {
         }
 
         return schema;
+    }
+
+    static boolean isAnnotationMissingOrHidden(AnnotationInstance annotation, Map<String, Object> defaults) {
+        if (annotation == null) {
+            return true;
+        }
+
+        // Schemas can be hidden. Skip if that's the case.
+        return Boolean.TRUE.equals(readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults));
     }
 
     /**
@@ -430,7 +419,7 @@ public class SchemaFactory {
      * @see java.lang.reflect.Field#isEnumConstant()
      */
     public static Schema enumToSchema(IndexView index, ClassLoader cl, Type enumType) {
-        IoLogging.log.enumProcessing(enumType);
+        IoLogging.logger.enumProcessing(enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
@@ -539,7 +528,7 @@ public class SchemaFactory {
      * @param types the implementation types of the items to scan, never null
      */
     private static List<Schema> readClassSchemas(IndexView index, ClassLoader cl, Type[] types) {
-        IoLogging.log.annotationsList("schema Class");
+        IoLogging.logger.annotationsList("schema Class");
 
         return Arrays.stream(types)
                 .map(type -> readClassSchema(index, cl, type, true))
@@ -614,7 +603,7 @@ public class SchemaFactory {
         }
 
         if (annotation != null) {
-            IoLogging.log.annotationsList("@DiscriminatorMapping");
+            IoLogging.logger.annotationsList("@DiscriminatorMapping");
 
             for (AnnotationInstance nested : annotation) {
                 String propertyValue = JandexUtil.stringValue(nested, SchemaConstant.PROP_VALUE);

@@ -256,8 +256,8 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             VertxLogging.log.processingMethod(method.toString());
 
             // Figure out the current @Produces and @Consumes (if any)
-            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
-            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
+            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES).orElse(null));
+            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES).orElse(null));
 
             // Process any @Operation annotation
             Optional<Operation> maybeOperation = processOperation(context, method);
@@ -334,17 +334,17 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         return true;
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property) {
         DotName annotationName = VertxConstants.ROUTE;
 
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
-        if (annotation == null || annotation.value(property.name()) == null) {
+        if (annotation == null || annotation.value(property) == null) {
             annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
         }
 
         if (annotation != null) {
-            AnnotationValue annotationValue = annotation.value(property.name());
+            AnnotationValue annotationValue = annotation.value(property);
 
             if (annotationValue != null) {
                 return Optional.of(annotationValue.asStringArray());
@@ -356,8 +356,4 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         return Optional.empty();
     }
 
-    enum MediaTypeProperty {
-        consumes,
-        produces
-    }
 }

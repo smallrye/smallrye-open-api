@@ -37,6 +37,9 @@ public class VertxConstants {
             R_HTTP_SERVER_REQUEST,
             R_HTTP_SERVER_RESPONSE));
 
+    public static final String ROUTE_CONSUMES = "consumes";
+    public static final String ROUTE_PRODUCES = "produces";
+
     private VertxConstants() {
     }
 }

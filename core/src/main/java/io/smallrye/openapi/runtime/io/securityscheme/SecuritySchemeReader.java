@@ -47,7 +47,7 @@ public class SecuritySchemeReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@SecurityScheme");
+        IoLogging.logger.annotationsMap("@SecurityScheme");
         Map<String, SecurityScheme> securitySchemes = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -92,7 +92,7 @@ public class SecuritySchemeReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@SecurityScheme");
+        IoLogging.logger.singleAnnotation("@SecurityScheme");
         SecurityScheme securityScheme = new SecuritySchemeImpl();
         securityScheme
                 .setType(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, Type.class));
@@ -107,7 +107,7 @@ public class SecuritySchemeReader {
         securityScheme
                 .setOpenIdConnectUrl(
                         JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
-        securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SecurityScheme));
+        securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SECURITY_SCHEME));
         return securityScheme;
     }
 

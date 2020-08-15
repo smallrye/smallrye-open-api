@@ -189,7 +189,7 @@ public class OpenApiDataObjectScanner {
      * @return the OAI schema
      */
     Schema process() {
-        ScannerLogging.log.startProcessing(rootClassType.name());
+        ScannerLogging.logger.startProcessing(rootClassType.name());
 
         // If top level item is simple
         if (TypeUtil.isTerminalType(rootClassType)) {
@@ -253,7 +253,7 @@ public class OpenApiDataObjectScanner {
                 continue;
             }
 
-            ScannerLogging.log.gettingFields(currentType, currentClass);
+            ScannerLogging.logger.gettingFields(currentType, currentClass);
 
             // reference will be the field or method that declaring the current class type being scanned
             AnnotationTarget reference = currentPathEntry.getAnnotationTarget();

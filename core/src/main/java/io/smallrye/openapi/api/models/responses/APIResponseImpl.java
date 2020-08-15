@@ -18,7 +18,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIResponse, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String description;
     private Map<String, Header> headers;
     private Content content;
@@ -29,7 +29,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -40,7 +40,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_API_RESPONSE + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

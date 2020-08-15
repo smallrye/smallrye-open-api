@@ -35,7 +35,7 @@ public class LicenseReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@License");
+        IoLogging.logger.singleAnnotation("@License");
         AnnotationInstance nested = annotationValue.asNested();
         License license = new LicenseImpl();
         license.setName(JandexUtil.stringValue(nested, LicenseConstant.PROP_NAME));
@@ -53,7 +53,7 @@ public class LicenseReader {
         if (node == null) {
             return null;
         }
-        IoLogging.log.singleJsonNode("License");
+        IoLogging.logger.singleJsonNode("License");
         License license = new LicenseImpl();
         license.setName(JsonUtil.stringProperty(node, LicenseConstant.PROP_NAME));
         license.setUrl(JsonUtil.stringProperty(node, LicenseConstant.PROP_URL));

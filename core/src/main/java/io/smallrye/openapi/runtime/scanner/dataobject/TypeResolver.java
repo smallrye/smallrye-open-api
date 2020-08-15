@@ -776,7 +776,7 @@ public class TypeResolver {
         List<Type> arguments = parameterizedType.arguments();
 
         if (arguments.size() != typeVariables.size()) {
-            DataObjectLogging.log.classNotAvailable(typeVariables, arguments);
+            DataObjectLogging.logger.classNotAvailable(typeVariables, arguments);
         }
 
         Map<String, Type> resolutionMap = new LinkedHashMap<>();

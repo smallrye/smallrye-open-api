@@ -42,7 +42,7 @@ public class MediaTypeReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotationAs("@Content", "MediaType");
+        IoLogging.logger.singleAnnotationAs("@Content", "MediaType");
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setExamples(ExampleReader.readExamples(annotationInstance.value(MediaTypeConstant.PROP_EXAMPLES)));
         mediaType.setExample(JandexUtil.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE));
@@ -64,7 +64,7 @@ public class MediaTypeReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Content");
+        IoLogging.logger.singleJsonNode("Content");
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setSchema(SchemaReader.readSchema(node.get(MediaTypeConstant.PROP_SCHEMA)));
         mediaType.setExample(readObject(node.get(MediaTypeConstant.PROP_EXAMPLE)));

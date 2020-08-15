@@ -37,7 +37,7 @@ public class InfoReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotation("@Info");
+        IoLogging.logger.annotation("@Info");
         AnnotationInstance nested = annotationValue.asNested();
 
         Info info = new InfoImpl();
@@ -60,7 +60,7 @@ public class InfoReader {
         if (node == null) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Info");
+        IoLogging.logger.singleJsonNode("Info");
 
         Info info = new InfoImpl();
         info.setTitle(JsonUtil.stringProperty(node, InfoConstant.PROP_TITLE));

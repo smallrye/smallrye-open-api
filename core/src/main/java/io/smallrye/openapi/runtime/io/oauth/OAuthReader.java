@@ -43,7 +43,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@OAuthFlows");
+        IoLogging.logger.singleAnnotation("@OAuthFlows");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlows flows = new OAuthFlowsImpl();
         flows.setImplicit(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_IMPLICIT)));
@@ -63,7 +63,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("OAuthFlows");
+        IoLogging.logger.singleJsonObject("OAuthFlows");
         OAuthFlows flows = new OAuthFlowsImpl();
         flows.setImplicit(readOAuthFlow(node.get(SecuritySchemeConstant.PROP_IMPLICIT)));
         flows.setPassword(readOAuthFlow(node.get(SecuritySchemeConstant.PROP_PASSWORD)));
@@ -83,7 +83,7 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@OAuthFlow");
+        IoLogging.logger.singleAnnotation("@OAuthFlow");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlow flow = new OAuthFlowImpl();
         flow.setAuthorizationUrl(JandexUtil.stringValue(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
@@ -103,7 +103,7 @@ public class OAuthReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("OAuthFlow");
+        IoLogging.logger.singleJsonObject("OAuthFlow");
         OAuthFlow flow = new OAuthFlowImpl();
         flow.setAuthorizationUrl(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
         flow.setTokenUrl(JsonUtil.stringProperty(node, SecuritySchemeConstant.PROP_TOKEN_URL));
@@ -123,9 +123,9 @@ public class OAuthReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsList("@OAuthScope");
+        IoLogging.logger.annotationsList("@OAuthScope");
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-        Map<String, String> scopes = new LinkedHashMap<String, String>();
+        Map<String, String> scopes = new LinkedHashMap<>();
         for (AnnotationInstance nested : nestedArray) {
             String name = JandexUtil.stringValue(nested, SecuritySchemeConstant.PROP_NAME);
             if (name != null) {
@@ -147,8 +147,8 @@ public class OAuthReader {
             return null;
         }
 
-        IoLogging.log.jsonMap("OAuthScope");
-        Map<String, String> scopes = new LinkedHashMap<String, String>();
+        IoLogging.logger.jsonMap("OAuthScope");
+        Map<String, String> scopes = new LinkedHashMap<>();
 
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();

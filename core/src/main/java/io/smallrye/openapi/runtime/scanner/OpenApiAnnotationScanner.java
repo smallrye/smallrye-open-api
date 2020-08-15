@@ -105,7 +105,7 @@ public class OpenApiAnnotationScanner {
         // Now load all entry points with SPI and scan those
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
-            ScannerLogging.log.scanning(annotationScanner.getName());
+            ScannerLogging.logger.scanning(annotationScanner.getName());
             CurrentScannerInfo.register(annotationScanner);
             openApi = annotationScanner.scan(annotationScannerContext, openApi);
         }
@@ -126,7 +126,7 @@ public class OpenApiAnnotationScanner {
         getCustomSchemaRegistry(annotationScannerContext.getConfig()).registerCustomSchemas(schemaRegistry);
 
         // Find all OpenAPIDefinition annotations at the package level
-        ScannerLogging.log.scanning("OpenAPI");
+        ScannerLogging.logger.scanning("OpenAPI");
         processPackageOpenAPIDefinitions(annotationScannerContext, openApi);
 
         return openApi;

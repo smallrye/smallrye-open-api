@@ -11,7 +11,7 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface ScannerLogging extends BasicLogger {
-    ScannerLogging log = Logger.getMessageLogger(ScannerLogging.class, ScannerLogging.class.getPackage().getName());
+    ScannerLogging logger = Logger.getMessageLogger(ScannerLogging.class, ScannerLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 4000, value = "Scanning deployment for %s Annotations.")

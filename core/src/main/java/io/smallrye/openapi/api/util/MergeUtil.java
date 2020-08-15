@@ -87,7 +87,7 @@ public class MergeUtil {
         try {
             descriptors = Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors();
         } catch (IntrospectionException e) {
-            UtilLogging.log.failedToIntrospectBeanInfo(object1.getClass(), e);
+            UtilLogging.logger.failedToIntrospectBeanInfo(object1.getClass(), e);
         }
 
         for (PropertyDescriptor descriptor : descriptors) {
