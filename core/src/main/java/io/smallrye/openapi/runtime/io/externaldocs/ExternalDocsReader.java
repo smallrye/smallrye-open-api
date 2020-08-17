@@ -49,7 +49,7 @@ public class ExternalDocsReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.annotation("@ExternalDocumentation");
+        IoLogging.logger.annotation("@ExternalDocumentation");
         ExternalDocumentation externalDoc = new ExternalDocumentationImpl();
         externalDoc.setDescription(
                 JandexUtil.stringValue(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));

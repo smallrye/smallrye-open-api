@@ -12,7 +12,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
  */
 public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implements SecurityScheme, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private Type type;
     private String description;
     private String name;
@@ -27,7 +27,7 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -38,7 +38,7 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_SECURITY_SCHEME + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

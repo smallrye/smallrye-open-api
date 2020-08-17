@@ -43,7 +43,7 @@ public class DefinitionReader {
     public static void processDefinition(final AnnotationScannerContext context,
             final OpenAPI openApi,
             final AnnotationInstance annotationInstance) {
-        IoLogging.log.annotation("@OpenAPIDefinition");
+        IoLogging.logger.annotation("@OpenAPIDefinition");
 
         openApi.setInfo(InfoReader.readInfo(annotationInstance.value(DefinitionConstant.PROP_INFO)));
         openApi.setTags(TagReader.readTags(annotationInstance.value(DefinitionConstant.PROP_TAGS)).orElse(null));
@@ -66,7 +66,7 @@ public class DefinitionReader {
      */
     public static void processDefinition(final OpenAPI openApi,
             final JsonNode node) {
-        IoLogging.log.jsonNode("OpenAPIDefinition");
+        IoLogging.logger.jsonNode("OpenAPIDefinition");
 
         openApi.setOpenapi(JsonUtil.stringProperty(node, DefinitionConstant.PROP_OPENAPI));
         openApi.setInfo(InfoReader.readInfo(node.get(DefinitionConstant.PROP_INFO)));

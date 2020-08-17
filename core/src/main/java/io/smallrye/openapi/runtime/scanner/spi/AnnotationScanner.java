@@ -554,9 +554,7 @@ public interface AnnotationScanner {
         return methodApiResponseAnnotations.stream()
                 .map(ResponseReader::getResponseName)
                 .filter(Objects::nonNull)
-                .filter(code -> code.equals(exMapperResponseCode))
-                .findFirst()
-                .isPresent();
+                .anyMatch(code -> code.equals(exMapperResponseCode));
     }
 
     /**

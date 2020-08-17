@@ -18,7 +18,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String description;
     private Boolean required;
     private Boolean deprecated;
@@ -35,7 +35,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -46,7 +46,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_HEADER + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

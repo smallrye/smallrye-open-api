@@ -54,7 +54,7 @@ public class SchemaReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Schema");
+        IoLogging.logger.annotationsMap("@Schema");
         Map<String, Schema> map = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -86,7 +86,7 @@ public class SchemaReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("Schema");
+        IoLogging.logger.singleJsonObject("Schema");
         String name = JsonUtil.stringProperty(node, SchemaConstant.PROP_NAME);
 
         Schema schema = new SchemaImpl(name);

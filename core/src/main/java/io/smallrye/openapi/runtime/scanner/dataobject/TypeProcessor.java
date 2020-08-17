@@ -79,7 +79,7 @@ public class TypeProcessor {
         }
 
         if (type.kind() == Type.Kind.ARRAY) {
-            DataObjectLogging.log.processingArray(type);
+            DataObjectLogging.logger.processingArray(type);
             ArrayType arrayType = type.asArrayType();
 
             // Array-type schema
@@ -150,19 +150,19 @@ public class TypeProcessor {
         } else {
             // If the type is not in Jandex then we don't have easy access to it.
             // Future work could consider separate code to traverse classes reachable from this classloader.
-            DataObjectLogging.log.typeNotInJandexIndex(type);
+            DataObjectLogging.logger.typeNotInJandexIndex(type);
         }
 
         return type;
     }
 
     private Type readParameterizedType(ParameterizedType pType) {
-        DataObjectLogging.log.processingParametrizedType(pType);
+        DataObjectLogging.logger.processingParametrizedType(pType);
         Type typeRead = pType;
 
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
-            DataObjectLogging.log.processingTypeAs("Java Collection", "Array");
+            DataObjectLogging.logger.processingTypeAs("Java Collection", "Array");
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
 
@@ -183,7 +183,7 @@ public class TypeProcessor {
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
-            DataObjectLogging.log.processingTypeAs("Map", "object");
+            DataObjectLogging.logger.processingTypeAs("Map", "object");
             schema.type(Schema.SchemaType.OBJECT);
 
             if (pType.arguments().size() == 2) {
@@ -217,7 +217,7 @@ public class TypeProcessor {
             }
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
-                DataObjectLogging.log.processingEnum(type);
+                DataObjectLogging.logger.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(index, cl, valueType);
                 pushToStack(valueType);
             } else {
@@ -234,10 +234,10 @@ public class TypeProcessor {
     private Type resolveTypeVariable(Schema schema, Type fieldType, boolean pushToStack) {
         // Type variable (e.g. A in Foo<A>)
         Type resolvedType = typeResolver.getResolvedType(fieldType);
-        DataObjectLogging.log.resolvedType(fieldType, resolvedType);
+        DataObjectLogging.logger.resolvedType(fieldType, resolvedType);
 
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
-            DataObjectLogging.log.terminalType(resolvedType);
+            DataObjectLogging.logger.terminalType(resolvedType);
             TypeUtil.applyTypeAttributes(resolvedType, schema);
         } else if (pushToStack) {
             // Add resolved type to stack.

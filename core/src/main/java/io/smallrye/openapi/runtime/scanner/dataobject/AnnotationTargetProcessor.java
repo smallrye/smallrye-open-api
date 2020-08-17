@@ -195,7 +195,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private Schema readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation, Type postProcessedField) {
-        DataObjectLogging.log.processingFieldAnnotation(annotation, propertyKey);
+        DataObjectLogging.logger.processingFieldAnnotation(annotation, propertyKey);
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.

@@ -9,7 +9,7 @@ import org.jboss.jandex.DotName;
 
 /**
  * Constants related to Spring
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class SpringConstants {
@@ -47,6 +47,9 @@ public class SpringConstants {
                     POST_MAPPING,
                     DELETE_MAPPING,
                     PATCH_MAPPING)));
+
+    public static final String MAPPING_CONSUMES = "consumes";
+    public static final String MAPPING_PRODUCES = "produces";
 
     private SpringConstants() {
     }

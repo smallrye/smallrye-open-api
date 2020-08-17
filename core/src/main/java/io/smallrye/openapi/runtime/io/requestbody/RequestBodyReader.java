@@ -55,7 +55,7 @@ public class RequestBodyReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@RequestBody");
+        IoLogging.logger.annotationsMap("@RequestBody");
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -80,7 +80,7 @@ public class RequestBodyReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonMap("RequestBody");
+        IoLogging.logger.jsonMap("RequestBody");
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -117,7 +117,7 @@ public class RequestBodyReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@RequestBody");
+        IoLogging.logger.singleAnnotation("@RequestBody");
         RequestBody requestBody = new RequestBodyImpl();
         requestBody.setDescription(JandexUtil.stringValue(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody
@@ -125,7 +125,7 @@ public class RequestBodyReader {
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),
                         ContentDirection.INPUT));
         requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED).orElse(null));
-        requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RequestBody));
+        requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.REQUEST_BODY));
         return requestBody;
     }
 
@@ -142,7 +142,7 @@ public class RequestBodyReader {
             // Only generate the RequestBody if the endpoint declares an @Consumes media type
             return null;
         }
-        IoLogging.log.singleAnnotation("@RequestBodySchema");
+        IoLogging.logger.singleAnnotation("@RequestBodySchema");
         Content content = new ContentImpl();
 
         for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {

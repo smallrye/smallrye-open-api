@@ -265,13 +265,13 @@ public class SchemaRegistry {
             try {
                 schema = OpenApiParser.parseSchema(jsonSchema);
             } catch (Exception e) {
-                ScannerLogging.log.errorParsingSchema(className);
+                ScannerLogging.logger.errorParsingSchema(className);
                 return;
             }
 
             Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
             this.register(new TypeKey(type), schema, ((SchemaImpl) schema).getName());
-            ScannerLogging.log.configSchemaRegistered(className);
+            ScannerLogging.logger.configSchemaRegistered(className);
         });
     }
 

@@ -47,7 +47,7 @@ public class CallbackReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Callback");
+        IoLogging.logger.annotationsMap("@Callback");
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -72,7 +72,7 @@ public class CallbackReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonNodeMap("Callback");
+        IoLogging.logger.jsonNodeMap("Callback");
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -102,9 +102,9 @@ public class CallbackReader {
         if (annotation == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Callback");
+        IoLogging.logger.singleAnnotation("@Callback");
         Callback callback = new CallbackImpl();
-        callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.Callback));
+        callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.CALLBACK));
         String expression = JandexUtil.stringValue(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
                 PathsReader.readPathItem(context, annotation.value(CallbackConstant.PROP_OPERATIONS), null));
@@ -121,7 +121,7 @@ public class CallbackReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Callback");
+        IoLogging.logger.singleJsonNode("Callback");
         Callback callback = new CallbackImpl();
         callback.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {

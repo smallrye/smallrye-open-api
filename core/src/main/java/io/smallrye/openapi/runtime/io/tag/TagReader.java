@@ -44,7 +44,7 @@ public class TagReader {
      */
     public static Optional<List<Tag>> readTags(final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            IoLogging.log.annotationsArray("@Tag");
+            IoLogging.logger.annotationsArray("@Tag");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Tag> tags = new ArrayList<>();
             for (AnnotationInstance tagAnno : nestedArray) {
@@ -65,7 +65,7 @@ public class TagReader {
      */
     public static Optional<List<Tag>> readTags(final JsonNode node) {
         if (node != null && node.isArray()) {
-            IoLogging.log.jsonArray("Tag");
+            IoLogging.logger.jsonArray("Tag");
             ArrayNode nodes = (ArrayNode) node;
             List<Tag> rval = new ArrayList<>(nodes.size());
             for (JsonNode tagNode : nodes) {
@@ -84,7 +84,7 @@ public class TagReader {
      */
     public static Tag readTag(final AnnotationInstance annotationInstance) {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
-        IoLogging.log.singleAnnotation("@Tag");
+        IoLogging.logger.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
         tag.setName(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_NAME));
         tag.setDescription(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
@@ -100,7 +100,7 @@ public class TagReader {
      * @return Tag model
      */
     private static Tag readTag(final JsonNode node) {
-        IoLogging.log.singleJsonNode("Tag");
+        IoLogging.logger.singleJsonNode("Tag");
         Tag tag = new TagImpl();
         tag.setName(JsonUtil.stringProperty(node, TagConstant.PROP_NAME));
         tag.setDescription(JsonUtil.stringProperty(node, TagConstant.PROP_DESCRIPTION));

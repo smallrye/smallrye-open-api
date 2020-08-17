@@ -58,7 +58,7 @@ public class ResponseReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsListInto("@APIResponse", "APIResponses model");
+        IoLogging.logger.annotationsListInto("@APIResponse", "APIResponses model");
         APIResponses responses = new APIResponsesImpl();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -81,7 +81,7 @@ public class ResponseReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonList("APIResponse");
+        IoLogging.logger.jsonList("APIResponse");
         APIResponses model = new APIResponsesImpl();
         model.setDefaultValue(readResponse(node.get(ResponseConstant.PROP_DEFAULT)));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
@@ -106,7 +106,7 @@ public class ResponseReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@APIResponse");
+        IoLogging.logger.annotationsMap("@APIResponse");
         Map<String, APIResponse> responses = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -131,7 +131,7 @@ public class ResponseReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonMap("APIResponse");
+        IoLogging.logger.jsonMap("APIResponse");
         Map<String, APIResponse> responses = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -154,7 +154,7 @@ public class ResponseReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@APIResponse");
+        IoLogging.logger.singleAnnotation("@APIResponse");
         APIResponse response = new APIResponseImpl();
         response.setDescription(JandexUtil.stringValue(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
         response.setHeaders(
@@ -163,7 +163,7 @@ public class ResponseReader {
         response.setContent(
                 ContentReader.readContent(context, annotationInstance.value(ResponseConstant.PROP_CONTENT),
                         ContentDirection.OUTPUT));
-        response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Response));
+        response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RESPONSE));
         return response;
     }
 
@@ -180,7 +180,7 @@ public class ResponseReader {
             // Only generate the APIResponse if the endpoint declares an @Produces media type
             return null;
         }
-        IoLogging.log.singleAnnotation("@APIResponseSchema");
+        IoLogging.logger.singleAnnotation("@APIResponseSchema");
         Content content = new ContentImpl();
 
         for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
@@ -208,7 +208,7 @@ public class ResponseReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("Response");
+        IoLogging.logger.singleJsonObject("Response");
         APIResponse model = new APIResponseImpl();
         model.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         model.setDescription(JsonUtil.stringProperty(node, ResponseConstant.PROP_DESCRIPTION));

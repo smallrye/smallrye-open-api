@@ -44,7 +44,7 @@ public class EncodingReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Encoding");
+        IoLogging.logger.annotationsMap("@Encoding");
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
@@ -66,7 +66,7 @@ public class EncodingReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonNodeMap("Encoding");
+        IoLogging.logger.jsonNodeMap("Encoding");
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String name = fieldNames.next();
@@ -86,7 +86,7 @@ public class EncodingReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Encoding");
+        IoLogging.logger.singleAnnotation("@Encoding");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(JandexUtil.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
@@ -108,7 +108,7 @@ public class EncodingReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Encoding");
+        IoLogging.logger.singleJsonNode("Encoding");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(JsonUtil.stringProperty(node, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setHeaders(HeaderReader.readHeaders(node.get(EncodingConstant.PROP_HEADERS)));

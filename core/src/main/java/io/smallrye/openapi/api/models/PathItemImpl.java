@@ -17,7 +17,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String summary;
     private String description;
     private Operation get;
@@ -36,7 +36,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public String getRef() {
-        return $ref;
+        return ref;
     }
 
     /**
@@ -44,7 +44,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setRef(String ref) {
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**
