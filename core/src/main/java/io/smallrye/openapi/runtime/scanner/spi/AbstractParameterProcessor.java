@@ -63,8 +63,8 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  *
- * Note, {@link javax.ws.rs.PathParam PathParam} targets of
- * {@link javax.ws.rs.core.PathSegment PathSegment} are not currently supported.
+ * Common parameter processing that may be customized by individual frameworks
+ * such as JAX-RS, Spring, Vert.x, etc.
  *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  *
@@ -257,8 +257,8 @@ public abstract class AbstractParameterProcessor {
      * Add the name of any discovered matrix parameters.
      *
      * @param target the target (either class or method)
-     * @param parameters
-     * @return
+     * @param parameters list of all parameters processed
+     * @return the path for the target
      */
     protected String generatePath(AnnotationTarget target, List<Parameter> parameters) {
         final StringBuilder path = new StringBuilder(pathOf(target));
@@ -341,7 +341,8 @@ public abstract class AbstractParameterProcessor {
     /**
      * Performs the final merging of framework parameters with MP-OAI parameters to produce the list
      * of {@link Parameter}s found while scanning the current level (class or method).
-     *
+     * 
+     * @param resourceMethod the method to which the returned parameters are applicable
      * @return list of {@link Parameter}s
      */
     protected List<Parameter> getParameters(MethodInfo resourceMethod) {
@@ -515,13 +516,13 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Create a {@link Content} and use the scanned {@link javax.ws.rs.FormParam}s
-     * as the properties. The media type will be defaulted to
-     * 'application/x-www-form-urlencoded' or set to 'multipart/form-data' if a
-     * RESTEasy {@link org.jboss.resteasy.annotations.providers.multipart.MultipartForm MultipartForm}
-     * annotation was used to wrap the {@link javax.ws.rs.FormParam}s. The encoding values
-     * for the {@link Content} will be set to the value of any
-     * {@link org.jboss.resteasy.annotations.providers.multipart.PartType PartType}
+     * Create a {@link Content} and use the scanned form parameters
+     * as the properties. The media type will be determined by the framework's
+     * subclass - e.g. for JAX-RS it may be defaulted to 'application/x-www-form-urlencoded' or set
+     * to 'multipart/form-data' if a
+     * RESTEasy <code>MultipartForm</code>
+     * annotation was used to wrap the <code>javax.ws.rs.FormParam</code>s. The encoding values
+     * for the {@link Content} will be set to the value of any RESTEasy <code>PartType</code>
      * annotations found for each parameter.
      *
      * @return generated form content
@@ -556,12 +557,12 @@ public abstract class AbstractParameterProcessor {
 
     /**
      * Determine if the paramTarget is annotated with the RestEasy
-     * {@link org.jboss.resteasy.annotations.providers.multipart.PartType @PartType}
+     * <code>PartType</code>
      * annotation and add the value to the encodings map.
      *
      * @param encodings map of encodings applicable to the current {@link MediaType} being processed
      * @param paramName name of the current form parameter being mapped to a schema property
-     * @param paramTarget the target annotated with {@link javax.ws.rs.FormParam FormParam}
+     * @param paramTarget the target annotated with the framework's form annotation
      *
      */
     protected void addEncoding(Map<String, Encoding> encodings, String paramName, AnnotationTarget paramTarget) {
@@ -648,8 +649,10 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Read a single annotation that is either {@link @Parameter} or
-     * {@link @Parameters}. The results are stored in the private {@link #params}
+     * Read a single annotation that is either {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter
+     * {@literal @}Parameter} or
+     * {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameters {@literal @}Parameters}. The results are stored
+     * in the private {@link #params}
      * collection.
      *
      * @param annotation a parameter annotation to be read and processed
@@ -679,7 +682,8 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Read a single annotation that is either {@link @Parameter} or
+     * Read a single annotation that is either {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter
+     * {@literal @}Parameter} or
      * one of the framework parameter annotations. The results are stored in the
      * private {@link #params} collection, depending on the type of parameter.
      *
@@ -690,13 +694,14 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Read a single annotation that is either {@link @Parameter} or
+     * Read a single annotation that is either {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter
+     * {@literal @}Parameter} or
      * one of the framework parameter annotations. The results are stored in the
      * private {@link #params} collection. When overriddenParametersOnly is true,
      * new parameters not already known in {@link #params} will be ignored.
      *
      * @param annotation a parameter annotation to be read and processed
-     * @param beanParamAnnotation
+     * @param beanParamAnnotation a framework's bean-type (POJO) parameter annotation
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     protected abstract void readAnnotatedType(AnnotationInstance annotation, AnnotationInstance beanParamAnnotation,
@@ -924,7 +929,7 @@ public abstract class AbstractParameterProcessor {
      * Concatenate the method's path with the path of its declaring
      * class.
      *
-     * @param method the method annotated with {@link javax.ws.rs.Path Path}
+     * @param method the method annotated with the framework's path annotation
      */
     String methodPath(MethodInfo method) {
         String methodPath = pathOf(method);
@@ -938,11 +943,11 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Reads the {@link javax.ws.rs.Path @Path} annotation present on the
+     * Reads the framework's path annotation present on the
      * target and strips leading and trailing slashes.
      *
      * @param target target object
-     * @return value of the {@link javax.ws.rs.Path @Path} without
+     * @return value of the framework's path annotation without
      *         leading/trailing slashes.
      */
     protected abstract String pathOf(AnnotationTarget target);
@@ -999,8 +1004,7 @@ public abstract class AbstractParameterProcessor {
      * @param key the key for the parameter being processed
      * @param oaiParam scanned {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}
      * @param frameworkParam Meta detail about the framework parameter being processed, if found.
-     * @param defaultValue value read from the {@link javax.ws.rs.DefaultValue @DefaultValue}
-     *        annotation.
+     * @param defaultValue value read from the framework's default-value annotation.
      * @param target target of the annotation
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
@@ -1153,7 +1157,7 @@ public abstract class AbstractParameterProcessor {
 
     /**
      * Scans for class level parameters. This method is used for both resource class
-     * annotation scanning and {@link javax.ws.rs.BeanParam @BeanParam} target type scanning.
+     * annotation scanning and framework-specific 'bean' parameter type target type scanning.
      *
      * @param clazz the class to be scanned for parameters.
      * @param beanParamAnnotation the bean parameter annotation to be used for path derivation

@@ -55,7 +55,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
      * {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters
      * are only applicable to the method-level in this component.
      *
-     * @param index index of classes to be used for further introspection, if necessary
+     * @param context the AnnotationScannerContext
      * @param resourceClass the class info
      * @param resourceMethod the Vert.x resource method, annotated with one of the
      *        Vert.x HTTP annotations

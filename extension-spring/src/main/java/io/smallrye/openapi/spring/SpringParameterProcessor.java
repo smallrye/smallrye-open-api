@@ -54,8 +54,7 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
      * {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters
      * are only applicable to the method-level in this component.
      *
-     * @param index index of classes to be used for further introspection, if necessary
-     * @param cl the classloader
+     * @param context the AnnotationScannerContext
      * @param resourceClass the class info
      * @param resourceMethod the Spring resource method, annotated with one of the
      *        Spring HTTP annotations
