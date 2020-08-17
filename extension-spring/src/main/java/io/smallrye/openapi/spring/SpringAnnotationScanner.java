@@ -239,7 +239,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         Set<String> tagRefs = processTags(resourceClass, openApi, false);
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
-            if (methodInfo.annotations().size() > 0) {
+            if (!methodInfo.annotations().isEmpty()) {
                 // Try @XXXMapping annotations
                 for (DotName validMethodAnnotations : SpringConstants.HTTP_METHODS) {
                     if (methodInfo.hasAnnotation(validMethodAnnotations)) {
@@ -316,7 +316,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-        ResourceParameters params = ParameterProcessor.process(context.getIndex(), context.getClassLoader(), resourceClass,
+        ResourceParameters params = ParameterProcessor.process(context, resourceClass,
                 method, reader,
                 context.getExtensions());
         operation.setParameters(params.getOperationParameters());
