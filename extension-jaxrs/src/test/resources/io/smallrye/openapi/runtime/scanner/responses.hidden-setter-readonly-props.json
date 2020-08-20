@@ -1,0 +1,80 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/beanparamimpl": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Policy437"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Policy437": {
+        "required": [
+          "conditions",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "actions": {
+            "description": "String describing actions separated by ';' when the policy is evaluated to true.Allowed values are 'email' and 'webhook'",
+            "type": "string"
+          },
+          "conditions": {
+            "description": "Condition string.",
+            "minLength": 1,
+            "type": "string",
+            "example": "arch = \"x86_64\"",
+            "nullable": false
+          },
+          "ctime": {
+            "format": "yyyy-MM-dd hh:mm:ss.ddd",
+            "description": "Create time in a form like '2020-01-24 12:19:56.718', output only",
+            "type": "string",
+            "readOnly": true
+          },
+          "description": {
+            "description": "A short description of the policy.",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+            "type": "string"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "lastTriggered": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mtime": {
+            "format": "yyyy-MM-dd hh:mm:ss.ddd",
+            "description": "Last update time in a form like '2020-01-24 12:19:56.718', output only",
+            "type": "string",
+            "readOnly": true
+          },
+          "name": {
+            "description": "Name of the rule. Must be unique per customer account.",
+            "maxLength": 150,
+            "minLength": 1,
+            "type": "string",
+            "nullable": false
+          }
+        }
+      }
+    }
+  }
+}
