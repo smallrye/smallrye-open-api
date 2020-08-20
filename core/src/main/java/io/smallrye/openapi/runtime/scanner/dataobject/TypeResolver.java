@@ -53,6 +53,8 @@ public class TypeResolver {
     private MethodInfo writeMethod;
     private boolean ignored = false;
     private boolean exposed = false;
+    private boolean readOnly = false;
+    private boolean writeOnly = false;
     private Type leaf;
 
     /**
@@ -451,7 +453,19 @@ public class TypeResolver {
                 this.exposed = true;
                 break;
             case IGNORED:
-                this.ignored = true;
+                if (target.kind() == Kind.METHOD) {
+                    if (isAccessor(target.asMethod())) {
+                        this.writeOnly = true;
+                    } else {
+                        this.readOnly = true;
+                    }
+
+                    if (this.readOnly && this.writeOnly) {
+                        this.ignored = true;
+                    }
+                } else {
+                    this.ignored = true;
+                }
                 break;
             default:
                 break;
@@ -459,8 +473,8 @@ public class TypeResolver {
     }
 
     /**
-     * Determines whether the target is explicit set to hidden = false via the <code>@Schema</code>
-     * annotation.
+     * Determines whether the target is set to hidden = false via the <code>@Schema</code>
+     * annotation (explicit or default value).
      * 
      * @return true if the field is un-hidden, false otherwise
      */
@@ -471,7 +485,7 @@ public class TypeResolver {
             if (schemaAnnotation != null) {
                 Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
 
-                if (hidden != null && !hidden.booleanValue()) {
+                if (hidden == null || !hidden.booleanValue()) {
                     return true;
                 }
             }
