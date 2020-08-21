@@ -130,7 +130,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addSecurityRequirement(SecurityRequirement securityRequirement) {
-        ModelUtil.add(securityRequirement, this.security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.add(securityRequirement, this.security, ArrayList<SecurityRequirement>::new);
         return this;
     }
 
