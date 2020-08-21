@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,18 +97,21 @@ public class OpenApiAnnotationScanner {
      * Scan the deployment for relevant annotations. Returns an OpenAPI data model that was
      * built from those found annotations.
      * 
+     * @param filter Filter to only include certain scanners. Based on the scanner name. (JAX-RS, Spring, Vert.x)
      * @return OpenAPI generated from scanning annotations
      */
-    public OpenAPI scan() {
+    public OpenAPI scan(String... filter) {
         // First scan the MicroProfile OpenAPI Annotations. Maybe later we can load this with SPI as well, and allow other Annotation sets.
         OpenAPI openApi = scanMicroProfileOpenApiAnnotations();
 
         // Now load all entry points with SPI and scan those
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
-            ScannerLogging.log.scanning(annotationScanner.getName());
-            CurrentScannerInfo.register(annotationScanner);
-            openApi = annotationScanner.scan(annotationScannerContext, openApi);
+            if (filter == null || filter.length == 0 || Arrays.asList(filter).contains(annotationScanner.getName())) {
+                ScannerLogging.log.scanning(annotationScanner.getName());
+                CurrentScannerInfo.register(annotationScanner);
+                openApi = annotationScanner.scan(annotationScannerContext, openApi);
+            }
         }
         return openApi;
     }
