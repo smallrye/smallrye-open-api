@@ -136,4 +136,38 @@ public interface OpenApiConfig {
         PACKAGE_CLASS_METHOD
     }
 
+    default Pattern patternOf(String configValue) {
+        return patternOf(configValue, null);
+    }
+
+    default Pattern patternOf(String configValue, Set<String> buildIn) {
+        Pattern pattern = null;
+
+        if (configValue != null && (configValue.startsWith("^") || configValue.endsWith("$"))) {
+            pattern = Pattern.compile(configValue);
+        } else {
+            Set<String> literals = asCsvSet(configValue);
+            if (buildIn != null && !buildIn.isEmpty()) {
+                literals.addAll(buildIn);
+            }
+            if (literals.isEmpty()) {
+                return Pattern.compile("", Pattern.LITERAL);
+            } else {
+                pattern = Pattern.compile("(" + literals.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
+            }
+        }
+
+        return pattern;
+    }
+
+    default Set<String> asCsvSet(String items) {
+        Set<String> rval = new HashSet<>();
+        if (items != null) {
+            String[] split = items.split(",");
+            for (String item : split) {
+                rval.add(item.trim());
+            }
+        }
+        return rval;
+    }
 }
