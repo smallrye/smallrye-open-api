@@ -115,7 +115,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected String getDefaultFormMediaType() {
-        return javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+        return "application/x-www-form-urlencoded";
     }
 
     @Override

@@ -1,8 +1,13 @@
 package io.smallrye.openapi.api;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Accessor to OpenAPI configuration options.
@@ -14,60 +19,116 @@ import java.util.regex.Pattern;
  */
 public interface OpenApiConfig {
 
-    public String modelReader();
+    default String modelReader() {
+        return null;
+    }
 
-    public String filter();
+    default String filter() {
+        return null;
+    }
 
-    public boolean scanDisable();
+    default boolean scanDisable() {
+        return false;
+    }
 
-    public Pattern scanPackages();
+    default Pattern scanPackages() {
+        return null;
+    }
 
-    public Pattern scanClasses();
+    default Pattern scanClasses() {
+        return null;
+    }
 
-    public Pattern scanExcludePackages();
+    default Pattern scanExcludePackages() {
+        return Pattern.compile(
+                "(" + OpenApiConstants.NEVER_SCAN_PACKAGES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
+    }
 
-    public Pattern scanExcludeClasses();
+    default Pattern scanExcludeClasses() {
+        return Pattern.compile(
+                "(" + OpenApiConstants.NEVER_SCAN_CLASSES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
+    }
 
-    public Set<String> servers();
+    default Set<String> servers() {
+        return new HashSet<>();
+    }
 
-    public Set<String> pathServers(String path);
+    default Set<String> pathServers(String path) {
+        return new HashSet<>();
+    }
 
-    public Set<String> operationServers(String operationId);
+    default Set<String> operationServers(String operationId) {
+        return new HashSet<>();
+    }
 
-    public boolean scanDependenciesDisable();
+    default boolean scanDependenciesDisable() {
+        return false;
+    }
 
-    public Set<String> scanDependenciesJars();
+    default Set<String> scanDependenciesJars() {
+        return new HashSet<>();
+    }
 
-    public boolean schemaReferencesEnable();
+    default boolean schemaReferencesEnable() {
+        return true;
+    }
 
-    public String customSchemaRegistryClass();
+    default String customSchemaRegistryClass() {
+        return null;
+    }
 
-    public boolean applicationPathDisable();
+    default boolean applicationPathDisable() {
+        return false;
+    }
 
-    public Map<String, String> getSchemas();
+    default Map<String, String> getSchemas() {
+        return new HashMap<>();
+    }
 
     // Here we extend this in SmallRye with some more configure options (mp.openapi.extensions)
-    public String getOpenApiVersion();
+    default String getOpenApiVersion() {
+        return null;
+    }
 
-    public String getInfoTitle();
+    default String getInfoTitle() {
+        return null;
+    }
 
-    public String getInfoVersion();
+    default String getInfoVersion() {
+        return null;
+    }
 
-    public String getInfoDescription();
+    default String getInfoDescription() {
+        return null;
+    }
 
-    public String getInfoTermsOfService();
+    default String getInfoTermsOfService() {
+        return null;
+    }
 
-    public String getInfoContactEmail();
+    default String getInfoContactEmail() {
+        return null;
+    }
 
-    public String getInfoContactName();
+    default String getInfoContactName() {
+        return null;
+    }
 
-    public String getInfoContactUrl();
+    default String getInfoContactUrl() {
+        return null;
+    }
 
-    public String getInfoLicenseName();
+    default String getInfoLicenseName() {
+        return null;
+    }
 
-    public String getInfoLicenseUrl();
+    default String getInfoLicenseUrl() {
+        return null;
+    }
 
-    public OperationIdStrategy getOperationIdStrategy();
+    default OperationIdStrategy getOperationIdStrategy() {
+        return null;
+    }
 
     enum OperationIdStrategy {
         METHOD,

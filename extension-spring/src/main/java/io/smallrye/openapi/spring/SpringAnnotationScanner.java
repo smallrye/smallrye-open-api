@@ -20,8 +20,6 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -31,6 +29,7 @@ import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
+import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
@@ -64,7 +63,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        if (hasRequestMappingMethod(method, RequestMethod.POST)) {
+        if (hasRequestMappingMethod(method, "POST")) {
             return true;
         }
         return method.hasAnnotation(SpringConstants.POST_MAPPING);
@@ -73,7 +72,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        if (hasRequestMappingMethod(method, RequestMethod.DELETE)) {
+        if (hasRequestMappingMethod(method, "DELETE")) {
             return true;
         }
         return method.hasAnnotation(SpringConstants.DELETE_MAPPING);
@@ -96,12 +95,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     public boolean isMultipartInput(Type inputType) {
         // TODO: Check this
         return SpringConstants.MULTIPART_INPUTS.contains(inputType.name());
-    }
-
-    @Override
-    public String getReasonPhrase(int statusCode) {
-        HttpStatus status = HttpStatus.resolve(statusCode);
-        return status != null ? status.getReasonPhrase() : null;
     }
 
     @Override
@@ -139,12 +132,12 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         return openApi;
     }
 
-    private boolean hasRequestMappingMethod(final MethodInfo method, final RequestMethod requestMethod) {
+    private boolean hasRequestMappingMethod(final MethodInfo method, final String requestMethod) {
         if (method.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
             AnnotationInstance annotation = method.annotation(SpringConstants.REQUEST_MAPPING);
             AnnotationValue value = annotation.value("method");
             return value != null && value.asEnumArray().length > 0
-                    && Arrays.asList(value.asEnumArray()).contains(requestMethod.name());
+                    && Arrays.asList(value.asEnumArray()).contains(requestMethod);
         }
         return false;
     }
