@@ -44,11 +44,11 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 public class GenerateSchemaMojo extends AbstractMojo {
 
     /**
-     * Destination file where to output the schema.
+     * Directory where to output the schemas.
      * If no path is specified, the schema will be printed to the log.
      */
-    @Parameter(defaultValue = "${project.build.directory}/generated/openapi.yaml", property = "destination")
-    private String destination;
+    @Parameter(defaultValue = "${project.build.directory}/generated/", property = "outputDirectory")
+    private File outputDirectory;
 
     /**
      * When you include dependencies, we only look at compile and system scopes (by default)
@@ -161,7 +161,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         try {
             IndexView index = createIndex();
-            String schema = generateSchema(index);
+            OpenApiDocument schema = generateSchema(index);
             if (schema != null) {
                 write(schema);
             } else {
@@ -221,7 +221,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         return indexer.complete();
     }
 
-    private String generateSchema(IndexView index) throws IOException {
+    private OpenApiDocument generateSchema(IndexView index) throws IOException {
         OpenApiConfig openApiConfig = new MavenConfig(getProperties());
 
         OpenAPI staticModel = generateStaticModel();
@@ -246,7 +246,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         document.filter(OpenApiProcessor.getFilter(openApiConfig, Thread.currentThread().getContextClassLoader()));
         document.initialize();
 
-        return OpenApiSerializer.serialize(document.get(), Format.YAML);
+        return document;
     }
 
     private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig) {
@@ -365,23 +365,39 @@ public class GenerateSchemaMojo extends AbstractMojo {
         }
     }
 
-    private void write(String schema) throws MojoExecutionException {
+    private void write(OpenApiDocument schema) throws MojoExecutionException {
         try {
-            if (destination == null || destination.isEmpty()) {
+            String yaml = OpenApiSerializer.serialize(schema.get(), Format.YAML);
+            String json = OpenApiSerializer.serialize(schema.get(), Format.JSON);
+            if (outputDirectory == null) {
                 // no destination file specified => print to stdout
-                getLog().info(schema);
+                getLog().info(yaml);
             } else {
-                Path path = new File(destination).toPath();
-                path.toFile().getParentFile().mkdirs();
-                Files.write(path, schema.getBytes(),
-                        StandardOpenOption.WRITE,
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING);
-                getLog().info("Wrote the schema to " + path.toAbsolutePath().toString());
+                Path directory = outputDirectory.toPath();
+                if (!Files.exists(directory)) {
+                    Files.createDirectories(directory);
+                }
+
+                writeSchemaFile(directory, "openapi.yaml", yaml.getBytes());
+                writeSchemaFile(directory, "openapi.json", json.getBytes());
+
+                getLog().info("Wrote the schema files to " + outputDirectory.getAbsolutePath());
             }
         } catch (IOException e) {
             throw new MojoExecutionException("Can't write the result", e);
         }
+    }
+
+    private void writeSchemaFile(Path directory, String filename, byte[] contents) throws IOException {
+        Path file = Paths.get(directory.toString(), filename);
+        if (!Files.exists(file)) {
+            Files.createFile(file);
+        }
+
+        Files.write(file, contents,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     private static final String META_INF_OPENAPI_YAML = "META-INF/openapi.yaml";

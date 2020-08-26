@@ -21,11 +21,11 @@ Add this to your pom.xml:
 </plugin>
 ----
 
-The schema will appear as `target/generated/openapi.yaml` by default. 
+The schema will appear as `target/generated/openapi.yaml` and `target/generated/openapi.json` by default. 
 
 == Configuration options
 
-- `destination` - To override the default `target/generated/openapi.yaml` destination
+- `outputDirectory` - To override the default `target/generated/` outputDirectory where the json and yaml files will be created.
 - `scanDependenciesDisable` - Disable scanning the project's dependencies for OpenAPI model classes too. False by default.
 - `includeDependenciesScopes` - If the above `includeDependencies` is true, you can control what scopes should be included. Default is `compile, system`
 - `includeDependenciesTypes` - If the above `includeDependencies` is true, you can control what types should be included. Default is `jar`
