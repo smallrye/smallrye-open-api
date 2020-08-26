@@ -29,8 +29,8 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  *
- * Note, {@link javax.ws.rs.PathParam PathParam} targets of
- * {@link javax.ws.rs.core.PathSegment PathSegment} are not currently supported.
+ * Note, javax.ws.rs.PathParam PathParam targets of
+ * javax.ws.rs.core.PathSegment PathSegment are not currently supported.
  *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  *
