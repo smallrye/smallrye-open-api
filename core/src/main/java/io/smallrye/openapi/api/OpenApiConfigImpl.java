@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -108,7 +107,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Pattern scanPackages() {
         if (scanPackages == null) {
-            scanPackages = patternOf(OASConfig.SCAN_PACKAGES);
+            scanPackages = patternOf(getStringConfigValue(OASConfig.SCAN_PACKAGES));
         }
         return scanPackages;
     }
@@ -119,7 +118,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Pattern scanClasses() {
         if (scanClasses == null) {
-            scanClasses = patternOf(OASConfig.SCAN_CLASSES);
+            scanClasses = patternOf(getStringConfigValue(OASConfig.SCAN_CLASSES));
         }
         return scanClasses;
     }
@@ -130,7 +129,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Pattern scanExcludePackages() {
         if (scanExcludePackages == null) {
-            scanExcludePackages = patternOf(OASConfig.SCAN_EXCLUDE_PACKAGES, OpenApiConstants.NEVER_SCAN_PACKAGES);
+            scanExcludePackages = patternOf(getStringConfigValue(OASConfig.SCAN_EXCLUDE_PACKAGES),
+                    OpenApiConstants.NEVER_SCAN_PACKAGES);
         }
         return scanExcludePackages;
     }
@@ -141,7 +141,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     @Override
     public Pattern scanExcludeClasses() {
         if (scanExcludeClasses == null) {
-            scanExcludeClasses = patternOf(OASConfig.SCAN_EXCLUDE_CLASSES, OpenApiConstants.NEVER_SCAN_CLASSES);
+            scanExcludeClasses = patternOf(getStringConfigValue(OASConfig.SCAN_EXCLUDE_CLASSES),
+                    OpenApiConstants.NEVER_SCAN_CLASSES);
         }
         return scanExcludeClasses;
     }
@@ -348,41 +349,4 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     String getStringConfigValue(String key) {
         return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v.trim()) ? null : v).orElse(null);
     }
-
-    Pattern patternOf(String key) {
-        return patternOf(key, null);
-    }
-
-    Pattern patternOf(String key, Set<String> buildIn) {
-        String configValue = getStringConfigValue(key);
-        Pattern pattern;
-
-        if (configValue != null && (configValue.startsWith("^") || configValue.endsWith("$"))) {
-            pattern = Pattern.compile(configValue);
-        } else {
-            Set<String> literals = asCsvSet(configValue);
-            if (buildIn != null && !buildIn.isEmpty()) {
-                literals.addAll(buildIn);
-            }
-            if (literals.isEmpty()) {
-                return Pattern.compile("", Pattern.LITERAL);
-            } else {
-                pattern = Pattern.compile("(" + literals.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
-            }
-        }
-
-        return pattern;
-    }
-
-    private static Set<String> asCsvSet(String items) {
-        Set<String> rval = new HashSet<>();
-        if (items != null) {
-            String[] split = items.split(",");
-            for (String item : split) {
-                rval.add(item.trim());
-            }
-        }
-        return rval;
-    }
-
 }

@@ -184,12 +184,13 @@ public class FilteredIndexView implements IndexView {
         }
 
         public boolean isImpliedInclusion() {
-            return scanClasses.pattern().isEmpty() && scanPackages.pattern().isEmpty();
+            return (scanClasses == null || scanClasses.pattern().isEmpty())
+                    && (scanPackages == null || scanPackages.pattern().isEmpty());
         }
     }
 
     String matchingGroup(String value, Pattern pattern) {
-        if (pattern.pattern().isEmpty() || value.isEmpty()) {
+        if (pattern == null || pattern.pattern().isEmpty() || value.isEmpty()) {
             return "";
         }
         Matcher m = pattern.matcher(value);
@@ -257,24 +258,29 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<AnnotationInstance> getAnnotations(DotName annotationName) {
-        return this.delegate.getAnnotations(annotationName).stream().filter(ai -> {
-            AnnotationTarget target = ai.target();
-            switch (target.kind()) {
-                case CLASS:
-                    return accepts(target.asClass().name());
-                case FIELD:
-                    return accepts(target.asField().declaringClass().name());
-                case METHOD:
-                    return accepts(target.asMethod().declaringClass().name());
-                case METHOD_PARAMETER:
-                    return accepts(target.asMethodParameter().method().declaringClass().name());
-                case TYPE:
-                    // TODO properly handle filtering of "type" annotation targets
-                    return true;
-                default:
-                    return false;
-            }
-        }).collect(Collectors.toList());
+        Collection<AnnotationInstance> annotations = this.delegate.getAnnotations(annotationName);
+        if (annotations != null && !annotations.isEmpty()) {
+            return annotations.stream().filter(ai -> {
+                AnnotationTarget target = ai.target();
+                switch (target.kind()) {
+                    case CLASS:
+                        return accepts(target.asClass().name());
+                    case FIELD:
+                        return accepts(target.asField().declaringClass().name());
+                    case METHOD:
+                        return accepts(target.asMethod().declaringClass().name());
+                    case METHOD_PARAMETER:
+                        return accepts(target.asMethodParameter().method().declaringClass().name());
+                    case TYPE:
+                        // TODO properly handle filtering of "type" annotation targets
+                        return true;
+                    default:
+                        return false;
+                }
+            }).collect(Collectors.toList());
+        } else {
+            return annotations;
+        }
     }
 
 }

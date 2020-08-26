@@ -39,13 +39,6 @@
             <artifactId>smallrye-open-api-core</artifactId>
         </dependency>
 
-        <!-- Provided Dependencies -->
-        <dependency>
-            <groupId>jakarta.ws.rs</groupId>
-            <artifactId>jakarta.ws.rs-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Third Party Libraries -->
         <dependency>
             <groupId>org.jboss.logging</groupId>
