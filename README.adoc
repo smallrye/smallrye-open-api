@@ -24,6 +24,7 @@ mvn clean install
 * link:extension-spring[] - The Spring entry point. This module depends on Spring and core.
 * link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
 * link:tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
+* link:tools/maven-plugin[] - Maven plugin that creates the OpenAPI Schema on build.
 
 === Links
 

@@ -26,17 +26,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    
     <dependencies>
         <!-- SmallRye core implementation -->
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Third Party Libraries -->
@@ -70,7 +65,11 @@
             <version>2.7</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Depend on core tests -->
         <dependency>

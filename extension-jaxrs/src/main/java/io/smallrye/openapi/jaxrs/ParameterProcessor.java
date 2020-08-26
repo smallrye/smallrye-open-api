@@ -4,7 +4,6 @@ import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -540,7 +539,7 @@ public class ParameterProcessor {
             mediaType.setEncoding(encodings);
         }
 
-        String mediaTypeName = formMediaType != null ? formMediaType : APPLICATION_FORM_URLENCODED;
+        String mediaTypeName = formMediaType != null ? formMediaType : "application/x-www-form-urlencoded";
         content.addMediaType(mediaTypeName, mediaType);
 
         return content;

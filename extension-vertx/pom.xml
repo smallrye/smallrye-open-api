@@ -25,20 +25,6 @@
             <artifactId>smallrye-open-api-core</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
-            <version>${version.vertx}</version>
-            <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-vertx-web</artifactId>
-            <version>${version.quarkus}</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- Third Party Libraries -->
         <dependency>
             <groupId>org.jboss.logging</groupId>
@@ -70,7 +56,12 @@
             <version>2.7</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-vertx-web</artifactId>
+            <version>${version.quarkus}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Depend on core tests -->
         <dependency>

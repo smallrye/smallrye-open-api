@@ -35,7 +35,6 @@ import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
-import io.vertx.core.http.HttpMethod;
 
 /**
  * Scanner that scan Vertx routes.
@@ -58,12 +57,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        return hasRouteMethod(method, HttpMethod.POST);
+        return hasRouteMethod(method, "POST");
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        return hasRouteMethod(method, HttpMethod.DELETE);
+        return hasRouteMethod(method, "DELETE");
     }
 
     @Override
@@ -106,12 +105,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         return openApi;
     }
 
-    private boolean hasRouteMethod(final MethodInfo method, final HttpMethod httpMethod) {
+    private boolean hasRouteMethod(final MethodInfo method, final String httpMethod) {
         if (method.hasAnnotation(VertxConstants.ROUTE)) {
             AnnotationInstance annotation = method.annotation(VertxConstants.ROUTE);
             AnnotationValue value = annotation.value("methods");
             return value != null && value.asEnumArray().length > 0
-                    && Arrays.asList(value.asEnumArray()).contains(httpMethod.name());
+                    && Arrays.asList(value.asEnumArray()).contains(httpMethod);
         }
         return false;
     }

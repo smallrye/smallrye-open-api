@@ -56,6 +56,7 @@
         <module>implementation</module>
         <module>tck</module>
         <module>ui</module>
+        <module>tools</module>
     </modules>
 
     <repositories>
@@ -150,6 +151,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>smallrye-open-api-spring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>smallrye-open-api-vertx</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

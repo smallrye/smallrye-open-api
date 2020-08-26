@@ -1,0 +1,69 @@
+= SmallRye OpenAPI Maven Plugin
+
+This maven plugin allows you to generate the OpenAPI Schema on build.
+
+== Using the Maven plugin
+
+Add this to your pom.xml:
+
+[source]
+----
+<plugin>
+    <artifactId>smallrye-open-api-maven-plugin</artifactId>
+    <groupId>io.smallrye</groupId>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate-schema</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+----
+
+The schema will appear as `target/generated/openapi.yaml` and `target/generated/openapi.json` by default. 
+
+== Configuration options
+
+- `outputDirectory` - To override the default `target/generated/` outputDirectory where the json and yaml files will be created.
+- `schemaFilename` - To override the default `openapi` filename. This will be the name without the extension.
+- `scanDependenciesDisable` - Disable scanning the project's dependencies for OpenAPI model classes too. False by default.
+- `includeDependenciesScopes` - If the above `includeDependencies` is true, you can control what scopes should be included. Default is `compile, system`
+- `includeDependenciesTypes` - If the above `includeDependencies` is true, you can control what types should be included. Default is `jar`
+- `configProperties` - Load any properties from a file. Example `${basedir}/src/main/resources/application.properties`
+    
+== MicroProfile OpenAPI Properties
+
+All properties from the MicroProfile OpenAPI Spec is supported. Properties set here will override the properties from `configProperties`.
+
+- modelReader
+- filter
+- scanDisabled (true/false)
+- scanPackages (regex)
+- scanClasses (regex)
+- scanExcludePackages (regex)
+- scanExcludeClasses (regex)
+- servers (comma-separated)
+- pathServers (comma-separated)
+- operationServers (comma-separated)
+
+== SmallRye OpenAPI Properties
+
+All properties from the SmallRye OpenAPI Implementation is supported. Properties set here will override the properties from `configProperties`.
+
+- scanDependenciesDisable (true/false)
+- scanDependenciesJars (comma-separated)
+- schemaReferencesEnable (true/false)
+- customSchemaRegistryClass
+- applicationPathDisable (true/false)
+- openApiVersion
+- infoTitle
+- infoVersion
+- infoDescription
+- infoTermsOfService
+- infoContactEmail
+- infoContactName
+- infoContactUrl
+- infoLicenseName
+- infoLicenseUrl
+- operationIdStrategy (METHOD/CLASS_METHOD/PACKAGE_CLASS_METHOD)
