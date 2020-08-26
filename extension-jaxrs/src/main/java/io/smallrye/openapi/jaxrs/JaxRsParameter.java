@@ -1,7 +1,5 @@
 package io.smallrye.openapi.jaxrs;
 
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
-
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.DotName;
 
@@ -31,7 +29,7 @@ public enum JaxRsParameter {
     RESTEASY_FORM_PARAM(RestEasyConstants.FORM_PARAM, null, Parameter.Style.FORM, Parameter.Style.FORM),
     RESTEASY_HEADER_PARAM(RestEasyConstants.HEADER_PARAM, Parameter.In.HEADER, null, Parameter.Style.SIMPLE),
     RESTEASY_COOKIE_PARAM(RestEasyConstants.COOKIE_PARAM, Parameter.In.COOKIE, null, Parameter.Style.FORM),
-    RESTEASY_MULITIPART_FORM(RestEasyConstants.MULTIPART_FORM, null, null, null, MULTIPART_FORM_DATA);
+    RESTEASY_MULITIPART_FORM(RestEasyConstants.MULTIPART_FORM, null, null, null, "multipart/form-data");
 
     final FrameworkParameter parameter;
 

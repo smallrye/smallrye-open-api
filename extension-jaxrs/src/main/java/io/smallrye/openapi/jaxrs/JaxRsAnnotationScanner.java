@@ -13,9 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Response.Status;
-
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -94,12 +91,6 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     @Override
     public boolean isMultipartInput(Type inputType) {
         return RestEasyConstants.MULTIPART_INPUTS.contains(inputType.name());
-    }
-
-    @Override
-    public String getReasonPhrase(int statusCode) {
-        Status status = Status.fromStatusCode(statusCode);
-        return status != null ? status.getReasonPhrase() : null;
     }
 
     @Override
