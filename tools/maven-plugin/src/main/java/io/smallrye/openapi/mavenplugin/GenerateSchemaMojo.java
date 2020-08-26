@@ -51,6 +51,13 @@ public class GenerateSchemaMojo extends AbstractMojo {
     private File outputDirectory;
 
     /**
+     * Filename of the schema
+     * Default to openapi. So the files created will be openapi.yaml and openapi.json.
+     */
+    @Parameter(defaultValue = "openapi", property = "schemaFilename")
+    private String schemaFilename;
+
+    /**
      * When you include dependencies, we only look at compile and system scopes (by default)
      * You can change that here.
      * Valid options are: compile, provided, runtime, system, test, import
@@ -378,8 +385,8 @@ public class GenerateSchemaMojo extends AbstractMojo {
                     Files.createDirectories(directory);
                 }
 
-                writeSchemaFile(directory, "openapi.yaml", yaml.getBytes());
-                writeSchemaFile(directory, "openapi.json", json.getBytes());
+                writeSchemaFile(directory, schemaFilename + ".yaml", yaml.getBytes());
+                writeSchemaFile(directory, schemaFilename + ".json", json.getBytes());
 
                 getLog().info("Wrote the schema files to " + outputDirectory.getAbsolutePath());
             }

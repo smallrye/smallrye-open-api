@@ -26,6 +26,7 @@ The schema will appear as `target/generated/openapi.yaml` and `target/generated/
 == Configuration options
 
 - `outputDirectory` - To override the default `target/generated/` outputDirectory where the json and yaml files will be created.
+- `schemaFilename` - To override the default `openapi` filename. This will be the name without the extension.
 - `scanDependenciesDisable` - Disable scanning the project's dependencies for OpenAPI model classes too. False by default.
 - `includeDependenciesScopes` - If the above `includeDependencies` is true, you can control what scopes should be included. Default is `compile, system`
 - `includeDependenciesTypes` - If the above `includeDependencies` is true, you can control what types should be included. Default is `jar`
