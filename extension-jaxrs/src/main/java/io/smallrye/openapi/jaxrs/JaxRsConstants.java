@@ -33,6 +33,9 @@ public class JaxRsConstants {
     static final DotName RESPONSE = DotName.createSimple("javax.ws.rs.core.Response");
     static final DotName PATH_SEGMENT = DotName.createSimple("javax.ws.rs.core.PathSegment");
 
+    static final DotName REGISTER_REST_CLIENT = DotName
+            .createSimple("org.eclipse.microprofile.rest.client.inject.RegisterRestClient");
+
     static final DotName GET = DotName.createSimple("javax.ws.rs.GET");
     static final DotName PUT = DotName.createSimple("javax.ws.rs.PUT");
     static final DotName POST = DotName.createSimple("javax.ws.rs.POST");
