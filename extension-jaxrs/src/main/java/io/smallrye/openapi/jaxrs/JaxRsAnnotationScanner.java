@@ -478,7 +478,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .map(AnnotationInstance::target)
                 .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
                 .map(AnnotationTarget::asClass)
-                .filter(classInfo -> !Modifier.isInterface(classInfo.flags()) ||
+                .filter(classInfo -> !classInfo.annotations().containsKey(JaxRsConstants.REGISTER_REST_CLIENT) ||
                         index.getAllKnownImplementors(classInfo.name()).stream()
                                 .anyMatch(info -> !Modifier.isAbstract(info.flags())))
                 .distinct() // CompositeIndex instances may return duplicates
