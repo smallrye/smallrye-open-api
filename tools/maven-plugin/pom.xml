@@ -12,6 +12,10 @@
     <name>SmallRye: OpenAPI Tools :: Maven</name>
     <description>a Maven plugin that can generate the schema on build</description>
     
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
+    
     <dependencies>
         <!-- Maven plugin stuff -->
         <dependency>
