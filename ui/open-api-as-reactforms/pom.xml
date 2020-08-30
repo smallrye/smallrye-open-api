@@ -12,6 +12,10 @@
 
     <name>SmallRye: OpenAPI UI as ReactForms</name>
 
+    <properties>
+        <path.smallrye-open-api-as-reactforms-ui>openapi-as-reactforms</path.smallrye-open-api-as-reactforms-ui>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -81,7 +85,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${project.version}/</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/${path.smallrye-open-api-as-reactforms-ui}/</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>dist/</directory>
