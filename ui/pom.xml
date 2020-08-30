@@ -15,5 +15,6 @@
     
     <modules>
         <module>open-api-ui</module>
+        <module>open-api-as-reactforms</module>
     </modules>
 </project>
