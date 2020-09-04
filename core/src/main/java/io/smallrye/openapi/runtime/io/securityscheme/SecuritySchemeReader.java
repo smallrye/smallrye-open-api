@@ -40,6 +40,7 @@ public class SecuritySchemeReader {
     /**
      * Reads a map of SecurityScheme annotations.
      * 
+     * @param context scanning context
      * @param annotationValue Map of {@literal @}SecurityScheme annotations
      * @return Map of SecurityScheme models
      */
@@ -86,6 +87,7 @@ public class SecuritySchemeReader {
     /**
      * Reads a SecurityScheme annotation into a model.
      * 
+     * @param context scanning context
      * @param annotationInstance the {@literal @}SecurityScheme annotation
      * @return SecurityScheme model
      */

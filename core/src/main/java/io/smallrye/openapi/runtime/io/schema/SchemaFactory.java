@@ -54,8 +54,7 @@ public class SchemaFactory {
     /**
      * Reads a Schema annotation into a model.
      *
-     * @param index the index
-     * @param cl the classLoader to use
+     * @param context scanning context
      * @param value the annotation value
      * @return Schema model
      */
@@ -78,8 +77,7 @@ public class SchemaFactory {
      * on the provided class. If the schema has already been registered (in components), the existing
      * registration will be replaced.
      * 
-     * @param index application class index
-     * @param cl the classLoader to use
+     * @param context scanning context
      * @param schema schema model to populate
      * @param annotation schema annotation to read
      * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
@@ -97,8 +95,7 @@ public class SchemaFactory {
      * on the provided class. If the schema has already been registered (in components), the existing
      * registration will be replaced.
      * 
-     * @param index application class index
-     * @param cl the classLoader to use
+     * @param context scanning context
      * @param schema schema model to populate
      * @param annotation schema annotation to read
      * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
@@ -331,7 +328,7 @@ public class SchemaFactory {
      * Introspect into the given Class to generate a Schema model. The boolean indicates
      * whether this class type should be turned into a reference.
      *
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param type the implementation type of the item to scan
      * @param schemaReferenceSupported
      */
@@ -365,7 +362,7 @@ public class SchemaFactory {
     /**
      * Converts a Jandex type to a {@link Schema} model.
      * 
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param type the implementation type of the item to scan
      * @param extensions list of AnnotationScannerExtensions
      * @return Schema model
@@ -412,7 +409,7 @@ public class SchemaFactory {
      * 
      * The given type must be found in the index.
      *
-     * @param index Jandex index containing the ClassInfo for the given enum type
+     * @param context scanning context
      * @param enumType type containing Java Enum constants
      * @return Schema model
      *
@@ -449,7 +446,7 @@ public class SchemaFactory {
      * Introspect the given class type to generate a Schema model. The boolean indicates
      * whether this class type should be turned into a reference.
      *
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param ctype
      * @param schemaReferenceSupported
      */
@@ -481,7 +478,7 @@ public class SchemaFactory {
     /**
      * Register the provided schema in the SchemaRegistry if allowed.
      * 
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param type the type of the schema to register
      * @param schema a schema
      * @return a reference to the registered schema or the input schema when registration is not allowed/possible
@@ -504,7 +501,7 @@ public class SchemaFactory {
      * is not already in the registry or the schema being registered is not already a
      * reference that has been registered.
      * 
-     * @param index
+     * @param context scanning context
      * @param registry
      * @param type
      * @param schema
@@ -525,7 +522,7 @@ public class SchemaFactory {
     /**
      * Reads an array of Class annotations to produce a list of {@link Schema} models.
      * 
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param types the implementation types of the items to scan, never null
      */
     private static List<Schema> readClassSchemas(final AnnotationScannerContext context, Type[] types) {
@@ -575,7 +572,7 @@ public class SchemaFactory {
      * {@link org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping @DiscriminatorMapping}
      * annotations into a {@link Discriminator} model.
      *
-     * @param index set of scanned classes to be used for further introspection
+     * @param context scanning context
      * @param propertyName the OAS required value specified by the
      *        {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorProperty() discriminatorProperty}
      *        attribute.

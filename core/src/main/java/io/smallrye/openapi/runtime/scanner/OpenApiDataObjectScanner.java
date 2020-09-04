@@ -125,8 +125,7 @@ public class OpenApiDataObjectScanner {
      * <p>
      * Call {@link #process()} to build and return the {@link Schema}.
      *
-     * @param index index of types to scan
-     * @param cl the classloader to use
+     * @param context scanning context
      * @param classType root to begin scan
      */
     public OpenApiDataObjectScanner(final AnnotationScannerContext context, Type classType) {
@@ -147,7 +146,7 @@ public class OpenApiDataObjectScanner {
     /**
      * Build a Schema with ClassType as root.
      *
-     * @param index index of types to scan
+     * @param context scanning context
      * @param type root to begin scan
      * @return the OAI schema
      */

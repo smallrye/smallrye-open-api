@@ -31,7 +31,7 @@ public class ExtensionParsingTests extends IndexScannerTestBase {
     @Test
     public void testAllExpectedParseTypes() throws IOException, JSONException {
         assertJsonEquals("extensions.parsing.expected.json",
-                         ExtensionParsingTestResource.class);
+                ExtensionParsingTestResource.class);
     }
 
     /* Test models and resources below. */
@@ -42,30 +42,18 @@ public class ExtensionParsingTests extends IndexScannerTestBase {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         @Callbacks({
-                     @Callback(
-                             name = "extendedCallback",
-                             callbackUrlExpression = "http://localhost:8080/resources/ext-callback",
-                             operations = @CallbackOperation(
-                                     summary = "Get results",
-                                     extensions = {
-                                                    @Extension(name = "x-object", value = "{ \"key\":\"value\" }", parseValue = true),
-                                                    @Extension(name = "x-object-unparsed", value = "{ \"key\":\"value\" }"),
-                                                    @Extension(name = "x-array", value = "[ \"val1\",\"val2\" ]", parseValue = true),
-                                                    @Extension(name = "x-booltrue", value = "true", parseValue = true),
-                                                    @Extension(name = "x-boolfalse", value = "false", parseValue = true),
-                                                    @Extension(name = "x-number", value = "42", parseValue = true),
-                                                    @Extension(name = "x-number-sci", value = "42e55", parseValue = true),
-                                                    @Extension(name = "x-positive-number-remains-string", value = "+42", parseValue = true),
-                                                    @Extension(name = "x-negative-number", value = "-42", parseValue = true),
-                                                    @Extension(name = "x-unparsable-number", value = "-Not.A.Number", parseValue = true)
-                                     },
-                                     method = "get",
-                                     responses = @APIResponse(
-                                             responseCode = "200",
-                                             description = "successful operation",
-                                             content = @Content(
-                                                     mediaType = "application/json",
-                                                     schema = @Schema(type = SchemaType.ARRAY, implementation = String.class)))))
+                @Callback(name = "extendedCallback", callbackUrlExpression = "http://localhost:8080/resources/ext-callback", operations = @CallbackOperation(summary = "Get results", extensions = {
+                        @Extension(name = "x-object", value = "{ \"key\":\"value\" }", parseValue = true),
+                        @Extension(name = "x-object-unparsed", value = "{ \"key\":\"value\" }"),
+                        @Extension(name = "x-array", value = "[ \"val1\",\"val2\" ]", parseValue = true),
+                        @Extension(name = "x-booltrue", value = "true", parseValue = true),
+                        @Extension(name = "x-boolfalse", value = "false", parseValue = true),
+                        @Extension(name = "x-number", value = "42", parseValue = true),
+                        @Extension(name = "x-number-sci", value = "42e55", parseValue = true),
+                        @Extension(name = "x-positive-number-remains-string", value = "+42", parseValue = true),
+                        @Extension(name = "x-negative-number", value = "-42", parseValue = true),
+                        @Extension(name = "x-unparsable-number", value = "-Not.A.Number", parseValue = true)
+                }, method = "get", responses = @APIResponse(responseCode = "200", description = "successful operation", content = @Content(mediaType = "application/json", schema = @Schema(type = SchemaType.ARRAY, implementation = String.class)))))
         })
         public String get(String data) {
             return data;
@@ -75,8 +63,8 @@ public class ExtensionParsingTests extends IndexScannerTestBase {
     @Test
     public void testSiblingExtensionAnnotations() throws IOException, JSONException {
         assertJsonEquals("extensions.scan-siblings.expected.json",
-                         ExtensionPlacementTestResource.class,
-                         ExtensionPlacementTestResource.Model.class);
+                ExtensionPlacementTestResource.class,
+                ExtensionPlacementTestResource.Model.class);
     }
 
     @Path("/ext")
@@ -97,10 +85,8 @@ public class ExtensionParsingTests extends IndexScannerTestBase {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         @Extension(name = "operation-ext", value = "plain string")
-        public Model get(@QueryParam("data") @Parameter() @Extension(
-                name = "qparam-data-ext",
-                value = "1",
-                parseValue = true) String data) {
+        public Model get(
+                @QueryParam("data") @Parameter() @Extension(name = "qparam-data-ext", value = "1", parseValue = true) String data) {
             return null;
         }
     }

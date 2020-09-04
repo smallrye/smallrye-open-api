@@ -30,6 +30,7 @@ public class ExternalDocsReader {
     /**
      * Reads an ExternalDocumentation annotation.
      * 
+     * @param context scanning context
      * @param annotationValue the {@literal @}ExternalDocumentation annotation
      * @return ExternalDocumentation model
      */
@@ -44,6 +45,7 @@ public class ExternalDocsReader {
     /**
      * Reads an ExternalDocumentation annotation.
      * 
+     * @param context scanning context
      * @param annotationInstance the {@literal @}ExternalDocumentation annotation
      * @return ExternalDocumentation model
      */

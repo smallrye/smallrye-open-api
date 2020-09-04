@@ -40,6 +40,7 @@ public class TagReader {
      * Reads any Tag annotations.The annotation
      * value is an array of Tag annotations.
      * 
+     * @param context scanning context
      * @param annotationValue an array of {@literal @}Tag annotations
      * @return List of Tag models
      */
@@ -80,6 +81,7 @@ public class TagReader {
     /**
      * Reads a single Tag annotation.
      * 
+     * @param context scanning context
      * @param annotationInstance {@literal @}Tag annotation, must not be null
      * @return Tag model
      */

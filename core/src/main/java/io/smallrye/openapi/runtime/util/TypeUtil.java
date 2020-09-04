@@ -268,7 +268,7 @@ public class TypeUtil {
      * those types with defined properties beyond 'type' and 'format' are
      * eligible.
      * 
-     * @param index index of classes to consider
+     * @param context scanning context
      * @param classType the type to check
      * @return true if the type may be registered in the SchemaRegistry, false otherwise.
      */
@@ -371,7 +371,7 @@ public class TypeUtil {
      * <p>
      * Attempts to work with both Jandex and using standard class.
      *
-     * @param index Jandex index
+     * @param context scanning context
      * @param testSubject type to test
      * @param testObject type to test against
      * @return true if is of type
