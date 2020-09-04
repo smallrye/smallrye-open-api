@@ -16,6 +16,7 @@ import org.junit.Test;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 public class TypeUtilTest extends IndexScannerTestBase {
 
@@ -135,7 +136,9 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     private boolean isA(Index index, Type testSubject, Type testObject) {
-        return TypeUtil.isA(index, ClassLoaderUtil.getDefaultClassLoader(), testSubject, testObject);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        return TypeUtil.isA(context, testSubject, testObject);
     }
 
     static class ArrayCollection extends ArrayList<String> {

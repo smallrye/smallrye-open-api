@@ -100,9 +100,7 @@ public class HeaderReader {
         Header header = new HeaderImpl();
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.HEADER));
         header.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
-        header.setSchema(
-                SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(),
-                        annotationInstance.value(Parameterizable.PROP_SCHEMA)));
+        header.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         header.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
         header.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
         header.setAllowEmptyValue(

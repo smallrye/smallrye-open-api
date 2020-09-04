@@ -63,7 +63,7 @@ public class ComponentsReader {
                 ResponseReader.readResponsesMap(context, nested.value(ComponentsConstant.PROP_RESPONSES)));
         components.setSchemas(SchemaReader.readSchemas(context, nested.value(ComponentsConstant.PROP_SCHEMAS)));
         components.setSecuritySchemes(
-                SecuritySchemeReader.readSecuritySchemes(nested.value(ComponentsConstant.PROP_SECURITY_SCHEMES)));
+                SecuritySchemeReader.readSecuritySchemes(context, nested.value(ComponentsConstant.PROP_SECURITY_SCHEMES)));
 
         return components;
     }

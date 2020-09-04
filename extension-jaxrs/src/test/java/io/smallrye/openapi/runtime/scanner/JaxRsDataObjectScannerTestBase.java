@@ -7,11 +7,15 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.junit.BeforeClass;
 
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
 
+    protected static AnnotationScannerContext context;
     protected static Index index;
 
     @BeforeClass
@@ -37,6 +41,7 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
         //indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
 
         index = indexer.complete();
+        context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
     }
 
     public FieldInfo getFieldFromKlazz(String containerName, String fieldName) {

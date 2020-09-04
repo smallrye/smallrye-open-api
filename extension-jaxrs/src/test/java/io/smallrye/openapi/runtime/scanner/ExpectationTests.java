@@ -28,7 +28,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testUnresolvable() throws IOException, JSONException {
         DotName bar = createSimple(Bar.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, ClassType.create(bar, Type.Kind.CLASS));
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(bar, Type.Kind.CLASS));
 
         Schema result = scanner.process();
 
@@ -42,7 +42,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testCycle() throws IOException, JSONException {
         DotName buzz = createSimple(BuzzLinkedList.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, ClassType.create(buzz, Type.Kind.CLASS));
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(buzz, Type.Kind.CLASS));
 
         Schema result = scanner.process();
 
@@ -53,7 +53,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testBareEnum() throws IOException, JSONException {
         DotName baz = createSimple(EnumContainer.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, ClassType.create(baz, Type.Kind.CLASS));
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(baz, Type.Kind.CLASS));
 
         Schema result = scanner.process();
 
@@ -64,7 +64,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testRequiredEnum() throws IOException, JSONException {
         DotName baz = createSimple(EnumRequiredContainer.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, ClassType.create(baz, Type.Kind.CLASS));
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(baz, Type.Kind.CLASS));
 
         Schema result = scanner.process();
 
@@ -76,7 +76,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     public void testNestedGenerics() throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
         Type pType = getFieldFromKlazz(name, "nesting").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
 
         Schema result = scanner.process();
 
@@ -88,7 +88,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     public void testComplexNestedGenerics() throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
         Type pType = getFieldFromKlazz(name, "complexNesting").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
 
         Schema result = scanner.process();
 
@@ -100,7 +100,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     public void testComplexInheritanceGenerics() throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
         Type pType = getFieldFromKlazz(name, "complexInheritance").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
 
         Schema result = scanner.process();
 
@@ -112,7 +112,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     public void testGenericsWithBounds() throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
         Type pType = getFieldFromKlazz(name, "genericWithBounds").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
 
         Schema result = scanner.process();
 
@@ -124,7 +124,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     public void genericFieldTest() throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
         Type pType = getFieldFromKlazz(name, "genericContainer").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
 
         Schema result = scanner.process();
 
@@ -136,7 +136,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     public void fieldNameOverrideTest() throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
         Type pType = getFieldFromKlazz(name, "overriddenNames").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
 
         Schema result = scanner.process();
 

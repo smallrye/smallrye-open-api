@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.scanner;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassInfo;
@@ -15,8 +14,11 @@ import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.Test;
 
+import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -113,14 +115,16 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$NamedNestable.class");
         Index index = indexer.complete();
 
+        OpenApiConfig config = emptyConfig();
         OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
+        SchemaRegistry registry = SchemaRegistry.newInstance(config, oai, index);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
 
         Type n6Type = cInfo.field("n6").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, n6Type);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), config);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, n6Type);
 
         Schema result = scanner.process();
         registry.register(n6Type, result);

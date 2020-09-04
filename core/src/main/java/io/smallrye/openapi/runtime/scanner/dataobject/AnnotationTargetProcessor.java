@@ -19,6 +19,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -29,8 +30,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class AnnotationTargetProcessor implements RequirementHandler {
 
-    private final AugmentedIndexView index;
-    private final ClassLoader cl;
+    private final AnnotationScannerContext context;
     private final DataObjectDeque objectStack;
     private final DataObjectDeque.PathEntry parentPathEntry;
     private final TypeResolver typeResolver;
@@ -39,16 +39,14 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     // May be null if field is unannotated.
     private final AnnotationTarget annotationTarget;
 
-    private AnnotationTargetProcessor(AugmentedIndexView index,
-            ClassLoader cl,
+    private AnnotationTargetProcessor(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             DataObjectDeque.PathEntry parentPathEntry,
             TypeResolver typeResolver,
             AnnotationTarget annotationTarget,
             Type entityType) {
 
-        this.index = index;
-        this.cl = cl;
+        this.context = context;
         this.objectStack = objectStack;
         this.parentPathEntry = parentPathEntry;
         this.typeResolver = typeResolver;
@@ -56,25 +54,23 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         this.annotationTarget = annotationTarget;
     }
 
-    public static Schema process(AugmentedIndexView index,
-            ClassLoader cl,
+    public static Schema process(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             TypeResolver typeResolver,
             DataObjectDeque.PathEntry parentPathEntry) {
 
-        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, cl, objectStack, parentPathEntry, typeResolver,
+        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(context, objectStack, parentPathEntry, typeResolver,
                 typeResolver.getAnnotationTarget(), typeResolver.getUnresolvedType());
         return fp.processField();
     }
 
-    public static Schema process(AugmentedIndexView index,
-            ClassLoader cl,
+    public static Schema process(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             TypeResolver typeResolver,
             DataObjectDeque.PathEntry parentPathEntry,
             Type type) {
-        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, cl, objectStack, parentPathEntry, typeResolver,
-                index.getClass(type), type);
+        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(context, objectStack, parentPathEntry, typeResolver,
+                context.getAugmentedIndex().getClass(type), type);
         return fp.processField();
     }
 
@@ -133,7 +129,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
         } else {
             // Process the type of the field to derive the typeSchema
-            TypeProcessor typeProcessor = new TypeProcessor(index, cl, objectStack, parentPathEntry, typeResolver, entityType,
+            TypeProcessor typeProcessor = new TypeProcessor(context, objectStack, parentPathEntry, typeResolver, entityType,
                     new SchemaImpl(), annotationTarget);
 
             // Type could be replaced (e.g. generics)
@@ -214,7 +210,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
 
         // readSchema *may* replace the existing schema, so we must assign.
-        return SchemaFactory.readSchema(index, cl, new SchemaImpl(), annotation, defaults);
+        return SchemaFactory.readSchema(context, new SchemaImpl(), annotation, defaults);
     }
 
     /**

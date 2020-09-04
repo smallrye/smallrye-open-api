@@ -422,7 +422,7 @@ public abstract class AbstractParameterProcessor {
             }
 
             if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
-                Schema schema = SchemaFactory.typeToSchema(index, cl, context.targetType, extensions);
+                Schema schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, extensions);
                 ModelUtil.setParameterSchema(param, schema);
             }
 
@@ -486,7 +486,7 @@ public abstract class AbstractParameterProcessor {
             AnnotationTarget paramTarget = param.getValue().target();
             addEncoding(encodings, paramName, paramTarget);
             Type paramType = getType(paramTarget);
-            Schema paramSchema = SchemaFactory.typeToSchema(index, cl, paramType, extensions);
+            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, extensions);
             Object defaultValue = getDefaultValue(paramTarget);
 
             if (paramSchema.getDefaultValue() == null) {

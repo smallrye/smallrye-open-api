@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
@@ -29,13 +28,13 @@ public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
     @Before
     public void setupRegistry() {
         oai = new OpenAPIImpl();
-        registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
+        registry = SchemaRegistry.newInstance(context.getConfig(), oai, context.getIndex());
     }
 
     private void testAssertion(Class<?> target, String expectedResourceName) throws IOException, JSONException {
         DotName name = componentize(target.getName());
         Type type = ClassType.create(name, Type.Kind.CLASS);
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, type);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
 
         Schema result = scanner.process();
         registry.register(type, result);
@@ -51,7 +50,7 @@ public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
         String containerName = containerClass.getName();
         Type parentType = getFieldFromKlazz(containerName, targetField).type();
 
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, parentType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
         registry.register(parentType, result);

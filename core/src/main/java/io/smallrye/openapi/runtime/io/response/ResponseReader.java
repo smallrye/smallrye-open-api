@@ -164,6 +164,7 @@ public class ResponseReader {
                 ContentReader.readContent(context, annotationInstance.value(ResponseConstant.PROP_CONTENT),
                         ContentDirection.OUTPUT));
         response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RESPONSE));
+        response.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return response;
     }
 
@@ -185,8 +186,7 @@ public class ResponseReader {
 
         for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
             MediaType type = new MediaTypeImpl();
-            type.setSchema(SchemaFactory.typeToSchema(context.getIndex(),
-                    context.getClassLoader(),
+            type.setSchema(SchemaFactory.typeToSchema(context,
                     JandexUtil.value(annotation, ResponseConstant.PROP_VALUE),
                     context.getExtensions()));
             content.addMediaType(mediaType, type);

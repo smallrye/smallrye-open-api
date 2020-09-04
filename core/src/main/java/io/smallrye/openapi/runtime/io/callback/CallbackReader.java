@@ -108,6 +108,7 @@ public class CallbackReader {
         String expression = JandexUtil.stringValue(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
                 PathsReader.readPathItem(context, annotation.value(CallbackConstant.PROP_OPERATIONS), null));
+        callback.setExtensions(ExtensionReader.readExtensions(context, annotation));
         return callback;
     }
 

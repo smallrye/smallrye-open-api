@@ -29,7 +29,7 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         OpenAPIImpl oai = new OpenAPIImpl();
         SchemaRegistry registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
 
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, parentType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
         registry.register(parentType, result);

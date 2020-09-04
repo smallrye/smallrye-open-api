@@ -52,7 +52,8 @@ public class OperationReader {
             operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
             operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
             operation.setExternalDocs(
-                    ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+                    ExternalDocsReader.readExternalDocs(context,
+                            annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
             operation.setParameters(ParameterReader.readParametersList(context,
                     annotationInstance.value(OperationConstant.PROP_PARAMETERS)).orElse(null));
             operation.setRequestBody(RequestBodyReader.readRequestBody(context,
@@ -69,6 +70,7 @@ public class OperationReader {
                     .orElse(getOperationId(context, methodInfo)));
             operation
                     .setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
+            // TODO: for non-callbacks: operation.setExtensions(ExtensionReader.readExtendsions(context, annotationInstance));
 
             return operation;
         } else if (shouldDoAutoGenerate(context)) {

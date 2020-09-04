@@ -20,6 +20,7 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -30,8 +31,8 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 public class TypeProcessor {
 
     private final Schema schema;
+    private final AnnotationScannerContext context;
     private final AugmentedIndexView index;
-    private final ClassLoader cl;
     private final AnnotationTarget annotationTarget;
     private final DataObjectDeque objectStack;
     private final TypeResolver typeResolver;
@@ -40,8 +41,7 @@ public class TypeProcessor {
     // Type may be changed.
     private Type type;
 
-    public TypeProcessor(AugmentedIndexView index,
-            ClassLoader cl,
+    public TypeProcessor(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             DataObjectDeque.PathEntry parentPathEntry, TypeResolver typeResolver,
             Type type,
@@ -52,8 +52,8 @@ public class TypeProcessor {
         this.parentPathEntry = parentPathEntry;
         this.type = type;
         this.schema = schema;
-        this.index = index;
-        this.cl = cl;
+        this.context = context;
+        this.index = context.getAugmentedIndex();
         this.annotationTarget = annotationTarget;
     }
 
@@ -119,7 +119,7 @@ public class TypeProcessor {
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
-            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, cl, type));
+            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(context, type));
             pushToStack(type);
             return STRING_TYPE;
         }
@@ -166,7 +166,7 @@ public class TypeProcessor {
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
 
-            if (TypeUtil.isA(index, cl, pType, SET_TYPE)) {
+            if (TypeUtil.isA(context, pType, SET_TYPE)) {
                 schema.setUniqueItems(Boolean.TRUE);
             }
 
@@ -218,7 +218,7 @@ public class TypeProcessor {
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
                 DataObjectLogging.logger.processingEnum(type);
-                propsSchema = SchemaFactory.enumToSchema(index, cl, valueType);
+                propsSchema = SchemaFactory.enumToSchema(context, valueType);
                 pushToStack(valueType);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
@@ -256,6 +256,6 @@ public class TypeProcessor {
     }
 
     private boolean isA(Type testSubject, Type test) {
-        return TypeUtil.isA(index, cl, testSubject, test);
+        return TypeUtil.isA(context, testSubject, test);
     }
 }

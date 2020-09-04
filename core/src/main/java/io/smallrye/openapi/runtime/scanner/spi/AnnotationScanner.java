@@ -145,7 +145,8 @@ public interface AnnotationScanner {
      * @param targetClass the class that contain the security annotation
      * @param openApi the current OpenApi model being created
      */
-    default void processSecuritySchemeAnnotation(final ClassInfo targetClass, OpenAPI openApi) {
+    default void processSecuritySchemeAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
+            OpenAPI openApi) {
         List<AnnotationInstance> securitySchemeAnnotations = SecuritySchemeReader.getSecuritySchemeAnnotations(targetClass);
 
         for (AnnotationInstance annotation : securitySchemeAnnotations) {
@@ -154,7 +155,7 @@ public interface AnnotationScanner {
                 name = JandexUtil.nameFromRef(annotation);
             }
             if (name != null) {
-                SecurityScheme securityScheme = SecuritySchemeReader.readSecurityScheme(annotation);
+                SecurityScheme securityScheme = SecuritySchemeReader.readSecurityScheme(context, annotation);
                 Components components = ModelUtil.components(openApi);
                 components.addSecurityScheme(name, securityScheme);
             }
@@ -198,10 +199,11 @@ public interface AnnotationScanner {
      * @param resourceTags tags passed in
      * @param operation the current operation
      */
-    default void processOperationTags(final MethodInfo method, OpenAPI openApi, Set<String> resourceTags,
+    default void processOperationTags(final AnnotationScannerContext context, final MethodInfo method, OpenAPI openApi,
+            Set<String> resourceTags,
             final Operation operation) {
         // 
-        Set<String> tags = processTags(method, openApi, true);
+        Set<String> tags = processTags(context, method, openApi, true);
         if (tags == null) {
             if (!resourceTags.isEmpty()) {
                 operation.setTags(new ArrayList<>(resourceTags));
@@ -222,7 +224,8 @@ public interface AnnotationScanner {
      * @param nullWhenMissing determines if an empty set or a null value is returned when no annotations are found.
      * @return the set of tag names found
      */
-    default Set<String> processTags(final AnnotationTarget target, OpenAPI openApi, final boolean nullWhenMissing) {
+    default Set<String> processTags(final AnnotationScannerContext context, final AnnotationTarget target, OpenAPI openApi,
+            final boolean nullWhenMissing) {
         if (!TagReader.hasTagAnnotation(target)) {
             return nullWhenMissing ? null : Collections.emptySet();
         }
@@ -234,7 +237,7 @@ public interface AnnotationScanner {
             if (JandexUtil.isRef(ta)) {
                 tags.add(JandexUtil.value(ta, OpenApiConstants.REF));
             } else {
-                Tag tag = TagReader.readTag(ta);
+                Tag tag = TagReader.readTag(context, ta);
 
                 if (tag.getName() != null) {
                     ModelUtil.addTag(openApi, tag);
@@ -384,8 +387,7 @@ public interface AnnotationScanner {
                     schema = new SchemaImpl();
                     schema.setType(Schema.SchemaType.OBJECT);
                 } else {
-                    schema = SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), returnType,
-                            context.getExtensions());
+                    schema = SchemaFactory.typeToSchema(context, returnType, context.getExtensions());
                 }
 
                 Content content = new ContentImpl();
@@ -798,8 +800,7 @@ public interface AnnotationScanner {
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
             if (requestBodyType != null && requestBody.getRef() == null) {
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
-                    Schema schema = SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), requestBodyType,
-                            context.getExtensions());
+                    Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
@@ -837,8 +838,7 @@ public interface AnnotationScanner {
                         schema = new SchemaImpl();
                         schema.setType(Schema.SchemaType.OBJECT);
                     } else {
-                        schema = SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), requestBodyType,
-                                context.getExtensions());
+                        schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
                     }
 
                     if (requestBody == null) {
