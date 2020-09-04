@@ -1,5 +1,5 @@
 {
-  "name": "smallrye-open-api-as-reactforms",
+  "name": "smallrye-open-api-ui-forms",
   "version": "1.0.0",
   "description": "Experimental SPA",
   "main": "index.js",

@@ -8,12 +8,12 @@
         <version>2.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-open-api-as-reactforms</artifactId>
+    <artifactId>smallrye-open-api-ui-forms</artifactId>
 
-    <name>SmallRye: OpenAPI UI as ReactForms</name>
+    <name>SmallRye: OpenAPI UI as Forms</name>
 
     <properties>
-        <path.smallrye-open-api-as-reactforms-ui>openapi-as-reactforms</path.smallrye-open-api-as-reactforms-ui>
+        <path.smallrye-open-api-ui-forms>openapi-ui-forms</path.smallrye-open-api-ui-forms>
     </properties>
 
     <build>
@@ -85,7 +85,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/${path.smallrye-open-api-as-reactforms-ui}/</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/${path.smallrye-open-api-ui-forms}/</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>dist/</directory>
