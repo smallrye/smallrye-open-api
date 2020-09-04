@@ -83,11 +83,6 @@ public class MavenConfig implements OpenApiConfig {
     }
 
     @Override
-    public boolean schemaReferencesEnable() {
-        return Boolean.valueOf(properties.getOrDefault(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, "true"));
-    }
-
-    @Override
     public String customSchemaRegistryClass() {
         return properties.getOrDefault(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, null);
     }

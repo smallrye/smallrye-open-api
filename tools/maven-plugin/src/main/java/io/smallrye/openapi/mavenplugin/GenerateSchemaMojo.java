@@ -338,7 +338,6 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, OASConfig.SERVERS_OPERATION_PREFIX, operationServers);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS, scanDependenciesJars);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, schemaReferencesEnable);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
         addToPropertyMap(cp, OpenApiConstants.VERSION, openApiVersion);

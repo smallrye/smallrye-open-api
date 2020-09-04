@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
@@ -28,7 +29,7 @@ public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
     @Before
     public void setupRegistry() {
         oai = new OpenAPIImpl();
-        registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
+        registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
     }
 
     private void testAssertion(Class<?> target, String expectedResourceName) throws IOException, JSONException {

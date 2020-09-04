@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -26,7 +27,7 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         DotName parentName = componentize(NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
         OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
+        SchemaRegistry registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
 
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, parentType);
 
@@ -44,7 +45,7 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
                 NestedSchemaOnParameterResource.NestedParameterTestChild.class,
                 NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
 
         OpenAPI result = scanner.scan();
 
@@ -67,7 +68,8 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Foo.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Bar.class");
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), indexer.complete());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()),
+                indexer.complete());
 
         OpenAPI result = scanner.scan();
 
