@@ -232,7 +232,6 @@ public class SchemaRegistry {
         }
     }
 
-    private final OpenApiConfig config;
     private final OpenAPI oai;
     private final IndexView index;
 
@@ -240,7 +239,6 @@ public class SchemaRegistry {
     private final Set<String> names = new LinkedHashSet<>();
 
     private SchemaRegistry(OpenApiConfig config, OpenAPI oai, IndexView index) {
-        this.config = config;
         this.oai = oai;
         this.index = index;
 
