@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassInfo;
@@ -113,7 +114,7 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         Index index = indexer.complete();
 
         OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
+        SchemaRegistry registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);

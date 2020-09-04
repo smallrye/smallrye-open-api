@@ -69,10 +69,6 @@ public interface OpenApiConfig {
         return new HashSet<>();
     }
 
-    default boolean schemaReferencesEnable() {
-        return true;
-    }
-
     default String customSchemaRegistryClass() {
         return null;
     }

@@ -168,7 +168,7 @@ public class SchemaRegistry {
 
         SchemaRegistry registry = currentInstance();
 
-        if (registry == null || !registry.schemaReferenceSupported()) {
+        if (registry == null) {
             return schema;
         }
 
@@ -196,7 +196,7 @@ public class SchemaRegistry {
     public static boolean hasSchema(Type type, TypeResolver resolver) {
         SchemaRegistry registry = currentInstance();
 
-        if (registry == null || !registry.schemaReferenceSupported()) {
+        if (registry == null) {
             return false;
         }
 
@@ -375,10 +375,6 @@ public class SchemaRegistry {
 
     public boolean hasSchema(Type instanceType) {
         return hasSchema(new TypeKey(instanceType));
-    }
-
-    public boolean schemaReferenceSupported() {
-        return config != null && config.schemaReferencesEnable();
     }
 
     private Schema lookupRef(TypeKey key) {

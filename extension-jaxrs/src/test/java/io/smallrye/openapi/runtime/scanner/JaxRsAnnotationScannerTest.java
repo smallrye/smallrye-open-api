@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -146,9 +147,6 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 if (OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
                     return (T) MyCustomSchemaRegistry.class.getName();
                 }
-                if (OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
-                    return (T) Boolean.TRUE;
-                }
                 return null;
             }
 
@@ -157,16 +155,12 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 if (OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
                     return (Optional<T>) Optional.of(MyCustomSchemaRegistry.class.getName());
                 }
-                if (OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE.equals(propertyName)) {
-                    return (Optional<T>) Optional.of(Boolean.TRUE);
-                }
                 return Optional.empty();
             }
 
             @Override
             public Iterable<String> getPropertyNames() {
-                return Arrays.asList(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS,
-                        OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE);
+                return Arrays.asList(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS);
             }
 
             @Override
@@ -181,7 +175,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testTagScanning() throws IOException, JSONException {
         Index i = indexOf(TagTestResource1.class, TagTestResource2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.tags.multilocation.json", result);
@@ -190,7 +184,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testTagScanning_OrderGivenAnnotations() throws IOException, JSONException {
         Index i = indexOf(TagTestApp.class, TagTestResource1.class, TagTestResource2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.tags.ordergiven.annotation.json", result);
@@ -199,14 +193,14 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testTagScanning_OrderGivenStaticFile() throws IOException, JSONException {
         Index i = indexOf(TagTestResource1.class, TagTestResource2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI scanResult = scanner.scan();
         OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(
                 "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}"
                         .getBytes()),
                 Format.JSON);
         OpenApiDocument doc = OpenApiDocument.INSTANCE;
-        doc.config(nestingSupportConfig());
+        doc.config(dynamicConfig(new HashMap<String, Object>()));
         doc.modelFromStaticFile(staticResult);
         doc.modelFromAnnotations(scanResult);
         doc.initialize();
