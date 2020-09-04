@@ -178,7 +178,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processDefinitionAnnotation(context, applicationClass, openApi);
 
         // Process @SecurityScheme annotations
-        processSecuritySchemeAnnotation(applicationClass, openApi);
+        processSecuritySchemeAnnotation(context, applicationClass, openApi);
 
         // Process @Server annotations
         processServerAnnotation(applicationClass, openApi);
@@ -208,7 +208,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingClass(resourceClass.simpleName());
 
         // Process @SecurityScheme annotations.
-        processSecuritySchemeAnnotation(resourceClass, openApi);
+        processSecuritySchemeAnnotation(context, resourceClass, openApi);
 
         // Process Java security
         processJavaSecurity(resourceClass, openApi);
@@ -231,7 +231,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             List<Parameter> locatorPathParameters) {
 
         // Process tags (both declarations and references).
-        Set<String> tagRefs = processTags(resourceClass, openApi, false);
+        Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
 
         // Process exception mapper to auto generate api response based on method exceptions
         Map<DotName, AnnotationInstance> exceptionAnnotationMap = processExceptionMappers(context);
@@ -385,7 +385,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         final Operation operation = maybeOperation.get();
 
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-        processOperationTags(method, openApi, resourceTags, operation);
+        processOperationTags(context, method, openApi, resourceTags, operation);
 
         // Process @Parameter annotations.
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);

@@ -74,6 +74,16 @@ public class ExtensionReader {
         return e;
     }
 
+    public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
+            final AnnotationInstance extensible) {
+        AnnotationTarget target = extensible.target();
+        // target may be null - checked by JandexUtil methods
+        List<AnnotationInstance> extensions = JandexUtil.getRepeatableAnnotation(target,
+                ExtensionConstant.DOTNAME_EXTENSION,
+                ExtensionConstant.DOTNAME_EXTENSIONS);
+        return extensions.isEmpty() ? null : readExtensions(context, extensions);
+    }
+
     /**
      * Reads a single Extension annotation. If the value must be parsed (as indicated by the
      * 'parseValue' attribute of the annotation), the parsing is delegated to the extensions

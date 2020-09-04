@@ -27,7 +27,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     public void testIgnore_jsonIgnorePropertiesOnClass() throws IOException, JSONException {
         String name = IgnoreTestContainer.class.getName();
         Type type = getFieldFromKlazz(name, "jipOnClassTest").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, type);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
 
         Schema result = scanner.process();
 
@@ -40,7 +40,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     public void testIgnore_jsonIgnorePropertiesOnField() throws IOException, JSONException {
         String name = IgnoreTestContainer.class.getName();
         FieldInfo fieldInfo = getFieldFromKlazz(name, "jipOnFieldTest");
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, fieldInfo, fieldInfo.type());
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, fieldInfo, fieldInfo.type());
 
         Schema result = scanner.process();
 
@@ -52,7 +52,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testIgnore_jsonIgnoreField() throws IOException, JSONException {
         DotName name = DotName.createSimple(JsonIgnoreOnFieldExample.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
 
         Schema result = scanner.process();
@@ -65,7 +65,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testIgnore_jsonIgnoreType() throws IOException, JSONException {
         DotName name = DotName.createSimple(JsonIgnoreTypeExample.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
 
         Schema result = scanner.process();
@@ -78,7 +78,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testIgnore_jsonbTransientField() throws IOException, JSONException {
         DotName name = DotName.createSimple(JsonbTransientOnFieldExample.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
 
         Schema result = scanner.process();
@@ -91,7 +91,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testIgnore_schemaHiddenField() throws IOException, JSONException {
         DotName name = DotName.createSimple(IgnoreSchemaOnFieldExample.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
 
         Schema result = scanner.process();
@@ -103,7 +103,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testIgnore_transientField() throws IOException, JSONException {
         DotName name = DotName.createSimple(TransientFieldExample.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
 
         Schema result = scanner.process();

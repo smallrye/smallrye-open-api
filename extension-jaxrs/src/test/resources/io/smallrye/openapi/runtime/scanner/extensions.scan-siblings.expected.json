@@ -1,0 +1,53 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/ext/segment1": {
+      "get": {
+        "parameters": [
+          {
+            "name": "data",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "qparam-data-ext": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model"
+                }
+              }
+            }
+          }
+        },
+        "operation-ext": "plain string"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Model": {
+        "type": "object",
+        "properties": {
+          "value1": {
+            "type": "string",
+            "value1-ext": "plain string"
+          },
+          "value2": {
+            "format": "int32",
+            "type": "integer",
+            "value2-ext": "plain string"
+          }
+        },
+        "model-schema-ext": {
+          "key": "value"
+        }
+      }
+    }
+  }
+}

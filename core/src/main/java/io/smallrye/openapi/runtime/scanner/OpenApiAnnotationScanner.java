@@ -140,6 +140,7 @@ public class OpenApiAnnotationScanner {
      * Scans all <code>@OpenAPIDefinition</code> annotations present on <code>package-info</code>
      * classes known to the scanner's index.
      * 
+     * @param context scanning context
      * @param oai the current OpenAPI result
      * @return the created OpenAPI
      */

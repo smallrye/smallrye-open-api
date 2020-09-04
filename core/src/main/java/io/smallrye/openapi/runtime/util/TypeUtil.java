@@ -40,6 +40,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
@@ -267,15 +268,15 @@ public class TypeUtil {
      * those types with defined properties beyond 'type' and 'format' are
      * eligible.
      * 
-     * @param index index of classes to consider
+     * @param context scanning context
      * @param classType the type to check
      * @return true if the type may be registered in the SchemaRegistry, false otherwise.
      */
-    public static boolean allowRegistration(IndexView index, Type classType) {
+    public static boolean allowRegistration(final AnnotationScannerContext context, Type classType) {
         TypeWithFormat typeFormat = getTypeFormat(classType);
 
         if (typeFormat.isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT)) {
-            return index.getClassByName(classType.name()) != null;
+            return context.getIndex().getClassByName(classType.name()) != null;
         }
         return typeFormat.getProperties().size() > 2;
     }
@@ -370,12 +371,15 @@ public class TypeUtil {
      * <p>
      * Attempts to work with both Jandex and using standard class.
      *
-     * @param index Jandex index
+     * @param context scanning context
      * @param testSubject type to test
      * @param testObject type to test against
      * @return true if is of type
      */
-    public static boolean isA(IndexView index, ClassLoader cl, Type testSubject, Type testObject) {
+    public static boolean isA(final AnnotationScannerContext context, Type testSubject, Type testObject) {
+        IndexView index = context.getIndex();
+        ClassLoader cl = context.getClassLoader();
+
         // The types may be the same -- short circuit looking in the index
         if (getName(testSubject).equals(getName(testObject))) {
             return true;

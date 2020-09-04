@@ -69,8 +69,7 @@ public class SchemaReader {
              * {@link org.eclipse.microprofile.openapi.annotations.Components}.
              */
             if (name != null) {
-                map.put(name, SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(), new SchemaImpl(name),
-                        nested, Collections.emptyMap()));
+                map.put(name, SchemaFactory.readSchema(context, new SchemaImpl(name), nested, Collections.emptyMap()));
             }
         }
         return map;

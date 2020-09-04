@@ -19,6 +19,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -39,17 +40,18 @@ public class TagReader {
      * Reads any Tag annotations.The annotation
      * value is an array of Tag annotations.
      * 
+     * @param context scanning context
      * @param annotationValue an array of {@literal @}Tag annotations
      * @return List of Tag models
      */
-    public static Optional<List<Tag>> readTags(final AnnotationValue annotationValue) {
+    public static Optional<List<Tag>> readTags(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue != null) {
             IoLogging.logger.annotationsArray("@Tag");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Tag> tags = new ArrayList<>();
             for (AnnotationInstance tagAnno : nestedArray) {
                 if (!JandexUtil.isRef(tagAnno)) {
-                    tags.add(readTag(tagAnno));
+                    tags.add(readTag(context, tagAnno));
                 }
             }
             return Optional.of(tags);
@@ -79,17 +81,20 @@ public class TagReader {
     /**
      * Reads a single Tag annotation.
      * 
+     * @param context scanning context
      * @param annotationInstance {@literal @}Tag annotation, must not be null
      * @return Tag model
      */
-    public static Tag readTag(final AnnotationInstance annotationInstance) {
+    public static Tag readTag(final AnnotationScannerContext context, final AnnotationInstance annotationInstance) {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
         IoLogging.logger.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
         tag.setName(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_NAME));
         tag.setDescription(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
         tag.setExternalDocs(
-                ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+                ExternalDocsReader.readExternalDocs(context,
+                        annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+        tag.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return tag;
     }
 

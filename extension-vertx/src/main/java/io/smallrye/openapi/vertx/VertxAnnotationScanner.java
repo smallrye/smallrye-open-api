@@ -172,7 +172,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processDefinitionAnnotation(context, routeClass, openApi);
 
         // Process @SecurityScheme annotations
-        processSecuritySchemeAnnotation(routeClass, openApi);
+        processSecuritySchemeAnnotation(context, routeClass, openApi);
 
         // Process @Server annotations
         processServerAnnotation(routeClass, openApi);
@@ -200,7 +200,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             List<Parameter> locatorPathParameters) {
 
         // Process tags (both declarations and references).
-        Set<String> tagRefs = processTags(resourceClass, openApi, false);
+        Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
             if (methodInfo.annotations().size() > 0) {
@@ -266,7 +266,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             final Operation operation = maybeOperation.get();
 
             // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-            processOperationTags(method, openApi, resourceTags, operation);
+            processOperationTags(context, method, openApi, resourceTags, operation);
 
             // Process @Parameter annotations.
             PathItem pathItem = new PathItemImpl();

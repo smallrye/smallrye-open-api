@@ -19,13 +19,13 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -115,8 +115,8 @@ public class OpenApiDataObjectScanner {
     private AnnotationTarget rootAnnotationTarget;
     private final Type rootClassType;
     private final ClassInfo rootClassInfo;
+    private final AnnotationScannerContext context;
     private final AugmentedIndexView index;
-    private final ClassLoader cl;
     private final DataObjectDeque objectStack;
     private final IgnoreResolver ignoreResolver;
 
@@ -125,33 +125,16 @@ public class OpenApiDataObjectScanner {
      * <p>
      * Call {@link #process()} to build and return the {@link Schema}.
      *
-     * @param index index of types to scan
+     * @param context scanning context
      * @param classType root to begin scan
      */
-    public OpenApiDataObjectScanner(IndexView index, Type classType) {
-        this(index, ClassLoaderUtil.getDefaultClassLoader(), null, classType);
+    public OpenApiDataObjectScanner(final AnnotationScannerContext context, Type classType) {
+        this(context, null, classType);
     }
 
-    /**
-     * Constructor for data object scanner.
-     * <p>
-     * Call {@link #process()} to build and return the {@link Schema}.
-     *
-     * @param index index of types to scan
-     * @param cl the classloader to use
-     * @param classType root to begin scan
-     */
-    public OpenApiDataObjectScanner(IndexView index, ClassLoader cl, Type classType) {
-        this(index, cl, null, classType);
-    }
-
-    public OpenApiDataObjectScanner(IndexView index, AnnotationTarget annotationTarget, Type classType) {
-        this(index, ClassLoaderUtil.getDefaultClassLoader(), annotationTarget, classType);
-    }
-
-    public OpenApiDataObjectScanner(IndexView index, ClassLoader cl, AnnotationTarget annotationTarget, Type classType) {
-        this.index = AugmentedIndexView.augment(index);
-        this.cl = cl;
+    public OpenApiDataObjectScanner(final AnnotationScannerContext context, AnnotationTarget annotationTarget, Type classType) {
+        this.context = context;
+        this.index = context.getAugmentedIndex();
         this.objectStack = new DataObjectDeque(this.index);
         this.ignoreResolver = new IgnoreResolver(this.index);
         this.rootClassType = classType;
@@ -163,12 +146,12 @@ public class OpenApiDataObjectScanner {
     /**
      * Build a Schema with ClassType as root.
      *
-     * @param index index of types to scan
+     * @param context scanning context
      * @param type root to begin scan
      * @return the OAI schema
      */
-    public static Schema process(IndexView index, ClassLoader cl, Type type) {
-        return new OpenApiDataObjectScanner(index, cl, type).process();
+    public static Schema process(final AnnotationScannerContext context, Type type) {
+        return new OpenApiDataObjectScanner(context, type).process();
     }
 
     /**
@@ -199,7 +182,7 @@ public class OpenApiDataObjectScanner {
         }
 
         if (isA(rootClassType, ENUM_TYPE) && index.containsClass(rootClassType)) {
-            return SchemaFactory.enumToSchema(index, cl, rootClassType);
+            return SchemaFactory.enumToSchema(context, rootClassType);
         }
 
         // If top level item is not indexed
@@ -245,7 +228,7 @@ public class OpenApiDataObjectScanner {
                 currentSchema.setType(Schema.SchemaType.OBJECT);
             } else {
                 // Ignore the returned ref, the currentSchema will be further modified with added properties
-                SchemaFactory.schemaRegistration(index, currentType, currentSchema);
+                SchemaFactory.schemaRegistration(context, currentType, currentSchema);
             }
 
             if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
@@ -266,7 +249,7 @@ public class OpenApiDataObjectScanner {
             properties.values()
                     .stream()
                     .filter(resolver -> !resolver.isIgnored())
-                    .forEach(resolver -> AnnotationTargetProcessor.process(index, cl, objectStack, resolver, currentPathEntry));
+                    .forEach(resolver -> AnnotationTargetProcessor.process(context, objectStack, resolver, currentPathEntry));
         }
     }
 
@@ -276,9 +259,9 @@ public class OpenApiDataObjectScanner {
         AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(currentClass);
         if (annotation != null) {
             // Because of implementation= field, *may* return a new schema rather than modify.
-            return SchemaFactory.readSchema(index, cl, currentSchema, annotation, currentClass);
+            return SchemaFactory.readSchema(context, currentSchema, annotation, currentClass);
         } else if (isA(currentType, ENUM_TYPE)) {
-            return SchemaFactory.enumToSchema(index, cl, currentType);
+            return SchemaFactory.enumToSchema(context, currentType);
         }
         return currentSchema;
     }
@@ -290,11 +273,11 @@ public class OpenApiDataObjectScanner {
     }
 
     private Schema preProcessSpecial(Type type, TypeResolver typeResolver, DataObjectDeque.PathEntry currentPathEntry) {
-        return AnnotationTargetProcessor.process(index, cl, objectStack, typeResolver, currentPathEntry, type);
+        return AnnotationTargetProcessor.process(context, objectStack, typeResolver, currentPathEntry, type);
     }
 
     private boolean isA(Type testSubject, Type test) {
-        return TypeUtil.isA(index, cl, testSubject, test);
+        return TypeUtil.isA(context, testSubject, test);
     }
 
     // Is Map, Collection, etc.

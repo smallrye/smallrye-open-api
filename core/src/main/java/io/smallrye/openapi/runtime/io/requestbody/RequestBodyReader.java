@@ -126,6 +126,7 @@ public class RequestBodyReader {
                         ContentDirection.INPUT));
         requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED).orElse(null));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.REQUEST_BODY));
+        requestBody.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return requestBody;
     }
 
@@ -147,8 +148,7 @@ public class RequestBodyReader {
 
         for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {
             MediaType type = new MediaTypeImpl();
-            type.setSchema(SchemaFactory.typeToSchema(context.getIndex(),
-                    context.getClassLoader(),
+            type.setSchema(SchemaFactory.typeToSchema(context,
                     JandexUtil.value(annotation, RequestBodyConstant.PROP_VALUE),
                     context.getExtensions()));
             content.addMediaType(mediaType, type);

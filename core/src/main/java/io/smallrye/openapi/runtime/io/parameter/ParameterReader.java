@@ -176,16 +176,30 @@ public class ParameterReader {
                 org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
         parameter.setAllowReserved(
                 JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
-        parameter.setSchema(
-                SchemaFactory.readSchema(context.getIndex(),
-                        context.getClassLoader(),
-                        annotationInstance.value(Parameterizable.PROP_SCHEMA)));
+        parameter.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),
                         ContentDirection.PARAMETER));
         parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
         parameter.setExample(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.PARAMETER));
+
+        if (annotationInstance.target() != null) {
+            switch (annotationInstance.target().kind()) {
+                case FIELD:
+                case METHOD_PARAMETER:
+                    /*
+                     * Limit to field and parameter. Extensions on methods are ambiguous and pertain
+                     * instead to the operation.
+                     *
+                     */
+                    parameter.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
+                    break;
+                default:
+                    break;
+            }
+        }
+
         return parameter;
     }
 

@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
@@ -32,7 +31,7 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testKitchenSink() throws IOException {
         DotName kitchenSink = DotName.createSimple(KitchenSink.class.getName());
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index,
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(kitchenSink, Type.Kind.CLASS));
 
         LOG.debugv("Scanning top-level entity: {0}", KitchenSink.class.getName());
@@ -50,7 +49,7 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
         Type pType = getFieldFromKlazz(KitchenSink.class.getName(), "simpleParameterizedType").type();
 
         LOG.debugv("Scanning top-level entity: {0}", pType);
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, pType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
         printToConsole("KustomPair", scanner.process());
     }
 
@@ -58,9 +57,9 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
     public void testKitchenSinkWithRefs() throws IOException, JSONException {
         DotName name = componentize(KitchenSink.class.getName());
         Type type = ClassType.create(name, Type.Kind.CLASS);
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, type);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
         OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
+        SchemaRegistry registry = SchemaRegistry.newInstance(context.getConfig(), oai, index);
 
         Schema result = scanner.process();
         registry.register(type, result);
