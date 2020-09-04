@@ -188,6 +188,11 @@ public class ParameterReader {
             switch (annotationInstance.target().kind()) {
                 case FIELD:
                 case METHOD_PARAMETER:
+                    /*
+                     * Limit to field and parameter. Extensions on methods are ambiguous and pertain
+                     * instead to the operation.
+                     *
+                     */
                     parameter.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
                     break;
                 default:
