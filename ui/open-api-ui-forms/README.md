@@ -44,10 +44,10 @@ To include it in your project (replace xyz with the latest version):
 ```
 <dependency>
     <groupId>io.smallrye</groupId>
-    <artifactId>smallrye-open-api-as-reactforms</artifactId>
+    <artifactId>smallrye-open-api-ui-forms</artifactId>
     <version>xyz</version>
     <scope>runtime</scope>
 </dependency>
 ```
 
-The UI will be available under `/openapi-as-reactforms`.
+The UI will be available under `/openapi-ui-forms`.
