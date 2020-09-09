@@ -1,5 +1,8 @@
 package io.smallrye.openapi.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
@@ -29,7 +32,7 @@ public class OpenApiDocument {
     private transient OpenAPI annotationsModel;
     private transient OpenAPI readerModel;
     private transient OpenAPI staticFileModel;
-    private transient OASFilter filter;
+    private transient List<OASFilter> filters = new ArrayList<>();
     private transient String archiveName;
 
     private transient OpenAPI model;
@@ -98,7 +101,9 @@ public class OpenApiDocument {
     }
 
     public void filter(OASFilter filter) {
-        set(() -> this.filter = filter);
+        if (filter != null) {
+            set(() -> this.filters.add(filter));
+        }
     }
 
     public void archiveName(String archiveName) {
@@ -162,10 +167,13 @@ public class OpenApiDocument {
      * @param model
      */
     private OpenAPI filterModel(OpenAPI model) {
-        if (model == null || filter == null) {
+        if (model == null || filters.isEmpty()) {
             return model;
         }
-        return FilterUtil.applyFilter(filter, model);
+        for (OASFilter filter : filters) {
+            model = FilterUtil.applyFilter(filter, model);
+        }
+        return model;
     }
 
     private void set(Runnable action) {
@@ -186,7 +194,7 @@ public class OpenApiDocument {
         annotationsModel = null;
         readerModel = null;
         staticFileModel = null;
-        filter = null;
+        filters.clear();
         archiveName = null;
     }
 
