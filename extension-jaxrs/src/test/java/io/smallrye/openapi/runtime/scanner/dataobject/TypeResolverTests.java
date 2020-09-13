@@ -2,7 +2,9 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -217,6 +219,37 @@ public class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_TITLE));
+    }
+
+    @Test
+    public void testOneSidedPropertiesHidden() {
+        AugmentedIndexView index = new AugmentedIndexView(indexOf(OneSidedProperties.class, OneSidedParent.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(OneSidedProperties.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(5, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+
+        TypeResolver parentProp1 = iter.next().getValue();
+        assertEquals("parentProp1", parentProp1.getPropertyName());
+        assertTrue(parentProp1.isIgnored());
+
+        TypeResolver parentProp2 = iter.next().getValue();
+        assertEquals("parentProp2", parentProp2.getPropertyName());
+        assertTrue(parentProp2.isIgnored());
+
+        TypeResolver prop1 = iter.next().getValue();
+        assertEquals("prop1", prop1.getPropertyName());
+        assertFalse(prop1.isIgnored());
+
+        TypeResolver prop2 = iter.next().getValue();
+        assertEquals("prop2", prop2.getPropertyName());
+        assertFalse(prop2.isIgnored());
+
+        TypeResolver prop3 = iter.next().getValue();
+        assertEquals("prop3", prop3.getPropertyName());
+        assertFalse(prop3.isIgnored());
     }
 
     /* Test models and resources below. */
@@ -469,5 +502,44 @@ public class TypeResolverTests extends IndexScannerTestBase {
         void name(String name) {
             this.name = name;
         }
+    }
+
+    static class OneSidedParent {
+
+        @Schema(hidden = true)
+        public String getParentProp1() {
+            return "";
+        }
+
+        @Schema(hidden = true)
+        public void setParentProp2(String something) {
+
+        }
+    }
+
+    static class OneSidedProperties extends OneSidedParent {
+
+        String prop1;
+        String prop2;
+        String prop3;
+
+        @Schema(hidden = true) // write only
+        public String getProp1() {
+            return prop1;
+        }
+
+        public void setProp1(String prop1) {
+            this.prop1 = prop1;
+        }
+
+        public String getProp2() {
+            return prop2;
+        }
+
+        @Schema(hidden = true) // read only
+        public void setProp2(String prop2) {
+            this.prop2 = prop2;
+        }
+
     }
 }
