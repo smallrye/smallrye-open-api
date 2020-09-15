@@ -302,7 +302,7 @@ public class TypeResolver {
     }
 
     public boolean isIgnored() {
-        return ignored;
+        return ignored || (readOnly && readMethod == null) || (writeOnly && writeMethod == null);
     }
 
     /**
