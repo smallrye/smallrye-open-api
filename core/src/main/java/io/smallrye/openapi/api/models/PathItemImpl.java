@@ -234,6 +234,46 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
+     * @see org.eclipse.microprofile.openapi.models.setOperation(PathItem.HttpMethod, Operation)
+     */
+    @Override
+    public void setOperation(PathItem.HttpMethod httpMethod, Operation operation) {
+        switch (httpMethod) {
+            case GET:
+                this.get = operation;
+                break;
+
+            case POST:
+                this.post = operation;
+                break;
+
+            case PUT:
+                this.put = operation;
+                break;
+
+            case DELETE:
+                this.delete = operation;
+                break;
+
+            case PATCH:
+                this.patch = operation;
+                break;
+
+            case OPTIONS:
+                this.options = operation;
+                break;
+
+            case HEAD:
+                this.head = operation;
+                break;
+
+            case TRACE:
+                this.trace = operation;
+                break;
+        } // SWITCH
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.PathItem#getServers()
      */
     @Override
