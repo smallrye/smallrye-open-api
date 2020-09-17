@@ -35,6 +35,9 @@ public class ExtensionWriter {
         }
         for (Map.Entry<String, Object> entry : extensions.entrySet()) {
             String key = entry.getKey();
+            if (!ExtensionConstant.isExtensionField(key)) {
+                key = ExtensionConstant.EXTENSION_PROPERTY_PREFIX + key;
+            }
             Object value = entry.getValue();
             ObjectWriter.writeObject(node, key, value);
         }

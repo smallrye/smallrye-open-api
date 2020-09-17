@@ -140,8 +140,4 @@ public class ExtensionReader {
     public static String getExtensionName(final AnnotationInstance annotation) {
         return JandexUtil.stringValue(annotation, ExtensionConstant.PROP_NAME);
     }
-
-    public static boolean isExtensionField(String fieldName) {
-        return fieldName.toLowerCase().startsWith(ExtensionConstant.EXTENSION_PROPERTY_PREFIX);
-    }
 }

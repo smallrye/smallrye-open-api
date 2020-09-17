@@ -20,6 +20,7 @@ import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
+import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.operation.OperationReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
@@ -54,7 +55,7 @@ public class PathsReader {
         Paths paths = new PathsImpl();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (ExtensionReader.isExtensionField(fieldName)) {
+            if (ExtensionConstant.isExtensionField(fieldName)) {
                 continue;
             }
             paths.addPathItem(fieldName, readPathItem(node.get(fieldName)));
