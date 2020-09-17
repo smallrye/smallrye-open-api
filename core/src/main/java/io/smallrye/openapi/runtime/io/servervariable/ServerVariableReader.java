@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -69,7 +70,7 @@ public class ServerVariableReader {
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (Iterator<String> iterator = node.fieldNames(); iterator.hasNext();) {
             String fieldName = iterator.next();
-            if (!ExtensionReader.isExtensionField(fieldName)) {
+            if (!ExtensionConstant.isExtensionField(fieldName)) {
                 JsonNode varNode = node.get(fieldName);
                 variables.put(fieldName, readServerVariable(varNode));
             }
