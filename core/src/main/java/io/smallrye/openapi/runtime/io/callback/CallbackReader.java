@@ -17,6 +17,7 @@ import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
+import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.paths.PathsReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -127,7 +128,7 @@ public class CallbackReader {
         callback.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (ExtensionReader.isExtensionField(fieldName)
+            if (ExtensionConstant.isExtensionField(fieldName)
                     || fieldName.equals(Referenceable.PROP_$REF)) {
                 continue;
             }
