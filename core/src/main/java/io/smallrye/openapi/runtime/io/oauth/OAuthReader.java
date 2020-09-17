@@ -15,6 +15,7 @@ import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
 import io.smallrye.openapi.api.models.security.ScopesImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -156,7 +157,7 @@ public class OAuthReader {
 
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
-            if (ExtensionReader.isExtensionField(fieldName)) {
+            if (ExtensionConstant.isExtensionField(fieldName)) {
                 continue;
             }
             String value = JsonUtil.stringProperty(node, fieldName);

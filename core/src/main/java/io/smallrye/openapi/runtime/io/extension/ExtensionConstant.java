@@ -21,7 +21,13 @@ public class ExtensionConstant {
     public static final String PROP_NAME = "name";
     public static final String PROP_VALUE = "value";
     public static final String EXTENSION_PROPERTY_PREFIX = "x-";
+    public static final String EXTENSION_PROPERTY_POSTFIX = "-ext";
     public static final String PROP_PARSE_VALUE = "parseValue";
+
+    public static boolean isExtensionField(String fieldName) {
+        return fieldName.toLowerCase().startsWith(ExtensionConstant.EXTENSION_PROPERTY_PREFIX)
+                || fieldName.toLowerCase().endsWith(ExtensionConstant.EXTENSION_PROPERTY_POSTFIX);
+    }
 
     private ExtensionConstant() {
     }
