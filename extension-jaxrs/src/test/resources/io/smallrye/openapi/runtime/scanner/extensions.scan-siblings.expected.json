@@ -10,7 +10,7 @@
             "schema": {
               "type": "string"
             },
-            "qparam-data-ext": 1
+            "x-qparam-data-ext": 1
           }
         ],
         "responses": {
@@ -25,7 +25,7 @@
             }
           }
         },
-        "operation-ext": "plain string"
+        "x-operation-ext": "plain string"
       }
     }
   },
@@ -36,15 +36,15 @@
         "properties": {
           "value1": {
             "type": "string",
-            "value1-ext": "plain string"
+            "x-value1-ext": "plain string"
           },
           "value2": {
             "format": "int32",
             "type": "integer",
-            "value2-ext": "plain string"
+            "x-value2-ext": "plain string"
           }
         },
-        "model-schema-ext": {
+        "x-model-schema-ext": {
           "key": "value"
         }
       }
