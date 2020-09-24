@@ -234,7 +234,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.setOperation(PathItem.HttpMethod, Operation)
+     * @see org.eclipse.microprofile.openapi.models.PathItem#setOperation(PathItem.HttpMethod, Operation)
      */
     @Override
     public void setOperation(PathItem.HttpMethod httpMethod, Operation operation) {
