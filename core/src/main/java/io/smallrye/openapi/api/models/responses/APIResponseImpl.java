@@ -23,6 +23,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
     private Map<String, Header> headers;
     private Content content;
     private Map<String, Link> links;
+    private String responseCode;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.Reference#getRef()
@@ -143,4 +144,11 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
         ModelUtil.remove(this.links, name);
     }
 
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
+    }
 }

@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
@@ -155,7 +156,7 @@ public class ResponseReader {
             return null;
         }
         IoLogging.log.singleAnnotation("@APIResponse");
-        APIResponse response = new APIResponseImpl();
+        APIResponseImpl response = new APIResponseImpl();
         response.setDescription(JandexUtil.stringValue(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
         response.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(ResponseConstant.PROP_HEADERS)));
@@ -164,6 +165,7 @@ public class ResponseReader {
                 ContentReader.readContent(context, annotationInstance.value(ResponseConstant.PROP_CONTENT),
                         ContentDirection.OUTPUT));
         response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Response));
+        response.setResponseCode(JandexUtil.value(annotationInstance, ResponseConstant.PROP_RESPONSE_CODE));
         return response;
     }
 
@@ -246,8 +248,26 @@ public class ResponseReader {
         return method.annotation(ResponseConstant.DOTNAME_API_RESPONSE_SCHEMA);
     }
 
-    public static String getResponseName(AnnotationInstance annotation) {
-        return JandexUtil.stringValue(annotation, ResponseConstant.PROP_RESPONSE_CODE);
+    public static String getResponseName(AnnotationScannerContext context, AnnotationInstance annotation) {
+        String responseCode = JandexUtil.stringValue(annotation, ResponseConstant.PROP_RESPONSE_CODE);
+
+        if (responseCode != null) {
+            return responseCode;
+        }
+
+        if (JandexUtil.isRef(annotation) && context.getOpenApi().getComponents() != null) {
+            String ref = JandexUtil.nameFromRef(annotation);
+            Components components = context.getOpenApi().getComponents();
+
+            if (components.getResponses() != null && components.getResponses().containsKey(ref)) {
+                APIResponse response = components.getResponses().get(ref);
+                if (response instanceof APIResponseImpl) {
+                    responseCode = ((APIResponseImpl) response).getResponseCode();
+                }
+            }
+        }
+
+        return responseCode;
     }
 
 }
