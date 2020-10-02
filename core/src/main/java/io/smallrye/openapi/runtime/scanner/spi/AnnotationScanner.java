@@ -331,7 +331,8 @@ public interface AnnotationScanner {
             if (exceptionAnnotationMap != null && !exceptionAnnotationMap.isEmpty()
                     && exceptionAnnotationMap.keySet().contains(exceptionDotName)) {
                 AnnotationInstance exMapperApiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
-                if (!this.responseCodeExistInMethodAnnotations(exMapperApiResponseAnnotation, apiResponseAnnotations)) {
+                if (!this.responseCodeExistInMethodAnnotations(context, exMapperApiResponseAnnotation,
+                        apiResponseAnnotations)) {
                     addApiReponseFromAnnotation(context, exMapperApiResponseAnnotation, operation);
                 }
             }
@@ -416,8 +417,6 @@ public interface AnnotationScanner {
 
             if (responses.hasAPIResponse(code)) {
                 APIResponse responseFromAnnotations = responses.getAPIResponse(code);
-                responses.removeAPIResponse(code);
-
                 // Overlay the information from the annotations (2nd arg) onto the generated details (1st)
                 response = MergeUtil.mergeObjects(response, responseFromAnnotations);
             }
@@ -493,7 +492,7 @@ public interface AnnotationScanner {
      */
     default void addApiReponseFromAnnotation(final AnnotationScannerContext context, AnnotationInstance apiResponseAnnotation,
             Operation operation) {
-        String responseCode = ResponseReader.getResponseName(apiResponseAnnotation);
+        String responseCode = ResponseReader.getResponseName(context, apiResponseAnnotation);
         if (responseCode == null) {
             responseCode = APIResponses.DEFAULT;
         }
@@ -519,7 +518,7 @@ public interface AnnotationScanner {
             return;
         }
 
-        String responseCode = ResponseReader.getResponseName(annotation);
+        String responseCode = ResponseReader.getResponseName(context, annotation);
         final int status;
 
         if (responseCode != null && responseCode.matches("\\d{3}")) {
@@ -548,13 +547,14 @@ public interface AnnotationScanner {
      * @param methodApiResponseAnnotations List of ApiResponse annotations declared in the jax-rs/spring method.
      * @return response code exist or not
      */
-    default boolean responseCodeExistInMethodAnnotations(AnnotationInstance exMapperApiResponseAnnotation,
+    default boolean responseCodeExistInMethodAnnotations(AnnotationScannerContext context,
+            AnnotationInstance exMapperApiResponseAnnotation,
             List<AnnotationInstance> methodApiResponseAnnotations) {
 
-        String exMapperResponseCode = ResponseReader.getResponseName(exMapperApiResponseAnnotation);
+        String exMapperResponseCode = ResponseReader.getResponseName(context, exMapperApiResponseAnnotation);
 
         return methodApiResponseAnnotations.stream()
-                .map(ResponseReader::getResponseName)
+                .map(a -> ResponseReader.getResponseName(context, a))
                 .filter(Objects::nonNull)
                 .anyMatch(code -> code.equals(exMapperResponseCode));
     }

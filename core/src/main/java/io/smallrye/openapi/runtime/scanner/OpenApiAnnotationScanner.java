@@ -89,7 +89,8 @@ public class OpenApiAnnotationScanner {
             filteredIndexView = new FilteredIndexView(index, config);
         }
 
-        this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, config);
+        this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, config,
+                new OpenAPIImpl());
         this.annotationScannerFactory = new AnnotationScannerFactory(loader);
     }
 
@@ -119,7 +120,7 @@ public class OpenApiAnnotationScanner {
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
-        OpenAPI openApi = new OpenAPIImpl();
+        OpenAPI openApi = this.annotationScannerContext.getOpenApi();
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Creating a new instance of a registry which will be set on the thread context.
