@@ -11,8 +11,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Components;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -85,6 +89,12 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public void testVoidAsyncResponseGeneration() throws IOException, JSONException {
         test("responses.void-async-response-generation.json",
                 VoidAsyncResponseGenerationTestResource.class);
+    }
+
+    @Test
+    public void testReferenceResponse() throws IOException, JSONException {
+        test("responses.component-status-reuse.json",
+                ReferenceResponseTestApp.class, ReferenceResponseTestResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -190,6 +200,28 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @APIResponse(responseCode = "200")
         @APIResponse(responseCode = "400", description = "Description 400")
         public void getPet(@PathParam("id") String id, @Suspended AsyncResponse response) {
+        }
+    }
+
+    @OpenAPIDefinition(info = @Info(title = "Test title", version = "0.1"), components = @Components(responses = {
+            @APIResponse(responseCode = "404", description = "Not Found!", name = "NotFound"),
+            @APIResponse(responseCode = "500", description = "Server Error!", name = "ServerError") }))
+    static class ReferenceResponseTestApp extends Application {
+
+    }
+
+    @Path("pets")
+    static class ReferenceResponseTestResource {
+        @SuppressWarnings("unused")
+        @Path("{id}")
+        @GET
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponse(responseCode = "200")
+        @APIResponse(ref = "NotFound")
+        @APIResponse(ref = "ServerError")
+        public Object getPet(@PathParam("id") String id) {
+            return null;
         }
     }
 }
