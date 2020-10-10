@@ -1,4 +1,6 @@
 import React from "react";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import SwaggerClient from "swagger-client";
 
 import { withTheme } from '@rjsf/core';
@@ -17,6 +19,74 @@ async function schemaOptions(openapiURL){
     }
   }
   return res;    
+}
+
+class OverrideRequestModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      show: false,
+      value: JSON.stringify(props.getCurrentRequestValue(), null, 2)
+    }
+    this.getCurrentRequestValue = props.getCurrentRequestValue;
+    this.onSave = props.onSave;
+    this.handleShow = this.handleShow.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSave = this.handleSave.bind(this);
+  }
+
+  handleShow() {
+    this.setState({value : JSON.stringify(this.getCurrentRequestValue(), null, 2)});
+    this.setState({show: true});
+  }
+
+  handleClose() {
+    this.setState({show: false});
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+
+  handleSave() {
+    try {
+      console.log(this.state.value);
+      var obj = JSON.parse(this.state.value);
+      console.log(obj);
+      this.onSave(obj);
+    } catch (error) {
+      console.error("the data manually put in the form is not a valid JSON object.");
+    }
+    this.setState({show: false});
+  }
+
+  render() {
+    return (
+      <div>
+        <Button variant="light" onClick={this.handleShow}>
+          Override request payload manually
+        </Button>
+
+        <Modal show={this.state.show} onHide={this.handleClose} animation={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Define request payload manually</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <textarea className="form-control" id="modalTextArea" rows="10" value={this.state.value} onChange={this.handleChange}/>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.handleSave}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    );
+  }
 }
 
 class MyOpenAPIForm extends React.Component {
@@ -38,6 +108,8 @@ class MyOpenAPIForm extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleForm = this.handleForm.bind(this);
     this.handleFormChange = this.handleFormChange.bind(this);
+    this.overrideRequest = this.overrideRequest.bind(this);
+    this.getCurrentRequestValue = this.getCurrentRequestValue.bind(this);
     this.refreshSchemasFromOpenapiURL(this.state.openapiURL);
   }
 
@@ -59,6 +131,15 @@ class MyOpenAPIForm extends React.Component {
   handleFormChange(a) {
     const formData = a.formData;
     this.setState({requestPayload: formData});
+  }
+
+  overrideRequest(x) {
+    console.log(x);
+    this.setState({requestPayload: x});
+  }
+
+  getCurrentRequestValue() {
+    return this.state.requestPayload;
   }
 
   handleForm(a) {
@@ -120,6 +201,7 @@ class MyOpenAPIForm extends React.Component {
   <div className="form-group">
     <label htmlFor="exampleFormControlTextarea1">Form request payload:</label>
     <textarea className="form-control" id="exampleFormControlTextarea1" rows="10" value={JSON.stringify(this.state.requestPayload, null, 2)} readOnly></textarea>
+    <OverrideRequestModal getCurrentRequestValue={this.getCurrentRequestValue} onSave={this.overrideRequest}/>
   </div>
   <div className="form-group">
     <label htmlFor="exampleFormControlTextarea2">Response:</label>
