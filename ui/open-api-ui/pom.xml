@@ -19,6 +19,16 @@
         <sonar.skip>true</sonar.skip>
     </properties>
     
+    <dependencies>
+        <!-- Only here to get dependabot notifications-->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>swagger-ui</artifactId>
+            <version>3.35.1</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    
     <build>            
         <!-- Copy all web content files META-INF folder, and push it though a filter to replace maven properties -->
         <resources>
