@@ -1,17 +1,21 @@
 html{
-  box-sizing: border-box;
-  overflow: -moz-scrollbars-vertical;
-  overflow-y: scroll;
+    box-sizing: border-box;
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
 }
 
 *,
 *:before,
 *:after
 {
-  box-sizing: inherit;
+    box-sizing: inherit;
 }
 
 body{
-  margin:0;
-  background: #fafafa;
+    margin:0;
+    background: #fafafa;
+}
+
+.swagger-ui .topbar {
+   background-color: #343a40;
 }
