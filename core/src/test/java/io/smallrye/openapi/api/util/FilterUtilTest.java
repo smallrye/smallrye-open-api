@@ -6,7 +6,9 @@ import java.net.URL;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -78,6 +80,17 @@ public class FilterUtilTest {
             }
 
             /**
+             * @see org.eclipse.microprofile.openapi.OASFilter.filterTag(org.eclipse.microprofile.openapi.models.tags.Tag)
+             */
+            @Override
+            public Tag filterTag(Tag tag) {
+                if (tag.getName().equals("tag-1")) {
+                    return null;
+                }
+                return tag;
+            }
+
+            /**
              * @see org.eclipse.microprofile.openapi.OASFilter#filterPathItem(org.eclipse.microprofile.openapi.models.PathItem)
              */
             @Override
@@ -87,6 +100,17 @@ public class FilterUtilTest {
                 } else {
                     return pathItem;
                 }
+            }
+
+            /**
+             * @see org.eclipse.microprofile.openapi.OASFilter#filterOperation(org.eclipse.microprofile.openapi.models.Operation)
+             */
+            @Override
+            public Operation filterOperation(Operation operation) {
+                if (operation.getTags() != null && operation.getTags().contains("tag-1")) {
+                    operation.removeTag("tag-1");
+                }
+                return operation;
             }
         };
     }
