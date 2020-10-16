@@ -79,7 +79,6 @@ public class FilterUtilTest {
                 openAPI.getInfo().setTitle("Updated API Title");
             }
 
-
             /**
              * @see org.eclipse.microprofile.openapi.OASFilter.filterTag(org.eclipse.microprofile.openapi.models.tags.Tag)
              */
