@@ -66,3 +66,4 @@ tags
 .cache
 **/node_modules/
 **/dist/
+/ui/open-api-ui/nbproject/

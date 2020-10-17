@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>${title}</title>
+        <link rel="stylesheet" type="text/css" href="swagger-ui.css" >
+        <link rel="stylesheet" type="text/css" href="${themeHref}" >
+
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel="icon" href="favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="${styleHref}" >
+    </head>
+
+    <body>
+        <div id="swagger-ui"></div>
+
+        <script src="swagger-ui-bundle.js" charset="UTF-8"> </script>
+        <script src="swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+        <script>
+    
+        window.onload = function() {
+          // Begin Swagger UI call region
+          const ui = SwaggerUIBundle({
+            ${urlSection},
+            dom_id: '${domId}',
+            deepLinking: ${deepLinking},
+            displayOperationId: ${displayOperationId},
+            defaultModelsExpandDepth: ${defaultModelsExpandDepth},
+            defaultModelExpandDepth: ${defaultModelExpandDepth},
+            defaultModelRendering: '${defaultModelRendering}',
+            displayRequestDuration: ${displayRequestDuration}, 
+            docExpansion: '${docExpansion}', 
+            filter: ${filter},
+            maxDisplayedTags: ${maxDisplayedTags},
+            operationsSorter: '${operationsSorter}',
+            showExtensions: ${showExtensions},
+            showCommonExtensions: ${showCommonExtensions},
+            tagsSorter: '${tagsSorter}',
+            onComplete: '${onComplete}',
+            syntaxHighlight: ${syntaxHighlight},
+            oauth2RedirectUrl: '${oauth2RedirectUrl}',
+            requestInterceptor: '${requestInterceptor}',
+            request.curlOptions: '${requestCurlOptions}',
+            responseInterceptor: '${responseInterceptor}',
+            showMutatedRequest: '${showMutatedRequest}',
+            supportedSubmitMethods: '${supportedSubmitMethods}',
+            validatorUrl: '${validatorUrl}',
+            withCredentials: ${withCredentials},
+            modelPropertyMacro: '${modelPropertyMacro}',
+            parameterMacro: '${parameterMacro}',
+            persistAuthorization: ${persistAuthorization},
+            presets: ${presets},
+            plugins: ${plugins},
+            layout: '${layout}'
+          })
+          // End Swagger UI call region
+
+          window.ui = ui
+      
+          document.getElementsByClassName("link")[0].innerHTML = "<img src='${logoHref}' alt='${title}' height='44' align='middle'>";
+        }
+        </script>
+    </body>
+</html>
