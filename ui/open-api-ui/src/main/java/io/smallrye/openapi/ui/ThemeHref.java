@@ -6,7 +6,7 @@ package io.smallrye.openapi.ui;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public enum ThemeHref {
-
+    original,
     feeling_blue,
     flattop,
     material,
@@ -33,7 +33,7 @@ public enum ThemeHref {
             case outline:
                 return String.format(FORMAT, "outline");
             default:
-                throw new IllegalArgumentException();
+                return null;
         }
     }
 
