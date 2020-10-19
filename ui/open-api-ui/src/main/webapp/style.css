@@ -19,3 +19,10 @@ body{
 .swagger-ui .topbar {
    background-color: #343a40;
 }
+
+#footer {
+    font-family:sans-serif;
+    color:#3b4151;
+    font-size:70%;
+    text-align: center;
+}
