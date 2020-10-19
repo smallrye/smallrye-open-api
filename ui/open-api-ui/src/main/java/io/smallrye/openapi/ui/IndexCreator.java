@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class IndexCreator {
 
         try (InputStream input = IndexCreator.class.getClassLoader()
                 .getResourceAsStream("META-INF/resources/template/index.html");
-                InputStreamReader streamreader = new InputStreamReader(input);
+                InputStreamReader streamreader = new InputStreamReader(input, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(streamreader);
                 StringWriter writer = new StringWriter()) {
 
@@ -51,7 +52,7 @@ public class IndexCreator {
                 }
             }
             String result = writer.toString();
-            return result.getBytes();
+            return result.getBytes(StandardCharsets.UTF_8);
         }
     }
 
@@ -67,10 +68,20 @@ public class IndexCreator {
                         return null;
                     } else {
                         // Some properties can be boolean or String, if String we need to add '
+                        replacement = replacement.trim();
                         if (BOOLEAN_OR_STRING_KEYS.contains(variableOption)) {
                             if (!replacement.equals("true") && !replacement.equals("false")) {
                                 replacement = "'" + replacement + "'";
                             }
+                        }
+                        // Some properties are string arrays, and we need to add the ' per element
+                        if (STRING_ARRAY_KEYS.contains(variableOption)) {
+                            List<String> newArray = new ArrayList<>();
+                            String[] parts = replacement.replace("[", "").replace("]", "").split(",");
+                            for (String part : parts) {
+                                newArray.add("'" + part.trim() + "'");
+                            }
+                            replacement = Arrays.toString(newArray.toArray(new String[] {}));
                         }
 
                         line = line.replace(VAR_BEGIN + variableOption + VAR_END, replacement);
@@ -127,11 +138,11 @@ public class IndexCreator {
                 for (Map.Entry<String, String> kv : urlsSet) {
                     urlsLines.add(String.format(URLS_ENTRY_FORMAT, kv.getValue(), kv.getKey()));
                 }
-                String urlSection = "urls: '[" + String.join(",", urlsLines.toArray(new String[] {})) + "]'";
+                String urlSection = "urls: [" + String.join(",", urlsLines.toArray(new String[] {})) + "]";
 
                 // Check the name
-                if (urlsPrimaryName != null && urls.containsKey(urlsPrimaryName)) {
-                    urlSection = urlSection + ",\n\t\t urls.primaryName: '" + urlsPrimaryName + "'";
+                if (urlsPrimaryName != null) {
+                    urlSection = urlSection + ",\n\t\t \"urls.primaryName\": '" + urlsPrimaryName + "'";
                 }
                 options.put(Option.urlSection, urlSection);
             }
@@ -141,6 +152,10 @@ public class IndexCreator {
     // Some properties can be a boolean or a String. To render correct we need to handle those specially
     private static final List<Option> BOOLEAN_OR_STRING_KEYS = Arrays
             .asList(new Option[] { Option.filter, Option.syntaxHighlight });
+
+    // Some properties can be a String arrays. To render correct we need to handle those specially
+    private static final List<Option> STRING_ARRAY_KEYS = Arrays
+            .asList(new Option[] { Option.supportedSubmitMethods });
 
     private static final String VAR_BEGIN = "${";
     private static final String VAR_END = "}";
@@ -154,9 +169,11 @@ public class IndexCreator {
 
         DEFAULT_OPTIONS.put(Option.url, "/openapi");
         DEFAULT_OPTIONS.put(Option.title, "SmallRye OpenAPI UI");
+        DEFAULT_OPTIONS.put(Option.selfHref, "/openapi-ui");
         DEFAULT_OPTIONS.put(Option.themeHref, ThemeHref.feeling_blue.toString());
         DEFAULT_OPTIONS.put(Option.logoHref, "logo.png");
         DEFAULT_OPTIONS.put(Option.styleHref, "style.css");
+        DEFAULT_OPTIONS.put(Option.footer, null);
         DEFAULT_OPTIONS.put(Option.domId, "#swagger-ui");
 
         // Display section

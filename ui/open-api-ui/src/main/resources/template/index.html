@@ -13,7 +13,7 @@
 
     <body>
         <div id="swagger-ui"></div>
-
+        <footer id="footer">${footer}</footer>
         <script src="swagger-ui-bundle.js" charset="UTF-8"> </script>
         <script src="swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
         <script>
@@ -36,14 +36,14 @@
             showExtensions: ${showExtensions},
             showCommonExtensions: ${showCommonExtensions},
             tagsSorter: '${tagsSorter}',
-            onComplete: '${onComplete}',
+            onComplete: ${onComplete},
             syntaxHighlight: ${syntaxHighlight},
             oauth2RedirectUrl: '${oauth2RedirectUrl}',
             requestInterceptor: '${requestInterceptor}',
             request.curlOptions: '${requestCurlOptions}',
             responseInterceptor: '${responseInterceptor}',
             showMutatedRequest: '${showMutatedRequest}',
-            supportedSubmitMethods: '${supportedSubmitMethods}',
+            supportedSubmitMethods: ${supportedSubmitMethods},
             validatorUrl: '${validatorUrl}',
             withCredentials: ${withCredentials},
             modelPropertyMacro: '${modelPropertyMacro}',
@@ -57,7 +57,7 @@
 
           window.ui = ui
 
-          document.getElementsByClassName("link")[0].innerHTML = "<img src='${logoHref}' alt='${title}' height='44' align='middle'>";
+          document.getElementsByClassName("link")[0].innerHTML = "<a href='${selfHref}'><img src='${logoHref}' alt='${title}' height='44' align='middle'></a>";
         }
         </script>
     </body>

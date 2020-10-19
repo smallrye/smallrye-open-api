@@ -96,8 +96,8 @@ public class IndexCreatorTest {
         assertTrue(s.contains("<img src='logo.png' alt='SmallRye OpenAPI UI'"));
         assertTrue(s.contains("dom_id: '#swagger-ui',"));
         assertTrue(s.contains("deepLinking: true,"));
-        assertTrue(s.contains("urls: '[{url: \"/api\", name: \"Production\"},{url: \"/swagger\", name: \"Default\"}]',"));
-        assertTrue(s.contains("urls.primaryName: 'Production',"));
+        assertTrue(s.contains("urls: [{url: \"/api\", name: \"Production\"},{url: \"/swagger\", name: \"Default\"}],"));
+        assertTrue(s.contains("\"urls.primaryName\": 'Production',"));
     }
 
     @Test
