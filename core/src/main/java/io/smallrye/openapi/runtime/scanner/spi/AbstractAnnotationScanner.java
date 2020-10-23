@@ -24,7 +24,7 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
      * @param segments String paths
      * @return Path built from the segments
      */
-    static String createPathFromSegments(String... segments) {
+    protected static String createPathFromSegments(String... segments) {
         StringBuilder builder = new StringBuilder();
         for (String segment : segments) {
             if (segment.startsWith("/")) {
