@@ -154,7 +154,7 @@ public class IndexCreator {
 
     // Some properties can be a String arrays. To render correct we need to handle those specially
     private static final List<Option> STRING_ARRAY_KEYS = Arrays
-            .asList(new Option[] { Option.supportedSubmitMethods });
+            .asList(new Option[] { Option.supportedSubmitMethods, Option.requestCurlOptions });
 
     private static final String VAR_BEGIN = "${";
     private static final String VAR_END = "}";
