@@ -58,6 +58,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource;
 
 /**
@@ -377,6 +378,18 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.generic-collection.set-indexed.json", result);
+    }
+
+    @Test
+    public void testGenericSetResponseWithSetIndexedWithoutArrayRefs() throws IOException, JSONException {
+        Index i = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
+                dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
+                        Boolean.FALSE),
+                i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.generic-collection.set-indexed-wo-array-refs.json", result);
     }
 
     @Test

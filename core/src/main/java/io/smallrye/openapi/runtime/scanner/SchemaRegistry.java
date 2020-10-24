@@ -12,6 +12,7 @@ import java.util.function.BiFunction;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.DotName;
@@ -28,8 +29,10 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * A simple registry used to track schemas that have been generated and inserted
@@ -48,23 +51,19 @@ public class SchemaRegistry {
      * to {@link #currentInstance()}. Additional calls of this method will
      * replace the registry in the current thread context with a new instance.
      *
-     * @param config
-     *        current runtime configuration
-     * @param oai
-     *        the OpenAPI being constructed by the scan
-     * @param index
-     *        indexed class information
+     * @param context
+     *        current scanner context
      * @return the registry
      */
-    public static SchemaRegistry newInstance(OpenApiConfig config, OpenAPI oai, IndexView index) {
-        SchemaRegistry registry = new SchemaRegistry(config, oai, index);
+    public static SchemaRegistry newInstance(AnnotationScannerContext context) {
+        SchemaRegistry registry = new SchemaRegistry(context);
         current.set(registry);
         return registry;
     }
 
     /**
      * Retrieve the {@link SchemaRegistry} previously created by
-     * {@link SchemaRegistry#newInstance(OpenApiConfig, OpenAPI, IndexView)
+     * {@link SchemaRegistry#newInstance(AnnotationScannerContext)
      * newInstance} for the current thread, or <code>null</code> if none has yet
      * been created.
      *
@@ -176,7 +175,8 @@ public class SchemaRegistry {
 
         if (registry.hasRef(key)) {
             schema = registry.lookupRef(key);
-        } else if (registry.index.getClassByName(resolvedType.name()) == null) {
+        } else if (!registry.isTypeRegistrationSupported(resolvedType, schema)
+                || registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
             schema = registrationAction.apply(registry, key);
@@ -189,8 +189,8 @@ public class SchemaRegistry {
      * Convenience method to check if the current thread's <code>SchemaRegistry</code>
      * contains a schema for the given type (which may require type resolution using resolver).
      * 
-     * @param type
-     * @param resolver
+     * @param type type to check for existence of schema
+     * @param resolver resolver for type parameter
      * @return true when schema references are enabled and the type is present in the registry, otherwise false
      */
     public static boolean hasSchema(Type type, TypeResolver resolver) {
@@ -232,15 +232,19 @@ public class SchemaRegistry {
         }
     }
 
+    private final AnnotationScannerContext context;
+    private final OpenApiConfig config;
     private final OpenAPI oai;
     private final IndexView index;
 
     private final Map<TypeKey, GeneratedSchemaInfo> registry = new LinkedHashMap<>();
     private final Set<String> names = new LinkedHashSet<>();
 
-    private SchemaRegistry(OpenApiConfig config, OpenAPI oai, IndexView index) {
-        this.oai = oai;
-        this.index = index;
+    private SchemaRegistry(AnnotationScannerContext context) {
+        this.context = context;
+        this.config = context.getConfig();
+        this.oai = context.getOpenApi();
+        this.index = context.getAugmentedIndex();
 
         /*
          * If anything has been added in the component scan, add the names here
@@ -373,6 +377,16 @@ public class SchemaRegistry {
 
     public boolean hasSchema(Type instanceType) {
         return hasSchema(new TypeKey(instanceType));
+    }
+
+    public boolean isTypeRegistrationSupported(Type type, Schema schema) {
+        if (config == null || !TypeUtil.allowRegistration(context, type)) {
+            return false;
+        }
+        if (!config.arrayReferencesEnable()) {
+            return !SchemaType.ARRAY.equals(schema.getType());
+        }
+        return true;
     }
 
     private Schema lookupRef(TypeKey key) {

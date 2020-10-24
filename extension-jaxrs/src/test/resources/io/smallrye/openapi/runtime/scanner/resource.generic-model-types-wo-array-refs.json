@@ -1,0 +1,598 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API - Service",
+    "version": "V1"
+  },
+  "security": [
+    {
+      "API-Key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Test",
+      "description": "Cristian"
+    }
+  ],
+  "paths": {
+    "/v1/kingcrimson": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "orderby",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListKingCrimson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KingCrimson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultKingCrimson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KingCrimson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultKingCrimson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KingCrimson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/kingcrimson/noooooooo": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListPOJO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/magma": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "orderby",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListMagma"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Magma"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMagma"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Magma"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultMagma"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Magma"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/residents": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "orderby",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultListResidents"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Residents"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Creates a new Chart",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultResidents"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Residents"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Creates a new Chart",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultResidents"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Residents"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Magma": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+            "type": "string"
+          },
+          "lastUpdate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "codename": {
+            "type": "string"
+          },
+          "deployment": {
+            "$ref": "#/components/schemas/KingCrimson"
+          },
+          "tier": {
+            "type": "string"
+          }
+        }
+      },
+      "KingCrimson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+            "type": "string"
+          },
+          "lastUpdate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Magma"
+          },
+          "status": {
+            "type": "object"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultListKingCrimson": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KingCrimson"
+            }
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "POJO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+            "type": "string"
+          },
+          "lastUpdate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultListPOJO": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/POJO"
+            }
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "ResultKingCrimson": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "$ref": "#/components/schemas/KingCrimson"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "ResultListMagma": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Magma"
+            }
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "ResultMagma": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "$ref": "#/components/schemas/Magma"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "Residents": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+            "type": "string"
+          },
+          "lastUpdate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "bar": {
+            "type": "string"
+          },
+          "foo": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultListResidents": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Residents"
+            }
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "ResultResidents": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "result": {
+            "$ref": "#/components/schemas/Residents"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "API-Key": {
+        "type": "apiKey",
+        "name": "API-Key",
+        "in": "header"
+      }
+    }
+  }
+}

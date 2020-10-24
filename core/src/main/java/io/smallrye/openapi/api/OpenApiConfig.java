@@ -69,6 +69,10 @@ public interface OpenApiConfig {
         return new HashSet<>();
     }
 
+    default boolean arrayReferencesEnable() {
+        return true;
+    }
+
     default String customSchemaRegistryClass() {
         return null;
     }

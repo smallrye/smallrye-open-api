@@ -12,8 +12,11 @@ import java.util.Map.Entry;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbPropertyOrder;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -250,6 +253,108 @@ public class TypeResolverTests extends IndexScannerTestBase {
         TypeResolver prop3 = iter.next().getValue();
         assertEquals("prop3", prop3.getPropertyName());
         assertFalse(prop3.isIgnored());
+    }
+
+    @Test
+    public void testXmlAccessTransientField() {
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientField.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientField.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(2, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+        TypeResolver property = iter.next().getValue();
+        assertEquals("prop1Field", property.getPropertyName());
+        assertTrue(property.isIgnored());
+        property = iter.next().getValue();
+        assertEquals("prop2Field", property.getPropertyName());
+        assertFalse(property.isIgnored());
+    }
+
+    @Test
+    public void testXmlAccessTransientClass() {
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientClass.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientClass.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(3, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+
+        TypeResolver property = iter.next().getValue();
+        assertEquals("prop1Field", property.getPropertyName());
+        assertTrue(property.isIgnored());
+
+        property = iter.next().getValue();
+        assertEquals("prop2Field", property.getPropertyName());
+        assertTrue(property.isIgnored());
+
+        property = iter.next().getValue();
+        assertEquals("prop3Property", property.getPropertyName());
+        assertTrue(property.isIgnored());
+    }
+
+    @Test
+    public void testXmlAccessPublicMember() {
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePublicMember.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePublicMember.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(3, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+
+        TypeResolver property = iter.next().getValue();
+        assertEquals("prop1Field", property.getPropertyName());
+        assertFalse(property.isIgnored());
+
+        property = iter.next().getValue();
+        assertEquals("prop2Field", property.getPropertyName());
+        assertTrue(property.isIgnored());
+
+        property = iter.next().getValue();
+        assertEquals("prop3Property", property.getPropertyName());
+        assertFalse(property.isIgnored());
+    }
+
+    @Test
+    public void testXmlAccessTypeFieldOnly() {
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypeFieldOnly.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypeFieldOnly.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(2, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+
+        TypeResolver property = iter.next().getValue();
+        assertEquals("prop1Field", property.getPropertyName());
+        assertFalse(property.isIgnored());
+
+        property = iter.next().getValue();
+        assertEquals("prop2Property", property.getPropertyName());
+        assertTrue(property.isIgnored());
+    }
+
+    @Test
+    public void testXmlAccessTypePropertyOnly() {
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePropertyOnly.class));
+        ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePropertyOnly.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
+                null);
+        assertEquals(2, properties.size());
+        Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
+        TypeResolver property;
+
+        property = iter.next().getValue();
+        assertEquals("prop2Field", property.getPropertyName());
+        assertTrue(property.isIgnored());
+
+        property = iter.next().getValue();
+        assertEquals("prop1Property", property.getPropertyName());
+        assertFalse(property.isIgnored());
     }
 
     /* Test models and resources below. */
@@ -540,6 +645,52 @@ public class TypeResolverTests extends IndexScannerTestBase {
         public void setProp2(String prop2) {
             this.prop2 = prop2;
         }
+    }
 
+    ///////////////////////////
+
+    static class XmlTransientField {
+        @XmlTransient
+        String prop1Field;
+        String prop2Field;
+    }
+
+    @XmlTransient
+    static class XmlTransientClass {
+        String prop1Field;
+        String prop2Field;
+
+        public String getProp3Property() {
+            return null;
+        }
+    }
+
+    @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
+    static class XmlAccessTypePublicMember {
+        public String prop1Field;
+        @SuppressWarnings("unused")
+        private String prop2Field;
+
+        public String getProp3Property() {
+            return null;
+        }
+    }
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    static class XmlAccessTypeFieldOnly {
+        String prop1Field;
+
+        public String getProp2Property() {
+            return null;
+        }
+    }
+
+    @XmlAccessorType(XmlAccessType.PROPERTY)
+    static class XmlAccessTypePropertyOnly {
+        String prop2Field;
+
+        public String getProp1Property() {
+            return null;
+        }
     }
 }

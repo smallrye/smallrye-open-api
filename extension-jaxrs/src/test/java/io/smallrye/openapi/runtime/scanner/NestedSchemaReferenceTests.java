@@ -13,7 +13,6 @@ import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.Test;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent;
 import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource;
 
@@ -26,8 +25,8 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
     public void testNestedSchemasAddedToRegistry() throws IOException, JSONException {
         DotName parentName = componentize(NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(dynamicConfig(new HashMap<String, Object>()), oai, index);
+        OpenAPI oai = context.getOpenApi();
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 

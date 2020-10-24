@@ -124,8 +124,7 @@ public class OpenApiAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Creating a new instance of a registry which will be set on the thread context.
-        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext.getConfig(), openApi,
-                annotationScannerContext.getIndex());
+        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext);
 
         // Register custom schemas if available
         getCustomSchemaRegistry(annotationScannerContext.getConfig()).registerCustomSchemas(schemaRegistry);
