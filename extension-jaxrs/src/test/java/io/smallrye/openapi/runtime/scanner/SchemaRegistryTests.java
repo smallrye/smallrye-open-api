@@ -31,7 +31,8 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
     @Test
     public void testParameterizedNameCollisionsUseSequence() throws IOException, JSONException {
         Index index = indexOf(Container.class, Nestable.class);
-        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
@@ -57,7 +58,8 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
         Index index = indexer.complete();
 
-        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
@@ -75,7 +77,8 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
         Index index = indexer.complete();
 
-        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
@@ -94,7 +97,8 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$NamedNestable.class");
         Index index = indexer.complete();
 
-        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
@@ -113,7 +117,8 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$NamedNestable.class");
         Index index = indexer.complete();
 
-        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());

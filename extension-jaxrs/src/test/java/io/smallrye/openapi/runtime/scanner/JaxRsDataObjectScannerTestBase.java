@@ -5,6 +5,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
@@ -15,7 +16,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
  */
 public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
 
-    protected static AnnotationScannerContext context;
+    protected AnnotationScannerContext context;
     protected static Index index;
 
     @BeforeClass
@@ -41,6 +42,10 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
         //indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
 
         index = indexer.complete();
+    }
+
+    @Before
+    public void createContext() {
         context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
     }
 

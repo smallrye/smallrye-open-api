@@ -51,12 +51,8 @@ public class SchemaRegistry {
      * to {@link #currentInstance()}. Additional calls of this method will
      * replace the registry in the current thread context with a new instance.
      *
-     * @param config
-     *        current runtime configuration
-     * @param oai
-     *        the OpenAPI being constructed by the scan
-     * @param index
-     *        indexed class information
+     * @param context
+     *        current scanner context
      * @return the registry
      */
     public static SchemaRegistry newInstance(AnnotationScannerContext context) {
@@ -67,7 +63,7 @@ public class SchemaRegistry {
 
     /**
      * Retrieve the {@link SchemaRegistry} previously created by
-     * {@link SchemaRegistry#newInstance(OpenApiConfig, OpenAPI, IndexView)
+     * {@link SchemaRegistry#newInstance(AnnotationScannerContext)
      * newInstance} for the current thread, or <code>null</code> if none has yet
      * been created.
      *
@@ -171,7 +167,7 @@ public class SchemaRegistry {
 
         SchemaRegistry registry = currentInstance();
 
-        if (registry == null || !registry.isTypeRegistrationSupported(resolvedType, schema)) {
+        if (registry == null) {
             return schema;
         }
 
@@ -179,7 +175,8 @@ public class SchemaRegistry {
 
         if (registry.hasRef(key)) {
             schema = registry.lookupRef(key);
-        } else if (registry.index.getClassByName(resolvedType.name()) == null) {
+        } else if (!registry.isTypeRegistrationSupported(resolvedType, schema)
+                || registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
             schema = registrationAction.apply(registry, key);
@@ -192,8 +189,8 @@ public class SchemaRegistry {
      * Convenience method to check if the current thread's <code>SchemaRegistry</code>
      * contains a schema for the given type (which may require type resolution using resolver).
      * 
-     * @param type
-     * @param resolver
+     * @param type type to check for existence of schema
+     * @param resolver resolver for type parameter
      * @return true when schema references are enabled and the type is present in the registry, otherwise false
      */
     public static boolean hasSchema(Type type, TypeResolver resolver) {
