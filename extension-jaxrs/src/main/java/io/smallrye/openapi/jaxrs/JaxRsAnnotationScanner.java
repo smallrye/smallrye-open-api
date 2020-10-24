@@ -334,7 +334,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 subResourcePath = params.getOperationPath();
             }
 
-            this.currentAppPath = super.makePath(subResourcePath);
+            this.currentAppPath = createPathFromSegments(this.currentAppPath, subResourcePath);
             this.subResourceStack.push(locator);
 
             /*
