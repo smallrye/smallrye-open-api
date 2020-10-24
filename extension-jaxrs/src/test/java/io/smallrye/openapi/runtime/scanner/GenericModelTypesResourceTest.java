@@ -84,8 +84,10 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
                 ResultList.class,
                 POJO.class,
                 List.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
-                                                                                      Boolean.FALSE), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
+                dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
+                        Boolean.FALSE),
+                i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.generic-model-types-wo-array-refs.json", result);
