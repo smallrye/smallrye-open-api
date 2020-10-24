@@ -383,8 +383,10 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testGenericSetResponseWithSetIndexedWithoutArrayRefs() throws IOException, JSONException {
         Index i = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
-                                                                                      Boolean.FALSE), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
+                dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
+                        Boolean.FALSE),
+                i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.generic-collection.set-indexed-wo-array-refs.json", result);
