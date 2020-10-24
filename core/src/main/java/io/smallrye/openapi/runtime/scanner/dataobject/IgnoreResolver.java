@@ -18,6 +18,7 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
+import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -39,7 +40,8 @@ public class IgnoreResolver {
                 new JsonIgnorePropertiesHandler(),
                 new JsonIgnoreHandler(),
                 new JsonIgnoreTypeHandler(),
-                new TransientIgnoreHandler()
+                new TransientIgnoreHandler(),
+                new JaxbAccessibilityHandler()
         };
     }
 
@@ -304,6 +306,70 @@ public class IgnoreResolver {
         @Override
         public DotName getName() {
             return DotName.createSimple(TransientIgnoreHandler.class.getName());
+        }
+    }
+
+    private final class JaxbAccessibilityHandler implements IgnoreAnnotationHandler {
+        @Override
+        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+            if (hasXmlTransient(target)) {
+                return Visibility.IGNORED;
+            }
+
+            final String accessTypeRequired;
+            final ClassInfo declaringClass;
+            final int flags;
+
+            switch (target.kind()) {
+                case FIELD:
+                    FieldInfo field = target.asField();
+                    accessTypeRequired = "FIELD";
+                    declaringClass = field.declaringClass();
+                    flags = field.flags();
+                    break;
+                case METHOD:
+                    MethodInfo method = target.asMethod();
+                    accessTypeRequired = "PROPERTY";
+                    declaringClass = method.declaringClass();
+                    flags = method.flags();
+                    break;
+                default:
+                    return Visibility.UNSET;
+            }
+
+            Visibility result;
+
+            if (hasXmlTransient(declaringClass)) {
+                result = Visibility.IGNORED;
+            } else {
+                result = getXmlVisibility(declaringClass, accessTypeRequired, flags);
+            }
+
+            return result;
+        }
+
+        boolean hasXmlTransient(AnnotationTarget target) {
+            return TypeUtil.hasAnnotation(target, JaxbConstants.XML_TRANSIENT);
+        }
+
+        Visibility getXmlVisibility(ClassInfo declaringClass, String accessTypeRequired, int flags) {
+            String xmlAccessType = TypeUtil.getAnnotationValue(declaringClass, JaxbConstants.XML_ACCESSOR_TYPE);
+
+            if (xmlAccessType == null) {
+                return Visibility.UNSET;
+            }
+
+            if (accessTypeRequired.equals(xmlAccessType)
+                    || ("PUBLIC_MEMBER".equals(xmlAccessType) && Modifier.isPublic(flags))) {
+                return Visibility.EXPOSED;
+            }
+
+            return Visibility.IGNORED;
+        }
+
+        @Override
+        public DotName getName() {
+            return null;
         }
     }
 

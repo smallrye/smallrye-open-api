@@ -99,13 +99,13 @@ public class TypeProcessor {
             while (arrayType.dimensions() > 1) {
                 Schema parentArrSchema = new SchemaImpl();
                 parentArrSchema.setType(Schema.SchemaType.ARRAY);
-                parentArrSchema.items(arrSchema);
+                parentArrSchema.setItems(arrSchema);
 
                 arrSchema = parentArrSchema;
                 arrayType = ArrayType.create(arrayType.component(), arrayType.dimensions() - 1);
             }
 
-            schema.items(arrSchema);
+            schema.setItems(arrSchema);
 
             return arrayType;
         }
@@ -179,7 +179,7 @@ public class TypeProcessor {
                 arraySchema = resolveParameterizedType(arg, arraySchema);
             }
 
-            schema.items(arraySchema);
+            schema.setItems(arraySchema);
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {

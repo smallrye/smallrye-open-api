@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
@@ -10,7 +11,6 @@ import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.Test;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
 
 /**
@@ -58,8 +58,8 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
         DotName name = componentize(KitchenSink.class.getName());
         Type type = ClassType.create(name, Type.Kind.CLASS);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(context.getConfig(), oai, index);
+        OpenAPI oai = context.getOpenApi();
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         Schema result = scanner.process();
         registry.register(type, result);

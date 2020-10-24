@@ -509,7 +509,7 @@ public class SchemaFactory {
      */
     static boolean allowRegistration(final AnnotationScannerContext context, SchemaRegistry registry, Type type,
             Schema schema) {
-        if (schema == null || registry == null || !TypeUtil.allowRegistration(context, type)) {
+        if (schema == null || registry == null || !registry.isTypeRegistrationSupported(type, schema)) {
             return false;
         }
 

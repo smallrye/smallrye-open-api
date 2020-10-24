@@ -2,6 +2,8 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 
+import javax.json.JsonObject;
+import javax.json.JsonString;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -42,28 +44,28 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public void testResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
         test("responses.generation-suppressed-by-api-responses-annotation.json",
                 ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
-                Pet.class);
+                Pet.class, JsonString.class);
     }
 
     @Test
     public void testResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
         test("responses.generation-suppressed-by-supplied-default-api-response.json",
                 ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
-                Pet.class);
+                Pet.class, JsonString.class);
     }
 
     @Test
     public void testResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
         test("responses.generation-suppressed-by-status-omission.json",
                 ResponseGenerationSuppressedByStatusOmissionTestResource.class,
-                Pet.class);
+                Pet.class, JsonString.class);
     }
 
     @Test
     public void testResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
         test("responses.generation-enabled-by-incomplete-api-response.json",
                 ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
-                Pet.class);
+                Pet.class, JsonString.class);
     }
 
     @Test
@@ -76,7 +78,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public void testVoidPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-post-response-generation.json",
                 VoidPostResponseGenerationTestResource.class,
-                Pet.class);
+                Pet.class, JsonString.class);
     }
 
     @Test
@@ -94,14 +96,14 @@ public class ApiResponseTests extends IndexScannerTestBase {
     @Test
     public void testReferenceResponse() throws IOException, JSONException {
         test("responses.component-status-reuse.json",
-                ReferenceResponseTestApp.class, ReferenceResponseTestResource.class);
+                ReferenceResponseTestApp.class, ReferenceResponseTestResource.class, JsonObject.class);
     }
 
     /***************** Test models and resources below. ***********************/
 
     public static class Pet {
         String id;
-        String name;
+        JsonString name;
     }
 
     @Path("pets")
@@ -220,7 +222,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @APIResponse(responseCode = "200")
         @APIResponse(ref = "NotFound")
         @APIResponse(ref = "ServerError")
-        public Object getPet(@PathParam("id") String id) {
+        public JsonObject getPet(@PathParam("id") String id) {
             return null;
         }
     }

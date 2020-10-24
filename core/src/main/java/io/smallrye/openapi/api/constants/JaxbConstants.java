@@ -16,6 +16,10 @@ public class JaxbConstants {
             .createSimple("javax.xml.bind.annotation.XmlElement");
     public static final DotName XML_ATTRIBUTE = DotName
             .createSimple("javax.xml.bind.annotation.XmlAttribute");
+    public static final DotName XML_ACCESSOR_TYPE = DotName
+            .createSimple("javax.xml.bind.annotation.XmlAccessorType");
+    public static final DotName XML_TRANSIENT = DotName
+            .createSimple("javax.xml.bind.annotation.XmlTransient");
 
     public static final String PROP_NAME = "name";
 
