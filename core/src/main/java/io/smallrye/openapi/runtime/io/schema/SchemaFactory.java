@@ -501,7 +501,7 @@ public class SchemaFactory {
      * @return true if the schema may be registered, otherwise false
      */
     static boolean allowRegistration(IndexView index, SchemaRegistry registry, Type type, Schema schema) {
-        if (schema == null || registry == null || !TypeUtil.allowRegistration(index, type)) {
+        if (schema == null || registry == null || !registry.isTypeRegistrationSupported(type, schema)) {
             return false;
         }
 

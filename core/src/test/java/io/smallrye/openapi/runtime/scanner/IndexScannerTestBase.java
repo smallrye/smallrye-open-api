@@ -147,32 +147,18 @@ public class IndexScannerTestBase {
     }
 
     public static OpenApiConfig emptyConfig() {
-        return new OpenApiConfigImpl(new Config() {
-            @Override
-            public <T> T getValue(String propertyName, Class<T> propertyType) {
-                return null;
-            }
-
-            @Override
-            public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-                return Optional.empty();
-            }
-
-            @Override
-            public Iterable<String> getPropertyNames() {
-                return Collections.emptyList();
-            }
-
-            @Override
-            public Iterable<ConfigSource> getConfigSources() {
-                return Collections.emptyList();
-            }
-        });
+        return dynamicConfig(Collections.emptyMap());
     }
 
     public static OpenApiConfig nestingSupportConfig() {
         Map<String, Object> config = new HashMap<>(2);
         config.put(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, Boolean.TRUE);
+        return dynamicConfig(config);
+    }
+
+    public static OpenApiConfig dynamicConfig(String key, Object value) {
+        Map<String, Object> config = new HashMap<>(1);
+        config.put(key, value);
         return dynamicConfig(config);
     }
 

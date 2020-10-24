@@ -36,6 +36,8 @@ import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.Test;
 
+import io.smallrye.openapi.api.constants.OpenApiConstants;
+
 public class GenericModelTypesResourceTest extends IndexScannerTestBase {
 
     /*
@@ -64,6 +66,29 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.generic-model-types.json", result);
+    }
+
+    @Test
+    public void testGenericsApplicationWithoutArrayRefs() throws IOException, JSONException {
+        Index i = indexOf(BaseModel.class,
+                BaseResource.class,
+                KingCrimson.class,
+                KingCrimsonResource.class,
+                Magma.class,
+                MagmaResource.class,
+                Message.class,
+                OpenAPIConfig.class,
+                Residents.class,
+                ResidentsResource.class,
+                Result.class,
+                ResultList.class,
+                POJO.class,
+                List.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
+                                                                                      Boolean.FALSE), i);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("resource.generic-model-types-wo-array-refs.json", result);
     }
 
     @OpenAPIDefinition(tags = {

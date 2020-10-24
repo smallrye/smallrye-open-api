@@ -73,6 +73,10 @@ public interface OpenApiConfig {
         return true;
     }
 
+    default boolean arrayReferencesEnable() {
+        return true;
+    }
+
     default String customSchemaRegistryClass() {
         return null;
     }
