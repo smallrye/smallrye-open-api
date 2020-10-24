@@ -130,7 +130,7 @@ public class SchemaRegistry {
 
         SchemaRegistry registry = currentInstance();
 
-        if (registry == null || !registry.isTypeRegistrationSupported(resolvedType, schema)) {
+        if (registry == null) {
             return schema;
         }
 
@@ -138,7 +138,8 @@ public class SchemaRegistry {
 
         if (registry.has(key)) {
             schema = registry.lookupRef(key);
-        } else if (registry.index.getClassByName(resolvedType.name()) == null) {
+        } else if (!registry.isTypeRegistrationSupported(resolvedType, schema)
+                || registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
             schema = registry.register(key, schema, null);
