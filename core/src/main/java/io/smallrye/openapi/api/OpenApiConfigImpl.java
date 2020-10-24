@@ -32,6 +32,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Boolean scanDependenciesDisable;
     private Set<String> scanDependenciesJars;
     private Boolean schemaReferencesEnable;
+    private Boolean arrayReferencesEnable;
     private String customSchemaRegistryClass;
     private Boolean applicationPathDisable;
     private Map<String, String> schemas;
@@ -215,6 +216,16 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                             .orElse(true));
         }
         return schemaReferencesEnable;
+    }
+
+    @Override
+    public boolean arrayReferencesEnable() {
+        if (arrayReferencesEnable == null) {
+            arrayReferencesEnable = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE, Boolean.class)
+                    .orElse(true);
+        }
+        return arrayReferencesEnable;
     }
 
     @Override

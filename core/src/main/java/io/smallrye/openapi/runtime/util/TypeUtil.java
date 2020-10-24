@@ -67,6 +67,10 @@ public class TypeUtil {
     // SPECIAL FORMATS
     private static final TypeWithFormat ARRAY_FORMAT = TypeWithFormat.of(SchemaType.ARRAY).build();
     private static final TypeWithFormat OBJECT_FORMAT = TypeWithFormat.of(SchemaType.OBJECT).build();
+
+    private static final TypeWithFormat ARRAY_OPAQUE_FORMAT = TypeWithFormat.of(SchemaType.ARRAY).opaque().build();
+    private static final TypeWithFormat OBJECT_OPAQUE_FORMAT = TypeWithFormat.of(SchemaType.OBJECT).opaque().build();
+
     private static final TypeWithFormat DATE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE).build();
     private static final TypeWithFormat DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE_TIME)
             .build();
@@ -147,6 +151,13 @@ public class TypeUtil {
         // Time
         TYPE_MAP.put(DotName.createSimple(java.time.LocalTime.class.getName()), TIME_LOCAL_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.OffsetTime.class.getName()), TIME_FORMAT);
+
+        for (String qualifier : Arrays.asList("jakarta.", "javax.")) {
+            TYPE_MAP.put(DotName.createSimple(qualifier + "json.JsonArray"), ARRAY_OPAQUE_FORMAT);
+            TYPE_MAP.put(DotName.createSimple(qualifier + "json.JsonNumber"), NUMBER_FORMAT);
+            TYPE_MAP.put(DotName.createSimple(qualifier + "json.JsonObject"), OBJECT_OPAQUE_FORMAT);
+            TYPE_MAP.put(DotName.createSimple(qualifier + "json.JsonString"), STRING_FORMAT);
+        }
 
         Indexer indexer = new Indexer();
         index(indexer, java.lang.Enum.class);
@@ -275,7 +286,7 @@ public class TypeUtil {
         TypeWithFormat typeFormat = getTypeFormat(classType);
 
         if (typeFormat.isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT)) {
-            return index.getClassByName(classType.name()) != null;
+            return !typeFormat.isOpaque() && index.getClassByName(classType.name()) != null;
         }
         return typeFormat.getProperties().size() > 2;
     }
@@ -727,10 +738,20 @@ public class TypeUtil {
     static final class TypeWithFormat {
         static class Builder {
             private final Map<String, Object> properties = new HashMap<>();
+            private boolean opaque;
 
             Builder(SchemaType schemaType) {
                 Objects.requireNonNull(schemaType);
                 properties.put(SchemaConstant.PROP_TYPE, schemaType);
+            }
+
+            Builder opaque(boolean opaque) {
+                this.opaque = opaque;
+                return this;
+            }
+
+            Builder opaque() {
+                return opaque(true);
             }
 
             Builder format(String format) {
@@ -757,7 +778,7 @@ public class TypeUtil {
             }
 
             TypeWithFormat build() {
-                return new TypeWithFormat(properties);
+                return new TypeWithFormat(properties, opaque);
             }
         }
 
@@ -766,9 +787,11 @@ public class TypeUtil {
         }
 
         private final Map<String, Object> properties;
+        private final boolean opaque;
 
-        private TypeWithFormat(Map<String, Object> properties) {
+        private TypeWithFormat(Map<String, Object> properties, boolean opaque) {
             this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
+            this.opaque = opaque;
         }
 
         boolean isSchemaType(SchemaType... schemaTypes) {
@@ -778,6 +801,10 @@ public class TypeUtil {
 
         Map<String, Object> getProperties() {
             return properties;
+        }
+
+        public boolean isOpaque() {
+            return opaque;
         }
     }
 

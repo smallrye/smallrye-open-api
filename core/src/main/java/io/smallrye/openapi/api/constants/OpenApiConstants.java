@@ -19,6 +19,7 @@ public final class OpenApiConstants {
     public static final String SUFFIX_SCAN_DEPENDENCIES_DISABLE = "scan-dependencies.disable";
     public static final String SUFFIX_SCAN_DEPENDENCIES_JARS = "scan-dependencies.jars";
     public static final String SUFFIX_SCHEMA_REFERENCES_ENABLE = "schema-references.enable";
+    public static final String SUFFIX_ARRAY_REFERENCES_ENABLE = "array-references.enable";
     public static final String SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS = "custom-schema-registry.class";
     public static final String SUFFIX_APP_PATH_DISABLE = "application-path.disable";
 
@@ -34,6 +35,8 @@ public final class OpenApiConstants {
             + SUFFIX_SCAN_DEPENDENCIES_JARS;
     public static final String SMALLRYE_SCHEMA_REFERENCES_ENABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
             + SUFFIX_SCHEMA_REFERENCES_ENABLE;
+    public static final String SMALLRYE_ARRAY_REFERENCES_ENABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
+            + SUFFIX_ARRAY_REFERENCES_ENABLE;
     public static final String SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME
             + SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS;
     public static final String SMALLRYE_APP_PATH_DISABLE = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + SUFFIX_APP_PATH_DISABLE;

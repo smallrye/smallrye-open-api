@@ -11,6 +11,7 @@ import java.util.Set;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.DotName;
@@ -29,6 +30,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * A simple registry used to track schemas that have been generated and inserted
@@ -128,7 +130,7 @@ public class SchemaRegistry {
 
         SchemaRegistry registry = currentInstance();
 
-        if (registry == null || !registry.schemaReferenceSupported()) {
+        if (registry == null) {
             return schema;
         }
 
@@ -136,7 +138,8 @@ public class SchemaRegistry {
 
         if (registry.has(key)) {
             schema = registry.lookupRef(key);
-        } else if (registry.index.getClassByName(resolvedType.name()) == null) {
+        } else if (!registry.isTypeRegistrationSupported(resolvedType, schema)
+                || registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
             schema = registry.register(key, schema, null);
@@ -288,8 +291,14 @@ public class SchemaRegistry {
         return has(new TypeKey(instanceType));
     }
 
-    public boolean schemaReferenceSupported() {
-        return config != null && config.schemaReferencesEnable();
+    public boolean isTypeRegistrationSupported(Type type, Schema schema) {
+        if (config == null || !TypeUtil.allowRegistration(index, type)) {
+            return false;
+        }
+        if (!config.arrayReferencesEnable()) {
+            return !SchemaType.ARRAY.equals(schema.getType());
+        }
+        return true;
     }
 
     private Schema lookupRef(TypeKey key) {
