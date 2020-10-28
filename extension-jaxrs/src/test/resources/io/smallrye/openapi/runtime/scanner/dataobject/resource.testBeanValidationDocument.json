@@ -38,8 +38,13 @@
   },
   "components": {
     "schemas": {
+      "TestEnum" : {
+        "enum" : [ "ABC", "DEF" ],
+        "type" : "string"
+      },
       "BVTestResourceEntity": {
         "type": "object",
+        "required" : [ "enumValue" ],
         "properties": {
           "string_no_bean_constraints": {
             "type": "string",
@@ -71,6 +76,13 @@
             "additionalProperties": {
               "type": "string"
             }
+          },
+          "enumValue" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/TestEnum"
+            }, {
+              "nullable" : false
+            } ]
           }
         }
       },
