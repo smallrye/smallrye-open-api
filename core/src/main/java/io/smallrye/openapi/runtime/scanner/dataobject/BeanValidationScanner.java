@@ -38,14 +38,9 @@ public class BeanValidationScanner {
 
     static final DotName BV_CONTRAINTS = createComponentized(BV_BASE, "constraints");
 
-    //static final DotName BV_ASSERT_TRUE = createComponentized(BV_CONTRAINTS, "AssertTrue");
-    //static final DotName BV_ASSERT_FALSE = createComponentized(BV_CONTRAINTS, "AssertFalse");
     static final DotName BV_DECIMAL_MAX = createComponentized(BV_CONTRAINTS, "DecimalMax");
     static final DotName BV_DECIMAL_MIN = createComponentized(BV_CONTRAINTS, "DecimalMin");
     static final DotName BV_DIGITS = createComponentized(BV_CONTRAINTS, "Digits");
-    //static final DotName BV_EMAIL = createComponentized(BV_CONTRAINTS, "Email");
-    //static final DotName BV_FUTURE = createComponentized(BV_CONTRAINTS, "Future");
-    //static final DotName BV_FUTURE_OR_PRESENT = createComponentized(BV_CONTRAINTS, "FutureOrPresent");
     static final DotName BV_MAX = createComponentized(BV_CONTRAINTS, "Max");
     static final DotName BV_MIN = createComponentized(BV_CONTRAINTS, "Min");
     static final DotName BV_NEGATIVE = createComponentized(BV_CONTRAINTS, "Negative");
@@ -53,10 +48,6 @@ public class BeanValidationScanner {
     static final DotName BV_NOT_BLANK = createComponentized(BV_CONTRAINTS, "NotBlank");
     static final DotName BV_NOT_EMPTY = createComponentized(BV_CONTRAINTS, "NotEmpty");
     static final DotName BV_NOT_NULL = createComponentized(BV_CONTRAINTS, "NotNull");
-    //static final DotName BV_NULL = createComponentized(BV_CONTRAINTS, "Null");
-    //static final DotName BV_PAST = createComponentized(BV_CONTRAINTS, "Past");
-    //static final DotName BV_PAST_OR_PRESENT = createComponentized(BV_CONTRAINTS, "PastOrPresent");
-    //static final DotName BV_PATTERN = createComponentized(BV_CONTRAINTS, "Pattern");
     static final DotName BV_POSITIVE = createComponentized(BV_CONTRAINTS, "Positive");
     static final DotName BV_POSITIVE_OR_ZERO = createComponentized(BV_CONTRAINTS, "PositiveOrZero");
     static final DotName BV_SIZE = createComponentized(BV_CONTRAINTS, "Size");
