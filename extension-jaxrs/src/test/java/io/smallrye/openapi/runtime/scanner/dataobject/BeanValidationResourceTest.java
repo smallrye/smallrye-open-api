@@ -37,7 +37,10 @@ public class BeanValidationResourceTest extends IndexScannerTestBase {
 
     @Before
     public void beforeEach() {
-        index = indexOf(BVTestResource.class, BVTestResourceEntity.class, BeanValidationScannerTest.BVTestContainer.class);
+        index = indexOf(BVTestResource.class,
+                BVTestResourceEntity.class,
+                BeanValidationScannerTest.BVTestContainer.class,
+                TestEnum.class);
     }
 
     @Test
@@ -92,5 +95,16 @@ public class BeanValidationResourceTest extends IndexScannerTestBase {
         @Schema(minProperties = 0, maxProperties = 100, nullable = true, name = "map_no_bean_constraints", required = false)
         @JsonbProperty("map_no_bean_constraints")
         private Map<String, String> mapIgnoreBvContraints;
+
+        @NotNull
+        TestEnum enumValue;
+
     }
+
+    @Schema
+    enum TestEnum {
+        ABC,
+        DEF
+    }
+
 }
