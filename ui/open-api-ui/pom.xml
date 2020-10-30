@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI UI</name>
     
     <properties>
-        <swagger-ui.version>3.36.0</swagger-ui.version>
+        <swagger-ui.version>3.36.1</swagger-ui.version>
         <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
         <path.swagger-ui>openapi-ui</path.swagger-ui>
         <sonar.skip>true</sonar.skip>
@@ -114,7 +114,7 @@
                             <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-bundle.js</url>
                             <unpack>false</unpack>
                             <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>ee32fa5b4197c9878c64402f3d2b516e</md5>
+                            <md5>169855e05a7a0a6eb2b6ccf03617f292</md5>
                         </configuration>
                     </execution>
                     <execution>
