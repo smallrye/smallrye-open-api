@@ -224,7 +224,7 @@ public class MergeUtil {
         if (values1 != null && values2 == null) {
             return Optional.of(values1);
         }
-        if (values1 == null && values2 != null) {
+        if ((values1 == null || values1.isEmpty()) && values2 != null) {
             return Optional.of(values2);
         }
         if (values1.equals(values2)) {
