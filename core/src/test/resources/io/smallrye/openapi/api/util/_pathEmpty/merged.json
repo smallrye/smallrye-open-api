@@ -1,0 +1,20 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/foo": {
+      "get": {
+        "parameters": [
+          {
+            "name": "pet_id",
+            "in": "query",
+            "description": "the ID of the pet to filter",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
