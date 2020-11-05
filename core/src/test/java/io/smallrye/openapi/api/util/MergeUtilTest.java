@@ -150,4 +150,12 @@ public class MergeUtilTest {
         doTest("_opTags/opTags1.json", "_opTags/opTags2.json", "_opTags/merged.json");
     }
 
+    /**
+     * Test method for
+     * {@link MergeUtil#merge(io.smallrye.openapi.api.models.OpenAPIImpl, io.smallrye.openapi.api.models.OpenAPIImpl)}.
+     */
+    @Test
+    public void testMerge_EmptyQueryParam() throws IOException, ParseException, JSONException {
+        doTest("_pathEmpty/pathEmpty1.json", "_pathEmpty/pathEmpty2.json", "_pathEmpty/merged.json");
+    }
 }
