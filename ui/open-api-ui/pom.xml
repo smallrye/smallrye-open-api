@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI UI</name>
     
     <properties>
-        <swagger-ui.version>3.36.1</swagger-ui.version>
+        <swagger-ui.version>3.36.2</swagger-ui.version>
         <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
         <path.swagger-ui>openapi-ui</path.swagger-ui>
         <sonar.skip>true</sonar.skip>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>swagger-ui</artifactId>
-            <version>3.36.1</version>
+            <version>${swagger-ui.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- Tests -->
@@ -114,7 +114,7 @@
                             <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-bundle.js</url>
                             <unpack>false</unpack>
                             <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>169855e05a7a0a6eb2b6ccf03617f292</md5>
+                            <md5>aed52866dc7d571064dbc72e3f60de18</md5>
                         </configuration>
                     </execution>
                     <execution>
@@ -127,7 +127,7 @@
                             <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-standalone-preset.js</url>
                             <unpack>false</unpack>
                             <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>f76577cd29dcfd05d77573be78cbe3a1</md5>
+                            <md5>97f5f477f101673dd65969260f1b17bb</md5>
                         </configuration>
                     </execution>
                     <execution>
