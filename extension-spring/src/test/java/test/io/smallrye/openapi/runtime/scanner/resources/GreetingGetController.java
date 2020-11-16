@@ -35,7 +35,7 @@ public class GreetingGetController {
     }
 
     // 2) Basic path var test
-    @GetMapping("/hellosPathVariable/{name}")
+    @GetMapping(path = "/hellosPathVariable/{name}")
     public List<Greeting> hellosPathVariable(@PathVariable(name = "name") String name) {
         return Arrays.asList(new Greeting("Hello " + name));
     }
@@ -47,7 +47,7 @@ public class GreetingGetController {
     }
 
     // 4) Basic request param test
-    @GetMapping("/helloRequestParam")
+    @GetMapping(path = "/helloRequestParam")
     public Greeting helloRequestParam(@RequestParam(value = "name", required = false) String name) {
         return new Greeting("Hello " + name);
     }
@@ -60,7 +60,7 @@ public class GreetingGetController {
     }
 
     // 6) ResponseEntity with a type specified (No JaxRS comparison)
-    @GetMapping("/helloPathVariableWithResponseTyped/{name}")
+    @GetMapping(path = "/helloPathVariableWithResponseTyped/{name}")
     public ResponseEntity<Greeting> helloPathVariableWithResponseTyped(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }

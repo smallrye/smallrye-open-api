@@ -31,38 +31,38 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 public class GreetingGetControllerAlt2 {
 
     // 1) Basic path var test
-    @RequestMapping(value = "/helloPathVariable/{name}", method = RequestMethod.GET)
+    @RequestMapping(path = "/helloPathVariable/{name}", method = RequestMethod.GET)
     public Greeting helloPathVariable(@PathVariable(name = "name") String name) {
         return new Greeting("Hello " + name);
     }
 
     // 2) Basic path var test
-    @RequestMapping(value = "/hellosPathVariable/{name}", method = RequestMethod.GET)
+    @RequestMapping(path = "/hellosPathVariable/{name}", method = RequestMethod.GET)
     public List<Greeting> hellosPathVariable(@PathVariable(name = "name") String name) {
         return Arrays.asList(new Greeting("Hello " + name));
     }
 
     // 3) Basic path var with Optional test
-    @RequestMapping(value = "/helloOptional/{name}", method = RequestMethod.GET)
+    @RequestMapping(path = "/helloOptional/{name}", method = RequestMethod.GET)
     public Optional<Greeting> helloOptional(@PathVariable(name = "name") String name) {
         return Optional.of(new Greeting("Hello " + name));
     }
 
     // 4) Basic request param test
-    @RequestMapping(value = "/helloRequestParam", method = RequestMethod.GET)
+    @RequestMapping(path = "/helloRequestParam", method = RequestMethod.GET)
     public Greeting helloRequestParam(@RequestParam(value = "name", required = false) String name) {
         return new Greeting("Hello " + name);
     }
 
     // 5) ResponseEntity without a type specified
-    @RequestMapping(value = "/helloPathVariableWithResponse/{name}", method = RequestMethod.GET)
+    @RequestMapping(path = "/helloPathVariableWithResponse/{name}", method = RequestMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }
 
     // 6) ResponseEntity with a type specified (No JaxRS comparison)
-    @RequestMapping(value = "/helloPathVariableWithResponseTyped/{name}", method = RequestMethod.GET)
+    @RequestMapping(path = "/helloPathVariableWithResponseTyped/{name}", method = RequestMethod.GET)
     public ResponseEntity<Greeting> helloPathVariableWithResponseTyped(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }
