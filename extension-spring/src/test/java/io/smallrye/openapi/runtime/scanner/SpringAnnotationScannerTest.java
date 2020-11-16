@@ -12,6 +12,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteControll
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteControllerAlt;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt2;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
@@ -52,6 +53,25 @@ public class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase
     @Test
     public void testBasicSpringDefinitionScanningAlt() throws IOException, JSONException {
         Index i = indexOf(GreetingGetControllerAlt.class, Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicSpringGetDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     * 
+     * Here we use the alternative RequestMapping plus path rather than value
+     * 
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testBasicSpringDefinitionScanningAlt2() throws IOException, JSONException {
+        Index i = indexOf(GreetingGetControllerAlt2.class, Greeting.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();

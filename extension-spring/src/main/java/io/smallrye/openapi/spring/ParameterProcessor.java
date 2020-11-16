@@ -1067,12 +1067,23 @@ public class ParameterProcessor {
      */
     static String requestMappingValuesToPath(AnnotationInstance requestMappingAnnotation) {
         StringBuilder sb = new StringBuilder();
-        AnnotationValue value = requestMappingAnnotation.value();
-        String[] parts = value.asStringArray();
-        for (String part : parts) {
-            sb.append(part);
+        AnnotationValue value = getRequestMappingPathAnnotation(requestMappingAnnotation);
+        if (value != null) {
+            String[] parts = value.asStringArray();
+            for (String part : parts) {
+                sb.append(part);
+            }
         }
         return sb.toString();
+    }
+
+    static AnnotationValue getRequestMappingPathAnnotation(AnnotationInstance requestMappingAnnotation) {
+        AnnotationValue value = requestMappingAnnotation.value();
+        if (value != null) {
+            return value;
+        } else {
+            return requestMappingAnnotation.value("path");
+        }
     }
 
     /**
