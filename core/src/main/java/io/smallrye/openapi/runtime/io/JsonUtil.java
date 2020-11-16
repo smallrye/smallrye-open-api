@@ -258,7 +258,7 @@ public final class JsonUtil {
      * @return Extension
      */
     public static Object parseValue(String value) {
-        if (value == null || value =="") {
+        if (value == null || value.isEmpty()) {
             return null;
         }
 
