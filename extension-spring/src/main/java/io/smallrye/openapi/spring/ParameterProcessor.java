@@ -1025,20 +1025,20 @@ public class ParameterProcessor {
         if (target.kind().equals(CLASS)) {
             for (DotName possiblePath : paths) {
                 AnnotationInstance classAnnotation = target.asClass().classAnnotation(possiblePath);
-                if (classAnnotation != null && classAnnotation.value() != null) {
+                if (classAnnotation != null && (classAnnotation.value() != null || classAnnotation.value("path") != null)) {
                     path = classAnnotation;
                 }
             }
         } else if (target.kind().equals(METHOD)) {
             for (DotName possiblePath : paths) {
                 AnnotationInstance methodAnnotation = target.asMethod().annotation(possiblePath);
-                if (methodAnnotation != null && methodAnnotation.value() != null) {
+                if (methodAnnotation != null && (methodAnnotation.value() != null || methodAnnotation.value("path") != null)) {
                     path = methodAnnotation;
                 }
             }
             // Also support @RequestMapping
             AnnotationInstance methodAnnotation = target.asMethod().annotation(SpringConstants.REQUEST_MAPPING);
-            if (methodAnnotation != null && methodAnnotation.value() != null) {
+            if (methodAnnotation != null && (methodAnnotation.value() != null || methodAnnotation.value("path") != null)) {
                 path = methodAnnotation;
             }
         }
@@ -1067,12 +1067,23 @@ public class ParameterProcessor {
      */
     static String requestMappingValuesToPath(AnnotationInstance requestMappingAnnotation) {
         StringBuilder sb = new StringBuilder();
-        AnnotationValue value = requestMappingAnnotation.value();
-        String[] parts = value.asStringArray();
-        for (String part : parts) {
-            sb.append(part);
+        AnnotationValue value = getRequestMappingPathAnnotation(requestMappingAnnotation);
+        if (value != null) {
+            String[] parts = value.asStringArray();
+            for (String part : parts) {
+                sb.append(part);
+            }
         }
         return sb.toString();
+    }
+
+    static AnnotationValue getRequestMappingPathAnnotation(AnnotationInstance requestMappingAnnotation) {
+        AnnotationValue value = requestMappingAnnotation.value();
+        if (value != null) {
+            return value;
+        } else {
+            return requestMappingAnnotation.value("path");
+        }
     }
 
     /**
