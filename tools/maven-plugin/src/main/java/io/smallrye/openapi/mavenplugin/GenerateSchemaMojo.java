@@ -3,15 +3,20 @@ package io.smallrye.openapi.mavenplugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,8 +78,11 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(defaultValue = "jar", property = "includeDependenciesTypes")
     private List<String> includeDependenciesTypes;
 
-    @Parameter(defaultValue = "${project}")
+    @Parameter(defaultValue = "${project}", required = true)
     private MavenProject mavenProject;
+
+    @Parameter(property = "project.compileClasspathElements", required = true, readonly = true)
+    private List<String> classpath;
 
     /**
      * Compiled classes of the project.
@@ -235,8 +243,9 @@ public class GenerateSchemaMojo extends AbstractMojo {
         OpenAPI staticModel = generateStaticModel();
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig);
 
-        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig,
-                Thread.currentThread().getContextClassLoader());
+        ClassLoader classLoader = getClassLoader();
+
+        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
 
         OpenApiDocument document = OpenApiDocument.INSTANCE;
 
@@ -252,10 +261,23 @@ public class GenerateSchemaMojo extends AbstractMojo {
         if (staticModel != null) {
             document.modelFromStaticFile(staticModel);
         }
-        document.filter(OpenApiProcessor.getFilter(openApiConfig, Thread.currentThread().getContextClassLoader()));
+        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader));
         document.initialize();
 
         return document;
+    }
+
+    private ClassLoader getClassLoader() throws MalformedURLException {
+        Set<URL> urls = new HashSet<>();
+
+        for (String element : classpath) {
+            urls.add(new File(element).toURI().toURL());
+        }
+
+        return URLClassLoader.newInstance(
+                urls.toArray(new URL[0]),
+                Thread.currentThread().getContextClassLoader());
+
     }
 
     private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig) {
