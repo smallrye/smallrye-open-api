@@ -83,6 +83,9 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "project.compileClasspathElements", required = true, readonly = true)
     private List<String> classpath;
 
+    @Parameter(defaultValue = "false", property = "skip")
+    private boolean skip;
+
     /**
      * Compiled classes of the project.
      */
@@ -174,17 +177,19 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        try {
-            IndexView index = createIndex();
-            OpenApiDocument schema = generateSchema(index);
-            if (schema != null) {
-                write(schema);
-            } else {
-                getLog().warn("No Schema generated. Check that your code contains the MicroProfile OpenAPI Annotations");
+        if (!skip) {
+            try {
+                IndexView index = createIndex();
+                OpenApiDocument schema = generateSchema(index);
+                if (schema != null) {
+                    write(schema);
+                } else {
+                    getLog().warn("No Schema generated. Check that your code contains the MicroProfile OpenAPI Annotations");
+                }
+            } catch (IOException ex) {
+                getLog().error(ex);
+                throw new MojoExecutionException("Could not generate OpenAPI Schema", ex); // TODO allow failOnError = false ?
             }
-        } catch (IOException ex) {
-            getLog().error(ex);
-            throw new MojoExecutionException("Could not generate OpenAPI Schema", ex); // TODO allow failOnError = false ?
         }
     }
 
