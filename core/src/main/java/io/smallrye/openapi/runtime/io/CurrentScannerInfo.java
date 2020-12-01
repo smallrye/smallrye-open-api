@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io;
 
+import org.jboss.jandex.Type;
+
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 
 /**
@@ -16,7 +18,8 @@ public class CurrentScannerInfo {
     }
 
     public static AnnotationScanner getCurrentAnnotationScanner() {
-        return current.get().annotationScanner;
+        CurrentScannerInfo info = current.get();
+        return info != null ? info.annotationScanner : null;
     }
 
     public static void setCurrentConsumes(final String[] currentConsumes) {
@@ -37,6 +40,16 @@ public class CurrentScannerInfo {
 
     public static void remove() {
         current.remove();
+    }
+
+    public static boolean isWrapperType(Type type) {
+        AnnotationScanner scanner = getCurrentAnnotationScanner();
+        return scanner != null && scanner.isWrapperType(type);
+    }
+
+    public static boolean isScannerInternalResponse(Type type) {
+        AnnotationScanner scanner = getCurrentAnnotationScanner();
+        return scanner != null && scanner.isScannerInternalResponse(type);
     }
 
     private String[] currentConsumes;
