@@ -4,12 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -19,6 +21,8 @@ import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
+import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
@@ -133,6 +137,8 @@ public class OpenApiAnnotationScanner {
         ScannerLogging.logger.scanning("OpenAPI");
         processPackageOpenAPIDefinitions(annotationScannerContext, openApi);
 
+        processClassSchemas(annotationScannerContext);
+
         return openApi;
     }
 
@@ -148,7 +154,7 @@ public class OpenApiAnnotationScanner {
         List<AnnotationInstance> packageDefs = context.getIndex()
                 .getAnnotations(DefinitionConstant.DOTNAME_OPEN_API_DEFINITION)
                 .stream()
-                .filter(annotation -> annotation.target().kind() == AnnotationTarget.Kind.CLASS)
+                .filter(this::annotatedClasses)
                 .filter(annotation -> annotation.target().asClass().name().withoutPackagePrefix().equals("package-info"))
                 .collect(Collectors.toList());
 
@@ -176,5 +182,20 @@ public class OpenApiAnnotationScanner {
             }
 
         }
+    }
+
+    private void processClassSchemas(final AnnotationScannerContext context) {
+        CurrentScannerInfo.register(null);
+
+        context.getIndex()
+                .getAnnotations(SchemaConstant.DOTNAME_SCHEMA)
+                .stream()
+                .filter(this::annotatedClasses)
+                .map(annotation -> Type.create(annotation.target().asClass().name(), Type.Kind.CLASS))
+                .forEach(type -> SchemaFactory.typeToSchema(context, type, context.getExtensions()));
+    }
+
+    private boolean annotatedClasses(AnnotationInstance annotation) {
+        return Objects.equals(annotation.target().kind(), AnnotationTarget.Kind.CLASS);
     }
 }

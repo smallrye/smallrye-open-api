@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Test",
+    "version": "1.0"
+  },
+  "components": {
+    "schemas": {
+      "CatType": {
+        "type": "object",
+        "properties": {
+          "age": {
+            "format": "int32",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "DogType": {
+        "type": "object",
+        "required": [ "volume" ],
+        "properties": {
+          "age": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "volume": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

@@ -37,7 +37,6 @@ import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -371,14 +370,12 @@ public class SchemaFactory {
             List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
 
-        AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
-
         if (TypeUtil.isOptional(type)) {
             // Recurse using the optional's type
             return typeToSchema(context, TypeUtil.getOptionalType(type), extensions);
-        } else if (annotationScanner.isWrapperType(type)) {
+        } else if (CurrentScannerInfo.isWrapperType(type)) {
             // Recurse using the wrapped type
-            return typeToSchema(context, annotationScanner.unwrapType(type), extensions);
+            return typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
@@ -452,9 +449,8 @@ public class SchemaFactory {
      */
     private static Schema introspectClassToSchema(final AnnotationScannerContext context, ClassType ctype,
             boolean schemaReferenceSupported) {
-        AnnotationScanner annotationScanner = CurrentScannerInfo.getCurrentAnnotationScanner();
 
-        if (annotationScanner.isScannerInternalResponse(ctype)) {
+        if (CurrentScannerInfo.isScannerInternalResponse(ctype)) {
             return null;
         }
 
