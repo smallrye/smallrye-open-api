@@ -6,7 +6,6 @@ import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
-import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -23,8 +22,6 @@ import test.io.smallrye.openapi.runtime.scanner.resources.DefaultContentTypeReso
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
-    private static final Logger LOG = Logger.getLogger(DefaultContentTypeTest.class);
-
     /**
      * This test the normal (no config) case
      * 

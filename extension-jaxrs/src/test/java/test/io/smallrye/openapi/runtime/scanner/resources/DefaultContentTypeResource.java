@@ -3,6 +3,8 @@ package test.io.smallrye.openapi.runtime.scanner.resources;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
@@ -24,6 +26,13 @@ public class DefaultContentTypeResource {
     @Path("/hello")
     public Greeting hello(Greeting greeting) {
         return greeting;
+    }
+
+    @GET
+    @Path("/goodbye")
+    @Produces(MediaType.APPLICATION_XML)
+    public Greeting byebye() {
+        return new Greeting("Good Bye !");
     }
 
 }
