@@ -292,8 +292,10 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes).orElse(null));
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces).orElse(null));
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes,
+                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces,
+                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -356,7 +358,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property, String[] defaultValue) {
         Set<DotName> annotationNames = SpringConstants.HTTP_METHODS;
 
         for (DotName annotationName : annotationNames) {
@@ -373,7 +375,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                     return Optional.of(annotationValue.asStringArray());
                 }
 
-                return Optional.of(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
+                return Optional.of(defaultValue);
             }
         }
         return Optional.empty();
