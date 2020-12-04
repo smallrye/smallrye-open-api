@@ -1,0 +1,67 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Generated API",
+    "version" : "1.0"
+  },
+  "paths" : {
+    "/greeting/goodbye" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/hello" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

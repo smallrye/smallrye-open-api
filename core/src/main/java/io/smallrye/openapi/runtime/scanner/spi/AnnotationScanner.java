@@ -395,7 +395,7 @@ public interface AnnotationScanner {
                 String[] produces = CurrentScannerInfo.getCurrentProduces();
 
                 if (produces == null || produces.length == 0) {
-                    produces = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                    produces = context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
                 }
 
                 if (schema != null && schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
@@ -803,7 +803,7 @@ public interface AnnotationScanner {
                     Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
 
                     if (schema != null) {
-                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
+                        ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
                     }
                 }
 
@@ -821,13 +821,13 @@ public interface AnnotationScanner {
         // If the request body is null, figure it out from the parameters.  Only if the
         // method declares that it @Consumes data
         if ((requestBody == null || (requestBody.getContent() == null && requestBody.getRef() == null))
-                && CurrentScannerInfo.getCurrentConsumes() != null) {
+                && getConsumes(context) != null) {
             if (params.getFormBodySchema() != null) {
                 if (requestBody == null) {
                     requestBody = new RequestBodyImpl();
                 }
                 Schema schema = params.getFormBodySchema();
-                ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
+                ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
             } else {
                 Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
 
@@ -846,7 +846,7 @@ public interface AnnotationScanner {
                     }
 
                     if (schema != null) {
-                        ModelUtil.setRequestBodySchema(requestBody, schema, CurrentScannerInfo.getCurrentConsumes());
+                        ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
                     }
 
                     if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
@@ -856,6 +856,14 @@ public interface AnnotationScanner {
             }
         }
         return requestBody;
+    }
+
+    default String[] getConsumes(final AnnotationScannerContext context) {
+        String[] currentConsumes = CurrentScannerInfo.getCurrentConsumes();
+        if (currentConsumes == null || currentConsumes.length == 0) {
+            currentConsumes = context.getConfig().getDefaultConsumes().orElse(null);
+        }
+        return currentConsumes;
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.smallrye.openapi.api;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,6 +47,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String infoLicenseName;
     private String infoLicenseUrl;
     private OperationIdStrategy operationIdStrategy;
+    private Optional<String[]> defaultProduces;
+    private Optional<String[]> defaultConsumes;
 
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
@@ -341,11 +344,31 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         return null;
     }
 
+    @Override
+    public Optional<String[]> getDefaultProduces() {
+        if (defaultProduces == null) {
+            defaultProduces = getDefaultContentType(OpenApiConstants.DEFAULT_PRODUCES);
+        }
+        return defaultProduces;
+    }
+
+    @Override
+    public Optional<String[]> getDefaultConsumes() {
+        if (defaultConsumes == null) {
+            defaultConsumes = getDefaultContentType(OpenApiConstants.DEFAULT_CONSUMES);
+        }
+        return defaultConsumes;
+    }
+
     /**
      * getConfig().getOptionalValue(key) can return "" if optional {@link Converter}s are used. Enforce a null value if
      * we get an empty string back.
      */
     String getStringConfigValue(String key) {
         return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v.trim()) ? null : v).orElse(null);
+    }
+
+    Optional<String[]> getDefaultContentType(String key) {
+        return getConfig().getOptionalValue(key, String[].class);
     }
 }

@@ -50,6 +50,8 @@ public final class OpenApiConstants {
     public static final String INFO_LICENSE_NAME = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.license.name";
     public static final String INFO_LICENSE_URL = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "info.license.url";
     public static final String OPERATION_ID_STRAGEGY = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "operationIdStrategy";
+    public static final String DEFAULT_PRODUCES = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "defaultProduces";
+    public static final String DEFAULT_CONSUMES = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME + "defaultConsumes";
 
     /**
      * Set of classes which should never be scanned, regardless of user configuration.

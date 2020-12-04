@@ -3,6 +3,7 @@ package io.smallrye.openapi.api;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -128,6 +129,14 @@ public interface OpenApiConfig {
 
     default OperationIdStrategy getOperationIdStrategy() {
         return null;
+    }
+
+    default Optional<String[]> getDefaultProduces() {
+        return Optional.empty();
+    }
+
+    default Optional<String[]> getDefaultConsumes() {
+        return Optional.empty();
     }
 
     enum OperationIdStrategy {
