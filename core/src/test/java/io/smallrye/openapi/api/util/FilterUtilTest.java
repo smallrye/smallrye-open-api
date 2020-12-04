@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
@@ -13,6 +15,9 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConfigImpl;
+import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
@@ -51,13 +56,23 @@ public class FilterUtilTest {
      */
     @Test
     public void testApplyFilter() throws Exception {
+        Config config = ConfigProvider.getConfig();
+        OpenApiConfig openApiConfig = new OpenApiConfigImpl(config);
+
         URL beforeUrl = FilterUtilTest.class.getResource("filter-before.json");
         URL afterUrl = FilterUtilTest.class.getResource("filter-after.json");
 
         OpenAPI model = OpenApiParser.parse(beforeUrl);
-        OASFilter filter = filter();
+        OpenApiDocument document = OpenApiDocument.INSTANCE;
+        document.reset();
+        document.config(openApiConfig);
+        document.modelFromReader(model);
 
-        model = FilterUtil.applyFilter(filter, model);
+        document.filter(filter());
+        document.filter(filter()); // Add it twice to make sure we do not repeat
+        document.initialize();
+
+        model = document.get();
 
         String actual = OpenApiSerializer.serialize(model, Format.JSON);
         String expected = loadResource(afterUrl);
