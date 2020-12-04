@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
@@ -23,8 +24,6 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingOperationResou
  */
 public class OperationIdTest extends JaxRsDataObjectScannerTestBase {
 
-    private static final String OPERATION_ID_PROPERTY = "mp.openapi.extensions.smallrye.operationIdStrategy";
-
     /**
      * This test a Method naming strategy
      * 
@@ -33,7 +32,7 @@ public class OperationIdTest extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     public void testMethodNaming() throws IOException, JSONException {
-        System.setProperty(OPERATION_ID_PROPERTY, "METHOD");
+        System.setProperty(OpenApiConstants.OPERATION_ID_STRAGEGY, "METHOD");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
         try {
@@ -44,13 +43,13 @@ public class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             assertJsonEquals("resource.testOperationIdMethod.json", result);
 
         } finally {
-            System.clearProperty(OPERATION_ID_PROPERTY);
+            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
         }
     }
 
     @Test
     public void testClassMethodNaming() throws IOException, JSONException {
-        System.setProperty(OPERATION_ID_PROPERTY, "CLASS_METHOD");
+        System.setProperty(OpenApiConstants.OPERATION_ID_STRAGEGY, "CLASS_METHOD");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
         try {
@@ -61,13 +60,13 @@ public class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             assertJsonEquals("resource.testOperationIdClassMethod.json", result);
 
         } finally {
-            System.clearProperty(OPERATION_ID_PROPERTY);
+            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
         }
     }
 
     @Test
     public void testPackageClassMethodNaming() throws IOException, JSONException {
-        System.setProperty(OPERATION_ID_PROPERTY, "PACKAGE_CLASS_METHOD");
+        System.setProperty(OpenApiConstants.OPERATION_ID_STRAGEGY, "PACKAGE_CLASS_METHOD");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
         try {
@@ -78,13 +77,13 @@ public class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             assertJsonEquals("resource.testOperationIdPackageClassMethod.json", result);
 
         } finally {
-            System.clearProperty(OPERATION_ID_PROPERTY);
+            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
         }
     }
 
     @Test
     public void testMethodNamingWhenOperationIsSet() throws IOException, JSONException {
-        System.setProperty(OPERATION_ID_PROPERTY, "METHOD");
+        System.setProperty(OpenApiConstants.OPERATION_ID_STRAGEGY, "METHOD");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
         try {
@@ -95,7 +94,7 @@ public class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             assertJsonEquals("resource.testOperationIdMethodWithOperation.json", result);
 
         } finally {
-            System.clearProperty(OPERATION_ID_PROPERTY);
+            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
         }
     }
 }

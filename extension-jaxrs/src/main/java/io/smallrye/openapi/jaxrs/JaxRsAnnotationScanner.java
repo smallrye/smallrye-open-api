@@ -374,8 +374,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES).orElse(null));
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES).orElse(null));
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES,
+                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
+                        .orElse(null));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES,
+                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
+                        .orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -445,7 +449,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, DotName annotationName) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, DotName annotationName, String[] defaultValue) {
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
         if (annotation == null) {
@@ -459,7 +463,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 return Optional.of(annotationValue.asStringArray());
             }
 
-            return Optional.of(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
+            return Optional.of(defaultValue);
         }
 
         return Optional.empty();

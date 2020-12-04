@@ -255,8 +255,10 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             VertxLogging.log.processingMethod(method.toString());
 
             // Figure out the current @Produces and @Consumes (if any)
-            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES).orElse(null));
-            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES).orElse(null));
+            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
+                    context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
+                    context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
             // Process any @Operation annotation
             Optional<Operation> maybeOperation = processOperation(context, method);
@@ -333,7 +335,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         return true;
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
         DotName annotationName = VertxConstants.ROUTE;
 
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
@@ -349,7 +351,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                 return Optional.of(annotationValue.asStringArray());
             }
 
-            return Optional.of(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
+            return Optional.of(defaultValue);
         }
 
         return Optional.empty();
