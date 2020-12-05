@@ -34,6 +34,8 @@ import io.smallrye.openapi.runtime.io.Format;
  */
 @WebServlet(urlPatterns = "/init", loadOnStartup = 1000)
 public class OpenApiRegistration extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
     @SuppressWarnings("unchecked")
     @Override
     public void init(final ServletConfig config) throws ServletException {
