@@ -30,6 +30,7 @@
 
   <modules>
     <module>tck</module>
+    <module>extra</module>
   </modules>
 
   <build>

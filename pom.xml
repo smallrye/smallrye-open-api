@@ -60,7 +60,6 @@
         <module>extension-spring</module>
         <module>extension-vertx</module>
         <module>implementation</module>
-        <module>tck</module>
         <module>testsuite</module>
         <module>ui</module>
         <module>tools</module>

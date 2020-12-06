@@ -39,6 +39,9 @@
           <systemProperties>
             <test.url>http://localhost:8080</test.url>
           </systemProperties>
+          <systemPropertyVariables>
+            <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
