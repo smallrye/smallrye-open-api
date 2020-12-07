@@ -14,7 +14,9 @@ import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.config.spi.Converter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.DotName;
@@ -183,6 +185,47 @@ public class IndexScannerTestBase {
             public Iterable<ConfigSource> getConfigSources() {
                 // Not needed for this test case
                 return Collections.emptyList();
+            }
+
+            @Override
+            public ConfigValue getConfigValue(String propertyName) {
+                return new ConfigValue() {
+                    @Override
+                    public String getName() {
+                        return propertyName;
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return (String) properties.get(propertyName);
+                    }
+
+                    @Override
+                    public String getRawValue() {
+                        return getValue();
+                    }
+
+                    @Override
+                    public String getSourceName() {
+                        // Not needed for this test case
+                        return null;
+                    }
+
+                    @Override
+                    public int getSourceOrdinal() {
+                        return 0;
+                    }
+                };
+            }
+
+            @Override
+            public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
+                return Optional.empty();
+            }
+
+            @Override
+            public <T> T unwrap(Class<T> type) {
+                throw new IllegalArgumentException();
             }
         });
     }

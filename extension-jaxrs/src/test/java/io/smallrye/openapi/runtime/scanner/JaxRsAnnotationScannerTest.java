@@ -2,10 +2,7 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.ApplicationPath;
@@ -18,8 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
@@ -35,7 +30,6 @@ import org.json.JSONException;
 import org.junit.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
@@ -90,7 +84,9 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         index(indexer,
                 "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$RequestBodyResource.class");
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(customSchemaRegistryConfig(), indexer.complete());
+        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS,
+                MyCustomSchemaRegistry.class.getName());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, indexer.complete());
 
         OpenAPI result = scanner.scan();
 
@@ -131,45 +127,6 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             schemaRegistry.register(uuidType, schema);
         }
 
-    }
-
-    /**
-     * Creates a configuration that has defined a custom schema registry.
-     * 
-     * @return New configuration instance with {@link MyCustomSchemaRegistry}.
-     */
-    @SuppressWarnings("unchecked")
-    private static OpenApiConfig customSchemaRegistryConfig() {
-        return new OpenApiConfigImpl(new Config() {
-
-            @Override
-            public <T> T getValue(String propertyName, Class<T> propertyType) {
-                if (OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
-                    return (T) MyCustomSchemaRegistry.class.getName();
-                }
-                return null;
-            }
-
-            @Override
-            public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-                if (OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS.equals(propertyName)) {
-                    return (Optional<T>) Optional.of(MyCustomSchemaRegistry.class.getName());
-                }
-                return Optional.empty();
-            }
-
-            @Override
-            public Iterable<String> getPropertyNames() {
-                return Arrays.asList(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS);
-            }
-
-            @Override
-            public Iterable<ConfigSource> getConfigSources() {
-                // Not needed for this test case
-                return Collections.emptyList();
-            }
-
-        });
     }
 
     @Test
