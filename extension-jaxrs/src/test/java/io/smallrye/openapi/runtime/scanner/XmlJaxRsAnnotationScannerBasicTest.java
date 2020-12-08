@@ -1,16 +1,17 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.IOException;
+
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.Test;
+
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.XmlGreetingDeleteResource;
 import test.io.smallrye.openapi.runtime.scanner.resources.XmlGreetingGetResource;
 import test.io.smallrye.openapi.runtime.scanner.resources.XmlGreetingPostResource;
 import test.io.smallrye.openapi.runtime.scanner.resources.XmlGreetingPutResource;
-
-import java.io.IOException;
 
 /**
  * Basic tests mostly to compare with Spring

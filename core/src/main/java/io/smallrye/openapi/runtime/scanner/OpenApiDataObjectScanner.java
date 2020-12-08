@@ -19,6 +19,7 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
@@ -245,11 +246,26 @@ public class OpenApiDataObjectScanner {
             Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, ignoreResolver, currentType, currentClass,
                     reference);
 
+            processClassAnnotations(currentSchema, currentClass);
+
             // Handle fields
             properties.values()
                     .stream()
                     .filter(resolver -> !resolver.isIgnored())
                     .forEach(resolver -> AnnotationTargetProcessor.process(context, objectStack, resolver, currentPathEntry));
+        }
+    }
+
+    private void processClassAnnotations(Schema schema, ClassInfo classInfo) {
+        AnnotationInstance annotation = TypeUtil.getAnnotation(classInfo,
+                DotName.createSimple("javax.xml.bind.annotation.XmlRootElement"));
+        if (annotation != null) {
+            if (annotation.value("name") != null) {
+                if (!classInfo.simpleName().equals(annotation.value("name").asString())) {
+                    schema.setXml(new XMLImpl());
+                    schema.getXml().setName(annotation.value("name").asString());
+                }
+            }
         }
     }
 

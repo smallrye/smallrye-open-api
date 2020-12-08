@@ -8,12 +8,10 @@ import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
-import org.jboss.jandex.AnnotationInstance;
-import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.Type;
+import org.jboss.jandex.*;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
@@ -189,8 +187,39 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = MergeUtil.mergeObjects(typeSchema, fieldSchema);
         }
 
+        processFieldAnnotations(fieldSchema, typeResolver);
+
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
+    }
+
+    private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
+        FieldInfo field = typeResolver.getField();
+        if (field != null) {
+            processXmlAttr(fieldSchema, field.annotation(DotName.createSimple("javax.xml.bind.annotation.XmlAttribute")));
+            return;
+        }
+        MethodInfo readMethod = typeResolver.getReadMethod();
+        if (readMethod != null) {
+            processXmlAttr(fieldSchema, readMethod.annotation(DotName.createSimple("javax.xml.bind.annotation.XmlAttribute")));
+            return;
+        }
+        MethodInfo writeMethod = typeResolver.getWriteMethod();
+        if (readMethod != null) {
+            processXmlAttr(fieldSchema, writeMethod.annotation(DotName.createSimple("javax.xml.bind.annotation.XmlAttribute")));
+            return;
+        }
+    }
+
+    private void processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr) {
+        if (xmlAttr != null) {
+            fieldSchema.setXml(new XMLImpl());
+            fieldSchema.getXml().attribute(true);
+            AnnotationValue name = xmlAttr.value("name");
+            if (name != null) {
+                fieldSchema.getXml().setName(name.asString());
+            }
+        }
     }
 
     /**
