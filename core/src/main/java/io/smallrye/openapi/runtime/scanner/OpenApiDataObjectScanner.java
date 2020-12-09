@@ -1,5 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ROOTELEMENT;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -28,9 +31,6 @@ import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
-
-import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
-import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ROOTELEMENT;
 
 /**
  * Explores the class graph from the provided root, creating an OpenAPI {@link Schema}
@@ -260,7 +260,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private void processClassAnnotations(Schema schema, ClassInfo classInfo) {
-        AnnotationInstance annotation = TypeUtil.getAnnotation(classInfo,XML_ROOTELEMENT);
+        AnnotationInstance annotation = TypeUtil.getAnnotation(classInfo, XML_ROOTELEMENT);
         if (annotation != null) {
             if (annotation.value(PROP_NAME) != null) {
                 if (!classInfo.simpleName().equals(annotation.value("name").asString())) {

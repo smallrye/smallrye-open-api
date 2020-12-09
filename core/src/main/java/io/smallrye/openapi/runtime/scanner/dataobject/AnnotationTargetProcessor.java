@@ -1,5 +1,8 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,9 +23,6 @@ import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.Requ
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
-
-import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
-import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
 
 /**
  * Process annotation targets such as {@link FieldInfo}.
