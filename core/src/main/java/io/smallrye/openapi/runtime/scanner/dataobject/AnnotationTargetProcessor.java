@@ -21,6 +21,9 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
+import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
+
 /**
  * Process annotation targets such as {@link FieldInfo}.
  *
@@ -196,17 +199,17 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
         FieldInfo field = typeResolver.getField();
         if (field != null) {
-            processXmlAttr(fieldSchema, field.annotation(DotName.createSimple("javax.xml.bind.annotation.XmlAttribute")));
+            processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE));
             return;
         }
         MethodInfo readMethod = typeResolver.getReadMethod();
         if (readMethod != null) {
-            processXmlAttr(fieldSchema, readMethod.annotation(DotName.createSimple("javax.xml.bind.annotation.XmlAttribute")));
+            processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE));
             return;
         }
         MethodInfo writeMethod = typeResolver.getWriteMethod();
-        if (readMethod != null) {
-            processXmlAttr(fieldSchema, writeMethod.annotation(DotName.createSimple("javax.xml.bind.annotation.XmlAttribute")));
+        if (writeMethod != null) {
+            processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE));
             return;
         }
     }
@@ -215,7 +218,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (xmlAttr != null) {
             fieldSchema.setXml(new XMLImpl());
             fieldSchema.getXml().attribute(true);
-            AnnotationValue name = xmlAttr.value("name");
+            AnnotationValue name = xmlAttr.value(PROP_NAME);
             if (name != null) {
                 fieldSchema.getXml().setName(name.asString());
             }
