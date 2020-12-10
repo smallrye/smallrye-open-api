@@ -7,7 +7,9 @@ import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.Test;
 
+import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.entities.JaxbGreeting;
+import test.io.smallrye.openapi.runtime.scanner.entities.JaxbWithNameGreeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.*;
 
 /**
@@ -25,63 +27,12 @@ public class JaxbJaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerT
      */
     @Test
     public void testBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(JaxbGreetingGetResource.class, JaxbGreeting.class);
+        Index i = indexOf(JaxbGreetingGetResource.class, Greeting.class, JaxbGreeting.class, JaxbWithNameGreeting.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
 
         printToConsole(result);
         assertJsonEquals("resource.testBasicJaxbJaxRsGetDefinitionScanning.json", result);
-    }
-
-    /**
-     * This test a basic, no OpenApi annotations, hello world POST service
-     *
-     * @throws IOException
-     * @throws JSONException
-     */
-    @Test
-    public void testBasicJaxRsPostDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(JaxbGreetingPostResource.class, JaxbGreeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicJaxbJaxRsPostDefinitionScanning.json", result);
-    }
-
-    /**
-     * This test a basic, no OpenApi annotations, hello world PUT service
-     *
-     * @throws IOException
-     * @throws JSONException
-     */
-    @Test
-    public void testBasicJaxRsPutDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(JaxbGreetingPutResource.class, JaxbGreeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicJaxbJaxRsPutDefinitionScanning.json", result);
-    }
-
-    /**
-     * This test a basic, no OpenApi annotations, hello world DELETE service
-     *
-     * @throws IOException
-     * @throws JSONException
-     */
-    @Test
-    public void testBasicJaxRsDeleteDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(JaxbGreetingDeleteResource.class, JaxbGreeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicJaxbJaxRsDeleteDefinitionScanning.json", result);
     }
 }

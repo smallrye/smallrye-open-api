@@ -1,7 +1,31 @@
 {
   "openapi" : "3.0.3",
   "paths" : {
-    "/greeting/helloOptional/{name}" : {
+    "/greeting/helloPathVariable1/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariable2/{name}" : {
       "get" : {
         "parameters" : [ {
           "name" : "name",
@@ -25,7 +49,7 @@
         }
       }
     },
-    "/greeting/helloPathVariable/{name}" : {
+    "/greeting/helloPathVariable3/{name}" : {
       "get" : {
         "parameters" : [ {
           "name" : "name",
@@ -41,105 +65,7 @@
             "content" : {
               "application/xml" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/JaxbGreeting"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/greeting/helloPathVariableWithResponse/{name}" : {
-      "get" : {
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/xml" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/JaxbGreeting"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/greeting/helloPathVariableWithResponseTyped/{name}" : {
-      "get" : {
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/xml" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/JaxbGreeting"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/greeting/helloRequestParam" : {
-      "get" : {
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "query",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/xml" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/JaxbGreeting"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/greeting/hellosPathVariable/{name}" : {
-      "get" : {
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/xml" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/JaxbGreeting"
-                  }
+                  "$ref" : "#/components/schemas/JaxbWithNameGreeting"
                 }
               }
             }
@@ -150,12 +76,34 @@
   },
   "components" : {
     "schemas" : {
+      "Greeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
       "JaxbGreeting" : {
         "type" : "object",
         "properties" : {
           "message" : {
             "type" : "string"
           }
+        }
+      },
+      "JaxbWithNameGreeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "xml" : {
+              "attribute" : true
+            }
+          }
+        },
+        "xml" : {
+          "name" : "MyGreeting"
         }
       }
     }
