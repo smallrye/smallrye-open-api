@@ -88,8 +88,16 @@ public class AugmentedIndexView implements IndexView {
         return index.getAnnotations(annotationName);
     }
 
-    private <T> void validateInput(T input) {
-        if (input == null)
-            throw DataObjectMessages.msg.notNull();
+    @Override
+    public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName, IndexView annotationIndex) {
+        validateInput(annotationName, annotationIndex);
+        return index.getAnnotationsWithRepeatable(annotationName, annotationIndex);
+    }
+
+    private void validateInput(Object... inputs) {
+        for (Object input : inputs) {
+            if (input == null)
+                throw DataObjectMessages.msg.notNull();
+        }
     }
 }
