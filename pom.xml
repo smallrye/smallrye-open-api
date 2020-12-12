@@ -32,7 +32,7 @@
         <version.jetty>9.4.35.v20201120</version.jetty>
         <version.resteasy>4.5.8.Final</version.resteasy>
 
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/tck/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../tck/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/testsuite/extra/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <licenses>
@@ -77,12 +77,12 @@
               <enabled>true</enabled>
            </snapshots>
         </repository>
-        
+
         <repository>
             <id>microprofile-openapi20-staging</id>
             <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1389</url>
         </repository>
-        
+
     </repositories>
 
     <dependencyManagement>
