@@ -32,7 +32,7 @@
         <version.jetty>9.4.35.v20201120</version.jetty>
         <version.resteasy>4.5.8.Final</version.resteasy>
 
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/testsuite/extra/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <licenses>
