@@ -33,6 +33,12 @@
             <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
         </dependency>
         <dependency>
+            <!-- Required to aggregate coverage -->
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-open-api-testsuite-tck</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
         </dependency>
