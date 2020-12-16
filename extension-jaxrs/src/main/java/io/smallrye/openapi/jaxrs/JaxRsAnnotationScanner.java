@@ -1,17 +1,20 @@
 package io.smallrye.openapi.jaxrs;
 
 import java.lang.reflect.Modifier;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
@@ -261,35 +264,29 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * 
      */
     private Map<DotName, AnnotationInstance> processExceptionMappers(final AnnotationScannerContext context) {
-        Map<DotName, AnnotationInstance> exceptionHandlerMap = new HashMap<>();
-        Collection<ClassInfo> exceptionMappers = context.getIndex()
-                .getKnownDirectImplementors(JaxRsConstants.EXCEPTION_MAPPER);
+        return context.getIndex()
+                .getKnownDirectImplementors(JaxRsConstants.EXCEPTION_MAPPER)
+                .stream()
+                .flatMap(this::exceptionResponseAnnotations)
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
 
-        for (ClassInfo classInfo : exceptionMappers) {
-            DotName exceptionDotName = classInfo.interfaceTypes()
-                    .stream()
-                    .filter(it -> it.name().equals(JaxRsConstants.EXCEPTION_MAPPER))
-                    .filter(it -> it.kind() == Type.Kind.PARAMETERIZED_TYPE)
-                    .map(Type::asParameterizedType)
-                    .map(type -> type.arguments().get(0)) // ExceptionMapper<?> has a single type argument
-                    .map(Type::name)
-                    .findFirst()
-                    .orElse(null);
+    private Stream<Entry<DotName, AnnotationInstance>> exceptionResponseAnnotations(ClassInfo classInfo) {
+        return classInfo.interfaceTypes()
+                .stream()
+                .filter(it -> it.name().equals(JaxRsConstants.EXCEPTION_MAPPER))
+                .filter(it -> Type.Kind.PARAMETERIZED_TYPE.equals(it.kind()))
+                .map(Type::asParameterizedType)
+                .map(type -> type.arguments().get(0)) // ExceptionMapper<?> has a single type argument
+                .map(type -> entryOf(type.name(), classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME, type)))
+                .filter(entry -> Objects.nonNull(entry.getValue()))
+                .filter(entry -> ResponseReader.hasResponseCodeValue(entry.getValue()))
+                .map(entry -> entryOf(entry.getKey(), ResponseReader.getResponseAnnotation(entry.getValue())));
+    }
 
-            if (exceptionDotName == null) {
-                continue;
-            }
-
-            MethodInfo toResponseMethod = classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME,
-                    Type.create(exceptionDotName, Type.Kind.CLASS));
-
-            if (ResponseReader.hasResponseCodeValue(toResponseMethod)) {
-                exceptionHandlerMap.put(exceptionDotName, ResponseReader.getResponseAnnotation(toResponseMethod));
-            }
-
-        }
-
-        return exceptionHandlerMap;
+    // Replace with Map.entry when available (Java 9+)
+    static <K, V> Entry<K, V> entryOf(K key, V value) {
+        return new SimpleEntry<>(key, value);
     }
 
     /**
