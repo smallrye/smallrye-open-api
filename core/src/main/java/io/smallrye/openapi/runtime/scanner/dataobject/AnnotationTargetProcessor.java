@@ -173,6 +173,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema.setNullable(Boolean.TRUE);
         }
 
+        processFieldAnnotations(fieldSchema, typeResolver);
+
         // Only when registration was successful (ref is present and the registered type is a different instance)
         if (registrationSuccessful(typeSchema, registeredTypeSchema)) {
             // Check if the field specifies something additional or different from the type's schema
@@ -190,39 +192,37 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = MergeUtil.mergeObjects(typeSchema, fieldSchema);
         }
 
-        processFieldAnnotations(fieldSchema, typeResolver);
-
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
     }
 
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
         FieldInfo field = typeResolver.getField();
-        if (field != null) {
-            processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE));
+        if (field != null && processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE))) {
             return;
         }
         MethodInfo readMethod = typeResolver.getReadMethod();
-        if (readMethod != null) {
-            processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE));
+        if (readMethod != null && processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE))) {
             return;
         }
         MethodInfo writeMethod = typeResolver.getWriteMethod();
-        if (writeMethod != null) {
-            processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE));
+        if (writeMethod != null && processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE))) {
             return;
         }
     }
 
-    private void processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr) {
-        if (xmlAttr != null) {
-            fieldSchema.setXml(new XMLImpl());
-            fieldSchema.getXml().attribute(true);
-            AnnotationValue name = xmlAttr.value(PROP_NAME);
-            if (name != null) {
-                fieldSchema.getXml().setName(name.asString());
-            }
+    private boolean processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr) {
+        if (xmlAttr == null) {
+            return false;
         }
+
+        fieldSchema.setXml(new XMLImpl());
+        fieldSchema.getXml().attribute(true);
+        AnnotationValue name = xmlAttr.value(PROP_NAME);
+        if (name != null) {
+            fieldSchema.getXml().setName(name.asString());
+        }
+        return true;
     }
 
     /**
