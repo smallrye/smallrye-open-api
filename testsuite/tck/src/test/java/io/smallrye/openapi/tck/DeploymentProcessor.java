@@ -16,6 +16,8 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -46,6 +48,7 @@ import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 
 public class DeploymentProcessor implements ApplicationArchiveProcessor {
+    private static Logger LOGGER = Logger.getLogger(DeploymentProcessor.class.getName());
     public static volatile ClassLoader classLoader;
 
     @Override
@@ -87,7 +90,7 @@ public class DeploymentProcessor implements ApplicationArchiveProcessor {
 
             generateOpenAPI(war);
 
-            System.out.println(war.toString(true));
+            LOGGER.log(Level.FINE, () -> war.toString(true));
         }
     }
 
@@ -120,7 +123,7 @@ public class DeploymentProcessor implements ApplicationArchiveProcessor {
 
         try {
             war.addAsManifestResource(new ByteArrayAsset(serialize(openAPI, JSON).getBytes(UTF_8)), "openapi.json");
-            war.addAsManifestResource(new ByteArrayAsset(serialize(openAPI, JSON).getBytes(UTF_8)), "openapi.yaml");
+            war.addAsManifestResource(new ByteArrayAsset(serialize(openAPI, YAML).getBytes(UTF_8)), "openapi.yaml");
         } catch (IOException e) {
             // Ignore
         }
