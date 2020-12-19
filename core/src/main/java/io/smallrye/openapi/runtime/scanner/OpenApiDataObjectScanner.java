@@ -1,5 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ROOTELEMENT;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -19,6 +22,7 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
@@ -245,11 +249,25 @@ public class OpenApiDataObjectScanner {
             Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, ignoreResolver, currentType, currentClass,
                     reference);
 
+            processClassAnnotations(currentSchema, currentClass);
+
             // Handle fields
             properties.values()
                     .stream()
                     .filter(resolver -> !resolver.isIgnored())
                     .forEach(resolver -> AnnotationTargetProcessor.process(context, objectStack, resolver, currentPathEntry));
+        }
+    }
+
+    private void processClassAnnotations(Schema schema, ClassInfo classInfo) {
+        AnnotationInstance annotation = TypeUtil.getAnnotation(classInfo, XML_ROOTELEMENT);
+        if (annotation != null) {
+            if (annotation.value(PROP_NAME) != null) {
+                if (!classInfo.simpleName().equals(annotation.value("name").asString())) {
+                    schema.setXml(new XMLImpl());
+                    schema.getXml().setName(annotation.value("name").asString());
+                }
+            }
         }
     }
 

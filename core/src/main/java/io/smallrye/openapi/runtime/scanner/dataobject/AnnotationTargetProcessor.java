@@ -1,5 +1,8 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -8,12 +11,10 @@ import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
-import org.jboss.jandex.AnnotationInstance;
-import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.Type;
+import org.jboss.jandex.*;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
@@ -172,6 +173,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema.setNullable(Boolean.TRUE);
         }
 
+        processFieldAnnotations(fieldSchema, typeResolver);
+
         // Only when registration was successful (ref is present and the registered type is a different instance)
         if (registrationSuccessful(typeSchema, registeredTypeSchema)) {
             // Check if the field specifies something additional or different from the type's schema
@@ -191,6 +194,35 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
         return fieldSchema;
+    }
+
+    private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
+        FieldInfo field = typeResolver.getField();
+        if (field != null && processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE))) {
+            return;
+        }
+        MethodInfo readMethod = typeResolver.getReadMethod();
+        if (readMethod != null && processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE))) {
+            return;
+        }
+        MethodInfo writeMethod = typeResolver.getWriteMethod();
+        if (writeMethod != null && processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE))) {
+            return;
+        }
+    }
+
+    private boolean processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr) {
+        if (xmlAttr == null) {
+            return false;
+        }
+
+        fieldSchema.setXml(new XMLImpl());
+        fieldSchema.getXml().attribute(true);
+        AnnotationValue name = xmlAttr.value(PROP_NAME);
+        if (name != null) {
+            fieldSchema.getXml().setName(name.asString());
+        }
+        return true;
     }
 
     /**
