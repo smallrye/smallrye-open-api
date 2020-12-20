@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
-import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
+import static io.smallrye.openapi.api.constants.JaxbConstants.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -198,37 +197,50 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
         FieldInfo field = typeResolver.getField();
-        if (field != null && processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE))) {
+        if (field != null && processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE),
+                field.annotation(XML_WRAPPERELEMENT))) {
             return;
         }
         MethodInfo readMethod = typeResolver.getReadMethod();
-        if (readMethod != null && processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE))) {
+        if (readMethod != null && processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE),
+                readMethod.annotation(XML_WRAPPERELEMENT))) {
             return;
         }
         MethodInfo writeMethod = typeResolver.getWriteMethod();
-        if (writeMethod != null && processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE))) {
+        if (writeMethod != null && processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE),
+                writeMethod.annotation(XML_WRAPPERELEMENT))) {
             return;
         }
     }
 
-    private boolean processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr) {
-        if (xmlAttr == null) {
+    private boolean processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr, AnnotationInstance xmlWrapper) {
+        if (xmlAttr == null && xmlWrapper == null) {
             return false;
         }
 
         fieldSchema.setXml(new XMLImpl());
-        fieldSchema.getXml().attribute(true);
-        AnnotationValue name = xmlAttr.value(PROP_NAME);
-        if (name != null) {
-            fieldSchema.getXml().setName(name.asString());
+        if (xmlAttr != null) {
+            fieldSchema.getXml().attribute(true);
+            setXmlName(fieldSchema, xmlAttr);
+        }
+        if (xmlWrapper != null) {
+            fieldSchema.getXml().wrapped(true);
+            setXmlName(fieldSchema, xmlWrapper);
         }
         return true;
+    }
+
+    private void setXmlName(Schema fieldSchema, AnnotationInstance xmlAttr) {
+        AnnotationValue name = xmlAttr.value(PROP_NAME);
+        if (name != null) {
+            fieldSchema.getXml().name(name.asString());
+        }
     }
 
     /**
      * A successful registration results in the registered type schema being a distinct
      * Schema instance containing only a <code>ref</code> to the original type schema.
-     * 
+     *
      * @param typeSchema schema for a type
      * @param registeredTypeSchema a (potential) reference schema to typeSchema
      * @return true if the schemas are not the same (i.e. registration occurred), otherwise false
