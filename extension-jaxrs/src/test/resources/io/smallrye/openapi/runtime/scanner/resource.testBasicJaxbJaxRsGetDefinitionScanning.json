@@ -95,6 +95,16 @@
       "JaxbWithNameGreeting" : {
         "type" : "object",
         "properties" : {
+          "books" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "xml": {
+              "wrapped": true,
+              "name": "books-array"
+            }
+          },
           "message" : {
             "type" : "string",
             "xml" : {
