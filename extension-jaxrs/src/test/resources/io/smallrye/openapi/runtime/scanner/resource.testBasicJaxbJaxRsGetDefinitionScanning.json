@@ -98,7 +98,10 @@
           "books" : {
             "type" : "array",
             "items" : {
-              "type" : "string"
+              "type" : "string",
+              "xml": {
+                "name": "item"
+              }
             },
             "xml": {
               "wrapped": true,
@@ -109,6 +112,12 @@
             "type" : "string",
             "xml" : {
               "attribute" : true
+            }
+          },
+          "title" : {
+            "type" : "string",
+            "xml": {
+              "name": "xml-title"
             }
           }
         },

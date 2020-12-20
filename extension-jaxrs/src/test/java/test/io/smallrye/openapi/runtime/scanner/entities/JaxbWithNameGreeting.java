@@ -3,6 +3,7 @@ package test.io.smallrye.openapi.runtime.scanner.entities;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -12,8 +13,9 @@ public class JaxbWithNameGreeting {
     @XmlAttribute
     private final String message;
 
-    public JaxbWithNameGreeting(String message, List<String> items) {
+    public JaxbWithNameGreeting(String message, String title, List<String> items) {
         this.message = message;
+        this.title = title;
         this.books = items;
     }
 
@@ -22,10 +24,17 @@ public class JaxbWithNameGreeting {
     }
 
     @XmlElementWrapper(name = "books-array")
+    @XmlElement(name = "item")
     private final List<String> books;
 
     public List<String> getBooks() {
         return books;
     }
 
+    @XmlElement(name = "xml-title")
+    private String title;
+
+    public String getTitle() {
+        return title;
+    }
 }
