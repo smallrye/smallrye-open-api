@@ -136,13 +136,13 @@ public class SchemaFactory {
         }
 
         schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, SchemaConstant.PROP_NOT,
-                type -> readClassSchema(context, type, true), defaults));
+                types -> readClassSchema(context, types, true), defaults));
         schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ONE_OF,
-                type -> readClassSchemas(context, type), defaults));
+                types -> readClassSchemas(context, types, false), defaults));
         schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ANY_OF,
-                type -> readClassSchemas(context, type), defaults));
+                types -> readClassSchemas(context, types, false), defaults));
         schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ALL_OF,
-                type -> readClassSchemas(context, type), defaults));
+                types -> readClassSchemas(context, types, true), defaults));
         schema.setTitle(readAttr(annotation, SchemaConstant.PROP_TITLE, defaults));
         schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
@@ -456,13 +456,17 @@ public class SchemaFactory {
 
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.hasRef(ctype)) {
+        if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype)) {
             return schemaRegistry.lookupRef(ctype);
         } else if (!schemaReferenceSupported && schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
             // Clone the schema from the registry using mergeObjects
             return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
+        } else if (context.getScanStack().contains(ctype)) {
+            // Protect against stack overflow when the type is in the process of being scanned.
+            return SchemaRegistry.registerReference(ctype, null, new SchemaImpl());
         } else {
             Schema schema = OpenApiDataObjectScanner.process(context, ctype);
+
             if (schemaReferenceSupported) {
                 return schemaRegistration(context, ctype, schema);
             } else {
@@ -521,10 +525,13 @@ public class SchemaFactory {
      * @param context scanning context
      * @param types the implementation types of the items to scan, never null
      */
-    private static List<Schema> readClassSchemas(final AnnotationScannerContext context, Type[] types) {
+    private static List<Schema> readClassSchemas(final AnnotationScannerContext context, Type[] types, boolean removeCurrent) {
         IoLogging.logger.annotationsList("schema Class");
 
+        Type introspectedClassType = removeCurrent ? context.getScanStack().peek() : null;
+
         return Arrays.stream(types)
+                .filter(type -> !type.equals(introspectedClassType))
                 .map(type -> readClassSchema(context, type, true))
                 .collect(Collectors.toList());
     }
@@ -598,30 +605,31 @@ public class SchemaFactory {
 
         if (annotation != null) {
             IoLogging.logger.annotationsList("@DiscriminatorMapping");
-
-            for (AnnotationInstance nested : annotation) {
-                String propertyValue = JandexUtil.stringValue(nested, SchemaConstant.PROP_VALUE);
-
-                AnnotationValue schemaValue = nested.value(SchemaConstant.PROP_SCHEMA);
-                String schemaRef;
-
-                if (schemaValue != null) {
-                    ClassType schemaType = schemaValue.asClass().asClassType();
-                    Schema schema = introspectClassToSchema(context, schemaType, true);
-                    schemaRef = schema != null ? schema.getRef() : null;
-                } else {
-                    schemaRef = null;
-                }
-
-                if (propertyValue == null && schemaRef != null) {
-                    // No mapping key provided, use the implied value.
-                    propertyValue = ModelUtil.nameFromRef(schemaRef);
-                }
-
-                discriminator.addMapping(propertyValue, schemaRef);
-            }
+            Arrays.stream(annotation).forEach(mapping -> readDiscriminatorMapping(context, discriminator, mapping));
         }
 
         return discriminator;
+    }
+
+    private static void readDiscriminatorMapping(AnnotationScannerContext context, Discriminator discriminator,
+            AnnotationInstance mapping) {
+        String propertyValue = JandexUtil.value(mapping, SchemaConstant.PROP_VALUE);
+        Type schemaType = JandexUtil.value(mapping, SchemaConstant.PROP_SCHEMA);
+
+        String schemaRef;
+
+        if (schemaType != null) {
+            Schema schema = introspectClassToSchema(context, schemaType.asClassType(), true);
+            schemaRef = schema != null ? schema.getRef() : null;
+        } else {
+            schemaRef = null;
+        }
+
+        if (propertyValue == null && schemaRef != null) {
+            // No mapping key provided, use the implied value.
+            propertyValue = ModelUtil.nameFromRef(schemaRef);
+        }
+
+        discriminator.addMapping(propertyValue, schemaRef);
     }
 }

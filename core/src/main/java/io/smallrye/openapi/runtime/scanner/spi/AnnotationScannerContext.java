@@ -1,10 +1,13 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
@@ -24,6 +27,7 @@ public class AnnotationScannerContext {
     private final OpenApiConfig config;
     private final ClassLoader classLoader;
     private final OpenAPI openApi;
+    private final Deque<Type> scanStack = new ArrayDeque<>();
 
     public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
@@ -64,5 +68,9 @@ public class AnnotationScannerContext {
 
     public OpenAPI getOpenApi() {
         return openApi;
+    }
+
+    public Deque<Type> getScanStack() {
+        return scanStack;
     }
 }
