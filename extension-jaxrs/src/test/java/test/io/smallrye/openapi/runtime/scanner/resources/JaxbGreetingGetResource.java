@@ -33,7 +33,7 @@ public class JaxbGreetingGetResource {
     @GET
     @Path("/helloPathVariable3/{name}")
     public JaxbWithNameGreeting helloPathVariable3(@PathParam("name") String name) {
-        return new JaxbWithNameGreeting("Hello " + name, null);
+        return new JaxbWithNameGreeting("Hello " + name, "Title!", null);
     }
 
 }

@@ -95,7 +95,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     /**
      * This method will generate a schema for the {@link #annotationTarget} containing one
      * of the following :
-     * 
+     *
      * <ol>
      * <li>A schema composed (using {@link Schema#allOf(List) allOf}) of a <code>$ref</code> to the schema of the
      * {@link #entityType}
@@ -112,7 +112,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
      * {@link SchemaRegistry#registerReference(Type, TypeResolver, Schema) checkRegistration}.
      * </li>
      * </ol>
-     * 
+     *
      * @return the individual or composite schema for the annotationTarget used to create this {@link AnnotationTargetProcessor}
      */
     Schema processField() {
@@ -196,44 +196,84 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
+        String name = typeResolver.getBeanPropertyName();
         FieldInfo field = typeResolver.getField();
-        if (field != null && processXmlAttr(fieldSchema, field.annotation(XML_ATTRIBUTE),
-                field.annotation(XML_WRAPPERELEMENT))) {
-            return;
+        if (field != null) {
+            if (processXmlAttr(name,
+                    fieldSchema,
+                    field.annotation(XML_ATTRIBUTE),
+                    field.annotation(XML_ELEMENT),
+                    field.annotation(XML_WRAPPERELEMENT))) {
+                return;
+            }
         }
         MethodInfo readMethod = typeResolver.getReadMethod();
-        if (readMethod != null && processXmlAttr(fieldSchema, readMethod.annotation(XML_ATTRIBUTE),
-                readMethod.annotation(XML_WRAPPERELEMENT))) {
-            return;
+        if (readMethod != null) {
+            if (processXmlAttr(name,
+                    fieldSchema,
+                    readMethod.annotation(XML_ATTRIBUTE),
+                    readMethod.annotation(XML_ELEMENT),
+                    readMethod.annotation(XML_WRAPPERELEMENT))) {
+                return;
+            }
         }
         MethodInfo writeMethod = typeResolver.getWriteMethod();
-        if (writeMethod != null && processXmlAttr(fieldSchema, writeMethod.annotation(XML_ATTRIBUTE),
-                writeMethod.annotation(XML_WRAPPERELEMENT))) {
-            return;
+        if (writeMethod != null) {
+            if (processXmlAttr(name,
+                    fieldSchema,
+                    writeMethod.annotation(XML_ATTRIBUTE),
+                    writeMethod.annotation(XML_ELEMENT),
+                    writeMethod.annotation(XML_WRAPPERELEMENT))) {
+                return;
+            }
         }
     }
 
-    private boolean processXmlAttr(Schema fieldSchema, AnnotationInstance xmlAttr, AnnotationInstance xmlWrapper) {
-        if (xmlAttr == null && xmlWrapper == null) {
+    private boolean processXmlAttr(
+            String name,
+            Schema fieldSchema,
+            AnnotationInstance xmlAttr,
+            AnnotationInstance xmlElement,
+            AnnotationInstance xmlWrapper) {
+        if (xmlAttr == null && xmlWrapper == null && xmlElement == null) {
             return false;
         }
 
-        fieldSchema.setXml(new XMLImpl());
         if (xmlAttr != null) {
+            setXmlIfEmpty(fieldSchema);
             fieldSchema.getXml().attribute(true);
-            setXmlName(fieldSchema, xmlAttr);
+            setXmlName(fieldSchema, name, xmlAttr);
         }
         if (xmlWrapper != null) {
+            setXmlIfEmpty(fieldSchema);
             fieldSchema.getXml().wrapped(true);
-            setXmlName(fieldSchema, xmlWrapper);
+            setXmlName(fieldSchema, name, xmlWrapper);
+            if (xmlElement != null) {
+                setXmlName(fieldSchema.getItems(), name, xmlElement);
+                return true;
+            }
+        }
+        if (xmlElement != null) {
+            setXmlName(fieldSchema, name, xmlElement);
         }
         return true;
     }
 
-    private void setXmlName(Schema fieldSchema, AnnotationInstance xmlAttr) {
+    private void setXmlIfEmpty(Schema schema) {
+        if (schema.getXml() != null) {
+            return;
+        }
+        schema.setXml(new XMLImpl());
+    }
+
+    private void setXmlName(Schema fieldSchema, String realName, AnnotationInstance xmlAttr) {
         AnnotationValue name = xmlAttr.value(PROP_NAME);
         if (name != null) {
-            fieldSchema.getXml().name(name.asString());
+            String annName = name.asString();
+            if (!annName.equals(realName)) {
+                setXmlIfEmpty(fieldSchema);
+                fieldSchema.getXml().name(annName);
+            }
         }
     }
 
@@ -275,7 +315,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     /**
      * Determine if the fieldSchema defines any attributes that are not present or
      * different from the attributes in the typeSchema.
-     * 
+     *
      * @param fieldSchema
      * @param typeSchema
      * @return true if fieldSchema defines new attributes or different attributes from typeSchema, otherwise false
@@ -302,7 +342,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     /**
      * Get accessors/suppliers for all schema attributes that are relevant to comparing two
      * schemas.
-     * 
+     *
      * @param schema the schema
      * @return a list of suppliers (i.e. getters) for the schema's attributes
      */
