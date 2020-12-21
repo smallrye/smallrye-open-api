@@ -207,6 +207,10 @@ public class TypeResolver {
         return this.propertyName;
     }
 
+    public String getBeanPropertyName() {
+        return this.propertyName;
+    }
+
     /**
      * Retrieves the field associated with this property. May be null.
      *

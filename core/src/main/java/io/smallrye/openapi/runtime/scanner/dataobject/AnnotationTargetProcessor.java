@@ -196,9 +196,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
+        String name = typeResolver.getBeanPropertyName();
         FieldInfo field = typeResolver.getField();
         if (field != null) {
-            String name = field.name();
             if (processXmlAttr(name,
                     fieldSchema,
                     field.annotation(XML_ATTRIBUTE),
@@ -209,7 +209,6 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
         MethodInfo readMethod = typeResolver.getReadMethod();
         if (readMethod != null) {
-            String name = removePrefix(readMethod.name(), "get");
             if (processXmlAttr(name,
                     fieldSchema,
                     readMethod.annotation(XML_ATTRIBUTE),
@@ -220,7 +219,6 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
         MethodInfo writeMethod = typeResolver.getWriteMethod();
         if (writeMethod != null) {
-            String name = removePrefix(writeMethod.name(), "set");
             if (processXmlAttr(name,
                     fieldSchema,
                     writeMethod.annotation(XML_ATTRIBUTE),
@@ -277,15 +275,6 @@ public class AnnotationTargetProcessor implements RequirementHandler {
                 fieldSchema.getXml().name(annName);
             }
         }
-    }
-
-    private String removePrefix(String name, String prefix) {
-        if (!name.startsWith(prefix)) {
-            return name;
-        }
-        name = name.substring(prefix.length());
-        name = name.substring(0, 1).toLowerCase() + name.substring(1);
-        return name;
     }
 
     /**
