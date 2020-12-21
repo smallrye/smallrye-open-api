@@ -184,10 +184,10 @@ public class TypeResolverTests extends IndexScannerTestBase {
                 null);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
-        assertEquals("theName", iter.next().getValue().getPropertyName());
-        assertEquals("comment2ActuallyFirst", iter.next().getValue().getPropertyName());
         assertEquals("comment", iter.next().getValue().getPropertyName());
         assertEquals("name2", iter.next().getValue().getPropertyName());
+        assertEquals("comment2", iter.next().getValue().getPropertyName());
+        assertEquals("name", iter.next().getValue().getPropertyName());
     }
 
     @Test

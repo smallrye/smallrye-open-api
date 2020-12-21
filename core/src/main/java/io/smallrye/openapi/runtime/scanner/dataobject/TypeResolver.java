@@ -204,18 +204,6 @@ public class TypeResolver {
             return name;
         }
 
-        if ((name = TypeUtil.getAnnotationValue(target,
-                JaxbConstants.XML_ELEMENT,
-                JaxbConstants.PROP_NAME)) != null) {
-            return name;
-        }
-
-        if ((name = TypeUtil.getAnnotationValue(target,
-                JaxbConstants.XML_ATTRIBUTE,
-                JaxbConstants.PROP_NAME)) != null) {
-            return name;
-        }
-
         return this.propertyName;
     }
 
