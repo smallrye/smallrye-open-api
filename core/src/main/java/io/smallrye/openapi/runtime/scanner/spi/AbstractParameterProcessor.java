@@ -52,6 +52,7 @@ import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
@@ -100,7 +101,7 @@ public abstract class AbstractParameterProcessor {
     protected String formMediaType;
 
     /**
-     * Collection of matrix paremeters found during scanning.
+     * Collection of matrix parameters found during scanning.
      * These annotations will be used as schema properties for the schema of a path parameter
      * having {@link Parameter#setStyle style} of {@link Style#MATRIX}.
      */
@@ -346,9 +347,24 @@ public abstract class AbstractParameterProcessor {
      * @return list of {@link Parameter}s
      */
     protected List<Parameter> getParameters(MethodInfo resourceMethod) {
-        List<Parameter> parameters = new ArrayList<>();
+        List<Parameter> parameters;
 
         // Process any Matrix Parameters found
+        mapMatrixParameters();
+
+        // Convert ParameterContext entries to MP-OAI Parameters
+        parameters = this.params.values()
+                .stream()
+                .map(context -> this.mapParameter(resourceMethod, context))
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(Parameter::getIn)
+                        .thenComparing(Parameter::getName))
+                .collect(Collectors.toList());
+
+        return parameters.isEmpty() ? null : parameters;
+    }
+
+    private void mapMatrixParameters() {
         for (Entry<String, Map<String, AnnotationInstance>> matrixPath : matrixParams.entrySet()) {
             String segmentName = matrixPath.getKey();
 
@@ -389,85 +405,75 @@ public abstract class AbstractParameterProcessor {
             }
 
             for (Schema schema : schemas) {
-                setSchemaProperties(schema, Collections.emptyMap(), matrixPath.getValue());
+                setSchemaProperties(schema, Collections.emptyMap(), matrixPath.getValue(), false);
             }
         }
-
-        // Convert ParameterContext entries to MP-OAI Parameters
-        params.values().forEach(context -> {
-            Parameter param;
-
-            if (context.oaiParam == null) {
-                param = new ParameterImpl();
-            } else {
-                param = context.oaiParam;
-            }
-
-            param.setName(context.name);
-
-            if (param.getIn() == null && context.location != null) {
-                param.setIn(context.location);
-            }
-
-            if (isIgnoredParameter(param, resourceMethod)) {
-                return;
-            }
-
-            if (param.getIn() == In.PATH) {
-                param.setRequired(true);
-            }
-
-            if (param.getStyle() == null && context.frameworkParam != null) {
-                param.setStyle(context.frameworkParam.style);
-            }
-
-            if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
-                Schema schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, extensions);
-                ModelUtil.setParameterSchema(param, schema);
-            }
-
-            if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
-                param.setDeprecated(Boolean.TRUE);
-            }
-
-            List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context.target);
-
-            if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
-                param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
-            }
-
-            if (param.getSchema() != null) {
-                //TODO: Test BV annotations on all target types
-                BeanValidationScanner.applyConstraints(context.target,
-                        param.getSchema(),
-                        param.getName(),
-                        (target, name) -> {
-                            if (param.getRequired() == null) {
-                                param.setRequired(Boolean.TRUE);
-                            }
-                        });
-
-                if (param.getSchema().getDefaultValue() == null) {
-                    param.getSchema().setDefaultValue(context.defaultValue);
-                }
-            }
-
-            if (param.getRequired() == null && TypeUtil.isOptional(context.targetType)) {
-                param.setRequired(Boolean.FALSE);
-            }
-
-            parameters.add(param);
-        });
-
-        return parameters.isEmpty()
-                ? null
-                : parameters.stream()
-                        .sorted(Comparator.comparing(Parameter::getIn)
-                                .thenComparing(Parameter::getName))
-                        .collect(Collectors.toList());
     }
 
     protected abstract FrameworkParameter getMatrixParameter();
+
+    private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
+        Parameter param;
+
+        if (context.oaiParam == null) {
+            param = new ParameterImpl();
+        } else {
+            param = context.oaiParam;
+        }
+
+        param.setName(context.name);
+
+        if (param.getIn() == null && context.location != null) {
+            param.setIn(context.location);
+        }
+
+        if (isIgnoredParameter(param, resourceMethod)) {
+            return null;
+        }
+
+        if (param.getIn() == In.PATH) {
+            param.setRequired(true);
+        }
+
+        if (param.getStyle() == null && context.frameworkParam != null) {
+            param.setStyle(context.frameworkParam.style);
+        }
+
+        if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
+            Schema schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, extensions);
+            ModelUtil.setParameterSchema(param, schema);
+        }
+
+        if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
+            param.setDeprecated(Boolean.TRUE);
+        }
+
+        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context.target);
+
+        if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
+            param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
+        }
+
+        if (param.getSchema() != null) {
+            //TODO: Test BV annotations on all target types
+            BeanValidationScanner.applyConstraints(context.target,
+                    param.getSchema(),
+                    param.getName(),
+                    (target, name) -> {
+                        if (param.getRequired() == null) {
+                            param.setRequired(Boolean.TRUE);
+                        }
+                    });
+
+            setDefaultValue(param.getSchema(), context.defaultValue);
+        }
+
+        if (param.getRequired() == null && TypeUtil.isOptional(context.targetType)) {
+            param.setRequired(Boolean.FALSE);
+        }
+
+        return param;
+    }
 
     /**
      * Converts the collection of parameter annotations to properties set on the
@@ -476,22 +482,33 @@ public abstract class AbstractParameterProcessor {
      * @param schema the {@link Schema} on which the properties will be set
      * @param encodings map of encodings applicable to the current {@link MediaType} being processed
      * @param params the name/value pairs of annotations for conversion to schema properties
+     * @param schemaAnnotationSupported true if the parameter supports a co-located {@code @Schema} annotation
      */
     protected void setSchemaProperties(Schema schema,
             Map<String, Encoding> encodings,
-            Map<String, AnnotationInstance> params) {
+            Map<String, AnnotationInstance> params,
+            boolean schemaAnnotationSupported) {
 
         for (Entry<String, AnnotationInstance> param : params.entrySet()) {
             String paramName = param.getKey();
             AnnotationTarget paramTarget = param.getValue().target();
-            addEncoding(encodings, paramName, paramTarget);
             Type paramType = getType(paramTarget);
-            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, extensions);
-            Object defaultValue = getDefaultValue(paramTarget);
+            Schema paramSchema;
 
-            if (paramSchema.getDefaultValue() == null) {
-                paramSchema.setDefaultValue(defaultValue);
+            if (schemaAnnotationSupported && TypeUtil.hasAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA)) {
+                paramSchema = SchemaFactory.readSchema(scannerContext,
+                        TypeUtil.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA));
+            } else {
+                paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, extensions);
             }
+
+            if (paramSchema == null) {
+                // hidden
+                continue;
+            }
+
+            addEncoding(encodings, paramName, paramTarget);
+            setDefaultValue(paramSchema, getDefaultValue(paramTarget));
 
             BeanValidationScanner.applyConstraints(paramTarget,
                     paramSchema,
@@ -511,7 +528,14 @@ public abstract class AbstractParameterProcessor {
             if (schema.getProperties() != null) {
                 paramSchema = mergeObjects(schema.getProperties().get(paramName), paramSchema);
             }
+
             schema.addProperty(paramName, paramSchema);
+        }
+    }
+
+    private void setDefaultValue(Schema schema, Object defaultValue) {
+        if (schema.getDefaultValue() == null) {
+            schema.setDefaultValue(defaultValue);
         }
     }
 
@@ -539,7 +563,7 @@ public abstract class AbstractParameterProcessor {
         schema.setType(SchemaType.OBJECT);
 
         mediaType.setSchema(schema);
-        setSchemaProperties(schema, encodings, formParams);
+        setSchemaProperties(schema, encodings, formParams, true);
 
         if (encodings.size() > 0) {
             mediaType.setEncoding(encodings);

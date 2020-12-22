@@ -51,6 +51,14 @@
                   },
                   "data": {
                     "type": "object"
+                  },
+                  "binaryData": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
                   }
                 }
               },
@@ -60,6 +68,12 @@
                 },
                 "f2": {
                   "contentType": "text/plain"
+                },
+                "binaryData": {
+                  "contentType": "application/octet-stream"
+                },
+                "file": {
+                  "contentType": "application/octet-stream"
                 }
               }
             }

@@ -62,8 +62,17 @@ public class SchemaFactory {
             return null;
         }
 
-        AnnotationInstance schemaAnnotation = value.asNested();
+        return readSchema(context, value.asNested());
+    }
 
+    /**
+     * Reads a Schema annotation into a model.
+     *
+     * @param context scanning context
+     * @param schemaAnnotation the {@code @Schema} annotation
+     * @return Schema model
+     */
+    public static Schema readSchema(final AnnotationScannerContext context, AnnotationInstance schemaAnnotation) {
         if (isAnnotationMissingOrHidden(schemaAnnotation, Collections.emptyMap())) {
             return null;
         }

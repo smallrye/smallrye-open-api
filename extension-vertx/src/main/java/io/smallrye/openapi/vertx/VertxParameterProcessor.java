@@ -149,11 +149,9 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
                         ? lastPathSegmentOf(beanParamAnnotation.target())
                         : lastPathSegmentOf(target);
 
-                if (!matrixParams.containsKey(pathSegment)) {
-                    matrixParams.put(pathSegment, new HashMap<>());
-                }
+                matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
+                        .put(paramName(annotation), annotation);
 
-                matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                 // Do this in Vert.x ?
                 //}else if (frameworkParam.location == In.PATH && targetType != null
                 //      && VertxConstants.REQUEST_MAPPING.equals(targetType.name())) {
