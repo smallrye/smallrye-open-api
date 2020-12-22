@@ -88,12 +88,6 @@
               <enabled>true</enabled>
            </snapshots>
         </repository>
-
-        <repository>
-            <id>microprofile-openapi20-staging</id>
-            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1389</url>
-        </repository>
-
     </repositories>
 
     <dependencyManagement>
