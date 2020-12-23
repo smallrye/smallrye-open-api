@@ -181,7 +181,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processDefinitionAnnotation(context, applicationClass, openApi);
 
         // Process @SecurityScheme annotations
-        processSecuritySchemeAnnotation(applicationClass, openApi);
+        processSecuritySchemeAnnotation(context, applicationClass, openApi);
 
         // Process @Server annotations
         processServerAnnotation(applicationClass, openApi);
@@ -211,7 +211,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingClass(resourceClass.simpleName());
 
         // Process @SecurityScheme annotations.
-        processSecuritySchemeAnnotation(resourceClass, openApi);
+        processSecuritySchemeAnnotation(context, resourceClass, openApi);
 
         // Process Java security
         processJavaSecurity(resourceClass, openApi);
@@ -234,7 +234,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             List<Parameter> locatorPathParameters) {
 
         // Process tags (both declarations and references).
-        Set<String> tagRefs = processTags(resourceClass, openApi, false);
+        Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
 
         // Process exception mapper to auto generate api response based on method exceptions
         Map<DotName, AnnotationInstance> exceptionAnnotationMap = processExceptionMappers(context);
@@ -318,7 +318,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         if (subResourceClass != null && !this.subResourceStack.contains(locator)) {
             Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-            ResourceParameters params = ParameterProcessor.process(context, resourceClass, method,
+            ResourceParameters params = JaxRsParameterProcessor.process(context, resourceClass, method,
                     reader, context.getExtensions());
 
             final String originalAppPath = this.currentAppPath;
@@ -371,14 +371,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(
-                getMediaTypes(method, JaxRsConstants.CONSUMES,
-                        context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
-                                .orElse(null));
-        CurrentScannerInfo.setCurrentProduces(
-                getMediaTypes(method, JaxRsConstants.PRODUCES,
-                        context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
-                                .orElse(null));
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES,
+                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
+                        .orElse(null));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES,
+                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
+                        .orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -388,12 +386,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         final Operation operation = maybeOperation.get();
 
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-        processOperationTags(method, openApi, resourceTags, operation);
+        processOperationTags(context, method, openApi, resourceTags, operation);
 
         // Process @Parameter annotations.
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-        ResourceParameters params = ParameterProcessor.process(context, resourceClass, method,
+        ResourceParameters params = JaxRsParameterProcessor.process(context, resourceClass, method,
                 reader, context.getExtensions());
         operation.setParameters(params.getOperationParameters());
 
@@ -461,6 +459,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             if (annotationValue != null) {
                 return Optional.of(annotationValue.asStringArray());
             }
+
             return Optional.of(defaultValue);
         }
 
@@ -480,7 +479,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .map(AnnotationInstance::target)
                 .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
                 .map(AnnotationTarget::asClass)
-                .filter(classInfo -> !Modifier.isInterface(classInfo.flags()) ||
+                .filter(classInfo -> !classInfo.annotations().containsKey(JaxRsConstants.REGISTER_REST_CLIENT) ||
                         index.getAllKnownImplementors(classInfo.name()).stream()
                                 .anyMatch(info -> !Modifier.isAbstract(info.flags())))
                 .distinct() // CompositeIndex instances may return duplicates

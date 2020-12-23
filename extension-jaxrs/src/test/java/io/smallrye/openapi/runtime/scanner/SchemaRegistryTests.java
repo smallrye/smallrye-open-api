@@ -14,8 +14,9 @@ import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.Test;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.util.ClassLoaderUtil;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -30,8 +31,9 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
     @Test
     public void testParameterizedNameCollisionsUseSequence() throws IOException, JSONException {
         Index index = indexOf(Container.class, Nestable.class);
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(emptyConfig(), oai, index);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -56,8 +58,9 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
         Index index = indexer.complete();
 
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(emptyConfig(), oai, index);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -74,8 +77,9 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
         Index index = indexer.complete();
 
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(emptyConfig(), oai, index);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -93,8 +97,9 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$NamedNestable.class");
         Index index = indexer.complete();
 
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(emptyConfig(), oai, index);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -112,21 +117,22 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$NamedNestable.class");
         Index index = indexer.complete();
 
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
 
         Type n6Type = cInfo.field("n6").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, n6Type);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, n6Type);
 
         Schema result = scanner.process();
         registry.register(n6Type, result);
-        printToConsole(oai);
+        printToConsole(context.getOpenApi());
 
         String field3SchemaName = ModelUtil.nameFromRef(result.getProperties().get("field3").getRef());
-        String field2SchemaName = oai.getComponents()
+        String field2SchemaName = context.getOpenApi().getComponents()
                 .getSchemas()
                 .get(field3SchemaName)
                 .getProperties()

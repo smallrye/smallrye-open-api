@@ -54,7 +54,7 @@ public class SchemaReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Schema");
+        IoLogging.logger.annotationsMap("@Schema");
         Map<String, Schema> map = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -69,8 +69,7 @@ public class SchemaReader {
              * {@link org.eclipse.microprofile.openapi.annotations.Components}.
              */
             if (name != null) {
-                map.put(name, SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(), new SchemaImpl(name),
-                        nested, Collections.emptyMap()));
+                map.put(name, SchemaFactory.readSchema(context, new SchemaImpl(name), nested, Collections.emptyMap()));
             }
         }
         return map;
@@ -86,7 +85,7 @@ public class SchemaReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("Schema");
+        IoLogging.logger.singleJsonObject("Schema");
         String name = JsonUtil.stringProperty(node, SchemaConstant.PROP_NAME);
 
         Schema schema = new SchemaImpl(name);

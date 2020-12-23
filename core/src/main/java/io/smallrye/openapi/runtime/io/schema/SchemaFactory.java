@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,7 +19,6 @@ import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 
@@ -31,11 +31,13 @@ import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -51,30 +53,22 @@ public class SchemaFactory {
     /**
      * Reads a Schema annotation into a model.
      *
-     * @param index the index
-     * @param cl the classLoader to use
+     * @param context scanning context
      * @param value the annotation value
      * @return Schema model
      */
-    public static Schema readSchema(IndexView index, ClassLoader cl, AnnotationValue value) {
+    public static Schema readSchema(final AnnotationScannerContext context, AnnotationValue value) {
         if (value == null) {
             return null;
         }
 
         AnnotationInstance schemaAnnotation = value.asNested();
 
-        if (schemaAnnotation == null) {
+        if (isAnnotationMissingOrHidden(schemaAnnotation, Collections.emptyMap())) {
             return null;
         }
 
-        IoLogging.log.singleAnnotation("@Schema");
-
-        // Schemas can be hidden. Skip if that's the case.
-        if (Boolean.TRUE.equals(JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
-            return null;
-        }
-
-        return readSchema(index, cl, new SchemaImpl(), schemaAnnotation, Collections.emptyMap());
+        return readSchema(context, new SchemaImpl(), schemaAnnotation, Collections.emptyMap());
     }
 
     /**
@@ -82,19 +76,17 @@ public class SchemaFactory {
      * on the provided class. If the schema has already been registered (in components), the existing
      * registration will be replaced.
      * 
-     * @param index application class index
-     * @param cl the classLoader to use
+     * @param context scanning context
      * @param schema schema model to populate
      * @param annotation schema annotation to read
      * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
      */
-    public static Schema readSchema(IndexView index,
-            ClassLoader cl,
+    public static Schema readSchema(final AnnotationScannerContext context,
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz) {
-        return readSchema(index, cl, schema, annotation, clazz, Collections.emptyMap());
+        return readSchema(context, schema, annotation, clazz, Collections.emptyMap());
     }
 
     /**
@@ -102,33 +94,24 @@ public class SchemaFactory {
      * on the provided class. If the schema has already been registered (in components), the existing
      * registration will be replaced.
      * 
-     * @param index application class index
-     * @param cl the classLoader to use
+     * @param context scanning context
      * @param schema schema model to populate
      * @param annotation schema annotation to read
      * @param clazz the class annotated with {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * @param defaults default values to be set on the schema when not present in the annotation
      * @return the schema, possibly replaced if <code>implementation</code> has been specified in the annotation
      */
-    static Schema readSchema(IndexView index,
-            ClassLoader cl,
+    static Schema readSchema(final AnnotationScannerContext context,
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz,
             Map<String, Object> defaults) {
 
-        if (annotation == null) {
+        if (isAnnotationMissingOrHidden(annotation, defaults)) {
             return schema;
         }
 
-        // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults);
-
-        if (Boolean.TRUE.equals(isHidden)) {
-            return schema;
-        }
-
-        schema = readSchema(index, cl, schema, annotation, defaults);
+        schema = readSchema(context, schema, annotation, defaults);
         ClassType clazzType = (ClassType) Type.create(clazz.name(), Type.Kind.CLASS);
 
         /*
@@ -138,35 +121,28 @@ public class SchemaFactory {
          * 
          * Ignore the reference returned by register, the caller expects the full schema.
          */
-        schemaRegistration(index, clazzType, schema);
+        schemaRegistration(context, clazzType, schema);
 
         return schema;
     }
 
-    public static Schema readSchema(IndexView index,
-            ClassLoader cl,
+    public static Schema readSchema(final AnnotationScannerContext context,
             Schema schema,
             AnnotationInstance annotation,
             Map<String, Object> defaults) {
-        if (annotation == null) {
-            return schema;
-        }
 
-        // Schemas can be hidden. Skip if that's the case.
-        Boolean isHidden = readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults);
-
-        if (Boolean.TRUE.equals(isHidden)) {
+        if (isAnnotationMissingOrHidden(annotation, defaults)) {
             return schema;
         }
 
         schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, SchemaConstant.PROP_NOT,
-                type -> readClassSchema(index, cl, type, true), defaults));
+                type -> readClassSchema(context, type, true), defaults));
         schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ONE_OF,
-                type -> readClassSchemas(index, cl, type), defaults));
+                type -> readClassSchemas(context, type), defaults));
         schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ANY_OF,
-                type -> readClassSchemas(index, cl, type), defaults));
+                type -> readClassSchemas(context, type), defaults));
         schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ALL_OF,
-                type -> readClassSchemas(index, cl, type), defaults));
+                type -> readClassSchemas(context, type), defaults));
         schema.setTitle(readAttr(annotation, SchemaConstant.PROP_TITLE, defaults));
         schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
@@ -188,8 +164,8 @@ public class SchemaFactory {
         schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        AnnotationInstance annotationInstance = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
-        schema.setExternalDocs(ExternalDocsReader.readExternalDocs(annotationInstance));
+        AnnotationInstance externalDocsAnnotation = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
+        schema.setExternalDocs(ExternalDocsReader.readExternalDocs(context, externalDocsAnnotation));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
         final SchemaType schemaType = SchemaFactory.<String, SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
                 value -> JandexUtil.enumValue(value, SchemaType.class), defaults);
@@ -197,12 +173,28 @@ public class SchemaFactory {
         schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schemaType));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
-                readDiscriminator(index, cl,
+                readDiscriminator(context,
                         JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
                         JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
         schema.setMaxItems(readAttr(annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
         schema.setMinItems(readAttr(annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
+        schema.setExtensions(ExtensionReader.readExtensions(context, annotation));
+
+        schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(annotation,
+                SchemaConstant.PROP_PROPERTIES, properties -> {
+                    if (properties == null || properties.length == 0) {
+                        return null;
+                    }
+                    Map<String, Schema> propertySchemas = new LinkedHashMap<>(properties.length);
+                    for (AnnotationInstance propAnnotation : properties) {
+                        String key = JandexUtil.value(propAnnotation, SchemaConstant.PROP_NAME);
+                        Schema value = readSchema(context, new SchemaImpl(), propAnnotation, Collections.emptyMap());
+                        propertySchemas.put(key, value);
+                    }
+
+                    return propertySchemas;
+                }, defaults));
 
         List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
 
@@ -213,19 +205,19 @@ public class SchemaFactory {
         boolean namedComponent = SchemaImpl.isNamed(schema);
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
-            Schema implSchema = readClassSchema(index, cl,
+            Schema implSchema = readClassSchema(context,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     !namedComponent);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(annotation)) {
-            Schema implSchema = readClassSchema(index, cl,
+            Schema implSchema = readClassSchema(context,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     !namedComponent);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            Schema implSchema = readClassSchema(index, cl,
+            Schema implSchema = readClassSchema(context,
                     JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     false);
 
@@ -242,6 +234,15 @@ public class SchemaFactory {
         }
 
         return schema;
+    }
+
+    static boolean isAnnotationMissingOrHidden(AnnotationInstance annotation, Map<String, Object> defaults) {
+        if (annotation == null) {
+            return true;
+        }
+
+        // Schemas can be hidden. Skip if that's the case.
+        return Boolean.TRUE.equals(readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults));
     }
 
     /**
@@ -326,11 +327,11 @@ public class SchemaFactory {
      * Introspect into the given Class to generate a Schema model. The boolean indicates
      * whether this class type should be turned into a reference.
      *
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param type the implementation type of the item to scan
      * @param schemaReferenceSupported
      */
-    static Schema readClassSchema(IndexView index, ClassLoader cl, Type type, boolean schemaReferenceSupported) {
+    static Schema readClassSchema(final AnnotationScannerContext context, Type type, boolean schemaReferenceSupported) {
         if (type == null) {
             return null;
         }
@@ -344,15 +345,15 @@ public class SchemaFactory {
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
                 schema.items(
-                        readClassSchema(index, cl, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
+                        readClassSchema(context, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
             } else {
                 // Recurse using the type of the array elements
-                schema.items(readClassSchema(index, cl, componentType, schemaReferenceSupported));
+                schema.items(readClassSchema(context, componentType, schemaReferenceSupported));
             }
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = introspectClassToSchema(index, cl, type.asClassType(), schemaReferenceSupported);
+            schema = introspectClassToSchema(context, type.asClassType(), schemaReferenceSupported);
         }
         return schema;
     }
@@ -360,20 +361,21 @@ public class SchemaFactory {
     /**
      * Converts a Jandex type to a {@link Schema} model.
      * 
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param type the implementation type of the item to scan
      * @param extensions list of AnnotationScannerExtensions
      * @return Schema model
      */
-    public static Schema typeToSchema(IndexView index, ClassLoader cl, Type type, List<AnnotationScannerExtension> extensions) {
+    public static Schema typeToSchema(final AnnotationScannerContext context, Type type,
+            List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
 
         if (TypeUtil.isOptional(type)) {
             // Recurse using the optional's type
-            return typeToSchema(index, cl, TypeUtil.getOptionalType(type), extensions);
+            return typeToSchema(context, TypeUtil.getOptionalType(type), extensions);
         } else if (CurrentScannerInfo.isWrapperType(type)) {
             // Recurse using the wrapped type
-            return typeToSchema(index, cl, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);
+            return typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
@@ -382,17 +384,17 @@ public class SchemaFactory {
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.items(typeToSchema(index, cl, ArrayType.create(componentType, dimensions - 1), extensions));
+                schema.items(typeToSchema(context, ArrayType.create(componentType, dimensions - 1), extensions));
             } else {
                 // Recurse using the type of the array elements
-                schema.items(typeToSchema(index, cl, componentType, extensions));
+                schema.items(typeToSchema(context, componentType, extensions));
             }
         } else if (type.kind() == Type.Kind.CLASS) {
-            schema = introspectClassToSchema(index, cl, type.asClassType(), true);
+            schema = introspectClassToSchema(context, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = otherTypeToSchema(index, cl, type, extensions);
+            schema = otherTypeToSchema(context, type, extensions);
         }
 
         return schema;
@@ -404,16 +406,16 @@ public class SchemaFactory {
      * 
      * The given type must be found in the index.
      *
-     * @param index Jandex index containing the ClassInfo for the given enum type
+     * @param context scanning context
      * @param enumType type containing Java Enum constants
      * @return Schema model
      *
      * @see java.lang.reflect.Field#isEnumConstant()
      */
-    public static Schema enumToSchema(IndexView index, ClassLoader cl, Type enumType) {
-        IoLogging.log.enumProcessing(enumType);
+    public static Schema enumToSchema(final AnnotationScannerContext context, Type enumType) {
+        IoLogging.logger.enumProcessing(enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
-        ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
+        ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
         List<Object> enumeration = enumKlazz.fields()
@@ -428,7 +430,7 @@ public class SchemaFactory {
             defaults.put(SchemaConstant.PROP_TYPE, SchemaType.STRING);
             defaults.put(SchemaConstant.PROP_ENUMERATION, enumeration);
 
-            enumSchema = readSchema(index, cl, enumSchema, schemaAnnotation, enumKlazz, defaults);
+            enumSchema = readSchema(context, enumSchema, schemaAnnotation, enumKlazz, defaults);
         } else {
             enumSchema.setType(SchemaType.STRING);
             enumSchema.setEnumeration(enumeration);
@@ -441,11 +443,11 @@ public class SchemaFactory {
      * Introspect the given class type to generate a Schema model. The boolean indicates
      * whether this class type should be turned into a reference.
      *
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param ctype
      * @param schemaReferenceSupported
      */
-    private static Schema introspectClassToSchema(IndexView index, ClassLoader cl, ClassType ctype,
+    private static Schema introspectClassToSchema(final AnnotationScannerContext context, ClassType ctype,
             boolean schemaReferenceSupported) {
 
         if (CurrentScannerInfo.isScannerInternalResponse(ctype)) {
@@ -454,12 +456,15 @@ public class SchemaFactory {
 
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.has(ctype)) {
+        if (schemaReferenceSupported && schemaRegistry.hasRef(ctype)) {
             return schemaRegistry.lookupRef(ctype);
+        } else if (!schemaReferenceSupported && schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
+            // Clone the schema from the registry using mergeObjects
+            return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
         } else {
-            Schema schema = OpenApiDataObjectScanner.process(index, cl, ctype);
+            Schema schema = OpenApiDataObjectScanner.process(context, ctype);
             if (schemaReferenceSupported) {
-                return schemaRegistration(index, ctype, schema);
+                return schemaRegistration(context, ctype, schema);
             } else {
                 return schema;
             }
@@ -469,16 +474,18 @@ public class SchemaFactory {
     /**
      * Register the provided schema in the SchemaRegistry if allowed.
      * 
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param type the type of the schema to register
      * @param schema a schema
      * @return a reference to the registered schema or the input schema when registration is not allowed/possible
      */
-    static Schema schemaRegistration(IndexView index, Type type, Schema schema) {
+    public static Schema schemaRegistration(final AnnotationScannerContext context, Type type, Schema schema) {
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (allowRegistration(index, schemaRegistry, type, schema)) {
+        if (allowRegistration(context, schemaRegistry, type, schema)) {
             schema = schemaRegistry.register(type, schema);
+        } else if (schemaRegistry != null && schemaRegistry.hasRef(type)) {
+            schema = schemaRegistry.lookupRef(type);
         }
 
         return schema;
@@ -490,62 +497,61 @@ public class SchemaFactory {
      * is not already in the registry or the schema being registered is not already a
      * reference that has been registered.
      * 
-     * @param index
+     * @param context scanning context
      * @param registry
      * @param type
      * @param schema
      * @return true if the schema may be registered, otherwise false
      */
-    static boolean allowRegistration(IndexView index, SchemaRegistry registry, Type type, Schema schema) {
+    static boolean allowRegistration(final AnnotationScannerContext context, SchemaRegistry registry, Type type,
+            Schema schema) {
         if (schema == null || registry == null || !registry.isTypeRegistrationSupported(type, schema)) {
             return false;
         }
 
         /*
-         * Only register if the type is not already registered or the schema
-         * being registered is not the same as an existing reference already
-         * in the registry. Such a situation may occur if a downstream process
-         * registered the schema now being checked.
+         * Only register if the type is not already registered
          */
-        return !registry.has(type) || !registry.lookupRef(type).equals(schema);
+        return !registry.hasSchema(type);
     }
 
     /**
      * Reads an array of Class annotations to produce a list of {@link Schema} models.
      * 
-     * @param index the index of classes being scanned
+     * @param context scanning context
      * @param types the implementation types of the items to scan, never null
      */
-    private static List<Schema> readClassSchemas(IndexView index, ClassLoader cl, Type[] types) {
-        IoLogging.log.annotationsList("schema Class");
+    private static List<Schema> readClassSchemas(final AnnotationScannerContext context, Type[] types) {
+        IoLogging.logger.annotationsList("schema Class");
 
         return Arrays.stream(types)
-                .map(type -> readClassSchema(index, cl, type, true))
+                .map(type -> readClassSchema(context, type, true))
                 .collect(Collectors.toList());
     }
 
-    private static Schema otherTypeToSchema(IndexView index, ClassLoader cl, Type type,
+    private static Schema otherTypeToSchema(final AnnotationScannerContext context, Type type,
             List<AnnotationScannerExtension> extensions) {
-        if (TypeUtil.isA(index, cl, type, MutinyConstants.MULTI_TYPE)) {
+        if (TypeUtil.isA(context, type, MutinyConstants.MULTI_TYPE)) {
             // Treat as an Array
             Schema schema = new SchemaImpl().type(SchemaType.ARRAY);
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements
-            schema.items(typeToSchema(index, cl, componentType, extensions));
+            schema.items(typeToSchema(context, componentType, extensions));
             return schema;
         } else {
-            Type asyncType = resolveAsyncType(index, cl, type, extensions);
-            return schemaRegistration(index, asyncType, OpenApiDataObjectScanner.process(index, cl, asyncType));
+            Type asyncType = resolveAsyncType(context, type, extensions);
+            return schemaRegistration(context, asyncType, OpenApiDataObjectScanner.process(context, asyncType));
         }
     }
 
-    static Type resolveAsyncType(IndexView index, ClassLoader cl, Type type, List<AnnotationScannerExtension> extensions) {
+    static Type resolveAsyncType(final AnnotationScannerContext context, Type type,
+            List<AnnotationScannerExtension> extensions) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
             if (pType.arguments().size() == 1 &&
-                    (TypeUtil.isA(index, cl, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
-                            TypeUtil.isA(index, cl, type, MutinyConstants.UNI_TYPE))) {
+                    (TypeUtil.isA(context, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
+                            TypeUtil.isA(context, type, MutinyConstants.UNI_TYPE))) {
                 return pType.arguments().get(0);
             }
         }
@@ -562,7 +568,7 @@ public class SchemaFactory {
      * {@link org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping @DiscriminatorMapping}
      * annotations into a {@link Discriminator} model.
      *
-     * @param index set of scanned classes to be used for further introspection
+     * @param context scanning context
      * @param propertyName the OAS required value specified by the
      *        {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorProperty() discriminatorProperty}
      *        attribute.
@@ -571,8 +577,7 @@ public class SchemaFactory {
      *        given by {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorMapping()
      *        discriminatorMapping}
      */
-    private static Discriminator readDiscriminator(IndexView index,
-            ClassLoader cl,
+    private static Discriminator readDiscriminator(final AnnotationScannerContext context,
             String propertyName,
             AnnotationInstance[] annotation) {
 
@@ -592,7 +597,7 @@ public class SchemaFactory {
         }
 
         if (annotation != null) {
-            IoLogging.log.annotationsList("@DiscriminatorMapping");
+            IoLogging.logger.annotationsList("@DiscriminatorMapping");
 
             for (AnnotationInstance nested : annotation) {
                 String propertyValue = JandexUtil.stringValue(nested, SchemaConstant.PROP_VALUE);
@@ -602,7 +607,7 @@ public class SchemaFactory {
 
                 if (schemaValue != null) {
                     ClassType schemaType = schemaValue.asClass().asClassType();
-                    Schema schema = introspectClassToSchema(index, cl, schemaType, true);
+                    Schema schema = introspectClassToSchema(context, schemaType, true);
                     schemaRef = schema != null ? schema.getRef() : null;
                 } else {
                     schemaRef = null;

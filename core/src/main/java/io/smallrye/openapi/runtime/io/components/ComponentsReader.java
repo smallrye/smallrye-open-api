@@ -46,7 +46,7 @@ public class ComponentsReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Components");
+        IoLogging.logger.singleAnnotation("@Components");
         AnnotationInstance nested = annotationValue.asNested();
         Components components = new ComponentsImpl();
         // TODO for EVERY item below, handle the case where the annotation is ref-only.  then strip the ref path and use the final segment as the name
@@ -63,7 +63,7 @@ public class ComponentsReader {
                 ResponseReader.readResponsesMap(context, nested.value(ComponentsConstant.PROP_RESPONSES)));
         components.setSchemas(SchemaReader.readSchemas(context, nested.value(ComponentsConstant.PROP_SCHEMAS)));
         components.setSecuritySchemes(
-                SecuritySchemeReader.readSecuritySchemes(nested.value(ComponentsConstant.PROP_SECURITY_SCHEMES)));
+                SecuritySchemeReader.readSecuritySchemes(context, nested.value(ComponentsConstant.PROP_SECURITY_SCHEMES)));
 
         return components;
     }
@@ -78,7 +78,7 @@ public class ComponentsReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Components");
+        IoLogging.logger.singleJsonNode("Components");
         Components components = new ComponentsImpl();
         components.setCallbacks(CallbackReader.readCallbacks(node.get(ComponentsConstant.PROP_CALLBACKS)));
         components.setExamples(ExampleReader.readExamples(node.get(ComponentsConstant.PROP_EXAMPLES)));

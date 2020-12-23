@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -12,7 +13,6 @@ import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.Test;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent;
 import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource;
 
@@ -25,10 +25,10 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
     public void testNestedSchemasAddedToRegistry() throws IOException, JSONException {
         DotName parentName = componentize(NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
-        OpenAPIImpl oai = new OpenAPIImpl();
-        SchemaRegistry registry = SchemaRegistry.newInstance(nestingSupportConfig(), oai, index);
+        OpenAPI oai = context.getOpenApi();
+        SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(index, parentType);
+        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
         registry.register(parentType, result);
@@ -44,7 +44,7 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
                 NestedSchemaOnParameterResource.NestedParameterTestChild.class,
                 NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
 
         OpenAPI result = scanner.scan();
 
@@ -67,7 +67,8 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Foo.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Bar.class");
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), indexer.complete());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()),
+                indexer.complete());
 
         OpenAPI result = scanner.scan();
 

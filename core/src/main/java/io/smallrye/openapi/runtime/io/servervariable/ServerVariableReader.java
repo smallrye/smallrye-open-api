@@ -44,7 +44,7 @@ public class ServerVariableReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsArray("@ServerVariable");
+        IoLogging.logger.annotationsArray("@ServerVariable");
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (AnnotationInstance serverVariableAnno : nestedArray) {
@@ -66,7 +66,7 @@ public class ServerVariableReader {
         if (node == null) {
             return null;
         }
-        IoLogging.log.jsonNodeMap("ServerVariable");
+        IoLogging.logger.jsonNodeMap("ServerVariable");
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (Iterator<String> iterator = node.fieldNames(); iterator.hasNext();) {
             String fieldName = iterator.next();
@@ -89,7 +89,7 @@ public class ServerVariableReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@ServerVariable");
+        IoLogging.logger.singleAnnotation("@ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
         variable.setDescription(
                 JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
@@ -110,7 +110,7 @@ public class ServerVariableReader {
         if (node == null) {
             return null;
         }
-        IoLogging.log.singleJsonNode("ServerVariable");
+        IoLogging.logger.singleJsonNode("ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
         JsonNode enumNode = node.get(ServerVariableConstant.PROP_ENUM);
         if (enumNode != null && enumNode.isArray()) {

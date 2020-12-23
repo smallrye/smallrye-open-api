@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 public class SchemaFactoryTest extends IndexScannerTestBase {
 
@@ -23,8 +24,9 @@ public class SchemaFactoryTest extends IndexScannerTestBase {
         Type target = ParameterizedType.create(DotName.createSimple(CompletableFuture.class.getName()),
                 new Type[] { STRING_TYPE },
                 null);
-        Type result = SchemaFactory.resolveAsyncType(index, ClassLoaderUtil.getDefaultClassLoader(), target,
-                Collections.emptyList());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        Type result = SchemaFactory.resolveAsyncType(context, target, Collections.emptyList());
         assertEquals(STRING_TYPE, result);
     }
 

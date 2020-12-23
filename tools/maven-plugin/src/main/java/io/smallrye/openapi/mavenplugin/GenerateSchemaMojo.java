@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -181,11 +182,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
             try {
                 IndexView index = createIndex();
                 OpenApiDocument schema = generateSchema(index);
-                if (schema != null) {
-                    write(schema);
-                } else {
-                    getLog().warn("No Schema generated. Check that your code contains the MicroProfile OpenAPI Annotations");
-                }
+                write(schema);
             } catch (IOException ex) {
                 getLog().error(ex);
                 throw new MojoExecutionException("Could not generate OpenAPI Schema", ex); // TODO allow failOnError = false ?
@@ -226,17 +223,21 @@ public class GenerateSchemaMojo extends AbstractMojo {
         if (scanDependenciesDisable == null) {
             return false;
         }
-        return Boolean.valueOf(scanDependenciesDisable);
+        return scanDependenciesDisable;
     }
 
     // index the classes of this Maven module
     private Index indexModuleClasses() throws IOException {
         Indexer indexer = new Indexer();
-        List<Path> classFiles = Files.walk(classesDir.toPath())
-                .filter(path -> path.toString().endsWith(".class"))
-                .collect(Collectors.toList());
-        for (Path path : classFiles) {
-            indexer.index(Files.newInputStream(path));
+
+        try (Stream<Path> stream = Files.walk(classesDir.toPath())) {
+
+            List<Path> classFiles = stream
+                    .filter(path -> path.toString().endsWith(".class"))
+                    .collect(Collectors.toList());
+            for (Path path : classFiles) {
+                indexer.index(Files.newInputStream(path));
+            }
         }
         return indexer.complete();
     }

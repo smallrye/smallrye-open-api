@@ -16,7 +16,9 @@
 
 06000-06999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner.dataobject] (logging)
 
-07000-07999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner.dataobject] (messages)
+07000-07899 = smallrye-open-api [io.smallrye.openapi.runtime.scanner.dataobject] (messages)
+
+07900-07999 = smallrye-open-api [io.smallrye.openapi.runtime.scanner.spi] (logging)
 
 08000-08999 = smallrye-open-api [io.smallrye.openapi.runtime.util] (messages)
 

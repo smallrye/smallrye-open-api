@@ -16,7 +16,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String operationRef;
     private String operationId;
     private Map<String, Object> parameters;
@@ -29,7 +29,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -40,7 +40,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_LINK + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

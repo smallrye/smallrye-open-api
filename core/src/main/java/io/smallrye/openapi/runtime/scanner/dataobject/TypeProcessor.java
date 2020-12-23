@@ -20,6 +20,7 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -30,8 +31,8 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 public class TypeProcessor {
 
     private final Schema schema;
+    private final AnnotationScannerContext context;
     private final AugmentedIndexView index;
-    private final ClassLoader cl;
     private final AnnotationTarget annotationTarget;
     private final DataObjectDeque objectStack;
     private final TypeResolver typeResolver;
@@ -40,8 +41,7 @@ public class TypeProcessor {
     // Type may be changed.
     private Type type;
 
-    public TypeProcessor(AugmentedIndexView index,
-            ClassLoader cl,
+    public TypeProcessor(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             DataObjectDeque.PathEntry parentPathEntry, TypeResolver typeResolver,
             Type type,
@@ -52,8 +52,8 @@ public class TypeProcessor {
         this.parentPathEntry = parentPathEntry;
         this.type = type;
         this.schema = schema;
-        this.index = index;
-        this.cl = cl;
+        this.context = context;
+        this.index = context.getAugmentedIndex();
         this.annotationTarget = annotationTarget;
     }
 
@@ -64,6 +64,7 @@ public class TypeProcessor {
     public Type processType() {
         // If it's a terminal type.
         if (isTerminalType(type)) {
+            SchemaRegistry.checkRegistration(type, typeResolver, schema);
             return type;
         }
 
@@ -78,7 +79,7 @@ public class TypeProcessor {
         }
 
         if (type.kind() == Type.Kind.ARRAY) {
-            DataObjectLogging.log.processingArray(type);
+            DataObjectLogging.logger.processingArray(type);
             ArrayType arrayType = type.asArrayType();
 
             // Array-type schema
@@ -93,7 +94,7 @@ public class TypeProcessor {
                 pushToStack(type, arrSchema);
             }
 
-            arrSchema = SchemaRegistry.checkRegistration(arrayType.component(), typeResolver, arrSchema);
+            arrSchema = SchemaRegistry.registerReference(arrayType.component(), typeResolver, arrSchema);
 
             while (arrayType.dimensions() > 1) {
                 Schema parentArrSchema = new SchemaImpl();
@@ -118,7 +119,8 @@ public class TypeProcessor {
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
-            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(index, cl, type));
+            MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(context, type));
+            pushToStack(type);
             return STRING_TYPE;
         }
 
@@ -148,23 +150,23 @@ public class TypeProcessor {
         } else {
             // If the type is not in Jandex then we don't have easy access to it.
             // Future work could consider separate code to traverse classes reachable from this classloader.
-            DataObjectLogging.log.typeNotInJandexIndex(type);
+            DataObjectLogging.logger.typeNotInJandexIndex(type);
         }
 
         return type;
     }
 
     private Type readParameterizedType(ParameterizedType pType) {
-        DataObjectLogging.log.processingParametrizedType(pType);
+        DataObjectLogging.logger.processingParametrizedType(pType);
         Type typeRead = pType;
 
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
-            DataObjectLogging.log.processingTypeAs("Java Collection", "Array");
+            DataObjectLogging.logger.processingTypeAs("Java Collection", "Array");
             Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
 
-            if (TypeUtil.isA(index, cl, pType, SET_TYPE)) {
+            if (TypeUtil.isA(context, pType, SET_TYPE)) {
                 schema.setUniqueItems(Boolean.TRUE);
             }
 
@@ -181,7 +183,7 @@ public class TypeProcessor {
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
-            DataObjectLogging.log.processingTypeAs("Map", "object");
+            DataObjectLogging.logger.processingTypeAs("Map", "object");
             schema.type(Schema.SchemaType.OBJECT);
 
             if (pType.arguments().size() == 2) {
@@ -211,18 +213,19 @@ public class TypeProcessor {
             Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
-                propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
+                propsSchema = SchemaRegistry.registerReference(valueType, typeResolver, propsSchema);
             }
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
-                DataObjectLogging.log.processingEnum(type);
-                propsSchema = SchemaFactory.enumToSchema(index, cl, valueType);
+                DataObjectLogging.logger.processingEnum(type);
+                propsSchema = SchemaFactory.enumToSchema(context, valueType);
+                pushToStack(valueType);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 pushToStack(valueType, propsSchema);
             }
 
-            propsSchema = SchemaRegistry.checkRegistration(valueType, typeResolver, propsSchema);
+            propsSchema = SchemaRegistry.registerReference(valueType, typeResolver, propsSchema);
         }
 
         return propsSchema;
@@ -231,10 +234,10 @@ public class TypeProcessor {
     private Type resolveTypeVariable(Schema schema, Type fieldType, boolean pushToStack) {
         // Type variable (e.g. A in Foo<A>)
         Type resolvedType = typeResolver.getResolvedType(fieldType);
-        DataObjectLogging.log.resolvedType(fieldType, resolvedType);
+        DataObjectLogging.logger.resolvedType(fieldType, resolvedType);
 
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
-            DataObjectLogging.log.terminalType(resolvedType);
+            DataObjectLogging.logger.terminalType(resolvedType);
             TypeUtil.applyTypeAttributes(resolvedType, schema);
         } else if (pushToStack) {
             // Add resolved type to stack.
@@ -253,6 +256,6 @@ public class TypeProcessor {
     }
 
     private boolean isA(Type testSubject, Type test) {
-        return TypeUtil.isA(index, cl, testSubject, test);
+        return TypeUtil.isA(context, testSubject, test);
     }
 }

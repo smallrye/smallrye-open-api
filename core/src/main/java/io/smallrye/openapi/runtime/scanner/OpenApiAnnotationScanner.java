@@ -113,7 +113,7 @@ public class OpenApiAnnotationScanner {
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
         for (AnnotationScanner annotationScanner : annotationScanners) {
             if (filter == null || filter.length == 0 || Arrays.asList(filter).contains(annotationScanner.getName())) {
-                ScannerLogging.log.scanning(annotationScanner.getName());
+                ScannerLogging.logger.scanning(annotationScanner.getName());
                 CurrentScannerInfo.register(annotationScanner);
                 openApi = annotationScanner.scan(annotationScannerContext, openApi);
             }
@@ -128,14 +128,13 @@ public class OpenApiAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Creating a new instance of a registry which will be set on the thread context.
-        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext.getConfig(), openApi,
-                annotationScannerContext.getIndex());
+        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext);
 
         // Register custom schemas if available
         getCustomSchemaRegistry(annotationScannerContext.getConfig()).registerCustomSchemas(schemaRegistry);
 
         // Find all OpenAPIDefinition annotations at the package level
-        ScannerLogging.log.scanning("OpenAPI");
+        ScannerLogging.logger.scanning("OpenAPI");
         processPackageOpenAPIDefinitions(annotationScannerContext, openApi);
 
         processClassSchemas(annotationScannerContext);
@@ -147,6 +146,7 @@ public class OpenApiAnnotationScanner {
      * Scans all <code>@OpenAPIDefinition</code> annotations present on <code>package-info</code>
      * classes known to the scanner's index.
      * 
+     * @param context scanning context
      * @param oai the current OpenAPI result
      * @return the created OpenAPI
      */
@@ -192,8 +192,7 @@ public class OpenApiAnnotationScanner {
                 .stream()
                 .filter(this::annotatedClasses)
                 .map(annotation -> Type.create(annotation.target().asClass().name(), Type.Kind.CLASS))
-                .forEach(type -> SchemaFactory.typeToSchema(context.getIndex(), context.getClassLoader(), type,
-                        context.getExtensions()));
+                .forEach(type -> SchemaFactory.typeToSchema(context, type, context.getExtensions()));
     }
 
     private boolean annotatedClasses(AnnotationInstance annotation) {

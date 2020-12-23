@@ -38,7 +38,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedMethodOverridesParentSchema() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Feline.class,
                 Cat.class));
 
@@ -58,7 +58,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedFieldsOverridesInterfaceSchema() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Feline.class,
                 Cat.class));
 
@@ -75,7 +75,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedInterfaceMethodOverridesImplMethod() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Canine.class,
                 Dog.class));
 
@@ -96,7 +96,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testAnnotatedInterfaceMethodOverridesStaticField() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(AbstractAnimal.class,
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Reptile.class,
                 Lizard.class));
 
@@ -119,7 +119,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testBareInterface() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(MySchema.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(MySchema.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(MySchema.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -150,7 +150,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testJacksonPropertyOrderDefault() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(JacksonPropertyOrderDefault.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderDefault.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderDefault.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -163,7 +163,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testJacksonPropertyOrderCustomName() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(JacksonPropertyOrderCustomName.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderCustomName.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderCustomName.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -177,22 +177,22 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testJaxbCustomPropertyOrder() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(JaxbCustomPropertyOrder.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JaxbCustomPropertyOrder.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JaxbCustomPropertyOrder.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
                 null);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
-        assertEquals("theName", iter.next().getValue().getPropertyName());
-        assertEquals("comment2ActuallyFirst", iter.next().getValue().getPropertyName());
         assertEquals("comment", iter.next().getValue().getPropertyName());
         assertEquals("name2", iter.next().getValue().getPropertyName());
+        assertEquals("comment2", iter.next().getValue().getPropertyName());
+        assertEquals("name", iter.next().getValue().getPropertyName());
     }
 
     @Test
     public void testNonJavaBeansPropertyAccessor() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(NonJavaBeanAccessorProperty.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanAccessorProperty.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanAccessorProperty.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -209,7 +209,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testNonJavaBeansPropertyMutator() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(NonJavaBeanMutatorProperty.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanMutatorProperty.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanMutatorProperty.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -226,7 +226,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testOneSidedPropertiesHidden() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(OneSidedProperties.class, OneSidedParent.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(OneSidedProperties.class, OneSidedParent.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(OneSidedProperties.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -257,7 +257,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testXmlAccessTransientField() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(XmlTransientField.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientField.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientField.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -274,7 +274,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testXmlAccessTransientClass() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(XmlTransientClass.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientClass.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientClass.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -297,7 +297,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testXmlAccessPublicMember() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(XmlAccessTypePublicMember.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePublicMember.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePublicMember.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -320,7 +320,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testXmlAccessTypeFieldOnly() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(XmlAccessTypeFieldOnly.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypeFieldOnly.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypeFieldOnly.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
@@ -339,7 +339,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     public void testXmlAccessTypePropertyOnly() {
-        AugmentedIndexView index = new AugmentedIndexView(indexOf(XmlAccessTypePropertyOnly.class));
+        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePropertyOnly.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePropertyOnly.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,

@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,7 +63,7 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
                 ResultList.class,
                 POJO.class,
                 List.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.generic-model-types.json", result);

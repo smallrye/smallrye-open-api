@@ -46,7 +46,7 @@ public class ExtensionReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Extension");
+        IoLogging.logger.annotationsMap("@Extension");
         Map<String, Object> e = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
@@ -65,13 +65,23 @@ public class ExtensionReader {
      */
     public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
             final List<AnnotationInstance> extensions) {
-        IoLogging.log.annotationsMap("@Extension");
+        IoLogging.logger.annotationsMap("@Extension");
         Map<String, Object> e = new LinkedHashMap<>();
         for (AnnotationInstance annotation : extensions) {
             String extName = JandexUtil.stringValue(annotation, ExtensionConstant.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
         return e;
+    }
+
+    public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
+            final AnnotationInstance extensible) {
+        AnnotationTarget target = extensible.target();
+        // target may be null - checked by JandexUtil methods
+        List<AnnotationInstance> extensions = JandexUtil.getRepeatableAnnotation(target,
+                ExtensionConstant.DOTNAME_EXTENSION,
+                ExtensionConstant.DOTNAME_EXTENSIONS);
+        return extensions.isEmpty() ? null : readExtensions(context, extensions);
     }
 
     /**
@@ -87,7 +97,7 @@ public class ExtensionReader {
      */
     public static Object readExtensionValue(final AnnotationScannerContext context, final String name,
             final AnnotationInstance annotationInstance) {
-        IoLogging.log.annotation("@Extension");
+        IoLogging.logger.annotation("@Extension");
         String extValue = JandexUtil.stringValue(annotationInstance, ExtensionConstant.PROP_VALUE);
         boolean parseValue = JandexUtil.booleanValueWithDefault(annotationInstance,
                 ExtensionConstant.PROP_PARSE_VALUE);

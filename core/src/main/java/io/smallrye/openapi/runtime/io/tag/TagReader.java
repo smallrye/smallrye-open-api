@@ -19,6 +19,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -39,17 +40,18 @@ public class TagReader {
      * Reads any Tag annotations.The annotation
      * value is an array of Tag annotations.
      * 
+     * @param context scanning context
      * @param annotationValue an array of {@literal @}Tag annotations
      * @return List of Tag models
      */
-    public static Optional<List<Tag>> readTags(final AnnotationValue annotationValue) {
+    public static Optional<List<Tag>> readTags(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            IoLogging.log.annotationsArray("@Tag");
+            IoLogging.logger.annotationsArray("@Tag");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Tag> tags = new ArrayList<>();
             for (AnnotationInstance tagAnno : nestedArray) {
                 if (!JandexUtil.isRef(tagAnno)) {
-                    tags.add(readTag(tagAnno));
+                    tags.add(readTag(context, tagAnno));
                 }
             }
             return Optional.of(tags);
@@ -65,7 +67,7 @@ public class TagReader {
      */
     public static Optional<List<Tag>> readTags(final JsonNode node) {
         if (node != null && node.isArray()) {
-            IoLogging.log.jsonArray("Tag");
+            IoLogging.logger.jsonArray("Tag");
             ArrayNode nodes = (ArrayNode) node;
             List<Tag> rval = new ArrayList<>(nodes.size());
             for (JsonNode tagNode : nodes) {
@@ -79,17 +81,20 @@ public class TagReader {
     /**
      * Reads a single Tag annotation.
      * 
+     * @param context scanning context
      * @param annotationInstance {@literal @}Tag annotation, must not be null
      * @return Tag model
      */
-    public static Tag readTag(final AnnotationInstance annotationInstance) {
+    public static Tag readTag(final AnnotationScannerContext context, final AnnotationInstance annotationInstance) {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
-        IoLogging.log.singleAnnotation("@Tag");
+        IoLogging.logger.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
         tag.setName(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_NAME));
         tag.setDescription(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
         tag.setExternalDocs(
-                ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+                ExternalDocsReader.readExternalDocs(context,
+                        annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+        tag.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return tag;
     }
 
@@ -100,7 +105,7 @@ public class TagReader {
      * @return Tag model
      */
     private static Tag readTag(final JsonNode node) {
-        IoLogging.log.singleJsonNode("Tag");
+        IoLogging.logger.singleJsonNode("Tag");
         Tag tag = new TagImpl();
         tag.setName(JsonUtil.stringProperty(node, TagConstant.PROP_NAME));
         tag.setDescription(JsonUtil.stringProperty(node, TagConstant.PROP_DESCRIPTION));

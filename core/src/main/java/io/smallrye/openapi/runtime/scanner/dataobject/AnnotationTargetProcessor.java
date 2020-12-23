@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static io.smallrye.openapi.api.constants.JaxbConstants.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -7,17 +9,17 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
-import org.jboss.jandex.AnnotationInstance;
-import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.Type;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
+import org.jboss.jandex.*;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -28,8 +30,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class AnnotationTargetProcessor implements RequirementHandler {
 
-    private final AugmentedIndexView index;
-    private final ClassLoader cl;
+    private final AnnotationScannerContext context;
     private final DataObjectDeque objectStack;
     private final DataObjectDeque.PathEntry parentPathEntry;
     private final TypeResolver typeResolver;
@@ -38,16 +39,14 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     // May be null if field is unannotated.
     private final AnnotationTarget annotationTarget;
 
-    private AnnotationTargetProcessor(AugmentedIndexView index,
-            ClassLoader cl,
+    private AnnotationTargetProcessor(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             DataObjectDeque.PathEntry parentPathEntry,
             TypeResolver typeResolver,
             AnnotationTarget annotationTarget,
             Type entityType) {
 
-        this.index = index;
-        this.cl = cl;
+        this.context = context;
         this.objectStack = objectStack;
         this.parentPathEntry = parentPathEntry;
         this.typeResolver = typeResolver;
@@ -55,25 +54,23 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         this.annotationTarget = annotationTarget;
     }
 
-    public static Schema process(AugmentedIndexView index,
-            ClassLoader cl,
+    public static Schema process(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             TypeResolver typeResolver,
             DataObjectDeque.PathEntry parentPathEntry) {
 
-        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, cl, objectStack, parentPathEntry, typeResolver,
+        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(context, objectStack, parentPathEntry, typeResolver,
                 typeResolver.getAnnotationTarget(), typeResolver.getUnresolvedType());
         return fp.processField();
     }
 
-    public static Schema process(AugmentedIndexView index,
-            ClassLoader cl,
+    public static Schema process(final AnnotationScannerContext context,
             DataObjectDeque objectStack,
             TypeResolver typeResolver,
             DataObjectDeque.PathEntry parentPathEntry,
             Type type) {
-        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(index, cl, objectStack, parentPathEntry, typeResolver,
-                index.getClass(type), type);
+        AnnotationTargetProcessor fp = new AnnotationTargetProcessor(context, objectStack, parentPathEntry, typeResolver,
+                context.getAugmentedIndex().getClass(type), type);
         return fp.processField();
     }
 
@@ -98,7 +95,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     /**
      * This method will generate a schema for the {@link #annotationTarget} containing one
      * of the following :
-     * 
+     *
      * <ol>
      * <li>A schema composed (using {@link Schema#allOf(List) allOf}) of a <code>$ref</code> to the schema of the
      * {@link #entityType}
@@ -112,10 +109,10 @@ public class AnnotationTargetProcessor implements RequirementHandler {
      * <li>A schema containing only the attributes scanned or derived from the {@link #annotationTarget} which will include
      * attributes
      * of the {@link #entityType} if it is not able to be registered via
-     * {@link SchemaRegistry#checkRegistration(Type, TypeResolver, Schema) checkRegistration}.
+     * {@link SchemaRegistry#registerReference(Type, TypeResolver, Schema) checkRegistration}.
      * </li>
      * </ol>
-     * 
+     *
      * @return the individual or composite schema for the annotationTarget used to create this {@link AnnotationTargetProcessor}
      */
     Schema processField() {
@@ -132,7 +129,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
         } else {
             // Process the type of the field to derive the typeSchema
-            TypeProcessor typeProcessor = new TypeProcessor(index, cl, objectStack, parentPathEntry, typeResolver, entityType,
+            TypeProcessor typeProcessor = new TypeProcessor(context, objectStack, parentPathEntry, typeResolver, entityType,
                     new SchemaImpl(), annotationTarget);
 
             // Type could be replaced (e.g. generics)
@@ -145,7 +142,15 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
             Type registrationType = TypeUtil.isOptional(entityType) ? fieldType : entityType;
-            registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, typeResolver, typeSchema);
+
+            if (typeSchema.getType() != SchemaType.ARRAY) {
+                // Only register a reference to the type schema. The full schema will be added by subsequent
+                // items on the stack (if not already present in the registry).
+                registeredTypeSchema = SchemaRegistry.registerReference(registrationType, typeResolver, typeSchema);
+            } else {
+                // Allow registration of arrays since we may not encounter a List<CurrentType> again.
+                registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, typeResolver, typeSchema);
+            }
         }
 
         Schema fieldSchema;
@@ -166,6 +171,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (fieldSchema.getNullable() == null && TypeUtil.isOptional(entityType)) {
             fieldSchema.setNullable(Boolean.TRUE);
         }
+
+        processFieldAnnotations(fieldSchema, typeResolver);
 
         // Only when registration was successful (ref is present and the registered type is a different instance)
         if (registrationSuccessful(typeSchema, registeredTypeSchema)) {
@@ -188,10 +195,92 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         return fieldSchema;
     }
 
+    private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
+        String name = typeResolver.getBeanPropertyName();
+        FieldInfo field = typeResolver.getField();
+        if (field != null) {
+            if (processXmlAttr(name,
+                    fieldSchema,
+                    field.annotation(XML_ATTRIBUTE),
+                    field.annotation(XML_ELEMENT),
+                    field.annotation(XML_WRAPPERELEMENT))) {
+                return;
+            }
+        }
+        MethodInfo readMethod = typeResolver.getReadMethod();
+        if (readMethod != null) {
+            if (processXmlAttr(name,
+                    fieldSchema,
+                    readMethod.annotation(XML_ATTRIBUTE),
+                    readMethod.annotation(XML_ELEMENT),
+                    readMethod.annotation(XML_WRAPPERELEMENT))) {
+                return;
+            }
+        }
+        MethodInfo writeMethod = typeResolver.getWriteMethod();
+        if (writeMethod != null) {
+            if (processXmlAttr(name,
+                    fieldSchema,
+                    writeMethod.annotation(XML_ATTRIBUTE),
+                    writeMethod.annotation(XML_ELEMENT),
+                    writeMethod.annotation(XML_WRAPPERELEMENT))) {
+                return;
+            }
+        }
+    }
+
+    private boolean processXmlAttr(
+            String name,
+            Schema fieldSchema,
+            AnnotationInstance xmlAttr,
+            AnnotationInstance xmlElement,
+            AnnotationInstance xmlWrapper) {
+        if (xmlAttr == null && xmlWrapper == null && xmlElement == null) {
+            return false;
+        }
+
+        if (xmlAttr != null) {
+            setXmlIfEmpty(fieldSchema);
+            fieldSchema.getXml().attribute(true);
+            setXmlName(fieldSchema, name, xmlAttr);
+        }
+        if (xmlWrapper != null) {
+            setXmlIfEmpty(fieldSchema);
+            fieldSchema.getXml().wrapped(true);
+            setXmlName(fieldSchema, name, xmlWrapper);
+            if (xmlElement != null) {
+                setXmlName(fieldSchema.getItems(), name, xmlElement);
+                return true;
+            }
+        }
+        if (xmlElement != null) {
+            setXmlName(fieldSchema, name, xmlElement);
+        }
+        return true;
+    }
+
+    private void setXmlIfEmpty(Schema schema) {
+        if (schema.getXml() != null) {
+            return;
+        }
+        schema.setXml(new XMLImpl());
+    }
+
+    private void setXmlName(Schema fieldSchema, String realName, AnnotationInstance xmlAttr) {
+        AnnotationValue name = xmlAttr.value(PROP_NAME);
+        if (name != null) {
+            String annName = name.asString();
+            if (!annName.equals(realName)) {
+                setXmlIfEmpty(fieldSchema);
+                fieldSchema.getXml().name(annName);
+            }
+        }
+    }
+
     /**
      * A successful registration results in the registered type schema being a distinct
      * Schema instance containing only a <code>ref</code> to the original type schema.
-     * 
+     *
      * @param typeSchema schema for a type
      * @param registeredTypeSchema a (potential) reference schema to typeSchema
      * @return true if the schemas are not the same (i.e. registration occurred), otherwise false
@@ -201,7 +290,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private Schema readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation, Type postProcessedField) {
-        DataObjectLogging.log.processingFieldAnnotation(annotation, propertyKey);
+        DataObjectLogging.logger.processingFieldAnnotation(annotation, propertyKey);
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
@@ -220,13 +309,13 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
 
         // readSchema *may* replace the existing schema, so we must assign.
-        return SchemaFactory.readSchema(index, cl, new SchemaImpl(), annotation, defaults);
+        return SchemaFactory.readSchema(context, new SchemaImpl(), annotation, defaults);
     }
 
     /**
      * Determine if the fieldSchema defines any attributes that are not present or
      * different from the attributes in the typeSchema.
-     * 
+     *
      * @param fieldSchema
      * @param typeSchema
      * @return true if fieldSchema defines new attributes or different attributes from typeSchema, otherwise false
@@ -253,7 +342,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     /**
      * Get accessors/suppliers for all schema attributes that are relevant to comparing two
      * schemas.
-     * 
+     *
      * @param schema the schema
      * @return a list of suppliers (i.e. getters) for the schema's attributes
      */

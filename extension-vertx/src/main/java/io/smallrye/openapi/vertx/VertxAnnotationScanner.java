@@ -172,7 +172,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processDefinitionAnnotation(context, routeClass, openApi);
 
         // Process @SecurityScheme annotations
-        processSecuritySchemeAnnotation(routeClass, openApi);
+        processSecuritySchemeAnnotation(context, routeClass, openApi);
 
         // Process @Server annotations
         processServerAnnotation(routeClass, openApi);
@@ -200,7 +200,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             List<Parameter> locatorPathParameters) {
 
         // Process tags (both declarations and references).
-        Set<String> tagRefs = processTags(resourceClass, openApi, false);
+        Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
             if (methodInfo.annotations().size() > 0) {
@@ -255,9 +255,9 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             VertxLogging.log.processingMethod(method.toString());
 
             // Figure out the current @Produces and @Consumes (if any)
-            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, MediaTypeProperty.consumes,
+            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
                     context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
-            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, MediaTypeProperty.produces,
+            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
                     context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
             // Process any @Operation annotation
@@ -268,13 +268,13 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             final Operation operation = maybeOperation.get();
 
             // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-            processOperationTags(method, openApi, resourceTags, operation);
+            processOperationTags(context, method, openApi, resourceTags, operation);
 
             // Process @Parameter annotations.
             PathItem pathItem = new PathItemImpl();
             Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-            ResourceParameters params = ParameterProcessor.process(context.getIndex(), context.getClassLoader(), resourceClass,
+            ResourceParameters params = VertxParameterProcessor.process(context, resourceClass,
                     method, reader,
                     context.getExtensions());
             operation.setParameters(params.getOperationParameters());
@@ -335,17 +335,17 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         return true;
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, MediaTypeProperty property, String[] defaultValue) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
         DotName annotationName = VertxConstants.ROUTE;
 
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
-        if (annotation == null || annotation.value(property.name()) == null) {
+        if (annotation == null || annotation.value(property) == null) {
             annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
         }
 
         if (annotation != null) {
-            AnnotationValue annotationValue = annotation.value(property.name());
+            AnnotationValue annotationValue = annotation.value(property);
 
             if (annotationValue != null) {
                 return Optional.of(annotationValue.asStringArray());
@@ -357,8 +357,4 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         return Optional.empty();
     }
 
-    enum MediaTypeProperty {
-        consumes,
-        produces
-    }
 }

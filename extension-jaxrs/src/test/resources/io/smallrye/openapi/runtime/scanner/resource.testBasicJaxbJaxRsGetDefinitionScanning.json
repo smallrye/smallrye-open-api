@@ -1,0 +1,130 @@
+{
+  "openapi" : "3.0.3",
+  "paths" : {
+    "/greeting/helloPathVariable1/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariable2/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/JaxbGreeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greeting/helloPathVariable3/{name}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/JaxbWithNameGreeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "JaxbGreeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "JaxbWithNameGreeting" : {
+        "type" : "object",
+        "properties" : {
+          "books" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "xml": {
+                "name": "item"
+              }
+            },
+            "xml": {
+              "wrapped": true,
+              "name": "books-array"
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "xml" : {
+              "attribute" : true
+            }
+          },
+          "title" : {
+            "type" : "string",
+            "xml": {
+              "name": "xml-title"
+            }
+          }
+        },
+        "xml" : {
+          "name" : "MyGreeting"
+        }
+      }
+    }
+  }
+}

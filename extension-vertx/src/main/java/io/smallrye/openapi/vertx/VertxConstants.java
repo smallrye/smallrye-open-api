@@ -1,13 +1,14 @@
 package io.smallrye.openapi.vertx;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.jandex.DotName;
 
 /**
  * Constants related to Vertx
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class VertxConstants {
@@ -28,10 +29,16 @@ public class VertxConstants {
     public static final DotName R_HTTP_SERVER_RESPONSE = DotName
             .createSimple("io.vertx.reactivex.core.http.HttpServerResponse");
 
-    public static final List<DotName> INTERNAL_PARAMETERS = Arrays.asList(new DotName[] {
-            ROUTING_CONTEXT, R_ROUTING_CONTEXT, ROUTING_EXCHANGE, HTTP_SERVER_REQUEST, HTTP_SERVER_RESPONSE,
-            R_HTTP_SERVER_REQUEST, R_HTTP_SERVER_RESPONSE
-    });
+    public static final List<DotName> INTERNAL_PARAMETERS = Collections.unmodifiableList(Arrays.asList(ROUTING_CONTEXT,
+            R_ROUTING_CONTEXT,
+            ROUTING_EXCHANGE,
+            HTTP_SERVER_REQUEST,
+            HTTP_SERVER_RESPONSE,
+            R_HTTP_SERVER_REQUEST,
+            R_HTTP_SERVER_RESPONSE));
+
+    public static final String ROUTE_CONSUMES = "consumes";
+    public static final String ROUTE_PRODUCES = "produces";
 
     private VertxConstants() {
     }

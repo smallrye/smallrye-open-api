@@ -45,7 +45,7 @@ public class ContentReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Content");
+        IoLogging.logger.singleAnnotation("@Content");
         Content content = new ContentImpl();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {

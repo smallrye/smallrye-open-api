@@ -42,7 +42,7 @@ public class SecurityRequirementReader {
      */
     public static Optional<List<SecurityRequirement>> readSecurityRequirements(final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            IoLogging.log.annotationsArray("@SecurityRequirement");
+            IoLogging.logger.annotationsArray("@SecurityRequirement");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<SecurityRequirement> requirements = new ArrayList<>();
             for (AnnotationInstance requirementAnno : nestedArray) {
@@ -64,7 +64,7 @@ public class SecurityRequirementReader {
      */
     public static Optional<List<SecurityRequirement>> readSecurityRequirements(final JsonNode node) {
         if (node != null && node.isArray()) {
-            IoLogging.log.jsonArray("SecurityRequirement");
+            IoLogging.logger.jsonArray("SecurityRequirement");
             List<SecurityRequirement> requirements = new ArrayList<>(node.size());
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode arrayItem : arrayNode) {

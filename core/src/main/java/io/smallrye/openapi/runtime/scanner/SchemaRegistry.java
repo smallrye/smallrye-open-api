@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -28,6 +29,7 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -49,23 +51,19 @@ public class SchemaRegistry {
      * to {@link #currentInstance()}. Additional calls of this method will
      * replace the registry in the current thread context with a new instance.
      *
-     * @param config
-     *        current runtime configuration
-     * @param oai
-     *        the OpenAPI being constructed by the scan
-     * @param index
-     *        indexed class information
+     * @param context
+     *        current scanner context
      * @return the registry
      */
-    public static SchemaRegistry newInstance(OpenApiConfig config, OpenAPI oai, IndexView index) {
-        SchemaRegistry registry = new SchemaRegistry(config, oai, index);
+    public static SchemaRegistry newInstance(AnnotationScannerContext context) {
+        SchemaRegistry registry = new SchemaRegistry(context);
         current.set(registry);
         return registry;
     }
 
     /**
      * Retrieve the {@link SchemaRegistry} previously created by
-     * {@link SchemaRegistry#newInstance(OpenApiConfig, OpenAPI, IndexView)
+     * {@link SchemaRegistry#newInstance(AnnotationScannerContext)
      * newInstance} for the current thread, or <code>null</code> if none has yet
      * been created.
      *
@@ -92,7 +90,7 @@ public class SchemaRegistry {
      * </ul>
      *
      * If eligible, schema references are enabled by MP Config property
-     * <code>mp.openapi.extensions.schema-references.enable</code>, and the
+     * <code>mp.openapi.extensions.smallrye.schema-references.enable</code>, and the
      * resolved type is available in the registry's {@link IndexView} then the
      * schema can be registered.
      *
@@ -110,6 +108,45 @@ public class SchemaRegistry {
      *         to the schema registered for the given Type
      */
     public static Schema checkRegistration(Type type, TypeResolver resolver, Schema schema) {
+        return register(type, resolver, schema, (registry, key) -> registry.register(key, schema, null));
+    }
+
+    /**
+     * Attempt to register ONLY a reference to entityType using the typeResolver.
+     * The eligible kinds of types are
+     *
+     * <ul>
+     * <li>{@link org.jboss.jandex.Type.Kind#CLASS CLASS}
+     * <li>{@link org.jboss.jandex.Type.Kind#PARAMETERIZED_TYPE
+     * PARAMETERIZED_TYPE}
+     * <li>{@link org.jboss.jandex.Type.Kind#TYPE_VARIABLE TYPE_VARIABLE}
+     * <li>{@link org.jboss.jandex.Type.Kind#WILDCARD_TYPE WILDCARD_TYPE}
+     * </ul>
+     *
+     * If eligible, schema references are enabled by MP Config property
+     * <code>mp.openapi.extensions.smallrye.schema-references.enable</code>, and the
+     * resolved type is available in the registry's {@link IndexView} then the
+     * schema reference can be registered.
+     *
+     * Only if the type has not already been registered earlier will it be
+     * added.
+     *
+     * @param type
+     *        the {@link Type} the {@link Schema} applies to
+     * @param resolver
+     *        a {@link TypeResolver} that will be used to resolve
+     *        parameterized and wildcard types
+     * @param schema
+     *        {@link Schema} to add to the registry
+     * @return the same schema if not eligible for registration, or a reference
+     *         to the schema registered for the given Type
+     */
+    public static Schema registerReference(Type type, TypeResolver resolver, Schema schema) {
+        return register(type, resolver, schema, (registry, key) -> registry.registerReference(key));
+    }
+
+    static Schema register(Type type, TypeResolver resolver, Schema schema,
+            BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
         Type resolvedType;
 
         if (type.kind() == Kind.PARAMETERIZED_TYPE) {
@@ -136,16 +173,46 @@ public class SchemaRegistry {
 
         TypeKey key = new TypeKey(resolvedType);
 
-        if (registry.has(key)) {
+        if (registry.hasRef(key)) {
             schema = registry.lookupRef(key);
         } else if (!registry.isTypeRegistrationSupported(resolvedType, schema)
                 || registry.index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
-            schema = registry.register(key, schema, null);
+            schema = registrationAction.apply(registry, key);
         }
 
         return schema;
+    }
+
+    /**
+     * Convenience method to check if the current thread's <code>SchemaRegistry</code>
+     * contains a schema for the given type (which may require type resolution using resolver).
+     * 
+     * @param type type to check for existence of schema
+     * @param resolver resolver for type parameter
+     * @return true when schema references are enabled and the type is present in the registry, otherwise false
+     */
+    public static boolean hasSchema(Type type, TypeResolver resolver) {
+        SchemaRegistry registry = currentInstance();
+
+        if (registry == null) {
+            return false;
+        }
+
+        Type resolvedType;
+
+        if (resolver != null) {
+            if (type.kind() == Kind.PARAMETERIZED_TYPE) {
+                resolvedType = resolver.getResolvedType(type.asParameterizedType());
+            } else {
+                resolvedType = resolver.getResolvedType(type);
+            }
+        } else {
+            resolvedType = type;
+        }
+
+        return registry.hasSchema(resolvedType);
     }
 
     /**
@@ -165,6 +232,7 @@ public class SchemaRegistry {
         }
     }
 
+    private final AnnotationScannerContext context;
     private final OpenApiConfig config;
     private final OpenAPI oai;
     private final IndexView index;
@@ -172,10 +240,11 @@ public class SchemaRegistry {
     private final Map<TypeKey, GeneratedSchemaInfo> registry = new LinkedHashMap<>();
     private final Set<String> names = new LinkedHashSet<>();
 
-    private SchemaRegistry(OpenApiConfig config, OpenAPI oai, IndexView index) {
-        this.config = config;
-        this.oai = oai;
-        this.index = index;
+    private SchemaRegistry(AnnotationScannerContext context) {
+        this.context = context;
+        this.config = context.getConfig();
+        this.oai = context.getOpenApi();
+        this.index = context.getAugmentedIndex();
 
         /*
          * If anything has been added in the component scan, add the names here
@@ -198,13 +267,13 @@ public class SchemaRegistry {
             try {
                 schema = OpenApiParser.parseSchema(jsonSchema);
             } catch (Exception e) {
-                ScannerLogging.log.errorParsingSchema(className);
+                ScannerLogging.logger.errorParsingSchema(className);
                 return;
             }
 
             Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
             this.register(new TypeKey(type), schema, ((SchemaImpl) schema).getName());
-            ScannerLogging.log.configSchemaRegistered(className);
+            ScannerLogging.logger.configSchemaRegistered(className);
         });
     }
 
@@ -222,12 +291,23 @@ public class SchemaRegistry {
     public Schema register(Type entityType, Schema schema) {
         TypeKey key = new TypeKey(entityType);
 
-        if (has(key)) {
+        if (hasRef(key)) {
             // This is a replacement registration
             remove(key);
         }
 
         return register(key, schema, null);
+    }
+
+    private Schema registerReference(TypeKey key) {
+        String name = deriveName(key, null);
+        Schema schemaRef = new SchemaImpl();
+        schemaRef.setRef(OpenApiConstants.REF_PREFIX_SCHEMA + name);
+
+        registry.put(key, new GeneratedSchemaInfo(name, null, schemaRef));
+        names.add(name);
+
+        return schemaRef;
     }
 
     /**
@@ -287,12 +367,20 @@ public class SchemaRegistry {
         return lookupRef(new TypeKey(instanceType));
     }
 
-    public boolean has(Type instanceType) {
-        return has(new TypeKey(instanceType));
+    public boolean hasRef(Type instanceType) {
+        return hasRef(new TypeKey(instanceType));
+    }
+
+    public Schema lookupSchema(Type instanceType) {
+        return lookupSchema(new TypeKey(instanceType));
+    }
+
+    public boolean hasSchema(Type instanceType) {
+        return hasSchema(new TypeKey(instanceType));
     }
 
     public boolean isTypeRegistrationSupported(Type type, Schema schema) {
-        if (config == null || !TypeUtil.allowRegistration(index, type)) {
+        if (config == null || !TypeUtil.allowRegistration(context, type)) {
             return false;
         }
         if (!config.arrayReferencesEnable()) {
@@ -311,8 +399,22 @@ public class SchemaRegistry {
         return info.schemaRef;
     }
 
-    private boolean has(TypeKey key) {
+    private Schema lookupSchema(TypeKey key) {
+        GeneratedSchemaInfo info = registry.get(key);
+
+        if (info == null) {
+            throw ScannerMessages.msg.notRegistered(key.type.name());
+        }
+
+        return info.schema;
+    }
+
+    private boolean hasRef(TypeKey key) {
         return registry.containsKey(key);
+    }
+
+    private boolean hasSchema(TypeKey key) {
+        return registry.containsKey(key) && registry.get(key).schema != null;
     }
 
     private void remove(TypeKey key) {

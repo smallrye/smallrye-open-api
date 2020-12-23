@@ -18,7 +18,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class ParameterImpl extends ExtensibleImpl<Parameter> implements Parameter, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String name;
     private In in;
     private String description;
@@ -38,7 +38,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -49,7 +49,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_PARAMETER + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

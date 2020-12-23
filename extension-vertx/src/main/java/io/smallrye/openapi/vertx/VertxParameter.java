@@ -3,10 +3,12 @@ package io.smallrye.openapi.vertx;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
+
 /**
  * Meta information for the Vert.x Parameter annotations relating them
  * to the In and Style attributes of Parameters.
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public enum VertxParameter {
@@ -14,19 +16,11 @@ public enum VertxParameter {
     QUERY_PARAM(VertxConstants.PARAM, Parameter.In.QUERY, null, Parameter.Style.FORM),
     HEADER_PARAM(VertxConstants.HEADER_PARAM, Parameter.In.HEADER, null, Parameter.Style.SIMPLE);
 
-    private final DotName name;
-    final Parameter.In location;
-    final Parameter.Style style;
-    final Parameter.Style defaultStyle;
-    final String mediaType;
+    final FrameworkParameter parameter;
 
     private VertxParameter(DotName name, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle,
             String mediaType) {
-        this.name = name;
-        this.location = location;
-        this.style = style;
-        this.defaultStyle = defaultStyle;
-        this.mediaType = mediaType;
+        this.parameter = new FrameworkParameter(name, location, style, defaultStyle, mediaType);
     }
 
     private VertxParameter(DotName name, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle) {
@@ -35,7 +29,7 @@ public enum VertxParameter {
 
     public static boolean isParameter(DotName annotationName) {
         for (VertxParameter value : values()) {
-            if (value.name.equals(annotationName)) {
+            if (value.parameter.getName().equals(annotationName)) {
                 return true;
             }
         }

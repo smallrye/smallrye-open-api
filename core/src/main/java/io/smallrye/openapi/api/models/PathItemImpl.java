@@ -17,7 +17,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String summary;
     private String description;
     private Operation get;
@@ -36,7 +36,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public String getRef() {
-        return $ref;
+        return ref;
     }
 
     /**
@@ -44,7 +44,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setRef(String ref) {
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**
@@ -231,6 +231,45 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
         addOperationToMap(HttpMethod.PATCH, this.patch, ops);
         addOperationToMap(HttpMethod.TRACE, this.trace, ops);
         return ops;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.PathItem#setOperation(PathItem.HttpMethod, Operation)
+     */
+    public void setOperation(PathItem.HttpMethod httpMethod, Operation operation) {
+        switch (httpMethod) {
+            case GET:
+                this.get = operation;
+                break;
+
+            case POST:
+                this.post = operation;
+                break;
+
+            case PUT:
+                this.put = operation;
+                break;
+
+            case DELETE:
+                this.delete = operation;
+                break;
+
+            case PATCH:
+                this.patch = operation;
+                break;
+
+            case OPTIONS:
+                this.options = operation;
+                break;
+
+            case HEAD:
+                this.head = operation;
+                break;
+
+            case TRACE:
+                this.trace = operation;
+                break;
+        } // SWITCH
     }
 
     /**

@@ -47,12 +47,13 @@ public class OperationReader {
             final MethodInfo methodInfo) {
 
         if (annotationInstance != null) {
-            IoLogging.log.singleAnnotation("@Operation");
+            IoLogging.logger.singleAnnotation("@Operation");
             Operation operation = new OperationImpl();
             operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
             operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
             operation.setExternalDocs(
-                    ExternalDocsReader.readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+                    ExternalDocsReader.readExternalDocs(context,
+                            annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
             operation.setParameters(ParameterReader.readParametersList(context,
                     annotationInstance.value(OperationConstant.PROP_PARAMETERS)).orElse(null));
             operation.setRequestBody(RequestBodyReader.readRequestBody(context,
@@ -69,6 +70,7 @@ public class OperationReader {
                     .orElse(getOperationId(context, methodInfo)));
             operation
                     .setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
+            // TODO: for non-callbacks: operation.setExtensions(ExtensionReader.readExtendsions(context, annotationInstance));
 
             return operation;
         } else if (shouldDoAutoGenerate(context)) {
@@ -90,7 +92,7 @@ public class OperationReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("Operation");
+        IoLogging.logger.singleJsonObject("Operation");
         Operation model = new OperationImpl();
         model.setTags(JsonUtil.readStringArray(node.get(OperationConstant.PROP_TAGS)).orElse(null));
         model.setSummary(JsonUtil.stringProperty(node, OperationConstant.PROP_SUMMARY));
@@ -154,9 +156,5 @@ public class OperationReader {
         OpenApiConfig config = context.getConfig();
         OpenApiConfig.OperationIdStrategy operationIdStrategy = config.getOperationIdStrategy();
         return operationIdStrategy != null;
-    }
-
-    private static boolean methodHasOperationAnnotation(final MethodInfo method) {
-        return method.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
     }
 }
