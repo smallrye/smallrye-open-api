@@ -31,13 +31,13 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
     @Test
     public void testExceptionMapper() throws IOException, JSONException {
         test("responses.exception-mapper-generation.json", TestResource.class, ExceptionHandler1.class,
-                ExceptionHandler2.class);
+                ExceptionHandler2.class, ResteasyReactiveExceptionMapper.class);
     }
 
     @Test
     public void testMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
         test("responses.exception-mapper-overridden-by-method-annotation-generation.json", TestResource2.class,
-                ExceptionHandler1.class, ExceptionHandler2.class);
+                ExceptionHandler1.class, ExceptionHandler2.class, ResteasyReactiveExceptionMapper.class);
     }
 
     @Path("/resources")
@@ -89,6 +89,11 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
         public Response toResponse(NotFoundException e) {
             return null;
         }
+    }
+
+    // Mimic org.jboss.resteasy.reactive.server.spi.ResteasyReactiveExceptionMapper
+    interface ResteasyReactiveExceptionMapper<E extends Throwable> extends ExceptionMapper<E> {
+        Response toResponse(E exception, Object context);
     }
 
 }
