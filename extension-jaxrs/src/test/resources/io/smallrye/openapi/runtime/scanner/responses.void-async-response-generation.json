@@ -19,6 +19,28 @@
           },
           "400": {
             "description": "Description 400"
+          },
+          "500": {
+            "description": "Internal Server Error!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ServerError": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
           }
         }
       }
