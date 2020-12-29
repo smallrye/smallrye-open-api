@@ -21,7 +21,7 @@
             "description": "Description 400"
           },
           "500": {
-            "description": "Internal Server Error!",
+            "description": "Server Error: 500",
             "content": {
               "application/json": {
                 "schema": {

@@ -206,7 +206,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @Produces(MediaType.APPLICATION_JSON)
         @APIResponse(responseCode = "200")
         @APIResponse(responseCode = "400", description = "Description 400")
-        @APIResponseSchema(value = ServerError.class, responseDescription = "Internal Server Error!", responseCode = "500")
+        @APIResponseSchema(value = ServerError.class, responseDescription = "Server Error: 500", responseCode = "500")
         public void getPet(@PathParam("id") String id, @Suspended AsyncResponse response) {
         }
     }
