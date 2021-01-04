@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.Components;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
@@ -90,7 +91,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     @Test
     public void testVoidAsyncResponseGeneration() throws IOException, JSONException {
         test("responses.void-async-response-generation.json",
-                VoidAsyncResponseGenerationTestResource.class);
+                VoidAsyncResponseGenerationTestResource.class, ServerError.class);
     }
 
     @Test
@@ -104,6 +105,10 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public static class Pet {
         String id;
         JsonString name;
+    }
+
+    static class ServerError {
+        String description;
     }
 
     @Path("pets")
@@ -201,6 +206,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @Produces(MediaType.APPLICATION_JSON)
         @APIResponse(responseCode = "200")
         @APIResponse(responseCode = "400", description = "Description 400")
+        @APIResponseSchema(value = ServerError.class, responseDescription = "Server Error: 500", responseCode = "500")
         public void getPet(@PathParam("id") String id, @Suspended AsyncResponse response) {
         }
     }
