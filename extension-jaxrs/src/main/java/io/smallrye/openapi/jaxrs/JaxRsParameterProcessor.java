@@ -187,18 +187,12 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                             ? lastPathSegmentOf(beanParamAnnotation.target())
                             : lastPathSegmentOf(target);
 
-                    if (!matrixParams.containsKey(pathSegment)) {
-                        matrixParams.put(pathSegment, new HashMap<>());
-                    }
-
-                    matrixParams.get(pathSegment).put(paramName(annotation), annotation);
+                    matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
+                            .put(paramName(annotation), annotation);
                 } else if (frameworkParam.location == In.PATH && targetType != null
                         && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
                     String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
-
-                    if (!matrixParams.containsKey(pathSegment)) {
-                        matrixParams.put(pathSegment, new HashMap<>());
-                    }
+                    matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
                 } else if (frameworkParam.location != null) {
                     readParameter(
                             new ParameterContextKey(paramName(annotation), frameworkParam.location,

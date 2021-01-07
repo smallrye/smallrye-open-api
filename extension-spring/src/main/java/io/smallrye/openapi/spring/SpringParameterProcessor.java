@@ -114,11 +114,9 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
                             ? lastPathSegmentOf(beanParamAnnotation.target())
                             : lastPathSegmentOf(target);
 
-                    if (!matrixParams.containsKey(pathSegment)) {
-                        matrixParams.put(pathSegment, new HashMap<>());
-                    }
+                    matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
+                            .put(paramName(annotation), annotation);
 
-                    matrixParams.get(pathSegment).put(paramName(annotation), annotation);
                     // Do this in Spring ?
                     //}else if (frameworkParam.location == In.PATH && targetType != null
                     //      && SpringConstants.REQUEST_MAPPING.equals(targetType.name())) {

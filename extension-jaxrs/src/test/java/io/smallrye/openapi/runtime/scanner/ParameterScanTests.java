@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -153,7 +154,8 @@ public class ParameterScanTests extends IndexScannerTestBase {
         test("params.multipart-form.json",
                 MultipartFormTestResource.class,
                 MultipartFormTestResource.Bean.class,
-                Widget.class);
+                Widget.class,
+                InputStream.class);
     }
 
     @Test
@@ -413,6 +415,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
         String id;
 
         @MatrixParam("c1")
+        @Schema(type = SchemaType.STRING, format = "custom-but-ignored")
         String c1;
 
         @MatrixParam("c2")
@@ -491,6 +494,21 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
             @FormParam("data")
             private InputPart data;
+
+            @FormParam("binaryData")
+            @PartType(MediaType.APPLICATION_OCTET_STREAM)
+            @Schema(type = SchemaType.STRING, format = "binary")
+            private byte[] binaryData;
+
+            @FormParam("file")
+            @PartType(MediaType.APPLICATION_OCTET_STREAM)
+            @Schema(type = SchemaType.STRING, format = "binary")
+            private InputStream file;
+
+            @FormParam("undocumentedFile")
+            @PartType(MediaType.APPLICATION_OCTET_STREAM)
+            @Schema(hidden = true)
+            private InputStream undocumentedFile;
         }
 
         @POST
