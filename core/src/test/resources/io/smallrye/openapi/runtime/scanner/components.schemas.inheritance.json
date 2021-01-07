@@ -1,0 +1,75 @@
+{
+    "openapi": "3.0.3",
+    "components": {
+        "schemas": {
+            "Lizard": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Reptile"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "color": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "Snake": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Reptile"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "length": {
+                                "format": "int32",
+                                "type": "integer"
+                            },
+                            "lengthUnits": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "Turtle": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Reptile"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "shellPattern": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "Reptile": {
+                "required": [
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    }
+                },
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "lizard": "#/components/schemas/Lizard",
+                        "snake": "#/components/schemas/Snake",
+                        "turtle": "#/components/schemas/Turtle"
+                    }
+                }
+            }
+        }
+    }
+}

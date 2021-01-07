@@ -590,6 +590,11 @@ public class TypeUtil {
         return getAnnotation(type, SchemaConstant.DOTNAME_SCHEMA);
     }
 
+    public static boolean isIncludedAllOf(ClassInfo annotatedClass, Type type) {
+        Type[] allOfTypes = getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA, SchemaConstant.PROP_ALL_OF);
+        return allOfTypes != null && Arrays.stream(allOfTypes).map(Type::name).anyMatch(type.name()::equals);
+    }
+
     public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
         if (target == null) {
             return false;
@@ -670,12 +675,13 @@ public class TypeUtil {
             T defaultValue) {
 
         AnnotationInstance annotation = getAnnotation(target, annotationName);
+        T value = null;
 
         if (annotation != null) {
-            return JandexUtil.value(annotation, propertyName);
+            value = JandexUtil.value(annotation, propertyName);
         }
 
-        return defaultValue;
+        return value != null ? value : defaultValue;
     }
 
     public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget type) {

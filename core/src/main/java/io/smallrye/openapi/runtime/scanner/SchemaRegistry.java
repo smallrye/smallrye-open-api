@@ -149,7 +149,9 @@ public class SchemaRegistry {
             BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
         Type resolvedType;
 
-        if (type.kind() == Kind.PARAMETERIZED_TYPE) {
+        if (resolver == null) {
+            resolvedType = type;
+        } else if (type.kind() == Kind.PARAMETERIZED_TYPE) {
             resolvedType = resolver.getResolvedType(type.asParameterizedType());
         } else {
             resolvedType = resolver.getResolvedType(type);

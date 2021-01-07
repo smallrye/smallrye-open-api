@@ -20,6 +20,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  */
 public class OpenApiConfigImpl implements OpenApiConfig {
 
+    private static final Optional<String[]> UNSET = Optional.of(new String[0]);
     private Config config;
 
     private String modelReader;
@@ -48,8 +49,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String infoLicenseName;
     private String infoLicenseUrl;
     private OperationIdStrategy operationIdStrategy;
-    private Optional<String[]> defaultProduces;
-    private Optional<String[]> defaultConsumes;
+    private Optional<String[]> defaultProduces = UNSET;
+    private Optional<String[]> defaultConsumes = UNSET;
 
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
@@ -358,7 +359,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
 
     @Override
     public Optional<String[]> getDefaultProduces() {
-        if (defaultProduces == null) {
+        if (defaultProduces == UNSET) {
             defaultProduces = getDefaultContentType(OpenApiConstants.DEFAULT_PRODUCES);
         }
         return defaultProduces;
@@ -366,7 +367,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
 
     @Override
     public Optional<String[]> getDefaultConsumes() {
-        if (defaultConsumes == null) {
+        if (defaultConsumes == UNSET) {
             defaultConsumes = getDefaultContentType(OpenApiConstants.DEFAULT_CONSUMES);
         }
         return defaultConsumes;

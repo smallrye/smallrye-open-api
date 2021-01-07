@@ -194,9 +194,10 @@ public class ResponseReader {
             content.addMediaType(mediaType, type);
         }
 
-        APIResponse response = new APIResponseImpl();
+        APIResponseImpl response = new APIResponseImpl();
+        response.setDescription(JandexUtil.value(annotation, ResponseConstant.PROP_RESPONSE_DESCRIPTION));
         response.setContent(content);
-
+        response.setResponseCode(JandexUtil.value(annotation, ResponseConstant.PROP_RESPONSE_CODE));
         return response;
     }
 

@@ -234,7 +234,9 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.PathItem#setOperation(PathItem.HttpMethod, Operation)
+     * Method is from MP OpenAPI 2.0. See Microprofile JavaDoc.
+     * 
+     * org.eclipse.microprofile.openapi.models.PathItem#setOperation(PathItem.HttpMethod, Operation)
      */
     public void setOperation(PathItem.HttpMethod httpMethod, Operation operation) {
         switch (httpMethod) {

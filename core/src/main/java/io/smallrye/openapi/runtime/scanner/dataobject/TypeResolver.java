@@ -354,6 +354,7 @@ public class TypeResolver {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
+        boolean allOfMatch = false;
 
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
@@ -362,6 +363,11 @@ public class TypeResolver {
             if (currentType.kind() == Type.Kind.PARAMETERIZED_TYPE) {
                 Map<String, Type> resMap = buildParamTypeResolutionMap(currentClass, currentType.asParameterizedType());
                 stack.push(resMap);
+            }
+
+            if (allOfMatch || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))) {
+                allOfMatch = true;
+                continue;
             }
 
             // Store all field properties

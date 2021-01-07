@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
@@ -16,6 +17,18 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.unreferenced.json", result);
+    }
+
+    @Test
+    public void testInheritanceAnyOf() throws Exception {
+        Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.inheritance.json", result);
+
     }
 
     /****************************************************************/
@@ -36,4 +49,29 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
         public int volume;
     }
 
+    @Schema(discriminatorProperty = "type", discriminatorMapping = {
+            @DiscriminatorMapping(value = "lizard", schema = Lizard.class),
+            @DiscriminatorMapping(value = "snake", schema = Snake.class),
+            @DiscriminatorMapping(value = "turtle", schema = Turtle.class)
+    })
+    static abstract class Reptile {
+        @Schema(required = true)
+        private String type;
+    }
+
+    @Schema(allOf = { Reptile.class, Lizard.class })
+    static class Lizard extends Reptile {
+        String color;
+    }
+
+    @Schema(allOf = { Reptile.class, Snake.class })
+    static class Snake extends Reptile {
+        int length;
+        String lengthUnits;
+    }
+
+    @Schema(allOf = { Reptile.class, Turtle.class })
+    static class Turtle extends Reptile {
+        String shellPattern;
+    }
 }
