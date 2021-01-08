@@ -178,11 +178,11 @@ public class BeanValidationScanner {
 
                 Optional<Boolean> inclusive = booleanValue(constraint, INCLUSIVE);
 
-                if (schema.getExclusiveMaximum() == null && inclusive.isPresent() && !inclusive.get()) {
+                if (schema.getExclusiveMaximum() == null && inclusive.isPresent() && !inclusive.get().booleanValue()) {
                     schema.setExclusiveMaximum(Boolean.TRUE);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                DataObjectLogging.log.invalidAnnotationFormat(decimalValue);
+                DataObjectLogging.logger.invalidAnnotationFormat(decimalValue);
             }
         }
     }
@@ -197,11 +197,11 @@ public class BeanValidationScanner {
                 schema.setMinimum(decimal);
                 Optional<Boolean> inclusive = booleanValue(constraint, INCLUSIVE);
 
-                if (schema.getExclusiveMinimum() == null && inclusive.isPresent() && !inclusive.get()) {
+                if (schema.getExclusiveMinimum() == null && inclusive.isPresent() && !inclusive.get().booleanValue()) {
                     schema.setExclusiveMinimum(Boolean.TRUE);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                DataObjectLogging.log.invalidAnnotationFormat(decimalValue);
+                DataObjectLogging.logger.invalidAnnotationFormat(decimalValue);
             }
         }
 

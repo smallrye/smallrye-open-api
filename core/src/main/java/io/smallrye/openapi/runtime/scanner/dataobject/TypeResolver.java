@@ -204,18 +204,10 @@ public class TypeResolver {
             return name;
         }
 
-        if ((name = TypeUtil.getAnnotationValue(target,
-                JaxbConstants.XML_ELEMENT,
-                JaxbConstants.PROP_NAME)) != null) {
-            return name;
-        }
+        return this.propertyName;
+    }
 
-        if ((name = TypeUtil.getAnnotationValue(target,
-                JaxbConstants.XML_ATTRIBUTE,
-                JaxbConstants.PROP_NAME)) != null) {
-            return name;
-        }
-
+    public String getBeanPropertyName() {
         return this.propertyName;
     }
 
@@ -362,6 +354,7 @@ public class TypeResolver {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
+        boolean allOfMatch = false;
 
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
@@ -370,6 +363,11 @@ public class TypeResolver {
             if (currentType.kind() == Type.Kind.PARAMETERIZED_TYPE) {
                 Map<String, Type> resMap = buildParamTypeResolutionMap(currentClass, currentType.asParameterizedType());
                 stack.push(resMap);
+            }
+
+            if (allOfMatch || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))) {
+                allOfMatch = true;
+                continue;
             }
 
             // Store all field properties
@@ -790,7 +788,7 @@ public class TypeResolver {
         List<Type> arguments = parameterizedType.arguments();
 
         if (arguments.size() != typeVariables.size()) {
-            DataObjectLogging.log.classNotAvailable(typeVariables, arguments);
+            DataObjectLogging.logger.classNotAvailable(typeVariables, arguments);
         }
 
         Map<String, Type> resolutionMap = new LinkedHashMap<>();

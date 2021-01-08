@@ -12,7 +12,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
  */
 public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements RequestBody, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String description;
     private Content content;
     private Boolean required;
@@ -22,7 +22,7 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -33,7 +33,7 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_REQUEST_BODY + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

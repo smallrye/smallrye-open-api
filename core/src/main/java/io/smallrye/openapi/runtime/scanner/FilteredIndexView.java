@@ -258,7 +258,18 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<AnnotationInstance> getAnnotations(DotName annotationName) {
-        Collection<AnnotationInstance> annotations = this.delegate.getAnnotations(annotationName);
+        return filterInstances(this.delegate.getAnnotations(annotationName));
+    }
+
+    /**
+     * @see org.jboss.jandex.IndexView#getAnnotationsWithRepeatable(org.jboss.jandex.DotName, org.jboss.jandex.IndexView)
+     */
+    @Override
+    public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName, IndexView annotationIndex) {
+        return filterInstances(this.delegate.getAnnotationsWithRepeatable(annotationName, annotationIndex));
+    }
+
+    private Collection<AnnotationInstance> filterInstances(Collection<AnnotationInstance> annotations) {
         if (annotations != null && !annotations.isEmpty()) {
             return annotations.stream().filter(ai -> {
                 AnnotationTarget target = ai.target();

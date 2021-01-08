@@ -262,14 +262,14 @@ public class IgnoreResolver {
             ClassInfo classInfo = index.getClass(classType);
 
             if (ignoredTypes.contains(classInfo.name())) {
-                DataObjectLogging.log.ignoringType(classInfo.name());
+                DataObjectLogging.logger.ignoringType(classInfo.name());
                 return Visibility.IGNORED;
             }
 
             AnnotationInstance annotationInstance = TypeUtil.getAnnotation(classInfo, getName());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 // Add the ignored field or class name
-                DataObjectLogging.log.ignoringTypeAndAddingToSet(classInfo.name());
+                DataObjectLogging.logger.ignoringTypeAndAddingToSet(classInfo.name());
                 ignoredTypes.add(classInfo.name());
                 return Visibility.IGNORED;
             }

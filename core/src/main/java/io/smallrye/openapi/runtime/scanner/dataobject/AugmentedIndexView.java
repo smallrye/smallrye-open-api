@@ -20,7 +20,14 @@ public class AugmentedIndexView implements IndexView {
 
     private final IndexView index;
 
-    public AugmentedIndexView(IndexView index) {
+    public static AugmentedIndexView augment(IndexView index) {
+        if (index instanceof AugmentedIndexView) {
+            return (AugmentedIndexView) index;
+        }
+        return new AugmentedIndexView(index);
+    }
+
+    private AugmentedIndexView(IndexView index) {
         validateInput(index);
         this.index = index;
     }
@@ -81,8 +88,16 @@ public class AugmentedIndexView implements IndexView {
         return index.getAnnotations(annotationName);
     }
 
-    private <T> void validateInput(T input) {
-        if (input == null)
-            throw DataObjectMessages.msg.notNull();
+    @Override
+    public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName, IndexView annotationIndex) {
+        validateInput(annotationName, annotationIndex);
+        return index.getAnnotationsWithRepeatable(annotationName, annotationIndex);
+    }
+
+    private void validateInput(Object... inputs) {
+        for (Object input : inputs) {
+            if (input == null)
+                throw DataObjectMessages.msg.notNull();
+        }
     }
 }

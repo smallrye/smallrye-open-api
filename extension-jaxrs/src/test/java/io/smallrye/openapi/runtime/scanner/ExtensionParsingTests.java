@@ -3,9 +3,11 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.callbacks.Callback;
@@ -15,6 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.json.JSONException;
 import org.junit.Test;
@@ -54,6 +57,37 @@ public class ExtensionParsingTests extends IndexScannerTestBase {
         })
         public String get(String data) {
             return data;
+        }
+    }
+
+    @Test
+    public void testSiblingExtensionAnnotations() throws IOException, JSONException {
+        assertJsonEquals("extensions.scan-siblings.expected.json",
+                ExtensionPlacementTestResource.class,
+                ExtensionPlacementTestResource.Model.class);
+    }
+
+    @Path("/ext")
+    static class ExtensionPlacementTestResource {
+        @Schema
+        @Extension(name = "model-schema-ext", value = "{ \"key\":\"value\" }", parseValue = true)
+        static class Model {
+            @Schema
+            @Extension(name = "value1-ext", value = "plain string", parseValue = true)
+            String value1;
+            @Schema
+            @Extension(name = "value2-ext", value = "plain string", parseValue = false)
+            Integer value2;
+        }
+
+        @GET
+        @Path("segment1")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        @Extension(name = "operation-ext", value = "plain string")
+        public Model get(
+                @QueryParam("data") @Parameter() @Extension(name = "qparam-data-ext", value = "1", parseValue = true) String data) {
+            return null;
         }
     }
 }

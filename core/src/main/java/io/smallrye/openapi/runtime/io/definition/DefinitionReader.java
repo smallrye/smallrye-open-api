@@ -43,19 +43,20 @@ public class DefinitionReader {
     public static void processDefinition(final AnnotationScannerContext context,
             final OpenAPI openApi,
             final AnnotationInstance annotationInstance) {
-        IoLogging.log.annotation("@OpenAPIDefinition");
+        IoLogging.logger.annotation("@OpenAPIDefinition");
 
         openApi.setInfo(InfoReader.readInfo(annotationInstance.value(DefinitionConstant.PROP_INFO)));
-        openApi.setTags(TagReader.readTags(annotationInstance.value(DefinitionConstant.PROP_TAGS)).orElse(null));
+        openApi.setTags(TagReader.readTags(context, annotationInstance.value(DefinitionConstant.PROP_TAGS)).orElse(null));
         openApi.setServers(
                 ServerReader.readServers(annotationInstance.value(DefinitionConstant.PROP_SERVERS)).orElse(null));
         openApi.setSecurity(SecurityRequirementReader
                 .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY)).orElse(null));
         openApi.setExternalDocs(
                 ExternalDocsReader
-                        .readExternalDocs(annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
+                        .readExternalDocs(context, annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
         openApi.setComponents(ComponentsReader.readComponents(context,
                 annotationInstance.value(DefinitionConstant.PROP_COMPONENTS)));
+        openApi.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
     }
 
     /**
@@ -66,7 +67,7 @@ public class DefinitionReader {
      */
     public static void processDefinition(final OpenAPI openApi,
             final JsonNode node) {
-        IoLogging.log.jsonNode("OpenAPIDefinition");
+        IoLogging.logger.jsonNode("OpenAPIDefinition");
 
         openApi.setOpenapi(JsonUtil.stringProperty(node, DefinitionConstant.PROP_OPENAPI));
         openApi.setInfo(InfoReader.readInfo(node.get(DefinitionConstant.PROP_INFO)));

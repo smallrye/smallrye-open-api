@@ -27,7 +27,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.Format;
@@ -136,7 +135,7 @@ public class IndexScannerTestBase {
     public static void assertJsonEquals(String expectedResource, Class<?>... classes)
             throws IOException, JSONException {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
@@ -148,12 +147,6 @@ public class IndexScannerTestBase {
 
     public static OpenApiConfig emptyConfig() {
         return dynamicConfig(Collections.emptyMap());
-    }
-
-    public static OpenApiConfig nestingSupportConfig() {
-        Map<String, Object> config = new HashMap<>(2);
-        config.put(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, Boolean.TRUE);
-        return dynamicConfig(config);
     }
 
     public static OpenApiConfig dynamicConfig(String key, Object value) {

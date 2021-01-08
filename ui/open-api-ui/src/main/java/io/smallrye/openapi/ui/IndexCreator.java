@@ -139,6 +139,7 @@ public class IndexCreator {
                     urlsLines.add(String.format(URLS_ENTRY_FORMAT, kv.getValue(), kv.getKey()));
                 }
                 String urlSection = "urls: [" + String.join(",", urlsLines.toArray(new String[] {})) + "]";
+
                 // Check the name
                 if (urlsPrimaryName != null) {
                     urlSection = urlSection + ",\n\t\t \"urls.primaryName\": '" + urlsPrimaryName + "'";

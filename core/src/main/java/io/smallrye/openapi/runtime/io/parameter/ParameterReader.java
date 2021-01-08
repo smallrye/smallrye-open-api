@@ -55,7 +55,7 @@ public class ParameterReader {
     public static Optional<List<Parameter>> readParametersList(final AnnotationScannerContext context,
             final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            IoLogging.log.annotationsList("@Parameter");
+            IoLogging.logger.annotationsList("@Parameter");
             List<Parameter> parameters = new ArrayList<>();
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             for (AnnotationInstance nested : nestedArray) {
@@ -77,7 +77,7 @@ public class ParameterReader {
      */
     public static Optional<List<Parameter>> readParameterList(final JsonNode node) {
         if (node != null && node.isArray()) {
-            IoLogging.log.jsonList("Parameter");
+            IoLogging.logger.jsonList("Parameter");
             List<Parameter> params = new ArrayList<>();
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode paramNode : arrayNode) {
@@ -100,7 +100,7 @@ public class ParameterReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Parameter");
+        IoLogging.logger.annotationsMap("@Parameter");
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -128,7 +128,7 @@ public class ParameterReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonMap("Parameters");
+        IoLogging.logger.jsonMap("Parameters");
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -152,7 +152,7 @@ public class ParameterReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Parameter");
+        IoLogging.logger.singleAnnotation("@Parameter");
         Parameter parameter = new ParameterImpl();
         parameter.setName(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_NAME));
         parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
@@ -176,16 +176,30 @@ public class ParameterReader {
                 org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
         parameter.setAllowReserved(
                 JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
-        parameter.setSchema(
-                SchemaFactory.readSchema(context.getIndex(),
-                        context.getClassLoader(),
-                        annotationInstance.value(Parameterizable.PROP_SCHEMA)));
+        parameter.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),
                         ContentDirection.PARAMETER));
         parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
         parameter.setExample(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE));
-        parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Parameter));
+        parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.PARAMETER));
+
+        if (annotationInstance.target() != null) {
+            switch (annotationInstance.target().kind()) {
+                case FIELD:
+                case METHOD_PARAMETER:
+                    /*
+                     * Limit to field and parameter. Extensions on methods are ambiguous and pertain
+                     * instead to the operation.
+                     *
+                     */
+                    parameter.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
+                    break;
+                default:
+                    break;
+            }
+        }
+
         return parameter;
     }
 
@@ -199,7 +213,7 @@ public class ParameterReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonObject("Parameter");
+        IoLogging.logger.singleJsonObject("Parameter");
         Parameter parameter = new ParameterImpl();
 
         parameter.setName(JsonUtil.stringProperty(node, Parameterizable.PROP_NAME));

@@ -88,14 +88,14 @@ public class DataObjectDeque {
         ClassInfo klazzInfo = entry.getClazz();
         if (parentPathEntry.hasParent(entry)) {
             // Cycle detected, don't push path.
-            DataObjectLogging.log.possibleCycle(klazzInfo);
-            DataObjectLogging.log.path(entry.toStringWithGraph());
+            DataObjectLogging.logger.possibleCycle(klazzInfo);
+            DataObjectLogging.logger.path(entry.toStringWithGraph());
             if (schema.getDescription() == null) {
                 schema.description("Cyclic reference to " + klazzInfo.name());
             }
         } else {
             // Push path to be inspected later.
-            DataObjectLogging.log.addingChildNode(klazzInfo);
+            DataObjectLogging.logger.addingChildNode(klazzInfo);
             path.push(entry);
         }
     }
@@ -243,8 +243,8 @@ public class DataObjectDeque {
         }
     }
 
-    private static <T> void validateInput(T... input) {
-        for (T t : input) {
+    private static void validateInput(Object... input) {
+        for (Object t : input) {
             if (t == null)
                 throw DataObjectMessages.msg.notNull();
         }

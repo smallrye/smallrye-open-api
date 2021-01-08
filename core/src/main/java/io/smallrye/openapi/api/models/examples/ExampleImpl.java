@@ -11,7 +11,7 @@ import io.smallrye.openapi.api.models.ModelImpl;
  */
 public class ExampleImpl extends ExtensibleImpl<Example> implements Example, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String summary;
     private String description;
     private Object value;
@@ -22,7 +22,7 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -33,7 +33,7 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_EXAMPLE + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

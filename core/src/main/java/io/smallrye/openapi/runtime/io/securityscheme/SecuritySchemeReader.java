@@ -1,14 +1,13 @@
 package io.smallrye.openapi.runtime.io.securityscheme;
 
-import static org.eclipse.microprofile.openapi.models.security.SecurityScheme.In;
-import static org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type;
-
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
+import org.eclipse.microprofile.openapi.models.security.SecurityScheme.In;
+import org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
@@ -21,6 +20,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.oauth.OAuthReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -40,14 +40,16 @@ public class SecuritySchemeReader {
     /**
      * Reads a map of SecurityScheme annotations.
      * 
+     * @param context scanning context
      * @param annotationValue Map of {@literal @}SecurityScheme annotations
      * @return Map of SecurityScheme models
      */
-    public static Map<String, SecurityScheme> readSecuritySchemes(final AnnotationValue annotationValue) {
+    public static Map<String, SecurityScheme> readSecuritySchemes(final AnnotationScannerContext context,
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@SecurityScheme");
+        IoLogging.logger.annotationsMap("@SecurityScheme");
         Map<String, SecurityScheme> securitySchemes = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -56,7 +58,7 @@ public class SecuritySchemeReader {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                securitySchemes.put(name, readSecurityScheme(nested));
+                securitySchemes.put(name, readSecurityScheme(context, nested));
             }
         }
         return securitySchemes;
@@ -85,14 +87,16 @@ public class SecuritySchemeReader {
     /**
      * Reads a SecurityScheme annotation into a model.
      * 
+     * @param context scanning context
      * @param annotationInstance the {@literal @}SecurityScheme annotation
      * @return SecurityScheme model
      */
-    public static SecurityScheme readSecurityScheme(final AnnotationInstance annotationInstance) {
+    public static SecurityScheme readSecurityScheme(final AnnotationScannerContext context,
+            final AnnotationInstance annotationInstance) {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@SecurityScheme");
+        IoLogging.logger.singleAnnotation("@SecurityScheme");
         SecurityScheme securityScheme = new SecuritySchemeImpl();
         securityScheme
                 .setType(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, Type.class));
@@ -107,7 +111,8 @@ public class SecuritySchemeReader {
         securityScheme
                 .setOpenIdConnectUrl(
                         JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
-        securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SecurityScheme));
+        securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SECURITY_SCHEME));
+        securityScheme.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return securityScheme;
     }
 

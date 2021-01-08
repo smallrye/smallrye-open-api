@@ -21,7 +21,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelImpl {
 
-    private String $ref;
+    private String ref;
     private String format;
     private final String name;
     private String title;
@@ -81,7 +81,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public String getRef() {
-        return this.$ref;
+        return this.ref;
     }
 
     /**
@@ -92,7 +92,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_SCHEMA + ref;
         }
-        this.$ref = ref;
+        this.ref = ref;
     }
 
     /**

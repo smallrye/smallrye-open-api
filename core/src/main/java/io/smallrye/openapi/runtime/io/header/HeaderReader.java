@@ -50,7 +50,7 @@ public class HeaderReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Header");
+        IoLogging.logger.annotationsMap("@Header");
         Map<String, Header> headers = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -75,7 +75,7 @@ public class HeaderReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonNodeMap("Headers");
+        IoLogging.logger.jsonNodeMap("Headers");
         Map<String, Header> headers = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -96,13 +96,11 @@ public class HeaderReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Header");
+        IoLogging.logger.singleAnnotation("@Header");
         Header header = new HeaderImpl();
-        header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Header));
+        header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.HEADER));
         header.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
-        header.setSchema(
-                SchemaFactory.readSchema(context.getIndex(), context.getClassLoader(),
-                        annotationInstance.value(Parameterizable.PROP_SCHEMA)));
+        header.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         header.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
         header.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
         header.setAllowEmptyValue(
@@ -119,7 +117,7 @@ public class HeaderReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Header");
+        IoLogging.logger.singleJsonNode("Header");
         Header header = new HeaderImpl();
         header.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         header.setDescription(JsonUtil.stringProperty(node, Parameterizable.PROP_DESCRIPTION));

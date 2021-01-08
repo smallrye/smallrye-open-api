@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -27,7 +28,7 @@ public class SubresourceScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);

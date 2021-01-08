@@ -35,7 +35,7 @@ public class ContactReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Contact");
+        IoLogging.logger.singleAnnotation("@Contact");
         AnnotationInstance nested = annotationValue.asNested();
         Contact contact = new ContactImpl();
         contact.setName(JandexUtil.stringValue(nested, ContactConstant.PROP_NAME));
@@ -54,7 +54,7 @@ public class ContactReader {
         if (node == null) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Contact");
+        IoLogging.logger.singleJsonNode("Contact");
         Contact contact = new ContactImpl();
         contact.setName(JsonUtil.stringProperty(node, ContactConstant.PROP_NAME));
         contact.setUrl(JsonUtil.stringProperty(node, ContactConstant.PROP_URL));

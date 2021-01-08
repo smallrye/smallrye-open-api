@@ -10,6 +10,7 @@ import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -29,31 +30,36 @@ public class ExternalDocsReader {
     /**
      * Reads an ExternalDocumentation annotation.
      * 
+     * @param context scanning context
      * @param annotationValue the {@literal @}ExternalDocumentation annotation
      * @return ExternalDocumentation model
      */
-    public static ExternalDocumentation readExternalDocs(final AnnotationValue annotationValue) {
+    public static ExternalDocumentation readExternalDocs(final AnnotationScannerContext context,
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
-        return readExternalDocs(annotationValue.asNested());
+        return readExternalDocs(context, annotationValue.asNested());
     }
 
     /**
      * Reads an ExternalDocumentation annotation.
      * 
+     * @param context scanning context
      * @param annotationInstance the {@literal @}ExternalDocumentation annotation
      * @return ExternalDocumentation model
      */
-    public static ExternalDocumentation readExternalDocs(AnnotationInstance annotationInstance) {
+    public static ExternalDocumentation readExternalDocs(AnnotationScannerContext context,
+            AnnotationInstance annotationInstance) {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.annotation("@ExternalDocumentation");
+        IoLogging.logger.annotation("@ExternalDocumentation");
         ExternalDocumentation externalDoc = new ExternalDocumentationImpl();
         externalDoc.setDescription(
                 JandexUtil.stringValue(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));
         externalDoc.setUrl(JandexUtil.stringValue(annotationInstance, ExternalDocsConstant.PROP_URL));
+        externalDoc.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return externalDoc;
     }
 

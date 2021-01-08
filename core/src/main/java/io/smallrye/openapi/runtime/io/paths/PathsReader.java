@@ -98,7 +98,7 @@ public class PathsReader {
                 Method mutator = descriptor.getWriteMethod();
                 mutator.invoke(pathItem, operation);
             } catch (IntrospectionException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                IoLogging.log.readingCallbackOperation(e);
+                IoLogging.logger.readingCallbackOperation(e);
             }
         }
         return pathItem;
@@ -114,7 +114,7 @@ public class PathsReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("PathItem");
+        IoLogging.logger.singleJsonNode("PathItem");
         PathItem pathItem = new PathItemImpl();
         pathItem.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
         pathItem.setSummary(JsonUtil.stringProperty(node, PathsConstant.PROP_SUMMARY));

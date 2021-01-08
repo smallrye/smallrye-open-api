@@ -2,7 +2,6 @@ package io.smallrye.openapi.runtime.util;
 
 import static java.util.stream.Collectors.toList;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,15 +41,15 @@ public class JandexUtil {
      * @author eric.wittmann@gmail.com
      */
     public enum RefType {
-        Header("headers"),
-        Schema("schemas"),
-        SecurityScheme("securitySchemes"),
-        Callback("callbacks"),
-        Link("links"),
-        Response("responses"),
-        Parameter("parameters"),
-        Example("examples"),
-        RequestBody("requestBodies");
+        HEADER("headers"),
+        SCHEMA("schemas"),
+        SECURITY_SCHEME("securitySchemes"),
+        CALLBACK("callbacks"),
+        LINK("links"),
+        RESPONSE("responses"),
+        PARAMETER("parameters"),
+        EXAMPLE("examples"),
+        REQUEST_BODY("requestBodies");
 
         String componentPath;
 
@@ -196,29 +195,6 @@ public class JandexUtil {
     public static boolean booleanValueWithDefault(AnnotationInstance annotation, String propertyName) {
         AnnotationValue value = annotation.value(propertyName);
         return value != null && value.asBoolean();
-    }
-
-    /**
-     * Reads a Double property value from the given annotation instance. If no value is found
-     * this will return null.
-     * 
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return BigDecimal value
-     */
-    public static BigDecimal bigDecimalValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        }
-        if (value.kind() == AnnotationValue.Kind.DOUBLE) {
-            return BigDecimal.valueOf(value.asDouble());
-        }
-        if (value.kind() == AnnotationValue.Kind.STRING) {
-            return new BigDecimal(value.asString());
-        }
-        throw new RuntimeException(
-                "Call to bigDecimalValue failed because the annotation property was not a double or a String.");
     }
 
     /**

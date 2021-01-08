@@ -41,7 +41,7 @@ public class JandexUtilTests {
         AnnotationInstance annotation = AnnotationInstance.create(DotName.createSimple(""),
                 null,
                 Arrays.asList(AnnotationValue.createStringValue("ref", ref)));
-        String outRef = JandexUtil.refValue(annotation, RefType.Link);
+        String outRef = JandexUtil.refValue(annotation, RefType.LINK);
         assertEquals(ref, outRef);
     }
 
@@ -51,7 +51,7 @@ public class JandexUtilTests {
         AnnotationInstance annotation = AnnotationInstance.create(DotName.createSimple(""),
                 null,
                 Arrays.asList(AnnotationValue.createStringValue("ref", ref)));
-        String outRef = JandexUtil.refValue(annotation, RefType.Link);
+        String outRef = JandexUtil.refValue(annotation, RefType.LINK);
         assertEquals(ref, outRef);
     }
 
@@ -61,7 +61,7 @@ public class JandexUtilTests {
         AnnotationInstance annotation = AnnotationInstance.create(DotName.createSimple(""),
                 null,
                 Arrays.asList(AnnotationValue.createStringValue("ref", ref)));
-        String outRef = JandexUtil.refValue(annotation, RefType.Link);
+        String outRef = JandexUtil.refValue(annotation, RefType.LINK);
         assertEquals("#/components/links/L1nk.T0_Something-Useful", outRef);
     }
 

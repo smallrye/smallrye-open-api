@@ -11,7 +11,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Implementation of the {@link OpenApiConfig} interface that gets config information from maven
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class MavenConfig implements OpenApiConfig {
@@ -80,11 +80,6 @@ public class MavenConfig implements OpenApiConfig {
     @Override
     public Set<String> scanDependenciesJars() {
         return asCsvSet(properties.getOrDefault(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS, null));
-    }
-
-    @Override
-    public boolean schemaReferencesEnable() {
-        return Boolean.valueOf(properties.getOrDefault(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, "true"));
     }
 
     @Override

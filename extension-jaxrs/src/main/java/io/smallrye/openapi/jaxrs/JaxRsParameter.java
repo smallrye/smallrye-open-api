@@ -3,6 +3,8 @@ package io.smallrye.openapi.jaxrs;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
+
 /**
  * Meta information for the JAX-RS *Param annotations relating them
  * to the In and Style attributes of Parameters.
@@ -29,40 +31,27 @@ public enum JaxRsParameter {
     RESTEASY_COOKIE_PARAM(RestEasyConstants.COOKIE_PARAM, Parameter.In.COOKIE, null, Parameter.Style.FORM),
     RESTEASY_MULITIPART_FORM(RestEasyConstants.MULTIPART_FORM, null, null, null, "multipart/form-data");
 
-    private final DotName name;
-    final Parameter.In location;
-    final Parameter.Style style;
-    final Parameter.Style defaultStyle;
-    final String mediaType;
+    final FrameworkParameter parameter;
 
     private JaxRsParameter(DotName name, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle,
             String mediaType) {
-        this.name = name;
-        this.location = location;
-        this.style = style;
-        this.defaultStyle = defaultStyle;
-        this.mediaType = mediaType;
+        this.parameter = new FrameworkParameter(name, location, style, defaultStyle, mediaType);
     }
 
     private JaxRsParameter(DotName name, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle) {
         this(name, location, style, defaultStyle, null);
     }
 
-    static JaxRsParameter forName(DotName annotationName) {
+    static FrameworkParameter forName(DotName annotationName) {
         for (JaxRsParameter value : values()) {
-            if (value.name.equals(annotationName)) {
-                return value;
+            if (value.parameter.getName().equals(annotationName)) {
+                return value.parameter;
             }
         }
         return null;
     }
 
     public static boolean isParameter(DotName annotationName) {
-        for (JaxRsParameter value : values()) {
-            if (value.name.equals(annotationName)) {
-                return true;
-            }
-        }
-        return false;
+        return forName(annotationName) != null;
     }
 }

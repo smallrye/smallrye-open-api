@@ -75,7 +75,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testParameterResource() throws IOException, JSONException {
         Index i = indexOf(ParameterResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.parameters.simpleSchema.json", result);
@@ -253,7 +253,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     @Test
     public void testTimeResource() throws IOException, JSONException {
         Index i = indexOf(TimeTestResource.class, TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(nestingSupportConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.parameters.time.json", result);

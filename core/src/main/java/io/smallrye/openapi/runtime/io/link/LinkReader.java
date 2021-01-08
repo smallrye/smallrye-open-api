@@ -43,7 +43,7 @@ public class LinkReader {
         if (annotationValue == null) {
             return null;
         }
-        IoLogging.log.annotationsMap("@Link");
+        IoLogging.logger.annotationsMap("@Link");
         Map<String, Link> links = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
@@ -68,7 +68,7 @@ public class LinkReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.jsonNodeMap("Link");
+        IoLogging.logger.jsonNodeMap("Link");
         Map<String, Link> links = new LinkedHashMap<>();
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
@@ -89,7 +89,7 @@ public class LinkReader {
         if (annotationInstance == null) {
             return null;
         }
-        IoLogging.log.singleAnnotation("@Link");
+        IoLogging.logger.singleAnnotation("@Link");
         Link link = new LinkImpl();
         link.setOperationRef(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_OPERATION_REF));
         link.setOperationId(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_OPERATION_ID));
@@ -97,7 +97,7 @@ public class LinkReader {
         link.setDescription(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_DESCRIPTION));
         link.setRequestBody(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_REQUEST_BODY));
         link.setServer(ServerReader.readServer(annotationInstance.value(LinkConstant.PROP_SERVER)));
-        link.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.Link));
+        link.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.LINK));
         return link;
     }
 
@@ -111,7 +111,7 @@ public class LinkReader {
         if (node == null || !node.isObject()) {
             return null;
         }
-        IoLogging.log.singleJsonNode("Link");
+        IoLogging.logger.singleJsonNode("Link");
         Link link = new LinkImpl();
         link.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
 
