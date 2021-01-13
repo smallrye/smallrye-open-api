@@ -268,7 +268,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
     private void setXmlName(Schema fieldSchema, String realName, AnnotationInstance xmlAttr) {
         AnnotationValue name = xmlAttr.value(PROP_NAME);
-        if (name != null) {
+        if (fieldSchema != null && name != null) {
             String annName = name.asString();
             if (!annName.equals(realName)) {
                 setXmlIfEmpty(fieldSchema);
