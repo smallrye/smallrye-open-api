@@ -29,7 +29,17 @@ public enum JaxRsParameter {
     RESTEASY_FORM_PARAM(RestEasyConstants.FORM_PARAM, null, Parameter.Style.FORM, Parameter.Style.FORM),
     RESTEASY_HEADER_PARAM(RestEasyConstants.HEADER_PARAM, Parameter.In.HEADER, null, Parameter.Style.SIMPLE),
     RESTEASY_COOKIE_PARAM(RestEasyConstants.COOKIE_PARAM, Parameter.In.COOKIE, null, Parameter.Style.FORM),
-    RESTEASY_MULITIPART_FORM(RestEasyConstants.MULTIPART_FORM, null, null, null, "multipart/form-data");
+    RESTEASY_MULITIPART_FORM(RestEasyConstants.MULTIPART_FORM, null, null, null, "multipart/form-data"),
+
+    // Support RESTEasy Reactive annotations directly
+    RESTEASY_REACTIVE_PATH_PARAM(RestEasyConstants.REACTIVE_REST_PATH, Parameter.In.PATH, null, Parameter.Style.SIMPLE),
+    // Apply to the last-matched @Path of the structure injecting the Matrix Param
+    RESTEASY_REACTIVE_MATRIX_PARAM(RestEasyConstants.REACTIVE_REST_MATRIX, Parameter.In.PATH, Parameter.Style.MATRIX,
+            Parameter.Style.MATRIX),
+    RESTEASY_REACTIVE_QUERY_PARAM(RestEasyConstants.REACTIVE_REST_QUERY, Parameter.In.QUERY, null, Parameter.Style.FORM),
+    RESTEASY_REACTIVE_FORM_PARAM(RestEasyConstants.REACTIVE_REST_FORM, null, Parameter.Style.FORM, Parameter.Style.FORM),
+    RESTEASY_REACTIVE_HEADER_PARAM(RestEasyConstants.REACTIVE_REST_HEADER, Parameter.In.HEADER, null, Parameter.Style.SIMPLE),
+    RESTEASY_REACTIVE_COOKIE_PARAM(RestEasyConstants.REACTIVE_REST_COOKIE, Parameter.In.COOKIE, null, Parameter.Style.FORM);
 
     final FrameworkParameter parameter;
 
@@ -54,4 +64,5 @@ public enum JaxRsParameter {
     public static boolean isParameter(DotName annotationName) {
         return forName(annotationName) != null;
     }
+
 }

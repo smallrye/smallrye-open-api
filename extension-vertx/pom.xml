@@ -12,11 +12,6 @@
 
     <name>SmallRye: OpenAPI extension - Vert.x</name>
 
-    <properties>
-        <version.vertx>3.9.2</version.vertx>
-        <version.quarkus>1.11.0.Final</version.quarkus>
-    </properties>
-
     <dependencies>
         <!-- SmallRye core implementation -->
         <dependency>
