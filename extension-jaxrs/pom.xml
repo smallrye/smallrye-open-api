@@ -9,24 +9,21 @@
     </parent>
     
     <artifactId>smallrye-open-api-jaxrs</artifactId>
-    
+
     <name>SmallRye: OpenAPI extension - JAX-RS</name>
-    <properties>
-        <version.org.jboss.resteasy>4.5.8.Final</version.org.jboss.resteasy>    
-    </properties>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-core-spi</artifactId>
-                <version>${version.org.jboss.resteasy}</version>
+                <version>${version.resteasy}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
               <groupId>org.jboss.resteasy</groupId>
               <artifactId>resteasy-multipart-provider</artifactId>
-              <version>${version.org.jboss.resteasy}</version>
+              <version>${version.resteasy}</version>
               <scope>test</scope>
             </dependency>
         </dependencies>
