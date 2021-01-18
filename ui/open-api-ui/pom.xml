@@ -74,7 +74,7 @@
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>1.6.1</version>
                 <executions>
                     <!-- We download the index.html just to compare to our custom template one. -->
                     <execution>
