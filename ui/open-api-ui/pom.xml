@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI UI</name>
 
     <properties>
-        <swagger-ui.version>3.38.0</swagger-ui.version>
+        <swagger-ui.version>3.40.0</swagger-ui.version>
         <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
         <path.swagger-ui>openapi-ui</path.swagger-ui>
         <sonar.skip>true</sonar.skip>
@@ -101,7 +101,7 @@
                             <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui.css</url>
                             <unpack>false</unpack>
                             <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>bc068a76c80f75bb497dc99d6f86afad</md5>
+                            <md5>dbaaebe362a6fcddd95f8eed1a660d59</md5>
                         </configuration>
                     </execution>
                     <execution>
@@ -114,7 +114,7 @@
                             <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-bundle.js</url>
                             <unpack>false</unpack>
                             <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>2f31cbde3e1cca70144a129d89299af8</md5>
+                            <md5>f94c6806da9cfca8cf30e1fe9eb7762f</md5>
                         </configuration>
                     </execution>
                     <execution>
@@ -127,7 +127,7 @@
                             <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-standalone-preset.js</url>
                             <unpack>false</unpack>
                             <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>a8e9236d4c5fbe5e8e29df8bb7f119dd</md5>
+                            <md5>38daefef8cbd97420cc2ed33cf332716</md5>
                         </configuration>
                     </execution>
                     <execution>
