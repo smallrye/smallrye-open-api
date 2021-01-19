@@ -118,14 +118,26 @@ public abstract class AbstractParameterProcessor {
      * @author Michael Edgar {@literal <michael@xlate.io>}
      */
     protected static class ParameterContext {
-        public String name;
-        public In location;
-        public Style style;
-        public Parameter oaiParam;
-        public FrameworkParameter frameworkParam;
-        public Object defaultValue;
-        public AnnotationTarget target;
-        public Type targetType;
+        protected String name;
+        protected In location;
+        protected Style style;
+        protected Parameter oaiParam;
+        protected FrameworkParameter frameworkParam;
+        protected Object defaultValue;
+        protected AnnotationTarget target;
+        protected Type targetType;
+
+        ParameterContext() {
+        }
+
+        public ParameterContext(String name, FrameworkParameter frameworkParam, AnnotationTarget target, Type targetType) {
+            this.name = name;
+            this.location = frameworkParam.location;
+            this.style = frameworkParam.style;
+            this.frameworkParam = frameworkParam;
+            this.target = target;
+            this.targetType = targetType;
+        }
 
         @Override
         public String toString() {
@@ -196,9 +208,7 @@ public abstract class AbstractParameterProcessor {
         matrixParams.clear();
     }
 
-    protected ResourceParameters process(ClassInfo resourceClass,
-            MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader) {
+    protected ResourceParameters process(ClassInfo resourceClass, MethodInfo resourceMethod) {
 
         ResourceParameters parameters = new ResourceParameters();
 
@@ -257,6 +267,14 @@ public abstract class AbstractParameterProcessor {
         parameters.setPathItemPath(generatePath(resourceClass, allParameters));
         parameters.setOperationPath(generatePath(resourceMethod, allParameters));
 
+        parameters.getPathParameterTemplateNames()
+                .stream()
+                .filter(pip -> allParameters.stream().noneMatch(ap -> this.samePathParameter(ap, pip)))
+                .map(pip -> getUnannotatedPathParameter(resourceMethod, pip))
+                .filter(Objects::nonNull)
+                .map(pip -> this.mapParameter(resourceMethod, pip))
+                .forEach(parameters::addOperationParameter);
+
         // Re-sort (names of matrix parameters may have changed)
         parameters.sort();
 
@@ -290,7 +308,7 @@ public abstract class AbstractParameterProcessor {
             String variablePattern = templateMatcher.group(2).trim();
 
             parameters.stream()
-                    .filter(p -> variableName.equals(p.getName()))
+                    .filter(p -> samePathParameter(p, variableName))
                     .filter(this::templateParameterPatternEligible)
                     .forEach(p -> p.getSchema().setPattern(variablePattern));
 
@@ -333,6 +351,12 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected abstract Pattern getTemplateParameterPattern();
+
+    boolean samePathParameter(Parameter param, String name) {
+        return name.equals(param.getName())
+                && Parameter.In.PATH.equals(param.getIn())
+                && !Style.MATRIX.equals(param.getStyle());
+    }
 
     /**
      * Determines if the parameter is eligible to have a pattern constraint
@@ -421,6 +445,16 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected abstract FrameworkParameter getMatrixParameter();
+
+    /**
+     * 
+     * @param resourceMethod method potentially containing an un-annotated path parameter argument
+     * @param name name of the path parameter without any associated annotations
+     * @return a new ParameterContext if the parameter is found, otherwise null
+     */
+    protected ParameterContext getUnannotatedPathParameter(MethodInfo resourceMethod, String name) {
+        return null;
+    }
 
     private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
         Parameter param;
@@ -523,13 +557,7 @@ public abstract class AbstractParameterProcessor {
             BeanValidationScanner.applyConstraints(paramTarget,
                     paramSchema,
                     paramName,
-                    (target, name) -> {
-                        List<String> requiredProperties = schema.getRequired();
-
-                        if (requiredProperties == null || !requiredProperties.contains(name)) {
-                            schema.addRequired(name);
-                        }
-                    });
+                    (target, name) -> setRequired(name, schema));
 
             if (paramSchema.getNullable() == null && TypeUtil.isOptional(paramType)) {
                 paramSchema.setNullable(Boolean.TRUE);
@@ -540,6 +568,21 @@ public abstract class AbstractParameterProcessor {
             }
 
             schema.addProperty(paramName, paramSchema);
+        }
+    }
+
+    /**
+     * Called by the BeanValidationScanner when a member is found to have a BV annotation
+     * indicating the parameter is required.
+     * 
+     * @param name name of the schema property
+     * @param schema schema holding the property
+     */
+    private void setRequired(String name, Schema schema) {
+        List<String> requiredProperties = schema.getRequired();
+
+        if (requiredProperties == null || !requiredProperties.contains(name)) {
+            schema.addRequired(name);
         }
     }
 

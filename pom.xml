@@ -31,7 +31,8 @@
         <version.arquillian.jetty>1.0.0.CR3</version.arquillian.jetty>
         <version.jetty>9.3.29.v20201019</version.jetty>
         <version.resteasy>4.5.8.Final</version.resteasy>
-
+        <version.quarkus>1.11.0.Final</version.quarkus>
+        
         <!--
             xmlReportPaths must contain an entry for each project that reports coverage.
             Each module reports execution data in its own target/jacoco.exec. The exec

@@ -3,6 +3,8 @@ package io.smallrye.openapi.runtime.scanner;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -24,6 +26,8 @@ public class ResourceParameters {
 
     private static final Comparator<Parameter> PARAMETER_COMPARATOR = Comparator.comparing(Parameter::getIn)
             .thenComparing(Parameter::getName);
+
+    static final Pattern TEMPLATE_PARAM_PATTERN = Pattern.compile("\\{(\\w[\\w\\.-]*)\\}");
 
     private String pathItemPath;
     private List<Parameter> pathItemParameters;
@@ -47,6 +51,14 @@ public class ResourceParameters {
 
     public List<Parameter> getOperationParameters() {
         return operationParameters;
+    }
+
+    public void addOperationParameter(Parameter parameter) {
+        if (this.operationParameters == null) {
+            this.operationParameters = new ArrayList<>();
+        }
+
+        this.operationParameters.add(parameter);
     }
 
     public Content getFormBodyContent() {
@@ -101,5 +113,23 @@ public class ResourceParameters {
         if (operationParameters != null) {
             operationParameters.sort(PARAMETER_COMPARATOR);
         }
+    }
+
+    public List<String> getPathParameterTemplateNames() {
+        return getPathParameterTemplateName(this.pathItemPath, this.operationPath);
+    }
+
+    private static List<String> getPathParameterTemplateName(String... paths) {
+        List<String> templateNames = new ArrayList<>();
+
+        for (String path : paths) {
+            Matcher m = TEMPLATE_PARAM_PATTERN.matcher(path);
+
+            while (m.find()) {
+                templateNames.add(m.group(1));
+            }
+        }
+
+        return templateNames;
     }
 }
