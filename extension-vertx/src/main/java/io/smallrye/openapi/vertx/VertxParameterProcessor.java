@@ -72,7 +72,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
             List<AnnotationScannerExtension> extensions) {
 
         VertxParameterProcessor processor = new VertxParameterProcessor(context, reader, extensions);
-        return processor.process(resourceClass, resourceMethod, reader);
+        return processor.process(resourceClass, resourceMethod);
     }
 
     @Override

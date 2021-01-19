@@ -29,6 +29,20 @@ public class RestEasyConstants {
     public static final DotName MATRIX_PARAM = DotName
             .createSimple("org.jboss.resteasy.annotations.jaxrs.MatrixParam");
 
+    // RestEasy reactive parameter extension annotations
+    public static final DotName REACTIVE_REST_QUERY = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestQuery");
+    public static final DotName REACTIVE_REST_FORM = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestForm");
+    public static final DotName REACTIVE_REST_COOKIE = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestCookie");
+    public static final DotName REACTIVE_REST_PATH = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestPath");
+    public static final DotName REACTIVE_REST_HEADER = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestHeader");
+    public static final DotName REACTIVE_REST_MATRIX = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestMatrix");
+
     // RestEasy multi-part form annotations
     public static final DotName MULTIPART_FORM = DotName
             .createSimple("org.jboss.resteasy.annotations.providers.multipart.MultipartForm");

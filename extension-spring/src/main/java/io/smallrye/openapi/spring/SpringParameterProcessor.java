@@ -71,7 +71,7 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
             List<AnnotationScannerExtension> extensions) {
 
         SpringParameterProcessor processor = new SpringParameterProcessor(context, reader, extensions);
-        return processor.process(resourceClass, resourceMethod, reader);
+        return processor.process(resourceClass, resourceMethod);
     }
 
     @Override

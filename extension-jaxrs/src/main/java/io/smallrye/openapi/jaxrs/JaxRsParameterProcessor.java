@@ -77,7 +77,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             List<AnnotationScannerExtension> extensions) {
 
         JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, reader, extensions);
-        return processor.process(resourceClass, resourceMethod, reader);
+        return processor.process(resourceClass, resourceMethod);
     }
 
     @Override
@@ -114,6 +114,26 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     @Override
+    protected ParameterContext getUnannotatedPathParameter(MethodInfo resourceMethod, String name) {
+        List<Type> methodParameters = resourceMethod.parameters();
+
+        for (int i = 0, m = methodParameters.size(); i < m; i++) {
+            if (name.equals(resourceMethod.parameterName(i))) {
+                List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(resourceMethod, (short) i);
+
+                if (!JaxRsAnnotationScanner.containsJaxRsAnnotations(annotations)) {
+                    // If the parameter has annotations, use the first entry's target for use later when searching for BV constraints and extensions
+                    AnnotationTarget target = annotations.isEmpty() ? null : annotations.get(0).target();
+                    Type arg = methodParameters.get(i);
+                    return new ParameterContext(name, JaxRsParameter.RESTEASY_REACTIVE_PATH_PARAM.parameter, target, arg);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     protected String getDefaultFormMediaType() {
         return "application/x-www-form-urlencoded";
     }
@@ -131,30 +151,6 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             encoding.setContentType(type.value().asString());
             encodings.put(paramName, encoding);
         }
-    }
-
-    /**
-     * Check if the given parameter name is present as a path segment in the resourcePath.
-     * 
-     * @param paramName name of parameter
-     * @param paramStyle style of parameter, e.g. simple or matrix
-     * @param resourcePath resource path/URL
-     * @return true if the paramName is in the resourcePath, false otherwise.
-     */
-    static boolean parameterInPath(String paramName, Style paramStyle, String resourcePath) {
-        if (paramName == null || resourcePath == null) {
-            return true;
-        }
-
-        final String regex;
-
-        if (Style.MATRIX.equals(paramStyle)) {
-            regex = String.format("(?:\\{[ \\t]*|^|/?)\\Q%s\\E(?:[ \\t]*(?:}|:)|/?|$)", paramName);
-        } else {
-            regex = String.format("\\{[ \\t]*\\Q%s\\E[ \\t]*(?:}|:)", paramName);
-        }
-
-        return Pattern.compile(regex).matcher(resourcePath).find();
     }
 
     @Override
