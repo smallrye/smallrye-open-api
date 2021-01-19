@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.ws.rs.BeanParam;
@@ -27,14 +28,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
+import javax.ws.rs.core.Request;
 
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Encoding;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -45,6 +49,12 @@ import org.jboss.jandex.Index;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.reactive.RestCookie;
+import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.RestHeader;
+import org.jboss.resteasy.reactive.RestMatrix;
+import org.jboss.resteasy.reactive.RestPath;
+import org.jboss.resteasy.reactive.RestQuery;
 import org.json.JSONException;
 import org.junit.Test;
 
@@ -147,6 +157,10 @@ public class ParameterScanTests extends IndexScannerTestBase {
                 AllTheParamsTestResource.class,
                 AllTheParamsTestResource.Bean.class,
                 Widget.class);
+        test("params.all-the-params.json",
+                RestEasyReactiveAllTheParamsTestResource.class,
+                RestEasyReactiveAllTheParamsTestResource.Bean.class,
+                Widget.class);
     }
 
     @Test
@@ -219,6 +233,12 @@ public class ParameterScanTests extends IndexScannerTestBase {
     @Test
     public void testCommonTargetMethodParameter() throws IOException, JSONException {
         test("params.common-annotation-target-method.json", CommonTargetMethodParameterResource.class);
+    }
+
+    @Test
+    public void testRestEasyReactivePathParamOmitted() throws IOException, JSONException {
+        test("params.resteasy-reactive-missing-restpath.json", RestEasyReactivePathParamOmittedTestResource.class,
+                Widget.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -850,6 +870,69 @@ public class ParameterScanTests extends IndexScannerTestBase {
         @GET
         @Produces(MediaType.APPLICATION_JSON)
         public String[] getRecords() {
+            return null;
+        }
+    }
+
+    @Path("/all/the/params/{id1}/{id2}")
+    @SuppressWarnings("unused")
+    static class RestEasyReactiveAllTheParamsTestResource {
+        public RestEasyReactiveAllTheParamsTestResource(@RestPath("id1") int id1,
+                @RestPath String id2) {
+        }
+
+        static class Bean {
+            @RestMatrix
+            @DefaultValue("BEAN1")
+            String matrixF1;
+
+            @RestMatrix("matrixF2")
+            @DefaultValue("BEAN2")
+            String matrixF2;
+
+            @RestCookie
+            @DefaultValue("COOKIE1")
+            @Deprecated
+            String cookieF1;
+        }
+
+        @Parameter(in = ParameterIn.PATH, style = ParameterStyle.MATRIX, name = "id2")
+        @BeanParam
+        private Bean param;
+
+        @POST
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Produces(MediaType.APPLICATION_JSON)
+        public CompletionStage<Widget> upd(@RestForm("f1") @DefaultValue("42") int f1,
+                @RestForm @DefaultValue("f2-default") @NotNull String f2,
+                @RestHeader("h1") @Deprecated int h1,
+                @RestHeader("h2") String notH2) {
+            return null;
+        }
+
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        public Widget get(@RestQuery("q1") @Deprecated long q1,
+                @RestQuery("q2") String notQ2) {
+            return null;
+        }
+    }
+
+    @Path("/path/{param1}")
+    static class RestEasyReactivePathParamOmittedTestResource {
+
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        @Path("/params/{param2}")
+        public Widget get1(@Min(100) int param1, @RestPath String param2) {
+            return null;
+        }
+
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        @Path("/params/{param3}")
+        public Widget get2(@Extension(name = "custom-info", value = "value for param3") String param3, @Context Request param1,
+                int paramOne) {
             return null;
         }
     }

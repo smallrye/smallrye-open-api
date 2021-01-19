@@ -99,6 +99,21 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     @Override
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
+
+        if (containsJaxRsAnnotations(instances)) {
+            return true;
+        }
+
+        for (AnnotationInstance instance : instances) {
+            for (AnnotationScannerExtension extension : extensions) {
+                if (extension.isScannerAnnotationExtension(instance))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances) {
         for (AnnotationInstance instance : instances) {
             if (JaxRsParameter.isParameter(instance.name())) {
                 return true;
@@ -106,11 +121,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
                 return true;
             }
-            for (AnnotationScannerExtension extension : extensions) {
-                if (extension.isScannerAnnotationExtension(instance))
-                    return true;
-            }
         }
+
         return false;
     }
 

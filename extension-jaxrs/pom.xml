@@ -28,7 +28,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
         <!-- SmallRye core implementation -->
         <dependency>
@@ -85,6 +85,12 @@
           <groupId>org.jboss.resteasy</groupId>
           <artifactId>resteasy-multipart-provider</artifactId>
           <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus.resteasy.reactive</groupId>
+            <artifactId>resteasy-reactive-common</artifactId>
+            <version>${version.quarkus}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.openapi</groupId>
