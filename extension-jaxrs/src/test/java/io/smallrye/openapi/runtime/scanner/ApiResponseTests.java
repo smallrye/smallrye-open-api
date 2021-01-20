@@ -180,7 +180,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
                 JsonString.class);
     }
 
-    //TODO: Raise issue for this currently returns 204 rather than 200; see spec
+    //TODO: Raise issue for this, currently returns 204 rather than 200; see spec
     @Ignore
     @Test
     public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoid()
