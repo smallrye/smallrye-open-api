@@ -438,8 +438,6 @@ public interface AnnotationScanner {
         if (isVoidResponse(method)) {
             if (isPostMethod(method)) {
                 status = 201; // Created
-            } else if (isDeleteMethod(method)) {
-                status = 204; // No Content (Maybe this should be 202 Accepted ?)
             } else if (!isAsyncResponse(method)) {
                 status = 204; // No Content
             } else {

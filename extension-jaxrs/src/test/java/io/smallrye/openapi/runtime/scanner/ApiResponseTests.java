@@ -198,18 +198,28 @@ public class ApiResponseTests extends IndexScannerTestBase {
         }
     }
 
-    @Path("pets")
+    @Path("pets/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     static class VoidAsyncResponseGenerationTestResource {
         @SuppressWarnings("unused")
-        @Path("{id}")
         @GET
-        @Consumes(MediaType.APPLICATION_JSON)
-        @Produces(MediaType.APPLICATION_JSON)
         @APIResponse(responseCode = "200")
         @APIResponse(responseCode = "400", description = "Description 400")
         // This test was changed to use the @APIResponseSchema annotation for 2.1.*
         @APIResponse(description = "Server Error: 500", responseCode = "500", content = @Content(schema = @Schema(implementation = ServerError.class)))
         public void getPet(@PathParam("id") String id, @Suspended AsyncResponse response) {
+        }
+
+        @SuppressWarnings("unused")
+        @DELETE
+        public void deletePet(@PathParam("id") String id) {
+        }
+
+        @SuppressWarnings("unused")
+        @DELETE
+        @Path("async")
+        public void deletePetAsync(@PathParam("id") String id, @Suspended AsyncResponse response) {
         }
     }
 
