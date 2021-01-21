@@ -28,7 +28,6 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartOutput;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -173,15 +172,12 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoid()
-            throws IOException, JSONException {
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-patch.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoidTestResource.class, Pet.class,
                 JsonString.class);
     }
 
-    //TODO: Raise issue for this, currently returns 204 rather than 200; see spec
-    @Ignore
     @Test
     public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-delete.json",
