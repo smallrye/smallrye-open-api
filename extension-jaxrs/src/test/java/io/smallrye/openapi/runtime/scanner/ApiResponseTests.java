@@ -150,8 +150,6 @@ public class ApiResponseTests extends IndexScannerTestBase {
 
     @Test
     public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoid() throws IOException, JSONException {
-        // no async-specific JSON required to test against 
-        // should produce equivalent output to non-async response
         test("responses.api-response-schema-invalid-response-code-void-post.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoidTestResource.class,
                 Pet.class, JsonString.class);
