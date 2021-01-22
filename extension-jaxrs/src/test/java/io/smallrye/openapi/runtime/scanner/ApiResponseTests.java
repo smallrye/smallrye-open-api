@@ -7,7 +7,9 @@ import javax.json.JsonString;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -29,7 +31,7 @@ import org.json.JSONException;
 import org.junit.Test;
 
 /**
- * @author Michael Edgar {@literal <michael@xlate.io>}
+ * @author Michael Edgar {@literal <michael@xlate.io>} and Scott Curtis {@literal <Scott.Curtis@ibm.com>}
  */
 public class ApiResponseTests extends IndexScannerTestBase {
 
@@ -66,6 +68,160 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public void testResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
         test("responses.generation-enabled-by-incomplete-api-response.json",
                 ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaNoResponseDescription() throws IOException, JSONException {
+        test("responses.api-response-schema-no-description.json",
+                ResponseGenerationAPIResponseSchemaNoResponseDescriptionTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePostNonVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-post.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeGetNonVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-get.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePutNonVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-put.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndNonVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-patch.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndNonVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-delete.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-void-post.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-not-async-void-get.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-not-async-void-put.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-not-async-void-patch.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-not-async-void-delete.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-void-post.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-get.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndVoidTestResource.class, Pet.class,
+                JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndVoid() throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-put.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndVoidTestResource.class, Pet.class,
+                JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-patch.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoidTestResource.class, Pet.class,
+                JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-delete.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoidTestResource.class, Pet.class,
+                JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndNonVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-post.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndNonVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-get.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndNonVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-put.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndNonVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-patch.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndNonVoidTestResource.class,
+                Pet.class, JsonString.class);
+    }
+
+    @Test
+    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndNonVoid()
+            throws IOException, JSONException {
+        test("responses.api-response-schema-invalid-response-code-delete.json",
+                ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndNonVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
@@ -157,6 +313,227 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @APIResponse(responseCode = "400", description = "Description 400")
         public Pet createOrUpdatePet(Pet pet) {
             return pet;
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaNoResponseDescriptionTestResource {
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "200")
+        public Pet createOrUpdatePet(Pet pet) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndNonVoidTestResource {
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet createOrUpdatePet(Pet pet) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndNonVoidTestResource {
+        @GET
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet getPet(Pet pet) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndNonVoidTestResource {
+        @PUT
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet createOrUpdatePet(Pet pet) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndNonVoidTestResource {
+        @PATCH
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet updatePet(Pet pet) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndNonVoidTestResource {
+        @DELETE
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet deletePet(Pet pet) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndVoidTestResource {
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void createOrUpdatePet(Pet pet) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndVoidTestResource {
+        @GET
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void getPet(Pet pet) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndVoidTestResource {
+        @PUT
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void createOrUpdatePet(Pet pet) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndVoidTestResource {
+        @PATCH
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void updatePet(Pet pet) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndVoidTestResource {
+        @DELETE
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void deletePet(Pet pet) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoidTestResource {
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void createOrUpdatePet(Pet pet, @Suspended AsyncResponse response) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndVoidTestResource {
+        @GET
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void getPet(Pet pet, @Suspended AsyncResponse response) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndVoidTestResource {
+        @PUT
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void createOrUpdatePet(Pet pet, @Suspended AsyncResponse response) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoidTestResource {
+        @PATCH
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void updatePet(Pet pet, @Suspended AsyncResponse response) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoidTestResource {
+        @DELETE
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public void deletePet(Pet pet, @Suspended AsyncResponse response) {
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndNonVoidTestResource {
+        @POST
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet createOrUpdatePet(Pet pet, @Suspended AsyncResponse response) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndNonVoidTestResource {
+        @GET
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet getPet(Pet pet, @Suspended AsyncResponse response) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndNonVoidTestResource {
+        @PUT
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet createOrUpdatePet(Pet pet, @Suspended AsyncResponse response) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndNonVoidTestResource {
+        @PATCH
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet updatePet(Pet pet, @Suspended AsyncResponse response) {
+            return new Pet();
+        }
+    }
+
+    @Path("pets")
+    static class ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndNonVoidTestResource {
+        @DELETE
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        @APIResponseSchema(value = Pet.class, responseCode = "NaN")
+        public Pet deletePet(Pet pet, @Suspended AsyncResponse response) {
+            return new Pet();
         }
     }
 
