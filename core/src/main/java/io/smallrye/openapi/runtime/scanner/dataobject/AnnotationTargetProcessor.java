@@ -21,6 +21,7 @@ import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -174,6 +175,14 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         processFieldAnnotations(fieldSchema, typeResolver);
 
+        Schema parentSchema = parentPathEntry.getSchema();
+        Schema existingFieldSchema = ModelUtil.getPropertySchema(parentSchema, propertyKey);
+
+        if (existingFieldSchema != null) {
+            // Existing schema (from @SchemaProperty) overrides @Schema on field
+            fieldSchema = MergeUtil.mergeObjects(fieldSchema, existingFieldSchema);
+        }
+
         // Only when registration was successful (ref is present and the registered type is a different instance)
         if (registrationSuccessful(typeSchema, registeredTypeSchema)) {
             // Check if the field specifies something additional or different from the type's schema
@@ -191,7 +200,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = MergeUtil.mergeObjects(typeSchema, fieldSchema);
         }
 
-        parentPathEntry.getSchema().addProperty(propertyKey, fieldSchema);
+        parentSchema.addProperty(propertyKey, fieldSchema);
+
         return fieldSchema;
     }
 

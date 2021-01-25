@@ -112,6 +112,23 @@ public class ModelUtil {
     }
 
     /**
+     * Gets the {@link Schema} associated with the named property of the given schema.
+     * When the property is not found or when no properties exist on the schema, returns
+     * null.
+     * 
+     * @param schema the schema from which to retrieve the property
+     * @param name name of the property
+     * @return schema for the named property if set, otherwise null
+     */
+    public static Schema getPropertySchema(Schema schema, String name) {
+        if (schema.getProperties() != null) {
+            return schema.getProperties().get(name);
+        }
+
+        return null;
+    }
+
+    /**
      * Returns true only if the given {@link Parameter} has a schema defined
      * for it. A schema can be defined either via the parameter's "schema"
      * property, or any "content.*.schema" property.
