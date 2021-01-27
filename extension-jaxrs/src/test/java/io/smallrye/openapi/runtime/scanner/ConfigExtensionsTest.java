@@ -16,11 +16,12 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
 
 /**
- * Basic tests to check the setting of certain Info elements via config
+ * Basic tests to check the setting of certain Info elements via config, using
+ * extensions config properties
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class ConfigTest extends JaxRsDataObjectScannerTestBase {
+public class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
 
     private static final String TITLE = "mp.openapi.extensions.smallrye.info.title";
     private static final String VERSION = "mp.openapi.extensions.smallrye.info.version";
