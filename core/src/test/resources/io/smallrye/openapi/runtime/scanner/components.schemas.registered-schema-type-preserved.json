@@ -1,0 +1,130 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "AnimalListEnvelope": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "description": "The API version",
+            "type": "string",
+            "example": "v3"
+          },
+          "context": {
+            "description": "Optional context-value for request/response correlation",
+            "type": "string"
+          },
+          "requestId": {
+            "description": "Unique request-id (used for logging)",
+            "type": "string",
+            "example": "F176f717c7a71"
+          },
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MessageDataItemsAnimal"
+              },
+              {
+                "description": "The business data object"
+              }
+            ]
+          },
+          "kind": {
+            "description": "The class-name of the business data object",
+            "type": "string"
+          }
+        }
+      },
+      "MessageDataItems": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Animal"
+            }
+          },
+          "currentItemCount": {
+            "format": "int32",
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "MessageDataItemsAnimal": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Animal"
+            }
+          },
+          "currentItemCount": {
+            "format": "int32",
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "Animal": {
+        "type": "object",
+        "properties": {
+          "age": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "MessageBase": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "description": "The API version",
+            "type": "string",
+            "example": "v3"
+          },
+          "context": {
+            "description": "Optional context-value for request/response correlation",
+            "type": "string"
+          },
+          "requestId": {
+            "description": "Unique request-id (used for logging)",
+            "type": "string",
+            "example": "F176f717c7a71"
+          }
+        }
+      },
+      "MessageData": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "description": "The API version",
+            "type": "string",
+            "example": "v3"
+          },
+          "context": {
+            "description": "Optional context-value for request/response correlation",
+            "type": "string"
+          },
+          "requestId": {
+            "description": "Unique request-id (used for logging)",
+            "type": "string",
+            "example": "F176f717c7a71"
+          },
+          "data": {
+            "description": "The business data object",
+            "type": "object"
+          },
+          "kind": {
+            "description": "The class-name of the business data object",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
