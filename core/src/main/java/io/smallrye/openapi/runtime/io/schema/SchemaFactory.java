@@ -176,10 +176,8 @@ public class SchemaFactory {
         AnnotationInstance externalDocsAnnotation = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(context, externalDocsAnnotation));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
-        final SchemaType schemaType = SchemaFactory.<String, SchemaType> readAttr(annotation, SchemaConstant.PROP_TYPE,
-                value -> JandexUtil.enumValue(value, SchemaType.class), defaults);
-        schema.setType(schemaType);
-        schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schemaType));
+        schema.setType(readSchemaType(annotation, schema, defaults));
+        schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
                 readDiscriminator(context,
@@ -330,6 +328,30 @@ public class SchemaFactory {
         }
 
         return value;
+    }
+
+    /**
+     * Read the <code>type</code> property from the provided <code>@Schema<code> annotation.
+     * When null, the value previously set on the given schema object (if any) will be returned.
+     * 
+     * @param annotation schema annotation being processed
+     * @param schema schema model being populated
+     * @param defaults default schema property values or empty
+     * @return the value of the type property if not null, otherwise the current schema type
+     */
+    static SchemaType readSchemaType(AnnotationInstance annotation, Schema schema, Map<String, Object> defaults) {
+        SchemaType type = readAttr(annotation, SchemaConstant.PROP_TYPE, SchemaFactory::parseSchemaType, defaults);
+        return type != null ? type : schema.getType();
+    }
+
+    /**
+     * Convert the string value to the enum equivalent <code>SchemaType</code>
+     * 
+     * @param value string value from the <code>@Schema<code> annotation.
+     * @return the equivalent SchemaType value, or null if not set or no match
+     */
+    static SchemaType parseSchemaType(String value) {
+        return JandexUtil.enumValue(value, SchemaType.class);
     }
 
     /**
