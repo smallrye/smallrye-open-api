@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
@@ -28,6 +29,8 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 import org.json.JSONException;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
@@ -235,4 +238,97 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         printToConsole(result);
         assertJsonEquals("resource.testEmptySecurityRequirements.json", result);
     }
+
+    /**************************************************************************/
+
+    @Test
+    public void testInterfaceWithoutImplentationExcluded() throws IOException, JSONException {
+        Index index = indexOf(MissingImplementation.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("default.json", result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            OASConfig.SCAN_CLASSES + ", JaxRsAnnotationScannerTest$MissingImplementation",
+            OASConfig.SCAN_CLASSES
+                    + ", ^io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest\\$MissingImplementation$",
+            OASConfig.SCAN_PACKAGES + ", ^io.smallrye.openapi.runtime.scanner$",
+            OASConfig.SCAN_PACKAGES + ", ^io.smallrye.openapi.*$",
+    })
+    void testInterfaceWithoutImplentationIncluded(String configKey, String configValue) throws IOException, JSONException {
+        Index index = indexOf(MissingImplementation.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(configKey, configValue), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.interface-only.json", result);
+    }
+
+    @Path("/noimpl")
+    interface MissingImplementation {
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        String getNoImpl();
+    }
+
+    /**************************************************************************/
+
+    @Test
+    public void testInterfaceWithConcreteImplentation() throws IOException, JSONException {
+        Index index = indexOf(HasConcreteImplementation.class, ImplementsHasConcreteImplementation.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.concrete-implementation.json", result);
+    }
+
+    @Path("/concrete")
+    interface HasConcreteImplementation {
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        String getConcrete();
+    }
+
+    static class ImplementsHasConcreteImplementation implements HasConcreteImplementation {
+        @Override
+        public String getConcrete() {
+            return "";
+        }
+    }
+
+    /**************************************************************************/
+
+    @Test
+    public void testInterfaceWithAbstractImplentation() throws IOException, JSONException {
+        Index index = indexOf(HasAbstractImplementation.class, ImplementsHasAbstractImplementation.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("default.json", result);
+    }
+
+    @Path("/abstract")
+    interface HasAbstractImplementation {
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        String getAbstract();
+    }
+
+    static abstract class ImplementsHasAbstractImplementation implements HasAbstractImplementation {
+        @Override
+        public String getAbstract() {
+            return "";
+        }
+    }
+
 }

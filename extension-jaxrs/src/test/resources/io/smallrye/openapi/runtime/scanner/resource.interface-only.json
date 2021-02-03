@@ -1,0 +1,21 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/noimpl": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
