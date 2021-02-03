@@ -52,6 +52,29 @@ public class FilteredIndexView implements IndexView {
      * @return true if the inclusion/exclusion configuration allows scanning of the class name
      */
     public boolean accepts(DotName className) {
+        return accepts(className, true);
+    }
+
+    /**
+     * Returns true if the class name should be included in the index, only when explicitly
+     * included (and not excluded) via configuration.
+     * 
+     * @param className the name of the class
+     * @return true if the inclusion/exclusion configuration allows scanning of the class name
+     */
+    public boolean explicitlyAccepts(DotName className) {
+        return accepts(className, false);
+    }
+
+    /**
+     * Returns true if the class name should be included in the index (is either included or
+     * not excluded).
+     * 
+     * @param className the name of the class
+     * @param allowImpliedInclusion whether the class may be implied for inclusion
+     * @return true if the inclusion/exclusion configuration allows scanning of the class name
+     */
+    public boolean accepts(DotName className, boolean allowImpliedInclusion) {
         final boolean accept;
         final MatchHandler match = new MatchHandler(className);
 
@@ -94,7 +117,7 @@ public class FilteredIndexView implements IndexView {
              * matches the start of the FQCN's package.
              */
             accept = true;
-        } else if (match.isImpliedInclusion()) {
+        } else if (allowImpliedInclusion && match.isImpliedInclusion()) {
             /*
              * No value has been specified for either `mp.openapi.scan.classes`
              * or `mp.openapi.scan.packages`.
