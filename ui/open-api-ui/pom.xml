@@ -13,18 +13,24 @@
     <name>SmallRye: OpenAPI UI</name>
 
     <properties>
-        <swagger-ui.version>3.40.0</swagger-ui.version>
-        <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
+        <swagger-ui.version>3.41.1</swagger-ui.version>
+        <swagger-ui-theme.version>3.0.0</swagger-ui-theme.version>
         <path.swagger-ui>openapi-ui</path.swagger-ui>
         <sonar.skip>true</sonar.skip>
     </properties>
 
     <dependencies>
-        <!-- Only here to get dependabot notifications-->
+        <!-- Keep it here so that dependabot can help us with the update -->
         <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>swagger-ui</artifactId>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>swagger-ui-dist</artifactId>
             <version>${swagger-ui.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>swagger-ui-themes</artifactId>
+            <version>${swagger-ui-theme.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- Tests -->
@@ -72,156 +78,45 @@
         <plugins>
             <!-- So we don't have to keep a version of these javascript libs in our repo -->
             <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
                 <executions>
-                    <!-- We download the index.html just to compare to our custom template one. -->
-                    <execution>
-                        <id>install-swagger-ui-html</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/index.html</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/original/</outputDirectory>
-                            <md5>3c09b175732f72a887bb60cafc9571cb</md5>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>install-swagger-ui-css</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>dbaaebe362a6fcddd95f8eed1a660d59</md5>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>install-swagger-ui</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>wget</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
-                            <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-bundle.js</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>f94c6806da9cfca8cf30e1fe9eb7762f</md5>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.webjars.npm</groupId>
+                                    <artifactId>swagger-ui-dist</artifactId>
+                                    <version>${swagger-ui.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}/</outputDirectory>
+                                    <includes>**/swagger-ui.css, **/swagger-ui.css.map, **/swagger-ui-bundle.js, **/swagger-ui-bundle.js.map, **/swagger-ui-standalone-preset.js, **/swagger-ui-standalone-preset.js.map</includes>
+                                    <fileMappers>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
+                                    </fileMappers>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.webjars.npm</groupId>
+                                    <artifactId>swagger-ui-themes</artifactId>
+                                    <version>${swagger-ui-theme.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}/</outputDirectory>
+                                    <includes>**/*.css</includes>
+                                    <fileMappers>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
+                                    </fileMappers>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>install-swagger-ui-standalone-preset</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-dist@${swagger-ui.version}/swagger-ui-standalone-preset.js</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>38daefef8cbd97420cc2ed33cf332716</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme1</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-feeling-blue.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>043718e5194b38bcbec6f28e4aeaf614</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme2</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-flattop.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>fa35bec1fbac3be81bbf39ba265e2513</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme3</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-material.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>e08a28fa9075553954222782f7219068</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme4</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-monokai.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>893e2f09f99768682fdddbfc42713fd0</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme5</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-muted.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>198359070aa509736bf1eb5b9d8441b0</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme6</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-newspaper.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>6ea2511178d892b5933c233785d2f3ac</md5>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-swagger-ui-theme7</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://unpkg.com/swagger-ui-themes@${swagger-ui-theme.version}/themes/3.x/theme-outline.css</url>
-                            <unpack>false</unpack>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</outputDirectory>
-                            <md5>eb3609706e0f296148a5c031f985fb17</md5>
-                        </configuration>
-                    </execution>
-
                 </executions>
             </plugin>
         </plugins>
