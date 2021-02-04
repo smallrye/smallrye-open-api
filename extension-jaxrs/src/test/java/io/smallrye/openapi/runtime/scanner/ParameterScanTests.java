@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import javax.json.JsonObject;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -44,8 +47,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Encoding;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.jboss.jandex.IndexReader;
+import org.jboss.jandex.IndexWriter;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -239,6 +245,20 @@ public class ParameterScanTests extends IndexScannerTestBase {
     public void testRestEasyReactivePathParamOmitted() throws IOException, JSONException {
         test("params.resteasy-reactive-missing-restpath.json", RestEasyReactivePathParamOmittedTestResource.class,
                 Widget.class);
+    }
+
+    @Test
+    public void testSerializedIndexParameterAnnotations() throws IOException, JSONException {
+        Index i1 = indexOf(GreetResource.class, GreetResource.GreetingMessage.class);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        IndexWriter writer = new IndexWriter(out);
+        writer.write(i1);
+
+        Index index = new IndexReader(new ByteArrayInputStream(out.toByteArray())).read();
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("params.serialized-annotation-index.json", result);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -934,6 +954,23 @@ public class ParameterScanTests extends IndexScannerTestBase {
         public Widget get2(@Extension(name = "custom-info", value = "value for param3") String param3, @Context Request param1,
                 int paramOne) {
             return null;
+        }
+    }
+
+    @Path("/greet")
+    static class GreetResource {
+        @Path("/{name}")
+        @GET
+        @Operation(summary = "Returns a personalized greeting")
+        @APIResponse(description = "Simple JSON containing the greeting", content = @Content(mediaType = "application/json", schema = @Schema(implementation = GreetingMessage.class)))
+        @Produces(MediaType.APPLICATION_JSON)
+        public JsonObject getMessage(
+                @Parameter(description = "The greeting name") @PathParam("name") String name) {
+            return null;
+        }
+
+        public static class GreetingMessage {
+            String message;
         }
     }
 }
