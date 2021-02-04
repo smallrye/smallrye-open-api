@@ -1179,7 +1179,7 @@ public abstract class AbstractParameterProcessor {
          */
         boolean nameMatches = (context.name == null || name == null || Objects.equals(context.name, name));
 
-        if (target.equals(context.target)) {
+        if (JandexUtil.equals(target, context.target)) {
             /*
              * The name must match for annotations on a method because it is
              * ambiguous which parameters is being referenced.
