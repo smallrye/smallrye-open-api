@@ -18,6 +18,7 @@ import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
@@ -507,4 +508,34 @@ public class JandexUtil {
 
         return chain;
     }
+
+    public static boolean equals(AnnotationTarget t1, AnnotationTarget t2) {
+        if (t1.kind() != t2.kind()) {
+            return false;
+        }
+
+        switch (t1.kind()) {
+            case CLASS:
+                return equals(t1.asClass(), t2.asClass());
+            case FIELD:
+                return equals(t1.asField(), t2.asField());
+            case METHOD_PARAMETER:
+                return equals(t1.asMethodParameter(), t2.asMethodParameter());
+            default:
+                return t1.equals(t2);
+        }
+    }
+
+    public static boolean equals(ClassInfo c1, ClassInfo c2) {
+        return c1.name().equals(c2.name());
+    }
+
+    public static boolean equals(FieldInfo f1, FieldInfo f2) {
+        return equals(f1.declaringClass(), f2.declaringClass()) && f1.name().equals(f2.name());
+    }
+
+    public static boolean equals(MethodParameterInfo p1, MethodParameterInfo p2) {
+        return p1.method().equals(p2.method()) && p1.position() == p2.position();
+    }
+
 }

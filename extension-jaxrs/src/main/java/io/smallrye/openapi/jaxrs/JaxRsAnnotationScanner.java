@@ -26,7 +26,6 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
-import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
@@ -39,6 +38,7 @@ import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
+import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
@@ -203,7 +203,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     private void processResourceClasses(final AnnotationScannerContext context, OpenAPI openApi) {
         // Now find all jax-rs endpoints
-        Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context.getIndex());
+        Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context);
         for (ClassInfo resourceClass : resourceClasses) {
             processResourceClass(context, openApi, resourceClass, null);
         }
@@ -482,19 +482,36 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.
      * 
-     * @param index IndexView
+     * @param context current scanning context
      * @return Collection of ClassInfo's
      */
-    private Collection<ClassInfo> getJaxRsResourceClasses(IndexView index) {
-        return index.getAnnotations(JaxRsConstants.PATH)
+    private Collection<ClassInfo> getJaxRsResourceClasses(AnnotationScannerContext context) {
+        return context.getIndex()
+                .getAnnotations(JaxRsConstants.PATH)
                 .stream()
                 .map(AnnotationInstance::target)
                 .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
                 .map(AnnotationTarget::asClass)
-                .filter(classInfo -> !classInfo.annotations().containsKey(JaxRsConstants.REGISTER_REST_CLIENT) ||
-                        index.getAllKnownImplementors(classInfo.name()).stream()
-                                .anyMatch(info -> !Modifier.isAbstract(info.flags())))
+                .filter(classInfo -> this.hasImplementationOrIsIncluded(context, classInfo))
                 .distinct() // CompositeIndex instances may return duplicates
                 .collect(Collectors.toList());
+    }
+
+    private boolean hasImplementationOrIsIncluded(AnnotationScannerContext context, ClassInfo clazz) {
+        if (!Modifier.isInterface(clazz.flags())) {
+            return true;
+        }
+
+        FilteredIndexView filteredIndex = context.getIndex();
+
+        if (filteredIndex.getAllKnownImplementors(clazz.name()).stream().anyMatch(this::notAbstract)) {
+            return true;
+        }
+
+        return filteredIndex.explicitlyAccepts(clazz.name());
+    }
+
+    private boolean notAbstract(ClassInfo clazz) {
+        return !Modifier.isAbstract(clazz.flags());
     }
 }
