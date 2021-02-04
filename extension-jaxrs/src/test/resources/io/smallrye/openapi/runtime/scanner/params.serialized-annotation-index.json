@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/greet/{name}": {
+      "get": {
+        "summary": "Returns a personalized greeting",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The greeting name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Simple JSON containing the greeting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GreetingMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
