@@ -1,9 +1,15 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.json.JSONException;
 import org.junit.Test;
 
 public class StandaloneSchemaScanTest extends IndexScannerTestBase {
@@ -73,5 +79,165 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Schema(allOf = { Reptile.class, Turtle.class })
     static class Turtle extends Reptile {
         String shellPattern;
+    }
+
+    /****************************************************************/
+
+    /*
+     * Test case derived from original example in Smallrye OpenAPI issue #649.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/649
+     * https://github.com/quarkusio/quarkus/issues/14670
+     */
+    @Test
+    public void testRegisteredSchemaTypePreserved() throws IOException, JSONException {
+        Index index = indexOf(RegisteredSchemaTypePreservedModel.Animal.class,
+                RegisteredSchemaTypePreservedModel.AnimalListEnvelope.class,
+                RegisteredSchemaTypePreservedModel.MessageBase.class,
+                RegisteredSchemaTypePreservedModel.MessageData.class,
+                RegisteredSchemaTypePreservedModel.MessageDataItems.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.registered-schema-type-preserved.json", result);
+    }
+
+    static class RegisteredSchemaTypePreservedModel {
+        @Schema
+        static class AnimalListEnvelope extends MessageData<MessageDataItems<Animal>> {
+            public AnimalListEnvelope() {
+            }
+
+            public AnimalListEnvelope(List<Animal> animals) {
+                super(new MessageDataItems<Animal>(animals));
+            }
+        }
+
+        static class Animal {
+            private String name;
+            private int age;
+
+            public Animal() {
+            }
+
+            public Animal(String name, int age) {
+                this.name = name;
+                this.age = age;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+        }
+
+        @Schema
+        static class MessageData<T> extends MessageBase {
+            @Schema(description = "The business data object")
+            private T data;
+
+            public MessageData() {
+            }
+
+            public MessageData(T data) {
+                this.data = data;
+            }
+
+            public T getData() {
+                return data;
+            }
+
+            public void setData(T data) {
+                this.data = data;
+            }
+
+            @Schema(description = "The class-name of the business data object")
+            public String getKind() {
+                if (data == null) {
+                    return null;
+                } else {
+                    return data.getClass()
+                            .getSimpleName();
+                }
+            }
+        }
+
+        @Schema
+        static class MessageBase {
+
+            @Schema(description = "The API version", example = "v3")
+            protected String apiVersion = "v3";
+
+            @Schema(description = "Unique request-id (used for logging)", example = "F176f717c7a71")
+            protected String requestId;
+
+            @Schema(description = "Optional context-value for request/response correlation")
+            protected String context;
+
+            protected MessageBase() {
+            }
+
+            public String getRequestId() {
+                return requestId;
+            }
+
+            public void setRequestId(String id) {
+                this.requestId = id;
+            }
+
+            public String getContext() {
+                return context;
+            }
+
+            public void setContext(String context) {
+                this.context = context;
+            }
+
+            public String getApiVersion() {
+                return apiVersion;
+            }
+
+            public void setApiVersion(String apiVersion) {
+                this.apiVersion = apiVersion;
+            }
+        }
+
+        @Schema
+        static class MessageDataItems<T> {
+            private List<T> items;
+
+            public MessageDataItems() {
+            }
+
+            public MessageDataItems(List<T> items) {
+                this.items = new ArrayList<T>(items);
+            }
+
+            public List<T> getItems() {
+                return Collections.unmodifiableList(items);
+            }
+
+            public void setItems(List<T> items) {
+                this.items = new ArrayList<T>(items);
+            }
+
+            @Schema(example = "1")
+            public int getCurrentItemCount() {
+                return (items == null) ? 0 : items.size();
+            }
+        }
     }
 }
