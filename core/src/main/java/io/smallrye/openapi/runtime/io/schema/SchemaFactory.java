@@ -401,9 +401,9 @@ public class SchemaFactory {
             List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
 
-        if (TypeUtil.isOptional(type)) {
+        if (TypeUtil.isWrappedType(type)) {
             // Recurse using the optional's type
-            return typeToSchema(context, TypeUtil.getOptionalType(type), extensions);
+            return typeToSchema(context, TypeUtil.unwrapType(type), extensions);
         } else if (CurrentScannerInfo.isWrapperType(type)) {
             // Recurse using the wrapped type
             return typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);

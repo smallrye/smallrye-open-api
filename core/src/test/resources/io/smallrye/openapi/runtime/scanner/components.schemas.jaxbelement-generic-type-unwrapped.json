@@ -1,0 +1,18 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "JAXBElementDto": {
+        "type": "object",
+        "properties": {
+          "caseSubtitleFree": {
+            "type": "string"
+          },
+          "caseSubtitle": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

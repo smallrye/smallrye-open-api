@@ -5,6 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlType;
+
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -239,5 +245,34 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
                 return (items == null) ? 0 : items.size();
             }
         }
+    }
+
+    /****************************************************************/
+
+    /*
+     * Test case derived from original example in Smallrye OpenAPI issue #650.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/650
+     */
+    @Test
+    public void testJaxbElementUnwrapped() throws IOException, JSONException {
+        Index index = indexOf(JAXBElementDto.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json", result);
+    }
+
+    @Schema
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "JAXBElementDto", propOrder = {
+            "caseSubtitleFree",
+            "caseSubtitle"
+    })
+    static class JAXBElementDto {
+        @XmlElementRef(name = "CaseSubtitle", namespace = "urn:Milo.API.Miljo.DataContracts.V1", type = JAXBElement.class, required = false)
+        protected JAXBElement<String> caseSubtitle;
+        @XmlElementRef(name = "CaseSubtitleFree", namespace = "urn:Milo.API.Miljo.DataContracts.V1", type = JAXBElement.class, required = false)
+        protected JAXBElement<String> caseSubtitleFree;
     }
 }
