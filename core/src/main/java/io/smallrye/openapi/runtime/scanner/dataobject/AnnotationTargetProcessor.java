@@ -141,7 +141,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             TypeUtil.applyTypeAttributes(fieldType, typeSchema);
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
-            Type registrationType = TypeUtil.isOptional(entityType) ? fieldType : entityType;
+            Type registrationType = TypeUtil.isWrappedType(entityType) ? fieldType : entityType;
 
             if (typeSchema.getType() != SchemaType.ARRAY) {
                 // Only register a reference to the type schema. The full schema will be added by subsequent
