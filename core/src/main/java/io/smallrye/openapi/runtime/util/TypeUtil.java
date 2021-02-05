@@ -36,6 +36,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
+import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
@@ -451,6 +452,26 @@ public class TypeUtil {
 
         // If is known type.
         return !getTypeFormat(type).isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT);
+    }
+
+    public static boolean isWrappedType(Type type) {
+        if (type != null) {
+            return isOptional(type) || JaxbConstants.JAXB_ELEMENT.equals(type.name());
+        }
+        return false;
+    }
+
+    public static Type unwrapType(Type type) {
+        if (type != null) {
+            if (isOptional(type)) {
+                return getOptionalType(type);
+            }
+            if (JaxbConstants.JAXB_ELEMENT.equals(type.name())) {
+                return type.asParameterizedType().arguments().get(0);
+            }
+        }
+
+        return type;
     }
 
     /**

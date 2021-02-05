@@ -137,10 +137,7 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
                 } else if (target != null) {
                     // This is a @BeanParam or a RESTEasy @MultipartForm
                     setMediaType(frameworkParam);
-
-                    if (TypeUtil.isOptional(targetType)) {
-                        targetType = TypeUtil.getOptionalType(targetType);
-                    }
+                    targetType = TypeUtil.unwrapType(targetType);
 
                     if (targetType != null) {
                         ClassInfo beanParam = index.getClassByName(targetType.name());

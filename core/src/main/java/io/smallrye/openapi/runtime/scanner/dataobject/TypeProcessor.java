@@ -110,12 +110,12 @@ public class TypeProcessor {
             return arrayType;
         }
 
-        if (TypeUtil.isOptional(type)) {
-            Type optType = TypeUtil.getOptionalType(type);
-            if (!isTerminalType(optType) && index.containsClass(optType)) {
-                pushToStack(optType);
+        if (TypeUtil.isWrappedType(type)) {
+            Type wrappedType = TypeUtil.unwrapType(type);
+            if (!isTerminalType(wrappedType) && index.containsClass(wrappedType)) {
+                pushToStack(wrappedType);
             }
-            return optType;
+            return wrappedType;
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
