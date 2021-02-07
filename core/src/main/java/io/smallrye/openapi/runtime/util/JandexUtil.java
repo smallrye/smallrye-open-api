@@ -57,6 +57,15 @@ public class JandexUtil {
         RefType(String componentPath) {
             this.componentPath = componentPath;
         }
+
+        public static RefType fromComponentPath(String path) {
+            for (RefType ref : values()) {
+                if (ref.componentPath.equals(path)) {
+                    return ref;
+                }
+            }
+            return null;
+        }
     }
 
     /**
