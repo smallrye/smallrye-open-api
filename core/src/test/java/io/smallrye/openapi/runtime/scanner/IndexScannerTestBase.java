@@ -31,6 +31,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
@@ -41,6 +42,7 @@ public class IndexScannerTestBase {
     @After
     public void removeSchemaRegistry() {
         SchemaRegistry.remove();
+        CurrentScannerInfo.remove();
     }
 
     protected static String pathOf(Class<?> clazz) {

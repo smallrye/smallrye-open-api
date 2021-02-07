@@ -510,7 +510,10 @@ public class JandexUtil {
     }
 
     public static boolean equals(AnnotationTarget t1, AnnotationTarget t2) {
-        if (t1.kind() != t2.kind()) {
+        if (t1 == t2) {
+            return true;
+        }
+        if (t1 == null || t2 == null || t1.kind() != t2.kind()) {
             return false;
         }
 

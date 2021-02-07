@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -156,17 +155,27 @@ public abstract class AbstractParameterProcessor {
         final String name;
         final In location;
         final Style style;
+        final String ref;
 
         public ParameterContextKey(String name, In location, Style style) {
             this.name = name;
             this.location = location;
             this.style = style;
+            this.ref = null;
+        }
+
+        public ParameterContextKey(Parameter oaiParam) {
+            this.name = oaiParam.getName();
+            this.location = oaiParam.getIn();
+            this.style = styleOf(oaiParam);
+            this.ref = oaiParam.getRef();
         }
 
         public ParameterContextKey(ParameterContext context) {
             this.name = context.name;
             this.location = context.location;
             this.style = context.style;
+            this.ref = context.oaiParam != null ? context.oaiParam.getRef() : null;
         }
 
         @Override
@@ -174,21 +183,34 @@ public abstract class AbstractParameterProcessor {
             if (obj instanceof ParameterContextKey) {
                 ParameterContextKey other = (ParameterContextKey) obj;
 
+                if (isNull() && other.isNull()) {
+                    return this == other;
+                }
+
+                if (ref != null) {
+                    return ref.equals(other.ref);
+                }
+
                 return Objects.equals(this.name, other.name) &&
                         Objects.equals(this.location, other.location) &&
                         Objects.equals(this.style, other.style);
             }
+
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, location, style);
+            return isNull() ? super.hashCode() : Objects.hash(name, location, style, ref);
         }
 
         @Override
         public String toString() {
-            return "name: " + name + "; in: " + location;
+            return "name: " + name + "; in: " + location + "; style: " + style + "; ref: " + ref;
+        }
+
+        public boolean isNull() {
+            return name == null && location == null && style == null && ref == null;
         }
     }
 
@@ -209,6 +231,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected ResourceParameters process(ClassInfo resourceClass, MethodInfo resourceMethod) {
+
         ResourceParameters parameters = new ResourceParameters();
 
         processPathParameters(resourceClass, resourceMethod, parameters);
@@ -231,13 +254,13 @@ public abstract class AbstractParameterProcessor {
         // Phase II - Read method argument @Parameter and framework's annotations
         resourceMethod.annotations()
                 .stream()
-                .filter(a -> !a.target().equals(resourceMethod))
+                .filter(a -> !JandexUtil.equals(a.target(), resourceMethod))
                 .forEach(this::readAnnotatedType);
 
         // Phase III - Read method @Parameter(s) annotations
         resourceMethod.annotations()
                 .stream()
-                .filter(a -> a.target().equals(resourceMethod))
+                .filter(a -> JandexUtil.equals(a.target(), resourceMethod))
                 .filter(a -> openApiParameterAnnotations.contains(a.name()))
                 .forEach(this::readParameterAnnotation);
 
@@ -380,8 +403,7 @@ public abstract class AbstractParameterProcessor {
                 .stream()
                 .map(context -> this.mapParameter(resourceMethod, context))
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(Parameter::getIn)
-                        .thenComparing(Parameter::getName))
+                .sorted(ResourceParameters.PARAMETER_COMPARATOR)
                 .collect(Collectors.toList());
 
         return parameters.isEmpty() ? null : parameters;
@@ -650,10 +672,11 @@ public abstract class AbstractParameterProcessor {
      * @see org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in()
      */
     protected boolean isIgnoredParameter(Parameter parameter, AnnotationTarget resourceMethod) {
-        String paramName = parameter.getName();
-        In paramIn = parameter.getIn();
+        final String ref = parameter.getRef();
+        final String paramName = parameter.getName();
+        final In paramIn = parameter.getIn();
 
-        if (paramIn == null) {
+        if (paramIn == null && ref == null) {
             /*
              * Per @Parameter JavaDoc, ignored when empty string (i.e., unspecified).
              * This may occur when @Parameter is specified without a matching framework
@@ -669,7 +692,7 @@ public abstract class AbstractParameterProcessor {
         /*
          * Name is REQUIRED unless it is a reference.
          */
-        if ((paramName == null || paramName.trim().isEmpty()) && parameter.getRef() == null) {
+        if ((paramName == null || paramName.trim().isEmpty()) && ref == null) {
             return true;
         }
 
@@ -780,7 +803,7 @@ public abstract class AbstractParameterProcessor {
      * @param param the {@link Parameter}
      * @return the param's style, the default style defined based on <code>in</code>, or null if <code>in</code> is not defined.
      */
-    protected Style styleOf(Parameter param) {
+    protected static Style styleOf(Parameter param) {
         if (param.getStyle() != null) {
             return param.getStyle();
         }
@@ -1053,6 +1076,21 @@ public abstract class AbstractParameterProcessor {
         return type;
     }
 
+    protected boolean isReadableParameterAnnotation(DotName name) {
+        return ParameterConstant.DOTNAME_PARAMETER.equals(name) && readerFunction != null;
+    }
+
+    protected void readParameterAnnotation(AnnotationInstance annotation, boolean overriddenParametersOnly) {
+        Parameter oaiParam = readerFunction.apply(annotation);
+
+        readParameter(new ParameterContextKey(oaiParam),
+                oaiParam,
+                null,
+                null,
+                annotation.target(),
+                overriddenParametersOnly);
+    }
+
     /**
      * Merges MP-OAI {@link Parameter}s and framework-specific parameters for the same {@link In} and name,
      * and {@link Style}. When overriddenParametersOnly is true, new parameters not already known
@@ -1151,47 +1189,80 @@ public abstract class AbstractParameterProcessor {
             context = params
                     .values()
                     .stream()
+                    // Only attempt to match parameters without `ref` specified
+                    .filter(c -> c.oaiParam == null || c.oaiParam.getRef() == null)
                     .filter(c -> haveSameAnnotatedTarget(c, target, key.name))
+                    .filter(c -> attributesCompatible(c.location, key.location))
+                    .filter(c -> attributesCompatible(c.style, key.style))
                     .findFirst()
-                    .orElse(null);
-        }
-
-        if (context == null) {
-            /*
-             * Allow a match on just the name and style if one of the Parameter.In values
-             * is not specified
-             */
-            context = params.values().stream().filter(c -> {
-                if (c.location == null || key.location == null) {
-                    return Objects.equals(c.name, key.name) && Objects.equals(c.style, key.style);
-                }
-                return false;
-            }).findFirst().orElse(null);
-
+                    .orElseGet(() -> params.values()
+                            .stream()
+                            .filter(c -> nameAndStyleMatch(c, key))
+                            .findFirst()
+                            .orElse(null));
         }
 
         return context;
     }
 
     boolean haveSameAnnotatedTarget(ParameterContext context, AnnotationTarget target, String name) {
-        /*
-         * Consider names to match if one is unspecified or they are equal.
-         */
-        boolean nameMatches = (context.name == null || name == null || Objects.equals(context.name, name));
+        boolean sameTarget = false;
 
         if (JandexUtil.equals(target, context.target)) {
+            if (target.kind() != Kind.METHOD) {
+                // Both annotations are set on the same method argument or field
+                sameTarget = true;
+            } else {
+                /*
+                 * Method targets: consider names to match if *one* is unspecified or they are equal.
+                 */
+                if (name != null) {
+                    sameTarget = context.name == null || Objects.equals(name, context.name);
+                } else if (context.name != null) {
+                    sameTarget = true;
+                }
+            }
+        } else if (JandexUtil.equals(targetMethod(target), targetMethod(context.target))) {
             /*
-             * The name must match for annotations on a method because it is
-             * ambiguous which parameters is being referenced.
+             * One annotation is on the method and the other is on a parameter. Require that
+             * the names are both given and match.
              */
-            return nameMatches || target.kind() != Kind.METHOD;
+            sameTarget = name != null && name.equals(context.name);
         }
 
-        if (nameMatches && target.kind() == Kind.METHOD && context.target.kind() == Kind.METHOD_PARAMETER) {
-            return context.target.asMethodParameter().method().equals(target);
+        return sameTarget;
+    }
+
+    boolean attributesCompatible(Object a1, Object a2) {
+        return a1 == null || a2 == null || a1.equals(a2);
+    }
+
+    boolean nameAndStyleMatch(ParameterContext context, ParameterContextKey key) {
+        /*
+         * Allow a match on just the name and style if one of the Parameter.In values
+         * is not specified
+         */
+        if ((context.location == null || key.location == null) && key.name != null && key.style != null) {
+            return key.name.equals(context.name) && key.style.equals(context.style);
         }
 
         return false;
+    }
+
+    /**
+     * Obtain the MethodInfo associated with the annotation target.
+     * 
+     * @param target annotated item. Only method and method parameter targets.
+     * @return the MethodInfo associated with the target, or null if target is not a method or parameter.
+     */
+    static MethodInfo targetMethod(AnnotationTarget target) {
+        if (target.kind() == Kind.METHOD) {
+            return target.asMethod();
+        }
+        if (target.kind() == Kind.METHOD_PARAMETER) {
+            return target.asMethodParameter().method();
+        }
+        return null;
     }
 
     /**
