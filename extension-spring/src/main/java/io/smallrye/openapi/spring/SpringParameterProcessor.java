@@ -89,15 +89,8 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
             boolean overriddenParametersOnly) {
         DotName name = annotation.name();
 
-        if (ParameterConstant.DOTNAME_PARAMETER.equals(name) && readerFunction != null) {
-            Parameter oaiParam = readerFunction.apply(annotation);
-
-            readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
-                    oaiParam,
-                    null,
-                    null,
-                    annotation.target(),
-                    overriddenParametersOnly);
+        if (isReadableParameterAnnotation(name)) {
+            readParameterAnnotation(annotation, overriddenParametersOnly);
         } else {
             FrameworkParameter frameworkParam = SpringParameter.forName(name);
 
