@@ -91,14 +91,8 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
 
         DotName name = annotation.name();
 
-        if (ParameterConstant.DOTNAME_PARAMETER.equals(name) && readerFunction != null) {
-            Parameter oaiParam = readerFunction.apply(annotation);
-            readParameter(new ParameterContextKey(oaiParam.getName(), oaiParam.getIn(), styleOf(oaiParam)),
-                    oaiParam,
-                    null,
-                    null, /* defaultValue */
-                    annotation.target(),
-                    overriddenParametersOnly);
+        if (isReadableParameterAnnotation(name)) {
+            readParameterAnnotation(annotation, overriddenParametersOnly);
         } else if (VertxConstants.PARAM.equals(name) && annotation.value() != null) {
             String parameterName = annotation.value().asString();
             String path = null;

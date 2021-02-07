@@ -1,0 +1,92 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "title",
+    "version": "1"
+  },
+  "paths": {
+    "/{pathParam1}/{pathParam2}/one": {
+      "get": {
+        "parameters": [
+          {
+            "name": "pathParam1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pathParam2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/queryParam1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{pathParam1}/{pathParam2}/two": {
+      "get": {
+        "parameters": [
+          {
+            "name": "pathParam1",
+            "in": "path",
+            "style": "simple",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/pathParam2"
+          },
+          {
+            "$ref": "#/components/parameters/queryParam1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "queryParam1": {
+        "name": "queryParam1",
+        "in": "query"
+      },
+      "pathParam2": {
+        "name": "pathParam2",
+        "in": "path",
+        "description": "`pathParam2` with info in components"
+      }
+    }
+  }
+}

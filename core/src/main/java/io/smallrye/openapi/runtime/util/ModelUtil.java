@@ -27,6 +27,7 @@ import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 
 /**
  * Class with some convenience methods useful for working with the OAI data model.
@@ -82,6 +83,68 @@ public class ModelUtil {
             openApi.setComponents(new ComponentsImpl());
         }
         return openApi.getComponents();
+    }
+
+    /**
+     * Gets the component type specified by the given `ref` from the OpenAPI model.
+     * 
+     * @param <T> the type of the component map's entry values
+     * @param openApi containing OpenAPI model
+     * @param ref reference path to retrieve
+     * @return the component referenced by ref if present, otherwise null
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getComponent(OpenAPI openApi, String ref) {
+        final Components components = openApi.getComponents();
+        Map<String, T> types = null;
+        T value = null;
+
+        if (components != null && ref.startsWith("#")) {
+            String[] split = ref.split("/");
+
+            if (split.length > 1) {
+                String name = split[split.length - 1];
+                RefType type = RefType.fromComponentPath(split[split.length - 2]);
+
+                if (type != null) {
+                    switch (type) {
+                        case CALLBACK:
+                            types = (Map<String, T>) components.getCallbacks();
+                            break;
+                        case EXAMPLE:
+                            types = (Map<String, T>) components.getExamples();
+                            break;
+                        case HEADER:
+                            types = (Map<String, T>) components.getHeaders();
+                            break;
+                        case LINK:
+                            types = (Map<String, T>) components.getLinks();
+                            break;
+                        case PARAMETER:
+                            types = (Map<String, T>) components.getParameters();
+                            break;
+                        case REQUEST_BODY:
+                            types = (Map<String, T>) components.getRequestBodies();
+                            break;
+                        case RESPONSE:
+                            types = (Map<String, T>) components.getResponses();
+                            break;
+                        case SCHEMA:
+                            types = (Map<String, T>) components.getSchemas();
+                            break;
+                        case SECURITY_SCHEME:
+                            types = (Map<String, T>) components.getSecuritySchemes();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                value = types != null ? types.get(name) : null;
+            }
+        }
+
+        return value;
     }
 
     /**

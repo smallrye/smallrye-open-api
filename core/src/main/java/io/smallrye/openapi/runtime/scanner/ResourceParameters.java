@@ -24,8 +24,10 @@ import org.eclipse.microprofile.openapi.models.parameters.Parameter;
  */
 public class ResourceParameters {
 
-    private static final Comparator<Parameter> PARAMETER_COMPARATOR = Comparator.comparing(Parameter::getIn)
-            .thenComparing(Parameter::getName);
+    public static final Comparator<Parameter> PARAMETER_COMPARATOR = Comparator
+            .comparing(Parameter::getRef, Comparator.nullsFirst(Comparator.naturalOrder()))
+            .thenComparing(Parameter::getIn, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(Parameter::getName, Comparator.nullsLast(Comparator.naturalOrder()));
 
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern.compile("\\{(\\w[\\w\\.-]*)\\}");
 
