@@ -59,9 +59,14 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     private Boolean nullable;
     private Boolean writeOnly;
     private Boolean deprecated;
+    private int modCount;
 
     public static boolean isNamed(Schema schema) {
         return schema instanceof SchemaImpl && ((SchemaImpl) schema).name != null;
+    }
+
+    public static int getModCount(Schema schema) {
+        return schema instanceof SchemaImpl ? ((SchemaImpl) schema).modCount : -1;
     }
 
     public SchemaImpl(String name) {
@@ -74,6 +79,10 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
 
     public String getName() {
         return name;
+    }
+
+    private void incrementModCount() {
+        modCount++;
     }
 
     /**
@@ -92,6 +101,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
         if (ref != null && !ref.contains("/")) {
             ref = OpenApiConstants.REF_PREFIX_SCHEMA + ref;
         }
+        incrementModCount();
         this.ref = ref;
     }
 
@@ -108,6 +118,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setDiscriminator(Discriminator discriminator) {
+        incrementModCount();
         this.discriminator = discriminator;
     }
 
@@ -124,6 +135,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setTitle(String title) {
+        incrementModCount();
         this.title = title;
     }
 
@@ -140,6 +152,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setDefaultValue(Object defaultValue) {
+        incrementModCount();
         this.defaultValue = defaultValue;
     }
 
@@ -156,6 +169,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setEnumeration(List<Object> enumeration) {
+        incrementModCount();
         this.enumeration = ModelUtil.replace(enumeration, ArrayList<Object>::new);
     }
 
@@ -164,6 +178,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addEnumeration(Object enumeration) {
+        incrementModCount();
         this.enumeration = ModelUtil.add(enumeration, this.enumeration, ArrayList<Object>::new);
         return this;
     }
@@ -173,6 +188,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeEnumeration(Object enumeration) {
+        incrementModCount();
         ModelUtil.remove(this.enumeration, enumeration);
     }
 
@@ -189,6 +205,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMultipleOf(BigDecimal multipleOf) {
+        incrementModCount();
         this.multipleOf = multipleOf;
     }
 
@@ -205,6 +222,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMaximum(BigDecimal maximum) {
+        incrementModCount();
         this.maximum = maximum;
     }
 
@@ -221,6 +239,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setExclusiveMaximum(Boolean exclusiveMaximum) {
+        incrementModCount();
         this.exclusiveMaximum = exclusiveMaximum;
     }
 
@@ -237,6 +256,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMinimum(BigDecimal minimum) {
+        incrementModCount();
         this.minimum = minimum;
     }
 
@@ -253,6 +273,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setExclusiveMinimum(Boolean exclusiveMinimum) {
+        incrementModCount();
         this.exclusiveMinimum = exclusiveMinimum;
     }
 
@@ -269,6 +290,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMaxLength(Integer maxLength) {
+        incrementModCount();
         this.maxLength = maxLength;
     }
 
@@ -285,6 +307,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMinLength(Integer minLength) {
+        incrementModCount();
         this.minLength = minLength;
     }
 
@@ -301,6 +324,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setPattern(String pattern) {
+        incrementModCount();
         this.pattern = pattern;
     }
 
@@ -317,6 +341,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMaxItems(Integer maxItems) {
+        incrementModCount();
         this.maxItems = maxItems;
     }
 
@@ -333,6 +358,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMinItems(Integer minItems) {
+        incrementModCount();
         this.minItems = minItems;
     }
 
@@ -349,6 +375,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setUniqueItems(Boolean uniqueItems) {
+        incrementModCount();
         this.uniqueItems = uniqueItems;
     }
 
@@ -365,6 +392,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMaxProperties(Integer maxProperties) {
+        incrementModCount();
         this.maxProperties = maxProperties;
     }
 
@@ -381,6 +409,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setMinProperties(Integer minProperties) {
+        incrementModCount();
         this.minProperties = minProperties;
     }
 
@@ -397,6 +426,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setRequired(List<String> required) {
+        incrementModCount();
         this.required = ModelUtil.replace(required, ArrayList<String>::new);
     }
 
@@ -405,6 +435,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addRequired(String required) {
+        incrementModCount();
         this.required = ModelUtil.add(required, this.required, ArrayList<String>::new);
         return this;
     }
@@ -414,6 +445,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeRequired(String required) {
+        incrementModCount();
         ModelUtil.remove(this.required, required);
     }
 
@@ -430,6 +462,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setType(SchemaType type) {
+        incrementModCount();
         this.type = type;
     }
 
@@ -446,6 +479,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setNot(Schema not) {
+        incrementModCount();
         this.not = not;
     }
 
@@ -462,6 +496,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setProperties(Map<String, Schema> properties) {
+        incrementModCount();
         this.properties = ModelUtil.replace(properties, LinkedHashMap<String, Schema>::new);
     }
 
@@ -471,6 +506,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addProperty(String key, Schema propertySchema) {
+        incrementModCount();
         this.properties = ModelUtil.add(key, propertySchema, this.properties, LinkedHashMap<String, Schema>::new);
         return this;
     }
@@ -480,6 +516,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeProperty(String key) {
+        incrementModCount();
         ModelUtil.remove(this.properties, key);
     }
 
@@ -498,6 +535,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAdditionalPropertiesSchema(Schema additionalProperties) {
+        incrementModCount();
         this.additionalPropertiesBoolean = null;
         this.additionalPropertiesSchema = additionalProperties;
     }
@@ -507,6 +545,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAdditionalPropertiesBoolean(Boolean additionalProperties) {
+        incrementModCount();
         this.additionalPropertiesSchema = null;
         this.additionalPropertiesBoolean = additionalProperties;
     }
@@ -524,6 +563,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setDescription(String description) {
+        incrementModCount();
         this.description = description;
     }
 
@@ -540,6 +580,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setFormat(String format) {
+        incrementModCount();
         this.format = format;
     }
 
@@ -556,6 +597,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setNullable(Boolean nullable) {
+        incrementModCount();
         this.nullable = nullable;
     }
 
@@ -572,6 +614,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setReadOnly(Boolean readOnly) {
+        incrementModCount();
         this.readOnly = readOnly;
     }
 
@@ -588,6 +631,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setWriteOnly(Boolean writeOnly) {
+        incrementModCount();
         this.writeOnly = writeOnly;
     }
 
@@ -604,6 +648,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setExample(Object example) {
+        incrementModCount();
         this.example = example;
     }
 
@@ -620,6 +665,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setExternalDocs(ExternalDocumentation externalDocs) {
+        incrementModCount();
         this.externalDocs = externalDocs;
     }
 
@@ -636,6 +682,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setDeprecated(Boolean deprecated) {
+        incrementModCount();
         this.deprecated = deprecated;
     }
 
@@ -652,6 +699,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setXml(XML xml) {
+        incrementModCount();
         this.xml = xml;
     }
 
@@ -668,6 +716,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setItems(Schema items) {
+        incrementModCount();
         this.items = items;
     }
 
@@ -684,6 +733,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAllOf(List<Schema> allOf) {
+        incrementModCount();
         this.allOf = ModelUtil.replace(allOf, ArrayList<Schema>::new);
     }
 
@@ -692,6 +742,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addAllOf(Schema allOf) {
+        incrementModCount();
         this.allOf = ModelUtil.add(allOf, this.allOf, ArrayList<Schema>::new);
         return this;
     }
@@ -701,6 +752,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeAllOf(Schema allOf) {
+        incrementModCount();
         ModelUtil.remove(this.allOf, allOf);
     }
 
@@ -717,6 +769,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setAnyOf(List<Schema> anyOf) {
+        incrementModCount();
         this.anyOf = ModelUtil.replace(anyOf, ArrayList<Schema>::new);
     }
 
@@ -725,6 +778,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addAnyOf(Schema anyOf) {
+        incrementModCount();
         this.anyOf = ModelUtil.add(anyOf, this.anyOf, ArrayList<Schema>::new);
         return this;
     }
@@ -734,6 +788,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeAnyOf(Schema anyOf) {
+        incrementModCount();
         ModelUtil.remove(this.anyOf, anyOf);
     }
 
@@ -750,6 +805,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void setOneOf(List<Schema> oneOf) {
+        incrementModCount();
         this.oneOf = ModelUtil.replace(oneOf, ArrayList<Schema>::new);
     }
 
@@ -758,6 +814,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public Schema addOneOf(Schema oneOf) {
+        incrementModCount();
         this.oneOf = ModelUtil.add(oneOf, this.oneOf, ArrayList<Schema>::new);
         return this;
     }
@@ -767,6 +824,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
      */
     @Override
     public void removeOneOf(Schema oneOf) {
+        incrementModCount();
         ModelUtil.remove(this.oneOf, oneOf);
     }
 

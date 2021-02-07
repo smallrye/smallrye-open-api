@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -31,17 +30,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Request;
 
+import org.eclipse.microprofile.openapi.annotations.Components;
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Encoding;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -71,7 +74,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
@@ -259,6 +262,16 @@ public class ParameterScanTests extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("params.serialized-annotation-index.json", result);
+    }
+
+    @Test
+    public void testParameterRefOnly() throws IOException, JSONException {
+        test("params.parameter-ref-property.json", ParameterRefTestApplication.class, ParameterRefTestResource.class);
+    }
+
+    @Test
+    public void testDefaultEnumValue() throws IOException, JSONException {
+        test("params.local-schema-attributes.json", DefaultEnumTestResource.class, DefaultEnumTestResource.MyEnum.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -971,6 +984,55 @@ public class ParameterScanTests extends IndexScannerTestBase {
 
         public static class GreetingMessage {
             String message;
+        }
+    }
+
+    @OpenAPIDefinition(info = @Info(title = "title", version = "1"), components = @Components(parameters = {
+            @Parameter(name = "queryParam1", in = ParameterIn.QUERY),
+            @Parameter(name = "pathParam2", in = ParameterIn.PATH, description = "`pathParam2` with info in components") }))
+    static class ParameterRefTestApplication extends Application {
+    }
+
+    @Path("/{pathParam1}/{pathParam2}")
+    static class ParameterRefTestResource {
+        @GET
+        @Path("one")
+        @Parameter(ref = "queryParam1")
+        String exampleEndpoint1(@PathParam("pathParam1") String pathParam1,
+                @PathParam("pathParam2") String pathParam2) {
+            return null;
+        }
+
+        @GET
+        @Path("/two")
+        @Parameter(name = "pathParam1", style = ParameterStyle.SIMPLE)
+        @Parameter(ref = "pathParam2")
+        // `name` on `queryParam1` ref ignored
+        @Parameter(ref = "queryParam1", name = "queryParamOne")
+        @Parameter(in = ParameterIn.COOKIE, description = "Ignored: missing key attributes")
+        @Parameter(in = ParameterIn.DEFAULT, description = "Ignored: missing key attributes")
+        @Parameter(in = ParameterIn.HEADER, description = "Ignored: missing key attributes")
+        @Parameter(in = ParameterIn.PATH, description = "Ignored: missing key attributes")
+        String exampleEndpoint2(@PathParam("pathParam1") String pathParam1,
+                @Parameter(hidden = true) @PathParam("pathParam2") String pathParam2) {
+            return null;
+        }
+    }
+
+    @Path("/enum-default-param")
+    static class DefaultEnumTestResource {
+        public enum MyEnum {
+            CAT,
+            DOG,
+            BAR,
+            FOO
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public String hello(@QueryParam("q0") String q0,
+                @Parameter(required = true) @QueryParam(value = "q1") @Size(min = 3, max = 3) @DefaultValue("DOG") Optional<MyEnum> q1) {
+            return "myEnum = " + q1;
         }
     }
 }
