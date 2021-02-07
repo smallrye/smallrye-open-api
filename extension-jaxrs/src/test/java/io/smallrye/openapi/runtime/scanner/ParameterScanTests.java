@@ -269,6 +269,11 @@ public class ParameterScanTests extends IndexScannerTestBase {
         test("params.parameter-ref-property.json", ParameterRefTestApplication.class, ParameterRefTestResource.class);
     }
 
+    @Test
+    public void testDefaultEnumValue() throws IOException, JSONException {
+        test("params.local-schema-attributes.json", DefaultEnumTestResource.class, DefaultEnumTestResource.MyEnum.class);
+    }
+
     /***************** Test models and resources below. ***********************/
 
     public static class Widget {
@@ -1011,6 +1016,23 @@ public class ParameterScanTests extends IndexScannerTestBase {
         String exampleEndpoint2(@PathParam("pathParam1") String pathParam1,
                 @Parameter(hidden = true) @PathParam("pathParam2") String pathParam2) {
             return null;
+        }
+    }
+
+    @Path("/enum-default-param")
+    static class DefaultEnumTestResource {
+        public enum MyEnum {
+            CAT,
+            DOG,
+            BAR,
+            FOO
+        }
+
+        @GET
+        @Produces(MediaType.TEXT_PLAIN)
+        public String hello(@QueryParam("q0") String q0,
+                @Parameter(required = true) @QueryParam(value = "q1") @Size(min = 3, max = 3) @DefaultValue("DOG") Optional<MyEnum> q1) {
+            return "myEnum = " + q1;
         }
     }
 }

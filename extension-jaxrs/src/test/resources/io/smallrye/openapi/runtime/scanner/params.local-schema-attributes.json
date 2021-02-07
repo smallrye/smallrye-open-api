@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/enum-default-param": {
+      "get": {
+        "parameters": [
+          {
+            "name": "q0",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q1",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/MyEnum"
+                },
+                {
+                  "default": "DOG",
+                  "maxLength": 3,
+                  "minLength": 3
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MyEnum": {
+        "enum": [
+          "BAR",
+          "CAT",
+          "DOG",
+          "FOO"
+        ],
+        "type": "string"
+      }
+    }
+  }
+}

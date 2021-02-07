@@ -510,17 +510,7 @@ public abstract class AbstractParameterProcessor {
         }
 
         if (param.getSchema() != null) {
-            //TODO: Test BV annotations on all target types
-            BeanValidationScanner.applyConstraints(context.target,
-                    param.getSchema(),
-                    param.getName(),
-                    (target, name) -> {
-                        if (param.getRequired() == null) {
-                            param.setRequired(Boolean.TRUE);
-                        }
-                    });
-
-            setDefaultValue(param.getSchema(), context.defaultValue);
+            augmentParamSchema(param, context);
         }
 
         if (param.getRequired() == null && TypeUtil.isOptional(context.targetType)) {
@@ -528,6 +518,61 @@ public abstract class AbstractParameterProcessor {
         }
 
         return param;
+    }
+
+    /**
+     * Scan the AnnotationTarget associated with Parameter <code>param</code> for supported
+     * default value or Bean Validation annotations that may alter the schema. When
+     * found, update param's schema either directly or, when a <code>ref</code> is present, by
+     * creating a union of the local and reference schemas using <code>allOf</code>.
+     * 
+     * @param param the Parameter containing a schema for update
+     * @param context ParameterContext associated with param
+     */
+    void augmentParamSchema(Parameter param, ParameterContext context) {
+        Schema paramSchema = param.getSchema();
+        String ref = paramSchema.getRef();
+        Schema localSchema;
+
+        if (ref != null) {
+            Type paramType = TypeUtil.unwrapType(context.targetType);
+
+            /*
+             * Lookup the schema `type` from components (if available) or guess the type if
+             * the `ref` is not available.
+             */
+            Schema refSchema = ModelUtil.getComponent(scannerContext.getOpenApi(), ref);
+
+            if (refSchema != null) {
+                localSchema = new SchemaImpl().type(refSchema.getType());
+            } else {
+                localSchema = new SchemaImpl().type(SchemaType
+                        .valueOf(TypeUtil.getTypeAttributes(paramType).get(SchemaConstant.PROP_TYPE).toString().toUpperCase()));
+            }
+        } else {
+            localSchema = paramSchema;
+        }
+
+        int modCount = SchemaImpl.getModCount(localSchema);
+
+        BeanValidationScanner.applyConstraints(context.target, localSchema, param.getName(),
+                (target, name) -> {
+                    if (param.getRequired() == null) {
+                        param.setRequired(Boolean.TRUE);
+                    }
+                });
+
+        setDefaultValue(localSchema, context.defaultValue);
+
+        if (localOnlySchemaModified(paramSchema, localSchema, modCount)) {
+            // Add new `allOf` schema, erasing `type` derived above from the local schema
+            Schema allOf = new SchemaImpl().addAllOf(paramSchema).addAllOf(localSchema.type(null));
+            param.setSchema(allOf);
+        }
+    }
+
+    boolean localOnlySchemaModified(Schema paramSchema, Schema localSchema, int originalModCount) {
+        return localSchema != paramSchema && originalModCount != -1 && SchemaImpl.getModCount(localSchema) > originalModCount;
     }
 
     /**
@@ -598,7 +643,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     private void setDefaultValue(Schema schema, Object defaultValue) {
-        if (schema.getDefaultValue() == null) {
+        if (schema.getDefaultValue() == null && defaultValue != null) {
             schema.setDefaultValue(defaultValue);
         }
     }
