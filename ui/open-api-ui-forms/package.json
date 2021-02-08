@@ -16,8 +16,8 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-bootstrap": "^1.2.2",
-    "@rjsf/core": "^2.2.2",
-    "@rjsf/bootstrap-4": "^2.2.2",
+    "@rjsf/core": "^2.4.2",
+    "@rjsf/bootstrap-4": "^2.4.2",
     "swagger-client": "^3.10.12"
   },
   "devDependencies": {
