@@ -19,7 +19,7 @@ public class IndexCreatorTest {
 
     @Test
     public void testCreateDefault() throws IOException {
-        byte[] indexHtml = IndexCreator.createIndexHtml();
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml();
         assertNotNull(indexHtml);
 
         String s = new String(indexHtml);
@@ -39,7 +39,7 @@ public class IndexCreatorTest {
         options.put(Option.logoHref, null);
         options.put(Option.themeHref, null);
 
-        byte[] indexHtml = IndexCreator.createIndexHtml(options);
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
         assertNotNull(indexHtml);
 
         String s = new String(indexHtml);
@@ -59,7 +59,7 @@ public class IndexCreatorTest {
         options.put(Option.syntaxHighlight, "false");
         options.put(Option.filter, "bla");
 
-        byte[] indexHtml = IndexCreator.createIndexHtml(options);
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
         assertNotNull(indexHtml);
 
         String s = new String(indexHtml);
@@ -84,7 +84,7 @@ public class IndexCreatorTest {
         urls.put("Default", "/swagger");
         urls.put("Production", "/api");
 
-        byte[] indexHtml = IndexCreator.createIndexHtml(urls, "Production", options);
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(urls, "Production", options);
         assertNotNull(indexHtml);
 
         String s = new String(indexHtml);
@@ -105,7 +105,7 @@ public class IndexCreatorTest {
         Map<String, String> urls = new HashMap<>();
         urls.put("Default", "/closeapi");
 
-        byte[] indexHtml = IndexCreator.createIndexHtml(urls, "Close", null);
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(urls, "Close", null);
         assertNotNull(indexHtml);
 
         String s = new String(indexHtml);
@@ -118,5 +118,85 @@ public class IndexCreatorTest {
         assertTrue(s.contains("dom_id: '#swagger-ui',"));
         assertTrue(s.contains("deepLinking: true,"));
         assertFalse(s.contains("urls.primaryName: 'Close',"));
+    }
+
+    @Test
+    public void testCreateWithInitOAuth() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.oauthClientId, "your-client-id");
+        options.put(Option.oauthClientSecret, "your-client-secret-if-required");
+        options.put(Option.oauthRealm, "your-realms");
+        options.put(Option.oauthAppName, "your-app-name");
+        options.put(Option.oauthScopeSeparator, " ");
+        options.put(Option.oauthScopes, "openid profile");
+        options.put(Option.oauthAdditionalQueryStringParams, "{test: \"hello\"}");
+        options.put(Option.oauthUsePkceWithAuthorizationCodeGrant, "true");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
+
+        assertTrue(s.contains("clientId: 'your-client-id'"));
+        assertTrue(s.contains("clientSecret: 'your-client-secret-if-required'"));
+        assertTrue(s.contains("realm: 'your-realms'"));
+        assertTrue(s.contains("appName: 'your-app-name'"));
+        assertTrue(s.contains("scopeSeparator: ' '"));
+        assertTrue(s.contains("scopes: 'openid profile'"));
+        assertTrue(s.contains("additionalQueryStringParams: {test: \"hello\"}"));
+        assertTrue(s.contains("usePkceWithAuthorizationCodeGrant: true"));
+    }
+
+    @Test
+    public void testCreateWithPreauthorizeBasic() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.preauthorizeBasicAuthDefinitionKey, "basicAuth");
+        options.put(Option.preauthorizeBasicUsername, "username");
+        options.put(Option.preauthorizeBasicPassword, "password");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
+        assertTrue(s.contains("ui.preauthorizeBasic('basicAuth', 'username', 'password');"));
+    }
+
+    @Test
+    public void testCreateWithPreauthorizeApiKey() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.preauthorizeApiKeyAuthDefinitionKey, "api_key");
+        options.put(Option.preauthorizeApiKeyApiKeyValue, "abcde12345");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
+        assertTrue(s.contains("ui.preauthorizeApiKey('api_key', 'abcde12345');"));
+    }
+
+    @Test
+    public void testCreateWithPreauthorizeBoth() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.preauthorizeBasicAuthDefinitionKey, "basicAuth");
+        options.put(Option.preauthorizeBasicUsername, "username");
+        options.put(Option.preauthorizeBasicPassword, "password");
+        options.put(Option.preauthorizeApiKeyAuthDefinitionKey, "api_key");
+        options.put(Option.preauthorizeApiKeyApiKeyValue, "abcde12345");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
+        assertTrue(s.contains("ui.preauthorizeApiKey('api_key', 'abcde12345');"));
+        assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
+        assertTrue(s.contains("ui.preauthorizeBasic('basicAuth', 'username', 'password');"));
     }
 }
