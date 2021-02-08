@@ -18,9 +18,9 @@ import java.util.Set;
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class IndexCreator {
+public class IndexHtmlCreator {
 
-    private IndexCreator() {
+    private IndexHtmlCreator() {
     }
 
     public static byte[] createIndexHtml() throws IOException {
@@ -37,8 +37,12 @@ public class IndexCreator {
         options = populateDefaults(options);
         // Next sort out the url/urls
         addUrlSection(urls, urlsPrimaryName, options);
+        // Add OAuth section
+        addOAuthSection(options);
+        // Add Preauth section
+        addPreauthorizeSection(options);
 
-        try (InputStream input = IndexCreator.class.getClassLoader()
+        try (InputStream input = IndexHtmlCreator.class.getClassLoader()
                 .getResourceAsStream("META-INF/resources/template/index.html");
                 InputStreamReader streamreader = new InputStreamReader(input, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(streamreader);
@@ -115,6 +119,101 @@ public class IndexCreator {
             }
         }
         return options;
+    }
+
+    private static void addPreauthorizeSection(Map<Option, String> options) {
+        if (options.containsKey(Option.preauthorizeSection) && options.get(Option.preauthorizeSection) != null) {
+            options.put(Option.preauthorizeSection, options.get(Option.preauthorizeSection));
+        } else if ((options.containsKey(Option.preauthorizeBasicAuthDefinitionKey) &&
+                options.containsKey(Option.preauthorizeBasicUsername) &&
+                options.containsKey(Option.preauthorizeBasicPassword))
+                ||
+                (options.containsKey(Option.preauthorizeApiKeyAuthDefinitionKey) &&
+                        options.containsKey(Option.preauthorizeApiKeyApiKeyValue))) {
+
+            try (StringWriter sw = new StringWriter()) {
+
+                sw.write("onComplete: function() {\n");
+                if (options.containsKey(Option.preauthorizeBasicAuthDefinitionKey) &&
+                        options.containsKey(Option.preauthorizeBasicUsername) &&
+                        options.containsKey(Option.preauthorizeBasicPassword)) {
+                    sw.write("\t\t\tui.preauthorizeBasic('" + options.get(Option.preauthorizeBasicAuthDefinitionKey) + "', '"
+                            + options.get(Option.preauthorizeBasicUsername) + "', '"
+                            + options.get(Option.preauthorizeBasicPassword) + "');\n");
+                }
+                if (options.containsKey(Option.preauthorizeApiKeyAuthDefinitionKey) &&
+                        options.containsKey(Option.preauthorizeApiKeyApiKeyValue)) {
+                    sw.write("\t\t\tui.preauthorizeApiKey('" + options.get(Option.preauthorizeApiKeyAuthDefinitionKey) + "', '"
+                            + options.get(Option.preauthorizeApiKeyApiKeyValue) + "');\n");
+                }
+                sw.write("\t\t}\n");
+
+                String preauthorizeSection = sw.toString();
+
+                options.put(Option.preauthorizeSection, preauthorizeSection);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    private static void addOAuthSection(Map<Option, String> options) {
+        if (options.containsKey(Option.initOAuthSection) && options.get(Option.initOAuthSection) != null) {
+            options.put(Option.initOAuthSection, options.get(Option.initOAuthSection));
+        } else if (options.containsKey(Option.oauthClientId) ||
+                options.containsKey(Option.oauthClientSecret) ||
+                options.containsKey(Option.oauthRealm) ||
+                options.containsKey(Option.oauthAppName) ||
+                options.containsKey(Option.oauthScopeSeparator) ||
+                options.containsKey(Option.oauthScopes) ||
+                options.containsKey(Option.oauthAdditionalQueryStringParams) ||
+                options.containsKey(Option.oauthUseBasicAuthenticationWithAccessCodeGrant) ||
+                options.containsKey(Option.oauthUsePkceWithAuthorizationCodeGrant)) {
+
+            try (StringWriter sw = new StringWriter()) {
+
+                sw.write("ui.initOAuth({\n");
+                if (options.containsKey(Option.oauthClientId)) {
+                    sw.write("\t\tclientId: '" + options.get(Option.oauthClientId) + "',\n");
+                }
+                if (options.containsKey(Option.oauthClientSecret)) {
+                    sw.write("\t\tclientSecret: '" + options.get(Option.oauthClientSecret) + "',\n");
+                }
+                if (options.containsKey(Option.oauthRealm)) {
+                    sw.write("\t\trealm: '" + options.get(Option.oauthRealm) + "',\n");
+                }
+                if (options.containsKey(Option.oauthAppName)) {
+                    sw.write("\t\tappName: '" + options.get(Option.oauthAppName) + "',\n");
+                }
+                if (options.containsKey(Option.oauthScopeSeparator)) {
+                    sw.write("\t\tscopeSeparator: '" + options.get(Option.oauthScopeSeparator) + "',\n");
+                }
+                if (options.containsKey(Option.oauthScopes)) {
+                    sw.write("\t\tscopes: '" + options.get(Option.oauthScopes) + "',\n");
+                }
+                if (options.containsKey(Option.oauthAdditionalQueryStringParams)) {
+                    sw.write(
+                            "\t\tadditionalQueryStringParams: " + options.get(Option.oauthAdditionalQueryStringParams) + ",\n");
+                }
+                if (options.containsKey(Option.oauthUseBasicAuthenticationWithAccessCodeGrant)) {
+                    sw.write("\t\tuseBasicAuthenticationWithAccessCodeGrant: "
+                            + options.get(Option.oauthUseBasicAuthenticationWithAccessCodeGrant) + ",\n");
+                }
+                if (options.containsKey(Option.oauthUsePkceWithAuthorizationCodeGrant)) {
+                    sw.write(
+                            "\t\tusePkceWithAuthorizationCodeGrant: "
+                                    + options.get(Option.oauthUsePkceWithAuthorizationCodeGrant)
+                                    + "\n");
+                }
+                sw.write("\t})");
+
+                String initOAuth = sw.toString();
+
+                options.put(Option.initOAuthSection, initOAuth);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     private static void addUrlSection(Map<String, String> urls, String urlsPrimaryName, Map<Option, String> options) {
@@ -210,10 +309,11 @@ public class IndexCreator {
         // Authorization
         DEFAULT_OPTIONS.put(Option.persistAuthorization, null);
 
-        // TODO: Instance methods
         // initOAuth
-        // preauthorizeBasic
-        // preauthorizeApiKey
+        DEFAULT_OPTIONS.put(Option.initOAuthSection, null);
+
+        // preauthorize
+        DEFAULT_OPTIONS.put(Option.preauthorizeSection, null);
 
         DEFAULT_OPTIONS.put(Option.layout, "StandaloneLayout");
         DEFAULT_OPTIONS.put(Option.plugins, "[SwaggerUIBundle.plugins.DownloadUrl]");
