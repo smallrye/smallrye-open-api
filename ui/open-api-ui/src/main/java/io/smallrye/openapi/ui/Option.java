@@ -43,5 +43,23 @@ public enum Option {
     persistAuthorization,
     layout,
     plugins,
-    presets
+    presets,
+    // OAuth related
+    initOAuthSection,
+    oauthClientId,
+    oauthClientSecret,
+    oauthRealm,
+    oauthAppName,
+    oauthScopeSeparator,
+    oauthScopes,
+    oauthAdditionalQueryStringParams,
+    oauthUseBasicAuthenticationWithAccessCodeGrant,
+    oauthUsePkceWithAuthorizationCodeGrant,
+    // Preauthorize
+    preauthorizeSection,
+    preauthorizeBasicAuthDefinitionKey,
+    preauthorizeBasicUsername,
+    preauthorizeBasicPassword,
+    preauthorizeApiKeyAuthDefinitionKey,
+    preauthorizeApiKeyApiKeyValue
 }
