@@ -17,6 +17,8 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.runtime.util.TypeUtil;
+
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
@@ -37,6 +39,7 @@ public class BeanValidationScanner {
     static final DotName BV_DEFAULT_GROUP = createComponentized(BV_GROUPS, "Default");
 
     static final DotName BV_CONTRAINTS = createComponentized(BV_BASE, "constraints");
+    static final String BV_CONSTRAINT_PACKAGE = BV_CONTRAINTS.toString();
 
     static final DotName BV_DECIMAL_MAX = createComponentized(BV_CONTRAINTS, "DecimalMax");
     static final DotName BV_DECIMAL_MIN = createComponentized(BV_CONTRAINTS, "DecimalMin");
@@ -51,6 +54,22 @@ public class BeanValidationScanner {
     static final DotName BV_POSITIVE = createComponentized(BV_CONTRAINTS, "Positive");
     static final DotName BV_POSITIVE_OR_ZERO = createComponentized(BV_CONTRAINTS, "PositiveOrZero");
     static final DotName BV_SIZE = createComponentized(BV_CONTRAINTS, "Size");
+
+    /**
+     * Scan the annotation target to determine whether any annotations
+     * from the Bean Validation package (<code>javax.validation.constraints</code>) are
+     * present.
+     * 
+     * @param target the annotation target to scan
+     * @return true if annotations from the Bean Validation package are present, otherwise false.
+     */
+    public static boolean hasConstraints(AnnotationTarget target) {
+        return TypeUtil.getAnnotations(target)
+                .stream()
+                .map(AnnotationInstance::name)
+                .map(DotName::toString)
+                .anyMatch(name -> name.startsWith(BV_CONSTRAINT_PACKAGE));
+    }
 
     /**
      * Determine if any Java Bean Validation constraint annotations are present

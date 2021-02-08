@@ -167,7 +167,10 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = MergeUtil.mergeObjects(new SchemaImpl(), typeSchema);
         }
 
-        BeanValidationScanner.applyConstraints(annotationTarget, fieldSchema, propertyKey, this);
+        for (AnnotationTarget contraintTarget : typeResolver.getConstraintTargets()) {
+            // Apply constraints from all bean properties associated with the schema property
+            BeanValidationScanner.applyConstraints(contraintTarget, fieldSchema, propertyKey, this);
+        }
 
         if (fieldSchema.getNullable() == null && TypeUtil.isOptional(entityType)) {
             fieldSchema.setNullable(Boolean.TRUE);

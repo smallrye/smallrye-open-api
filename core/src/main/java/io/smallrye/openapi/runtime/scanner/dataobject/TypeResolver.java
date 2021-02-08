@@ -56,6 +56,7 @@ public class TypeResolver {
     private boolean readOnly = false;
     private boolean writeOnly = false;
     private Type leaf;
+    private List<AnnotationTarget> constraintTargets = new ArrayList<>();
 
     /**
      * A comparator to order the field, write method, and read method in the {@link #targets}
@@ -349,6 +350,10 @@ public class TypeResolver {
         return getResolvedType((Type) type);
     }
 
+    public List<AnnotationTarget> getConstraintTargets() {
+        return constraintTargets;
+    }
+
     public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, IgnoreResolver ignoreResolver, Type leaf,
             ClassInfo leafKlazz, AnnotationTarget reference) {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
@@ -526,6 +531,10 @@ public class TypeResolver {
             properties.put(propertyName, resolver);
         }
 
+        if (BeanValidationScanner.hasConstraints(field)) {
+            resolver.constraintTargets.add(field);
+        }
+
         resolver.processVisibility(field, reference, ignoreResolver);
     }
 
@@ -612,6 +621,10 @@ public class TypeResolver {
             if (isHigherPriority(method, resolver.getReadMethod())) {
                 resolver.setReadMethod(method);
             }
+        }
+
+        if (BeanValidationScanner.hasConstraints(method)) {
+            resolver.constraintTargets.add(method);
         }
 
         return resolver;
