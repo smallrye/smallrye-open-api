@@ -34,6 +34,8 @@ class OverrideRequestModal extends React.Component {
     this.handleClose = this.handleClose.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handleApply = this.handleApply.bind(this);
+    this.handleReset = this.handleReset.bind(this);
   }
 
   handleShow() {
@@ -60,12 +62,24 @@ class OverrideRequestModal extends React.Component {
     }
     this.setState({show: false});
   }
+  handleApply() {
+    this.onSave(this.getCurrentRequestValue());
+  }
+  handleReset() {
+    this.onSave({});
+  }
 
   render() {
     return (
       <div>
         <Button variant="light" onClick={this.handleShow}>
           Override request payload manually
+        </Button>
+        <Button variant="outline-light" onClick={this.handleApply}>
+          Apply
+        </Button>
+        <Button variant="outline-light" onClick={this.handleReset}>
+          Reset
         </Button>
 
         <Modal show={this.state.show} onHide={this.handleClose} animation={false}>
@@ -101,7 +115,8 @@ class MyOpenAPIForm extends React.Component {
   "type": "object"
 }},
                    requestPayload : {},
-                   responsePayload : "(nothing yet.)"
+                   responsePayload : "(nothing yet.)",
+                   key: Date.now() // required to reset any possible validation errors
                  };
 
     this.handleOpenAPIURLChange = this.handleOpenAPIURLChange.bind(this);
@@ -135,7 +150,10 @@ class MyOpenAPIForm extends React.Component {
 
   overrideRequest(x) {
     console.log(x);
-    this.setState({requestPayload: x});
+    this.setState({
+      requestPayload: x,
+      key: Date.now() // reset any possible validation errors
+    });
   }
 
   getCurrentRequestValue() {
@@ -195,7 +213,7 @@ class MyOpenAPIForm extends React.Component {
 
 <div className="row">
 <div className="col">
-  <Form schema={this.state.selected.schema} onSubmit={this.handleForm} onChange={this.handleFormChange} formData={this.state.requestPayload} />
+  <Form key={this.state.key} schema={this.state.selected.schema} onSubmit={this.handleForm} onChange={this.handleFormChange} formData={this.state.requestPayload} noHtml5Validate={true} />
 </div>
 <div className="col">
   <div className="form-group">
