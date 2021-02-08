@@ -1,0 +1,23 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "UserImpl": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "int32",
+            "description": "The user identifier",
+            "maximum": 9999,
+            "minimum": 15,
+            "type": "integer",
+            "nullable": false
+          }
+        }
+      }
+    }
+  }
+}
