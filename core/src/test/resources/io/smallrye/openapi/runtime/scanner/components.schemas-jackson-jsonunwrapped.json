@@ -1,0 +1,100 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "JacksonJsonPerson": {
+        "type": "object",
+        "properties": {
+          "streetName": {
+            "type": "string"
+          },
+          "streetNumber": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "JacksonJsonPersonWithPrefixedAddress": {
+        "type": "object",
+        "properties": {
+          "addr-city": {
+            "type": "string"
+          },
+          "addr-postalCode": {
+            "type": "string"
+          },
+          "addr-streetName": {
+            "type": "string"
+          },
+          "addr-state": {
+            "type": "string"
+          },
+          "addr-streetNumber": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "JacksonJsonPersonWithSuffixedAddress": {
+        "type": "object",
+        "properties": {
+          "city-addr": {
+            "type": "string"
+          },
+          "streetName-addr": {
+            "type": "string"
+          },
+          "postalCode-addr": {
+            "type": "string"
+          },
+          "streetNumber-addr": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "state-addr": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "JacksonJsonAddress": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "streetName": {
+            "type": "string"
+          },
+          "streetNumber": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
