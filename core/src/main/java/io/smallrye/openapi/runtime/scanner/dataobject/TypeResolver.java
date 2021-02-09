@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import java.lang.reflect.Modifier;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +58,8 @@ public class TypeResolver {
     private boolean writeOnly = false;
     private Type leaf;
     private List<AnnotationTarget> constraintTargets = new ArrayList<>();
+    private String propertyNamePrefix;
+    private String propertyNameSuffix;
 
     /**
      * A comparator to order the field, write method, and read method in the {@link #targets}
@@ -190,22 +193,37 @@ public class TypeResolver {
         if ((name = TypeUtil.getAnnotationValue(target,
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_NAME)) != null) {
-            return name;
+            return wrap(name);
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
                 JsonbConstants.JSONB_PROPERTY,
                 JsonbConstants.PROP_VALUE)) != null) {
-            return name;
+            return wrap(name);
         }
 
         if ((name = TypeUtil.getAnnotationValue(target,
                 JacksonConstants.JSON_PROPERTY,
                 JacksonConstants.PROP_VALUE)) != null) {
-            return name;
+            return wrap(name);
         }
 
-        return this.propertyName;
+        return wrap(this.propertyName);
+    }
+
+    private String wrap(String name) {
+        if (this.propertyNamePrefix == null && this.propertyNameSuffix == null) {
+            return name;
+        }
+        StringBuilder wrapped = new StringBuilder();
+        if (this.propertyNamePrefix != null) {
+            wrapped.append(this.propertyNamePrefix);
+        }
+        wrapped.append(name);
+        if (this.propertyNameSuffix != null) {
+            wrapped.append(this.propertyNameSuffix);
+        }
+        return wrapped.toString();
     }
 
     public String getBeanPropertyName() {
@@ -379,7 +397,7 @@ public class TypeResolver {
             currentClass.fields()
                     .stream()
                     .filter(TypeResolver::acceptField)
-                    .forEach(field -> scanField(properties, field, stack, reference, ignoreResolver));
+                    .forEach(field -> scanField(index, properties, field, stack, reference, ignoreResolver));
 
             currentClass.methods()
                     .stream()
@@ -510,10 +528,21 @@ public class TypeResolver {
      * @param reference an annotated member (field or method) that referenced the type of field's declaring class
      * @param ignoreResolver resolver to determine if the field is ignored
      */
-    private static void scanField(Map<String, TypeResolver> properties, FieldInfo field, Deque<Map<String, Type>> stack,
+    private static void scanField(AugmentedIndexView index, Map<String, TypeResolver> properties, FieldInfo field,
+            Deque<Map<String, Type>> stack,
             AnnotationTarget reference, IgnoreResolver ignoreResolver) {
-        String propertyName = field.name();
+        final String propertyName = field.name();
+        final Type fieldType = field.type();
+        final ClassInfo fieldClass = index.getClass(fieldType);
+        final boolean unwrapped;
         final TypeResolver resolver;
+
+        if (field.hasAnnotation(JacksonConstants.JSON_UNWRAPPED) && fieldClass != null) {
+            unwrapped = true;
+            properties.putAll(unwrapProperties(index, field, fieldType, fieldClass, ignoreResolver));
+        } else {
+            unwrapped = false;
+        }
 
         // Consider only using fields that are public?
         if (properties.containsKey(propertyName)) {
@@ -535,7 +564,49 @@ public class TypeResolver {
             resolver.constraintTargets.add(field);
         }
 
-        resolver.processVisibility(field, reference, ignoreResolver);
+        if (unwrapped) {
+            // Ignored for getters/setters
+            resolver.ignored = true;
+        } else {
+            resolver.processVisibility(field, reference, ignoreResolver);
+        }
+    }
+
+    private static Map<String, TypeResolver> unwrapProperties(AugmentedIndexView index,
+            AnnotationTarget member,
+            Type memberType,
+            ClassInfo memberClass,
+            IgnoreResolver ignoreResolver) {
+
+        Map<String, TypeResolver> unwrappedProperties = getAllFields(index, ignoreResolver, memberType, memberClass, member);
+        AnnotationInstance jsonUnwrapped = TypeUtil.getAnnotation(member, JacksonConstants.JSON_UNWRAPPED);
+        String unwrapPrefix = JandexUtil.value(jsonUnwrapped, "prefix");
+        String unwrapSuffix = JandexUtil.value(jsonUnwrapped, "suffix");
+
+        return unwrappedProperties.entrySet()
+                .stream()
+                .map(p -> applyPrefixSuffix(p, unwrapPrefix, unwrapSuffix))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    static Map.Entry<String, TypeResolver> applyPrefixSuffix(Map.Entry<String, TypeResolver> property, String prefix,
+            String suffix) {
+        TypeResolver unwrappedResolver = property.getValue();
+        StringBuilder key = new StringBuilder();
+
+        if (prefix != null) {
+            unwrappedResolver.propertyNamePrefix = prefix;
+            key.append(prefix);
+        }
+
+        key.append(property.getKey());
+
+        if (suffix != null) {
+            unwrappedResolver.propertyNameSuffix = suffix;
+            key.append(suffix);
+        }
+
+        return new SimpleEntry<>(key.toString(), unwrappedResolver);
     }
 
     /**
