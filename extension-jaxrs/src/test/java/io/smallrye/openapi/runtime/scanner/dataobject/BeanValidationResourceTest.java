@@ -7,8 +7,11 @@ import java.util.Map;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -21,7 +24,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Before;
 import org.junit.Test;
 
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
@@ -33,24 +35,23 @@ import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScannerTest.
  */
 public class BeanValidationResourceTest extends IndexScannerTestBase {
 
-    Index index;
-
-    @Before
-    public void beforeEach() {
-        index = indexOf(BVTestResource.class,
-                BVTestResourceEntity.class,
-                BeanValidationScannerTest.BVTestContainer.class,
+    @Test
+    public void testBeanValidationDocument() throws IOException, JSONException {
+        Index index = indexOf(BVTestResource.class, BVTestResourceEntity.class, BeanValidationScannerTest.BVTestContainer.class,
                 TestEnum.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("dataobject/resource.testBeanValidationDocument.json", result);
     }
 
     @Test
-    public void testBeanValidationDocument() throws IOException, JSONException {
+    public void testInheritedBVConstraints() throws IOException, JSONException {
+        Index index = indexOf(User.class, BaseUser.class, UserImpl.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
         OpenAPI result = scanner.scan();
-
         printToConsole(result);
-        assertJsonEquals("dataobject/resource.testBeanValidationDocument.json", result);
+        assertJsonEquals("dataobject/schema.inherited-bv-constraints.json", result);
     }
 
     /**********************************************************************/
@@ -107,4 +108,23 @@ public class BeanValidationResourceTest extends IndexScannerTestBase {
         DEF
     }
 
+    interface User {
+        @Positive
+        @Max(9999)
+        Integer getId();
+    }
+
+    static abstract class BaseUser {
+        @Min(10)
+        @NotNull
+        protected Integer id;
+    }
+
+    @Schema
+    static class UserImpl extends BaseUser implements User {
+        @Schema(description = "The user identifier", minimum = "15")
+        public Integer getId() {
+            return 0;
+        }
+    }
 }
