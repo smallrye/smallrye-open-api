@@ -18,6 +18,8 @@ import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 public class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
@@ -274,5 +276,55 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
         protected JAXBElement<String> caseSubtitle;
         @XmlElementRef(name = "CaseSubtitleFree", namespace = "urn:Milo.API.Miljo.DataContracts.V1", type = JAXBElement.class, required = false)
         protected JAXBElement<String> caseSubtitleFree;
+    }
+
+    /****************************************************************/
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/226
+     */
+    @Test
+    public void testJacksonJsonUnwrapped() throws IOException, JSONException {
+        Index index = indexOf(JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
+                JacksonJsonPersonWithSuffixedAddress.class, JacksonJsonAddress.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas-jackson-jsonunwrapped.json", result);
+    }
+
+    @Schema
+    static class JacksonJsonPerson {
+        protected String name;
+        @JsonUnwrapped
+        protected JacksonJsonAddress address;
+
+        @Schema(description = "Ignored since address is unwrapped")
+        public JacksonJsonAddress getAddress() {
+            return address;
+        }
+    }
+
+    @Schema
+    static class JacksonJsonPersonWithPrefixedAddress {
+        protected String name;
+        @JsonUnwrapped(prefix = "addr-")
+        protected JacksonJsonAddress address;
+    }
+
+    @Schema
+    static class JacksonJsonPersonWithSuffixedAddress {
+        protected String name;
+        @JsonUnwrapped(suffix = "-addr")
+        protected JacksonJsonAddress address;
+    }
+
+    @Schema
+    static class JacksonJsonAddress {
+        protected int streetNumber;
+        protected String streetName;
+        protected String city;
+        protected String state;
+        protected String postalCode;
     }
 }
