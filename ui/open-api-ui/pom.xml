@@ -97,7 +97,13 @@
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}/</outputDirectory>
-                                    <includes>**/swagger-ui.css, **/swagger-ui.css.map, **/swagger-ui-bundle.js, **/swagger-ui-bundle.js.map, **/swagger-ui-standalone-preset.js, **/swagger-ui-standalone-preset.js.map</includes>
+                                    <includes>**/swagger-ui.css, 
+                                                **/swagger-ui.css.map, 
+                                                **/swagger-ui-bundle.js, 
+                                                **/swagger-ui-bundle.js.map, 
+                                                **/swagger-ui-standalone-preset.js, 
+                                                **/swagger-ui-standalone-preset.js.map,
+                                                **/oauth2-redirect.html</includes>
                                     <fileMappers>
                                         <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
                                     </fileMappers>
