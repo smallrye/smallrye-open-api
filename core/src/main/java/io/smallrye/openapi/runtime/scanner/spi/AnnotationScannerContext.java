@@ -14,6 +14,7 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 
 /**
  * Context for scanners.
@@ -28,6 +29,7 @@ public class AnnotationScannerContext {
     private final ClassLoader classLoader;
     private final OpenAPI openApi;
     private final Deque<Type> scanStack = new ArrayDeque<>();
+    private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
 
     public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
@@ -73,4 +75,13 @@ public class AnnotationScannerContext {
     public Deque<Type> getScanStack() {
         return scanStack;
     }
+
+    public Deque<TypeResolver> getResolverStack() {
+        return resolverStack;
+    }
+
+    public TypeResolver getResourceTypeResolver() {
+        return resolverStack.peek();
+    }
+
 }

@@ -25,6 +25,7 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
+import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
@@ -368,8 +369,63 @@ public class TypeResolver {
         return getResolvedType((Type) type);
     }
 
+    /**
+     * Resolve a parameterized type against this {@link TypeResolver}'s resolution stack.
+     * If any of the type's arguments are wild card types, the resolution will fall back
+     * to the basic {@link #getResolvedType(Type)} method, resolving none of
+     * the arguments.
+     *
+     * @param type type to resolve
+     * @return resolved type (if found)
+     */
+    public Type resolve(Type type) {
+        Type resolvedType;
+
+        if (type == null) {
+            resolvedType = null;
+        } else if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+            resolvedType = getResolvedType(type.asParameterizedType());
+        } else {
+            resolvedType = getResolvedType(type);
+        }
+
+        return resolvedType;
+    }
+
     public List<AnnotationTarget> getConstraintTargets() {
         return constraintTargets;
+    }
+
+    /**
+     * Create a new TypeResolver for the given ClassInfo clazz and type. If the Type leaf if not
+     * available, the type of the clazz will be used, without parameters.
+     * 
+     * @param index class scanning index
+     * @param clazz class to be resolved
+     * @param leaf the type of clazz where referenced
+     * @return a new TypeResolver
+     */
+    public static TypeResolver forClass(IndexView index, ClassInfo clazz, Type leaf) {
+        Type clazzType = leaf != null ? leaf : Type.create(clazz.name(), Type.Kind.CLASS);
+        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, clazz, clazzType);
+        Deque<Map<String, Type>> stack = new ArrayDeque<>();
+        boolean allOfMatch = false;
+
+        for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
+            ClassInfo currentClass = entry.getKey();
+            Type currentType = entry.getValue();
+
+            if (currentType.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+                Map<String, Type> resMap = buildParamTypeResolutionMap(currentClass, currentType.asParameterizedType());
+                stack.push(resMap);
+            }
+
+            if (allOfMatch || (!currentType.equals(clazzType) && TypeUtil.isIncludedAllOf(clazz, currentType))) {
+                allOfMatch = true;
+            }
+        }
+
+        return new TypeResolver(null, null, stack);
     }
 
     public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, IgnoreResolver ignoreResolver, Type leaf,
