@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -11,6 +12,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Application;
@@ -99,6 +101,12 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public void testReferenceResponse() throws IOException, JSONException {
         test("responses.component-status-reuse.json",
                 ReferenceResponseTestApp.class, ReferenceResponseTestResource.class, JsonObject.class);
+    }
+
+    @Test
+    public void testGenericTypeVariableResponses() throws IOException, JSONException {
+        test("responses.generic-type-variables.json",
+                Apple.class, BaseResource.class, TestResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -241,6 +249,35 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @APIResponse(ref = "NotFound")
         @APIResponse(ref = "ServerError")
         public JsonObject getPet(@PathParam("id") String id) {
+            return null;
+        }
+    }
+
+    static class Apple {
+        public String name;
+    }
+
+    static class BaseResource<T, S> {
+        @GET
+        @Path("typevar")
+        public T test(@QueryParam("q1") S q1) {
+            return null;
+        }
+
+        @GET
+        @Path("map")
+        public Map<String, T> getMap() {
+            return null;
+        }
+    }
+
+    @Path("/generic")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    static class TestResource extends BaseResource<Apple, String> {
+        @POST
+        @Path("save")
+        public Apple update(Apple filter) {
             return null;
         }
     }

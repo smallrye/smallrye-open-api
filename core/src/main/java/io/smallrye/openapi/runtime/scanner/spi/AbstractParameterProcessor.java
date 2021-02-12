@@ -57,6 +57,7 @@ import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -528,6 +529,23 @@ public abstract class AbstractParameterProcessor {
         }
 
         return param;
+    }
+
+    /**
+     * Attempt to resolve the type of targetType, using the full stack of resolvers
+     * from the scanning context.
+     * 
+     * @param targetType the type to resolve
+     * @return the resolved type or targetType unchanged if resolution is not possible
+     */
+    protected Type resolveType(Type targetType) {
+        if (targetType != null) {
+            for (TypeResolver resolver : this.scannerContext.getResolverStack()) {
+                targetType = resolver.resolve(targetType);
+            }
+        }
+
+        return targetType;
     }
 
     /**
@@ -1218,7 +1236,7 @@ public abstract class AbstractParameterProcessor {
 
         if (context.target == null || context.target.kind() == Kind.METHOD) {
             context.target = target;
-            context.targetType = getType(target);
+            context.targetType = this.resolveType(getType(target));
         }
 
         if (addParam) {
@@ -1356,17 +1374,13 @@ public abstract class AbstractParameterProcessor {
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     protected void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
-        for (Entry<DotName, List<AnnotationInstance>> entry : clazz.annotations().entrySet()) {
-            DotName name = entry.getKey();
-
-            if (ParameterConstant.DOTNAME_PARAMETER.equals(name) || isParameter(name)) {
-                for (AnnotationInstance annotation : entry.getValue()) {
-                    if (isBeanPropertyParam(annotation)) {
-                        readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
-                    }
-                }
-            }
-        }
+        clazz.annotations()
+                .entrySet()
+                .stream()
+                .filter(e -> ParameterConstant.DOTNAME_PARAMETER.equals(e.getKey()) || isParameter(e.getKey()))
+                .flatMap(a -> a.getValue().stream())
+                .filter(this::isBeanPropertyParam)
+                .forEach(annotation -> readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly));
     }
 
     /**

@@ -21,6 +21,7 @@ import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
@@ -198,7 +199,9 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
                     if (targetType != null) {
                         ClassInfo beanParam = index.getClassByName(targetType.name());
+                        this.scannerContext.getResolverStack().push(TypeResolver.forClass(index, beanParam, targetType));
                         readParametersInherited(beanParam, annotation, overriddenParametersOnly);
+                        this.scannerContext.getResolverStack().pop();
                     }
                 }
             }
@@ -249,11 +252,17 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isSubResourceLocator(MethodInfo method) {
-        return method.returnType().kind() == Type.Kind.CLASS &&
-                method.hasAnnotation(JaxRsConstants.PATH) &&
-                method.annotations().stream()
-                        .map(AnnotationInstance::name)
-                        .noneMatch(JaxRsConstants.HTTP_METHODS::contains);
+        switch (method.returnType().kind()) {
+            case CLASS:
+            case PARAMETERIZED_TYPE:
+                return method.hasAnnotation(JaxRsConstants.PATH) &&
+                        method.annotations()
+                                .stream()
+                                .map(AnnotationInstance::name)
+                                .noneMatch(JaxRsConstants.HTTP_METHODS::contains);
+            default:
+                return false;
+        }
     }
 
     @Override
