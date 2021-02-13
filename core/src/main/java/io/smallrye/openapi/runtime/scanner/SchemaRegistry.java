@@ -19,7 +19,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.jandex.Type.Kind;
 import org.jboss.jandex.TypeVariable;
 import org.jboss.jandex.WildcardType;
 
@@ -151,10 +150,8 @@ public class SchemaRegistry {
 
         if (resolver == null) {
             resolvedType = type;
-        } else if (type.kind() == Kind.PARAMETERIZED_TYPE) {
-            resolvedType = resolver.getResolvedType(type.asParameterizedType());
         } else {
-            resolvedType = resolver.getResolvedType(type);
+            resolvedType = resolver.resolve(type);
         }
 
         switch (resolvedType.kind()) {
@@ -205,11 +202,7 @@ public class SchemaRegistry {
         Type resolvedType;
 
         if (resolver != null) {
-            if (type.kind() == Kind.PARAMETERIZED_TYPE) {
-                resolvedType = resolver.getResolvedType(type.asParameterizedType());
-            } else {
-                resolvedType = resolver.getResolvedType(type);
-            }
+            resolvedType = resolver.resolve(type);
         } else {
             resolvedType = type;
         }

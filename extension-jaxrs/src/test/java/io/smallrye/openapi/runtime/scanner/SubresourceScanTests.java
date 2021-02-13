@@ -76,7 +76,7 @@ public class SubresourceScanTests extends IndexScannerTestBase {
 
         @Path("/sub/{id}")
         @Parameter(name = "id", description = "Resource Identifier")
-        public Sub1TestResource get(@PathParam("id") String id,
+        public Sub1TestResource<String> get(@PathParam("id") String id,
                 @QueryParam("q1") String q1,
                 @MatrixParam("m1") String m1,
                 @MatrixParam("m2") int m2,
@@ -86,9 +86,9 @@ public class SubresourceScanTests extends IndexScannerTestBase {
     }
 
     @SuppressWarnings("unused")
-    static class Sub1TestResource {
+    static class Sub1TestResource<T> {
         @QueryParam("q2")
-        String q2;
+        T q2;
 
         @GET
         public String get(@QueryParam("q3") String q3) {
@@ -108,16 +108,16 @@ public class SubresourceScanTests extends IndexScannerTestBase {
         }
 
         @Path("/sub2")
-        public Sub2TestResource getSub2() {
-            return new Sub2TestResource();
+        public Sub2TestResource<T> getSub2() {
+            return new Sub2TestResource<T>();
         }
     }
 
     @SuppressWarnings("unused")
-    static class Sub2TestResource {
+    static class Sub2TestResource<T> {
         @GET
         @Path("{subsubid}")
-        public String getSub2(@PathParam("subsubid") String subsubid) {
+        public T getSub2(@PathParam("subsubid") String subsubid) {
             return null;
         }
     }

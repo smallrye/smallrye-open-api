@@ -40,6 +40,7 @@ import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -205,7 +206,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Now find all jax-rs endpoints
         Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context);
         for (ClassInfo resourceClass : resourceClasses) {
+            TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), resourceClass, null);
+            context.getResolverStack().push(resolver);
             processResourceClass(context, openApi, resourceClass, null);
+            context.getResolverStack().pop();
         }
     }
 
@@ -316,7 +320,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             final MethodInfo method,
             OpenAPI openApi,
             List<Parameter> locatorPathParameters) {
-        final Type methodReturnType = method.returnType();
+        final Type methodReturnType = context.getResourceTypeResolver().resolve(method.returnType());
 
         if (Type.Kind.VOID.equals(methodReturnType.kind())) {
             // Can sub-resource locators return a CompletionStage?
@@ -346,6 +350,9 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             this.currentAppPath = createPathFromSegments(this.currentAppPath, subResourcePath);
             this.subResourceStack.push(locator);
 
+            TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), subResourceClass, methodReturnType);
+            context.getResolverStack().push(resolver);
+
             /*
              * Combine parameters passed previously with all of those from the current resource class and
              * method that apply to this Path. The full list will be used as PATH-LEVEL parameters for
@@ -356,6 +363,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                             params.getPathItemParameters(),
                             params.getOperationParameters()));
 
+            context.getResolverStack().pop();
             this.subResourceStack.pop();
             this.currentAppPath = originalAppPath;
         }
