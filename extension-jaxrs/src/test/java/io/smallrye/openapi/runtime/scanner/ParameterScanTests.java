@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -272,6 +273,12 @@ public class ParameterScanTests extends IndexScannerTestBase {
     @Test
     public void testDefaultEnumValue() throws IOException, JSONException {
         test("params.local-schema-attributes.json", DefaultEnumTestResource.class, DefaultEnumTestResource.MyEnum.class);
+    }
+
+    @Test
+    public void testGenericTypeVariableResource() throws IOException, JSONException {
+        test("params.generic-type-variables.json", BaseGenericResource.class, BaseGenericResource.GenericBean.class,
+                IntegerStringUUIDResource.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -1033,6 +1040,36 @@ public class ParameterScanTests extends IndexScannerTestBase {
         public String hello(@QueryParam("q0") String q0,
                 @Parameter(required = true) @QueryParam(value = "q1") @Size(min = 3, max = 3) @DefaultValue("DOG") Optional<MyEnum> q1) {
             return "myEnum = " + q1;
+        }
+    }
+
+    static class BaseGenericResource<T1, T2, T3> {
+        protected static class GenericBean<G> {
+            @QueryParam("g1")
+            G g1;
+        }
+
+        @GET
+        @Path("typevar")
+        public T1 test(@QueryParam("q1") T2 q1) {
+            return null;
+        }
+
+        @GET
+        @Path("map")
+        public Map<T2, T3> getMap(T1 filter) {
+            return null;
+        }
+    }
+
+    @Path("/integer-string")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    static class IntegerStringUUIDResource extends BaseGenericResource<Integer, String, UUID> {
+        @POST
+        @Path("save")
+        public Integer update(Integer value, @BeanParam GenericBean<String> gbean) {
+            return null;
         }
     }
 }

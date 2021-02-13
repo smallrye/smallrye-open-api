@@ -377,7 +377,7 @@ public class TypeUtil {
     }
 
     /**
-     * Test whether testSubject is an instanceof type test.
+     * Test whether testSubject is an "instanceof" type testObject.
      * <p>
      * For example, test whether List is a Collection.
      * <p>

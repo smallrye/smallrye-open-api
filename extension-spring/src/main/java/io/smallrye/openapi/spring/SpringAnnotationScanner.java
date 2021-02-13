@@ -30,6 +30,7 @@ import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -183,6 +184,9 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         SpringLogging.log.processingController(controllerClass.simpleName());
 
+        TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), controllerClass, null);
+        context.getResolverStack().push(resolver);
+
         OpenAPI openApi = new OpenAPIImpl();
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
@@ -210,6 +214,8 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         // Now find and process the operation methods
         processControllerMethods(context, controllerClass, openApi, null);
+
+        context.getResolverStack().pop();
 
         return openApi;
     }

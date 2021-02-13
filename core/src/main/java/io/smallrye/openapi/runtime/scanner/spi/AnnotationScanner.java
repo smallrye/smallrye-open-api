@@ -361,7 +361,7 @@ public interface AnnotationScanner {
             final MethodInfo method,
             Operation operation) {
 
-        Type returnType = method.returnType();
+        Type returnType = context.getResourceTypeResolver().resolve(method.returnType());
         APIResponse response = null;
         final int status = getDefaultStatus(method);
         final String code = String.valueOf(status);
@@ -798,6 +798,7 @@ public interface AnnotationScanner {
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
             if (requestBodyType != null && requestBody.getRef() == null) {
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
+                    requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
                     Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
 
                     if (schema != null) {
@@ -828,6 +829,7 @@ public interface AnnotationScanner {
                 ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
             } else {
                 Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
+                requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
 
                 if (requestBodyType != null && !isScannerInternalParameter(requestBodyType)) {
                     Schema schema = null;
