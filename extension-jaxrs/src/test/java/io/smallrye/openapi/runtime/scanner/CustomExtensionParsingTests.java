@@ -30,6 +30,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 
+import io.smallrye.openapi.api.OpenApiConfig;
+
 /**
  * Special tests using a custom {@link AnnotationScannerExtension#parseExtension(String, String)}
  * implementation. The tests in this class will only run when system property `classpath.jackson.excluded`
@@ -55,8 +57,9 @@ public class CustomExtensionParsingTests {
     @Test
     public void testDefaultExtensionParseThrowsJacksonNotFound() {
         Index index = IndexScannerTestBase.indexOf(ExtensionParsingTestResource.class);
-        NoClassDefFoundError err = assertThrows(NoClassDefFoundError.class,
-                () -> new OpenApiAnnotationScanner(IndexScannerTestBase.emptyConfig(), index).scan());
+        OpenApiConfig config = IndexScannerTestBase.emptyConfig();
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
+        NoClassDefFoundError err = assertThrows(NoClassDefFoundError.class, () -> scanner.scan());
         assertTrue(err.getMessage().contains("jackson"));
     }
 
