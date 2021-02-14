@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -35,6 +36,7 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -348,8 +350,8 @@ public class TypeResolver {
         return current;
     }
 
-    private Type[] resolveArguments(ParameterizedType type) {
-        return type.arguments().stream().map(this::resolve).toArray(Type[]::new);
+    private static Type[] resolveArguments(ParameterizedType type, Function<Type, Type> resolver) {
+        return type.arguments().stream().map(resolver).toArray(Type[]::new);
     }
 
     /**
@@ -363,7 +365,7 @@ public class TypeResolver {
      */
     public Type getResolvedType(ParameterizedType type) {
         if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
-            return ParameterizedType.create(type.name(), resolveArguments(type), null);
+            return ParameterizedType.create(type.name(), resolveArguments(type, this::resolve), null);
         }
 
         return getResolvedType((Type) type);
@@ -467,6 +469,7 @@ public class TypeResolver {
 
             interfaces(index, currentClass)
                     .stream()
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> clazz.methods().stream())
@@ -481,7 +484,7 @@ public class TypeResolver {
     }
 
     private static boolean acceptField(FieldInfo field) {
-        return !Modifier.isStatic(field.flags());
+        return !Modifier.isStatic(field.flags()) && !field.isSynthetic();
     }
 
     /**
@@ -928,7 +931,7 @@ public class TypeResolver {
         return Collections.emptyList();
     }
 
-    static Map<String, Type> buildParamTypeResolutionMap(ClassInfo klazz, ParameterizedType parameterizedType) {
+    private static Map<String, Type> buildParamTypeResolutionMap(ClassInfo klazz, ParameterizedType parameterizedType) {
         List<TypeVariable> typeVariables = klazz.typeParameters();
         List<Type> arguments = parameterizedType.arguments();
 
@@ -946,4 +949,57 @@ public class TypeResolver {
         return resolutionMap;
     }
 
+    public static ParameterizedType resolveParameterizedAncestor(AnnotationScannerContext context, ParameterizedType pType,
+            Type seekType) {
+        ParameterizedType cursor = pType;
+        boolean seekContinue = true;
+
+        while (context.getAugmentedIndex().containsClass(cursor) && seekContinue) {
+            ClassInfo cursorClass = context.getIndex().getClassByName(cursor.name());
+            Map<String, Type> resolutionMap = buildParamTypeResolutionMap(cursorClass, cursor);
+            boolean searchSuperType = true;
+
+            for (Type implementedType : cursorClass.interfaceTypes()) {
+                if (TypeUtil.isA(context, implementedType, seekType)) {
+                    // Follow interface hierarchy toward `seekType` instead of parent class
+                    searchSuperType = false;
+                    cursor = createParameterizedType(implementedType, resolutionMap);
+
+                    if (implementedType.name().equals(seekType.name())) {
+                        // The searched-for type is implemented directly
+                        seekContinue = false;
+                    }
+                }
+            }
+
+            if (searchSuperType) {
+                Type superType = cursorClass.superClassType();
+
+                if (TypeUtil.isA(context, superType, seekType)) {
+                    cursor = createParameterizedType(superType, resolutionMap);
+                } else {
+                    seekContinue = false;
+                }
+            }
+        }
+
+        return cursor;
+    }
+
+    private static ParameterizedType createParameterizedType(Type targetType, Map<String, Type> resolutionMap) {
+        Type[] resolvedArgs = resolveArguments(targetType.asParameterizedType(), t -> resolveType(t, resolutionMap));
+        return ParameterizedType.create(targetType.name(), resolvedArgs, null);
+    }
+
+    private static Type resolveType(Type type, Map<String, Type> resolutionMap) {
+        switch (type.kind()) {
+            case PARAMETERIZED_TYPE:
+                return createParameterizedType(type, resolutionMap);
+            case TYPE_VARIABLE:
+                String id = type.asTypeVariable().identifier();
+                return resolutionMap.getOrDefault(id, type);
+            default:
+                return type;
+        }
+    }
 }
