@@ -43,7 +43,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.EmptySecurityRequireme
 /**
  * @author eric.wittmann@gmail.com
  */
-public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
+class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     public void testHiddenOperationNotPresent() throws IOException, JSONException {

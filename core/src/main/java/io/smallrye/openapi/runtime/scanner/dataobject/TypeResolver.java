@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -350,7 +350,7 @@ public class TypeResolver {
         return current;
     }
 
-    private static Type[] resolveArguments(ParameterizedType type, Function<Type, Type> resolver) {
+    private static Type[] resolveArguments(ParameterizedType type, UnaryOperator<Type> resolver) {
         return type.arguments().stream().map(resolver).toArray(Type[]::new);
     }
 
@@ -957,22 +957,20 @@ public class TypeResolver {
         while (context.getAugmentedIndex().containsClass(cursor) && seekContinue) {
             ClassInfo cursorClass = context.getIndex().getClassByName(cursor.name());
             Map<String, Type> resolutionMap = buildParamTypeResolutionMap(cursorClass, cursor);
-            boolean searchSuperType = true;
+            List<Type> interfaces = getInterfacesOfType(context, cursorClass, seekType);
 
-            for (Type implementedType : cursorClass.interfaceTypes()) {
-                if (TypeUtil.isA(context, implementedType, seekType)) {
-                    // Follow interface hierarchy toward `seekType` instead of parent class
-                    searchSuperType = false;
-                    cursor = createParameterizedType(implementedType, resolutionMap);
+            for (Type implementedType : interfaces) {
+                // Follow interface hierarchy toward `seekType` instead of parent class
+                cursor = createParameterizedType(implementedType, resolutionMap);
 
-                    if (implementedType.name().equals(seekType.name())) {
-                        // The searched-for type is implemented directly
-                        seekContinue = false;
-                    }
+                if (implementedType.name().equals(seekType.name())) {
+                    // The searched-for type is implemented directly
+                    seekContinue = false;
+                    break;
                 }
             }
 
-            if (searchSuperType) {
+            if (interfaces.isEmpty()) {
                 Type superType = cursorClass.superClassType();
 
                 if (TypeUtil.isA(context, superType, seekType)) {
@@ -984,6 +982,10 @@ public class TypeResolver {
         }
 
         return cursor;
+    }
+
+    private static List<Type> getInterfacesOfType(AnnotationScannerContext context, ClassInfo clazz, Type seekType) {
+        return clazz.interfaceTypes().stream().filter(t -> TypeUtil.isA(context, t, seekType)).collect(Collectors.toList());
     }
 
     private static ParameterizedType createParameterizedType(Type targetType, Map<String, Type> resolutionMap) {

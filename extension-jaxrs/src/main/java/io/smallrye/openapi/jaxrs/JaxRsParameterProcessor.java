@@ -165,45 +165,53 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             FrameworkParameter frameworkParam = JaxRsParameter.forName(name);
 
             if (frameworkParam != null) {
-                AnnotationTarget target = annotation.target();
-                Type targetType = getType(target);
+                readJaxRsParameter(annotation, frameworkParam, beanParamAnnotation, overriddenParametersOnly);
+            }
+        }
+    }
 
-                if (frameworkParam.style == Style.FORM) {
-                    // Store the @FormParam for later processing
-                    formParams.put(paramName(annotation), annotation);
-                } else if (frameworkParam.style == Style.MATRIX) {
-                    // Store the @MatrixParam for later processing
-                    String pathSegment = beanParamAnnotation != null
-                            ? lastPathSegmentOf(beanParamAnnotation.target())
-                            : lastPathSegmentOf(target);
+    private void readJaxRsParameter(AnnotationInstance annotation,
+            FrameworkParameter frameworkParam,
+            AnnotationInstance beanParamAnnotation,
+            boolean overriddenParametersOnly) {
 
-                    matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
-                            .put(paramName(annotation), annotation);
-                } else if (frameworkParam.location == In.PATH && targetType != null
-                        && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
-                    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
-                    matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
-                } else if (frameworkParam.location != null) {
-                    readParameter(
-                            new ParameterContextKey(paramName(annotation), frameworkParam.location,
-                                    frameworkParam.defaultStyle),
-                            null,
-                            frameworkParam,
-                            getDefaultValue(target),
-                            target,
-                            overriddenParametersOnly);
-                } else if (target != null) {
-                    // This is a @BeanParam or a RESTEasy @MultipartForm
-                    setMediaType(frameworkParam);
-                    targetType = TypeUtil.unwrapType(targetType);
+        AnnotationTarget target = annotation.target();
+        Type targetType = getType(target);
 
-                    if (targetType != null) {
-                        ClassInfo beanParam = index.getClassByName(targetType.name());
-                        this.scannerContext.getResolverStack().push(TypeResolver.forClass(index, beanParam, targetType));
-                        readParametersInherited(beanParam, annotation, overriddenParametersOnly);
-                        this.scannerContext.getResolverStack().pop();
-                    }
-                }
+        if (frameworkParam.style == Style.FORM) {
+            // Store the @FormParam for later processing
+            formParams.put(paramName(annotation), annotation);
+        } else if (frameworkParam.style == Style.MATRIX) {
+            // Store the @MatrixParam for later processing
+            String pathSegment = beanParamAnnotation != null
+                    ? lastPathSegmentOf(beanParamAnnotation.target())
+                    : lastPathSegmentOf(target);
+
+            matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
+                    .put(paramName(annotation), annotation);
+        } else if (frameworkParam.location == In.PATH && targetType != null
+                && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
+            String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
+            matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
+        } else if (frameworkParam.location != null) {
+            readParameter(
+                    new ParameterContextKey(paramName(annotation), frameworkParam.location,
+                            frameworkParam.defaultStyle),
+                    null,
+                    frameworkParam,
+                    getDefaultValue(target),
+                    target,
+                    overriddenParametersOnly);
+        } else if (target != null) {
+            // This is a @BeanParam or a RESTEasy @MultipartForm
+            setMediaType(frameworkParam);
+            targetType = TypeUtil.unwrapType(targetType);
+
+            if (targetType != null) {
+                ClassInfo beanParam = index.getClassByName(targetType.name());
+                this.scannerContext.getResolverStack().push(TypeResolver.forClass(index, beanParam, targetType));
+                readParametersInherited(beanParam, annotation, overriddenParametersOnly);
+                this.scannerContext.getResolverStack().pop();
             }
         }
     }
