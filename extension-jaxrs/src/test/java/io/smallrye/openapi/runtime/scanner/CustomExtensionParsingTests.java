@@ -1,8 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,11 +24,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.InitializationError;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 
@@ -39,23 +36,11 @@ import io.smallrye.openapi.api.OpenApiConfig;
  * 
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-@RunWith(CustomExtensionParsingTests.JacksonExcludedRunner.class)
-public class CustomExtensionParsingTests {
-
-    public static class JacksonExcludedRunner extends BlockJUnit4ClassRunner {
-
-        public JacksonExcludedRunner(Class<?> testClass) throws InitializationError {
-            super(testClass);
-        }
-
-        @Override
-        protected boolean isIgnored(FrameworkMethod child) {
-            return !Boolean.valueOf(System.getProperty("classpath.jackson.excluded"));
-        }
-    }
+@EnabledIfSystemProperty(named = "classpath.jackson.excluded", matches = "true")
+class CustomExtensionParsingTests {
 
     @Test
-    public void testDefaultExtensionParseThrowsJacksonNotFound() {
+    void testDefaultExtensionParseThrowsJacksonNotFound() {
         Index index = IndexScannerTestBase.indexOf(ExtensionParsingTestResource.class);
         OpenApiConfig config = IndexScannerTestBase.emptyConfig();
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
@@ -64,7 +49,7 @@ public class CustomExtensionParsingTests {
     }
 
     @Test
-    public void testCustomAnnotationScannerExtension() {
+    void testCustomAnnotationScannerExtension() {
         Index index = IndexScannerTestBase.indexOf(ExtensionParsingTestResource.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(IndexScannerTestBase.emptyConfig(), index,
                 Arrays.asList(new AnnotationScannerExtension() {

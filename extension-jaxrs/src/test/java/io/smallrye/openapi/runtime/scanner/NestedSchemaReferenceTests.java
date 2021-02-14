@@ -11,7 +11,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent;
 import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource;
@@ -19,10 +19,10 @@ import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParamete
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
+class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
-    public void testNestedSchemasAddedToRegistry() throws IOException, JSONException {
+    void testNestedSchemasAddedToRegistry() throws IOException, JSONException {
         DotName parentName = componentize(NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
         OpenAPI oai = context.getOpenApi();
@@ -38,7 +38,7 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testNestedSchemaOnParameter() throws IOException, JSONException {
+    void testNestedSchemaOnParameter() throws IOException, JSONException {
         IndexView i = indexOf(NestedSchemaOnParameterResource.class,
                 NestedSchemaOnParameterResource.NestedParameterTestParent.class,
                 NestedSchemaOnParameterResource.NestedParameterTestChild.class,
@@ -59,7 +59,7 @@ public class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testSimpleNestedSchemaOnParameter() throws IOException, JSONException {
+    void testSimpleNestedSchemaOnParameter() throws IOException, JSONException {
         Indexer indexer = new Indexer();
 
         // Test samples

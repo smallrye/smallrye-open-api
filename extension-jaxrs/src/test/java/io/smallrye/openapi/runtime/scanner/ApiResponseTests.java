@@ -34,12 +34,12 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartOutput;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ApiResponseTests extends IndexScannerTestBase {
+class ApiResponseTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -50,72 +50,72 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
+    void testResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
         test("responses.generation-suppressed-by-api-responses-annotation.json",
                 ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
+    void testResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
         test("responses.generation-suppressed-by-supplied-default-api-response.json",
                 ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
+    void testResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
         test("responses.generation-suppressed-by-status-omission.json",
                 ResponseGenerationSuppressedByStatusOmissionTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
+    void testResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
         test("responses.generation-enabled-by-incomplete-api-response.json",
                 ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseMultipartGeneration() throws IOException, JSONException {
+    void testResponseMultipartGeneration() throws IOException, JSONException {
         test("responses.multipart-generation.json",
                 ResponseMultipartGenerationTestResource.class);
     }
 
     @Test
-    public void testVoidPostResponseGeneration() throws IOException, JSONException {
+    void testVoidPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-post-response-generation.json",
                 VoidPostResponseGenerationTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testVoidNonPostResponseGeneration() throws IOException, JSONException {
+    void testVoidNonPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-nonpost-response-generation.json",
                 VoidNonPostResponseGenerationTestResource.class);
     }
 
     @Test
-    public void testVoidAsyncResponseGeneration() throws IOException, JSONException {
+    void testVoidAsyncResponseGeneration() throws IOException, JSONException {
         test("responses.void-async-response-generation.json",
                 VoidAsyncResponseGenerationTestResource.class, ServerError.class);
     }
 
     @Test
-    public void testReferenceResponse() throws IOException, JSONException {
+    void testReferenceResponse() throws IOException, JSONException {
         test("responses.component-status-reuse.json",
                 ReferenceResponseTestApp.class, ReferenceResponseTestResource.class, JsonObject.class);
     }
 
     @Test
-    public void testGenericTypeVariableResponses() throws IOException, JSONException {
+    void testGenericTypeVariableResponses() throws IOException, JSONException {
         test("responses.generic-type-variables.json",
                 Apple.class, BaseResource.class, TestResource.class);
     }
 
     @Test
-    public void testMultivaluedCustomMapTypeResponse() throws IOException, JSONException {
+    void testMultivaluedCustomMapTypeResponse() throws IOException, JSONException {
         @Path("map")
         @SuppressWarnings("unused")
         class Resource {

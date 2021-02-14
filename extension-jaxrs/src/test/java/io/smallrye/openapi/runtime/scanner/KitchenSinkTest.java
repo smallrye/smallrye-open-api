@@ -11,7 +11,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
 
@@ -58,7 +58,7 @@ class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testKitchenSinkWithRefs() throws IOException, JSONException {
+    void testKitchenSinkWithRefs() throws IOException, JSONException {
         DotName name = componentize(KitchenSink.class.getName());
         Type type = ClassType.create(name, Type.Kind.CLASS);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);

@@ -21,14 +21,14 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
+class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
 
     /*
      * Test case derived from original example linked from Smallrye OpenAPI
@@ -39,7 +39,7 @@ public class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testInheritedResourceMethod() throws IOException, JSONException {
+    void testInheritedResourceMethod() throws IOException, JSONException {
         Index i = indexOf(GenericResource.class,
                 ExampleResource1.class,
                 ExampleResource2.class,

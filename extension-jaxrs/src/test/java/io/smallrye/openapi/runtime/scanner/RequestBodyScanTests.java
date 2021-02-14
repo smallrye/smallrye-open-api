@@ -17,9 +17,9 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartRelatedInput;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RequestBodyScanTests extends IndexScannerTestBase {
+class RequestBodyScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -30,33 +30,33 @@ public class RequestBodyScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResteasyMultipartInput() throws IOException, JSONException {
+    void testResteasyMultipartInput() throws IOException, JSONException {
         test("params.resteasy-multipart-mixed.json",
                 ResteasyMultipartInputTestResource.class);
     }
 
     @Test
-    public void testResteasyMultipartInputList() throws IOException, JSONException {
+    void testResteasyMultipartInputList() throws IOException, JSONException {
         test("params.resteasy-multipart-mixed-array.json",
                 ResteasyMultipartMixedListTestResource.class,
                 RequestBodyWidget.class);
     }
 
     @Test
-    public void testResteasyMultipartFormDataInput() throws IOException, JSONException {
+    void testResteasyMultipartFormDataInput() throws IOException, JSONException {
         test("params.resteasy-multipart-form-data-input.json",
                 ResteasyMultipartFormDataInputTestResource.class);
     }
 
     @Test
-    public void testResteasyMultipartFormDataMap() throws IOException, JSONException {
+    void testResteasyMultipartFormDataMap() throws IOException, JSONException {
         test("params.resteasy-multipart-form-data-map.json",
                 ResteasyMultipartFormDataMapTestResource.class,
                 RequestBodyWidget.class);
     }
 
     @Test
-    public void testResteasyMultipartRelatedInput() throws IOException, JSONException {
+    void testResteasyMultipartRelatedInput() throws IOException, JSONException {
         test("params.resteasy-multipart-related-input.json",
                 ResteasyMultipartRelatedInputTestResource.class);
     }

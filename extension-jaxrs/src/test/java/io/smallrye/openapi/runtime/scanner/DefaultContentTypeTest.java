@@ -7,7 +7,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
@@ -21,7 +21,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.DefaultContentTypeReso
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
+class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
     /**
      * This test the normal (no config) case
      * 
@@ -29,7 +29,7 @@ public class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
      * @throws org.json.JSONException
      */
     @Test
-    public void testVanilla() throws IOException, JSONException {
+    void testVanilla() throws IOException, JSONException {
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
 
@@ -48,7 +48,7 @@ public class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
      * @throws org.json.JSONException
      */
     @Test
-    public void testConfigured() throws IOException, JSONException {
+    void testConfigured() throws IOException, JSONException {
         System.setProperty(OpenApiConstants.DEFAULT_CONSUMES, "application/json");
         System.setProperty(OpenApiConstants.DEFAULT_PRODUCES, "application/json");
         Config config = ConfigProvider.getConfig();

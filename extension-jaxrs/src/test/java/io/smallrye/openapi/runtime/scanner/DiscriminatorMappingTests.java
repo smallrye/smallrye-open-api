@@ -15,15 +15,15 @@ import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class DiscriminatorMappingTests extends IndexScannerTestBase {
+class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
-    public void testDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
+    void testDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator.json",
                 DiscriminatorFullDeclaredInResponseTestResource.class,
                 AbstractPet.class,
@@ -34,7 +34,7 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDiscriminatorNoMappingTestResource() throws IOException, JSONException {
+    void testDiscriminatorNoMappingTestResource() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping.json",
                 DiscriminatorNoMappingTestResource.class,
                 AbstractPet.class,
@@ -45,7 +45,7 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDiscriminatorMappingNoSchema() throws IOException, JSONException {
+    void testDiscriminatorMappingNoSchema() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping-schema.json",
                 DiscriminatorMappingNoSchemaTestResource.class,
                 AbstractPet.class,
@@ -56,7 +56,7 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDiscriminatorMappingNoKey() throws IOException, JSONException {
+    void testDiscriminatorMappingNoKey() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping-key.json",
                 DiscriminatorMappingNoKeyTestResource.class,
                 AbstractPet.class,
@@ -67,7 +67,7 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
+    void testDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-empty-mapping.json",
                 DiscriminatorMappingEmptyMappingTestResource.class,
                 AbstractPet.class,
@@ -78,7 +78,7 @@ public class DiscriminatorMappingTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
+    void testDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-property-name.json",
                 DiscriminatorMappingNoPropertyNameTestResource.class,
                 AbstractPet.class,

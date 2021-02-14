@@ -5,8 +5,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -22,7 +21,6 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
     protected static Index index;
 
     @BeforeAll
-    @BeforeClass
     public static void createIndex() {
         Indexer indexer = new Indexer();
 
@@ -48,9 +46,13 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
     }
 
     @BeforeEach
-    @Before
     public void createContext() {
         context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        super.removeSchemaRegistry();
     }
 
     public FieldInfo getFieldFromKlazz(String containerName, String fieldName) {
