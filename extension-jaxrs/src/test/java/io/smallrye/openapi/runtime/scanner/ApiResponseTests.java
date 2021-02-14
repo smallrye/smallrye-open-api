@@ -35,12 +35,12 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartOutput;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>} and Scott Curtis {@literal <Scott.Curtis@ibm.com>}
  */
-public class ApiResponseTests extends IndexScannerTestBase {
+class ApiResponseTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -51,133 +51,133 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
+    void testResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
         test("responses.generation-suppressed-by-api-responses-annotation.json",
                 ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
+    void testResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
         test("responses.generation-suppressed-by-supplied-default-api-response.json",
                 ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
+    void testResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
         test("responses.generation-suppressed-by-status-omission.json",
                 ResponseGenerationSuppressedByStatusOmissionTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
+    void testResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
         test("responses.generation-enabled-by-incomplete-api-response.json",
                 ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaNoResponseDescription() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaNoResponseDescription() throws IOException, JSONException {
         test("responses.api-response-schema-no-description.json",
                 ResponseGenerationAPIResponseSchemaNoResponseDescriptionTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePostNonVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodePostNonVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-post.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndNonVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeGetNonVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeGetNonVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-get.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndNonVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePutNonVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodePutNonVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-put.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndNonVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndNonVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndNonVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-patch.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndNonVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndNonVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndNonVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-delete.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndNonVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-void-post.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodePostAndVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-not-async-void-get.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeGetAndVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-not-async-void-put.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodePutAndVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-not-async-void-patch.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodePatchAndVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-not-async-void-delete.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeDeleteAndVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-void-post.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndVoidTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-get.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndVoidTestResource.class, Pet.class,
                 JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndVoid() throws IOException, JSONException {
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndVoid() throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-put.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndVoidTestResource.class, Pet.class,
                 JsonString.class);
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-patch.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndVoidTestResource.class, Pet.class,
@@ -185,7 +185,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-delete.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndVoidTestResource.class, Pet.class,
@@ -193,7 +193,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndNonVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndNonVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-post.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPostAndNonVoidTestResource.class,
@@ -201,7 +201,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndNonVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndNonVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-get.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncGetAndNonVoidTestResource.class,
@@ -209,7 +209,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndNonVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndNonVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-put.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPutAndNonVoidTestResource.class,
@@ -217,7 +217,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndNonVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndNonVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-patch.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncPatchAndNonVoidTestResource.class,
@@ -225,7 +225,7 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndNonVoid()
+    void testResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndNonVoid()
             throws IOException, JSONException {
         test("responses.api-response-schema-invalid-response-code-delete.json",
                 ResponseGenerationAPIResponseSchemaInvalidResponseCodeAsyncDeleteAndNonVoidTestResource.class,
@@ -233,44 +233,44 @@ public class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResponseMultipartGeneration() throws IOException, JSONException {
+    void testResponseMultipartGeneration() throws IOException, JSONException {
         test("responses.multipart-generation.json",
                 ResponseMultipartGenerationTestResource.class);
     }
 
     @Test
-    public void testVoidPostResponseGeneration() throws IOException, JSONException {
+    void testVoidPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-post-response-generation.json",
                 VoidPostResponseGenerationTestResource.class,
                 Pet.class, JsonString.class);
     }
 
     @Test
-    public void testVoidNonPostResponseGeneration() throws IOException, JSONException {
+    void testVoidNonPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-nonpost-response-generation.json",
                 VoidNonPostResponseGenerationTestResource.class);
     }
 
     @Test
-    public void testVoidAsyncResponseGeneration() throws IOException, JSONException {
+    void testVoidAsyncResponseGeneration() throws IOException, JSONException {
         test("responses.void-async-response-generation.json",
                 VoidAsyncResponseGenerationTestResource.class, ServerError.class);
     }
 
     @Test
-    public void testReferenceResponse() throws IOException, JSONException {
+    void testReferenceResponse() throws IOException, JSONException {
         test("responses.component-status-reuse.json",
                 ReferenceResponseTestApp.class, ReferenceResponseTestResource.class, JsonObject.class);
     }
 
     @Test
-    public void testGenericTypeVariableResponses() throws IOException, JSONException {
+    void testGenericTypeVariableResponses() throws IOException, JSONException {
         test("responses.generic-type-variables.json",
                 Apple.class, BaseResource.class, TestResource.class);
     }
 
     @Test
-    public void testMultivaluedCustomMapTypeResponse() throws IOException, JSONException {
+    void testMultivaluedCustomMapTypeResponse() throws IOException, JSONException {
         @Path("map")
         @SuppressWarnings("unused")
         class Resource {

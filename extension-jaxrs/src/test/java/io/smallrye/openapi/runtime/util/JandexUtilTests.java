@@ -1,6 +1,6 @@
 package io.smallrye.openapi.runtime.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 
@@ -14,15 +14,15 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 
-public class JandexUtilTests {
+class JandexUtilTests {
 
     @Test
-    public void testEnumValue() {
+    void testEnumValue() {
         Index index = IndexScannerTestBase.indexOf(Implementor2.class);
         ClassInfo clazz = index.getClassByName(DotName.createSimple(Implementor2.class.getName()));
         AnnotationInstance annotation = clazz.method("getData")
@@ -36,7 +36,7 @@ public class JandexUtilTests {
     }
 
     @Test
-    public void testRefValueWithHttpUrl() {
+    void testRefValueWithHttpUrl() {
         String ref = "https://www.example.com/openapi";
         AnnotationInstance annotation = AnnotationInstance.create(DotName.createSimple(""),
                 null,
@@ -46,7 +46,7 @@ public class JandexUtilTests {
     }
 
     @Test
-    public void testRefValueWithRelativeUrl() {
+    void testRefValueWithRelativeUrl() {
         String ref = "./additional-schemas.json";
         AnnotationInstance annotation = AnnotationInstance.create(DotName.createSimple(""),
                 null,
@@ -56,7 +56,7 @@ public class JandexUtilTests {
     }
 
     @Test
-    public void testRefValueWithValidLinkName() {
+    void testRefValueWithValidLinkName() {
         String ref = "L1nk.T0_Something-Useful";
         AnnotationInstance annotation = AnnotationInstance.create(DotName.createSimple(""),
                 null,
@@ -67,7 +67,7 @@ public class JandexUtilTests {
 
     // TODO: Re implement this maybe ?
     //    @Test
-    //    public void testGetJaxRsResourceClasses() {
+    //    void testGetJaxRsResourceClasses() {
     //        Index index = IndexScannerTestBase.indexOf(I1.class, I2.class, Implementor1.class, Implementor2.class);
     //        Collection<ClassInfo> resources = JandexUtil.getJaxRsResourceClasses(index);
     //        assertEquals(3, resources.size());

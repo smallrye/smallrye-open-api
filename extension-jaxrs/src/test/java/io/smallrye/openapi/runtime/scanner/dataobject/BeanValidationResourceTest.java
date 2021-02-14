@@ -24,7 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
@@ -33,10 +33,10 @@ import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScannerTest.
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class BeanValidationResourceTest extends IndexScannerTestBase {
+class BeanValidationResourceTest extends IndexScannerTestBase {
 
     @Test
-    public void testBeanValidationDocument() throws IOException, JSONException {
+    void testBeanValidationDocument() throws IOException, JSONException {
         Index index = indexOf(BVTestResource.class, BVTestResourceEntity.class, BeanValidationScannerTest.BVTestContainer.class,
                 TestEnum.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
@@ -46,7 +46,7 @@ public class BeanValidationResourceTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testInheritedBVConstraints() throws IOException, JSONException {
+    void testInheritedBVConstraints() throws IOException, JSONException {
         Index index = indexOf(User.class, BaseUser.class, UserImpl.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();

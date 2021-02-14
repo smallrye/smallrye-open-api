@@ -1,7 +1,7 @@
 package io.smallrye.openapi.runtime.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,21 +11,21 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Type;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class TypeUtilTest extends IndexScannerTestBase {
+class TypeUtilTest extends IndexScannerTestBase {
 
     private static final Type TYPE_COLLECTION = OpenApiDataObjectScanner.COLLECTION_TYPE;
     private static final Type TYPE_ENUM = OpenApiDataObjectScanner.ENUM_TYPE;
     private static final Type TYPE_MAP = OpenApiDataObjectScanner.MAP_TYPE;
 
     @Test
-    public void testIsA_BothIndexed() {
+    void testIsA_BothIndexed() {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(subjectClass, Collection.class);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -34,7 +34,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_SubjectIndexed() {
+    void testIsA_SubjectIndexed() {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -43,7 +43,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_ObjectIndexed() {
+    void testIsA_ObjectIndexed() {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(Collection.class);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -52,7 +52,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_IndexedSubjectImplementsObject() {
+    void testIsA_IndexedSubjectImplementsObject() {
         final Class<?> subjectClass = CustomCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -61,7 +61,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_IndexedSubjectImplementsOther() {
+    void testIsA_IndexedSubjectImplementsOther() {
         final Class<?> subjectClass = CustomMap.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -70,7 +70,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_IndexedSubjectExtendsUnindexedCollection() {
+    void testIsA_IndexedSubjectExtendsUnindexedCollection() {
         final Class<?> subjectClass = ChildCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -79,7 +79,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_IndexedSubjectUnrelatedToObject() {
+    void testIsA_IndexedSubjectUnrelatedToObject() {
         final Class<?> subjectClass = UnrelatedType.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -88,7 +88,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_UnindexedPrimitiveSubjectUnrelatedToObject() {
+    void testIsA_UnindexedPrimitiveSubjectUnrelatedToObject() {
         final Class<?> subjectClass = int.class;
         Index index = indexOf();
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.PRIMITIVE);
@@ -97,7 +97,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_UnindexedPrimitiveWrapperSubjectUnrelatedToObject() {
+    void testIsA_UnindexedPrimitiveWrapperSubjectUnrelatedToObject() {
         final Class<?> subjectClass = Integer.class;
         final DotName subjectName = DotName.createSimple(subjectClass.getName());
         Index index = indexOf();
@@ -107,7 +107,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_SubjectIsJavaLangObject() {
+    void testIsA_SubjectIsJavaLangObject() {
         final Class<?> subjectClass = Object.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
@@ -116,7 +116,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_SubjectSameAsObject() {
+    void testIsA_SubjectSameAsObject() {
         final Class<?> subjectClass = MapContainer.class;
         final DotName subjectName = DotName.createSimple(subjectClass.getName());
         Index index = indexOf(subjectClass);
@@ -127,7 +127,7 @@ public class TypeUtilTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIsA_SubjectSuperSameAsObject() {
+    void testIsA_SubjectSuperSameAsObject() {
         final Class<?> subjectClass = TestEnum.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);

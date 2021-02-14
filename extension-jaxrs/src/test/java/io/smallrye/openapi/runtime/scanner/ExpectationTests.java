@@ -9,7 +9,7 @@ import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -28,7 +28,7 @@ class ExpectationTests extends JaxRsDataObjectScannerTestBase {
      * Unresolvable type parameter.
      */
     @Test
-    public void testUnresolvable() throws IOException, JSONException {
+    void testUnresolvable() throws IOException, JSONException {
         DotName bar = createSimple(Bar.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(bar, Type.Kind.CLASS));
 
@@ -42,7 +42,7 @@ class ExpectationTests extends JaxRsDataObjectScannerTestBase {
      * Unresolvable type parameter.
      */
     @Test
-    public void testCycle() throws IOException, JSONException {
+    void testCycle() throws IOException, JSONException {
         DotName buzz = createSimple(BuzzLinkedList.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(buzz, Type.Kind.CLASS));
 
@@ -53,7 +53,7 @@ class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testBareEnum() throws IOException, JSONException {
+    void testBareEnum() throws IOException, JSONException {
         DotName baz = createSimple(EnumContainer.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(baz, Type.Kind.CLASS));
 
@@ -64,7 +64,7 @@ class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testRequiredEnum() throws IOException, JSONException {
+    void testRequiredEnum() throws IOException, JSONException {
         DotName baz = createSimple(EnumRequiredContainer.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(baz, Type.Kind.CLASS));
 

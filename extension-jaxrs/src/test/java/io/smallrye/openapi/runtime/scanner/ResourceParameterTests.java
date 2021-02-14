@@ -52,7 +52,7 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -64,7 +64,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource;
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
+class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     /*
      * Test case derived from original example in Smallrye OpenAPI issue #25.
@@ -73,7 +73,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testParameterResource() throws IOException, JSONException {
+    void testParameterResource() throws IOException, JSONException {
         Index i = indexOf(ParameterResource.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
@@ -88,7 +88,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testPrimitiveArraySchema() throws IOException, JSONException {
+    void testPrimitiveArraySchema() throws IOException, JSONException {
         Index i = indexOf(PrimitiveArraySchemaTestResource.class,
                 PrimitiveArraySchemaTestResource.PrimitiveArrayTestObject.class);
         OpenApiConfig config = emptyConfig();
@@ -123,7 +123,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     /*************************************************************************/
 
     @Test
-    public void testPrimitiveArrayParameter() throws IOException, JSONException {
+    void testPrimitiveArrayParameter() throws IOException, JSONException {
         Index i = indexOf(PrimitiveArrayParameterTestResource.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(i, config);
@@ -149,7 +149,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     /*************************************************************************/
 
     @Test
-    public void testPrimitiveArrayPolymorphism() throws IOException, JSONException {
+    void testPrimitiveArrayPolymorphism() throws IOException, JSONException {
         Index i = indexOf(PrimitiveArrayPolymorphismTestResource.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(i, config);
@@ -183,7 +183,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testSchemaImplementationType() throws IOException, JSONException {
+    void testSchemaImplementationType() throws IOException, JSONException {
         Index i = indexOf(SchemaImplementationTypeResource.class,
                 SchemaImplementationTypeResource.GreetingMessage.class,
                 SchemaImplementationTypeResource.SimpleString.class);
@@ -251,7 +251,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testTimeResource() throws IOException, JSONException {
+    void testTimeResource() throws IOException, JSONException {
         Index i = indexOf(TimeTestResource.class, TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
@@ -302,7 +302,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testTypeVariableResponse() throws IOException, JSONException {
+    void testTypeVariableResponse() throws IOException, JSONException {
         Index i = indexOf(TypeVariableResponseTestResource.class,
                 TypeVariableResponseTestResource.Dto.class);
         OpenApiConfig config = emptyConfig();
@@ -341,7 +341,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testResponseTypeUnindexed() throws IOException, JSONException {
+    void testResponseTypeUnindexed() throws IOException, JSONException {
         // Index is intentionally missing ResponseTypeUnindexedTestResource$ThirdPartyType
         Index i = indexOf(ResponseTypeUnindexedTestResource.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
@@ -372,7 +372,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testGenericSetResponseWithSetIndexed() throws IOException, JSONException {
+    void testGenericSetResponseWithSetIndexed() throws IOException, JSONException {
         Index i = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();
@@ -381,7 +381,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testGenericSetResponseWithSetIndexedWithoutArrayRefs() throws IOException, JSONException {
+    void testGenericSetResponseWithSetIndexedWithoutArrayRefs() throws IOException, JSONException {
         Index i = indexOf(FruitResource.class, Fruit.class, Seed.class, Set.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
                 dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
@@ -393,7 +393,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testGenericSetResponseWithSetUnindexed() throws IOException, JSONException {
+    void testGenericSetResponseWithSetUnindexed() throws IOException, JSONException {
         Index i = indexOf(FruitResource.class, Fruit.class, Seed.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();
@@ -441,7 +441,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    public void testBeanParamMultipartFormInheritance() throws IOException, JSONException {
+    void testBeanParamMultipartFormInheritance() throws IOException, JSONException {
         Index i = indexOf(BeanParamMultipartFormInheritanceResource.class,
                 MultipartFormVerify.class,
                 MultipartFormUploadIconForm.class,
@@ -516,7 +516,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
 
     @Test
-    public void testMethodTargetParametersWithoutJAXRS() throws IOException, JSONException {
+    void testMethodTargetParametersWithoutJAXRS() throws IOException, JSONException {
         Index i = indexOf(MethodTargetParametersResource.class,
                 MethodTargetParametersResource.PagedResponse.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
@@ -590,7 +590,7 @@ public class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
 
     @Test
-    public void testJsonbTransientOnSetterGeneratesReadOnly() throws IOException, JSONException {
+    void testJsonbTransientOnSetterGeneratesReadOnly() throws IOException, JSONException {
         Index i = indexOf(Policy437Resource.class, Policy437.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();

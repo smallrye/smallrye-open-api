@@ -7,7 +7,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
@@ -21,7 +21,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
+class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
 
     private static final String TITLE = "mp.openapi.extensions.smallrye.info.title";
     private static final String VERSION = "mp.openapi.extensions.smallrye.info.version";
@@ -34,7 +34,7 @@ public class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     private static final String LICENSE_URL = "mp.openapi.extensions.smallrye.info.license.url";
 
     @Test
-    public void testSettingJustTitle() throws IOException, JSONException {
+    void testSettingJustTitle() throws IOException, JSONException {
         System.setProperty(TITLE, "My Awesome Service");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -51,7 +51,7 @@ public class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testSettingJustContactEmail() throws IOException, JSONException {
+    void testSettingJustContactEmail() throws IOException, JSONException {
         System.setProperty(CONTACT_EMAIL, "phillip.kruger@redhat.com");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -68,7 +68,7 @@ public class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testSettingJustLicenseName() throws IOException, JSONException {
+    void testSettingJustLicenseName() throws IOException, JSONException {
         System.setProperty(LICENSE_NAME, "Apache License 2.0");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -85,7 +85,7 @@ public class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testSettingAllInfo() throws IOException, JSONException {
+    void testSettingAllInfo() throws IOException, JSONException {
 
         System.setProperty(TITLE, "My own awesome REST service");
         System.setProperty(VERSION, "1.2.3");
