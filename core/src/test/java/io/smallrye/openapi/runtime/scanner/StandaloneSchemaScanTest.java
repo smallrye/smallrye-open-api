@@ -336,7 +336,7 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
     /****************************************************************/
 
     /*
-     * https://github.com/smallrye/smallrye-open-api/issues/226
+     * https://github.com/smallrye/smallrye-open-api/issues/688
      */
     @Test
     public void testNestedCollectionSchemas() throws IOException, JSONException {

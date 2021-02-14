@@ -123,13 +123,7 @@
             <scope>test</scope>
             <type>pom</type>
         </dependency>
-        <dependency>
-  <groupId>org.keycloak</groupId>
-  <artifactId>keycloak-core</artifactId>
-  <version>11.0.3</version>
-  <scope>test</scope>
-</dependency>
-        
+
         <!-- Depend on core tests -->
         <dependency>
             <groupId>${project.groupId}</groupId>

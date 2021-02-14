@@ -10,13 +10,9 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_T
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
-import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
@@ -178,7 +174,7 @@ public class TypeProcessor {
         if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
             DataObjectLogging.logger.processingTypeAs("Java Collection", "Array");
             schema.type(Schema.SchemaType.ARRAY);
-            ParameterizedType ancestorType = findParameterizedAncestor(pType, ITERABLE_TYPE);
+            ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, ITERABLE_TYPE);
 
             if (TypeUtil.isA(context, pType, SET_TYPE)) {
                 schema.setUniqueItems(Boolean.TRUE);
@@ -192,7 +188,7 @@ public class TypeProcessor {
         } else if (isA(pType, MAP_TYPE)) {
             DataObjectLogging.logger.processingTypeAs("Map", "object");
             schema.type(Schema.SchemaType.OBJECT);
-            ParameterizedType ancestorType = findParameterizedAncestor(pType, MAP_TYPE);
+            ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, MAP_TYPE);
 
             if (ancestorType.arguments().size() == 2) {
                 Type valueType = ancestorType.arguments().get(1);
@@ -211,63 +207,6 @@ public class TypeProcessor {
         }
 
         return typeRead;
-    }
-
-    private ParameterizedType findParameterizedAncestor(ParameterizedType pType, Type seekType) {
-        ParameterizedType cursor = pType;
-        boolean seekContinue = true;
-
-        while (context.getAugmentedIndex().containsClass(cursor) && seekContinue) {
-            ClassInfo cursorClass = context.getIndex().getClassByName(cursor.name());
-            Map<String, Type> resolutionMap = TypeResolver.buildParamTypeResolutionMap(cursorClass, cursor);
-            boolean searchSuperType = true;
-
-            for (Type implementedType : cursorClass.interfaceTypes()) {
-                if (isA(implementedType, seekType)) {
-                    searchSuperType = false;
-                    cursor = createParameterizedType(implementedType, resolutionMap);
-
-                    if (implementedType.name().equals(seekType.name())) {
-                        // The searched-for type is implemented directly
-                        seekContinue = false;
-                    }
-                }
-            }
-
-            if (searchSuperType) {
-                Type superType = cursorClass.superClassType();
-
-                if (isA(superType, seekType)) {
-                    cursor = createParameterizedType(superType, resolutionMap);
-                } else {
-                    seekContinue = false;
-                }
-            }
-        }
-
-        return cursor;
-    }
-
-    private ParameterizedType createParameterizedType(Type targetType, Map<String, Type> resolutionMap) {
-        List<Type> args = targetType.asParameterizedType().arguments();
-        return ParameterizedType.create(targetType.name(),
-                args.stream().map(arg -> resolveType(resolutionMap, arg)).toArray(Type[]::new), null);
-    }
-
-    private Type resolveType(Map<String, Type> resolutionMap, Type type) {
-        switch (type.kind()) {
-            case PARAMETERIZED_TYPE:
-                return ParameterizedType.create(type.name(), type.asParameterizedType()
-                        .arguments()
-                        .stream()
-                        .map(a -> this.resolveType(resolutionMap, a))
-                        .toArray(Type[]::new),
-                        null);
-            case TYPE_VARIABLE:
-                return resolutionMap.get(type.asTypeVariable().identifier());
-            default:
-                return type;
-        }
     }
 
     private Schema readGenericValueType(Type valueType, Schema schema) {
