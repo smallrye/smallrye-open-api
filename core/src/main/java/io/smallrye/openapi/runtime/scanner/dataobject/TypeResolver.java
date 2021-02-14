@@ -348,6 +348,10 @@ public class TypeResolver {
         return current;
     }
 
+    private Type[] resolveArguments(ParameterizedType type) {
+        return type.arguments().stream().map(this::resolve).toArray(Type[]::new);
+    }
+
     /**
      * Resolve a parameterized type against this {@link TypeResolver}'s resolution stack.
      * If any of the type's arguments are wild card types, the resolution will fall back
@@ -359,11 +363,7 @@ public class TypeResolver {
      */
     public Type getResolvedType(ParameterizedType type) {
         if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
-            return ParameterizedType.create(type.name(),
-                    type.arguments().stream()
-                            .map(this::getResolvedType)
-                            .toArray(Type[]::new),
-                    null);
+            return ParameterizedType.create(type.name(), resolveArguments(type), null);
         }
 
         return getResolvedType((Type) type);
@@ -433,7 +433,7 @@ public class TypeResolver {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
-        boolean allOfMatch = false;
+        boolean skipPropertyScan = false;
 
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
@@ -444,8 +444,13 @@ public class TypeResolver {
                 stack.push(resMap);
             }
 
-            if (allOfMatch || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))) {
-                allOfMatch = true;
+            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))
+                    || TypeUtil.knownJavaType(currentClass.name())) {
+                /*
+                 * Do not attempt to introspect fields of Java/JDK types or if the @Schema
+                 * annotation indicates the use of a `ref` for superclass fields.
+                 */
+                skipPropertyScan = true;
                 continue;
             }
 
@@ -923,7 +928,7 @@ public class TypeResolver {
         return Collections.emptyList();
     }
 
-    private static Map<String, Type> buildParamTypeResolutionMap(ClassInfo klazz, ParameterizedType parameterizedType) {
+    static Map<String, Type> buildParamTypeResolutionMap(ClassInfo klazz, ParameterizedType parameterizedType) {
         List<TypeVariable> typeVariables = klazz.typeParameters();
         List<Type> arguments = parameterizedType.arguments();
 

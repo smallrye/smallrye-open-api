@@ -10,11 +10,16 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_T
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
+import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
@@ -79,54 +84,22 @@ public class TypeProcessor {
         }
 
         if (type.kind() == Type.Kind.ARRAY) {
-            DataObjectLogging.logger.processingArray(type);
-            ArrayType arrayType = type.asArrayType();
-
-            // Array-type schema
-            Schema arrSchema = new SchemaImpl();
-            schema.type(Schema.SchemaType.ARRAY);
-
-            // Only use component (excludes the special name formatting for arrays).
-            TypeUtil.applyTypeAttributes(arrayType.component(), arrSchema);
-
-            // If it's not a terminal type, then push for later inspection.
-            if (!isTerminalType(arrayType.component()) && index.containsClass(type)) {
-                pushToStack(type, arrSchema);
-            }
-
-            arrSchema = SchemaRegistry.registerReference(arrayType.component(), typeResolver, arrSchema);
-
-            while (arrayType.dimensions() > 1) {
-                Schema parentArrSchema = new SchemaImpl();
-                parentArrSchema.setType(Schema.SchemaType.ARRAY);
-                parentArrSchema.setItems(arrSchema);
-
-                arrSchema = parentArrSchema;
-                arrayType = ArrayType.create(arrayType.component(), arrayType.dimensions() - 1);
-            }
-
-            schema.setItems(arrSchema);
-
-            return arrayType;
+            readArrayType(type.asArrayType(), this.schema);
         }
 
         if (TypeUtil.isWrappedType(type)) {
-            Type wrappedType = TypeUtil.unwrapType(type);
-            if (!isTerminalType(wrappedType) && index.containsClass(wrappedType)) {
-                pushToStack(wrappedType);
-            }
-            return wrappedType;
+            return readWrappedType(type, this.schema);
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
             MergeUtil.mergeObjects(schema, SchemaFactory.enumToSchema(context, type));
-            pushToStack(type);
+            pushToStack(type, this.schema);
             return STRING_TYPE;
         }
 
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             // Parameterized type (e.g. Foo<A, B>)
-            return readParameterizedType(type.asParameterizedType());
+            return readParameterizedType(type.asParameterizedType(), this.schema);
         }
 
         // Raw Collection
@@ -146,7 +119,7 @@ public class TypeProcessor {
 
         // Simple case: bare class or primitive type.
         if (index.containsClass(type)) {
-            pushToStack(type);
+            pushToStack(type, this.schema);
         } else {
             // If the type is not in Jandex then we don't have easy access to it.
             // Future work could consider separate code to traverse classes reachable from this classloader.
@@ -156,57 +129,162 @@ public class TypeProcessor {
         return type;
     }
 
-    private Type readParameterizedType(ParameterizedType pType) {
+    private Type readArrayType(ArrayType arrayType, Schema arraySchema) {
+        DataObjectLogging.logger.processingArray(arrayType);
+
+        // Array-type schema
+        Schema itemSchema = new SchemaImpl();
+        arraySchema.type(Schema.SchemaType.ARRAY);
+
+        // Only use component (excludes the special name formatting for arrays).
+        TypeUtil.applyTypeAttributes(arrayType.component(), itemSchema);
+
+        // If it's not a terminal type, then push for later inspection.
+        if (!isTerminalType(arrayType.component()) && index.containsClass(arrayType)) {
+            pushToStack(arrayType, itemSchema);
+        }
+
+        itemSchema = SchemaRegistry.registerReference(arrayType.component(), typeResolver, itemSchema);
+
+        while (arrayType.dimensions() > 1) {
+            Schema parentArrSchema = new SchemaImpl();
+            parentArrSchema.setType(Schema.SchemaType.ARRAY);
+            parentArrSchema.setItems(itemSchema);
+
+            itemSchema = parentArrSchema;
+            arrayType = ArrayType.create(arrayType.component(), arrayType.dimensions() - 1);
+        }
+
+        arraySchema.setItems(itemSchema);
+
+        return arrayType;
+    }
+
+    private Type readWrappedType(Type wrapperType, Schema schema) {
+        Type wrappedType = TypeUtil.unwrapType(wrapperType);
+
+        if (!isTerminalType(wrappedType) && index.containsClass(wrappedType)) {
+            pushToStack(wrappedType, schema);
+        }
+
+        return wrappedType;
+    }
+
+    private Type readParameterizedType(ParameterizedType pType, Schema schema) {
         DataObjectLogging.logger.processingParametrizedType(pType);
         Type typeRead = pType;
 
         // If it's a collection, we should treat it as an array.
         if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
             DataObjectLogging.logger.processingTypeAs("Java Collection", "Array");
-            Schema arraySchema = new SchemaImpl();
             schema.type(Schema.SchemaType.ARRAY);
+            ParameterizedType ancestorType = findParameterizedAncestor(pType, ITERABLE_TYPE);
 
             if (TypeUtil.isA(context, pType, SET_TYPE)) {
                 schema.setUniqueItems(Boolean.TRUE);
             }
 
             // Should only have one arg for collection.
-            Type arg = pType.arguments().get(0);
-
-            if (isTerminalType(arg)) {
-                TypeUtil.applyTypeAttributes(arg, arraySchema);
-            } else {
-                arraySchema = resolveParameterizedType(arg, arraySchema);
-            }
-
-            schema.setItems(arraySchema);
+            Type valueType = ancestorType.arguments().get(0);
+            schema.setItems(readGenericValueType(valueType, schema));
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {
             DataObjectLogging.logger.processingTypeAs("Map", "object");
             schema.type(Schema.SchemaType.OBJECT);
+            ParameterizedType ancestorType = findParameterizedAncestor(pType, MAP_TYPE);
 
-            if (pType.arguments().size() == 2) {
-                Type valueType = pType.arguments().get(1);
-                Schema propsSchema = new SchemaImpl();
-                if (isTerminalType(valueType)) {
-                    TypeUtil.applyTypeAttributes(valueType, propsSchema);
-                } else {
-                    propsSchema = resolveParameterizedType(valueType, propsSchema);
-                }
+            if (ancestorType.arguments().size() == 2) {
+                Type valueType = ancestorType.arguments().get(1);
                 // Add properties schema to field schema.
-                schema.additionalPropertiesSchema(propsSchema);
+                schema.additionalPropertiesSchema(readGenericValueType(valueType, schema));
             }
+
             typeRead = OBJECT_TYPE;
-        } else if (index.containsClass(type)) {
+
+            if (TypeUtil.allowRegistration(context, pType)) {
+                pushToStack(pType, schema);
+            }
+        } else if (index.containsClass(pType)) {
             // This type will be resolved later, if necessary.
-            pushToStack(pType);
+            pushToStack(pType, schema);
         }
 
         return typeRead;
     }
 
-    private Schema resolveParameterizedType(Type valueType, Schema propsSchema) {
+    private ParameterizedType findParameterizedAncestor(ParameterizedType pType, Type seekType) {
+        ParameterizedType cursor = pType;
+        boolean seekContinue = true;
+
+        while (context.getAugmentedIndex().containsClass(cursor) && seekContinue) {
+            ClassInfo cursorClass = context.getIndex().getClassByName(cursor.name());
+            Map<String, Type> resolutionMap = TypeResolver.buildParamTypeResolutionMap(cursorClass, cursor);
+            boolean searchSuperType = true;
+
+            for (Type implementedType : cursorClass.interfaceTypes()) {
+                if (isA(implementedType, seekType)) {
+                    searchSuperType = false;
+                    cursor = createParameterizedType(implementedType, resolutionMap);
+
+                    if (implementedType.name().equals(seekType.name())) {
+                        // The searched-for type is implemented directly
+                        seekContinue = false;
+                    }
+                }
+            }
+
+            if (searchSuperType) {
+                Type superType = cursorClass.superClassType();
+
+                if (isA(superType, seekType)) {
+                    cursor = createParameterizedType(superType, resolutionMap);
+                } else {
+                    seekContinue = false;
+                }
+            }
+        }
+
+        return cursor;
+    }
+
+    private ParameterizedType createParameterizedType(Type targetType, Map<String, Type> resolutionMap) {
+        List<Type> args = targetType.asParameterizedType().arguments();
+        return ParameterizedType.create(targetType.name(),
+                args.stream().map(arg -> resolveType(resolutionMap, arg)).toArray(Type[]::new), null);
+    }
+
+    private Type resolveType(Map<String, Type> resolutionMap, Type type) {
+        switch (type.kind()) {
+            case PARAMETERIZED_TYPE:
+                return ParameterizedType.create(type.name(), type.asParameterizedType()
+                        .arguments()
+                        .stream()
+                        .map(a -> this.resolveType(resolutionMap, a))
+                        .toArray(Type[]::new),
+                        null);
+            case TYPE_VARIABLE:
+                return resolutionMap.get(type.asTypeVariable().identifier());
+            default:
+                return type;
+        }
+    }
+
+    private Schema readGenericValueType(Type valueType, Schema schema) {
+        Schema valueSchema = new SchemaImpl();
+
+        if (isTerminalType(valueType)) {
+            TypeUtil.applyTypeAttributes(valueType, valueSchema);
+        } else if (valueType.kind() == Kind.PARAMETERIZED_TYPE) {
+            readParameterizedType(valueType.asParameterizedType(), valueSchema);
+        } else {
+            valueSchema = resolveParameterizedType(valueType, schema, valueSchema);
+        }
+
+        return valueSchema;
+    }
+
+    private Schema resolveParameterizedType(Type valueType, Schema schema, Schema propsSchema) {
         if (valueType.kind() == Type.Kind.TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.WILDCARD_TYPE) {
@@ -219,7 +297,7 @@ public class TypeProcessor {
             if (isA(valueType, ENUM_TYPE)) {
                 DataObjectLogging.logger.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(context, valueType);
-                pushToStack(valueType);
+                pushToStack(valueType, schema);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 pushToStack(valueType, propsSchema);
@@ -247,12 +325,8 @@ public class TypeProcessor {
         return resolvedType;
     }
 
-    private void pushToStack(Type fieldType) {
-        objectStack.push(annotationTarget, parentPathEntry, fieldType, schema);
-    }
-
-    private void pushToStack(Type resolvedType, Schema schema) {
-        objectStack.push(annotationTarget, parentPathEntry, resolvedType, schema);
+    private void pushToStack(Type type, Schema schema) {
+        objectStack.push(annotationTarget, parentPathEntry, type, schema);
     }
 
     private boolean isA(Type testSubject, Type test) {

@@ -46,7 +46,10 @@
             "name": "orderby",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/ListString"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -172,7 +175,10 @@
             "name": "orderby",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/ListString"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -282,7 +288,10 @@
             "name": "orderby",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/ListString"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -429,12 +438,6 @@
           }
         }
       },
-      "ListString": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
       "Message": {
         "type": "object",
         "properties": {
@@ -446,12 +449,6 @@
           }
         }
       },
-      "ListKingCrimson": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/KingCrimson"
-        }
-      },
       "ResultListKingCrimson": {
         "type": "object",
         "properties": {
@@ -459,18 +456,15 @@
             "$ref": "#/components/schemas/Message"
           },
           "result": {
-            "$ref": "#/components/schemas/ListKingCrimson"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KingCrimson"
+            }
           },
           "status": {
             "format": "int32",
             "type": "integer"
           }
-        }
-      },
-      "ListPOJO": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/POJO"
         }
       },
       "ResultListPOJO": {
@@ -480,7 +474,10 @@
             "$ref": "#/components/schemas/Message"
           },
           "result": {
-            "$ref": "#/components/schemas/ListPOJO"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/POJO"
+            }
           },
           "status": {
             "format": "int32",
@@ -503,12 +500,6 @@
           }
         }
       },
-      "ListMagma": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Magma"
-        }
-      },
       "ResultListMagma": {
         "type": "object",
         "properties": {
@@ -516,7 +507,10 @@
             "$ref": "#/components/schemas/Message"
           },
           "result": {
-            "$ref": "#/components/schemas/ListMagma"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Magma"
+            }
           },
           "status": {
             "format": "int32",
@@ -559,12 +553,6 @@
           }
         }
       },
-      "ListResidents": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Residents"
-        }
-      },
       "ResultListResidents": {
         "type": "object",
         "properties": {
@@ -572,7 +560,10 @@
             "$ref": "#/components/schemas/Message"
           },
           "result": {
-            "$ref": "#/components/schemas/ListResidents"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Residents"
+            }
           },
           "status": {
             "format": "int32",

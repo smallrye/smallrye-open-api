@@ -1,7 +1,10 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -19,17 +22,23 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.Components;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartOutput;
 import org.json.JSONException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -262,6 +271,26 @@ public class ApiResponseTests extends IndexScannerTestBase {
     public void testGenericTypeVariableResponses() throws IOException, JSONException {
         test("responses.generic-type-variables.json",
                 Apple.class, BaseResource.class, TestResource.class);
+    }
+
+    @Test
+    @Ignore
+    public void testKeycloakIssue() throws IOException, JSONException {
+        test("",
+                AccountResource.class,
+                PasswordRequest.class,
+                UsersResource.class,
+                org.keycloak.representations.idm.UserRepresentation.class,
+                org.keycloak.representations.idm.CredentialRepresentation.class,
+                org.keycloak.representations.idm.FederatedIdentityRepresentation.class,
+                org.keycloak.representations.idm.UserConsentRepresentation.class,
+                org.keycloak.representations.idm.SocialLinkRepresentation.class,
+                org.keycloak.representations.idm.RoleRepresentation.class,
+                org.keycloak.common.util.MultivaluedHashMap.class,
+                Collection.class,
+                List.class,
+                Map.class,
+                Set.class);
     }
 
     /***************** Test models and resources below. ***********************/
@@ -654,6 +683,174 @@ public class ApiResponseTests extends IndexScannerTestBase {
         @Path("save")
         public Apple update(Apple filter) {
             return null;
+        }
+    }
+
+    @Tag(name = "Account Management", description = "An API to manage the logged in Account Account.")
+    @Path("/account")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    static class AccountResource {
+
+        @GET
+        @Operation(summary = "Get account", description = "Get the logged in account.")
+        @APIResponses({
+                @APIResponse(responseCode = "200", description = "The logged in account profile"),
+                @APIResponse(responseCode = "500", description = "The logged in account profile is either empty or invalid or an internal error occurred")
+        })
+        public org.keycloak.representations.idm.UserRepresentation getAccount() {
+            return null;
+        }
+
+        @POST
+        @Operation(summary = "Update account", description = "Update the logged in account.")
+        public org.keycloak.representations.idm.UserRepresentation updateAccount(
+                @RequestBody(description = "The updated user account") org.keycloak.representations.idm.UserRepresentation user) {
+            return null;
+        }
+
+        @POST
+        @Path("/credentials/password")
+        @Operation(summary = "Update password", description = "Update the password for logged in account.")
+        public void updatePassword(@RequestBody(description = "The password change request") PasswordRequest request) {
+        }
+    }
+
+    static class PasswordRequest {
+        String currentPassword;
+        String newPassword;
+        String confirmation;
+
+        public PasswordRequest() {
+        }
+
+        public String getCurrentPassword() {
+            return currentPassword;
+        }
+
+        public void setCurrentPassword(String currentPassword) {
+            this.currentPassword = currentPassword;
+        }
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
+        }
+
+        public String getConfirmation() {
+            return confirmation;
+        }
+
+        public void setConfirmation(String confirmation) {
+            this.confirmation = confirmation;
+        }
+    }
+
+    @Tag(name = "Users Management", description = "An API to manage users.")
+    @Path("/users")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    static class UsersResource {
+        @GET
+        @Operation(summary = "Get users", description = "Get all users.")
+        @APIResponses({
+                @APIResponse(responseCode = "200", description = "The list of Users"),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public Collection<org.keycloak.representations.idm.UserRepresentation> getUsers() {
+            return null;
+        }
+
+        @GET
+        @Path("{id}")
+        @Operation(summary = "Get user", description = "Get the user.")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @APIResponses({
+                @APIResponse(responseCode = "200", description = "The Account"),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public org.keycloak.representations.idm.UserRepresentation getUser(
+                @Parameter(description = "The id of the user") @PathParam("id") String id) {
+            return null;
+        }
+
+        @POST
+        @Operation(summary = "Create user", description = "Create user.")
+        @APIResponses({
+                @APIResponse(responseCode = "201", description = "Creation succeeded"),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public Response createUser(
+                @RequestBody(description = "The user") org.keycloak.representations.idm.UserRepresentation user) {
+            return null;
+        }
+
+        @PUT
+        @Path("{id}")
+        @Operation(summary = "Update user", description = "Update user by id.")
+        @APIResponses({
+                @APIResponse(responseCode = "200", description = "Update succeeded"),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public org.keycloak.representations.idm.UserRepresentation updateUser(
+                @Parameter(description = "The id of the user") @PathParam("id") String id,
+                @RequestBody(description = "The user") org.keycloak.representations.idm.UserRepresentation user) {
+            return null;
+        }
+
+        @DELETE
+        @Path("{id}")
+        @Operation(summary = "Delete users", description = "Delete user by id.")
+        @APIResponses({
+                @APIResponse(responseCode = "200", description = "Deletion succeeded"),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public Response deleteUser(@Parameter(description = "The id of the user") @PathParam("id") String id) {
+            return null;
+        }
+
+        @PUT
+        @Path("{id}/reset-password")
+        @Operation(summary = "Reset password", description = "Reset the old password with new one..")
+        public void resetPassword(@Parameter(description = "The id of the user") @PathParam("id") String id,
+                @RequestBody(description = "The credentials. Only newPassword is used here.") PasswordRequest credentials) {
+        }
+
+        @GET
+        @Path("{id}/role-mappings/realm")
+        @Operation(summary = "Get realm roles", description = "Get a list of realm roles of the user.")
+        @APIResponses({
+                @APIResponse(responseCode = "200", description = "The list of Roles."),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public Collection<org.keycloak.representations.idm.RoleRepresentation> getRealmRoleMappings(
+                @Parameter(description = "The id of the user") @PathParam("id") String id) {
+            return null;
+        }
+
+        @POST
+        @Path("{id}/role-mappings/realm")
+        @Operation(summary = "Add realm roles to user", description = "Add a list of realm roles to the user.")
+        @APIResponses({
+                @APIResponse(responseCode = "204", description = "Operation successful."),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public void addRealmRoleMappings(@Parameter(description = "The id of the user") @PathParam("id") String id,
+                Collection<org.keycloak.representations.idm.RoleRepresentation> roles) {
+        }
+
+        @DELETE
+        @Path("{id}/role-mappings/realm")
+        @Operation(summary = "Delete realm roles", description = "Delete a list of realm roles from the user.")
+        @APIResponses({
+                @APIResponse(responseCode = "204", description = "Operation successful."),
+                @APIResponse(responseCode = "500", description = "An internal error occurred")
+        })
+        public void deleteRealmRoleMappings(@Parameter(description = "The id of the user") @PathParam("id") String id,
+                Collection<org.keycloak.representations.idm.RoleRepresentation> roles) {
         }
     }
 }

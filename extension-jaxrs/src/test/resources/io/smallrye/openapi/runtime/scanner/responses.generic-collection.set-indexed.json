@@ -9,7 +9,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SetFruit"
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Fruit"
+                  }
                 }
               }
             }
@@ -32,7 +36,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SetFruit"
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Fruit"
+                  }
                 }
               }
             }
@@ -55,7 +63,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SetFruit"
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Fruit"
+                  }
                 }
               }
             }
@@ -84,13 +96,6 @@
               "$ref": "#/components/schemas/Seed"
             }
           }
-        }
-      },
-      "SetFruit": {
-        "type": "array",
-        "uniqueItems": true,
-        "items": {
-          "$ref": "#/components/schemas/Fruit"
         }
       }
     }
