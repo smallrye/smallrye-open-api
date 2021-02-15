@@ -13,20 +13,19 @@
     "locktt": "locktt"
   },
   "dependencies": {
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-bootstrap": "^1.2.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-bootstrap": "^1.4.3",
     "@rjsf/core": "^2.4.2",
     "@rjsf/bootstrap-4": "^2.4.2",
-    "swagger-client": "^3.10.12"
+    "swagger-client": "^3.12.2"
   },
   "devDependencies": {
-    "lock-treatment-tool": "^0.4.1",
-    "webpack": "^4.44.0",
+    "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
-    "@babel/preset-react": "^7.10.4",
-    "babel-loader": "^8.1.0",
-    "@babel/core": "^7.10.5",
-    "@babel/preset-env": "^7.10.4"
+    "@babel/preset-react": "^7.12.13",
+    "babel-loader": "^8.2.2",
+    "@babel/core": "^7.12.13",
+    "@babel/preset-env": "^7.12.13"
   }
 }
