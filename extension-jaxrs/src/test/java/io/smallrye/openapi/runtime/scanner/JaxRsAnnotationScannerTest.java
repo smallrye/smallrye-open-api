@@ -28,7 +28,7 @@ import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -43,10 +43,10 @@ import test.io.smallrye.openapi.runtime.scanner.resources.EmptySecurityRequireme
 /**
  * @author eric.wittmann@gmail.com
  */
-public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
+class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
-    public void testHiddenOperationNotPresent() throws IOException, JSONException {
+    void testHiddenOperationNotPresent() throws IOException, JSONException {
         Indexer indexer = new Indexer();
 
         // Test samples
@@ -62,7 +62,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testHiddenOperationPathNotPresent() throws IOException, JSONException {
+    void testHiddenOperationPathNotPresent() throws IOException, JSONException {
         Indexer indexer = new Indexer();
 
         // Test samples
@@ -77,7 +77,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testRequestBodyComponentGeneration() throws IOException, JSONException {
+    void testRequestBodyComponentGeneration() throws IOException, JSONException {
         Indexer indexer = new Indexer();
 
         // Test samples
@@ -98,7 +98,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testPackageInfoDefinitionScanning() throws IOException, JSONException {
+    void testPackageInfoDefinitionScanning() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/package-info.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/PackageInfoTestApplication.class");
@@ -115,7 +115,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     /**
      * Example of a simple custom schema registry that has only UUID type schema.
      */
-    public static class MyCustomSchemaRegistry implements CustomSchemaRegistry {
+    static class MyCustomSchemaRegistry implements CustomSchemaRegistry {
 
         @Override
         public void registerCustomSchemas(SchemaRegistry schemaRegistry) {
@@ -133,7 +133,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testTagScanning() throws IOException, JSONException {
+    void testTagScanning() throws IOException, JSONException {
         Index i = indexOf(TagTestResource1.class, TagTestResource2.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
@@ -142,7 +142,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testTagScanning_OrderGivenAnnotations() throws IOException, JSONException {
+    void testTagScanning_OrderGivenAnnotations() throws IOException, JSONException {
         Index i = indexOf(TagTestApp.class, TagTestResource1.class, TagTestResource2.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI result = scanner.scan();
@@ -151,7 +151,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testTagScanning_OrderGivenStaticFile() throws IOException, JSONException {
+    void testTagScanning_OrderGivenStaticFile() throws IOException, JSONException {
         Index i = indexOf(TagTestResource1.class, TagTestResource2.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
         OpenAPI scanResult = scanner.scan();
@@ -176,20 +176,20 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
         @GET
         @Produces(MediaType.TEXT_PLAIN)
-        public String getValue1() {
+        String getValue1() {
             return null;
         }
 
         @POST
         @Consumes(MediaType.TEXT_PLAIN)
         @Tag(name = "tag1", description = "TAG1 from TagTestResource1#postValue")
-        public void postValue(String value) {
+        void postValue(String value) {
         }
 
         @PATCH
         @Consumes(MediaType.TEXT_PLAIN)
         @Tag
-        public void patchValue(String value) {
+        void patchValue(String value) {
         }
     }
 
@@ -203,13 +203,13 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         @GET
         @Produces(MediaType.TEXT_PLAIN)
         @Tag(name = "tag3", description = "TAG3 from TagTestResource2#getValue1", externalDocs = @ExternalDocumentation(description = "Ext doc from TagTestResource2#getValue1"))
-        public String getValue1() {
+        String getValue1() {
             return null;
         }
 
         @POST
         @Consumes(MediaType.TEXT_PLAIN)
-        public void postValue(String value) {
+        void postValue(String value) {
         }
 
         @PATCH
@@ -217,7 +217,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         @Tags({
                 @Tag, @Tag
         })
-        public void patchValue(String value) {
+        void patchValue(String value) {
         }
     }
 
@@ -229,7 +229,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testEmptySecurityRequirements() throws IOException, JSONException {
+    void testEmptySecurityRequirements() throws IOException, JSONException {
         Index index = indexOf(EmptySecurityRequirementsResource.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -242,7 +242,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     /**************************************************************************/
 
     @Test
-    public void testInterfaceWithoutImplentationExcluded() throws IOException, JSONException {
+    void testInterfaceWithoutImplentationExcluded() throws IOException, JSONException {
         Index index = indexOf(MissingImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -280,7 +280,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     /**************************************************************************/
 
     @Test
-    public void testInterfaceWithConcreteImplentation() throws IOException, JSONException {
+    void testInterfaceWithConcreteImplentation() throws IOException, JSONException {
         Index index = indexOf(HasConcreteImplementation.class, ImplementsHasConcreteImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -307,7 +307,7 @@ public class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     /**************************************************************************/
 
     @Test
-    public void testInterfaceWithAbstractImplentation() throws IOException, JSONException {
+    void testInterfaceWithAbstractImplentation() throws IOException, JSONException {
         Index index = indexOf(HasAbstractImplementation.class, ImplementsHasAbstractImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 

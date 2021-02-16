@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -35,6 +36,7 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -348,6 +350,10 @@ public class TypeResolver {
         return current;
     }
 
+    private static Type[] resolveArguments(ParameterizedType type, UnaryOperator<Type> resolver) {
+        return type.arguments().stream().map(resolver).toArray(Type[]::new);
+    }
+
     /**
      * Resolve a parameterized type against this {@link TypeResolver}'s resolution stack.
      * If any of the type's arguments are wild card types, the resolution will fall back
@@ -359,11 +365,7 @@ public class TypeResolver {
      */
     public Type getResolvedType(ParameterizedType type) {
         if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
-            return ParameterizedType.create(type.name(),
-                    type.arguments().stream()
-                            .map(this::getResolvedType)
-                            .toArray(Type[]::new),
-                    null);
+            return ParameterizedType.create(type.name(), resolveArguments(type, this::resolve), null);
         }
 
         return getResolvedType((Type) type);
@@ -433,7 +435,7 @@ public class TypeResolver {
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
-        boolean allOfMatch = false;
+        boolean skipPropertyScan = false;
 
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
@@ -444,8 +446,13 @@ public class TypeResolver {
                 stack.push(resMap);
             }
 
-            if (allOfMatch || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))) {
-                allOfMatch = true;
+            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))
+                    || TypeUtil.knownJavaType(currentClass.name())) {
+                /*
+                 * Do not attempt to introspect fields of Java/JDK types or if the @Schema
+                 * annotation indicates the use of a `ref` for superclass fields.
+                 */
+                skipPropertyScan = true;
                 continue;
             }
 
@@ -462,6 +469,7 @@ public class TypeResolver {
 
             interfaces(index, currentClass)
                     .stream()
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> clazz.methods().stream())
@@ -476,7 +484,7 @@ public class TypeResolver {
     }
 
     private static boolean acceptField(FieldInfo field) {
-        return !Modifier.isStatic(field.flags());
+        return !Modifier.isStatic(field.flags()) && !field.isSynthetic();
     }
 
     /**
@@ -941,4 +949,59 @@ public class TypeResolver {
         return resolutionMap;
     }
 
+    public static ParameterizedType resolveParameterizedAncestor(AnnotationScannerContext context, ParameterizedType pType,
+            Type seekType) {
+        ParameterizedType cursor = pType;
+        boolean seekContinue = true;
+
+        while (context.getAugmentedIndex().containsClass(cursor) && seekContinue) {
+            ClassInfo cursorClass = context.getIndex().getClassByName(cursor.name());
+            Map<String, Type> resolutionMap = buildParamTypeResolutionMap(cursorClass, cursor);
+            List<Type> interfaces = getInterfacesOfType(context, cursorClass, seekType);
+
+            for (Type implementedType : interfaces) {
+                // Follow interface hierarchy toward `seekType` instead of parent class
+                cursor = createParameterizedType(implementedType, resolutionMap);
+
+                if (implementedType.name().equals(seekType.name())) {
+                    // The searched-for type is implemented directly
+                    seekContinue = false;
+                    break;
+                }
+            }
+
+            if (interfaces.isEmpty()) {
+                Type superType = cursorClass.superClassType();
+
+                if (TypeUtil.isA(context, superType, seekType)) {
+                    cursor = createParameterizedType(superType, resolutionMap);
+                } else {
+                    seekContinue = false;
+                }
+            }
+        }
+
+        return cursor;
+    }
+
+    private static List<Type> getInterfacesOfType(AnnotationScannerContext context, ClassInfo clazz, Type seekType) {
+        return clazz.interfaceTypes().stream().filter(t -> TypeUtil.isA(context, t, seekType)).collect(Collectors.toList());
+    }
+
+    private static ParameterizedType createParameterizedType(Type targetType, Map<String, Type> resolutionMap) {
+        Type[] resolvedArgs = resolveArguments(targetType.asParameterizedType(), t -> resolveType(t, resolutionMap));
+        return ParameterizedType.create(targetType.name(), resolvedArgs, null);
+    }
+
+    private static Type resolveType(Type type, Map<String, Type> resolutionMap) {
+        switch (type.kind()) {
+            case PARAMETERIZED_TYPE:
+                return createParameterizedType(type, resolutionMap);
+            case TYPE_VARIABLE:
+                String id = type.asTypeVariable().identifier();
+                return resolutionMap.getOrDefault(id, type);
+            default:
+                return type;
+        }
+    }
 }

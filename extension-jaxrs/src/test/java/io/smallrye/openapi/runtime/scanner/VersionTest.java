@@ -8,7 +8,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
@@ -23,7 +23,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class VersionTest extends JaxRsDataObjectScannerTestBase {
+class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     private static final String VERSION_PROPERTY = "mp.openapi.extensions.smallrye.openapi";
 
@@ -34,7 +34,7 @@ public class VersionTest extends JaxRsDataObjectScannerTestBase {
      * @throws org.json.JSONException
      */
     @Test
-    public void testSettingViaProvidedSchema() throws IOException, JSONException {
+    void testSettingViaProvidedSchema() throws IOException, JSONException {
         Index i = indexOf(GreetingGetResource.class, Greeting.class);
         OpenAPI result = OpenApiProcessor.bootstrap(emptyConfig(), i, loadStaticFile());
 
@@ -43,7 +43,7 @@ public class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testSettingViaConfig() throws IOException, JSONException {
+    void testSettingViaConfig() throws IOException, JSONException {
         System.setProperty(VERSION_PROPERTY, "3.0.0");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -60,7 +60,7 @@ public class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
+    void testSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
         System.setProperty(VERSION_PROPERTY, "3.0.0");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);

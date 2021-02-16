@@ -288,9 +288,16 @@ public class TypeUtil {
         TypeWithFormat typeFormat = getTypeFormat(classType);
 
         if (typeFormat.isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT)) {
-            return !typeFormat.isOpaque() && context.getIndex().getClassByName(classType.name()) != null;
+            return !typeFormat.isOpaque()
+                    && !knownJavaType(classType.name())
+                    && context.getIndex().getClassByName(classType.name()) != null;
         }
+
         return typeFormat.getProperties().size() > 2;
+    }
+
+    public static boolean knownJavaType(DotName name) {
+        return jdkIndex.getClassByName(name) != null;
     }
 
     /**
@@ -351,7 +358,7 @@ public class TypeUtil {
     }
 
     private static Class<?> getClass(DotName name, ClassLoader cl) throws ClassNotFoundException {
-        return Class.forName(name.toString(), true, cl);
+        return Class.forName(name.toString(), false, cl);
     }
 
     private static boolean isAssignableFrom(DotName subject, DotName object, ClassLoader cl) {

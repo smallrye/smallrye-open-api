@@ -1,9 +1,9 @@
 package io.smallrye.openapi.runtime.scanner;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,14 +31,14 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 
-public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
+class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
-    public void testClassRolesAllowedGeneratedScheme() throws IOException {
+    void testClassRolesAllowedGeneratedScheme() throws IOException {
         Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource1.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
@@ -61,7 +61,7 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testPermitAllWithoutGeneratedScheme() throws IOException {
+    void testPermitAllWithoutGeneratedScheme() throws IOException {
         Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource1.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
@@ -72,7 +72,7 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testGeneratedSchemeEmptyRoles() throws IOException {
+    void testGeneratedSchemeEmptyRoles() throws IOException {
         Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource1.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
@@ -85,7 +85,7 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testMethodRolesAllowedGeneratedScheme() throws IOException {
+    void testMethodRolesAllowedGeneratedScheme() throws IOException {
         Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource2.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
@@ -109,7 +109,7 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testNoEligibleScheme() throws IOException {
+    void testNoEligibleScheme() throws IOException {
         Index index = indexOf(RolesNotAllowedApp.class, RolesAllowedResource1.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
@@ -121,7 +121,7 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDeclaredRolesMethodRolesAllowedGeneratedScheme() throws IOException {
+    void testDeclaredRolesMethodRolesAllowedGeneratedScheme() throws IOException {
         Index index = indexOf(RolesAllowedApp.class, RolesDeclaredResource.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
@@ -150,7 +150,7 @@ public class RolesAllowedScopeScanTests extends IndexScannerTestBase {
      *
      */
     @Test
-    public void testSchemesWithoutRoles() throws IOException {
+    void testSchemesWithoutRoles() throws IOException {
         Index index = indexOf(UndeclaredFlowsNoRolesAllowedApp.class, NoRolesResource.class);
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);

@@ -7,8 +7,8 @@ import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.Bar;
@@ -20,13 +20,13 @@ import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContaine
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
+class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
 
     OpenAPIImpl oai;
     SchemaRegistry registry;
 
-    @Before
-    public void setupRegistry() {
+    @BeforeEach
+    void setupRegistry() {
         oai = (OpenAPIImpl) context.getOpenApi();
         registry = SchemaRegistry.newInstance(context);
     }
@@ -63,7 +63,7 @@ public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
      * Unresolvable type parameter.
      */
     @Test
-    public void testUnresolvableWithRefs() throws IOException, JSONException {
+    void testUnresolvableWithRefs() throws IOException, JSONException {
         testAssertion(Bar.class, "refsEnabled.unresolvable.expected.json");
     }
 
@@ -71,59 +71,59 @@ public class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
      * Cyclic reference.
      */
     @Test
-    public void testCycleWithRef() throws IOException, JSONException {
+    void testCycleWithRef() throws IOException, JSONException {
         testAssertion(BuzzLinkedList.class, "refsEnabled.cycle.expected.json");
     }
 
     @Test
-    public void testBareEnumWithRef() throws IOException, JSONException {
+    void testBareEnumWithRef() throws IOException, JSONException {
         testAssertion(EnumContainer.class, "refsEnabled.enum.expected.json");
     }
 
     @Test
-    public void testRequiredEnumWithRef() throws IOException, JSONException {
+    void testRequiredEnumWithRef() throws IOException, JSONException {
         testAssertion(EnumRequiredContainer.class, "refsEnabled.enumRequired.expected.json");
     }
 
     @Test
-    public void testNestedGenericsWithRefs() throws IOException, JSONException {
+    void testNestedGenericsWithRefs() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "nesting", "refsEnabled.generic.nested.expected.json");
     }
 
     @Test
-    public void testComplexNestedGenericsWithRefs() throws IOException, JSONException {
+    void testComplexNestedGenericsWithRefs() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "complexNesting", "refsEnabled.generic.complexNesting.expected.json");
     }
 
     @Test
-    public void testComplexInheritanceGenericsWithRefs() throws IOException, JSONException {
+    void testComplexInheritanceGenericsWithRefs() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "complexInheritance",
                 "refsEnabled.generic.complexInheritance.expected.json");
     }
 
     @Test
-    public void testGenericsWithBoundsWithRef() throws IOException, JSONException {
+    void testGenericsWithBoundsWithRef() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "genericWithBounds", "refsEnabled.generic.withBounds.expected.json");
     }
 
     @Test
-    public void genericFieldWithRefTest() throws IOException, JSONException {
+    void genericFieldWithRefTest() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "genericContainer", "refsEnabled.generic.fields.expected.json");
     }
 
     @Test
-    public void fieldNameOverrideWithRefTest() throws IOException, JSONException {
+    void fieldNameOverrideWithRefTest() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "overriddenNames",
                 "refsEnabled.generic.fields.overriddenNames.expected.json");
     }
 
     @Test
-    public void durationContainer() throws IOException, JSONException {
+    void durationContainer() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "durationContainer", "refsEnabled.duration.fields.expected.json");
     }
 
     @Test
-    public void periodContainer() throws IOException, JSONException {
+    void periodContainer() throws IOException, JSONException {
         testAssertion(GenericTypeTestContainer.class, "periodContainer", "refsEnabled.period.fields.expected.json");
     }
 }

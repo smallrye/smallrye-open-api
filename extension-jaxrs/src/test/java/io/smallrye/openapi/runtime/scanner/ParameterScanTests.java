@@ -66,12 +66,12 @@ import org.jboss.resteasy.reactive.RestMatrix;
 import org.jboss.resteasy.reactive.RestPath;
 import org.jboss.resteasy.reactive.RestQuery;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class ParameterScanTests extends IndexScannerTestBase {
+class ParameterScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -82,28 +82,28 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIgnoredMpOpenApiHeaders() throws IOException, JSONException {
+    void testIgnoredMpOpenApiHeaders() throws IOException, JSONException {
         test("params.ignored-mp-openapi-headers.json",
                 IgnoredMpOpenApiHeaderArgsTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testParameterOnMethod() throws IOException, JSONException {
+    void testParameterOnMethod() throws IOException, JSONException {
         test("params.parameter-on-method.json",
                 ParameterOnMethodTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testParameterOnField() throws IOException, JSONException {
+    void testParameterOnField() throws IOException, JSONException {
         test("params.parameter-on-field.json",
                 ResourcePathParamTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testParameterInBeanFromField() throws IOException, JSONException {
+    void testParameterInBeanFromField() throws IOException, JSONException {
         test("params.parameter-in-bean-from-field.json",
                 ParameterInBeanFromFieldTestResource.class,
                 ParameterInBeanFromFieldTestResource.Bean.class,
@@ -111,7 +111,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testParameterInBeanFromSetter() throws IOException, JSONException {
+    void testParameterInBeanFromSetter() throws IOException, JSONException {
         test("params.parameter-in-bean-from-setter.json",
                 ParameterInBeanFromSetterTestResource.class,
                 ParameterInBeanFromSetterTestResource.Bean.class,
@@ -119,21 +119,21 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testPathParamWithFormParams() throws IOException, JSONException {
+    void testPathParamWithFormParams() throws IOException, JSONException {
         test("params.path-param-with-form-params.json",
                 PathParamWithFormParamsTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testMultipleContentTypesWithFormParams() throws IOException, JSONException {
+    void testMultipleContentTypesWithFormParams() throws IOException, JSONException {
         test("params.multiple-content-types-with-form-params.json",
                 MultipleContentTypesWithFormParamsTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testParametersInConstructor() throws IOException, JSONException {
+    void testParametersInConstructor() throws IOException, JSONException {
         test("params.parameters-in-constructor.json",
                 ParametersInConstructorTestResource.class,
                 ParametersInConstructorTestResource.Bean.class,
@@ -141,28 +141,28 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testMatrixParamsOnResourceMethodArgs() throws IOException, JSONException {
+    void testMatrixParamsOnResourceMethodArgs() throws IOException, JSONException {
         test("params.matrix-params-on-resource-method-args.json",
                 MatrixParamsOnResourceMethodArgsTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testMatrixParamsOnResourceMethodCustomName() throws IOException, JSONException {
+    void testMatrixParamsOnResourceMethodCustomName() throws IOException, JSONException {
         test("params.matrix-params-on-resource-method-custom-name.json",
                 MatrixParamsOnResourceMethodCustomNameTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testMatrixParamsOnMethodAndFieldArgs() throws IOException, JSONException {
+    void testMatrixParamsOnMethodAndFieldArgs() throws IOException, JSONException {
         test("params.matrix-params-on-method-and-field-args.json",
                 MatrixParamsOnMethodAndFieldArgsTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testAllTheParams() throws IOException, JSONException {
+    void testAllTheParams() throws IOException, JSONException {
         test("params.all-the-params.json",
                 AllTheParamsTestResource.class,
                 AllTheParamsTestResource.Bean.class,
@@ -174,7 +174,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testMultipartForm() throws IOException, JSONException {
+    void testMultipartForm() throws IOException, JSONException {
         test("params.multipart-form.json",
                 MultipartFormTestResource.class,
                 MultipartFormTestResource.Bean.class,
@@ -183,7 +183,7 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testEnumQueryParam() throws IOException, JSONException {
+    void testEnumQueryParam() throws IOException, JSONException {
         test("params.enum-form-param.json",
                 EnumQueryParamTestResource.class,
                 EnumQueryParamTestResource.TestEnum.class,
@@ -191,27 +191,27 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testUUIDQueryParam() throws IOException, JSONException {
+    void testUUIDQueryParam() throws IOException, JSONException {
         test("params.uuid-params-responses.json",
                 UUIDQueryParamTestResource.class,
                 UUIDQueryParamTestResource.WrappedUUID.class);
     }
 
     @Test
-    public void testRestEasyFieldsAndSetters() throws IOException, JSONException {
+    void testRestEasyFieldsAndSetters() throws IOException, JSONException {
         test("params.resteasy-fields-and-setters.json",
                 RestEasyFieldsAndSettersTestResource.class);
     }
 
     @Test
-    public void testCharSequenceArrayParam() throws IOException, JSONException {
+    void testCharSequenceArrayParam() throws IOException, JSONException {
         test("params.char-sequence-arrays.json",
                 CharSequenceArrayParamTestResource.class,
                 CharSequenceArrayParamTestResource.EchoResult.class);
     }
 
     @Test
-    public void testOptionalParam() throws IOException, JSONException {
+    void testOptionalParam() throws IOException, JSONException {
         test("params.optional-types.json",
                 OptionalParamTestResource.class,
                 OptionalParamTestResource.Bean.class,
@@ -223,36 +223,36 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testPathParamTemplateRegex() throws IOException, JSONException {
+    void testPathParamTemplateRegex() throws IOException, JSONException {
         test("params.path-param-templates.json",
                 PathParamTemplateRegexTestResource.class);
     }
 
     @Test
-    public void testPathSegmentMatrix() throws IOException, JSONException {
+    void testPathSegmentMatrix() throws IOException, JSONException {
         test("params.path-segment-param.json",
                 PathSegmentMatrixTestResource.class);
     }
 
     @Test
-    public void testParamNameOverride() throws IOException, JSONException {
+    void testParamNameOverride() throws IOException, JSONException {
         test("params.param-name-override.json",
                 ParamNameOverrideTestResource.class);
     }
 
     @Test
-    public void testCommonTargetMethodParameter() throws IOException, JSONException {
+    void testCommonTargetMethodParameter() throws IOException, JSONException {
         test("params.common-annotation-target-method.json", CommonTargetMethodParameterResource.class);
     }
 
     @Test
-    public void testRestEasyReactivePathParamOmitted() throws IOException, JSONException {
+    void testRestEasyReactivePathParamOmitted() throws IOException, JSONException {
         test("params.resteasy-reactive-missing-restpath.json", RestEasyReactivePathParamOmittedTestResource.class,
                 Widget.class);
     }
 
     @Test
-    public void testSerializedIndexParameterAnnotations() throws IOException, JSONException {
+    void testSerializedIndexParameterAnnotations() throws IOException, JSONException {
         Index i1 = indexOf(GreetResource.class, GreetResource.GreetingMessage.class);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         IndexWriter writer = new IndexWriter(out);
@@ -266,17 +266,17 @@ public class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testParameterRefOnly() throws IOException, JSONException {
+    void testParameterRefOnly() throws IOException, JSONException {
         test("params.parameter-ref-property.json", ParameterRefTestApplication.class, ParameterRefTestResource.class);
     }
 
     @Test
-    public void testDefaultEnumValue() throws IOException, JSONException {
+    void testDefaultEnumValue() throws IOException, JSONException {
         test("params.local-schema-attributes.json", DefaultEnumTestResource.class, DefaultEnumTestResource.MyEnum.class);
     }
 
     @Test
-    public void testGenericTypeVariableResource() throws IOException, JSONException {
+    void testGenericTypeVariableResource() throws IOException, JSONException {
         test("params.generic-type-variables.json", BaseGenericResource.class, BaseGenericResource.GenericBean.class,
                 IntegerStringUUIDResource.class);
     }

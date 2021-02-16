@@ -20,16 +20,16 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  * 
  */
-public class ExtensionParsingTests extends IndexScannerTestBase {
+class ExtensionParsingTests extends IndexScannerTestBase {
 
     @Test
-    public void testAllExpectedParseTypes() throws IOException, JSONException {
+    void testAllExpectedParseTypes() throws IOException, JSONException {
         assertJsonEquals("extensions.parsing.expected.json",
                 ExtensionParsingTestResource.class);
     }
@@ -61,7 +61,7 @@ public class ExtensionParsingTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testSiblingExtensionAnnotations() throws IOException, JSONException {
+    void testSiblingExtensionAnnotations() throws IOException, JSONException {
         assertJsonEquals("extensions.scan-siblings.expected.json",
                 ExtensionPlacementTestResource.class,
                 ExtensionPlacementTestResource.Model.class);

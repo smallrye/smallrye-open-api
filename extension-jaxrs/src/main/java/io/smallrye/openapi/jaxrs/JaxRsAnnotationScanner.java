@@ -265,7 +265,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                     .map(PathItem.HttpMethod::valueOf)
                     .forEach(httpMethod -> {
                         resourceCount.incrementAndGet();
-                        processResourceMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
+                        processResourceMethod(context, resourceClass, methodInfo, httpMethod, tagRefs,
                                 locatorPathParameters, exceptionAnnotationMap);
                     });
 
@@ -383,7 +383,6 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             final ClassInfo resourceClass,
             final MethodInfo method,
             final PathItem.HttpMethod methodType,
-            OpenAPI openApi,
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters,
             Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
@@ -406,7 +405,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         final Operation operation = maybeOperation.get();
 
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-        processOperationTags(context, method, openApi, resourceTags, operation);
+        processOperationTags(context, method, context.getOpenApi(), resourceTags, operation);
 
         // Process @Parameter annotations.
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
@@ -456,10 +455,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Get or create a PathItem to hold the operation
-        PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
+        PathItem existingPath = ModelUtil.paths(context.getOpenApi()).getPathItem(path);
 
         if (existingPath == null) {
-            ModelUtil.paths(openApi).addPathItem(path, pathItem);
+            ModelUtil.paths(context.getOpenApi()).addPathItem(path, pathItem);
         } else {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
