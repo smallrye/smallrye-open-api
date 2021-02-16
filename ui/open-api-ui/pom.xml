@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-ui-parent</artifactId>
-        <version>2.1.2-SNAPSHOT</version>
+        <version>2.1.2</version>
     </parent>
 
     <artifactId>smallrye-open-api-ui</artifactId>
@@ -105,7 +105,7 @@
                                                 **/swagger-ui-standalone-preset.js.map,
                                                 **/oauth2-redirect.html</includes>
                                     <fileMappers>
-                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
                                     </fileMappers>
                                 </artifactItem>
                                 <artifactItem>
@@ -117,7 +117,7 @@
                                     <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}/</outputDirectory>
                                     <includes>**/*.css</includes>
                                     <fileMappers>
-                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
                                     </fileMappers>
                                 </artifactItem>
                             </artifactItems>
