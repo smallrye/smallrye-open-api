@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import java.io.IOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -9,14 +11,14 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.KitchenSink;
 
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
+class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
 
     private static final Logger LOG = Logger.getLogger(KitchenSinkTest.class);
 
@@ -29,13 +31,14 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
      * It is to validate the scanner doesn't break rather than strictly assessing correctness.
      */
     @Test
-    public void testKitchenSink() throws IOException {
+    void testKitchenSink() throws IOException {
         DotName kitchenSink = DotName.createSimple(KitchenSink.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(kitchenSink, Type.Kind.CLASS));
 
         LOG.debugv("Scanning top-level entity: {0}", KitchenSink.class.getName());
-        printToConsole(kitchenSink.local(), scanner.process());
+        Schema resultSchema = assertDoesNotThrow(() -> scanner.process());
+        printToConsole(kitchenSink.local(), resultSchema);
     }
 
     /**
@@ -44,17 +47,18 @@ public class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
      * @see org.jboss.jandex.ParameterizedType
      */
     @Test
-    public void testTopLevelParameterisedType() throws IOException {
+    void testTopLevelParameterisedType() throws IOException {
         // Look up the kitchen sink and get the field named "simpleParameterizedType"
         Type pType = getFieldFromKlazz(KitchenSink.class.getName(), "simpleParameterizedType").type();
 
         LOG.debugv("Scanning top-level entity: {0}", pType);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-        printToConsole("KustomPair", scanner.process());
+        Schema resultSchema = assertDoesNotThrow(() -> scanner.process());
+        printToConsole("KustomPair", resultSchema);
     }
 
     @Test
-    public void testKitchenSinkWithRefs() throws IOException, JSONException {
+    void testKitchenSinkWithRefs() throws IOException, JSONException {
         DotName name = componentize(KitchenSink.class.getName());
         Type type = ClassType.create(name, Type.Kind.CLASS);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);

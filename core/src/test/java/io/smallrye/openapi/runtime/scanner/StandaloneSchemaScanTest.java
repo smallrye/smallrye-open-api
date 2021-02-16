@@ -2,8 +2,13 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -326,5 +331,80 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
         protected String city;
         protected String state;
         protected String postalCode;
+    }
+
+    /****************************************************************/
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/688
+     */
+    @Test
+    public void testNestedCollectionSchemas() throws IOException, JSONException {
+        // Place the JDK classes in the index to simulate Quarkus
+        Index index = indexOf(CollectionBean.class,
+                EntryBean.class,
+                MultivaluedCollection.class,
+                MultivaluedMap.class,
+                // CustomMap.class excluded intentionally
+                Collection.class,
+                ArrayList.class,
+                HashMap.class,
+                List.class,
+                Map.class,
+                Set.class,
+                UUID.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.nested-parameterized-collection-types.json", result);
+    }
+
+    @Schema
+    static class CollectionBean {
+        @Schema(description = "In-line schema, `additionalProperties` array `items` reference `EntryBean`")
+        CustomMap<String, List<EntryBean>> a_customMapOfLists;
+
+        @Schema(description = "Reference to `MultivaluedMapStringEntryBean")
+        MultivaluedMap<String, EntryBean> b_multivaluedEntryMap;
+
+        @Schema(description = "In-line schema, `additionalProperties` array `items` reference `EntryBean`")
+        Map<String, List<EntryBean>> c_mapStringListEntryBean;
+
+        @Schema(description = "In-line schema (All JDK types, no references)")
+        Collection<Map<String, List<String>>> d_collectionOfMapsOfListsOfStrings;
+
+        @Schema(description = "In-line schema")
+        Map<UUID, Map<String, Set<UUID>>> e_mapOfMapsOfSetsOfUUIDs;
+
+        @Schema(description = "Reference to `MultivaluedCollectionString`")
+        MultivaluedCollection<String> f_listOfStringLists;
+    }
+
+    static class EntryBean {
+        String name;
+        String value;
+    }
+
+    /*
+     * Not present in index - will cause call to Class.forName(...) and is not
+     * eligible for a entry in #/components/schemas
+     */
+    static class CustomMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        static {
+            // We shouldn't run any code while scanning
+            if (true) {
+                throw new RuntimeException("CustomMap was initialized!?");
+            }
+        }
+    }
+
+    static class MultivaluedCollection<T> extends ArrayList<List<T>> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    static class MultivaluedMap<K, V> extends HashMap<K, List<V>> {
+        private static final long serialVersionUID = 1L;
     }
 }

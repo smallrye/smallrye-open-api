@@ -1,10 +1,10 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -25,7 +25,7 @@ import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
@@ -34,10 +34,10 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class TypeResolverTests extends IndexScannerTestBase {
+class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
-    public void testAnnotatedMethodOverridesParentSchema() {
+    void testAnnotatedMethodOverridesParentSchema() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Feline.class,
                 Cat.class));
@@ -57,7 +57,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testAnnotatedFieldsOverridesInterfaceSchema() {
+    void testAnnotatedFieldsOverridesInterfaceSchema() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Feline.class,
                 Cat.class));
@@ -74,7 +74,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testAnnotatedInterfaceMethodOverridesImplMethod() {
+    void testAnnotatedInterfaceMethodOverridesImplMethod() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Canine.class,
                 Dog.class));
@@ -95,7 +95,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testAnnotatedInterfaceMethodOverridesStaticField() {
+    void testAnnotatedInterfaceMethodOverridesStaticField() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
                 Reptile.class,
                 Lizard.class));
@@ -118,7 +118,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testBareInterface() {
+    void testBareInterface() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(MySchema.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(MySchema.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -149,7 +149,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testJacksonPropertyOrderDefault() {
+    void testJacksonPropertyOrderDefault() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderDefault.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderDefault.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -162,7 +162,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testJacksonPropertyOrderCustomName() {
+    void testJacksonPropertyOrderCustomName() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderCustomName.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderCustomName.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -176,7 +176,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testJaxbCustomPropertyOrder() {
+    void testJaxbCustomPropertyOrder() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JaxbCustomPropertyOrder.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(JaxbCustomPropertyOrder.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -191,7 +191,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testNonJavaBeansPropertyAccessor() {
+    void testNonJavaBeansPropertyAccessor() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanAccessorProperty.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanAccessorProperty.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -208,7 +208,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testNonJavaBeansPropertyMutator() {
+    void testNonJavaBeansPropertyMutator() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanMutatorProperty.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanMutatorProperty.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -225,7 +225,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testOneSidedPropertiesHidden() {
+    void testOneSidedPropertiesHidden() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(OneSidedProperties.class, OneSidedParent.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(OneSidedProperties.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -256,7 +256,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testXmlAccessTransientField() {
+    void testXmlAccessTransientField() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientField.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientField.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -273,7 +273,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testXmlAccessTransientClass() {
+    void testXmlAccessTransientClass() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientClass.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientClass.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -296,7 +296,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testXmlAccessPublicMember() {
+    void testXmlAccessPublicMember() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePublicMember.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePublicMember.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -319,7 +319,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testXmlAccessTypeFieldOnly() {
+    void testXmlAccessTypeFieldOnly() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypeFieldOnly.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypeFieldOnly.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
@@ -338,7 +338,7 @@ public class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testXmlAccessTypePropertyOnly() {
+    void testXmlAccessTypePropertyOnly() {
         AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePropertyOnly.class));
         ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePropertyOnly.class.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);

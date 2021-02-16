@@ -22,9 +22,9 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SubresourceScanTests extends IndexScannerTestBase {
+class SubresourceScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -35,7 +35,7 @@ public class SubresourceScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testResteasyMultipartInput() throws IOException, JSONException {
+    void testResteasyMultipartInput() throws IOException, JSONException {
         test("resource.subresources-with-params.json",
                 MainTestResource.class, Sub1TestResource.class, Sub2TestResource.class, RecursiveLocatorResource.class);
     }

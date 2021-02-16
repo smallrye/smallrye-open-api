@@ -8,7 +8,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreSchemaOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer;
@@ -20,11 +20,11 @@ import test.io.smallrye.openapi.runtime.scanner.entities.TransientFieldExample;
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
+class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Always ignore nominated properties when given class is used.
     @Test
-    public void testIgnore_jsonIgnorePropertiesOnClass() throws IOException, JSONException {
+    void testIgnore_jsonIgnorePropertiesOnClass() throws IOException, JSONException {
         String name = IgnoreTestContainer.class.getName();
         Type type = getFieldFromKlazz(name, "jipOnClassTest").type();
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
@@ -37,7 +37,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Ignore nominated properties of the field in this instance only.
     @Test
-    public void testIgnore_jsonIgnorePropertiesOnField() throws IOException, JSONException {
+    void testIgnore_jsonIgnorePropertiesOnField() throws IOException, JSONException {
         String name = IgnoreTestContainer.class.getName();
         FieldInfo fieldInfo = getFieldFromKlazz(name, "jipOnFieldTest");
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, fieldInfo, fieldInfo.type());
@@ -50,7 +50,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Entirely ignore a single field once.
     @Test
-    public void testIgnore_jsonIgnoreField() throws IOException, JSONException {
+    void testIgnore_jsonIgnoreField() throws IOException, JSONException {
         DotName name = DotName.createSimple(JsonIgnoreOnFieldExample.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
@@ -63,7 +63,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Entirely ignore a single field once.
     @Test
-    public void testIgnore_jsonIgnoreType() throws IOException, JSONException {
+    void testIgnore_jsonIgnoreType() throws IOException, JSONException {
         DotName name = DotName.createSimple(JsonIgnoreTypeExample.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
@@ -76,7 +76,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Entirely ignore a single field once using JSON-B.
     @Test
-    public void testIgnore_jsonbTransientField() throws IOException, JSONException {
+    void testIgnore_jsonbTransientField() throws IOException, JSONException {
         DotName name = DotName.createSimple(JsonbTransientOnFieldExample.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
@@ -89,7 +89,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Entirely ignore a single field once using hidden attribute of Schema.
     @Test
-    public void testIgnore_schemaHiddenField() throws IOException, JSONException {
+    void testIgnore_schemaHiddenField() throws IOException, JSONException {
         DotName name = DotName.createSimple(IgnoreSchemaOnFieldExample.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
@@ -101,7 +101,7 @@ public class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testIgnore_transientField() throws IOException, JSONException {
+    void testIgnore_transientField() throws IOException, JSONException {
         DotName name = DotName.createSimple(TransientFieldExample.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));

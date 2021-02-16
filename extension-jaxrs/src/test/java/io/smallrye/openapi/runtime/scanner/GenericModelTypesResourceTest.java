@@ -35,11 +35,11 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
-public class GenericModelTypesResourceTest extends IndexScannerTestBase {
+class GenericModelTypesResourceTest extends IndexScannerTestBase {
 
     /*
      * Test case derived from original example in Smallrye OpenAPI issue #25.
@@ -48,7 +48,7 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
      *
      */
     @Test
-    public void testGenericsApplication() throws IOException, JSONException {
+    void testGenericsApplication() throws IOException, JSONException {
         Index i = indexOf(BaseModel.class,
                 BaseResource.class,
                 KingCrimson.class,
@@ -70,7 +70,7 @@ public class GenericModelTypesResourceTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testGenericsApplicationWithoutArrayRefs() throws IOException, JSONException {
+    void testGenericsApplicationWithoutArrayRefs() throws IOException, JSONException {
         Index i = indexOf(BaseModel.class,
                 BaseResource.class,
                 KingCrimson.class,

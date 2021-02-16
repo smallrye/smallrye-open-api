@@ -9,7 +9,9 @@ import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Bar;
 import test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList;
@@ -20,13 +22,13 @@ import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContaine
 /**
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
-public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
+class ExpectationTests extends JaxRsDataObjectScannerTestBase {
 
     /**
      * Unresolvable type parameter.
      */
     @Test
-    public void testUnresolvable() throws IOException, JSONException {
+    void testUnresolvable() throws IOException, JSONException {
         DotName bar = createSimple(Bar.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(bar, Type.Kind.CLASS));
 
@@ -40,7 +42,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
      * Unresolvable type parameter.
      */
     @Test
-    public void testCycle() throws IOException, JSONException {
+    void testCycle() throws IOException, JSONException {
         DotName buzz = createSimple(BuzzLinkedList.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(buzz, Type.Kind.CLASS));
 
@@ -51,7 +53,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testBareEnum() throws IOException, JSONException {
+    void testBareEnum() throws IOException, JSONException {
         DotName baz = createSimple(EnumContainer.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(baz, Type.Kind.CLASS));
 
@@ -62,7 +64,7 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    public void testRequiredEnum() throws IOException, JSONException {
+    void testRequiredEnum() throws IOException, JSONException {
         DotName baz = createSimple(EnumRequiredContainer.class.getName());
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, ClassType.create(baz, Type.Kind.CLASS));
 
@@ -72,75 +74,21 @@ public class ExpectationTests extends JaxRsDataObjectScannerTestBase {
         assertJsonEquals(baz.local(), "enumRequired.expected.json", result);
     }
 
-    @Test
-    public void testNestedGenerics() throws IOException, JSONException {
+    @ParameterizedTest
+    @CsvSource({
+            "nesting, generic.nested.expected.json",
+            "complexNesting, generic.complexNesting.expected.json",
+            "complexInheritance, generic.complexInheritance.expected.json",
+            "genericWithBounds, generic.withBounds.expected.json",
+            "genericContainer, generic.fields.expected.json",
+            "overriddenNames, generic.fields.overriddenNames.expected.json"
+    })
+    void testGenericTypeFields(String fieldName, String expectedResource) throws IOException, JSONException {
         String name = GenericTypeTestContainer.class.getName();
-        Type pType = getFieldFromKlazz(name, "nesting").type();
+        Type pType = getFieldFromKlazz(name, fieldName).type();
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-
         Schema result = scanner.process();
-
         printToConsole(name, result);
-        assertJsonEquals(name, "generic.nested.expected.json", result);
-    }
-
-    @Test
-    public void testComplexNestedGenerics() throws IOException, JSONException {
-        String name = GenericTypeTestContainer.class.getName();
-        Type pType = getFieldFromKlazz(name, "complexNesting").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-
-        Schema result = scanner.process();
-
-        printToConsole(name, result);
-        assertJsonEquals(name, "generic.complexNesting.expected.json", result);
-    }
-
-    @Test
-    public void testComplexInheritanceGenerics() throws IOException, JSONException {
-        String name = GenericTypeTestContainer.class.getName();
-        Type pType = getFieldFromKlazz(name, "complexInheritance").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-
-        Schema result = scanner.process();
-
-        printToConsole(name, result);
-        assertJsonEquals(name, "generic.complexInheritance.expected.json", result);
-    }
-
-    @Test
-    public void testGenericsWithBounds() throws IOException, JSONException {
-        String name = GenericTypeTestContainer.class.getName();
-        Type pType = getFieldFromKlazz(name, "genericWithBounds").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-
-        Schema result = scanner.process();
-
-        printToConsole(name, result);
-        assertJsonEquals(name, "generic.withBounds.expected.json", result);
-    }
-
-    @Test
-    public void genericFieldTest() throws IOException, JSONException {
-        String name = GenericTypeTestContainer.class.getName();
-        Type pType = getFieldFromKlazz(name, "genericContainer").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-
-        Schema result = scanner.process();
-
-        printToConsole(name, result);
-        assertJsonEquals(name, "generic.fields.expected.json", result);
-    }
-
-    @Test
-    public void fieldNameOverrideTest() throws IOException, JSONException {
-        String name = GenericTypeTestContainer.class.getName();
-        Type pType = getFieldFromKlazz(name, "overriddenNames").type();
-        OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, pType);
-
-        Schema result = scanner.process();
-
-        printToConsole(name, result);
-        assertJsonEquals(name, "generic.fields.overriddenNames.expected.json", result);
+        assertJsonEquals(name, expectedResource, result);
     }
 }

@@ -21,11 +21,11 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class InterfaceInheritanceTest extends IndexScannerTestBase {
+class InterfaceInheritanceTest extends IndexScannerTestBase {
 
     /*
      * Test case derived from original example in Smallrye OpenAPI issue #423.
@@ -34,7 +34,7 @@ public class InterfaceInheritanceTest extends IndexScannerTestBase {
      *
      */
     @Test
-    public void testInterfaceInheritance() throws IOException, JSONException {
+    void testInterfaceInheritance() throws IOException, JSONException {
         Index i = indexOf(ImmutableEntity.class, MutableEntity.class, Note.class, FruitResource.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
         OpenAPI result = scanner.scan();

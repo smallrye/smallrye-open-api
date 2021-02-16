@@ -16,9 +16,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ExceptionMapperScanTests extends IndexScannerTestBase {
+class ExceptionMapperScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -29,13 +29,13 @@ public class ExceptionMapperScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testExceptionMapper() throws IOException, JSONException {
+    void testExceptionMapper() throws IOException, JSONException {
         test("responses.exception-mapper-generation.json", TestResource.class, ExceptionHandler1.class,
                 ExceptionHandler2.class, ResteasyReactiveExceptionMapper.class);
     }
 
     @Test
-    public void testMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
+    void testMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
         test("responses.exception-mapper-overridden-by-method-annotation-generation.json", TestResource2.class,
                 ExceptionHandler1.class, ExceptionHandler2.class, ResteasyReactiveExceptionMapper.class);
     }

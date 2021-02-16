@@ -1,6 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
@@ -24,12 +24,12 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author Michael Edgar {@literal <michael@xlate.io>}
  *
  */
-public class SchemaRegistryTests extends IndexScannerTestBase {
+class SchemaRegistryTests extends IndexScannerTestBase {
 
     SchemaRegistry registry;
 
     @Test
-    public void testParameterizedNameCollisionsUseSequence() throws IOException, JSONException {
+    void testParameterizedNameCollisionsUseSequence() throws IOException, JSONException {
         Index index = indexOf(Container.class, Nestable.class);
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
@@ -52,7 +52,7 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testWildcardLowerBoundName() throws IOException, JSONException {
+    void testWildcardLowerBoundName() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Container.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
@@ -71,7 +71,7 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testWildcardUpperBoundName() throws IOException, JSONException {
+    void testWildcardUpperBoundName() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Container.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
@@ -90,7 +90,7 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testWildcardWithGivenName() throws IOException, JSONException {
+    void testWildcardWithGivenName() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Container.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");
@@ -110,7 +110,7 @@ public class SchemaRegistryTests extends IndexScannerTestBase {
     }
 
     @Test
-    public void testNestedGenericWildcard() throws IOException, JSONException {
+    void testNestedGenericWildcard() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Container.class");
         index(indexer, "io/smallrye/openapi/runtime/scanner/SchemaRegistryTests$Nestable.class");

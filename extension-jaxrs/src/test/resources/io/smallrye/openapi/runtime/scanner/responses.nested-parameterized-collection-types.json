@@ -1,0 +1,74 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/map": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MultivaluedMapStringMapStringCustomRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultivaluedMapStringMapStringCustomResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MultivaluedMapStringMapStringCustomRequest": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CustomRequest"
+            }
+          }
+        }
+      },
+      "CustomRequest": {
+        "type": "object",
+        "properties": {
+          "requestName": {
+            "type": "string"
+          }
+        }
+      },
+      "MultivaluedMapStringMapStringCustomResponse": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CustomResponse"
+            }
+          }
+        }
+      },
+      "CustomResponse": {
+        "type": "object",
+        "properties": {
+          "responseName": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

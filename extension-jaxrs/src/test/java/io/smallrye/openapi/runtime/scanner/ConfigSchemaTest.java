@@ -9,7 +9,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
@@ -22,7 +22,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
  * 
  * @author Scott Curtis (@literal <Scott.Curtis@ibm.com>)
  */
-public class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
+class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
 
     private static final String VALID_SCHEMA_PROPERTY_KEY = "mp.openapi.schema.java.lang.String";
     private static final String INVALID_SCHEMA_PROPERTY_KEY = "mp.openapi.schema.java.lang.NonExistentClass";
@@ -46,7 +46,7 @@ public class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
             + "  \"description\": \"Invali\"{d\"}";
 
     @Test
-    public void testValidSchemaDefinitionViaConfig() throws IOException, JSONException {
+    void testValidSchemaDefinitionViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, VALID_PROPERTY_VALUE);
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -64,7 +64,7 @@ public class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
 
     // If the class in the key is non existent, schema is only rendered in components block
     @Test
-    public void testInvalidSchemaKeyDefinitionViaConfig() throws IOException, JSONException {
+    void testInvalidSchemaKeyDefinitionViaConfig() throws IOException, JSONException {
         System.setProperty(INVALID_SCHEMA_PROPERTY_KEY, VALID_PROPERTY_VALUE);
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -82,7 +82,7 @@ public class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
 
     // Technically correct behaviour as malformed-property is not rendered in schema, but no feedback
     @Test
-    public void testValidSchemaKeyWithInvalidSchemaPropertyValueViaConfig() throws IOException, JSONException {
+    void testValidSchemaKeyWithInvalidSchemaPropertyValueViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, INVALID_PROPERTY_VALUE_SCHEMA);
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
@@ -100,7 +100,7 @@ public class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
 
     // Technically correct behaviour as malformed schema is not rendered, but no feedback
     @Test
-    public void testValidSchemaKeyWithInvalidSchemaJSONValueViaConfig() throws IOException, JSONException {
+    void testValidSchemaKeyWithInvalidSchemaJSONValueViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, INVALID_PROPERTY_VALUE_JSON);
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);

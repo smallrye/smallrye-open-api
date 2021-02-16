@@ -1,9 +1,9 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -35,8 +35,8 @@ import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
@@ -44,7 +44,7 @@ import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-public class BeanValidationScannerTest extends IndexScannerTestBase {
+class BeanValidationScannerTest extends IndexScannerTestBase {
 
     BeanValidationScanner testTarget;
     Index index;
@@ -52,8 +52,8 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     Schema schema;
     ClassInfo targetClass;
 
-    @Before
-    public void beforeEach() {
+    @BeforeEach
+    void beforeEach() {
         testTarget = BeanValidationScanner.INSTANCE;
         index = indexOf(BVTestContainer.class);
         methodsInvoked.clear();
@@ -78,19 +78,19 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testNullSchemaIgnored() {
+    void testNullSchemaIgnored() {
         BeanValidationScanner.applyConstraints(targetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);
 
-        assertArrayEquals("Unexpected methods were invoked",
-                new String[] { "getType" },
-                methodsInvoked.toArray());
+        assertArrayEquals(new String[] { "getType" },
+                methodsInvoked.toArray(),
+                "Unexpected methods were invoked");
     }
 
     @Test
-    public void testRefSchemaIgnored() {
+    void testRefSchemaIgnored() {
         schema.setType(SchemaType.OBJECT);
         schema.setRef("#/components/schemas/Anything");
         BeanValidationScanner.applyConstraints(targetClass,
@@ -98,15 +98,15 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
                 null,
                 null);
 
-        assertArrayEquals("Unexpected methods were invoked",
-                new String[] { "getType", "getRef" },
-                methodsInvoked.toArray());
+        assertArrayEquals(new String[] { "getType", "getRef" },
+                methodsInvoked.toArray(),
+                "Unexpected methods were invoked");
     }
 
     /**********************************************************************/
 
     @Test
-    public void testArrayListNotNullAndNotEmptyAndMaxItems() {
+    void testArrayListNotNullAndNotEmptyAndMaxItems() {
         FieldInfo targetField = targetClass.field("arrayListNotNullAndNotEmptyAndMaxItems");
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
@@ -124,7 +124,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testArrayListNullableAndMinItemsAndMaxItems() {
+    void testArrayListNullableAndMinItemsAndMaxItems() {
         FieldInfo targetField = targetClass.field("arrayListNullableAndMinItemsAndMaxItems");
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
@@ -144,7 +144,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    public void testMapObjectNotNullAndNotEmptyAndMaxProperties() {
+    void testMapObjectNotNullAndNotEmptyAndMaxProperties() {
         schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
 
         FieldInfo targetField = targetClass.field("mapObjectNotNullAndNotEmptyAndMaxProperties");
@@ -164,7 +164,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testMapObjectNullableAndMinPropertiesAndMaxProperties() {
+    void testMapObjectNullableAndMinPropertiesAndMaxProperties() {
         schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
 
         FieldInfo targetField = targetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
@@ -184,7 +184,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testMapObjectNullableNoAdditionalProperties() {
+    void testMapObjectNullableNoAdditionalProperties() {
         FieldInfo targetField = targetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
@@ -204,7 +204,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    public void testDecimalMaxPrimaryDigits() {
+    void testDecimalMaxPrimaryDigits() {
         FieldInfo targetField = targetClass.field("decimalMaxBigDecimalPrimaryDigits");
         testTarget.decimalMax(targetField, schema);
         testTarget.digits(targetField, schema);
@@ -215,21 +215,21 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDecimalMaxNoConstraint() {
+    void testDecimalMaxNoConstraint() {
         testTarget.decimalMax(targetClass.field("decimalMaxBigDecimalNoConstraint"), schema);
         assertEquals(null, schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
     }
 
     @Test
-    public void testDecimalMaxInvalidValue() {
+    void testDecimalMaxInvalidValue() {
         testTarget.decimalMax(targetClass.field("decimalMaxBigDecimalInvalidValue"), schema);
         assertEquals(null, schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
     }
 
     @Test
-    public void testDecimalMaxExclusiveDigits() {
+    void testDecimalMaxExclusiveDigits() {
         FieldInfo targetField = targetClass.field("decimalMaxBigDecimalExclusiveDigits");
         testTarget.decimalMax(targetField, schema);
         testTarget.digits(targetField, schema);
@@ -239,7 +239,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDecimalMaxInclusive() {
+    void testDecimalMaxInclusive() {
         testTarget.decimalMax(targetClass.field("decimalMaxBigDecimalInclusive"), schema);
         assertEquals(new BigDecimal("201.00"), schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
@@ -248,28 +248,28 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    public void testDecimalMinPrimary() {
+    void testDecimalMinPrimary() {
         testTarget.decimalMin(targetClass.field("decimalMinBigDecimalPrimary"), schema);
         assertEquals(new BigDecimal("10.0"), schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test
-    public void testDecimalMinNoConstraint() {
+    void testDecimalMinNoConstraint() {
         testTarget.decimalMin(targetClass.field("decimalMinBigDecimalNoConstraint"), schema);
         assertEquals(null, schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test
-    public void testDecimalMinInvalidValue() {
+    void testDecimalMinInvalidValue() {
         testTarget.decimalMin(targetClass.field("decimalMinBigDecimalInvalidValue"), schema);
         assertEquals(null, schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test
-    public void testDecimalMinExclusiveDigits() {
+    void testDecimalMinExclusiveDigits() {
         FieldInfo targetField = targetClass.field("decimalMinBigDecimalExclusiveDigits");
         testTarget.decimalMin(targetField, schema);
         testTarget.digits(targetField, schema);
@@ -280,7 +280,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testDecimalMinInclusive() {
+    void testDecimalMinInclusive() {
         testTarget.decimalMin(targetClass.field("decimalMinBigDecimalInclusive"), schema);
         assertEquals(new BigDecimal("9.00"), schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
@@ -289,7 +289,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    public void testIntegerPositiveNotZeroMaxValue() {
+    void testIntegerPositiveNotZeroMaxValue() {
         FieldInfo targetField = targetClass.field("integerPositiveNotZeroMaxValue");
         testTarget.max(targetField, schema);
         testTarget.positive(targetField, schema);
@@ -301,7 +301,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIntegerPositiveNotZeroMaxValueExclusive() {
+    void testIntegerPositiveNotZeroMaxValueExclusive() {
         FieldInfo targetField = targetClass.field("integerPositiveNotZeroMaxValue");
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
@@ -316,7 +316,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIntegerPositiveOrZeroMaxValue() {
+    void testIntegerPositiveOrZeroMaxValue() {
         FieldInfo targetField = targetClass.field("integerPositiveOrZeroMaxValue");
         testTarget.max(targetField, schema);
         testTarget.positiveOrZero(targetField, schema);
@@ -328,7 +328,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIntegerPositiveOrZeroMaxValueExclusive() {
+    void testIntegerPositiveOrZeroMaxValueExclusive() {
         FieldInfo targetField = targetClass.field("integerPositiveOrZeroMaxValue");
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
@@ -345,7 +345,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    public void testIntegerNegativeNotZeroMinValue() {
+    void testIntegerNegativeNotZeroMinValue() {
         FieldInfo targetField = targetClass.field("integerNegativeNotZeroMinValue");
         testTarget.min(targetField, schema);
         testTarget.negative(targetField, schema);
@@ -357,7 +357,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIntegerNegativeNotZeroMinValueExclusive() {
+    void testIntegerNegativeNotZeroMinValueExclusive() {
         FieldInfo targetField = targetClass.field("integerNegativeNotZeroMinValue");
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
@@ -372,7 +372,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIntegerNegativeOrZeroMinValue() {
+    void testIntegerNegativeOrZeroMinValue() {
         FieldInfo targetField = targetClass.field("integerNegativeOrZeroMinValue");
         testTarget.min(targetField, schema);
         testTarget.negativeOrZero(targetField, schema);
@@ -384,7 +384,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testIntegerNegativeOrZeroMinValueExclusive() {
+    void testIntegerNegativeOrZeroMinValueExclusive() {
         FieldInfo targetField = targetClass.field("integerNegativeOrZeroMinValue");
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
@@ -401,7 +401,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    public void testStringNotBlankNotNull() {
+    void testStringNotBlankNotNull() {
         FieldInfo targetField = targetClass.field("stringNotBlankNotNull");
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
@@ -417,7 +417,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testStringNotBlankDigits() {
+    void testStringNotBlankDigits() {
         FieldInfo targetField = targetClass.field("stringNotBlankDigits");
 
         testTarget.digits(targetField, schema);
@@ -428,7 +428,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testStringNotEmptyMaxSize() {
+    void testStringNotEmptyMaxSize() {
         FieldInfo targetField = targetClass.field("stringNotEmptyMaxSize");
 
         testTarget.sizeString(targetField, schema);
@@ -440,7 +440,7 @@ public class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testStringNotEmptySizeRange() {
+    void testStringNotEmptySizeRange() {
         FieldInfo targetField = targetClass.field("stringNotEmptySizeRange");
 
         testTarget.sizeString(targetField, schema);
