@@ -21,14 +21,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-public class StandaloneSchemaScanTest extends IndexScannerTestBase {
+class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
-    public void testUnreferencedSchemasInComponents() throws Exception {
+    void testUnreferencedSchemasInComponents() throws Exception {
         Index index = indexOf(Cat.class, Dog.class, Class.forName(getClass().getPackage().getName() + ".package-info"));
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -39,7 +39,7 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testInheritanceAnyOf() throws Exception {
+    void testInheritanceAnyOf() throws Exception {
         Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -103,7 +103,7 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
      * https://github.com/quarkusio/quarkus/issues/14670
      */
     @Test
-    public void testRegisteredSchemaTypePreserved() throws IOException, JSONException {
+    void testRegisteredSchemaTypePreserved() throws IOException, JSONException {
         Index index = indexOf(RegisteredSchemaTypePreservedModel.Animal.class,
                 RegisteredSchemaTypePreservedModel.AnimalListEnvelope.class,
                 RegisteredSchemaTypePreservedModel.MessageBase.class,
@@ -262,7 +262,7 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
      * https://github.com/smallrye/smallrye-open-api/issues/650
      */
     @Test
-    public void testJaxbElementUnwrapped() throws IOException, JSONException {
+    void testJaxbElementUnwrapped() throws IOException, JSONException {
         Index index = indexOf(JAXBElementDto.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
@@ -289,7 +289,7 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
      * https://github.com/smallrye/smallrye-open-api/issues/226
      */
     @Test
-    public void testJacksonJsonUnwrapped() throws IOException, JSONException {
+    void testJacksonJsonUnwrapped() throws IOException, JSONException {
         Index index = indexOf(JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
                 JacksonJsonPersonWithSuffixedAddress.class, JacksonJsonAddress.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
@@ -339,7 +339,7 @@ public class StandaloneSchemaScanTest extends IndexScannerTestBase {
      * https://github.com/smallrye/smallrye-open-api/issues/688
      */
     @Test
-    public void testNestedCollectionSchemas() throws IOException, JSONException {
+    void testNestedCollectionSchemas() throws IOException, JSONException {
         // Place the JDK classes in the index to simulate Quarkus
         Index index = indexOf(CollectionBean.class,
                 EntryBean.class,

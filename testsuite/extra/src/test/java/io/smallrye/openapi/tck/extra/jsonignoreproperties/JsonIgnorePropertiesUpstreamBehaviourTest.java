@@ -9,18 +9,18 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JsonIgnorePropertiesUpstreamBehaviourTest {
+class JsonIgnorePropertiesUpstreamBehaviourTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void testDirectAnnotation() throws JsonProcessingException {
+    void testDirectAnnotation() throws JsonProcessingException {
         List<String> fieldNames = getFieldNamesAfterJackson(new JsonIgnorePropertiesResource.DirectIgnore());
         assertThat(fieldNames, hasItem("ignoreMeNested"));
         assertThat(fieldNames, hasItem("dontIgnoreMe"));
@@ -28,7 +28,7 @@ public class JsonIgnorePropertiesUpstreamBehaviourTest {
     }
 
     @Test
-    public void testInheritedAnnotation() throws JsonProcessingException {
+    void testInheritedAnnotation() throws JsonProcessingException {
         List<String> fieldNames = getFieldNamesAfterJackson(new JsonIgnorePropertiesResource.InheritIgnore());
         assertThat(fieldNames, hasItem("ignoreMeNested"));
         assertThat(fieldNames, hasItem("dontIgnoreMe"));
@@ -36,7 +36,7 @@ public class JsonIgnorePropertiesUpstreamBehaviourTest {
     }
 
     @Test
-    public void testInheritedAnnotationThirdLevel() throws JsonProcessingException {
+    void testInheritedAnnotationThirdLevel() throws JsonProcessingException {
         List<String> fieldNames = getFieldNamesAfterJackson(new JsonIgnorePropertiesResource.ThirdLevelIgnore());
         assertThat(fieldNames, hasItem("ignoreMeNested"));
         assertThat(fieldNames, hasItem("dontIgnoreMe"));
@@ -44,7 +44,7 @@ public class JsonIgnorePropertiesUpstreamBehaviourTest {
     }
 
     @Test
-    public void testInheritedAnnotationOverride() throws JsonProcessingException {
+    void testInheritedAnnotationOverride() throws JsonProcessingException {
         List<String> fieldNames = getFieldNamesAfterJackson(new JsonIgnorePropertiesResource.InheritIgnoreOverride());
         assertThat(fieldNames, hasItem("ignoreMeNested"));
         assertThat(fieldNames, not(hasItem("dontIgnoreMe")));
@@ -52,7 +52,7 @@ public class JsonIgnorePropertiesUpstreamBehaviourTest {
     }
 
     @Test
-    public void testInheritedAnnotationNestedOverride() throws JsonProcessingException {
+    void testInheritedAnnotationNestedOverride() throws JsonProcessingException {
         List<String> fieldNames = getFieldNamesAfterJackson(new JsonIgnorePropertiesResource.NestedOverride(), "nested");
         assertThat(fieldNames, not(hasItem("ignoreMeNested")));
         assertThat(fieldNames, hasItem("dontIgnoreMe"));
