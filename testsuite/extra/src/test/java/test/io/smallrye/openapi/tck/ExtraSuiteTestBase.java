@@ -47,14 +47,14 @@ import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
 /**
- * Base class for all Tck tests.
+ * Base class for all extra test suite tests.
  *
  * @author eric.wittmann@gmail.com
  */
 @SuppressWarnings("restriction")
-public abstract class BaseTckTest<T extends Arquillian> {
+public abstract class ExtraSuiteTestBase<T extends Arquillian> {
 
-    private static final Logger LOGGER = Logger.getLogger(BaseTckTest.class);
+    private static final Logger LOGGER = Logger.getLogger(ExtraSuiteTestBase.class);
     public static Map<Class<?>, OpenAPI> OPEN_API_DOCS = new HashMap<>();
 
     protected static final String APPLICATION_JSON = "application/json";
@@ -64,7 +64,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
 
     @TestFactory
     Collection<DynamicTest> generateTests() throws Exception {
-        TckTestRunner runner = new TckTestRunner(getClass());
+        ExtraTestRunner runner = new ExtraTestRunner(getClass());
 
         return runner.getChildren()
                 .stream()
@@ -77,7 +77,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
         // Set up a little HTTP server so that Rest assured has something to pull /openapi from
         server = HttpServer.create(new InetSocketAddress(0), 0);
         int dynamicPort = server.getAddress().getPort();
-        LOGGER.debugf("Starting TCK test server on port %d", dynamicPort);
+        LOGGER.debugf("Starting test server on port %d", dynamicPort);
 
         server.createContext("/openapi", new MyHandler());
         server.setExecutor(null);
@@ -95,7 +95,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
     @AfterAll
     public static final void tearDown() throws Exception {
         server.stop(0);
-        LOGGER.debugf("TCK test server stopped.");
+        LOGGER.debugf("Test server stopped.");
     }
 
     static class MyHandler implements HttpHandler {
@@ -144,7 +144,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
     }
 
     /**
-     * Returns an instance of the TCK test being run. The subclass must implement
+     * Returns an instance of the test class being run. The subclass must implement
      * this so that the correct test delegate is created *and* its callEndpoint()
      * method can be properly overridden.
      */

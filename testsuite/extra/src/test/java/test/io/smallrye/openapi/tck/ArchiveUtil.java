@@ -103,7 +103,7 @@ public class ArchiveUtil {
      */
     public static IndexView archiveToIndex(OpenApiConfig config, Archive<?> archive) {
         if (archive == null) {
-            throw TckMessages.msg.nullArchive();
+            throw ExtraSuiteMessages.msg.nullArchive();
         }
 
         Indexer indexer = new Indexer();
@@ -139,7 +139,7 @@ public class ArchiveUtil {
                 if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX)
                         && acceptClassForScanning(filter, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        TckLogging.log.indexing(archivePath.get(), archive.getName());
+                        ExtraSuiteLogging.log.indexing(archivePath.get(), archive.getName());
                         indexer.index(contentStream);
                     }
                     continue;

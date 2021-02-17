@@ -50,18 +50,17 @@ import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
 /**
- * A Junit 4 test runner used to quickly run the OpenAPI tck tests directly against the
- * {@link OpenApiDocument} without spinning up an MP compliant server. This is not
- * a replacement for running the full OpenAPI TCK using Arquillian. However, it runs
- * much faster and does *most* of what we need for coverage.
- *
+ * A test runner used to quickly run the OpenAPI extra tests directly against the
+ * {@link OpenApiDocument} without spinning up an MP compliant server. This is used
+ * as a helper for generating and running Junit DynamicTests from ExtraSuiteTestBase.
+ * 
  * @author eric.wittmann@gmail.com
  */
 @SuppressWarnings("rawtypes")
-public class TckTestRunner {
+public class ExtraTestRunner {
 
     private Class<?> testClass;
-    private Class<? extends Arquillian> tckTestClass;
+    private Class<? extends Arquillian> nestedTestClass;
 
     public static Map<Class, OpenAPI> OPEN_API_DOCS = new HashMap<>();
 
@@ -71,9 +70,9 @@ public class TckTestRunner {
      * @param testClass
      * @throws InitializationError
      */
-    public TckTestRunner(Class<?> testClass) throws Exception {
+    public ExtraTestRunner(Class<?> testClass) throws Exception {
         this.testClass = testClass;
-        this.tckTestClass = determineTckTestClass(testClass);
+        this.nestedTestClass = determineTestClass(testClass);
 
         // The Archive (shrinkwrap deployment)
         Archive archive = archive();
@@ -90,7 +89,7 @@ public class TckTestRunner {
         OPEN_API_DOCS.put(testClass, openAPI);
 
         // Output the /openapi content to a file for debugging purposes
-        File parent = new File("target", "TckTestRunner");
+        File parent = new File("target", "testsuite-extra");
         if (!parent.exists()) {
             parent.mkdir();
         }
@@ -105,31 +104,31 @@ public class TckTestRunner {
      * Creates and returns the shrinkwrap archive for this test.
      */
     private Archive archive() throws Exception {
-        Method[] methods = tckTestClass.getMethods();
+        Method[] methods = nestedTestClass.getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(Deployment.class)) {
                 Archive archive = (Archive) method.invoke(null);
                 return archive;
             }
         }
-        throw TckMessages.msg.missingDeploymentArchive();
+        throw ExtraSuiteMessages.msg.missingDeploymentArchive();
     }
 
     /**
-     * Figures out what TCK test is being run.
+     * Figures out what test class is being run.
      * 
      * @throws InitializationError
      */
     @SuppressWarnings("unchecked")
-    private Class<? extends Arquillian> determineTckTestClass(Class<?> testClass) {
+    private Class<? extends Arquillian> determineTestClass(Class<?> testClass) {
         ParameterizedType ptype = (ParameterizedType) testClass.getGenericSuperclass();
         Class cc = (Class) ptype.getActualTypeArguments()[0];
         return cc;
     }
 
-    List<ProxiedTckTest> getChildren() {
-        List<ProxiedTckTest> children = new ArrayList<>();
-        Method[] methods = tckTestClass.getMethods();
+    List<ExtraSuiteGeneratedTestProxy> getChildren() {
+        List<ExtraSuiteGeneratedTestProxy> children = new ArrayList<>();
+        Method[] methods = nestedTestClass.getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(Test.class)) {
                 try {
@@ -139,7 +138,7 @@ public class TckTestRunner {
                     String providerMethodName = testAnnotation.dataProvider();
                     Method providerMethod = null;
 
-                    for (Method m : tckTestClass.getMethods()) {
+                    for (Method m : nestedTestClass.getMethods()) {
                         if (m.isAnnotationPresent(DataProvider.class)) {
                             DataProvider provider = m.getAnnotation(DataProvider.class);
                             if (provider.name().equals(providerMethodName)) {
@@ -153,19 +152,19 @@ public class TckTestRunner {
                         Object[][] args = (Object[][]) providerMethod.invoke(delegate);
 
                         for (Object[] arg : args) {
-                            children.add(ProxiedTckTest.create(delegate, theTestObj, method, arg));
+                            children.add(ExtraSuiteGeneratedTestProxy.create(delegate, theTestObj, method, arg));
                         }
                     } else {
-                        children.add(ProxiedTckTest.create(delegate, theTestObj, method, new Object[0]));
+                        children.add(ExtraSuiteGeneratedTestProxy.create(delegate, theTestObj, method, new Object[0]));
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
         }
-        children.sort(new Comparator<ProxiedTckTest>() {
+        children.sort(new Comparator<ExtraSuiteGeneratedTestProxy>() {
             @Override
-            public int compare(ProxiedTckTest o1, ProxiedTckTest o2) {
+            public int compare(ExtraSuiteGeneratedTestProxy o1, ExtraSuiteGeneratedTestProxy o2) {
                 return o1.getTestMethod().getName().compareTo(o2.getTestMethod().getName());
             }
         });
@@ -182,7 +181,7 @@ public class TckTestRunner {
         return (Arquillian) delegate;
     }
 
-    String describeChild(ProxiedTckTest child) {
+    String describeChild(ExtraSuiteGeneratedTestProxy child) {
         StringBuilder name = new StringBuilder(child.getTestMethod().getName());
 
         if (child.getArguments().length > 0) {
@@ -193,8 +192,8 @@ public class TckTestRunner {
         return name.toString();
     }
 
-    protected void runChild(final ProxiedTckTest child) throws Throwable {
-        OpenApiDocument.INSTANCE.set(TckTestRunner.OPEN_API_DOCS.get(child.getTest().getClass()));
+    protected void runChild(final ExtraSuiteGeneratedTestProxy child) throws Throwable {
+        OpenApiDocument.INSTANCE.set(ExtraTestRunner.OPEN_API_DOCS.get(child.getTest().getClass()));
 
         if (isIgnored(child)) {
             return;
@@ -216,7 +215,7 @@ public class TckTestRunner {
         }
     }
 
-    boolean isIgnored(ProxiedTckTest child) {
+    boolean isIgnored(ExtraSuiteGeneratedTestProxy child) {
         Method testMethod = child.getTestMethod();
 
         if (testMethod.isAnnotationPresent(Ignore.class)) {
@@ -229,7 +228,7 @@ public class TckTestRunner {
             testMethodOverride = testClass.getMethod(testMethod.getName(), testMethod.getParameterTypes());
             return testMethodOverride.isAnnotationPresent(Ignore.class);
         } catch (NoSuchMethodException | SecurityException e) {
-            // Ignore, no override has been specified in the BaseTckTest subclass
+            // Ignore, no override has been specified in the ExtraSuiteTestBase subclass
         }
 
         return false;
