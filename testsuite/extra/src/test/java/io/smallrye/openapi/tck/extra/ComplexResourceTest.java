@@ -25,8 +25,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 import io.restassured.response.ValidatableResponse;
-import test.io.smallrye.openapi.tck.BaseTckTest;
-import test.io.smallrye.openapi.tck.TckTest;
+import test.io.smallrye.openapi.tck.ExtraSuiteTestBase;
 
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
@@ -35,8 +34,7 @@ import test.io.smallrye.openapi.tck.TckTest;
  *         <br>
  *         Date: 4/19/18
  */
-@TckTest
-public class ComplexResourceTest extends BaseTckTest<ComplexResourceTest.ComplexResourceTestArquillian> {
+public class ComplexResourceTest extends ExtraSuiteTestBase<ComplexResourceTest.ComplexResourceTestArquillian> {
 
     public static class ComplexResourceTestArquillian extends AppTestBase {
         @Deployment(name = "complexTypes")

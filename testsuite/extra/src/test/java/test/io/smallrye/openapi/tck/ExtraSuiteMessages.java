@@ -5,8 +5,8 @@ import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
 
 @MessageBundle(projectCode = "SROAP", length = 5)
-interface TckMessages {
-    TckMessages msg = Messages.getBundle(TckMessages.class);
+interface ExtraSuiteMessages {
+    ExtraSuiteMessages msg = Messages.getBundle(ExtraSuiteMessages.class);
 
     @Message(id = 13000, value = "Archive was null!")
     RuntimeException nullArchive();
