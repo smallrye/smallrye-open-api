@@ -37,19 +37,13 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.jandex.IndexView;
 import org.jboss.shrinkwrap.api.Archive;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.ParentRunner;
-import org.junit.runners.model.InitializationError;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
-// import io.smallrye.openapi.api.util.ArchiveUtil;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
@@ -64,7 +58,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
  * @author eric.wittmann@gmail.com
  */
 @SuppressWarnings("rawtypes")
-public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
+public class TckTestRunner {
 
     private Class<?> testClass;
     private Class<? extends Arquillian> tckTestClass;
@@ -77,8 +71,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
      * @param testClass
      * @throws InitializationError
      */
-    public TckTestRunner(Class<?> testClass) throws InitializationError {
-        super(testClass);
+    public TckTestRunner(Class<?> testClass) throws Exception {
         this.testClass = testClass;
         this.tckTestClass = determineTckTestClass(testClass);
 
@@ -87,47 +80,39 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         // MPConfig
         OpenApiConfig config = ArchiveUtil.archiveToConfig(archive);
 
-        try {
-            IndexView index = ArchiveUtil.archiveToIndex(config, archive);
-            OpenApiStaticFile staticFile = ArchiveUtil.archiveToStaticFile(archive);
+        IndexView index = ArchiveUtil.archiveToIndex(config, archive);
+        OpenApiStaticFile staticFile = ArchiveUtil.archiveToStaticFile(archive);
 
-            OpenAPI openAPI = OpenApiProcessor.bootstrap(config, index, getContextClassLoader(), staticFile);
+        OpenAPI openAPI = OpenApiProcessor.bootstrap(config, index, getContextClassLoader(), staticFile);
 
-            Assert.assertNotNull("Generated OAI document must not be null.", openAPI);
+        Assertions.assertNotNull(openAPI, "Generated OAI document must not be null.");
 
-            OPEN_API_DOCS.put(testClass, openAPI);
+        OPEN_API_DOCS.put(testClass, openAPI);
 
-            // Output the /openapi content to a file for debugging purposes
-            File parent = new File("target", "TckTestRunner");
-            if (!parent.exists()) {
-                parent.mkdir();
-            }
-            File file = new File(parent, testClass.getName() + ".json");
-            String content = OpenApiSerializer.serialize(openAPI, Format.JSON);
-            try (FileWriter writer = new FileWriter(file)) {
-                IOUtils.write(content, writer);
-            }
-        } catch (Exception e) {
-            throw new InitializationError(e);
+        // Output the /openapi content to a file for debugging purposes
+        File parent = new File("target", "TckTestRunner");
+        if (!parent.exists()) {
+            parent.mkdir();
+        }
+        File file = new File(parent, testClass.getName() + ".json");
+        String content = OpenApiSerializer.serialize(openAPI, Format.JSON);
+        try (FileWriter writer = new FileWriter(file)) {
+            IOUtils.write(content, writer);
         }
     }
 
     /**
      * Creates and returns the shrinkwrap archive for this test.
      */
-    private Archive archive() throws InitializationError {
-        try {
-            Method[] methods = tckTestClass.getMethods();
-            for (Method method : methods) {
-                if (method.isAnnotationPresent(Deployment.class)) {
-                    Archive archive = (Archive) method.invoke(null);
-                    return archive;
-                }
+    private Archive archive() throws Exception {
+        Method[] methods = tckTestClass.getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(Deployment.class)) {
+                Archive archive = (Archive) method.invoke(null);
+                return archive;
             }
-            throw TckMessages.msg.missingDeploymentArchive();
-        } catch (Exception e) {
-            throw new InitializationError(e);
         }
+        throw TckMessages.msg.missingDeploymentArchive();
     }
 
     /**
@@ -136,17 +121,13 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
      * @throws InitializationError
      */
     @SuppressWarnings("unchecked")
-    private Class<? extends Arquillian> determineTckTestClass(Class<?> testClass) throws InitializationError {
+    private Class<? extends Arquillian> determineTckTestClass(Class<?> testClass) {
         ParameterizedType ptype = (ParameterizedType) testClass.getGenericSuperclass();
         Class cc = (Class) ptype.getActualTypeArguments()[0];
         return cc;
     }
 
-    /**
-     * @see org.junit.runners.ParentRunner#getChildren()
-     */
-    @Override
-    protected List<ProxiedTckTest> getChildren() {
+    List<ProxiedTckTest> getChildren() {
         List<ProxiedTckTest> children = new ArrayList<>();
         Method[] methods = tckTestClass.getMethods();
         for (Method method : methods) {
@@ -201,11 +182,7 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
         return (Arquillian) delegate;
     }
 
-    /**
-     * @see org.junit.runners.ParentRunner#describeChild(java.lang.Object)
-     */
-    @Override
-    protected Description describeChild(ProxiedTckTest child) {
+    String describeChild(ProxiedTckTest child) {
         StringBuilder name = new StringBuilder(child.getTestMethod().getName());
 
         if (child.getArguments().length > 0) {
@@ -213,49 +190,33 @@ public class TckTestRunner extends ParentRunner<ProxiedTckTest> {
             name.append(Arrays.stream(child.getArguments()).map(Object::toString).collect(Collectors.joining(",")));
         }
 
-        return Description.createTestDescription(tckTestClass, name.toString());
+        return name.toString();
     }
 
-    /**
-     * @see org.junit.runners.ParentRunner#runChild(java.lang.Object, org.junit.runner.notification.RunNotifier)
-     */
-    @Override
-    protected void runChild(final ProxiedTckTest child, final RunNotifier notifier) {
+    protected void runChild(final ProxiedTckTest child) throws Throwable {
         OpenApiDocument.INSTANCE.set(TckTestRunner.OPEN_API_DOCS.get(child.getTest().getClass()));
 
-        Description description = describeChild(child);
         if (isIgnored(child)) {
-            notifier.fireTestIgnored(description);
-        } else {
-            Statement statement = new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    try {
-                        Method testMethod = child.getTestMethod();
-                        testMethod.invoke(child.getDelegate(), child.getArguments());
-                    } catch (InvocationTargetException e) {
-                        Throwable cause = e.getCause();
-                        Test testAnno = child.getTestMethod().getAnnotation(Test.class);
-                        Class[] expectedExceptions = testAnno.expectedExceptions();
-                        if (expectedExceptions != null && expectedExceptions.length > 0) {
-                            Class expectedException = expectedExceptions[0];
-                            Assert.assertEquals(expectedException, cause.getClass());
-                        } else {
-                            throw cause;
-                        }
-                    }
-                }
-            };
-            runLeaf(statement, description, notifier);
+            return;
         }
 
+        try {
+            Method testMethod = child.getTestMethod();
+            testMethod.invoke(child.getDelegate(), child.getArguments());
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            Test testAnno = child.getTestMethod().getAnnotation(Test.class);
+            Class[] expectedExceptions = testAnno.expectedExceptions();
+            if (expectedExceptions != null && expectedExceptions.length > 0) {
+                Class expectedException = expectedExceptions[0];
+                Assertions.assertEquals(expectedException, cause.getClass());
+            } else {
+                throw cause;
+            }
+        }
     }
 
-    /**
-     * @see org.junit.runners.ParentRunner#isIgnored(java.lang.Object)
-     */
-    @Override
-    protected boolean isIgnored(ProxiedTckTest child) {
+    boolean isIgnored(ProxiedTckTest child) {
         Method testMethod = child.getTestMethod();
 
         if (testMethod.isAnnotationPresent(Ignore.class)) {

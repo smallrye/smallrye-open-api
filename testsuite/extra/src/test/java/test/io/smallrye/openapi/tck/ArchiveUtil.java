@@ -11,7 +11,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
-import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ArchivePath;
 import org.jboss.shrinkwrap.api.Node;
@@ -34,8 +33,6 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
  * @author eric.wittmann@gmail.com
  */
 public class ArchiveUtil {
-    private static final Logger LOG = Logger.getLogger(ArchiveUtil.class);
-
     private ArchiveUtil() {
     }
 

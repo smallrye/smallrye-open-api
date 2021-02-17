@@ -26,7 +26,6 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 import io.restassured.response.ValidatableResponse;
-import io.smallrye.openapi.tck.extra.jsonignoreproperties.JsonIgnorePropertiesUpstreamBehaviourTest;
 import test.io.smallrye.openapi.tck.BaseTckTest;
 import test.io.smallrye.openapi.tck.TckTest;
 
