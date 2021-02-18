@@ -23,15 +23,13 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 import io.restassured.response.ValidatableResponse;
-import test.io.smallrye.openapi.tck.BaseTckTest;
-import test.io.smallrye.openapi.tck.TckTest;
+import test.io.smallrye.openapi.tck.ExtraSuiteTestBase;
 
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
  */
-@TckTest
 public class SmallRyeDisabledApplicationPathTest
-        extends BaseTckTest<SmallRyeDisabledApplicationPathTest.ApplicationPathTestArquillian> {
+        extends ExtraSuiteTestBase<SmallRyeDisabledApplicationPathTest.ApplicationPathTestArquillian> {
 
     public static class ApplicationPathTestArquillian extends AppTestBase {
         @Deployment(name = "jaxrs")

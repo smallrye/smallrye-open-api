@@ -5,12 +5,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SchemaPropertyTest extends IndexScannerTestBase {
+class SchemaPropertyTest extends IndexScannerTestBase {
 
     @Test
-    public void testClassSchemaPropertyMergesWithFieldSchemas() throws Exception {
+    void testClassSchemaPropertyMergesWithFieldSchemas() throws Exception {
         Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class, LengthUnits.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 

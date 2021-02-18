@@ -46,10 +46,16 @@ public class ApplicationPathResource {
         return rval;
     }
 
+    /**
+     * @param path request body
+     */
     @POST
     public void createPath(Path path) {
     }
 
+    /**
+     * @param path path parameter
+     */
     @GET
     @javax.ws.rs.Path("{path}")
     public Path getPath(@PathParam("path") String path) {
@@ -59,9 +65,13 @@ public class ApplicationPathResource {
         return Path;
     }
 
+    /**
+     * @param path path parameter
+     * @param body request body
+     */
     @PUT
     @javax.ws.rs.Path("{path}")
-    public void updatePath(@PathParam("path") String path, Path Path) {
+    public void updatePath(@PathParam("path") String path, Path body) {
         // Update the Path
     }
 

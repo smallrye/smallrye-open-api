@@ -32,15 +32,15 @@ import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.models.info.LicenseImpl;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-public class OASFactoryResolverImplTest {
+class OASFactoryResolverImplTest {
 
     /**
      * Test method for
@@ -48,7 +48,7 @@ public class OASFactoryResolverImplTest {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testCreateObject_All() {
+    void testCreateObject_All() {
         Class modelClasses[] = { APIResponse.class, APIResponses.class, Callback.class, Components.class,
                 Contact.class, Content.class, Discriminator.class, Encoding.class, Example.class,
                 ExternalDocumentation.class, Header.class, Info.class, License.class, Link.class, MediaType.class,
@@ -57,7 +57,7 @@ public class OASFactoryResolverImplTest {
                 SecurityScheme.class, Server.class, ServerVariable.class, Tag.class, XML.class };
         for (Class modelClass : modelClasses) {
             Constructible object = OASFactory.createObject(modelClass);
-            Assert.assertNotNull(object);
+            Assertions.assertNotNull(object);
         }
     }
 
@@ -66,12 +66,12 @@ public class OASFactoryResolverImplTest {
      * {@link OASFactoryResolverImpl#createObject(java.lang.Class)}.
      */
     @Test
-    public void testCreateObject_License() {
+    void testCreateObject_License() {
         License license = OASFactory.createObject(License.class).name("Test License").url("urn:test-url");
-        Assert.assertNotNull(license);
-        Assert.assertEquals(LicenseImpl.class, license.getClass());
-        Assert.assertEquals("Test License", license.getName());
-        Assert.assertEquals("urn:test-url", license.getUrl());
+        Assertions.assertNotNull(license);
+        Assertions.assertEquals(LicenseImpl.class, license.getClass());
+        Assertions.assertEquals("Test License", license.getName());
+        Assertions.assertEquals("urn:test-url", license.getUrl());
     }
 
     /**
@@ -80,13 +80,13 @@ public class OASFactoryResolverImplTest {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testCreateObject_RTE() {
+    void testCreateObject_RTE() {
         Class c = String.class;
         try {
             OASFactory.createObject(c);
-            Assert.fail("Expected a runtime error.");
+            Assertions.fail("Expected a runtime error.");
         } catch (RuntimeException e) {
-            Assert.assertEquals("SROAP09000: Class 'java.lang.String' is not Constructible.", e.getMessage());
+            Assertions.assertEquals("SROAP09000: Class 'java.lang.String' is not Constructible.", e.getMessage());
         }
     }
 

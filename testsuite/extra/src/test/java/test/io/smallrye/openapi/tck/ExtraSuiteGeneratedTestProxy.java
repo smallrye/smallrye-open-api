@@ -23,26 +23,26 @@ import org.jboss.arquillian.testng.Arquillian;
 /**
  * @author eric.wittmann@gmail.com
  */
-public class ProxiedTckTest {
+public class ExtraSuiteGeneratedTestProxy {
 
     private Arquillian delegate;
     private Object test;
     private Method testMethod;
     private Object[] arguments;
 
-    public static ProxiedTckTest create(Arquillian delegate, Object test, Method testMethod, Object[] arguments) {
-        ProxiedTckTest tckTest = new ProxiedTckTest();
-        tckTest.delegate = delegate;
-        tckTest.test = test;
-        tckTest.testMethod = testMethod;
-        tckTest.arguments = arguments;
-        return tckTest;
+    public static ExtraSuiteGeneratedTestProxy create(Arquillian delegate, Object test, Method testMethod, Object[] arguments) {
+        ExtraSuiteGeneratedTestProxy proxy = new ExtraSuiteGeneratedTestProxy();
+        proxy.delegate = delegate;
+        proxy.test = test;
+        proxy.testMethod = testMethod;
+        proxy.arguments = arguments;
+        return proxy;
     }
 
     /**
      * Constructor.
      */
-    public ProxiedTckTest() {
+    public ExtraSuiteGeneratedTestProxy() {
     }
 
     /**

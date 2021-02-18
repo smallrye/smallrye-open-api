@@ -12,7 +12,7 @@ import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.json.JSONException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -25,7 +25,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 /**
  * @author eric.wittmann@gmail.com
  */
-public class FilterUtilTest {
+class FilterUtilTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
@@ -55,7 +55,7 @@ public class FilterUtilTest {
      * @throws Exception
      */
     @Test
-    public void testApplyFilter() throws Exception {
+    void testApplyFilter() throws Exception {
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = new OpenApiConfigImpl(config);
 

@@ -62,11 +62,17 @@ public class WidgetResource {
         return rval;
     }
 
+    /**
+     * @param widget request body
+     */
     @POST
     public void createWidget(Widget widget) {
         // Add the widget to the DB
     }
 
+    /**
+     * @param widgetId path parameter
+     */
     @GET
     @Path("{widgetId}")
     public Widget getWidget(@PathParam("widgetId") String widgetId) {
@@ -76,6 +82,10 @@ public class WidgetResource {
         return widget;
     }
 
+    /**
+     * @param widgetId path parameter
+     * @param widget request body
+     */
     @PUT
     @Path("{widgetId}")
     public void updateWidget(@PathParam("widgetId") String widgetId, Widget widget) {
