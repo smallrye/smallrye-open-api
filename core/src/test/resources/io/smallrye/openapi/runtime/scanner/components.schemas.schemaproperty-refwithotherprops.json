@@ -1,0 +1,15 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "RefWithOtherProps" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "$ref" : "#/components/schemas/foobar"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "MinPropertiesNegative" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "minProperties" : -2,
+            "type" : "object"
+          }
+        }
+      }
+    }
+  }
+}

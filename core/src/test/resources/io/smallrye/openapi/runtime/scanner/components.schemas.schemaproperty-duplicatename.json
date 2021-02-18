@@ -1,0 +1,15 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "DuplicateNameTest" : {
+        "type" : "object",
+        "properties" : {
+          "foo" : {
+            "type" : "integer"
+          }
+        }
+      }
+    }
+  }
+}
