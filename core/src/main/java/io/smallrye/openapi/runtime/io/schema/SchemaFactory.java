@@ -155,10 +155,10 @@ public class SchemaFactory {
         schema.setTitle(readAttr(annotation, SchemaConstant.PROP_TITLE, defaults));
         schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
-        schema.setMaximum(SchemaFactory.<String, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MAXIMUM,
-                BigDecimal::new, defaults));
-        schema.setMinimum(SchemaFactory.<String, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MINIMUM,
-                BigDecimal::new, defaults));
+        schema.setMaximum(SchemaFactory.readAttr(annotation, SchemaConstant.PROP_MAXIMUM,
+                SchemaFactory::tolerantParseBigDecimal, defaults));
+        schema.setMinimum(SchemaFactory.readAttr(annotation, SchemaConstant.PROP_MINIMUM,
+                SchemaFactory::tolerantParseBigDecimal, defaults));
         schema.setExclusiveMaximum(readAttr(annotation, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, defaults));
         schema.setExclusiveMinimum(readAttr(annotation, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, defaults));
         schema.setMaxLength(readAttr(annotation, SchemaConstant.PROP_MAX_LENGTH, defaults));
@@ -662,5 +662,13 @@ public class SchemaFactory {
         }
 
         discriminator.addMapping(propertyValue, schemaRef);
+    }
+
+    private static BigDecimal tolerantParseBigDecimal(String value) {
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
