@@ -22,7 +22,7 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.logging.Logger;
 import org.json.JSONException;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -37,7 +37,7 @@ public class IndexScannerTestBase {
 
     private static final Logger LOG = Logger.getLogger(IndexScannerTestBase.class);
 
-    @After
+    @AfterEach
     public void removeSchemaRegistry() {
         SchemaRegistry.remove();
         CurrentScannerInfo.remove();

@@ -1,19 +1,19 @@
 package io.smallrye.openapi.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class OpenApiConfigImplTest {
+class OpenApiConfigImplTest {
 
     private static final String TEST_PROPERTY = OASConfig.EXTENSIONS_PREFIX + "OpenApiConfigImplTest";
 
     @Test
-    public void testGetStringConfigValueMissingIsNull() {
+    void testGetStringConfigValueMissingIsNull() {
         System.clearProperty(TEST_PROPERTY);
         Config config = ConfigProvider.getConfig();
         OpenApiConfigImpl oaiConfig = new OpenApiConfigImpl(config);
@@ -21,7 +21,7 @@ public class OpenApiConfigImplTest {
     }
 
     @Test
-    public void testGetStringConfigValueBlankIsNull() {
+    void testGetStringConfigValueBlankIsNull() {
         System.setProperty(TEST_PROPERTY, "\t \n\r");
 
         try {
@@ -35,7 +35,7 @@ public class OpenApiConfigImplTest {
     }
 
     @Test
-    public void testGetStringConfigValuePresent() {
+    void testGetStringConfigValuePresent() {
         System.setProperty(TEST_PROPERTY, "  VALUE  \t");
 
         try {

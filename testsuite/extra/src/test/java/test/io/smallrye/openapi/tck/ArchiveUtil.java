@@ -11,7 +11,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
-import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ArchivePath;
 import org.jboss.shrinkwrap.api.Node;
@@ -34,8 +33,6 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
  * @author eric.wittmann@gmail.com
  */
 public class ArchiveUtil {
-    private static final Logger LOG = Logger.getLogger(ArchiveUtil.class);
-
     private ArchiveUtil() {
     }
 
@@ -106,7 +103,7 @@ public class ArchiveUtil {
      */
     public static IndexView archiveToIndex(OpenApiConfig config, Archive<?> archive) {
         if (archive == null) {
-            throw TckMessages.msg.nullArchive();
+            throw ExtraSuiteMessages.msg.nullArchive();
         }
 
         Indexer indexer = new Indexer();
@@ -142,7 +139,7 @@ public class ArchiveUtil {
                 if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX)
                         && acceptClassForScanning(filter, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
-                        TckLogging.log.indexing(archivePath.get(), archive.getName());
+                        ExtraSuiteLogging.log.indexing(archivePath.get(), archive.getName());
                         indexer.index(contentStream);
                     }
                     continue;

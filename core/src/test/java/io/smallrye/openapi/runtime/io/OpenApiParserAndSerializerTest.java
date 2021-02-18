@@ -9,14 +9,14 @@ import java.text.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.json.JSONException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * @author eric.wittmann@gmail.com
  */
-public class OpenApiParserAndSerializerTest {
+class OpenApiParserAndSerializerTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
@@ -44,7 +44,7 @@ public class OpenApiParserAndSerializerTest {
      * @param roundTrip
      */
     private static void assertYamlEquals(String original, String roundTrip) {
-        Assert.assertEquals(normalizeYaml(original), normalizeYaml(roundTrip));
+        Assertions.assertEquals(normalizeYaml(original), normalizeYaml(roundTrip));
     }
 
     /**
@@ -102,7 +102,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testParseSimplest() throws IOException, ParseException, JSONException {
+    void testParseSimplest() throws IOException, ParseException, JSONException {
         doTest("simplest.json", Format.JSON);
     }
 
@@ -110,7 +110,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testParseSimplestYaml() throws IOException, ParseException, JSONException {
+    void testParseSimplestYaml() throws IOException, ParseException, JSONException {
         doTest("simplest.yaml", Format.YAML);
     }
 
@@ -118,7 +118,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testParseInfo() throws IOException, ParseException, JSONException {
+    void testParseInfo() throws IOException, ParseException, JSONException {
         doTest("info.json", Format.JSON);
     }
 
@@ -126,7 +126,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testParseInfoYaml() throws IOException, ParseException, JSONException {
+    void testParseInfoYaml() throws IOException, ParseException, JSONException {
         doTest("info.yaml", Format.YAML);
     }
 
@@ -134,7 +134,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testExternalDocs() throws IOException, ParseException, JSONException {
+    void testExternalDocs() throws IOException, ParseException, JSONException {
         doTest("externalDocs.json", Format.JSON);
     }
 
@@ -142,7 +142,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testExtensions() throws IOException, ParseException, JSONException {
+    void testExtensions() throws IOException, ParseException, JSONException {
         doTest("extensions.json", Format.JSON);
     }
 
@@ -150,7 +150,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSecurity() throws IOException, ParseException, JSONException {
+    void testSecurity() throws IOException, ParseException, JSONException {
         doTest("security.json", Format.JSON);
     }
 
@@ -158,7 +158,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testServers() throws IOException, ParseException, JSONException {
+    void testServers() throws IOException, ParseException, JSONException {
         doTest("servers.json", Format.JSON);
     }
 
@@ -166,7 +166,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testServersYaml() throws IOException, ParseException, JSONException {
+    void testServersYaml() throws IOException, ParseException, JSONException {
         doTest("servers.yaml", Format.YAML);
     }
 
@@ -174,7 +174,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testTags() throws IOException, ParseException, JSONException {
+    void testTags() throws IOException, ParseException, JSONException {
         doTest("tags.json", Format.JSON);
     }
 
@@ -182,7 +182,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Callbacks() throws IOException, ParseException, JSONException {
+    void testComponents_Callbacks() throws IOException, ParseException, JSONException {
         doTest("components-callbacks.json", Format.JSON);
     }
 
@@ -190,7 +190,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Empty() throws IOException, ParseException, JSONException {
+    void testComponents_Empty() throws IOException, ParseException, JSONException {
         doTest("components-empty.json", Format.JSON);
     }
 
@@ -198,7 +198,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Examples() throws IOException, ParseException, JSONException {
+    void testComponents_Examples() throws IOException, ParseException, JSONException {
         doTest("components-examples.json", Format.JSON);
     }
 
@@ -206,7 +206,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Headers() throws IOException, ParseException, JSONException {
+    void testComponents_Headers() throws IOException, ParseException, JSONException {
         doTest("components-headers.json", Format.JSON);
     }
 
@@ -214,7 +214,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Links() throws IOException, ParseException, JSONException {
+    void testComponents_Links() throws IOException, ParseException, JSONException {
         doTest("components-links.json", Format.JSON);
     }
 
@@ -222,7 +222,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Parameters() throws IOException, ParseException, JSONException {
+    void testComponents_Parameters() throws IOException, ParseException, JSONException {
         doTest("components-parameters.json", Format.JSON);
     }
 
@@ -230,7 +230,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_RequestBodies() throws IOException, ParseException, JSONException {
+    void testComponents_RequestBodies() throws IOException, ParseException, JSONException {
         doTest("components-requestBodies.json", Format.JSON);
     }
 
@@ -238,7 +238,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Responses() throws IOException, ParseException, JSONException {
+    void testComponents_Responses() throws IOException, ParseException, JSONException {
         doTest("components-responses.json", Format.JSON);
     }
 
@@ -246,7 +246,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_Schemas() throws IOException, ParseException, JSONException {
+    void testComponents_Schemas() throws IOException, ParseException, JSONException {
         doTest("components-schemas.json", Format.JSON);
     }
 
@@ -254,7 +254,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testComponents_SecuritySchemes() throws IOException, ParseException, JSONException {
+    void testComponents_SecuritySchemes() throws IOException, ParseException, JSONException {
         doTest("components-securitySchemes.json", Format.JSON);
     }
 
@@ -262,7 +262,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_AllOperations() throws IOException, ParseException, JSONException {
+    void testPaths_AllOperations() throws IOException, ParseException, JSONException {
         doTest("paths-all-operations.json", Format.JSON);
     }
 
@@ -270,7 +270,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_Empty() throws IOException, ParseException, JSONException {
+    void testPaths_Empty() throws IOException, ParseException, JSONException {
         doTest("paths-empty.json", Format.JSON);
     }
 
@@ -278,7 +278,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetCallbacks() throws IOException, ParseException, JSONException {
+    void testPaths_GetCallbacks() throws IOException, ParseException, JSONException {
         doTest("paths-get-callbacks.json", Format.JSON);
     }
 
@@ -286,7 +286,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetParameters() throws IOException, ParseException, JSONException {
+    void testPaths_GetParameters() throws IOException, ParseException, JSONException {
         doTest("paths-get-parameters.json", Format.JSON);
     }
 
@@ -294,7 +294,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetRequestBodyContent() throws IOException, ParseException, JSONException {
+    void testPaths_GetRequestBodyContent() throws IOException, ParseException, JSONException {
         doTest("paths-get-requestBody-content.json", Format.JSON);
     }
 
@@ -302,7 +302,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetRequestBodyExample() throws IOException, ParseException, JSONException {
+    void testPaths_GetRequestBodyExample() throws IOException, ParseException, JSONException {
         doTest("paths-get-requestBody-example.json", Format.JSON);
     }
 
@@ -310,7 +310,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetRequestBody() throws IOException, ParseException, JSONException {
+    void testPaths_GetRequestBody() throws IOException, ParseException, JSONException {
         doTest("paths-get-requestBody.json", Format.JSON);
     }
 
@@ -318,7 +318,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetResponseContent() throws IOException, ParseException, JSONException {
+    void testPaths_GetResponseContent() throws IOException, ParseException, JSONException {
         doTest("paths-get-response-content.json", Format.JSON);
     }
 
@@ -326,7 +326,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetResponseHeaders() throws IOException, ParseException, JSONException {
+    void testPaths_GetResponseHeaders() throws IOException, ParseException, JSONException {
         doTest("paths-get-response-headers.json", Format.JSON);
     }
 
@@ -334,7 +334,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetResponseLinks() throws IOException, ParseException, JSONException {
+    void testPaths_GetResponseLinks() throws IOException, ParseException, JSONException {
         doTest("paths-get-response-links.json", Format.JSON);
     }
 
@@ -342,7 +342,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetResponses() throws IOException, ParseException, JSONException {
+    void testPaths_GetResponses() throws IOException, ParseException, JSONException {
         doTest("paths-get-responses.json", Format.JSON);
     }
 
@@ -350,7 +350,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetSecurity() throws IOException, ParseException, JSONException {
+    void testPaths_GetSecurity() throws IOException, ParseException, JSONException {
         doTest("paths-get-security.json", Format.JSON);
     }
 
@@ -358,7 +358,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_GetServers() throws IOException, ParseException, JSONException {
+    void testPaths_GetServers() throws IOException, ParseException, JSONException {
         doTest("paths-get-servers.json", Format.JSON);
     }
 
@@ -366,7 +366,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_Get() throws IOException, ParseException, JSONException {
+    void testPaths_Get() throws IOException, ParseException, JSONException {
         doTest("paths-get.json", Format.JSON);
     }
 
@@ -374,7 +374,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_Parameters() throws IOException, ParseException, JSONException {
+    void testPaths_Parameters() throws IOException, ParseException, JSONException {
         doTest("paths-parameters.json", Format.JSON);
     }
 
@@ -382,7 +382,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_Ref() throws IOException, ParseException, JSONException {
+    void testPaths_Ref() throws IOException, ParseException, JSONException {
         doTest("paths-ref.json", Format.JSON);
     }
 
@@ -390,7 +390,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_Servers() throws IOException, ParseException, JSONException {
+    void testPaths_Servers() throws IOException, ParseException, JSONException {
         doTest("paths-servers.json", Format.JSON);
     }
 
@@ -398,7 +398,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testPaths_Extensions() throws IOException, ParseException, JSONException {
+    void testPaths_Extensions() throws IOException, ParseException, JSONException {
         doTest("paths-with-extensions.json", Format.JSON);
     }
 
@@ -406,7 +406,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_Discriminator() throws IOException, ParseException, JSONException {
+    void testSchemas_Discriminator() throws IOException, ParseException, JSONException {
         doTest("schemas-discriminator.json", Format.JSON);
     }
 
@@ -414,7 +414,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_AdditionalProperties() throws IOException, ParseException, JSONException {
+    void testSchemas_AdditionalProperties() throws IOException, ParseException, JSONException {
         doTest("schemas-with-additionalProperties.json", Format.JSON);
     }
 
@@ -422,7 +422,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_AllOf() throws IOException, ParseException, JSONException {
+    void testSchemas_AllOf() throws IOException, ParseException, JSONException {
         doTest("schemas-with-allOf.json", Format.JSON);
     }
 
@@ -430,7 +430,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_Composition() throws IOException, ParseException, JSONException {
+    void testSchemas_Composition() throws IOException, ParseException, JSONException {
         doTest("schemas-with-composition.json", Format.JSON);
     }
 
@@ -438,7 +438,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_Example() throws IOException, ParseException, JSONException {
+    void testSchemas_Example() throws IOException, ParseException, JSONException {
         doTest("schemas-with-example.json", Format.JSON);
     }
 
@@ -446,7 +446,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_ExternalDocs() throws IOException, ParseException, JSONException {
+    void testSchemas_ExternalDocs() throws IOException, ParseException, JSONException {
         doTest("schemas-with-externalDocs.json", Format.JSON);
     }
 
@@ -454,7 +454,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_MetaData() throws IOException, ParseException, JSONException {
+    void testSchemas_MetaData() throws IOException, ParseException, JSONException {
         doTest("schemas-with-metaData.json", Format.JSON);
     }
 
@@ -462,7 +462,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testSchemas_XML() throws IOException, ParseException, JSONException {
+    void testSchemas_XML() throws IOException, ParseException, JSONException {
         doTest("schemas-with-xml.json", Format.JSON);
     }
 
@@ -470,7 +470,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testEverything() throws IOException, ParseException, JSONException {
+    void testEverything() throws IOException, ParseException, JSONException {
         doTest("_everything.json", Format.JSON);
     }
 
@@ -478,7 +478,7 @@ public class OpenApiParserAndSerializerTest {
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test
-    public void testEverythingYaml() throws IOException, ParseException, JSONException {
+    void testEverythingYaml() throws IOException, ParseException, JSONException {
         doTest("_everything.yaml", Format.YAML);
     }
 

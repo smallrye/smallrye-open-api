@@ -1,24 +1,24 @@
 package io.smallrye.openapi.ui;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Check that the html gets created correctly
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class IndexCreatorTest {
+class IndexCreatorTest {
 
     @Test
-    public void testCreateDefault() throws IOException {
+    void testCreateDefault() throws IOException {
         byte[] indexHtml = IndexHtmlCreator.createIndexHtml();
         assertNotNull(indexHtml);
 
@@ -34,7 +34,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateVanilla() throws IOException {
+    void testCreateVanilla() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.logoHref, null);
         options.put(Option.themeHref, null);
@@ -54,7 +54,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithStringBooleanOption() throws IOException {
+    void testCreateWithStringBooleanOption() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.syntaxHighlight, "false");
         options.put(Option.filter, "bla");
@@ -76,7 +76,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithMultipleUrls() throws IOException {
+    void testCreateWithMultipleUrls() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.themeHref, ThemeHref.newspaper.toString());
 
@@ -101,7 +101,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithMultipleUrl() throws IOException {
+    void testCreateWithMultipleUrl() throws IOException {
         Map<String, String> urls = new HashMap<>();
         urls.put("Default", "/closeapi");
 
@@ -121,7 +121,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithInitOAuth() throws IOException {
+    void testCreateWithInitOAuth() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.oauthClientId, "your-client-id");
         options.put(Option.oauthClientSecret, "your-client-secret-if-required");
@@ -150,7 +150,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithPreauthorizeBasic() throws IOException {
+    void testCreateWithPreauthorizeBasic() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.preauthorizeBasicAuthDefinitionKey, "basicAuth");
         options.put(Option.preauthorizeBasicUsername, "username");
@@ -166,7 +166,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithPreauthorizeApiKey() throws IOException {
+    void testCreateWithPreauthorizeApiKey() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.preauthorizeApiKeyAuthDefinitionKey, "api_key");
         options.put(Option.preauthorizeApiKeyApiKeyValue, "abcde12345");
@@ -181,7 +181,7 @@ public class IndexCreatorTest {
     }
 
     @Test
-    public void testCreateWithPreauthorizeBoth() throws IOException {
+    void testCreateWithPreauthorizeBoth() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.preauthorizeBasicAuthDefinitionKey, "basicAuth");
         options.put(Option.preauthorizeBasicUsername, "username");

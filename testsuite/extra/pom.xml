@@ -76,8 +76,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -121,30 +121,10 @@
             <artifactId>java-hamcrest</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Reserve random free port for TCK -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>smallrye.openapi.server.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Export the reserved port from above as a system property (code will use a default port if port unset) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -152,14 +132,11 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
+                        <artifactId>surefire-junit-platform</artifactId>
                         <version>${version.surefire.plugin}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <systemPropertyVariables>
-                        <smallrye.openapi.server.port>${smallrye.openapi.server.port}</smallrye.openapi.server.port>
-                    </systemPropertyVariables>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>

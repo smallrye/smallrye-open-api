@@ -21,14 +21,21 @@ import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.tck.utils.YamlToJsonFilter;
 import org.jboss.arquillian.testng.Arquillian;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
+import org.jboss.logging.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -40,34 +47,38 @@ import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
 /**
- * Base class for all Tck tests.
- * 
+ * Base class for all extra test suite tests.
+ *
  * @author eric.wittmann@gmail.com
  */
 @SuppressWarnings("restriction")
-@RunWith(TckTestRunner.class)
-public abstract class BaseTckTest<T extends Arquillian> {
+public abstract class ExtraSuiteTestBase<T extends Arquillian> {
+
+    private static final Logger LOGGER = Logger.getLogger(ExtraSuiteTestBase.class);
+    public static Map<Class<?>, OpenAPI> OPEN_API_DOCS = new HashMap<>();
 
     protected static final String APPLICATION_JSON = "application/json";
     protected static final String TEXT_PLAIN = "text/plain";
 
     private static HttpServer server;
-    private static int HTTP_PORT;
 
-    @BeforeClass
+    @TestFactory
+    Collection<DynamicTest> generateTests() throws Exception {
+        ExtraTestRunner runner = new ExtraTestRunner(getClass());
+
+        return runner.getChildren()
+                .stream()
+                .map(test -> DynamicTest.dynamicTest(runner.describeChild(test), () -> runner.runChild(test)))
+                .collect(Collectors.toList());
+    }
+
+    @BeforeAll
     public static final void setUp() throws Exception {
-        String portEnv = System.getProperty("smallrye.openapi.server.port");
-        if (portEnv == null || portEnv.isEmpty()) {
-            portEnv = "8082";
-        }
-        HTTP_PORT = Integer.valueOf(portEnv);
-        // Set RestAssured default port directly. A bit nasty, but we have no easy way to change
-        // AppTestBase#callEndpoint in the upstream. They also seem to do it this way, so it's no worse
-        // than what's there.
-        RestAssured.port = HTTP_PORT;
         // Set up a little HTTP server so that Rest assured has something to pull /openapi from
-        System.out.println("Starting TCK test server on port " + HTTP_PORT);
-        server = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
+        server = HttpServer.create(new InetSocketAddress(0), 0);
+        int dynamicPort = server.getAddress().getPort();
+        LOGGER.debugf("Starting test server on port %d", dynamicPort);
+
         server.createContext("/openapi", new MyHandler());
         server.setExecutor(null);
         server.start();
@@ -75,13 +86,16 @@ public abstract class BaseTckTest<T extends Arquillian> {
         // Register a filter that performs YAML to JSON conversion
         // Called here because the TCK's AppTestBase#setUp() is not called. (Remove for 2.0)
         RestAssured.filters(new YamlToJsonFilter());
+        // Set RestAssured default port directly. A bit nasty, but we have no easy way to change
+        // AppTestBase#callEndpoint in the upstream. They also seem to do it this way, so it's no worse
+        // than what's there.
+        RestAssured.port = dynamicPort;
     }
 
-    @AfterClass
+    @AfterAll
     public static final void tearDown() throws Exception {
         server.stop(0);
-        Thread.sleep(100);
-        System.out.println("TCK test server stopped.");
+        LOGGER.debugf("Test server stopped.");
     }
 
     static class MyHandler implements HttpHandler {
@@ -130,7 +144,7 @@ public abstract class BaseTckTest<T extends Arquillian> {
     }
 
     /**
-     * Returns an instance of the TCK test being run. The subclass must implement
+     * Returns an instance of the test class being run. The subclass must implement
      * this so that the correct test delegate is created *and* its callEndpoint()
      * method can be properly overridden.
      */
