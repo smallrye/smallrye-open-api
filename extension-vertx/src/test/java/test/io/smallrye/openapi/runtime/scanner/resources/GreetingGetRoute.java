@@ -58,8 +58,7 @@ public class GreetingGetRoute {
     // 5) Void, so without a type specified
     @Route(path = "/helloPathVariableWithResponse/:name", methods = HttpMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public void helloPathVariableWithResponse(io.vertx.reactivex.core.http.HttpServerRequest httpServerRequest,
-            @Param("name") String name) {
+    public void helloPathVariableWithResponse(@Param("name") String name) {
         // 
     }
 
