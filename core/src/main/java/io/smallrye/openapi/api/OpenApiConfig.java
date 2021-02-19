@@ -82,6 +82,10 @@ public interface OpenApiConfig {
         return false;
     }
 
+    default boolean privatePropertiesEnable() {
+        return true;
+    }
+
     default Map<String, String> getSchemas() {
         return new HashMap<>();
     }
