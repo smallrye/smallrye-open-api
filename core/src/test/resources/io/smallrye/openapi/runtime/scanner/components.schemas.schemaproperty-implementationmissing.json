@@ -1,0 +1,15 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "ImplementationMissing" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "type" : "object"
+          }
+        }
+      }
+    }
+  }
+}

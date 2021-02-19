@@ -1,0 +1,16 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "PatternInvalid" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "pattern" : "(invalid",
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

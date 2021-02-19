@@ -33,4 +33,8 @@ interface ScannerLogging extends BasicLogger {
     @Message(id = 4004, value = "Configured schema for %s has been registered")
     void configSchemaRegistered(String className);
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 4005, value = "Could not find schema class in index: %s")
+    void schemaTypeNotFound(DotName className);
+
 }

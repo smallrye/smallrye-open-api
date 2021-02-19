@@ -1,0 +1,16 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "MaxPropertiesNegative" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "maxProperties" : -2,
+            "type" : "object"
+          }
+        }
+      }
+    }
+  }
+}

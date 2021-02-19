@@ -1,0 +1,15 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "BlankNameTest" : {
+        "type" : "object",
+        "properties" : {
+          "" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

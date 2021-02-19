@@ -1,0 +1,17 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "OneOfMissing" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "oneOf" : [ {
+              "type" : "object"
+            } ]
+          }
+        }
+      }
+    }
+  }
+}

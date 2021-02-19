@@ -1,0 +1,16 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "NegativeMultipleOf" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "multipleOf" : -2,
+            "type" : "integer"
+          }
+        }
+      }
+    }
+  }
+}
