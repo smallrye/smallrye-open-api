@@ -27,8 +27,11 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -36,16 +39,21 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 class TypeResolverTests extends IndexScannerTestBase {
 
+    private Map<String, TypeResolver> getProperties(Class<?> leafClass, OpenApiConfig config, Class<?>... indexClasses) {
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        AnnotationScannerContext context = new AnnotationScannerContext(indexOf(indexClasses), loader, config);
+        ClassInfo leafKlazz = context.getIndex().getClassByName(componentize(leafClass.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        return TypeResolver.getAllFields(context, leaf, leafKlazz, null);
+    }
+
+    private Map<String, TypeResolver> getProperties(Class<?> leafClass, Class<?>... indexClasses) {
+        return getProperties(leafClass, emptyConfig(), indexClasses);
+    }
+
     @Test
     void testAnnotatedMethodOverridesParentSchema() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
-                Feline.class,
-                Cat.class));
-
-        ClassInfo leafKlazz = index.getClassByName(componentize(Cat.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(Cat.class, AbstractAnimal.class, Feline.class, Cat.class);
         TypeResolver resolver = properties.get("type");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -58,14 +66,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testAnnotatedFieldsOverridesInterfaceSchema() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
-                Feline.class,
-                Cat.class));
-
-        ClassInfo leafKlazz = index.getClassByName(componentize(Cat.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(Cat.class, AbstractAnimal.class, Feline.class, Cat.class);
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.FIELD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -75,14 +76,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testAnnotatedInterfaceMethodOverridesImplMethod() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
-                Canine.class,
-                Dog.class));
-
-        ClassInfo leafKlazz = index.getClassByName(componentize(Dog.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(Dog.class, AbstractAnimal.class, Canine.class, Dog.class);
         assertEquals(5, properties.size());
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
@@ -96,15 +90,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testAnnotatedInterfaceMethodOverridesStaticField() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(AbstractAnimal.class,
-                Reptile.class,
-                Lizard.class));
-
-        ClassInfo leafKlazz = index.getClassByName(componentize(Lizard.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
-
+        Map<String, TypeResolver> properties = getProperties(Lizard.class, AbstractAnimal.class, Reptile.class, Lizard.class);
         TypeResolver resolver = properties.get("scaleColor");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -119,11 +105,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testBareInterface() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(MySchema.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(MySchema.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(MySchema.class, MySchema.class);
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("field1", iter.next().getKey());
@@ -150,11 +132,8 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJacksonPropertyOrderDefault() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderDefault.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderDefault.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(JacksonPropertyOrderDefault.class,
+                JacksonPropertyOrderDefault.class);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("comment", iter.next().getValue().getPropertyName());
@@ -163,11 +142,8 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJacksonPropertyOrderCustomName() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JacksonPropertyOrderCustomName.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(JacksonPropertyOrderCustomName.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(JacksonPropertyOrderCustomName.class,
+                JacksonPropertyOrderCustomName.class);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("theName", iter.next().getValue().getPropertyName());
@@ -177,11 +153,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJaxbCustomPropertyOrder() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(JaxbCustomPropertyOrder.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(JaxbCustomPropertyOrder.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(JaxbCustomPropertyOrder.class, JaxbCustomPropertyOrder.class);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("comment", iter.next().getValue().getPropertyName());
@@ -192,11 +164,8 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testNonJavaBeansPropertyAccessor() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanAccessorProperty.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanAccessorProperty.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(NonJavaBeanAccessorProperty.class,
+                NonJavaBeanAccessorProperty.class);
         assertEquals(1, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
@@ -209,11 +178,8 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testNonJavaBeansPropertyMutator() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(NonJavaBeanMutatorProperty.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(NonJavaBeanMutatorProperty.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(NonJavaBeanMutatorProperty.class,
+                NonJavaBeanMutatorProperty.class);
         assertEquals(1, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
@@ -226,11 +192,8 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testOneSidedPropertiesHidden() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(OneSidedProperties.class, OneSidedParent.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(OneSidedProperties.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(OneSidedProperties.class, OneSidedProperties.class,
+                OneSidedParent.class);
         assertEquals(5, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -257,11 +220,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testXmlAccessTransientField() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientField.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientField.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(XmlTransientField.class, XmlTransientField.class);
         assertEquals(2, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
@@ -274,11 +233,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testXmlAccessTransientClass() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlTransientClass.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(XmlTransientClass.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(XmlTransientClass.class, XmlTransientClass.class);
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -297,11 +252,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testXmlAccessPublicMember() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePublicMember.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePublicMember.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(XmlAccessTypePublicMember.class, XmlAccessTypePublicMember.class);
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -320,11 +271,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testXmlAccessTypeFieldOnly() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypeFieldOnly.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypeFieldOnly.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(XmlAccessTypeFieldOnly.class, XmlAccessTypeFieldOnly.class);
         assertEquals(2, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -339,11 +286,7 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testXmlAccessTypePropertyOnly() {
-        AugmentedIndexView index = AugmentedIndexView.augment(indexOf(XmlAccessTypePropertyOnly.class));
-        ClassInfo leafKlazz = index.getClassByName(componentize(XmlAccessTypePropertyOnly.class.getName()));
-        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
-        Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, new IgnoreResolver(index), leaf, leafKlazz,
-                null);
+        Map<String, TypeResolver> properties = getProperties(XmlAccessTypePropertyOnly.class, XmlAccessTypePropertyOnly.class);
         assertEquals(2, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property;
@@ -355,6 +298,129 @@ class TypeResolverTests extends IndexScannerTestBase {
         property = iter.next().getValue();
         assertEquals("prop1Property", property.getPropertyName());
         assertFalse(property.isIgnored());
+    }
+
+    @Test
+    void testPrivatePropertyHidden() {
+        @SuppressWarnings("unused")
+        class Test {
+            private String field1;
+            public String field2;
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class,
+                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                Test.class);
+
+        assertEquals(2, properties.size());
+        assertTrue(properties.get("field1").isIgnored());
+        assertFalse(properties.get("field2").isIgnored());
+    }
+
+    @Test
+    void testPrivatePropertyExposedWithSchema() {
+        @SuppressWarnings("unused")
+        class Test {
+            @Schema(hidden = false)
+            private String field1;
+            public String field2;
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class,
+                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                Test.class);
+
+        assertEquals(2, properties.size());
+        assertFalse(properties.get("field1").isIgnored());
+        assertFalse(properties.get("field2").isIgnored());
+    }
+
+    @Test
+    void testPublicPropertyHiddenWithSchema() {
+        @SuppressWarnings("unused")
+        class Test {
+            private String field1;
+            @Schema(hidden = true)
+            public String field2;
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class,
+                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                Test.class);
+
+        assertEquals(2, properties.size());
+        assertTrue(properties.get("field1").isIgnored());
+        assertTrue(properties.get("field2").isIgnored());
+    }
+
+    @Test
+    void testPrivatePropertyVisibleWithProtectedGetter() {
+        @SuppressWarnings("unused")
+        class Test {
+            private String field1;
+            public String field2;
+
+            public String getField1() {
+                return field1;
+            }
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class,
+                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                Test.class);
+
+        assertEquals(2, properties.size());
+        assertFalse(properties.get("field1").isIgnored());
+        assertFalse(properties.get("field2").isIgnored());
+    }
+
+    @Test
+    void testPrivatePropertyHiddenWithPrivateGetter() {
+        @SuppressWarnings("unused")
+        class Test {
+            private String field1;
+            private String field2;
+
+            public String getField1() {
+                return field1;
+            }
+
+            private String getField2() {
+                return field2;
+            }
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class,
+                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                Test.class);
+
+        assertEquals(2, properties.size());
+        assertFalse(properties.get("field1").isIgnored());
+        assertTrue(properties.get("field2").isIgnored());
+    }
+
+    @Test
+    void testPrivatePropertyHiddenWithPrivateGetterAndMissingField() {
+        @SuppressWarnings("unused")
+        class Test {
+            private String field1;
+
+            public String getField1() {
+                return field1;
+            }
+
+            private String getField2() {
+                return "field2";
+            }
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class,
+                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                Test.class);
+
+        assertEquals(2, properties.size());
+        assertFalse(properties.get("field1").isIgnored());
+        assertTrue(properties.get("field2").isIgnored());
     }
 
     /* Test models and resources below. */
@@ -693,4 +759,5 @@ class TypeResolverTests extends IndexScannerTestBase {
             return null;
         }
     }
+
 }

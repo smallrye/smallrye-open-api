@@ -14,6 +14,7 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 
 /**
@@ -24,6 +25,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 public class AnnotationScannerContext {
     private final FilteredIndexView index;
     private final AugmentedIndexView augmentedIndex;
+    private final IgnoreResolver ignoreResolver;
     private final List<AnnotationScannerExtension> extensions;
     private final OpenApiConfig config;
     private final ClassLoader classLoader;
@@ -37,6 +39,7 @@ public class AnnotationScannerContext {
             OpenAPI openApi) {
         this.index = index;
         this.augmentedIndex = AugmentedIndexView.augment(index);
+        this.ignoreResolver = new IgnoreResolver(this.augmentedIndex);
         this.classLoader = classLoader;
         this.extensions = extensions;
         this.config = config;
@@ -54,6 +57,10 @@ public class AnnotationScannerContext {
 
     public AugmentedIndexView getAugmentedIndex() {
         return augmentedIndex;
+    }
+
+    public IgnoreResolver getIgnoreResolver() {
+        return ignoreResolver;
     }
 
     public List<AnnotationScannerExtension> getExtensions() {
