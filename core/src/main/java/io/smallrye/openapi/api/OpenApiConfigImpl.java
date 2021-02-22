@@ -36,6 +36,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Boolean arrayReferencesEnable;
     private String customSchemaRegistryClass;
     private Boolean applicationPathDisable;
+    private Boolean privatePropertiesEnable;
     private Map<String, String> schemas;
     private String version;
     private String infoTitle;
@@ -239,6 +240,17 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                             .orElse(false));
         }
         return applicationPathDisable;
+    }
+
+    @Override
+    public boolean privatePropertiesEnable() {
+        if (privatePropertiesEnable == null) {
+            privatePropertiesEnable = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, Boolean.class)
+                    .orElse(OpenApiConfig.super.privatePropertiesEnable());
+        }
+
+        return privatePropertiesEnable;
     }
 
     @Override

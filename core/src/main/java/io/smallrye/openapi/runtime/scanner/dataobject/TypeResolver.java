@@ -319,6 +319,10 @@ public class TypeResolver {
         return ignored || (readOnly && readMethod == null) || (writeOnly && writeMethod == null);
     }
 
+    private boolean isExposedByDefault() {
+        return !isIgnored() && !exposed;
+    }
+
     /**
      * Resolve a type against this {@link TypeResolver}'s resolution stack
      *
@@ -430,8 +434,9 @@ public class TypeResolver {
         return new TypeResolver(null, null, stack);
     }
 
-    public static Map<String, TypeResolver> getAllFields(AugmentedIndexView index, IgnoreResolver ignoreResolver, Type leaf,
+    public static Map<String, TypeResolver> getAllFields(AnnotationScannerContext context, Type leaf,
             ClassInfo leafKlazz, AnnotationTarget reference) {
+        final AugmentedIndexView index = context.getAugmentedIndex();
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
@@ -460,12 +465,12 @@ public class TypeResolver {
             currentClass.fields()
                     .stream()
                     .filter(TypeResolver::acceptField)
-                    .forEach(field -> scanField(index, properties, field, stack, reference, ignoreResolver));
+                    .forEach(field -> scanField(context, properties, field, stack, reference));
 
             currentClass.methods()
                     .stream()
                     .filter(TypeResolver::acceptMethod)
-                    .forEach(method -> scanMethod(properties, method, stack, reference, ignoreResolver));
+                    .forEach(method -> scanMethod(context, properties, method, stack, reference));
 
             interfaces(index, currentClass)
                     .stream()
@@ -473,7 +478,17 @@ public class TypeResolver {
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> clazz.methods().stream())
-                    .forEach(method -> scanMethod(properties, method, stack, reference, ignoreResolver));
+                    .forEach(method -> scanMethod(context, properties, method, stack, reference));
+        }
+
+        if (!context.getConfig().privatePropertiesEnable()) {
+            properties.values()
+                    .stream()
+                    .filter(TypeResolver::isExposedByDefault)
+                    .filter(resolver -> isPrivateOrAbsent(resolver.field))
+                    .filter(resolver -> isPrivateOrAbsent(resolver.readMethod))
+                    .filter(resolver -> isPrivateOrAbsent(resolver.writeMethod))
+                    .forEach(property -> property.ignored = true);
         }
 
         return sorted(properties, chain.keySet());
@@ -485,6 +500,14 @@ public class TypeResolver {
 
     private static boolean acceptField(FieldInfo field) {
         return !Modifier.isStatic(field.flags()) && !field.isSynthetic();
+    }
+
+    private static boolean isPrivateOrAbsent(FieldInfo field) {
+        return field == null || Modifier.isPrivate(field.flags());
+    }
+
+    private static boolean isPrivateOrAbsent(MethodInfo method) {
+        return method == null || Modifier.isPrivate(method.flags());
     }
 
     /**
@@ -586,24 +609,24 @@ public class TypeResolver {
      * protected and it is assumed that the getter/setter methods scanned lower in the inheritance chain
      * operate on the field which is in a super class.
      *
+     * @param context current scanner context
      * @param properties current map of properties discovered
      * @param field the field to scan
      * @param stack type resolution stack for parameterized types
      * @param reference an annotated member (field or method) that referenced the type of field's declaring class
-     * @param ignoreResolver resolver to determine if the field is ignored
      */
-    private static void scanField(AugmentedIndexView index, Map<String, TypeResolver> properties, FieldInfo field,
+    private static void scanField(AnnotationScannerContext context, Map<String, TypeResolver> properties, FieldInfo field,
             Deque<Map<String, Type>> stack,
-            AnnotationTarget reference, IgnoreResolver ignoreResolver) {
+            AnnotationTarget reference) {
         final String propertyName = field.name();
         final Type fieldType = field.type();
-        final ClassInfo fieldClass = index.getClass(fieldType);
+        final ClassInfo fieldClass = context.getAugmentedIndex().getClass(fieldType);
         final boolean unwrapped;
         final TypeResolver resolver;
 
         if (field.hasAnnotation(JacksonConstants.JSON_UNWRAPPED) && fieldClass != null) {
             unwrapped = true;
-            properties.putAll(unwrapProperties(index, field, fieldType, fieldClass, ignoreResolver));
+            properties.putAll(unwrapProperties(context, field, fieldType, fieldClass));
         } else {
             unwrapped = false;
         }
@@ -632,17 +655,16 @@ public class TypeResolver {
             // Ignored for getters/setters
             resolver.ignored = true;
         } else {
-            resolver.processVisibility(field, reference, ignoreResolver);
+            resolver.processVisibility(field, reference, context.getIgnoreResolver());
         }
     }
 
-    private static Map<String, TypeResolver> unwrapProperties(AugmentedIndexView index,
+    private static Map<String, TypeResolver> unwrapProperties(AnnotationScannerContext context,
             AnnotationTarget member,
             Type memberType,
-            ClassInfo memberClass,
-            IgnoreResolver ignoreResolver) {
+            ClassInfo memberClass) {
 
-        Map<String, TypeResolver> unwrappedProperties = getAllFields(index, ignoreResolver, memberType, memberClass, member);
+        Map<String, TypeResolver> unwrappedProperties = getAllFields(context, memberType, memberClass, member);
         AnnotationInstance jsonUnwrapped = TypeUtil.getAnnotation(member, JacksonConstants.JSON_UNWRAPPED);
         String unwrapPrefix = JandexUtil.value(jsonUnwrapped, "prefix");
         String unwrapSuffix = JandexUtil.value(jsonUnwrapped, "suffix");
@@ -677,14 +699,15 @@ public class TypeResolver {
      * Determines if a method is a bean property method. The method must conform to the Java bean
      * conventions for getter or setter methods.
      *
+     * @param context current scanner context
      * @param properties current map of properties discovered
      * @param method the method to scan
      * @param stack type resolution stack for parameterized types
      * @param reference an annotated member (field or method) that referenced the type of method's declaring class
-     * @param ignoreResolver resolver to determine if the field is ignored
      */
-    private static void scanMethod(Map<String, TypeResolver> properties, MethodInfo method, Deque<Map<String, Type>> stack,
-            AnnotationTarget reference, IgnoreResolver ignoreResolver) {
+    private static void scanMethod(AnnotationScannerContext context, Map<String, TypeResolver> properties, MethodInfo method,
+            Deque<Map<String, Type>> stack,
+            AnnotationTarget reference) {
         Type returnType = method.returnType();
         Type propertyType = null;
 
@@ -697,7 +720,7 @@ public class TypeResolver {
         if (propertyType != null) {
             TypeResolver resolver = updateTypeResolvers(properties, stack, method, propertyType);
             if (resolver != null) {
-                resolver.processVisibility(method, reference, ignoreResolver);
+                resolver.processVisibility(method, reference, context.getIgnoreResolver());
             }
         }
     }
