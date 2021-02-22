@@ -27,7 +27,6 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
-import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -122,7 +121,6 @@ public class OpenApiDataObjectScanner {
     private final AnnotationScannerContext context;
     private final AugmentedIndexView index;
     private final DataObjectDeque objectStack;
-    private final IgnoreResolver ignoreResolver;
 
     /**
      * Constructor for data object scanner.
@@ -140,7 +138,6 @@ public class OpenApiDataObjectScanner {
         this.context = context;
         this.index = context.getAugmentedIndex();
         this.objectStack = new DataObjectDeque(this.index);
-        this.ignoreResolver = new IgnoreResolver(this.index);
         this.rootClassType = classType;
         this.rootSchema = new SchemaImpl();
         this.rootClassInfo = initialType(classType);
@@ -250,7 +247,7 @@ public class OpenApiDataObjectScanner {
                 AnnotationTarget reference = currentPathEntry.getAnnotationTarget();
 
                 // Get all fields *including* inherited.
-                Map<String, TypeResolver> properties = TypeResolver.getAllFields(index, ignoreResolver, currentType,
+                Map<String, TypeResolver> properties = TypeResolver.getAllFields(context, currentType,
                         currentClass,
                         reference);
 
@@ -319,7 +316,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private void resolveSpecial(DataObjectDeque.PathEntry root, Type type) {
-        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(index, ignoreResolver, type, rootClassInfo,
+        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(context, type, rootClassInfo,
                 root.getAnnotationTarget());
         rootSchema = preProcessSpecial(type, fieldResolution.values().iterator().next(), root);
     }
