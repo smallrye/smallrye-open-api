@@ -38,6 +38,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Boolean applicationPathDisable;
     private Boolean privatePropertiesEnable;
     private String propertyNamingStrategy;
+    private Boolean sortedPropertiesEnable;
     private Map<String, String> schemas;
     private String version;
     private String infoTitle;
@@ -263,6 +264,17 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         }
 
         return propertyNamingStrategy;
+    }
+
+    @Override
+    public boolean sortedPropertiesEnable() {
+        if (sortedPropertiesEnable == null) {
+            sortedPropertiesEnable = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_SORTED_PROPERTIES_ENABLE, Boolean.class)
+                    .orElse(OpenApiConfig.super.sortedPropertiesEnable());
+        }
+
+        return sortedPropertiesEnable;
     }
 
     @Override

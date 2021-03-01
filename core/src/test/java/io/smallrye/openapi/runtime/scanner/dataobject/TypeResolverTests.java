@@ -17,6 +17,8 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -242,8 +244,8 @@ class TypeResolverTests extends IndexScannerTestBase {
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("comment", iter.next().getValue().getPropertyName());
         assertEquals("name2", iter.next().getValue().getPropertyName());
-        assertEquals("comment2", iter.next().getValue().getPropertyName());
         assertEquals("name", iter.next().getValue().getPropertyName());
+        assertEquals("comment2", iter.next().getValue().getPropertyName());
     }
 
     @Test
@@ -660,5 +662,27 @@ class TypeResolverTests extends IndexScannerTestBase {
         Map<String, TypeResolver> properties = getProperties(Test.class, emptyConfig(), Test.class);
         assertEquals(1, properties.size());
         assertEquals("b", properties.keySet().iterator().next());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "false, c, b, a",
+            "true, a, b, c",
+    })
+    void testSortedPropertyNames(boolean unsortedEnabled, String first, String second, String third) {
+        @SuppressWarnings("unused")
+        class Test {
+            int c;
+            int b;
+            int a;
+        }
+
+        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_SORTED_PROPERTIES_ENABLE, unsortedEnabled);
+        Map<String, TypeResolver> properties = getProperties(Test.class, config, Test.class);
+        assertEquals(3, properties.size());
+        Iterator<String> keys = properties.keySet().iterator();
+        assertEquals(first, keys.next());
+        assertEquals(second, keys.next());
+        assertEquals(third, keys.next());
     }
 }
