@@ -1,0 +1,40 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "Foo": {
+        "type": "object",
+        "properties": {
+          "generic": {
+            "$ref": "#/components/schemas/Generic2String"
+          }
+        }
+      },
+      "Generic2String": {
+        "type": "object",
+        "properties": {
+          "nested": {
+            "$ref": "#/components/schemas/Generic1String"
+          },
+          "nestedMap": {
+            "$ref": "#/components/schemas/CustomMapStringString"
+          }
+        }
+      },
+      "CustomMapStringString": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "Generic1String": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -407,4 +407,33 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     static class MultivaluedMap<K, V> extends HashMap<K, List<V>> {
         private static final long serialVersionUID = 1L;
     }
+
+    /****************************************************************/
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/715
+     */
+    @Test
+    void testNestedCustomGenericSchemas() throws IOException, JSONException {
+        Index index = indexOf(Foo.class, Generic1.class, Generic2.class, CustomMap.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.nested-custom-generics.json", result);
+    }
+
+    static class Generic1<T> {
+        T value;
+    }
+
+    static class Generic2<T> {
+        Generic1<T> nested;
+        CustomMap<T, T> nestedMap;
+    }
+
+    @Schema
+    static class Foo {
+        Generic2<String> generic;
+    }
+
 }
