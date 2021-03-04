@@ -64,4 +64,11 @@ public class GreetingGetController {
     public ResponseEntity<Greeting> helloPathVariableWithResponseTyped(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }
+
+    // 7) Test override of produces
+    @GetMapping(value = "/overrideProduces/{name}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String overrideProduces(@PathVariable(name = "name") String name) {
+        return "Hello " + name;
+    }
+
 }
