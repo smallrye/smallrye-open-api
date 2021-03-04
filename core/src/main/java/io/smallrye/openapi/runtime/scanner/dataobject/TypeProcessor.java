@@ -199,11 +199,12 @@ public class TypeProcessor {
             typeRead = OBJECT_TYPE;
 
             if (TypeUtil.allowRegistration(context, pType)) {
-                pushToStack(pType, schema);
+                // This type will be inspected later, if necessary.
+                pushResolvedToStack(pType, schema);
             }
         } else if (index.containsClass(pType)) {
-            // This type will be resolved later, if necessary.
-            pushToStack(pType, schema);
+            // This type will be inspected later, if necessary.
+            pushResolvedToStack(pType, schema);
         }
 
         return typeRead;
@@ -258,10 +259,15 @@ public class TypeProcessor {
             TypeUtil.applyTypeAttributes(resolvedType, schema);
         } else if (pushToStack) {
             // Add resolved type to stack.
-            objectStack.push(annotationTarget, parentPathEntry, resolvedType, schema);
+            pushToStack(resolvedType, schema);
         }
 
         return resolvedType;
+    }
+
+    private void pushResolvedToStack(Type type, Schema schema) {
+        Type resolvedType = this.typeResolver.resolve(type);
+        pushToStack(resolvedType, schema);
     }
 
     private void pushToStack(Type type, Schema schema) {
