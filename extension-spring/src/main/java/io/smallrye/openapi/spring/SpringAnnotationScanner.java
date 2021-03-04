@@ -297,7 +297,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             List<Parameter> locatorPathParameters) {
 
         SpringLogging.log.processingMethod(method.toString());
-        
+
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES,
                 context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
