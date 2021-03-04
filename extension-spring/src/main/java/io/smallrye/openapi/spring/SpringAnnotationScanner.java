@@ -3,6 +3,7 @@ package io.smallrye.openapi.spring;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -296,13 +297,14 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             List<Parameter> locatorPathParameters) {
 
         SpringLogging.log.processingMethod(method.toString());
-
+        
         // Figure out the current @Produces and @Consumes (if any)
         CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES,
                 context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES,
-                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+        String[] produces = getMediaTypes(method, SpringConstants.MAPPING_PRODUCES,
+                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null);
+        CurrentScannerInfo.setCurrentProduces(produces);
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, method);
@@ -366,25 +368,32 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
-        Set<DotName> annotationNames = SpringConstants.HTTP_METHODS;
+        Set<DotName> annotationNames = new HashSet<>(SpringConstants.HTTP_METHODS);
+        annotationNames.add(SpringConstants.REQUEST_MAPPING);
 
+        // Check methods
         for (DotName annotationName : annotationNames) {
             AnnotationInstance annotation = resourceMethod.annotation(annotationName);
-
-            if (annotation == null || annotation.value(property) == null) {
-                annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), SpringConstants.REQUEST_MAPPING);
-            }
-
             if (annotation != null) {
                 AnnotationValue annotationValue = annotation.value(property);
-
                 if (annotationValue != null) {
                     return Optional.of(annotationValue.asStringArray());
                 }
-
-                return Optional.of(defaultValue);
             }
         }
+
+        // Check class
+        AnnotationInstance annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(),
+                SpringConstants.REQUEST_MAPPING);
+        if (annotation != null) {
+            AnnotationValue annotationValue = annotation.value(property);
+            if (annotationValue != null) {
+                return Optional.of(annotationValue.asStringArray());
+            }
+
+            return Optional.of(defaultValue);
+        }
+
         return Optional.empty();
     }
 }
