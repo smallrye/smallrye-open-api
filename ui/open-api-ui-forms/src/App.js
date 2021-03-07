@@ -6,19 +6,32 @@ import SwaggerClient from "swagger-client";
 import { withTheme } from '@rjsf/core';
 import { Theme as Bootstrap4Theme } from '@rjsf/bootstrap-4';
 
+class SwaggerResult {
+  constructor(endpoints, servers) {
+      this.endpoints = endpoints;
+      this.servers = servers;
+  }
+}
+
 const Form = withTheme(Bootstrap4Theme);
 
 async function schemaOptions(openapiURL){
-  const a = await new SwaggerClient(openapiURL);
-  let res = [];
+  const a = await SwaggerClient.resolve({url: openapiURL});
+  const s = a.spec.servers != null ? a.spec.servers : [];
+  let endpoints = [];
   const b = a.spec.paths;
   for (const url in b) {
-    const schema = b[url]["post"]["requestBody"]["content"]["application/json"]["schema"];
-    if (schema != null) {
-      res.push({url : url, schema : schema});
+    try {
+      const schema = b[url]["post"]["requestBody"]["content"]["application/json"]["schema"];
+      if (schema != null) {
+        endpoints.push({url : url, schema : schema});
+      }
+    } catch (error) {
+      // the path url does not define any post for json, compatible with this app.
     }
   }
-  return res;    
+  const result = new SwaggerResult(endpoints, s);
+  return result;    
 }
 
 class OverrideRequestModal extends React.Component {
@@ -103,6 +116,11 @@ class OverrideRequestModal extends React.Component {
   }
 }
 
+const EMPTY_SELECTED = {url : "loading", schema: {
+  "title": "Please enter openapi URL",
+  "type": "object"
+}};
+
 class MyOpenAPIForm extends React.Component {
   constructor(props) {
     super(props);
@@ -110,12 +128,11 @@ class MyOpenAPIForm extends React.Component {
     console.log(this.myResult);
     this.state = { openapiURL : "/openapi",
                    schemas: [],
-                   selected :  {url : "loading", schema: {
-  "title": "Please enter openapi URL",
-  "type": "object"
-}},
+                   selected : EMPTY_SELECTED,
                    requestPayload : {},
                    responsePayload : "(nothing yet.)",
+                   servers: [],
+                   selectedServer: "",
                    key: Date.now() // required to reset any possible validation errors
                  };
 
@@ -125,6 +142,7 @@ class MyOpenAPIForm extends React.Component {
     this.handleFormChange = this.handleFormChange.bind(this);
     this.overrideRequest = this.overrideRequest.bind(this);
     this.getCurrentRequestValue = this.getCurrentRequestValue.bind(this);
+    this.handleServerChange = this.handleServerChange.bind(this);
     this.refreshSchemasFromOpenapiURL(this.state.openapiURL);
   }
 
@@ -139,13 +157,22 @@ class MyOpenAPIForm extends React.Component {
   }
 
   refreshSchemasFromOpenapiURL(openapiURL) {
-    schemaOptions(openapiURL).then(x => this.setState({schemas: x, selected: x[0], requestPayload : {}, responsePayload : "(nothing yet.)"}),
+    schemaOptions(openapiURL).then(x => this.setState({schemas: x.endpoints,
+                                                       selected: x.endpoints?.length > 0 ? x.endpoints[0] : EMPTY_SELECTED,
+                                                       servers: x.servers,
+                                                       selectedServer : x.servers?.length > 0 ? x.servers[0].url : "",
+                                                       requestPayload : {},
+                                                       responsePayload : "(nothing yet.)"}),
                                    err => this.setState({schemas: [], selected: { url : "Invalid_openAPI_url", schema: { "title": "Please enter a valid openapi URL", "type": "object" } } }));
   }
 
   handleFormChange(a) {
     const formData = a.formData;
     this.setState({requestPayload: formData});
+  }
+
+  handleServerChange(e) {
+    this.setState({selectedServer: e.target.value});
   }
 
   overrideRequest(x) {
@@ -172,7 +199,8 @@ class MyOpenAPIForm extends React.Component {
       method: "POST",
       mode: "cors" 
     };
-    fetch(this.state.selected.url, other_params)
+    const destURL = this.state.selectedServer + this.state.selected.url;
+    fetch(destURL, other_params)
     .then(function(response) {
       return response.json();
     }).then((data) => {
@@ -196,15 +224,24 @@ class MyOpenAPIForm extends React.Component {
   <div className="form-group">
     <label htmlFor="exampleFormControlSelect1">Select POST endpoint:</label>
     <select className="form-control" id="exampleFormControlSelect1" value={this.state.selected.url} onChange={this.handleChange}>
- {this.state.schemas.map(s => (
-            <option
-              key={s.url}
-              value={s.url}
-            >
-              {s.url}
-            </option>
-          ))}
-          </select>
+        {
+        this.state.schemas.map(s => (
+          <option key={s.url} value={s.url} > {s.url} </option>
+        ))
+        }
+    </select>
+  </div>
+  <div className="form-group row" style={this.state.servers?.length > 0 ? {} : { display: 'none' }}>
+    <label htmlFor="serverFormControlSelect" className="col-sm-2 col-form-label">Server:</label>
+    <div className="col-sm-10">
+      <select className="form-control" id="serverFormControlSelect" value={this.state.selectedServer} onChange={this.handleServerChange} >
+        {
+        this.state.servers?.map(s => (
+          <option key={s.url} value={s.url} >{s.url}</option>
+        ))
+        }
+      </select>
+    </div>
   </div>
 </div>
 </div>
