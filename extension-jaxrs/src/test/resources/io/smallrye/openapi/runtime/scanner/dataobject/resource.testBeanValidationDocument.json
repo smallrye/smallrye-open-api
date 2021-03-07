@@ -91,6 +91,7 @@
         "required": [
             "arrayListNotNullAndNotEmptyAndMaxItems",
             "booleanNotNull",
+            "jacksonRequiredTrueString",
             "mapObjectNotNullAndNotEmptyAndMaxProperties",
             "stringNotBlankNotNull"
         ],
@@ -219,6 +220,12 @@
             "nullable": false,
             "minLength": 100,
             "maxLength": 2000
+          },
+          "jacksonRequiredTrueString" : {
+            "type" : "string"
+          },
+          "jacksonDefaultString" : {
+            "type" : "string"
           }
         }
       }
