@@ -7,7 +7,9 @@ import static io.smallrye.openapi.runtime.util.TypeUtil.getAnnotation;
 import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -17,6 +19,7 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -29,6 +32,7 @@ public class BeanValidationScanner {
     }
 
     static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
+    static final Set<DotName> CONSTRAINTS = new HashSet<>();
 
     static final BigDecimal NEGATIVE_ONE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
@@ -39,21 +43,33 @@ public class BeanValidationScanner {
     static final DotName BV_DEFAULT_GROUP = createComponentized(BV_GROUPS, "Default");
 
     static final DotName BV_CONTRAINTS = createComponentized(BV_BASE, "constraints");
-    static final String BV_CONSTRAINT_PACKAGE = BV_CONTRAINTS.toString();
 
-    static final DotName BV_DECIMAL_MAX = createComponentized(BV_CONTRAINTS, "DecimalMax");
-    static final DotName BV_DECIMAL_MIN = createComponentized(BV_CONTRAINTS, "DecimalMin");
-    static final DotName BV_DIGITS = createComponentized(BV_CONTRAINTS, "Digits");
-    static final DotName BV_MAX = createComponentized(BV_CONTRAINTS, "Max");
-    static final DotName BV_MIN = createComponentized(BV_CONTRAINTS, "Min");
-    static final DotName BV_NEGATIVE = createComponentized(BV_CONTRAINTS, "Negative");
-    static final DotName BV_NEGATIVE_OR_ZERO = createComponentized(BV_CONTRAINTS, "NegativeOrZero");
-    static final DotName BV_NOT_BLANK = createComponentized(BV_CONTRAINTS, "NotBlank");
-    static final DotName BV_NOT_EMPTY = createComponentized(BV_CONTRAINTS, "NotEmpty");
-    static final DotName BV_NOT_NULL = createComponentized(BV_CONTRAINTS, "NotNull");
-    static final DotName BV_POSITIVE = createComponentized(BV_CONTRAINTS, "Positive");
-    static final DotName BV_POSITIVE_OR_ZERO = createComponentized(BV_CONTRAINTS, "PositiveOrZero");
-    static final DotName BV_SIZE = createComponentized(BV_CONTRAINTS, "Size");
+    // Bean Validation Constraints
+    static final DotName BV_DECIMAL_MAX = createConstraintName(BV_CONTRAINTS, "DecimalMax");
+    static final DotName BV_DECIMAL_MIN = createConstraintName(BV_CONTRAINTS, "DecimalMin");
+    static final DotName BV_DIGITS = createConstraintName(BV_CONTRAINTS, "Digits");
+    static final DotName BV_MAX = createConstraintName(BV_CONTRAINTS, "Max");
+    static final DotName BV_MIN = createConstraintName(BV_CONTRAINTS, "Min");
+    static final DotName BV_NEGATIVE = createConstraintName(BV_CONTRAINTS, "Negative");
+    static final DotName BV_NEGATIVE_OR_ZERO = createConstraintName(BV_CONTRAINTS, "NegativeOrZero");
+    static final DotName BV_NOT_BLANK = createConstraintName(BV_CONTRAINTS, "NotBlank");
+    static final DotName BV_NOT_EMPTY = createConstraintName(BV_CONTRAINTS, "NotEmpty");
+    static final DotName BV_NOT_NULL = createConstraintName(BV_CONTRAINTS, "NotNull");
+    static final DotName BV_POSITIVE = createConstraintName(BV_CONTRAINTS, "Positive");
+    static final DotName BV_POSITIVE_OR_ZERO = createConstraintName(BV_CONTRAINTS, "PositiveOrZero");
+    static final DotName BV_SIZE = createConstraintName(BV_CONTRAINTS, "Size");
+
+    // Jackson Constraints
+    static final DotName JACKSON_JSONPROPERTY = createConstraintName(JacksonConstants.JSON_PROPERTY);
+
+    static DotName createConstraintName(DotName packageName, String className) {
+        return createConstraintName(createComponentized(packageName, className));
+    }
+
+    static DotName createConstraintName(DotName constraintName) {
+        CONSTRAINTS.add(constraintName);
+        return constraintName;
+    }
 
     /**
      * Scan the annotation target to determine whether any annotations
@@ -67,8 +83,7 @@ public class BeanValidationScanner {
         return TypeUtil.getAnnotations(target)
                 .stream()
                 .map(AnnotationInstance::name)
-                .map(DotName::toString)
-                .anyMatch(name -> name.startsWith(BV_CONSTRAINT_PACKAGE));
+                .anyMatch(CONSTRAINTS::contains);
     }
 
     /**
@@ -123,6 +138,7 @@ public class BeanValidationScanner {
                 break;
             case BOOLEAN:
                 INSTANCE.notNull(target, schema, propertyKey, handler);
+                INSTANCE.requiredJackson(target, propertyKey, handler);
                 break;
             case INTEGER:
                 applyNumberConstraints(target, schema, propertyKey, handler);
@@ -148,6 +164,7 @@ public class BeanValidationScanner {
         INSTANCE.digits(target, schema);
         INSTANCE.notBlank(target, schema);
         INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeString(target, schema);
         INSTANCE.notEmptyString(target, schema);
     }
@@ -157,6 +174,7 @@ public class BeanValidationScanner {
             String propertyKey,
             RequirementHandler handler) {
         INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeObject(target, schema);
         INSTANCE.notEmptyObject(target, schema);
     }
@@ -166,6 +184,7 @@ public class BeanValidationScanner {
             String propertyKey,
             RequirementHandler handler) {
         INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeArray(target, schema);
         INSTANCE.notEmptyArray(target, schema);
     }
@@ -182,6 +201,7 @@ public class BeanValidationScanner {
         INSTANCE.negative(target, schema);
         INSTANCE.negativeOrZero(target, schema);
         INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.positive(target, schema);
         INSTANCE.positiveOrZero(target, schema);
     }
@@ -361,9 +381,7 @@ public class BeanValidationScanner {
                 schema.setNullable(Boolean.FALSE);
             }
 
-            if (handler != null && propertyKey != null) {
-                handler.setRequired(target, propertyKey);
-            }
+            handler.setRequired(target, propertyKey);
         }
     }
 
@@ -392,6 +410,14 @@ public class BeanValidationScanner {
             } else {
                 schema.setMinimum(BigDecimal.ZERO);
             }
+        }
+    }
+
+    void requiredJackson(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
+        Boolean required = TypeUtil.getAnnotationValue(target, JACKSON_JSONPROPERTY, "required");
+
+        if (Boolean.TRUE.equals(required)) {
+            handler.setRequired(target, propertyKey);
         }
     }
 
