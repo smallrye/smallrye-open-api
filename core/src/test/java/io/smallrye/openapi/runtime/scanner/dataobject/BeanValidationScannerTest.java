@@ -38,6 +38,8 @@ import org.jboss.jandex.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 
@@ -451,6 +453,34 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         assertEquals(Boolean.FALSE, schema.getNullable());
     }
 
+    @Test
+    void testJacksonRequiredString() {
+        String propertyKey = "jacksonRequiredTrueString";
+        FieldInfo targetField = targetClass.field(propertyKey);
+        Schema parentSchema = new SchemaImpl();
+
+        testTarget.requiredJackson(targetField, propertyKey, (target, name) -> {
+            parentSchema.addRequired(name);
+        });
+
+        assertNull(schema.getNullable());
+        assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
+    }
+
+    @Test
+    void testJacksonDefaultString() {
+        String propertyKey = "jacksonDefaultString";
+        FieldInfo targetField = targetClass.field(propertyKey);
+        Schema parentSchema = new SchemaImpl();
+
+        testTarget.requiredJackson(targetField, propertyKey, (target, name) -> {
+            parentSchema.addRequired(name);
+        });
+
+        assertNull(schema.getNullable());
+        assertNull(parentSchema.getRequired());
+    }
+
     /**********************************************************************/
 
     @SuppressWarnings("unused")
@@ -542,5 +572,12 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
         @NotNull
         private boolean booleanNotNull;
+
+        @JsonProperty(required = true)
+        private String jacksonRequiredTrueString;
+
+        @JsonProperty
+        private String jacksonDefaultString;
+
     }
 }
