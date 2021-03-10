@@ -132,17 +132,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Get all JaxRs applications and convert them to OpenAPI models (and merge them into a single one)
         processApplicationClasses(context, openApi);
 
-        // This needs to be here just after we have done JaxRs Application
-        boolean tagsDefined = openApi.getTags() != null && !openApi.getTags().isEmpty();
-
         // Now find all jax-rs endpoints
         processResourceClasses(context, openApi);
-
-        // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
-        sortTags(openApi, tagsDefined);
-
-        // Now that all paths have been created, sort them (we don't have a better way to organize them).
-        sortPaths(openApi);
 
         return openApi;
     }
