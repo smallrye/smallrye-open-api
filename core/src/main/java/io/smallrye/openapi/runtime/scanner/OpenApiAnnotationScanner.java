@@ -3,11 +3,19 @@ package io.smallrye.openapi.runtime.scanner;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Paths;
+import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.IndexView;
@@ -111,6 +119,7 @@ public class OpenApiAnnotationScanner {
 
         // Now load all entry points with SPI and scan those
         List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
+
         for (AnnotationScanner annotationScanner : annotationScanners) {
             if (filter == null || filter.length == 0 || Arrays.asList(filter).contains(annotationScanner.getName())) {
                 ScannerLogging.logger.scanning(annotationScanner.getName());
@@ -118,6 +127,10 @@ public class OpenApiAnnotationScanner {
                 openApi = annotationScanner.scan(annotationScannerContext, openApi);
             }
         }
+
+        sortTags(annotationScannerContext, openApi);
+        sortMaps(openApi);
+
         return openApi;
     }
 
@@ -197,5 +210,70 @@ public class OpenApiAnnotationScanner {
 
     private boolean annotatedClasses(AnnotationInstance annotation) {
         return Objects.equals(annotation.target().kind(), AnnotationTarget.Kind.CLASS);
+    }
+
+    /**
+     * Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
+     *
+     * @param context scanning context
+     * @param oai the openAPI model
+     */
+    private void sortTags(final AnnotationScannerContext context, OpenAPI oai) {
+        List<Tag> tags = oai.getTags();
+
+        // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
+        if (tags != null && !tags.isEmpty() && !tagsDefinedByOpenAPIDefinition(context)) {
+            oai.setTags(tags.stream()
+                    .sorted(Comparator.comparing(Tag::getName))
+                    .collect(Collectors.toList()));
+        }
+    }
+
+    private boolean tagsDefinedByOpenAPIDefinition(final AnnotationScannerContext context) {
+        return context.getIndex()
+                .getAnnotations(DefinitionConstant.DOTNAME_OPEN_API_DEFINITION)
+                .stream()
+                .filter(a -> a.value(DefinitionConstant.PROP_TAGS) != null)
+                .map(a -> a.value(DefinitionConstant.PROP_TAGS).asNestedArray())
+                .anyMatch(definitionTags -> definitionTags.length > 0);
+    }
+
+    private void sortMaps(OpenAPI oai) {
+        // Now that all paths have been created, sort them (we don't have a better way to organize them).
+        sort(oai.getPaths(), Paths::getPathItems, Paths::setPathItems);
+
+        final Components components = oai.getComponents();
+
+        sort(components, Components::getCallbacks, Components::setCallbacks);
+        sort(components, Components::getExamples, Components::setExamples);
+        sort(components, Components::getHeaders, Components::setHeaders);
+        sort(components, Components::getLinks, Components::setLinks);
+        sort(components, Components::getParameters, Components::setParameters);
+        sort(components, Components::getRequestBodies, Components::setRequestBodies);
+        sort(components, Components::getResponses, Components::setResponses);
+        sort(components, Components::getSchemas, Components::setSchemas);
+        sort(components, Components::getSecuritySchemes, Components::setSecuritySchemes);
+    }
+
+    private <P, V> void sort(P parent, Function<P, Map<String, V>> source, BiConsumer<P, Map<String, V>> target) {
+        if (parent == null) {
+            return;
+        }
+
+        final Map<String, V> unsorted = source.apply(parent);
+
+        if (unsorted == null || unsorted.isEmpty()) {
+            return;
+        }
+
+        final Map<String, V> sorted = unsorted.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new));
+
+        target.accept(parent, sorted);
     }
 }
