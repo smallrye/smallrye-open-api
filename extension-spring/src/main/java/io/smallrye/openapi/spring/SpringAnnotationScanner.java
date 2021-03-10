@@ -122,14 +122,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Get all Spring controllers and convert them to OpenAPI models (and merge them into a single one)
         processControllerClasses(context, openApi);
 
-        boolean tagsDefined = openApi.getTags() != null && !openApi.getTags().isEmpty();
-
-        // Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
-        sortTags(openApi, tagsDefined);
-
-        // Now that all paths have been created, sort them (we don't have a better way to organize them).
-        sortPaths(openApi);
-
         return openApi;
     }
 

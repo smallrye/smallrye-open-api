@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,14 +13,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
-import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
@@ -44,7 +40,6 @@ import org.jboss.jandex.Type;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
@@ -723,42 +718,6 @@ public interface AnnotationScanner {
         // this can be a useful extension point to set/override the application path
         for (AnnotationScannerExtension extension : context.getExtensions()) {
             extension.processScannerApplications(this, applications);
-        }
-    }
-
-    /**
-     * Sort the tags unless the application has defined the order in OpenAPIDefinition annotation(s)
-     * 
-     * @param openApi the openAPI model
-     * @param tagsDefined is the tags defined
-     */
-    default void sortTags(OpenAPI openApi, boolean tagsDefined) {
-
-        if (!tagsDefined && openApi.getTags() != null) {
-            openApi.setTags(openApi.getTags()
-                    .stream()
-                    .sorted(Comparator.comparing(Tag::getName))
-                    .collect(Collectors.toList()));
-        }
-    }
-
-    /**
-     * Now that all paths have been created, sort them.
-     * (we don't have a better way to organize them)
-     * 
-     * @param openApi the openApi model
-     */
-    default void sortPaths(OpenAPI openApi) {
-        Paths paths = openApi.getPaths();
-        if (paths != null) {
-            Paths sortedPaths = new PathsImpl();
-            TreeSet<String> sortedKeys = new TreeSet<>(paths.getPathItems().keySet());
-            for (String pathKey : sortedKeys) {
-                PathItem pathItem = paths.getPathItem(pathKey);
-                sortedPaths.addPathItem(pathKey, pathItem);
-            }
-            sortedPaths.setExtensions(paths.getExtensions());
-            openApi.setPaths(sortedPaths);
         }
     }
 
