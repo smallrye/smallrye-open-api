@@ -423,6 +423,29 @@ class TypeResolverTests extends IndexScannerTestBase {
         assertTrue(properties.get("field2").isIgnored());
     }
 
+    @Test
+    /*
+     * Issue: https://github.com/smallrye/smallrye-open-api/issues/746
+     */
+    void testSingleCharacterPropertyName() {
+        @SuppressWarnings("unused")
+        class Test {
+            private boolean b;
+
+            public boolean isB() {
+                return b;
+            }
+
+            public void setB(boolean b) {
+                this.b = b;
+            }
+        }
+
+        Map<String, TypeResolver> properties = getProperties(Test.class, emptyConfig(), Test.class);
+        assertEquals(1, properties.size());
+        assertEquals("b", properties.keySet().iterator().next());
+    }
+
     /* Test models and resources below. */
 
     @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "age", "type" })

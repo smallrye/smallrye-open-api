@@ -741,20 +741,10 @@ public class TypeResolver {
             MethodInfo method,
             Type propertyType) {
 
-        final String methodName = method.name();
-        final int nameStart = methodNamePrefix(method).length();
-        final boolean isWriteMethod = isMutator(method);
-        final String propertyName;
+        final String propertyName = propertyName(method);
 
-        if (methodName.length() == nameStart) {
-            // The method's name is "get", "set", or "is" without the property name
+        if (propertyName == null) {
             return null;
-        }
-
-        if (nameStart > 0) {
-            propertyName = Character.toLowerCase(methodName.charAt(nameStart)) + methodName.substring(nameStart + 1);
-        } else {
-            propertyName = methodName;
         }
 
         TypeResolver resolver;
@@ -771,6 +761,8 @@ public class TypeResolver {
             properties.put(propertyName, resolver);
         }
 
+        final boolean isWriteMethod = isMutator(method);
+
         if (isWriteMethod) {
             if (isHigherPriority(method, resolver.getWriteMethod())) {
                 resolver.setWriteMethod(method);
@@ -786,6 +778,37 @@ public class TypeResolver {
         }
 
         return resolver;
+    }
+
+    /**
+     * Derive the name of the property using the name of the given method. The method
+     * is assumed to be a "getter" (also supporting accessors for boolean values starting
+     * with "is") or a "setter".
+     * 
+     * @param method either an accessor (getter) or mutator (setter) for the property
+     * @return the property name
+     */
+    static String propertyName(MethodInfo method) {
+        final String methodName = method.name();
+        final int nameStart = methodNamePrefix(method).length();
+        final String propertyName;
+
+        if (methodName.length() == nameStart) {
+            // The method's name is "get", "set", or "is" without the property name
+            return null;
+        }
+
+        if (nameStart > 0) {
+            StringBuilder nameBuffer = new StringBuilder(methodName.length());
+            nameBuffer.append(methodName);
+            nameBuffer.setCharAt(nameStart, Character.toLowerCase(methodName.charAt(nameStart)));
+
+            propertyName = nameBuffer.substring(nameStart);
+        } else {
+            propertyName = methodName;
+        }
+
+        return propertyName;
     }
 
     /**
