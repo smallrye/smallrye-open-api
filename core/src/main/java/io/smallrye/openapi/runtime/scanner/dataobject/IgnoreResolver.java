@@ -174,8 +174,7 @@ public class IgnoreResolver {
                 return target.asField().name();
             }
             // Assuming this is a getter or setter
-            String name = target.asMethod().name().substring(3);
-            return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+            return TypeResolver.propertyName(target.asMethod());
         }
 
         private Visibility shouldIgnoreTarget(AnnotationInstance jipAnnotation, String targetName) {
