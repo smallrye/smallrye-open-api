@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -322,26 +321,52 @@ public class JandexUtil {
      * is found.
      * 
      * @param ct ClassInfo
-     * @param name DotName
+     * @param names List of DotNames
      * @return AnnotationInstance
      */
     public static AnnotationInstance getClassAnnotation(ClassInfo ct, List<DotName> names) {
         if (names == null || names.isEmpty()) {
             return null;
         }
-        Collection<AnnotationInstance> annotations = ct.classAnnotations();
-        for (AnnotationInstance annotationInstance : annotations) {
-            for (DotName dn : names) {
-                if (annotationInstance.name().equals(dn)) {
-                    return annotationInstance;
-                }
+
+        for (DotName dn : names) {
+            AnnotationInstance classAnnotation = ct.classAnnotation(dn);
+            if (classAnnotation != null) {
+                return classAnnotation;
             }
         }
+
         return null;
     }
 
     public static AnnotationInstance getAnnotation(MethodInfo mi, DotName... names) {
         return getAnnotation(mi, Arrays.asList(names));
+    }
+
+    public static AnnotationInstance getAnnotation(FieldInfo field, DotName name) {
+        return getAnnotation(field, Arrays.asList(name));
+    }
+
+    /**
+     * Gets a single annotation from the given field. Returns null if no matching annotation
+     * is found.
+     * 
+     * @param ct ClassInfo
+     * @param names DotName
+     * @return AnnotationInstance
+     */
+    public static AnnotationInstance getAnnotation(FieldInfo field, List<DotName> names) {
+        if (names == null || names.isEmpty()) {
+            return null;
+        }
+
+        for (DotName dn : names) {
+            AnnotationInstance annotation = field.annotation(dn);
+            if (annotation != null)
+                return annotation;
+        }
+
+        return null;
     }
 
     /**

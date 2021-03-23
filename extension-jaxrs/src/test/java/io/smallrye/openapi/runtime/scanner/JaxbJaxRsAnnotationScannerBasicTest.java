@@ -4,13 +4,9 @@ import java.io.IOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.jboss.jandex.Indexer;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
-
-import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
-import test.io.smallrye.openapi.runtime.scanner.entities.JaxbGreeting;
-import test.io.smallrye.openapi.runtime.scanner.entities.JaxbWithNameGreeting;
-import test.io.smallrye.openapi.runtime.scanner.resources.*;
 
 /**
  * Basic tests mostly to compare with Spring
@@ -26,8 +22,28 @@ class JaxbJaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase
      * @throws JSONException
      */
     @Test
-    void testBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(JaxbGreetingGetResource.class, Greeting.class, JaxbGreeting.class, JaxbWithNameGreeting.class);
+    void testJavaxBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/JaxbGreetingGetResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/JaxbGreeting.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/JaxbWithNameGreeting.class");
+
+        testBasicJaxRsGetDefinitionScanning(indexer.complete());
+    }
+
+    @Test
+    void testJakartaBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/JaxbGreetingGetResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/jakarta/JaxbGreeting.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/jakarta/JaxbWithNameGreeting.class");
+
+        testBasicJaxRsGetDefinitionScanning(indexer.complete());
+    }
+
+    void testBasicJaxRsGetDefinitionScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
