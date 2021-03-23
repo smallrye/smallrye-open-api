@@ -2,6 +2,7 @@ package io.smallrye.openapi.jaxrs;
 
 import java.lang.reflect.Modifier;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -69,22 +70,22 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return method.parameters()
                 .stream()
                 .map(Type::name)
-                .anyMatch(JaxRsConstants.ASYNC_RESPONSE::equals);
+                .anyMatch(JaxRsConstants.ASYNC_RESPONSE::contains);
     }
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        return method.hasAnnotation(JaxRsConstants.POST);
+        return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.POST);
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        return method.hasAnnotation(JaxRsConstants.DELETE);
+        return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.DELETE);
     }
 
     @Override
     public boolean isScannerInternalResponse(Type returnType) {
-        return returnType.name().equals(JaxRsConstants.RESPONSE);
+        return JaxRsConstants.RESPONSE.contains(returnType.name());
     }
 
     @Override
@@ -146,8 +147,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      */
     private void processApplicationClasses(final AnnotationScannerContext context, OpenAPI openApi) {
         // Get all JaxRs applications and convert them to OpenAPI models (and merge them into a single one)
-        Collection<ClassInfo> applications = context.getIndex().getAllKnownSubclasses(JaxRsConstants.APPLICATION);
-
+        Collection<ClassInfo> applications = new ArrayList<>();
+        for (DotName applicationindicator : JaxRsConstants.APPLICATION) {
+            applications.addAll(context.getIndex().getAllKnownSubclasses(applicationindicator));
+        }
         // this can be a useful extension point to set/override the application path
         processScannerExtensions(context, applications);
 
@@ -260,7 +263,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                                 locatorPathParameters, exceptionAnnotationMap);
                     });
 
-            if (resourceCount.get() == 0 && methodInfo.hasAnnotation(JaxRsConstants.PATH)) {
+            if (resourceCount.get() == 0 && JandexUtil.hasAnyOneOfAnnotation(methodInfo, JaxRsConstants.PATH)) {
                 processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters);
             }
         }
@@ -271,9 +274,14 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * 
      */
     private Map<DotName, AnnotationInstance> processExceptionMappers(final AnnotationScannerContext context) {
-        return context.getIndex()
-                .getKnownDirectImplementors(JaxRsConstants.EXCEPTION_MAPPER)
-                .stream()
+        Collection<ClassInfo> exceptionMappers = new ArrayList<>();
+
+        for (DotName dn : JaxRsConstants.EXCEPTION_MAPPER) {
+            exceptionMappers.addAll(context.getIndex()
+                    .getKnownDirectImplementors(dn));
+        }
+
+        return exceptionMappers.stream()
                 .flatMap(this::exceptionResponseAnnotations)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
@@ -281,7 +289,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private Stream<Entry<DotName, AnnotationInstance>> exceptionResponseAnnotations(ClassInfo classInfo) {
         return classInfo.interfaceTypes()
                 .stream()
-                .filter(it -> it.name().equals(JaxRsConstants.EXCEPTION_MAPPER))
+                .filter(it -> JaxRsConstants.EXCEPTION_MAPPER.contains(it.name()))
                 .filter(it -> Type.Kind.PARAMETERIZED_TYPE.equals(it.kind()))
                 .map(Type::asParameterizedType)
                 .map(type -> type.arguments().get(0)) // ExceptionMapper<?> has a single type argument
@@ -456,8 +464,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, DotName annotationName, String[] defaultValue) {
-        AnnotationInstance annotation = resourceMethod.annotation(annotationName);
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, List<DotName> annotationName, String[] defaultValue) {
+        AnnotationInstance annotation = JandexUtil.getAnnotation(resourceMethod, annotationName);
 
         if (annotation == null) {
             annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), annotationName);
@@ -484,8 +492,14 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * @return Collection of ClassInfo's
      */
     private Collection<ClassInfo> getJaxRsResourceClasses(AnnotationScannerContext context) {
-        return context.getIndex()
-                .getAnnotations(JaxRsConstants.PATH)
+        Collection<AnnotationInstance> pathAnnotations = new ArrayList<>();
+
+        for (DotName dn : JaxRsConstants.PATH) {
+            pathAnnotations.addAll(context.getIndex()
+                    .getAnnotations(dn));
+        }
+
+        return pathAnnotations
                 .stream()
                 .map(AnnotationInstance::target)
                 .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -657,6 +658,18 @@ public class TypeUtil {
                 .filter(annotation -> annotation.name().equals(annotationName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, List<DotName> annotationNames) {
+        if (annotationTarget == null) {
+            return null;
+        }
+        for (DotName dn : annotationNames) {
+            AnnotationInstance ai = getAnnotation(annotationTarget, dn);
+            if (ai != null)
+                return ai;
+        }
+        return null;
     }
 
     /**
