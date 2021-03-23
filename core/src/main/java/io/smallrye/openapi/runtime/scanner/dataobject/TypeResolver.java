@@ -60,7 +60,7 @@ public class TypeResolver {
     private boolean readOnly = false;
     private boolean writeOnly = false;
     private Type leaf;
-    private List<AnnotationTarget> constraintTargets = new ArrayList<>();
+    private final List<AnnotationTarget> constraintTargets = new ArrayList<>();
     private String propertyNamePrefix;
     private String propertyNameSuffix;
 
@@ -86,8 +86,10 @@ public class TypeResolver {
         if ((result = compareAnnotation(t1, t2, SchemaConstant.DOTNAME_SCHEMA)) != 0) {
             return result;
         }
-        if ((result = compareAnnotation(t1, t2, JsonbConstants.JSONB_PROPERTY)) != 0) {
-            return result;
+        for (DotName jsonbProperty : JsonbConstants.JSONB_PROPERTY) {
+            if ((result = compareAnnotation(t1, t2, jsonbProperty)) != 0) {
+                return result;
+            }
         }
         if ((result = compareAnnotation(t1, t2, JacksonConstants.JSON_PROPERTY)) != 0) {
             return result;
@@ -966,7 +968,7 @@ public class TypeResolver {
         AnnotationInstance propertyOrder;
         AnnotationValue orderArray = null;
 
-        if ((propertyOrder = clazz.classAnnotation(JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
+        if ((propertyOrder = JandexUtil.getClassAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
         } else if ((propertyOrder = JandexUtil.getClassAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
             orderArray = propertyOrder.value("propOrder");
