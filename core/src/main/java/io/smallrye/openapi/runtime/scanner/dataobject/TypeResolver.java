@@ -92,11 +92,15 @@ public class TypeResolver {
         if ((result = compareAnnotation(t1, t2, JacksonConstants.JSON_PROPERTY)) != 0) {
             return result;
         }
-        if ((result = compareAnnotation(t1, t2, JaxbConstants.XML_ELEMENT)) != 0) {
-            return result;
+        for (DotName xmlElement : JaxbConstants.XML_ELEMENT) {
+            if ((result = compareAnnotation(t1, t2, xmlElement)) != 0) {
+                return result;
+            }
         }
-        if ((result = compareAnnotation(t1, t2, JaxbConstants.XML_ATTRIBUTE)) != 0) {
-            return result;
+        for (DotName xmlAttribute : JaxbConstants.XML_ATTRIBUTE) {
+            if ((result = compareAnnotation(t1, t2, xmlAttribute)) != 0) {
+                return result;
+            }
         }
         if (t1.kind() == Kind.FIELD) {
             return -1;
@@ -964,7 +968,7 @@ public class TypeResolver {
 
         if ((propertyOrder = clazz.classAnnotation(JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
-        } else if ((propertyOrder = clazz.classAnnotation(JaxbConstants.XML_TYPE)) != null) {
+        } else if ((propertyOrder = JandexUtil.getClassAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
             orderArray = propertyOrder.value("propOrder");
         } else if ((propertyOrder = clazz.classAnnotation(JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
