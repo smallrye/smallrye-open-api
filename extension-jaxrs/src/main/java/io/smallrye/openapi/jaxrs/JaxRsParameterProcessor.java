@@ -190,7 +190,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
                     .put(paramName(annotation), annotation);
         } else if (frameworkParam.location == In.PATH && targetType != null
-                && JaxRsConstants.PATH_SEGMENT.equals(targetType.name())) {
+                && JaxRsConstants.PATH_SEGMENT.contains(targetType.name())) {
             String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
         } else if (frameworkParam.location != null) {
@@ -217,7 +217,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     @Override
-    protected DotName getDefaultAnnotationName() {
+    protected List<DotName> getDefaultAnnotationNames() {
         return JaxRsConstants.DEFAULT_VALUE;
     }
 
@@ -232,10 +232,10 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
         switch (target.kind()) {
             case CLASS:
-                path = target.asClass().classAnnotation(JaxRsConstants.PATH);
+                path = JandexUtil.getClassAnnotation(target.asClass(), JaxRsConstants.PATH);
                 break;
             case METHOD:
-                path = target.asMethod().annotation(JaxRsConstants.PATH);
+                path = JandexUtil.getAnnotation(target.asMethod(), JaxRsConstants.PATH);
                 break;
             default:
                 break;
@@ -263,7 +263,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         switch (method.returnType().kind()) {
             case CLASS:
             case PARAMETERIZED_TYPE:
-                return method.hasAnnotation(JaxRsConstants.PATH) &&
+                return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.PATH) &&
                         method.annotations()
                                 .stream()
                                 .map(AnnotationInstance::name)

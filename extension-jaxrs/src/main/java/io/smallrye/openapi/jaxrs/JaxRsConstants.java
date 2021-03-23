@@ -2,7 +2,8 @@ package io.smallrye.openapi.jaxrs;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.jandex.DotName;
@@ -15,46 +16,98 @@ import org.jboss.jandex.DotName;
  */
 public class JaxRsConstants {
 
-    static final DotName APPLICATION = DotName.createSimple("javax.ws.rs.core.Application");
-    static final DotName APPLICATION_PATH = DotName.createSimple("javax.ws.rs.ApplicationPath");
-    static final DotName PATH = DotName.createSimple("javax.ws.rs.Path");
-    static final DotName PRODUCES = DotName.createSimple("javax.ws.rs.Produces");
-    static final DotName CONSUMES = DotName.createSimple("javax.ws.rs.Consumes");
-    static final DotName EXCEPTION_MAPPER = DotName.createSimple("javax.ws.rs.ext.ExceptionMapper");
-    static final DotName QUERY_PARAM = DotName.createSimple("javax.ws.rs.QueryParam");
-    static final DotName FORM_PARAM = DotName.createSimple("javax.ws.rs.FormParam");
-    static final DotName COOKIE_PARAM = DotName.createSimple("javax.ws.rs.CookieParam");
-    static final DotName PATH_PARAM = DotName.createSimple("javax.ws.rs.PathParam");
-    static final DotName HEADER_PARAM = DotName.createSimple("javax.ws.rs.HeaderParam");
-    static final DotName MATRIX_PARAM = DotName.createSimple("javax.ws.rs.MatrixParam");
-    static final DotName BEAN_PARAM = DotName.createSimple("javax.ws.rs.BeanParam");
-    static final DotName ASYNC_RESPONSE = DotName.createSimple("javax.ws.rs.container.AsyncResponse");
-    static final DotName DEFAULT_VALUE = DotName.createSimple("javax.ws.rs.DefaultValue");
-    static final DotName RESPONSE = DotName.createSimple("javax.ws.rs.core.Response");
-    static final DotName PATH_SEGMENT = DotName.createSimple("javax.ws.rs.core.PathSegment");
+    static final List<DotName> APPLICATION = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.core.Application"),
+            DotName.createSimple("jakarta.ws.rs.core.Application"));
+    static final List<DotName> APPLICATION_PATH = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.ApplicationPath"),
+            DotName.createSimple("jakarta.ws.rs.ApplicationPath"));
+    static final List<DotName> PATH = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.Path"),
+            DotName.createSimple("jakarta.ws.rs.Path"));
+    static final List<DotName> PRODUCES = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.Produces"),
+            DotName.createSimple("jakarta.ws.rs.Produces"));
+    static final List<DotName> CONSUMES = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.Consumes"),
+            DotName.createSimple("jakarta.ws.rs.Consumes"));
+    static final List<DotName> EXCEPTION_MAPPER = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.ext.ExceptionMapper"),
+            DotName.createSimple("jakarta.ws.rs.ext.ExceptionMapper"));
+    static final List<DotName> QUERY_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.QueryParam"),
+            DotName.createSimple("jakarta.ws.rs.QueryParam"));
+    static final List<DotName> FORM_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.FormParam"),
+            DotName.createSimple("jakarta.ws.rs.FormParam"));
+    static final List<DotName> COOKIE_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.CookieParam"),
+            DotName.createSimple("jakarta.ws.rs.CookieParam"));
+    static final List<DotName> PATH_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.PathParam"),
+            DotName.createSimple("jakarta.ws.rs.PathParam"));
+    static final List<DotName> HEADER_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.HeaderParam"),
+            DotName.createSimple("jakarta.ws.rs.HeaderParam"));
+    static final List<DotName> MATRIX_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.MatrixParam"),
+            DotName.createSimple("jakarta.ws.rs.MatrixParam"));
+    static final List<DotName> BEAN_PARAM = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.BeanParam"),
+            DotName.createSimple("jakarta.ws.rs.BeanParam"));
+    static final List<DotName> ASYNC_RESPONSE = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.container.AsyncResponse"),
+            DotName.createSimple("jakarta.ws.rs.container.AsyncResponse"));
+    static final List<DotName> DEFAULT_VALUE = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.DefaultValue"),
+            DotName.createSimple("jakarta.ws.rs.DefaultValue"));
+    static final List<DotName> RESPONSE = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.core.Response"),
+            DotName.createSimple("jakarta.ws.rs.core.Response"));
+    static final List<DotName> PATH_SEGMENT = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.core.PathSegment"),
+            DotName.createSimple("jakarta.ws.rs.core.PathSegment"));
 
     static final DotName REGISTER_REST_CLIENT = DotName
             .createSimple("org.eclipse.microprofile.rest.client.inject.RegisterRestClient");
 
-    static final DotName GET = DotName.createSimple("javax.ws.rs.GET");
-    static final DotName PUT = DotName.createSimple("javax.ws.rs.PUT");
-    static final DotName POST = DotName.createSimple("javax.ws.rs.POST");
-    static final DotName DELETE = DotName.createSimple("javax.ws.rs.DELETE");
-    static final DotName HEAD = DotName.createSimple("javax.ws.rs.HEAD");
-    static final DotName OPTIONS = DotName.createSimple("javax.ws.rs.OPTIONS");
-    static final DotName PATCH = DotName.createSimple("javax.ws.rs.PATCH");
+    static final List<DotName> GET = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.GET"),
+            DotName.createSimple("jakarta.ws.rs.GET"));
+    static final List<DotName> PUT = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.PUT"),
+            DotName.createSimple("jakarta.ws.rs.PUT"));
+    static final List<DotName> POST = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.POST"),
+            DotName.createSimple("jakarta.ws.rs.POST"));
+    static final List<DotName> DELETE = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.DELETE"),
+            DotName.createSimple("jakarta.ws.rs.DELETE"));
+    static final List<DotName> HEAD = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.HEAD"),
+            DotName.createSimple("jakarta.ws.rs.HEAD"));
+    static final List<DotName> OPTIONS = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.OPTIONS"),
+            DotName.createSimple("jakarta.ws.rs.OPTIONS"));
+    static final List<DotName> PATCH = Arrays.asList(
+            DotName.createSimple("javax.ws.rs.PATCH"),
+            DotName.createSimple("jakarta.ws.rs.PATCH"));
 
     static final String TO_RESPONSE_METHOD_NAME = "toResponse";
 
+    private static final Set<DotName> methods = new LinkedHashSet<>();
+    static {
+        methods.addAll(GET);
+        methods.addAll(PUT);
+        methods.addAll(POST);
+        methods.addAll(DELETE);
+        methods.addAll(HEAD);
+        methods.addAll(OPTIONS);
+        methods.addAll(PATCH);
+    }
+
     static final Set<DotName> HTTP_METHODS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(
-                    GET,
-                    PUT,
-                    POST,
-                    DELETE,
-                    HEAD,
-                    OPTIONS,
-                    PATCH)));
+            .unmodifiableSet(methods);
 
     private JaxRsConstants() {
     }

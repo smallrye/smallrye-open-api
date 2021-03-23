@@ -29,8 +29,10 @@ public enum VertxParameter {
 
     public static boolean isParameter(DotName annotationName) {
         for (VertxParameter value : values()) {
-            if (value.parameter.getName().equals(annotationName)) {
-                return true;
+            for (DotName name : value.parameter.getNames()) {
+                if (name.equals(annotationName)) {
+                    return true;
+                }
             }
         }
         return false;
