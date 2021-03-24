@@ -14,7 +14,6 @@ import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreSchemaOnFieldExam
 import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreTypeExample;
-import test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.TransientFieldExample;
 
 /**
@@ -76,15 +75,27 @@ class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
     // Entirely ignore a single field once using JSON-B.
     @Test
-    void testIgnore_jsonbTransientField() throws IOException, JSONException {
-        DotName name = DotName.createSimple(JsonbTransientOnFieldExample.class.getName());
+    void testJavaxIgnore_jsonbTransientField() throws IOException, JSONException {
+        DotName name = DotName
+                .createSimple(test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample.class.getName());
+        testIgnore_jsonbTransientField(name, "ignore.jsonbTransientField.expected.json");
+    }
+
+    @Test
+    void testJakartaIgnore_jsonbTransientField() throws IOException, JSONException {
+        DotName name = DotName.createSimple(
+                test.io.smallrye.openapi.runtime.scanner.entities.jakarta.JsonbTransientOnFieldExample.class.getName());
+        testIgnore_jsonbTransientField(name, "ignore.jakartaJsonbTransientField.expected.json");
+    }
+
+    void testIgnore_jsonbTransientField(DotName name, String expected) throws IOException, JSONException {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context,
                 ClassType.create(name, Type.Kind.CLASS));
 
         Schema result = scanner.process();
 
         printToConsole(name.local(), result);
-        assertJsonEquals(name.local(), "ignore.jsonbTransientField.expected.json", result);
+        assertJsonEquals(name.local(), expected, result);
     }
 
     // Entirely ignore a single field once using hidden attribute of Schema.
