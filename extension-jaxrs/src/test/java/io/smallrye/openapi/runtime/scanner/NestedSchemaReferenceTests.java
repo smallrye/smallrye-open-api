@@ -7,14 +7,12 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
-
-import test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent;
-import test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -23,7 +21,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testNestedSchemasAddedToRegistry() throws IOException, JSONException {
-        DotName parentName = componentize(NestedSchemaParent.class.getName());
+        DotName parentName = componentize(test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
         OpenAPI oai = context.getOpenApi();
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
@@ -38,12 +36,26 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    void testNestedSchemaOnParameter() throws IOException, JSONException {
-        IndexView i = indexOf(NestedSchemaOnParameterResource.class,
-                NestedSchemaOnParameterResource.NestedParameterTestParent.class,
-                NestedSchemaOnParameterResource.NestedParameterTestChild.class,
-                NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
+    void testJavaxNestedSchemaOnParameter() throws IOException, JSONException {
+        IndexView i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.NestedParameterTestParent.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.NestedParameterTestChild.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
 
+        testNestedSchemaOnParameter(i);
+    }
+
+    @Test
+    void testJakartaNestedSchemaOnParameter() throws IOException, JSONException {
+        IndexView i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.NestedSchemaOnParameterResource.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.NestedSchemaOnParameterResource.NestedParameterTestParent.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.NestedSchemaOnParameterResource.NestedParameterTestChild.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
+
+        testNestedSchemaOnParameter(i);
+    }
+
+    void testNestedSchemaOnParameter(IndexView i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
 
         OpenAPI result = scanner.scan();
@@ -59,7 +71,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    void testSimpleNestedSchemaOnParameter() throws IOException, JSONException {
+    void testJavaxSimpleNestedSchemaOnParameter() throws IOException, JSONException {
         Indexer indexer = new Indexer();
 
         // Test samples
@@ -67,8 +79,24 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Foo.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Bar.class");
 
+        testSimpleNestedSchemaOnParameter(indexer.complete());
+    }
+
+    @Test
+    void testJakartaSimpleNestedSchemaOnParameter() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+
+        // Test samples
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/FooResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/FooResource$Foo.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/FooResource$Bar.class");
+
+        testSimpleNestedSchemaOnParameter(indexer.complete());
+    }
+
+    void testSimpleNestedSchemaOnParameter(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()),
-                indexer.complete());
+                i);
 
         OpenAPI result = scanner.scan();
 
