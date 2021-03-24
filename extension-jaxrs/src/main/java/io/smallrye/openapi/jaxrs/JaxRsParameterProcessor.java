@@ -122,7 +122,8 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             if (name.equals(resourceMethod.parameterName(i))) {
                 List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(resourceMethod, (short) i);
 
-                if (!JaxRsAnnotationScanner.containsJaxRsAnnotations(annotations)) {
+                if (!JaxRsAnnotationScanner.containsJavaxAnnotations(annotations) &&
+                        !JaxRsAnnotationScanner.containsJakartaAnnotations(annotations)) {
                     // If the parameter has annotations, use the first entry's target for use later when searching for BV constraints and extensions
                     AnnotationTarget target = annotations.isEmpty() ? null : annotations.get(0).target();
                     Type arg = methodParameters.get(i);
