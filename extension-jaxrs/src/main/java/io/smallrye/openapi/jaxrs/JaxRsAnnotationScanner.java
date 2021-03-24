@@ -56,7 +56,8 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
-    private static final String JAXRS_PACKAGE = "javax.ws.rs";
+    private static final String JAVAX_PACKAGE = "javax.ws.rs";
+    private static final String JAKARTA_PACKAGE = "jakarta.ws.rs";
 
     private final Deque<JaxRsSubResourceLocator> subResourceStack = new LinkedList<>();
 
@@ -102,7 +103,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
 
-        if (containsJaxRsAnnotations(instances)) {
+        if (containsJavaxAnnotations(instances) || containsJakartaAnnotations(instances)) {
             return true;
         }
 
@@ -115,12 +116,20 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return false;
     }
 
-    static boolean containsJaxRsAnnotations(List<AnnotationInstance> instances) {
+    static boolean containsJavaxAnnotations(List<AnnotationInstance> instances) {
+        return containsJaxrsAnnotations(instances, JAVAX_PACKAGE);
+    }
+
+    static boolean containsJakartaAnnotations(List<AnnotationInstance> instances) {
+        return containsJaxrsAnnotations(instances, JAKARTA_PACKAGE);
+    }
+
+    private static boolean containsJaxrsAnnotations(List<AnnotationInstance> instances, String packageIndicator) {
         for (AnnotationInstance instance : instances) {
             if (JaxRsParameter.isParameter(instance.name())) {
                 return true;
             }
-            if (instance.name().toString().startsWith(JAXRS_PACKAGE)) {
+            if (instance.name().toString().startsWith(packageIndicator)) {
                 return true;
             }
         }
