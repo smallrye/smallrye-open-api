@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
-import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScannerTest.BVTestContainer;
+import test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestContainer;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -37,7 +37,7 @@ class BeanValidationResourceTest extends IndexScannerTestBase {
 
     @Test
     void testBeanValidationDocument() throws IOException, JSONException {
-        Index index = indexOf(BVTestResource.class, BVTestResourceEntity.class, BeanValidationScannerTest.BVTestContainer.class,
+        Index index = indexOf(BVTestResource.class, BVTestResourceEntity.class, BVTestContainer.class,
                 TestEnum.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
