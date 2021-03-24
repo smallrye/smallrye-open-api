@@ -8,20 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.eclipse.microprofile.openapi.annotations.callbacks.Callback;
-import org.eclipse.microprofile.openapi.annotations.callbacks.CallbackOperation;
-import org.eclipse.microprofile.openapi.annotations.callbacks.Callbacks;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
@@ -40,8 +26,20 @@ import io.smallrye.openapi.api.OpenApiConfig;
 class CustomExtensionParsingTests {
 
     @Test
-    void testDefaultExtensionParseThrowsJacksonNotFound() {
-        Index index = IndexScannerTestBase.indexOf(ExtensionParsingTestResource.class);
+    void testJavaxDefaultExtensionParseThrowsJacksonNotFound() {
+        Index index = IndexScannerTestBase
+                .indexOf(test.io.smallrye.openapi.runtime.scanner.ExtensionParsingTestResource1.class);
+        testDefaultExtensionParseThrowsJacksonNotFound(index);
+    }
+
+    @Test
+    void testJakartaDefaultExtensionParseThrowsJacksonNotFound() {
+        Index index = IndexScannerTestBase
+                .indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.ExtensionParsingTestResource1.class);
+        testDefaultExtensionParseThrowsJacksonNotFound(index);
+    }
+
+    void testDefaultExtensionParseThrowsJacksonNotFound(Index index) {
         OpenApiConfig config = IndexScannerTestBase.emptyConfig();
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
         NoClassDefFoundError err = assertThrows(NoClassDefFoundError.class, () -> scanner.scan());
@@ -49,8 +47,20 @@ class CustomExtensionParsingTests {
     }
 
     @Test
-    void testCustomAnnotationScannerExtension() {
-        Index index = IndexScannerTestBase.indexOf(ExtensionParsingTestResource.class);
+    void testJavaxCustomAnnotationScannerExtension() {
+        Index index = IndexScannerTestBase
+                .indexOf(test.io.smallrye.openapi.runtime.scanner.ExtensionParsingTestResource1.class);
+        testCustomAnnotationScannerExtension(index);
+    }
+
+    @Test
+    void testJakartaCustomAnnotationScannerExtension() {
+        Index index = IndexScannerTestBase
+                .indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.ExtensionParsingTestResource1.class);
+        testCustomAnnotationScannerExtension(index);
+    }
+
+    void testCustomAnnotationScannerExtension(Index index) {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(IndexScannerTestBase.emptyConfig(), index,
                 Arrays.asList(new AnnotationScannerExtension() {
                     @Override
@@ -72,25 +82,5 @@ class CustomExtensionParsingTests {
         assertEquals("{ \"key\":\"value\" }", ext.get("x-object-unparsed"));
         assertEquals(Collections.singletonMap("x-array", "[ \"val1\",\"val2\" ]"), ext.get("x-array"));
         assertEquals("true", ext.get("x-booltrue"));
-    }
-
-    /* Test models and resources below. */
-
-    @Path("/ext-custom")
-    static class ExtensionParsingTestResource {
-        @POST
-        @Consumes(MediaType.TEXT_PLAIN)
-        @Produces(MediaType.TEXT_PLAIN)
-        @Callbacks({
-                @Callback(name = "extendedCallback", callbackUrlExpression = "http://localhost:8080/resources/ext-callback", operations = @CallbackOperation(summary = "Get results", extensions = {
-                        @Extension(name = "x-object", value = "{ \"key\":\"value\" }", parseValue = true),
-                        @Extension(name = "x-object-unparsed", value = "{ \"key\":\"value\" }"),
-                        @Extension(name = "x-array", value = "[ \"val1\",\"val2\" ]", parseValue = true),
-                        @Extension(name = "x-booltrue", value = "true", parseValue = false)
-                }, method = "get", responses = @APIResponse(responseCode = "200", description = "successful operation", content = @Content(mediaType = "application/json", schema = @Schema(type = SchemaType.ARRAY, implementation = String.class)))))
-        })
-        public String get(String data) {
-            return data;
-        }
     }
 }
