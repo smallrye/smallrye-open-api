@@ -7,7 +7,9 @@ import static io.smallrye.openapi.runtime.util.TypeUtil.getAnnotation;
 import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,27 +39,60 @@ public class BeanValidationScanner {
     static final BigDecimal NEGATIVE_ONE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
     static final DotName BV_JAVAX = createComponentized(null, "javax");
-    static final DotName BV_BASE = createComponentized(BV_JAVAX, "validation");
+    static final DotName BV_JAKARTA = createComponentized(null, "jakarta");
 
-    static final DotName BV_GROUPS = createComponentized(BV_BASE, "groups");
-    static final DotName BV_DEFAULT_GROUP = createComponentized(BV_GROUPS, "Default");
+    static final DotName BV_JAVAX_BASE = createComponentized(BV_JAVAX, "validation");
+    static final DotName BV_JAKARTA_BASE = createComponentized(BV_JAKARTA, "validation");
 
-    static final DotName BV_CONTRAINTS = createComponentized(BV_BASE, "constraints");
+    static final DotName BV_JAVAX_GROUPS = createComponentized(BV_JAVAX_BASE, "groups");
+    static final DotName BV_JAKARTA_GROUPS = createComponentized(BV_JAKARTA_BASE, "groups");
+
+    static final DotName BV_JAVAX_DEFAULT_GROUP = createComponentized(BV_JAVAX_GROUPS, "Default");
+    static final DotName BV_JAKARTA_DEFAULT_GROUP = createComponentized(BV_JAKARTA_GROUPS, "Default");
+
+    static final DotName BV_JAVAX_CONTRAINTS = createComponentized(BV_JAVAX_BASE, "constraints");
+    static final DotName BV_JAKARTA_CONTRAINTS = createComponentized(BV_JAKARTA_BASE, "constraints");
 
     // Bean Validation Constraints
-    static final DotName BV_DECIMAL_MAX = createConstraintName(BV_CONTRAINTS, "DecimalMax");
-    static final DotName BV_DECIMAL_MIN = createConstraintName(BV_CONTRAINTS, "DecimalMin");
-    static final DotName BV_DIGITS = createConstraintName(BV_CONTRAINTS, "Digits");
-    static final DotName BV_MAX = createConstraintName(BV_CONTRAINTS, "Max");
-    static final DotName BV_MIN = createConstraintName(BV_CONTRAINTS, "Min");
-    static final DotName BV_NEGATIVE = createConstraintName(BV_CONTRAINTS, "Negative");
-    static final DotName BV_NEGATIVE_OR_ZERO = createConstraintName(BV_CONTRAINTS, "NegativeOrZero");
-    static final DotName BV_NOT_BLANK = createConstraintName(BV_CONTRAINTS, "NotBlank");
-    static final DotName BV_NOT_EMPTY = createConstraintName(BV_CONTRAINTS, "NotEmpty");
-    static final DotName BV_NOT_NULL = createConstraintName(BV_CONTRAINTS, "NotNull");
-    static final DotName BV_POSITIVE = createConstraintName(BV_CONTRAINTS, "Positive");
-    static final DotName BV_POSITIVE_OR_ZERO = createConstraintName(BV_CONTRAINTS, "PositiveOrZero");
-    static final DotName BV_SIZE = createConstraintName(BV_CONTRAINTS, "Size");
+    static final List<DotName> BV_DECIMAL_MAX = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "DecimalMax"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "DecimalMax"));
+    static final List<DotName> BV_DECIMAL_MIN = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "DecimalMin"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "DecimalMin"));
+    static final List<DotName> BV_DIGITS = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Digits"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Digits"));
+    static final List<DotName> BV_MAX = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Max"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Max"));
+    static final List<DotName> BV_MIN = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Min"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Min"));
+    static final List<DotName> BV_NEGATIVE = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Negative"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Negative"));
+    static final List<DotName> BV_NEGATIVE_OR_ZERO = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "NegativeOrZero"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "NegativeOrZero"));
+    static final List<DotName> BV_NOT_BLANK = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "NotBlank"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "NotBlank"));
+    static final List<DotName> BV_NOT_EMPTY = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "NotEmpty"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "NotEmpty"));
+    static final List<DotName> BV_NOT_NULL = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "NotNull"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "NotNull"));
+    static final List<DotName> BV_POSITIVE = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Positive"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Positive"));
+    static final List<DotName> BV_POSITIVE_OR_ZERO = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "PositiveOrZero"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "PositiveOrZero"));
+    static final List<DotName> BV_SIZE = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Size"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Size"));
 
     // Jackson Constraints
     static final DotName JACKSON_JSONPROPERTY = createConstraintName(JacksonConstants.JSON_PROPERTY);
@@ -499,7 +534,7 @@ public class BeanValidationScanner {
      * @return the first occurrence of the named constraint if no groups or only
      *         the {@link Default} group is specified, or null
      */
-    AnnotationInstance getConstraint(AnnotationTarget target, DotName annotationName) {
+    AnnotationInstance getConstraint(AnnotationTarget target, List<DotName> annotationName) {
         AnnotationInstance constraint = getAnnotation(target, annotationName);
 
         if (constraint != null) {
@@ -515,7 +550,7 @@ public class BeanValidationScanner {
                 case 0:
                     return constraint;
                 case 1:
-                    if (groups[0].name().equals(BV_DEFAULT_GROUP)) {
+                    if (groups[0].name().equals(BV_JAVAX_DEFAULT_GROUP) || groups[0].name().equals(BV_JAKARTA_DEFAULT_GROUP)) {
                         return constraint;
                     }
                     break;
