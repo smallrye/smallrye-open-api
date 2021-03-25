@@ -1,0 +1,14 @@
+{
+  "components" : {
+    "schemas" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.jakarta.JsonbTransientOnFieldExample" : {
+        "type": "object",
+        "properties" : {
+          "serializedField" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,7 +73,7 @@ public class IgnoreResolver {
     private final class SchemaHiddenHandler implements IgnoreAnnotationHandler {
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
+            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getNames());
             if (annotationInstance != null) {
                 Boolean hidden = JandexUtil.value(annotationInstance, SchemaConstant.PROP_HIDDEN);
 
@@ -84,8 +85,8 @@ public class IgnoreResolver {
         }
 
         @Override
-        public DotName getName() {
-            return SchemaConstant.DOTNAME_SCHEMA;
+        public List<DotName> getNames() {
+            return Arrays.asList(SchemaConstant.DOTNAME_SCHEMA);
         }
     }
 
@@ -95,11 +96,11 @@ public class IgnoreResolver {
     private final class JsonbTransientHandler implements IgnoreAnnotationHandler {
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            return TypeUtil.hasAnnotation(target, getName()) ? Visibility.IGNORED : Visibility.UNSET;
+            return TypeUtil.hasAnnotation(target, getNames()) ? Visibility.IGNORED : Visibility.UNSET;
         }
 
         @Override
-        public DotName getName() {
+        public List<DotName> getNames() {
             return JsonbConstants.JSONB_TRANSIENT;
         }
     }
@@ -136,7 +137,7 @@ public class IgnoreResolver {
          * @return
          */
         private Visibility declaringClassIgnore(AnnotationTarget target) {
-            AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(TypeUtil.getDeclaringClass(target), getName());
+            AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(TypeUtil.getDeclaringClass(target), getNames());
             return shouldIgnoreTarget(declaringClassJIP, propertyName(target));
         }
 
@@ -165,7 +166,7 @@ public class IgnoreResolver {
             if (nesting == null) {
                 return Visibility.UNSET;
             }
-            AnnotationInstance nestedTypeJIP = TypeUtil.getAnnotation(nesting, getName());
+            AnnotationInstance nestedTypeJIP = TypeUtil.getAnnotation(nesting, getNames());
             return shouldIgnoreTarget(nestedTypeJIP, propertyName);
         }
 
@@ -190,8 +191,8 @@ public class IgnoreResolver {
         }
 
         @Override
-        public DotName getName() {
-            return JacksonConstants.JSON_IGNORE_PROPERTIES;
+        public List<DotName> getNames() {
+            return Arrays.asList(JacksonConstants.JSON_IGNORE_PROPERTIES);
         }
     }
 
@@ -202,7 +203,7 @@ public class IgnoreResolver {
 
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getName());
+            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getNames());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 return Visibility.IGNORED;
             }
@@ -210,8 +211,8 @@ public class IgnoreResolver {
         }
 
         @Override
-        public DotName getName() {
-            return JacksonConstants.JSON_IGNORE;
+        public List<DotName> getNames() {
+            return Arrays.asList(JacksonConstants.JSON_IGNORE);
         }
     }
 
@@ -265,7 +266,7 @@ public class IgnoreResolver {
                 return Visibility.IGNORED;
             }
 
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(classInfo, getName());
+            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(classInfo, getNames());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 // Add the ignored field or class name
                 DataObjectLogging.logger.ignoringTypeAndAddingToSet(classInfo.name());
@@ -276,8 +277,8 @@ public class IgnoreResolver {
         }
 
         @Override
-        public DotName getName() {
-            return JacksonConstants.JSON_IGNORE_TYPE;
+        public List<DotName> getNames() {
+            return Arrays.asList(JacksonConstants.JSON_IGNORE_TYPE);
         }
     }
 
@@ -303,8 +304,8 @@ public class IgnoreResolver {
         }
 
         @Override
-        public DotName getName() {
-            return DotName.createSimple(TransientIgnoreHandler.class.getName());
+        public List<DotName> getNames() {
+            return Arrays.asList(DotName.createSimple(TransientIgnoreHandler.class.getName()));
         }
     }
 
@@ -367,7 +368,7 @@ public class IgnoreResolver {
         }
 
         @Override
-        public DotName getName() {
+        public List<DotName> getNames() {
             return null;
         }
     }
@@ -381,7 +382,7 @@ public class IgnoreResolver {
     private interface IgnoreAnnotationHandler {
         Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference);
 
-        DotName getName();
+        List<DotName> getNames();
     }
 
 }

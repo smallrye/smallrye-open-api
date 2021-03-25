@@ -53,11 +53,6 @@
             <groupId>org.jboss</groupId>
             <artifactId>jandex</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>jakarta.json.bind</groupId>
-            <artifactId>jakarta.json.bind-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

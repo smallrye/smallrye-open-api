@@ -8,25 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.io.IOException;
 import java.util.List;
 
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Response;
-
-import org.eclipse.microprofile.openapi.annotations.Components;
-import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
-import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
-import org.eclipse.microprofile.openapi.annotations.info.Info;
-import org.eclipse.microprofile.openapi.annotations.security.OAuthFlow;
-import org.eclipse.microprofile.openapi.annotations.security.OAuthFlows;
-import org.eclipse.microprofile.openapi.annotations.security.OAuthScope;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
-import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.Index;
@@ -38,8 +19,22 @@ import io.smallrye.openapi.api.OpenApiConfig;
 class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
-    void testClassRolesAllowedGeneratedScheme() throws IOException {
-        Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource1.class);
+    void testJavaxClassRolesAllowedGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+
+        testClassRolesAllowedGeneratedScheme(index);
+    }
+
+    @Test
+    void testJakartaClassRolesAllowedGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedResource1.class);
+
+        testClassRolesAllowedGeneratedScheme(index);
+    }
+
+    void testClassRolesAllowedGeneratedScheme(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -61,8 +56,20 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testPermitAllWithoutGeneratedScheme() throws IOException {
-        Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource1.class);
+    void testJavaxPermitAllWithoutGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        testPermitAllWithoutGeneratedScheme(index);
+    }
+
+    @Test
+    void testJakartaPermitAllWithoutGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedResource1.class);
+        testPermitAllWithoutGeneratedScheme(index);
+    }
+
+    void testPermitAllWithoutGeneratedScheme(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -72,8 +79,20 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testGeneratedSchemeEmptyRoles() throws IOException {
-        Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource1.class);
+    void testJavaxGeneratedSchemeEmptyRoles() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        testGeneratedSchemeEmptyRoles(index);
+    }
+
+    @Test
+    void testJakartaGeneratedSchemeEmptyRoles() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedResource1.class);
+        testGeneratedSchemeEmptyRoles(index);
+    }
+
+    void testGeneratedSchemeEmptyRoles(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -85,8 +104,20 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testMethodRolesAllowedGeneratedScheme() throws IOException {
-        Index index = indexOf(RolesAllowedApp.class, RolesAllowedResource2.class);
+    void testJavaxMethodRolesAllowedGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource2.class);
+        testMethodRolesAllowedGeneratedScheme(index);
+    }
+
+    @Test
+    void testJakartaMethodRolesAllowedGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedResource2.class);
+        testMethodRolesAllowedGeneratedScheme(index);
+    }
+
+    void testMethodRolesAllowedGeneratedScheme(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -109,8 +140,20 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testNoEligibleScheme() throws IOException {
-        Index index = indexOf(RolesNotAllowedApp.class, RolesAllowedResource1.class);
+    void testJavaxNoEligibleScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesNotAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        testNoEligibleScheme(index);
+    }
+
+    @Test
+    void testJakartaNoEligibleScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.RolesNotAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedResource1.class);
+        testNoEligibleScheme(index);
+    }
+
+    void testNoEligibleScheme(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -121,8 +164,20 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testDeclaredRolesMethodRolesAllowedGeneratedScheme() throws IOException {
-        Index index = indexOf(RolesAllowedApp.class, RolesDeclaredResource.class);
+    void testJavaxDeclaredRolesMethodRolesAllowedGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.RolesDeclaredResource.class);
+        testDeclaredRolesMethodRolesAllowedGeneratedScheme(index);
+    }
+
+    @Test
+    void testJakartaDeclaredRolesMethodRolesAllowedGeneratedScheme() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RolesDeclaredResource.class);
+        testDeclaredRolesMethodRolesAllowedGeneratedScheme(index);
+    }
+
+    void testDeclaredRolesMethodRolesAllowedGeneratedScheme(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -150,8 +205,20 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
      *
      */
     @Test
-    void testSchemesWithoutRoles() throws IOException {
-        Index index = indexOf(UndeclaredFlowsNoRolesAllowedApp.class, NoRolesResource.class);
+    void testJavaxSchemesWithoutRoles() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.UndeclaredFlowsNoRolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.NoRolesResource.class);
+        testSchemesWithoutRoles(index);
+    }
+
+    @Test
+    void testJakartaSchemesWithoutRoles() throws IOException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.UndeclaredFlowsNoRolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.NoRolesResource.class);
+        testSchemesWithoutRoles(index);
+    }
+
+    void testSchemesWithoutRoles(Index index) throws IOException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(index, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -165,91 +232,5 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
                 .getSecuritySchemes()
                 .get("oidc")
                 .getFlows());
-    }
-
-    @OpenAPIDefinition(info = @Info(title = "RolesAllowed App", version = "1.0"), components = @Components(securitySchemes = {
-            @SecurityScheme(securitySchemeName = "rolesScheme", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(), implicit = @OAuthFlow(scopes = {
-                    @OAuthScope(name = "scope1", description = "Provided by OAI annotation") })))
-    }))
-    static class RolesAllowedApp extends Application {
-    }
-
-    @OpenAPIDefinition(info = @Info(title = "RolesNotAllowed App", version = "1.0"), components = @Components(securitySchemes = {
-            @SecurityScheme(securitySchemeName = "noTypeScheme", flows = @OAuthFlows(clientCredentials = @OAuthFlow(), implicit = @OAuthFlow(scopes = {
-                    @OAuthScope(name = "scope1", description = "Provided by OAI annotation") })))
-    }))
-    static class RolesNotAllowedApp extends Application {
-    }
-
-    @OpenAPIDefinition(info = @Info(title = "UndeclaredFlowsNoRolesAllowed App", version = "1.0"))
-    // Single scheme missing 'flows'
-    @SecuritySchemes(value = {
-            @SecurityScheme(securitySchemeName = "oidc", type = SecuritySchemeType.OPENIDCONNECT, openIdConnectUrl = "https://example.com/auth/realms/custom_realm/.well-known/openid-configuration") })
-    static class UndeclaredFlowsNoRolesAllowedApp extends Application {
-    }
-
-    @Path("/v1")
-    @RolesAllowed("admin")
-    @SuppressWarnings("unused")
-    static class RolesAllowedResource1 {
-        @GET
-        @Path("secured")
-        @Produces("application/json")
-        public Response getSecuredData(int id) {
-            return null;
-        }
-
-        @GET
-        @Path("open")
-        @Produces("application/json")
-        @PermitAll
-        public Response getOpenData(int id) {
-            return null;
-        }
-
-        @GET
-        @Path("locked")
-        @Produces("application/json")
-        @DenyAll
-        public Response getLockedData(int id) {
-            return null;
-        }
-    }
-
-    @Path("/v2")
-    @SuppressWarnings("unused")
-    static class RolesAllowedResource2 {
-        @GET
-        @Path("secured")
-        @Produces("application/json")
-        @RolesAllowed({ "admin", "users" })
-        public Response getSecuredData(int id) {
-            return null;
-        }
-    }
-
-    @Path("/v1")
-    @SuppressWarnings("unused")
-    @DeclareRoles({ "admin", "users" })
-    static class RolesDeclaredResource {
-        @GET
-        @Path("secured")
-        @Produces("application/json")
-        @RolesAllowed({ "admin" })
-        public Response getSecuredData(int id) {
-            return null;
-        }
-    }
-
-    @Path("/v1")
-    @SuppressWarnings("unused")
-    static class NoRolesResource {
-        @GET
-        @Path("secured")
-        @Produces("application/json")
-        @RolesAllowed({ "admin" })
-        public Response getSecuredData(int id) {
-            return null;
-        }
     }
 }

@@ -1,5 +1,8 @@
 package io.smallrye.openapi.api.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.jandex.DotName;
 
 /**
@@ -10,12 +13,17 @@ import org.jboss.jandex.DotName;
  */
 public class JsonbConstants {
 
-    public static final DotName JSONB_PROPERTY = DotName
-            .createSimple("javax.json.bind.annotation.JsonbProperty");
-    public static final DotName JSONB_TRANSIENT = DotName
-            .createSimple("javax.json.bind.annotation.JsonbTransient");
-    public static final DotName JSONB_PROPERTY_ORDER = DotName
-            .createSimple("javax.json.bind.annotation.JsonbPropertyOrder");
+    public static final List<DotName> JSONB_PROPERTY = Arrays.asList(
+            DotName.createSimple("javax.json.bind.annotation.JsonbProperty"),
+            DotName.createSimple("jakarta.json.bind.annotation.JsonbProperty"));
+
+    public static final List<DotName> JSONB_TRANSIENT = Arrays.asList(
+            DotName.createSimple("javax.json.bind.annotation.JsonbTransient"),
+            DotName.createSimple("jakarta.json.bind.annotation.JsonbTransient"));
+
+    public static final List<DotName> JSONB_PROPERTY_ORDER = Arrays.asList(
+            DotName.createSimple("javax.json.bind.annotation.JsonbPropertyOrder"),
+            DotName.createSimple("jakarta.json.bind.annotation.JsonbPropertyOrder"));
 
     public static final String PROP_VALUE = "value";
 

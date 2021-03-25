@@ -16,7 +16,6 @@ import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
 
 /**
  * Basic tests to check the version configuration
@@ -34,8 +33,18 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
      * @throws org.json.JSONException
      */
     @Test
-    void testSettingViaProvidedSchema() throws IOException, JSONException {
-        Index i = indexOf(GreetingGetResource.class, Greeting.class);
+    void testJavaxSettingViaProvidedSchema() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource.class, Greeting.class);
+        testSettingViaProvidedSchema(i);
+    }
+
+    @Test
+    void testJakartaSettingViaProvidedSchema() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
+        testSettingViaProvidedSchema(i);
+    }
+
+    void testSettingViaProvidedSchema(Index i) throws IOException, JSONException {
         OpenAPI result = OpenApiProcessor.bootstrap(emptyConfig(), i, loadStaticFile());
 
         printToConsole(result);
@@ -43,14 +52,23 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    void testSettingViaConfig() throws IOException, JSONException {
+    void testJavaxSettingViaConfig() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfig(i);
+    }
+
+    @Test
+    void testJakartaSettingViaConfig() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfig(i);
+    }
+
+    void testSettingViaConfig(Index i) throws IOException, JSONException {
         System.setProperty(VERSION_PROPERTY, "3.0.0");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
         try {
-            Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
-
             printToConsole(result);
             assertJsonEquals("resource.testVersionViaConfig.json", result);
 
@@ -60,12 +78,22 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    void testSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
+    void testJavaxSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfigWhenStaticPresent(i);
+    }
+
+    @Test
+    void testJakartaSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfigWhenStaticPresent(i);
+    }
+
+    void testSettingViaConfigWhenStaticPresent(Index i) throws IOException, JSONException {
         System.setProperty(VERSION_PROPERTY, "3.0.0");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
         try {
-            Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i, loadStaticFile());
 
             printToConsole(result);

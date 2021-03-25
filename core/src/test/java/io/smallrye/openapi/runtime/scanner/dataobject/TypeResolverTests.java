@@ -10,15 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.json.bind.annotation.JsonbProperty;
-import javax.json.bind.annotation.JsonbPropertyOrder;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget.Kind;
@@ -52,8 +43,28 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testAnnotatedMethodOverridesParentSchema() {
-        Map<String, TypeResolver> properties = getProperties(Cat.class, AbstractAnimal.class, Feline.class, Cat.class);
+    void testJavaxAnnotatedMethodOverridesParentSchema() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class);
+
+        testAnnotatedMethodOverridesParentSchema(properties);
+    }
+
+    @Test
+    void testJakartaAnnotatedMethodOverridesParentSchema() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
+
+        testAnnotatedMethodOverridesParentSchema(properties);
+    }
+
+    void testAnnotatedMethodOverridesParentSchema(Map<String, TypeResolver> properties) {
         TypeResolver resolver = properties.get("type");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -65,8 +76,25 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testAnnotatedFieldsOverridesInterfaceSchema() {
-        Map<String, TypeResolver> properties = getProperties(Cat.class, AbstractAnimal.class, Feline.class, Cat.class);
+    void testJavaxAnnotatedFieldsOverridesInterfaceSchema() {
+        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class);
+        testAnnotatedFieldsOverridesInterfaceSchema(properties);
+    }
+
+    @Test
+    void testJakartaAnnotatedFieldsOverridesInterfaceSchema() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
+        testAnnotatedFieldsOverridesInterfaceSchema(properties);
+    }
+
+    void testAnnotatedFieldsOverridesInterfaceSchema(Map<String, TypeResolver> properties) {
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.FIELD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -75,8 +103,27 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testAnnotatedInterfaceMethodOverridesImplMethod() {
-        Map<String, TypeResolver> properties = getProperties(Dog.class, AbstractAnimal.class, Canine.class, Dog.class);
+    void testJavaxAnnotatedInterfaceMethodOverridesImplMethod() {
+        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Dog.class);
+
+        testAnnotatedInterfaceMethodOverridesImplMethod(properties);
+    }
+
+    @Test
+    void testJakartaAnnotatedInterfaceMethodOverridesImplMethod() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class);
+
+        testAnnotatedInterfaceMethodOverridesImplMethod(properties);
+    }
+
+    void testAnnotatedInterfaceMethodOverridesImplMethod(Map<String, TypeResolver> properties) {
         assertEquals(5, properties.size());
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
@@ -90,7 +137,11 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testAnnotatedInterfaceMethodOverridesStaticField() {
-        Map<String, TypeResolver> properties = getProperties(Lizard.class, AbstractAnimal.class, Reptile.class, Lizard.class);
+        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Reptile.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class);
+
         TypeResolver resolver = properties.get("scaleColor");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
         AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
@@ -104,8 +155,23 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testBareInterface() {
-        Map<String, TypeResolver> properties = getProperties(MySchema.class, MySchema.class);
+    void testJavaxBareInterface() {
+        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.MySchema.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.MySchema.class);
+
+        testBareInterface(properties);
+    }
+
+    @Test
+    void testJakartaBareInterface() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.MySchema.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.MySchema.class);
+
+        testBareInterface(properties);
+    }
+
+    void testBareInterface(Map<String, TypeResolver> properties) {
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("field1", iter.next().getKey());
@@ -132,8 +198,9 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJacksonPropertyOrderDefault() {
-        Map<String, TypeResolver> properties = getProperties(JacksonPropertyOrderDefault.class,
-                JacksonPropertyOrderDefault.class);
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.JacksonPropertyOrderDefault.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.JacksonPropertyOrderDefault.class);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("comment", iter.next().getValue().getPropertyName());
@@ -142,8 +209,9 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJacksonPropertyOrderCustomName() {
-        Map<String, TypeResolver> properties = getProperties(JacksonPropertyOrderCustomName.class,
-                JacksonPropertyOrderCustomName.class);
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.JacksonPropertyOrderCustomName.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.JacksonPropertyOrderCustomName.class);
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("theName", iter.next().getValue().getPropertyName());
@@ -152,8 +220,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testJaxbCustomPropertyOrder() {
-        Map<String, TypeResolver> properties = getProperties(JaxbCustomPropertyOrder.class, JaxbCustomPropertyOrder.class);
+    void testJavaxJaxbCustomPropertyOrder() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.JaxbCustomPropertyOrder.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.JaxbCustomPropertyOrder.class);
+
+        testJaxbCustomPropertyOrder(properties);
+    }
+
+    @Test
+    void testJakartaJaxbCustomPropertyOrder() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.JaxbCustomPropertyOrder.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.JaxbCustomPropertyOrder.class);
+
+        testJaxbCustomPropertyOrder(properties);
+    }
+
+    void testJaxbCustomPropertyOrder(Map<String, TypeResolver> properties) {
         assertEquals(4, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("comment", iter.next().getValue().getPropertyName());
@@ -164,8 +248,9 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testNonJavaBeansPropertyAccessor() {
-        Map<String, TypeResolver> properties = getProperties(NonJavaBeanAccessorProperty.class,
-                NonJavaBeanAccessorProperty.class);
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanAccessorProperty.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanAccessorProperty.class);
         assertEquals(1, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
@@ -178,8 +263,9 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testNonJavaBeansPropertyMutator() {
-        Map<String, TypeResolver> properties = getProperties(NonJavaBeanMutatorProperty.class,
-                NonJavaBeanMutatorProperty.class);
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanMutatorProperty.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanMutatorProperty.class);
         assertEquals(1, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
@@ -192,8 +278,10 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testOneSidedPropertiesHidden() {
-        Map<String, TypeResolver> properties = getProperties(OneSidedProperties.class, OneSidedProperties.class,
-                OneSidedParent.class);
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.OneSidedProperties.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.OneSidedProperties.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.OneSidedParent.class);
         assertEquals(5, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -219,8 +307,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testXmlAccessTransientField() {
-        Map<String, TypeResolver> properties = getProperties(XmlTransientField.class, XmlTransientField.class);
+    void testJavaxXmlAccessTransientField() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientField.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientField.class);
+
+        testXmlAccessTransientField(properties);
+    }
+
+    @Test
+    void testJakartaXmlAccessTransientField() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlTransientField.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlTransientField.class);
+
+        testXmlAccessTransientField(properties);
+    }
+
+    void testXmlAccessTransientField(Map<String, TypeResolver> properties) {
         assertEquals(2, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
@@ -232,8 +336,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testXmlAccessTransientClass() {
-        Map<String, TypeResolver> properties = getProperties(XmlTransientClass.class, XmlTransientClass.class);
+    void testJavaxXmlAccessTransientClass() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientClass.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientClass.class);
+
+        testXmlAccessTransientClass(properties);
+    }
+
+    @Test
+    void testJakartaXmlAccessTransientClass() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlTransientClass.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlTransientClass.class);
+
+        testXmlAccessTransientClass(properties);
+    }
+
+    void testXmlAccessTransientClass(Map<String, TypeResolver> properties) {
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -251,8 +371,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testXmlAccessPublicMember() {
-        Map<String, TypeResolver> properties = getProperties(XmlAccessTypePublicMember.class, XmlAccessTypePublicMember.class);
+    void testJavaxXmlAccessPublicMember() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePublicMember.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePublicMember.class);
+
+        testXmlAccessPublicMember(properties);
+    }
+
+    @Test
+    void testJakartaXmlAccessPublicMember() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlAccessTypePublicMember.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlAccessTypePublicMember.class);
+
+        testXmlAccessPublicMember(properties);
+    }
+
+    void testXmlAccessPublicMember(Map<String, TypeResolver> properties) {
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -270,8 +406,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testXmlAccessTypeFieldOnly() {
-        Map<String, TypeResolver> properties = getProperties(XmlAccessTypeFieldOnly.class, XmlAccessTypeFieldOnly.class);
+    void testJavaxXmlAccessTypeFieldOnly() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypeFieldOnly.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypeFieldOnly.class);
+
+        testXmlAccessTypeFieldOnly(properties);
+    }
+
+    @Test
+    void testJakartaXmlAccessTypeFieldOnly() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlAccessTypeFieldOnly.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlAccessTypeFieldOnly.class);
+
+        testXmlAccessTypeFieldOnly(properties);
+    }
+
+    void testXmlAccessTypeFieldOnly(Map<String, TypeResolver> properties) {
         assertEquals(2, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
 
@@ -285,8 +437,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testXmlAccessTypePropertyOnly() {
-        Map<String, TypeResolver> properties = getProperties(XmlAccessTypePropertyOnly.class, XmlAccessTypePropertyOnly.class);
+    void testJavaxXmlAccessTypePropertyOnly() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePropertyOnly.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePropertyOnly.class);
+
+        testXmlAccessTypePropertyOnly(properties);
+    }
+
+    @Test
+    void testJakartaXmlAccessTypePropertyOnly() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlAccessTypePropertyOnly.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.XmlAccessTypePropertyOnly.class);
+
+        testXmlAccessTypePropertyOnly(properties);
+    }
+
+    void testXmlAccessTypePropertyOnly(Map<String, TypeResolver> properties) {
         assertEquals(2, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property;
@@ -445,342 +613,4 @@ class TypeResolverTests extends IndexScannerTestBase {
         assertEquals(1, properties.size());
         assertEquals("b", properties.keySet().iterator().next());
     }
-
-    /* Test models and resources below. */
-
-    @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "age", "type" })
-    public static abstract class AbstractAnimal {
-        @Schema
-        private String type;
-
-        protected Integer age;
-        private boolean extinct;
-
-        @Schema(name = "pet_type", required = true)
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-
-        @Schema
-        public Boolean isExtinct() {
-            return extinct;
-        }
-
-        public void setExtinct(boolean extinct) {
-            this.extinct = extinct;
-        }
-    }
-
-    public static interface Feline {
-        @Schema(name = "name", required = false, example = "Feline")
-        void setName(String name);
-    }
-
-    // "type" will be first due to ordering on AbstractAnimal
-    @javax.xml.bind.annotation.XmlType(propOrder = { "name", "type" })
-    public static class Cat extends AbstractAnimal implements Feline {
-        @Schema(required = true, example = "Felix")
-        String name;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        @Override
-        @Schema(name = "type", required = false, example = "Cat")
-        public String getType() {
-            return super.getType();
-        }
-    }
-
-    public static interface Canine {
-        @Schema(name = "c_name", description = "The name of the canine", maxLength = 50)
-        public String getName();
-    }
-
-    // "type" will be first due to ordering on AbstractAnimal
-    @javax.json.bind.annotation.JsonbPropertyOrder({ "name", "type", "bark" })
-    public static class Dog extends AbstractAnimal implements Canine {
-        @JsonbProperty("bark")
-        String bark;
-
-        @Schema(name = "bark")
-        public String getBark() {
-            return bark;
-        }
-
-        @Override
-        public String getName() {
-            return "Fido";
-        }
-
-        @Schema(description = "This property is not used due to being static")
-        public static int getStaticAge() {
-            return -1;
-        }
-    }
-
-    public static interface Reptile {
-        @Schema(name = "scaleColor", description = "The color of a reptile's scales")
-        public String getScaleColor();
-
-        @Schema(name = "scaleColor", description = "This is how the color is set, but the description comes from getScaleColor")
-        public void setScaleColor(String color);
-    }
-
-    public static class Lizard extends AbstractAnimal implements Reptile {
-        @Schema(deprecated = true)
-        static String scaleColor;
-        boolean lovesRocks;
-
-        @Override
-        public String getScaleColor() {
-            return "green";
-        }
-
-        public void setScaleColor(String scaleColor) {
-            // Bad idea, but doing it anyway ;-)
-            Lizard.scaleColor = scaleColor;
-        }
-
-        public void setAge(String age) {
-            super.setAge(Integer.parseInt(age));
-        }
-    }
-
-    // Out of order on purpose
-    @JsonbPropertyOrder({ "field1", "field3", "field2" })
-    public interface MySchema {
-        @Schema(required = true)
-        String getField1();
-
-        @Schema(name = "anotherField")
-        String getField2();
-
-        String getField3();
-    }
-
-    @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "comment", "name" })
-    public static class JacksonPropertyOrderDefault {
-
-        @com.fasterxml.jackson.annotation.JsonProperty("theName")
-        String name;
-        String name2;
-        String comment;
-        String comment2;
-
-        public String getComment() {
-            return comment;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "theName", "comment2ActuallyFirst", "comment" })
-    public static class JacksonPropertyOrderCustomName {
-
-        @com.fasterxml.jackson.annotation.JsonProperty("theName")
-        String name;
-        String name2;
-        String comment;
-        @com.fasterxml.jackson.annotation.JsonProperty("comment2ActuallyFirst")
-        String comment2;
-
-        public String getComment() {
-            return comment;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    @XmlType(propOrder = { "theName", "comment2ActuallyFirst", "comment", "name2" })
-    public static class JaxbCustomPropertyOrder {
-
-        @XmlElement(name = "theName")
-        String name;
-        @XmlAttribute
-        String name2;
-        @XmlElement
-        String comment;
-        @XmlAttribute(name = "comment2ActuallyFirst")
-        String comment2;
-
-        public String getComment() {
-            return comment;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getName2() {
-            return name2;
-        }
-
-        public String getComment2() {
-            return comment2;
-        }
-    }
-
-    static class NonJavaBeanAccessorProperty {
-        String name;
-
-        @Schema(title = "Name of the property")
-        String name() {
-            return name;
-        }
-
-        // Should be skipped
-        String anotherValue() {
-            return null;
-        }
-
-        // Should be skipped
-        String get() {
-            return name;
-        }
-
-        // Should be skipped
-        String isNotAnAccessor() {
-            return null;
-        }
-
-        void name(String name) {
-            this.name = name;
-        }
-    }
-
-    static class NonJavaBeanMutatorProperty {
-        String name;
-
-        String name() {
-            return name;
-        }
-
-        // Should be skipped
-        void anotherValue(String value) {
-            return;
-        }
-
-        // Should be skipped
-        String get() {
-            return name;
-        }
-
-        // Should be skipped
-        String isNotAnAccessor() {
-            return null;
-        }
-
-        @Schema(title = "Name of the property")
-        void name(String name) {
-            this.name = name;
-        }
-    }
-
-    static class OneSidedParent {
-
-        @Schema(hidden = true)
-        public String getParentProp1() {
-            return "";
-        }
-
-        @Schema(hidden = true)
-        public void setParentProp2(String something) {
-
-        }
-    }
-
-    static class OneSidedProperties extends OneSidedParent {
-
-        String prop1;
-        String prop2;
-        String prop3;
-
-        @Schema(hidden = true) // write only
-        public String getProp1() {
-            return prop1;
-        }
-
-        public void setProp1(String prop1) {
-            this.prop1 = prop1;
-        }
-
-        public String getProp2() {
-            return prop2;
-        }
-
-        @Schema(hidden = true) // read only
-        public void setProp2(String prop2) {
-            this.prop2 = prop2;
-        }
-    }
-
-    ///////////////////////////
-
-    static class XmlTransientField {
-        @XmlTransient
-        String prop1Field;
-        String prop2Field;
-    }
-
-    @XmlTransient
-    static class XmlTransientClass {
-        String prop1Field;
-        String prop2Field;
-
-        public String getProp3Property() {
-            return null;
-        }
-    }
-
-    @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
-    static class XmlAccessTypePublicMember {
-        public String prop1Field;
-        @SuppressWarnings("unused")
-        private String prop2Field;
-
-        public String getProp3Property() {
-            return null;
-        }
-    }
-
-    @XmlAccessorType(XmlAccessType.FIELD)
-    static class XmlAccessTypeFieldOnly {
-        String prop1Field;
-
-        public String getProp2Property() {
-            return null;
-        }
-    }
-
-    @XmlAccessorType(XmlAccessType.PROPERTY)
-    static class XmlAccessTypePropertyOnly {
-        String prop2Field;
-
-        public String getProp1Property() {
-            return null;
-        }
-    }
-
 }

@@ -74,10 +74,15 @@ public final class OpenApiConstants {
 
     public static final String PROP_MEDIA_TYPE = "mediaType";
 
-    public static final Set<DotName> PROPERTY_ANNOTATIONS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(SchemaConstant.DOTNAME_SCHEMA,
-                    JsonbConstants.JSONB_PROPERTY,
-                    JacksonConstants.JSON_PROPERTY)));
+    private static final Set<DotName> propertyAnnotations = new HashSet<>();
+
+    static {
+        propertyAnnotations.add(SchemaConstant.DOTNAME_SCHEMA);
+        propertyAnnotations.addAll(JsonbConstants.JSONB_PROPERTY);
+        propertyAnnotations.add(JacksonConstants.JSON_PROPERTY);
+    }
+
+    public static final Set<DotName> PROPERTY_ANNOTATIONS = Collections.unmodifiableSet(propertyAnnotations);
 
     public static final String REF_PREFIX_API_RESPONSE = "#/components/responses/";
     public static final String REF_PREFIX_CALLBACK = "#/components/callbacks/";

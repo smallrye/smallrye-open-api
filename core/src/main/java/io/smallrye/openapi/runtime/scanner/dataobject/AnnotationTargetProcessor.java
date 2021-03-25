@@ -204,9 +204,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (field != null) {
             if (processXmlAttr(name,
                     fieldSchema,
-                    field.annotation(XML_ATTRIBUTE),
-                    field.annotation(XML_ELEMENT),
-                    field.annotation(XML_WRAPPERELEMENT))) {
+                    JandexUtil.getAnnotation(field, XML_ATTRIBUTE),
+                    JandexUtil.getAnnotation(field, XML_ELEMENT),
+                    JandexUtil.getAnnotation(field, XML_WRAPPERELEMENT))) {
                 return;
             }
         }
@@ -214,9 +214,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (readMethod != null) {
             if (processXmlAttr(name,
                     fieldSchema,
-                    readMethod.annotation(XML_ATTRIBUTE),
-                    readMethod.annotation(XML_ELEMENT),
-                    readMethod.annotation(XML_WRAPPERELEMENT))) {
+                    JandexUtil.getAnnotation(readMethod, XML_ATTRIBUTE),
+                    JandexUtil.getAnnotation(readMethod, XML_ELEMENT),
+                    JandexUtil.getAnnotation(readMethod, XML_WRAPPERELEMENT))) {
                 return;
             }
         }
@@ -224,9 +224,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (writeMethod != null) {
             if (processXmlAttr(name,
                     fieldSchema,
-                    writeMethod.annotation(XML_ATTRIBUTE),
-                    writeMethod.annotation(XML_ELEMENT),
-                    writeMethod.annotation(XML_WRAPPERELEMENT))) {
+                    JandexUtil.getAnnotation(writeMethod, XML_ATTRIBUTE),
+                    JandexUtil.getAnnotation(writeMethod, XML_ELEMENT),
+                    JandexUtil.getAnnotation(writeMethod, XML_WRAPPERELEMENT))) {
                 return;
             }
         }

@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -314,16 +313,109 @@ public class JandexUtil {
      * @return AnnotationInstance
      */
     public static AnnotationInstance getClassAnnotation(ClassInfo ct, DotName name) {
-        if (name == null) {
+        return getClassAnnotation(ct, Arrays.asList(name));
+    }
+
+    /**
+     * Gets a single class annotation from the given class. Returns null if no matching annotation
+     * is found.
+     * 
+     * @param ct ClassInfo
+     * @param names List of DotNames
+     * @return AnnotationInstance
+     */
+    public static AnnotationInstance getClassAnnotation(ClassInfo ct, List<DotName> names) {
+        if (names == null || names.isEmpty()) {
             return null;
         }
-        Collection<AnnotationInstance> annotations = ct.classAnnotations();
-        for (AnnotationInstance annotationInstance : annotations) {
-            if (annotationInstance.name().equals(name)) {
-                return annotationInstance;
+
+        for (DotName dn : names) {
+            AnnotationInstance classAnnotation = ct.classAnnotation(dn);
+            if (classAnnotation != null) {
+                return classAnnotation;
             }
         }
+
         return null;
+    }
+
+    public static AnnotationInstance getAnnotation(MethodInfo mi, DotName... names) {
+        return getAnnotation(mi, Arrays.asList(names));
+    }
+
+    public static AnnotationInstance getAnnotation(FieldInfo field, DotName name) {
+        return getAnnotation(field, Arrays.asList(name));
+    }
+
+    /**
+     * Gets a single annotation from the given field. Returns null if no matching annotation
+     * is found.
+     * 
+     * @param ct ClassInfo
+     * @param names DotName
+     * @return AnnotationInstance
+     */
+    public static AnnotationInstance getAnnotation(FieldInfo field, List<DotName> names) {
+        if (names == null || names.isEmpty()) {
+            return null;
+        }
+
+        for (DotName dn : names) {
+            AnnotationInstance annotation = field.annotation(dn);
+            if (annotation != null)
+                return annotation;
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets a single annotation from the given method. Returns null if no matching annotation
+     * is found.
+     * 
+     * @param ct ClassInfo
+     * @param names DotName
+     * @return AnnotationInstance
+     */
+    public static AnnotationInstance getAnnotation(MethodInfo mi, List<DotName> names) {
+        if (names == null || names.isEmpty()) {
+            return null;
+        }
+
+        for (DotName dn : names) {
+            AnnotationInstance annotation = mi.annotation(dn);
+            if (annotation != null)
+                return annotation;
+        }
+
+        return null;
+    }
+
+    /**
+     * Return if any one of the listed annotations exist
+     * 
+     * @param method
+     * @param annotations
+     * @return
+     */
+    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, DotName... annotations) {
+        return hasAnyOneOfAnnotation(method, Arrays.asList(annotations));
+    }
+
+    /**
+     * Return if any one of the listed annotations exist
+     * 
+     * @param method
+     * @param annotations
+     * @return
+     */
+    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, List<DotName> annotations) {
+        for (DotName dotName : annotations) {
+            if (method.hasAnnotation(dotName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
