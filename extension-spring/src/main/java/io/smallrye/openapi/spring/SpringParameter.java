@@ -34,8 +34,10 @@ public enum SpringParameter {
 
     static FrameworkParameter forName(DotName annotationName) {
         for (SpringParameter value : values()) {
-            if (value.parameter.getName().equals(annotationName)) {
-                return value.parameter;
+            for (DotName name : value.parameter.getNames()) {
+                if (name.equals(annotationName)) {
+                    return value.parameter;
+                }
             }
         }
         return null;

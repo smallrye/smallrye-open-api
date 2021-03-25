@@ -1,17 +1,14 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static io.smallrye.openapi.runtime.scanner.IndexScannerTestBase.index;
+
 import java.io.IOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.jboss.jandex.Indexer;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
-
-import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteResource;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostResource;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutResource;
 
 /**
  * Basic tests mostly to compare with Spring
@@ -27,8 +24,24 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
      * @throws JSONException
      */
     @Test
-    void testBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingGetResource.class, Greeting.class);
+    void testJavaxBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingGetResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsGetDefinitionScanning(indexer.complete());
+    }
+
+    @Test
+    void testJakartaBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/GreetingGetResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsGetDefinitionScanning(indexer.complete());
+    }
+
+    void testBasicJaxRsGetDefinitionScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
@@ -44,8 +57,24 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
      * @throws JSONException
      */
     @Test
-    void testBasicJaxRsPostDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingPostResource.class, Greeting.class);
+    void testJavaxBasicJaxRsPostDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPostResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsPostDefinitionScanning(indexer.complete());
+    }
+
+    @Test
+    void testJakartaBasicJaxRsPostDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/GreetingPostResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsPostDefinitionScanning(indexer.complete());
+    }
+
+    void testBasicJaxRsPostDefinitionScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
@@ -61,8 +90,24 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
      * @throws JSONException
      */
     @Test
-    void testBasicJaxRsPutDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingPutResource.class, Greeting.class);
+    void testJavaxBasicJaxRsPutDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingPutResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsPutDefinitionScanning(indexer.complete());
+    }
+
+    @Test
+    void testJakartaBasicJaxRsPutDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/GreetingPutResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsPutDefinitionScanning(indexer.complete());
+    }
+
+    void testBasicJaxRsPutDefinitionScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
@@ -78,8 +123,24 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
      * @throws JSONException
      */
     @Test
-    void testBasicJaxRsDeleteDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingDeleteResource.class, Greeting.class);
+    void testJavaxBasicJaxRsDeleteDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/GreetingDeleteResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsDeleteDefinitionScanning(indexer.complete());
+    }
+
+    @Test
+    void testJakartaBasicJaxRsDeleteDefinitionScanning() throws IOException, JSONException {
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/GreetingDeleteResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
+
+        testBasicJaxRsDeleteDefinitionScanning(indexer.complete());
+    }
+
+    void testBasicJaxRsDeleteDefinitionScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();

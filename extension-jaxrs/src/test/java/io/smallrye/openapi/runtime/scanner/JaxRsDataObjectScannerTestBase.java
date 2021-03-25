@@ -31,6 +31,7 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
 
         // Test samples
         indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
+        indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/jakarta/");
 
         // Microprofile TCK classes
         index(indexer, "org/eclipse/microprofile/openapi/apps/airlines/model/Airline.class");

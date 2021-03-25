@@ -11,24 +11,7 @@ import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Negative;
-import javax.validation.constraints.NegativeOrZero;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import javax.validation.constraints.Size;
-import javax.validation.groups.Default;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -37,8 +20,6 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
@@ -49,18 +30,23 @@ import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 class BeanValidationScannerTest extends IndexScannerTestBase {
 
     BeanValidationScanner testTarget;
-    Index index;
     Set<String> methodsInvoked = new LinkedHashSet<>();
     Schema schema;
-    ClassInfo targetClass;
+    ClassInfo javaxTargetClass;
+    ClassInfo jakartaTargetClass;
 
     @BeforeEach
     void beforeEach() {
         testTarget = BeanValidationScanner.INSTANCE;
-        index = indexOf(BVTestContainer.class);
+        Index javaxIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestContainer.class);
+        Index jakartaIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.BVTestContainer.class);
         methodsInvoked.clear();
         schema = new SchemaImpl();
-        targetClass = index.getClassByName(componentize(BVTestContainer.class.getName()));
+        javaxTargetClass = javaxIndex.getClassByName(
+                componentize(test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestContainer.class.getName()));
+
+        jakartaTargetClass = jakartaIndex.getClassByName(
+                componentize(test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.BVTestContainer.class.getName()));
     }
 
     Schema proxySchema(Schema schema, Set<String> methodsInvoked) {
@@ -80,8 +66,8 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testNullSchemaIgnored() {
-        BeanValidationScanner.applyConstraints(targetClass,
+    void testJavaxNullSchemaIgnored() {
+        BeanValidationScanner.applyConstraints(javaxTargetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);
@@ -92,10 +78,36 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testRefSchemaIgnored() {
+    void testJakartaNullSchemaIgnored() {
+        BeanValidationScanner.applyConstraints(jakartaTargetClass,
+                proxySchema(schema, methodsInvoked),
+                null,
+                null);
+
+        assertArrayEquals(new String[] { "getType" },
+                methodsInvoked.toArray(),
+                "Unexpected methods were invoked");
+    }
+
+    @Test
+    void testJavaxRefSchemaIgnored() {
         schema.setType(SchemaType.OBJECT);
         schema.setRef("#/components/schemas/Anything");
-        BeanValidationScanner.applyConstraints(targetClass,
+        BeanValidationScanner.applyConstraints(javaxTargetClass,
+                proxySchema(schema, methodsInvoked),
+                null,
+                null);
+
+        assertArrayEquals(new String[] { "getType", "getRef" },
+                methodsInvoked.toArray(),
+                "Unexpected methods were invoked");
+    }
+
+    @Test
+    void testJakartaRefSchemaIgnored() {
+        schema.setType(SchemaType.OBJECT);
+        schema.setRef("#/components/schemas/Anything");
+        BeanValidationScanner.applyConstraints(jakartaTargetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);
@@ -108,8 +120,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testArrayListNotNullAndNotEmptyAndMaxItems() {
-        FieldInfo targetField = targetClass.field("arrayListNotNullAndNotEmptyAndMaxItems");
+    void testJavaxArrayListNotNullAndNotEmptyAndMaxItems() {
+        FieldInfo targetField = javaxTargetClass.field("arrayListNotNullAndNotEmptyAndMaxItems");
+        testArrayListNotNullAndNotEmptyAndMaxItems(targetField);
+    }
+
+    @Test
+    void testJakartaArrayListNotNullAndNotEmptyAndMaxItems() {
+        FieldInfo targetField = jakartaTargetClass.field("arrayListNotNullAndNotEmptyAndMaxItems");
+        testArrayListNotNullAndNotEmptyAndMaxItems(targetField);
+    }
+
+    void testArrayListNotNullAndNotEmptyAndMaxItems(FieldInfo targetField) {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
@@ -126,8 +148,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testArrayListNullableAndMinItemsAndMaxItems() {
-        FieldInfo targetField = targetClass.field("arrayListNullableAndMinItemsAndMaxItems");
+    void testJavaxArrayListNullableAndMinItemsAndMaxItems() {
+        FieldInfo targetField = javaxTargetClass.field("arrayListNullableAndMinItemsAndMaxItems");
+        testArrayListNullableAndMinItemsAndMaxItems(targetField);
+    }
+
+    @Test
+    void testJakartaArrayListNullableAndMinItemsAndMaxItems() {
+        FieldInfo targetField = jakartaTargetClass.field("arrayListNullableAndMinItemsAndMaxItems");
+        testArrayListNullableAndMinItemsAndMaxItems(targetField);
+    }
+
+    void testArrayListNullableAndMinItemsAndMaxItems(FieldInfo targetField) {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
@@ -146,10 +178,20 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testMapObjectNotNullAndNotEmptyAndMaxProperties() {
+    void testJavaxMapObjectNotNullAndNotEmptyAndMaxProperties() {
+        FieldInfo targetField = javaxTargetClass.field("mapObjectNotNullAndNotEmptyAndMaxProperties");
+        testMapObjectNotNullAndNotEmptyAndMaxProperties(targetField);
+    }
+
+    @Test
+    void testJakartaMapObjectNotNullAndNotEmptyAndMaxProperties() {
+        FieldInfo targetField = jakartaTargetClass.field("mapObjectNotNullAndNotEmptyAndMaxProperties");
+        testMapObjectNotNullAndNotEmptyAndMaxProperties(targetField);
+    }
+
+    void testMapObjectNotNullAndNotEmptyAndMaxProperties(FieldInfo targetField) {
         schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
 
-        FieldInfo targetField = targetClass.field("mapObjectNotNullAndNotEmptyAndMaxProperties");
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
@@ -166,10 +208,20 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testMapObjectNullableAndMinPropertiesAndMaxProperties() {
+    void testJavaxMapObjectNullableAndMinPropertiesAndMaxProperties() {
+        FieldInfo targetField = javaxTargetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
+        testMapObjectNullableAndMinPropertiesAndMaxProperties(targetField);
+    }
+
+    @Test
+    void testJakartaMapObjectNullableAndMinPropertiesAndMaxProperties() {
+        FieldInfo targetField = jakartaTargetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
+        testMapObjectNullableAndMinPropertiesAndMaxProperties(targetField);
+    }
+
+    void testMapObjectNullableAndMinPropertiesAndMaxProperties(FieldInfo targetField) {
         schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
 
-        FieldInfo targetField = targetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
@@ -186,8 +238,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testMapObjectNullableNoAdditionalProperties() {
-        FieldInfo targetField = targetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
+    void testJavaxMapObjectNullableNoAdditionalProperties() {
+        FieldInfo targetField = javaxTargetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
+        testMapObjectNullableNoAdditionalProperties(targetField);
+    }
+
+    @Test
+    void testJakartaMapObjectNullableNoAdditionalProperties() {
+        FieldInfo targetField = jakartaTargetClass.field("mapObjectNullableAndMinPropertiesAndMaxProperties");
+        testMapObjectNullableNoAdditionalProperties(targetField);
+    }
+
+    void testMapObjectNullableNoAdditionalProperties(FieldInfo targetField) {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
@@ -206,8 +268,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testDecimalMaxPrimaryDigits() {
-        FieldInfo targetField = targetClass.field("decimalMaxBigDecimalPrimaryDigits");
+    void testJavaxDecimalMaxPrimaryDigits() {
+        FieldInfo targetField = javaxTargetClass.field("decimalMaxBigDecimalPrimaryDigits");
+        testDecimalMaxPrimaryDigits(targetField);
+    }
+
+    @Test
+    void testJakartaDecimalMaxPrimaryDigits() {
+        FieldInfo targetField = jakartaTargetClass.field("decimalMaxBigDecimalPrimaryDigits");
+        testDecimalMaxPrimaryDigits(targetField);
+    }
+
+    void testDecimalMaxPrimaryDigits(FieldInfo targetField) {
         testTarget.decimalMax(targetField, schema);
         testTarget.digits(targetField, schema);
 
@@ -217,22 +289,46 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testDecimalMaxNoConstraint() {
-        testTarget.decimalMax(targetClass.field("decimalMaxBigDecimalNoConstraint"), schema);
+    void testJavaxDecimalMaxNoConstraint() {
+        testTarget.decimalMax(javaxTargetClass.field("decimalMaxBigDecimalNoConstraint"), schema);
         assertEquals(null, schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
     }
 
     @Test
-    void testDecimalMaxInvalidValue() {
-        testTarget.decimalMax(targetClass.field("decimalMaxBigDecimalInvalidValue"), schema);
+    void testJakartaDecimalMaxNoConstraint() {
+        testTarget.decimalMax(jakartaTargetClass.field("decimalMaxBigDecimalNoConstraint"), schema);
         assertEquals(null, schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
     }
 
     @Test
-    void testDecimalMaxExclusiveDigits() {
-        FieldInfo targetField = targetClass.field("decimalMaxBigDecimalExclusiveDigits");
+    void testJavaxDecimalMaxInvalidValue() {
+        testTarget.decimalMax(javaxTargetClass.field("decimalMaxBigDecimalInvalidValue"), schema);
+        assertEquals(null, schema.getMaximum());
+        assertEquals(null, schema.getExclusiveMaximum());
+    }
+
+    @Test
+    void testJakartaDecimalMaxInvalidValue() {
+        testTarget.decimalMax(jakartaTargetClass.field("decimalMaxBigDecimalInvalidValue"), schema);
+        assertEquals(null, schema.getMaximum());
+        assertEquals(null, schema.getExclusiveMaximum());
+    }
+
+    @Test
+    void testJavaxDecimalMaxExclusiveDigits() {
+        FieldInfo targetField = javaxTargetClass.field("decimalMaxBigDecimalExclusiveDigits");
+        testDecimalMaxExclusiveDigits(targetField);
+    }
+
+    @Test
+    void testJakartaDecimalMaxExclusiveDigits() {
+        FieldInfo targetField = jakartaTargetClass.field("decimalMaxBigDecimalExclusiveDigits");
+        testDecimalMaxExclusiveDigits(targetField);
+    }
+
+    void testDecimalMaxExclusiveDigits(FieldInfo targetField) {
         testTarget.decimalMax(targetField, schema);
         testTarget.digits(targetField, schema);
         assertEquals(new BigDecimal("201.0"), schema.getMaximum());
@@ -241,8 +337,15 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testDecimalMaxInclusive() {
-        testTarget.decimalMax(targetClass.field("decimalMaxBigDecimalInclusive"), schema);
+    void testJavaxDecimalMaxInclusive() {
+        testTarget.decimalMax(javaxTargetClass.field("decimalMaxBigDecimalInclusive"), schema);
+        assertEquals(new BigDecimal("201.00"), schema.getMaximum());
+        assertEquals(null, schema.getExclusiveMaximum());
+    }
+
+    @Test
+    void testJakartaDecimalMaxInclusive() {
+        testTarget.decimalMax(jakartaTargetClass.field("decimalMaxBigDecimalInclusive"), schema);
         assertEquals(new BigDecimal("201.00"), schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
     }
@@ -250,29 +353,60 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testDecimalMinPrimary() {
-        testTarget.decimalMin(targetClass.field("decimalMinBigDecimalPrimary"), schema);
+    void testJavaxDecimalMinPrimary() {
+        testTarget.decimalMin(javaxTargetClass.field("decimalMinBigDecimalPrimary"), schema);
         assertEquals(new BigDecimal("10.0"), schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test
-    void testDecimalMinNoConstraint() {
-        testTarget.decimalMin(targetClass.field("decimalMinBigDecimalNoConstraint"), schema);
+    void testJakartaDecimalMinPrimary() {
+        testTarget.decimalMin(jakartaTargetClass.field("decimalMinBigDecimalPrimary"), schema);
+        assertEquals(new BigDecimal("10.0"), schema.getMinimum());
+        assertEquals(null, schema.getExclusiveMinimum());
+    }
+
+    @Test
+    void testJavaxDecimalMinNoConstraint() {
+        testTarget.decimalMin(javaxTargetClass.field("decimalMinBigDecimalNoConstraint"), schema);
         assertEquals(null, schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test
-    void testDecimalMinInvalidValue() {
-        testTarget.decimalMin(targetClass.field("decimalMinBigDecimalInvalidValue"), schema);
+    void testJakartaDecimalMinNoConstraint() {
+        testTarget.decimalMin(jakartaTargetClass.field("decimalMinBigDecimalNoConstraint"), schema);
         assertEquals(null, schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test
-    void testDecimalMinExclusiveDigits() {
-        FieldInfo targetField = targetClass.field("decimalMinBigDecimalExclusiveDigits");
+    void testJavaxDecimalMinInvalidValue() {
+        testTarget.decimalMin(javaxTargetClass.field("decimalMinBigDecimalInvalidValue"), schema);
+        assertEquals(null, schema.getMinimum());
+        assertEquals(null, schema.getExclusiveMinimum());
+    }
+
+    @Test
+    void testJakartaDecimalMinInvalidValue() {
+        testTarget.decimalMin(jakartaTargetClass.field("decimalMinBigDecimalInvalidValue"), schema);
+        assertEquals(null, schema.getMinimum());
+        assertEquals(null, schema.getExclusiveMinimum());
+    }
+
+    @Test
+    void testJavaxDecimalMinExclusiveDigits() {
+        FieldInfo targetField = javaxTargetClass.field("decimalMinBigDecimalExclusiveDigits");
+        testDecimalMinExclusiveDigits(targetField);
+    }
+
+    @Test
+    void testJakartaDecimalMinExclusiveDigits() {
+        FieldInfo targetField = jakartaTargetClass.field("decimalMinBigDecimalExclusiveDigits");
+        testDecimalMinExclusiveDigits(targetField);
+    }
+
+    void testDecimalMinExclusiveDigits(FieldInfo targetField) {
         testTarget.decimalMin(targetField, schema);
         testTarget.digits(targetField, schema);
 
@@ -282,8 +416,15 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testDecimalMinInclusive() {
-        testTarget.decimalMin(targetClass.field("decimalMinBigDecimalInclusive"), schema);
+    void testJavaxDecimalMinInclusive() {
+        testTarget.decimalMin(javaxTargetClass.field("decimalMinBigDecimalInclusive"), schema);
+        assertEquals(new BigDecimal("9.00"), schema.getMinimum());
+        assertEquals(null, schema.getExclusiveMinimum());
+    }
+
+    @Test
+    void testJakartaDecimalMinInclusive() {
+        testTarget.decimalMin(jakartaTargetClass.field("decimalMinBigDecimalInclusive"), schema);
         assertEquals(new BigDecimal("9.00"), schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
@@ -291,8 +432,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testIntegerPositiveNotZeroMaxValue() {
-        FieldInfo targetField = targetClass.field("integerPositiveNotZeroMaxValue");
+    void testJavaxIntegerPositiveNotZeroMaxValue() {
+        FieldInfo targetField = javaxTargetClass.field("integerPositiveNotZeroMaxValue");
+        testIntegerPositiveNotZeroMaxValue(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerPositiveNotZeroMaxValue() {
+        FieldInfo targetField = jakartaTargetClass.field("integerPositiveNotZeroMaxValue");
+        testIntegerPositiveNotZeroMaxValue(targetField);
+    }
+
+    void testIntegerPositiveNotZeroMaxValue(FieldInfo targetField) {
         testTarget.max(targetField, schema);
         testTarget.positive(targetField, schema);
 
@@ -303,8 +454,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testIntegerPositiveNotZeroMaxValueExclusive() {
-        FieldInfo targetField = targetClass.field("integerPositiveNotZeroMaxValue");
+    void testJavaxIntegerPositiveNotZeroMaxValueExclusive() {
+        FieldInfo targetField = javaxTargetClass.field("integerPositiveNotZeroMaxValue");
+        testIntegerPositiveNotZeroMaxValueExclusive(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerPositiveNotZeroMaxValueExclusive() {
+        FieldInfo targetField = jakartaTargetClass.field("integerPositiveNotZeroMaxValue");
+        testIntegerPositiveNotZeroMaxValueExclusive(targetField);
+    }
+
+    void testIntegerPositiveNotZeroMaxValueExclusive(FieldInfo targetField) {
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
 
@@ -318,8 +479,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testIntegerPositiveOrZeroMaxValue() {
-        FieldInfo targetField = targetClass.field("integerPositiveOrZeroMaxValue");
+    void testJavaxIntegerPositiveOrZeroMaxValue() {
+        FieldInfo targetField = javaxTargetClass.field("integerPositiveOrZeroMaxValue");
+        testIntegerPositiveOrZeroMaxValue(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerPositiveOrZeroMaxValue() {
+        FieldInfo targetField = jakartaTargetClass.field("integerPositiveOrZeroMaxValue");
+        testIntegerPositiveOrZeroMaxValue(targetField);
+    }
+
+    void testIntegerPositiveOrZeroMaxValue(FieldInfo targetField) {
         testTarget.max(targetField, schema);
         testTarget.positiveOrZero(targetField, schema);
 
@@ -330,8 +501,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testIntegerPositiveOrZeroMaxValueExclusive() {
-        FieldInfo targetField = targetClass.field("integerPositiveOrZeroMaxValue");
+    void testJavaxIntegerPositiveOrZeroMaxValueExclusive() {
+        FieldInfo targetField = javaxTargetClass.field("integerPositiveOrZeroMaxValue");
+        testIntegerPositiveOrZeroMaxValueExclusive(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerPositiveOrZeroMaxValueExclusive() {
+        FieldInfo targetField = jakartaTargetClass.field("integerPositiveOrZeroMaxValue");
+        testIntegerPositiveOrZeroMaxValueExclusive(targetField);
+    }
+
+    void testIntegerPositiveOrZeroMaxValueExclusive(FieldInfo targetField) {
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
 
@@ -347,8 +528,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testIntegerNegativeNotZeroMinValue() {
-        FieldInfo targetField = targetClass.field("integerNegativeNotZeroMinValue");
+    void testJavaxIntegerNegativeNotZeroMinValue() {
+        FieldInfo targetField = javaxTargetClass.field("integerNegativeNotZeroMinValue");
+        testIntegerNegativeNotZeroMinValue(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerNegativeNotZeroMinValue() {
+        FieldInfo targetField = jakartaTargetClass.field("integerNegativeNotZeroMinValue");
+        testIntegerNegativeNotZeroMinValue(targetField);
+    }
+
+    void testIntegerNegativeNotZeroMinValue(FieldInfo targetField) {
         testTarget.min(targetField, schema);
         testTarget.negative(targetField, schema);
 
@@ -359,8 +550,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testIntegerNegativeNotZeroMinValueExclusive() {
-        FieldInfo targetField = targetClass.field("integerNegativeNotZeroMinValue");
+    void testJavaxIntegerNegativeNotZeroMinValueExclusive() {
+        FieldInfo targetField = javaxTargetClass.field("integerNegativeNotZeroMinValue");
+        testIntegerNegativeNotZeroMinValueExclusive(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerNegativeNotZeroMinValueExclusive() {
+        FieldInfo targetField = jakartaTargetClass.field("integerNegativeNotZeroMinValue");
+        testIntegerNegativeNotZeroMinValueExclusive(targetField);
+    }
+
+    void testIntegerNegativeNotZeroMinValueExclusive(FieldInfo targetField) {
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
 
@@ -374,8 +575,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testIntegerNegativeOrZeroMinValue() {
-        FieldInfo targetField = targetClass.field("integerNegativeOrZeroMinValue");
+    void testJavaxIntegerNegativeOrZeroMinValue() {
+        FieldInfo targetField = javaxTargetClass.field("integerNegativeOrZeroMinValue");
+        testIntegerNegativeOrZeroMinValue(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerNegativeOrZeroMinValue() {
+        FieldInfo targetField = jakartaTargetClass.field("integerNegativeOrZeroMinValue");
+        testIntegerNegativeOrZeroMinValue(targetField);
+    }
+
+    void testIntegerNegativeOrZeroMinValue(FieldInfo targetField) {
         testTarget.min(targetField, schema);
         testTarget.negativeOrZero(targetField, schema);
 
@@ -386,8 +597,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testIntegerNegativeOrZeroMinValueExclusive() {
-        FieldInfo targetField = targetClass.field("integerNegativeOrZeroMinValue");
+    void testJavaxIntegerNegativeOrZeroMinValueExclusive() {
+        FieldInfo targetField = javaxTargetClass.field("integerNegativeOrZeroMinValue");
+        testIntegerNegativeOrZeroMinValueExclusive(targetField);
+    }
+
+    @Test
+    void testJakartaIntegerNegativeOrZeroMinValueExclusive() {
+        FieldInfo targetField = jakartaTargetClass.field("integerNegativeOrZeroMinValue");
+        testIntegerNegativeOrZeroMinValueExclusive(targetField);
+    }
+
+    void testIntegerNegativeOrZeroMinValueExclusive(FieldInfo targetField) {
         schema.setExclusiveMaximum(Boolean.TRUE);
         schema.setExclusiveMinimum(Boolean.TRUE);
 
@@ -403,8 +624,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     /**********************************************************************/
 
     @Test
-    void testStringNotBlankNotNull() {
-        FieldInfo targetField = targetClass.field("stringNotBlankNotNull");
+    void testJavaxStringNotBlankNotNull() {
+        FieldInfo targetField = javaxTargetClass.field("stringNotBlankNotNull");
+        testStringNotBlankNotNull(targetField);
+    }
+
+    @Test
+    void testJakartaStringNotBlankNotNull() {
+        FieldInfo targetField = jakartaTargetClass.field("stringNotBlankNotNull");
+        testStringNotBlankNotNull(targetField);
+    }
+
+    void testStringNotBlankNotNull(FieldInfo targetField) {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = "TESTKEY";
 
@@ -419,9 +650,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testStringNotBlankDigits() {
-        FieldInfo targetField = targetClass.field("stringNotBlankDigits");
+    void testJavaxStringNotBlankDigits() {
+        FieldInfo targetField = javaxTargetClass.field("stringNotBlankDigits");
+        testStringNotBlankDigits(targetField);
+    }
 
+    @Test
+    void testJakartaStringNotBlankDigits() {
+        FieldInfo targetField = jakartaTargetClass.field("stringNotBlankDigits");
+        testStringNotBlankDigits(targetField);
+    }
+
+    void testStringNotBlankDigits(FieldInfo targetField) {
         testTarget.digits(targetField, schema);
         testTarget.notBlank(targetField, schema);
 
@@ -430,9 +670,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testStringNotEmptyMaxSize() {
-        FieldInfo targetField = targetClass.field("stringNotEmptyMaxSize");
+    void testJavaxStringNotEmptyMaxSize() {
+        FieldInfo targetField = javaxTargetClass.field("stringNotEmptyMaxSize");
+        testStringNotEmptyMaxSize(targetField);
+    }
 
+    @Test
+    void testJakartaStringNotEmptyMaxSize() {
+        FieldInfo targetField = jakartaTargetClass.field("stringNotEmptyMaxSize");
+        testStringNotEmptyMaxSize(targetField);
+    }
+
+    void testStringNotEmptyMaxSize(FieldInfo targetField) {
         testTarget.sizeString(targetField, schema);
         testTarget.notEmptyString(targetField, schema);
 
@@ -442,9 +691,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testStringNotEmptySizeRange() {
-        FieldInfo targetField = targetClass.field("stringNotEmptySizeRange");
+    void testJavaxStringNotEmptySizeRange() {
+        FieldInfo targetField = javaxTargetClass.field("stringNotEmptySizeRange");
+        testStringNotEmptySizeRange(targetField);
+    }
 
+    @Test
+    void testJakartaStringNotEmptySizeRange() {
+        FieldInfo targetField = jakartaTargetClass.field("stringNotEmptySizeRange");
+        testStringNotEmptySizeRange(targetField);
+    }
+
+    void testStringNotEmptySizeRange(FieldInfo targetField) {
         testTarget.sizeString(targetField, schema);
         testTarget.notEmptyString(targetField, schema);
 
@@ -454,9 +712,20 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testJacksonRequiredString() {
+    void testJavaxJacksonRequiredString() {
         String propertyKey = "jacksonRequiredTrueString";
-        FieldInfo targetField = targetClass.field(propertyKey);
+        FieldInfo targetField = javaxTargetClass.field(propertyKey);
+        testJacksonRequiredString(targetField, propertyKey);
+    }
+
+    @Test
+    void testJakartaJacksonRequiredString() {
+        String propertyKey = "jacksonRequiredTrueString";
+        FieldInfo targetField = jakartaTargetClass.field(propertyKey);
+        testJacksonRequiredString(targetField, propertyKey);
+    }
+
+    void testJacksonRequiredString(FieldInfo targetField, String propertyKey) {
         Schema parentSchema = new SchemaImpl();
 
         testTarget.requiredJackson(targetField, propertyKey, (target, name) -> {
@@ -468,9 +737,21 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testJacksonDefaultString() {
+    void testJavaxJacksonDefaultString() {
         String propertyKey = "jacksonDefaultString";
-        FieldInfo targetField = targetClass.field(propertyKey);
+        FieldInfo targetField = javaxTargetClass.field(propertyKey);
+        testJacksonDefaultString(targetField);
+    }
+
+    @Test
+    void testJakartaJacksonDefaultString() {
+        String propertyKey = "jacksonDefaultString";
+        FieldInfo targetField = jakartaTargetClass.field(propertyKey);
+        testJacksonDefaultString(targetField);
+    }
+
+    void testJacksonDefaultString(FieldInfo targetField) {
+        String propertyKey = "jacksonDefaultString";
         Schema parentSchema = new SchemaImpl();
 
         testTarget.requiredJackson(targetField, propertyKey, (target, name) -> {
@@ -481,103 +762,4 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         assertNull(parentSchema.getRequired());
     }
 
-    /**********************************************************************/
-
-    @SuppressWarnings("unused")
-    static class BVTestContainer {
-        @NotNull
-        @NotEmpty
-        @Size(max = 20)
-        List<String> arrayListNotNullAndNotEmptyAndMaxItems;
-
-        @NotEmpty
-        @Size(min = 5, max = 20)
-        List<String> arrayListNullableAndMinItemsAndMaxItems;
-
-        /**********************************************************************/
-
-        @NotNull
-        @NotEmpty
-        @Size(max = 20)
-        Map<String, String> mapObjectNotNullAndNotEmptyAndMaxProperties;
-
-        @NotEmpty
-        @Size(min = 5, max = 20)
-        Map<String, String> mapObjectNullableAndMinPropertiesAndMaxProperties;
-
-        /**********************************************************************/
-
-        @DecimalMax("200.00")
-        @Digits(integer = 3, fraction = 2)
-        private BigDecimal decimalMaxBigDecimalPrimaryDigits;
-        private BigDecimal decimalMaxBigDecimalNoConstraint;
-        @DecimalMax("Invalid BigDecimal value")
-        private BigDecimal decimalMaxBigDecimalInvalidValue;
-        @DecimalMax(value = "201.0", inclusive = false, groups = {})
-        @Digits(integer = 3, fraction = 1)
-        private BigDecimal decimalMaxBigDecimalExclusiveDigits;
-        @DecimalMax(value = "201.00", inclusive = true, groups = Default.class)
-        private BigDecimal decimalMaxBigDecimalInclusive;
-
-        /**********************************************************************/
-
-        @DecimalMin("10.0")
-        private BigDecimal decimalMinBigDecimalPrimary;
-        private BigDecimal decimalMinBigDecimalNoConstraint;
-        @DecimalMin("Invalid BigDecimal value")
-        private BigDecimal decimalMinBigDecimalInvalidValue;
-        @DecimalMin(value = "9.00", inclusive = false)
-        @Digits(integer = 1, fraction = 2)
-        private BigDecimal decimalMinBigDecimalExclusiveDigits;
-        @DecimalMin(value = "9.00", inclusive = true)
-        private BigDecimal decimalMinBigDecimalInclusive;
-
-        /**********************************************************************/
-
-        @Positive
-        @Max(1000)
-        private Long integerPositiveNotZeroMaxValue;
-
-        @PositiveOrZero
-        @Max(999)
-        private Integer integerPositiveOrZeroMaxValue;
-
-        @Negative
-        @Min(-1_000_000)
-        private Long integerNegativeNotZeroMinValue;
-
-        @NegativeOrZero
-        @Min(-999)
-        private Integer integerNegativeOrZeroMinValue;
-
-        /**********************************************************************/
-
-        @NotNull
-        @NotBlank
-        private String stringNotBlankNotNull;
-
-        @Digits(integer = 8, fraction = 10)
-        @NotBlank
-        private String stringNotBlankDigits;
-
-        @NotEmpty
-        @Size(max = 2000)
-        private String stringNotEmptyMaxSize;
-
-        @NotEmpty
-        @Size(min = 100, max = 2000)
-        private String stringNotEmptySizeRange;
-
-        /**********************************************************************/
-
-        @NotNull
-        private boolean booleanNotNull;
-
-        @JsonProperty(required = true)
-        private String jacksonRequiredTrueString;
-
-        @JsonProperty
-        private String jacksonDefaultString;
-
-    }
 }

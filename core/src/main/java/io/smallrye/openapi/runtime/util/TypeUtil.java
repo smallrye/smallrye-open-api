@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -463,7 +464,7 @@ public class TypeUtil {
 
     public static boolean isWrappedType(Type type) {
         if (type != null) {
-            return isOptional(type) || JaxbConstants.JAXB_ELEMENT.equals(type.name());
+            return isOptional(type) || JaxbConstants.JAXB_ELEMENT.contains(type.name());
         }
         return false;
     }
@@ -473,7 +474,7 @@ public class TypeUtil {
             if (isOptional(type)) {
                 return getOptionalType(type);
             }
-            if (JaxbConstants.JAXB_ELEMENT.equals(type.name())) {
+            if (JaxbConstants.JAXB_ELEMENT.contains(type.name())) {
                 return type.asParameterizedType().arguments().get(0);
             }
         }
@@ -623,6 +624,15 @@ public class TypeUtil {
         return allOfTypes != null && Arrays.stream(allOfTypes).map(Type::name).anyMatch(type.name()::equals);
     }
 
+    public static boolean hasAnnotation(AnnotationTarget target, List<DotName> annotationNames) {
+        for (DotName dn : annotationNames) {
+            if (hasAnnotation(target, dn)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
         if (target == null) {
             return false;
@@ -659,6 +669,18 @@ public class TypeUtil {
                 .orElse(null);
     }
 
+    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, List<DotName> annotationNames) {
+        if (annotationTarget == null) {
+            return null;
+        }
+        for (DotName dn : annotationNames) {
+            AnnotationInstance ai = getAnnotation(annotationTarget, dn);
+            if (ai != null)
+                return ai;
+        }
+        return null;
+    }
+
     /**
      * Convenience method to retrieve the "value" parameter from an annotation bound to the target.
      * The value will be unwrapped from its containing {@link AnnotationValue}.
@@ -669,7 +691,11 @@ public class TypeUtil {
      * @return an unwrapped annotation parameter value
      */
     public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName) {
-        return getAnnotationValue(target, annotationName, OpenApiConstants.VALUE, null);
+        return getAnnotationValue(target, Arrays.asList(annotationName), OpenApiConstants.VALUE);
+    }
+
+    public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
+        return getAnnotationValue(target, annotationNames, OpenApiConstants.VALUE, null);
     }
 
     /**
@@ -683,7 +709,37 @@ public class TypeUtil {
      * @return an unwrapped annotation parameter value
      */
     public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName, String propertyName) {
-        return getAnnotationValue(target, annotationName, propertyName, null);
+        return getAnnotationValue(target, Arrays.asList(annotationName), propertyName);
+    }
+
+    public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames, String propertyName) {
+        return getAnnotationValue(target, annotationNames, propertyName, null);
+    }
+
+    /**
+     * Convenience method to retrieve the named parameter from an annotation bound to the target.
+     * The value will be unwrapped from its containing {@link AnnotationValue}.
+     *
+     * @param <T> the type of the parameter being retrieved
+     * @param target the target object annotated with the annotation named by annotationName
+     * @param annotationNames names of the annotations from which to retrieve the value
+     * @param propertyName the name of the parameter/property in the annotation
+     * @param defaultValue a default value to return if either the annotation or the value are missing
+     * @return an unwrapped annotation parameter value
+     */
+    public static <T> T getAnnotationValue(AnnotationTarget target,
+            List<DotName> annotationNames,
+            String propertyName,
+            T defaultValue) {
+
+        AnnotationInstance annotation = getAnnotation(target, annotationNames);
+        T value = null;
+
+        if (annotation != null) {
+            value = JandexUtil.value(annotation, propertyName);
+        }
+
+        return value != null ? value : defaultValue;
     }
 
     /**
@@ -702,14 +758,7 @@ public class TypeUtil {
             String propertyName,
             T defaultValue) {
 
-        AnnotationInstance annotation = getAnnotation(target, annotationName);
-        T value = null;
-
-        if (annotation != null) {
-            value = JandexUtil.value(annotation, propertyName);
-        }
-
-        return value != null ? value : defaultValue;
+        return getAnnotationValue(target, Arrays.asList(annotationName), propertyName, defaultValue);
     }
 
     public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget type) {

@@ -10,12 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlType;
-
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -262,25 +256,21 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      * https://github.com/smallrye/smallrye-open-api/issues/650
      */
     @Test
-    void testJaxbElementUnwrapped() throws IOException, JSONException {
-        Index index = indexOf(JAXBElementDto.class);
+    void testJavaxJaxbElementUnwrapped() throws IOException, JSONException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.JAXBElementDto.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json", result);
     }
 
-    @Schema
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "JAXBElementDto", propOrder = {
-            "caseSubtitleFree",
-            "caseSubtitle"
-    })
-    static class JAXBElementDto {
-        @XmlElementRef(name = "CaseSubtitle", namespace = "urn:Milo.API.Miljo.DataContracts.V1", type = JAXBElement.class, required = false)
-        protected JAXBElement<String> caseSubtitle;
-        @XmlElementRef(name = "CaseSubtitleFree", namespace = "urn:Milo.API.Miljo.DataContracts.V1", type = JAXBElement.class, required = false)
-        protected JAXBElement<String> caseSubtitleFree;
+    @Test
+    void testJakartaJaxbElementUnwrapped() throws IOException, JSONException {
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.JAXBElementDto.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json", result);
     }
 
     /****************************************************************/

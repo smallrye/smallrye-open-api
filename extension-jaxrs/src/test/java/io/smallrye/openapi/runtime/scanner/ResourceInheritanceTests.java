@@ -1,22 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
-import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
@@ -39,13 +24,28 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
      *
      */
     @Test
-    void testInheritedResourceMethod() throws IOException, JSONException {
-        Index i = indexOf(GenericResource.class,
-                ExampleResource1.class,
-                ExampleResource2.class,
-                Greetable.class,
-                Greetable.GreetingBean.class);
+    void testJavaxInheritedResourceMethod() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.GenericResource.class,
+                test.io.smallrye.openapi.runtime.scanner.ExampleResource1.class,
+                test.io.smallrye.openapi.runtime.scanner.ExampleResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.Greetable.class,
+                test.io.smallrye.openapi.runtime.scanner.Greetable.GreetingBean.class);
 
+        testInheritedResourceMethod(i);
+    }
+
+    @Test
+    void testJakartaInheritedResourceMethod() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.GenericResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExampleResource1.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExampleResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Greetable.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Greetable.GreetingBean.class);
+
+        testInheritedResourceMethod(i);
+    }
+
+    void testInheritedResourceMethod(Index i) throws IOException, JSONException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
@@ -53,95 +53,5 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
         printToConsole(result);
         assertJsonEquals("resource.inheritance.params.json", result);
     }
-
-    static class GenericResource {
-        @GET
-        @Path("/extension")
-        @Produces(MediaType.TEXT_PLAIN)
-        public String helloExtension() {
-            return "hello extension";
-        }
-    }
-
-    static interface Greetable {
-        static class GreetingBean {
-            String name;
-
-            @FormParam("greetingName")
-            public void setName(String name) {
-                this.name = name;
-            }
-        }
-
-        @PathParam("from")
-        @Parameter(name = "from", in = ParameterIn.PATH, description = "The name of the person sending the greeting")
-        void setFromName(String from);
-
-        @HeaderParam("date")
-        @Parameter(name = "date", in = ParameterIn.HEADER, description = "The local date when the greeting is sent", allowEmptyValue = true)
-        void setGreetingDate(LocalDate date);
-
-        @POST
-        @Path("/greet/{from}")
-        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        @Produces(MediaType.TEXT_PLAIN)
-        @Parameter(name = "greetingName", style = ParameterStyle.FORM)
-        String greet(@BeanParam GreetingBean bean);
-    }
-
-    @Path("/hi")
-    // All JAX-RS annotations inherited
-    static class ExampleResource1 extends GenericResource implements Greetable {
-        String from;
-
-        @Override
-        public void setFromName(String from) {
-            this.from = from;
-        }
-
-        LocalDate date;
-
-        @Override
-        public void setGreetingDate(LocalDate date) {
-            this.date = date;
-        }
-
-        @Override
-        public String greet(GreetingBean bean) {
-            return "hi " + bean.name + ", from: " + from + "; on date: " + date;
-        }
-    }
-
-    @Path("/hello")
-    static class ExampleResource2 extends GenericResource implements Greetable {
-        @GET
-        @Produces(MediaType.TEXT_PLAIN)
-        public String hello() {
-            return "hello";
-        }
-
-        String from;
-
-        @Override
-        @Parameter(name = "from", in = ParameterIn.PATH, style = ParameterStyle.SIMPLE)
-        public void setFromName(String from) {
-            this.from = from;
-        }
-
-        @Parameter(name = "date", in = ParameterIn.HEADER, example = "2019-12-31", allowEmptyValue = false)
-        LocalDate date;
-
-        @Override
-        public void setGreetingDate(LocalDate date) {
-            this.date = date;
-        }
-
-        @Override
-        public String greet(GreetingBean bean) {
-            return "hello " + bean.name + ", from: " + from + "; on date: " + date;
-        }
-    }
-
-    /*************************************************************************/
 
 }

@@ -3,16 +3,6 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
@@ -29,71 +19,38 @@ class ExceptionMapperScanTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testExceptionMapper() throws IOException, JSONException {
-        test("responses.exception-mapper-generation.json", TestResource.class, ExceptionHandler1.class,
-                ExceptionHandler2.class, ResteasyReactiveExceptionMapper.class);
+    void testJavaxExceptionMapper() throws IOException, JSONException {
+        test("responses.exception-mapper-generation.json",
+                test.io.smallrye.openapi.runtime.scanner.TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler1.class,
+                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler2.class,
+                test.io.smallrye.openapi.runtime.scanner.ResteasyReactiveExceptionMapper.class);
     }
 
     @Test
-    void testMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
-        test("responses.exception-mapper-overridden-by-method-annotation-generation.json", TestResource2.class,
-                ExceptionHandler1.class, ExceptionHandler2.class, ResteasyReactiveExceptionMapper.class);
+    void testJakartaExceptionMapper() throws IOException, JSONException {
+        test("responses.exception-mapper-generation.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler1.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler2.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ResteasyReactiveExceptionMapper.class);
     }
 
-    @Path("/resources")
-    static class TestResource {
-
-        @GET
-        public String getResource() throws NotFoundException {
-            return "resource";
-        }
-
-        @POST
-        public String createResource() throws WebApplicationException {
-            return "OK";
-        }
+    @Test
+    void testJavaxMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
+        test("responses.exception-mapper-overridden-by-method-annotation-generation.json",
+                test.io.smallrye.openapi.runtime.scanner.TestResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler1.class,
+                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler2.class,
+                test.io.smallrye.openapi.runtime.scanner.ResteasyReactiveExceptionMapper.class);
     }
 
-    @Path("resource2s")
-    static class TestResource2 {
-
-        @GET
-        @APIResponse(responseCode = "500", description = "Internal Server Error")
-        @APIResponse(responseCode = "404", description = "Resource Not Found")
-        public String getResource() throws NotFoundException {
-            return "resource2";
-        }
-
-        @POST
-        public String createResource() throws WebApplicationException {
-            return "OK";
-        }
-
+    @Test
+    void testJakartaMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
+        test("responses.exception-mapper-overridden-by-method-annotation-generation.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.TestResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler1.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler2.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ResteasyReactiveExceptionMapper.class);
     }
-
-    @Provider
-    static class ExceptionHandler1 implements ExceptionMapper<WebApplicationException> {
-
-        @Override
-        @APIResponse(responseCode = "500", description = "Server error")
-        public Response toResponse(WebApplicationException e) {
-            return null;
-        }
-    }
-
-    @Provider
-    static class ExceptionHandler2 implements ExceptionMapper<NotFoundException> {
-
-        @Override
-        @APIResponse(responseCode = "404", description = "Not Found")
-        public Response toResponse(NotFoundException e) {
-            return null;
-        }
-    }
-
-    // Mimic org.jboss.resteasy.reactive.server.spi.ResteasyReactiveExceptionMapper
-    interface ResteasyReactiveExceptionMapper<E extends Throwable> extends ExceptionMapper<E> {
-        Response toResponse(E exception, Object context);
-    }
-
 }

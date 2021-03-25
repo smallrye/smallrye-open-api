@@ -2,18 +2,6 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 
-import javax.json.bind.annotation.JsonbPropertyOrder;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
@@ -23,230 +11,134 @@ import org.junit.jupiter.api.Test;
 class DiscriminatorMappingTests extends IndexScannerTestBase {
 
     @Test
-    void testDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
+    void testJavaxDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator.json",
-                DiscriminatorFullDeclaredInResponseTestResource.class,
-                AbstractPet.class,
-                Canine.class,
-                Cat.class,
-                Dog.class,
-                Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.DiscriminatorFullDeclaredInResponseTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
     }
 
     @Test
-    void testDiscriminatorNoMappingTestResource() throws IOException, JSONException {
+    void testJakartaDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
+        assertJsonEquals("polymorphism.declared-discriminator.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.DiscriminatorFullDeclaredInResponseTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Lizard.class);
+    }
+
+    @Test
+    void testJavaxDiscriminatorNoMappingTestResource() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping.json",
-                DiscriminatorNoMappingTestResource.class,
-                AbstractPet.class,
-                Canine.class,
-                Cat.class,
-                Dog.class,
-                Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.DiscriminatorNoMappingTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
     }
 
     @Test
-    void testDiscriminatorMappingNoSchema() throws IOException, JSONException {
+    void testJakartaDiscriminatorNoMappingTestResource() throws IOException, JSONException {
+        assertJsonEquals("polymorphism.declared-discriminator-no-mapping.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.DiscriminatorNoMappingTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Lizard.class);
+    }
+
+    @Test
+    void testJavaxDiscriminatorMappingNoSchema() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping-schema.json",
-                DiscriminatorMappingNoSchemaTestResource.class,
-                AbstractPet.class,
-                Canine.class,
-                Cat.class,
-                Dog.class,
-                Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingNoSchemaTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
     }
 
     @Test
-    void testDiscriminatorMappingNoKey() throws IOException, JSONException {
+    void testJakartaDiscriminatorMappingNoSchema() throws IOException, JSONException {
+        assertJsonEquals("polymorphism.declared-discriminator-no-mapping-schema.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.DiscriminatorMappingNoSchemaTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Lizard.class);
+    }
+
+    @Test
+    void testJavaxDiscriminatorMappingNoKey() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping-key.json",
-                DiscriminatorMappingNoKeyTestResource.class,
-                AbstractPet.class,
-                Canine.class,
-                Cat.class,
-                Dog.class,
-                Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingNoKeyTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
     }
 
     @Test
-    void testDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
+    void testJakartaDiscriminatorMappingNoKey() throws IOException, JSONException {
+        assertJsonEquals("polymorphism.declared-discriminator-no-mapping-key.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.DiscriminatorMappingNoKeyTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Lizard.class);
+    }
+
+    @Test
+    void testJavaxDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-empty-mapping.json",
-                DiscriminatorMappingEmptyMappingTestResource.class,
-                AbstractPet.class,
-                Canine.class,
-                Cat.class,
-                Dog.class,
-                Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingEmptyMappingTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
     }
 
     @Test
-    void testDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
+    void testJakartaDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
+        assertJsonEquals("polymorphism.declared-discriminator-empty-mapping.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.DiscriminatorMappingEmptyMappingTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Lizard.class);
+    }
+
+    @Test
+    void testJavaxDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-property-name.json",
-                DiscriminatorMappingNoPropertyNameTestResource.class,
-                AbstractPet.class,
-                Canine.class,
-                Cat.class,
-                Dog.class,
-                Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingNoPropertyNameTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
     }
 
-    /* Test models and resources below. */
-
-    public static abstract class AbstractPet {
-        @Schema(name = "pet_type", required = true)
-        private String type;
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-    }
-
-    public static interface Canine {
-        @Schema(name = "bark1", readOnly = true) // Overridden by Dog#bark
-        public String getBark();
-    }
-
-    public static class Cat extends AbstractPet {
-        String name;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
-
-    public static class Dog extends AbstractPet implements Canine {
-        @Schema(name = "bark")
-        String bark;
-
-        @Override
-        @Schema(name = "bark")
-        public String getBark() {
-            return bark;
-        }
-
-        @Schema(name = "dog_name", description = "An annotated method, no field!")
-        public String getName() {
-            return "Fido";
-        }
-
-        @Schema(description = "This property is not used due to being static")
-        public static int getAge() {
-            return -1;
-        }
-    }
-
-    @JsonbPropertyOrder({ "type", "lovesRocks" })
-    public static class Lizard extends AbstractPet {
-        boolean lovesRocks;
-    }
-
-    @Path("/pets")
-    static class DiscriminatorFullDeclaredInResponseTestResource {
-        @Path("{id}")
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response")
-        @APIResponse(content = {
-                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
-                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = {
-                                @DiscriminatorMapping(value = "dog", schema = Dog.class)
-                        }))
-        })
-        @SuppressWarnings("unused")
-        public AbstractPet get(@PathParam("id") String id) {
-            return null;
-        }
-    }
-
-    @Path("/pets")
-    static class DiscriminatorNoMappingTestResource {
-        @Path("{id}")
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        @Operation(summary = "Returns an AbstractPet with only a discriminator property declared in the response, "
-                + "no Dogs allowed!")
-        @APIResponse(content = {
-                @Content(schema = @Schema(oneOf = { Cat.class, Lizard.class }, discriminatorProperty = "pet_type"))
-        })
-        @SuppressWarnings("unused")
-        public AbstractPet get(@PathParam("id") String id) {
-            return null;
-        }
-    }
-
-    @Path("/pets")
-    static class DiscriminatorMappingNoSchemaTestResource {
-        @Path("{id}")
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                + "no mapping due to undeclared mapping schema")
-        @APIResponse(content = {
-                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
-                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = {
-                                @DiscriminatorMapping(value = "dog") }))
-        })
-        @SuppressWarnings("unused")
-        public AbstractPet get(@PathParam("id") String id) {
-            return null;
-        }
-    }
-
-    @Path("/pets")
-    static class DiscriminatorMappingNoKeyTestResource {
-        @Path("{id}")
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                + "mapping with default (implied) key")
-        @APIResponse(content = {
-                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
-                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = {
-                                @DiscriminatorMapping(schema = Dog.class) }))
-        })
-        @SuppressWarnings("unused")
-        public AbstractPet get(@PathParam("id") String id) {
-            return null;
-        }
-    }
-
-    @Path("/pets")
-    static class DiscriminatorMappingEmptyMappingTestResource {
-        @Path("{id}")
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                + "no mapping due to empty @DiscriminatorMapping")
-        @APIResponse(content = {
-                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class,
-                        Lizard.class }, discriminatorProperty = "pet_type", discriminatorMapping = { @DiscriminatorMapping }))
-        })
-        @SuppressWarnings("unused")
-        public AbstractPet get(@PathParam("id") String id) {
-            return null;
-        }
-    }
-
-    @Path("/pets")
-    static class DiscriminatorMappingNoPropertyNameTestResource {
-        @Path("{id}")
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        @Operation(summary = "Returns an AbstractPet with a discriminator declared in the response, "
-                + "no property name (invalid OpenAPI document)")
-        @APIResponse(content = {
-                @Content(schema = @Schema(oneOf = { Cat.class, Dog.class, Lizard.class }, discriminatorMapping = {
-                        @DiscriminatorMapping(value = "dog", schema = Dog.class) }))
-        })
-        @SuppressWarnings("unused")
-        public AbstractPet get(@PathParam("id") String id) {
-            return null;
-        }
+    @Test
+    void testJakartaDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
+        assertJsonEquals("polymorphism.declared-discriminator-no-property-name.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.DiscriminatorMappingNoPropertyNameTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Lizard.class);
     }
 }
