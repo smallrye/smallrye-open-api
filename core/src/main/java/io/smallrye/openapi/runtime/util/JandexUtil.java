@@ -351,7 +351,7 @@ public class JandexUtil {
      * Gets a single annotation from the given field. Returns null if no matching annotation
      * is found.
      * 
-     * @param ct ClassInfo
+     * @param field FieldInfo
      * @param names DotName
      * @return AnnotationInstance
      */
@@ -373,7 +373,7 @@ public class JandexUtil {
      * Gets a single annotation from the given method. Returns null if no matching annotation
      * is found.
      * 
-     * @param ct ClassInfo
+     * @param mi MethodInfo
      * @param names DotName
      * @return AnnotationInstance
      */
