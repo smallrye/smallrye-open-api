@@ -19,23 +19,23 @@
     },
     "/fruits/{fid}/notes/{nid}": {
       "get": {
-        "parameters": [
+        "parameters": [ 
           {
-            "name": "fid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "nid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+           "name": "fid",
+           "in": "path",
+           "required": true,
+           "schema": {
+             "type": "string"
           }
+        }, 
+        {
+          "name": "nid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        } 
         ],
         "responses": {
           "404": {
@@ -59,7 +59,7 @@
     "schemas": {
       "Note": {
         "description": "A `Note` is an immutable text annotation with an associated MIME type. ",
-        "required": [
+        "required": [ 
           "created",
           "creator",
           "id",
@@ -69,9 +69,10 @@
         "type": "object",
         "properties": {
           "modified": {
+            "format": "date-time",
             "description": "When the entity was modified as a Unix timestamp.",
-            "type": "object",
-            "example": 0
+            "type": "string",
+            "example": "0"
           },
           "modifier": {
             "format": "uuid",
@@ -82,9 +83,10 @@
             "type": "string"
           },
           "created": {
+            "format": "date-time",
             "description": "When the entity was created as a Unix timestamp. For create operations, this will not need to be defined.",
-            "type": "object",
-            "example": 0,
+            "type": "string",
+            "example": "0",
             "nullable": false
           },
           "creator": {
