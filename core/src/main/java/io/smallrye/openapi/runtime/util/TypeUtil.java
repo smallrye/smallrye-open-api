@@ -146,6 +146,7 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(java.time.LocalDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.ZonedDateTime.class.getName()), DATE_TIME_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.time.OffsetDateTime.class.getName()), DATE_TIME_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.Instant.class.getName()), DATE_TIME_FORMAT);
 
         // Duration
         TYPE_MAP.put(DotName.createSimple(java.time.Duration.class.getName()), DURATION_FORMAT);
