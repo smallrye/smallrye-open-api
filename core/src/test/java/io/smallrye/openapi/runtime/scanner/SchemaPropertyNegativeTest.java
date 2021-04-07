@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
+class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @RegisterExtension
     public LogCapture logs = new LogCapture(ScannerLogging.class.getPackage().getName());
@@ -26,7 +26,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyBlankName() throws Exception {
+    void testClassSchemaPropertyBlankName() throws Exception {
         Index index = indexOf(BlankNameTest.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -43,7 +43,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyDuplicateName() throws Exception {
+    void testClassSchemaPropertyDuplicateName() throws Exception {
         Index index = indexOf(DuplicateNameTest.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -60,7 +60,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyNegativeMultipleOf() throws Exception {
+    void testClassSchemaPropertyNegativeMultipleOf() throws Exception {
         Index index = indexOf(NegativeMultipleOf.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -75,7 +75,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMaximumNotNumber() throws Exception {
+    void testClassSchemaPropertyMaximumNotNumber() throws Exception {
         Index index = indexOf(MaximumNotNumber.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -91,7 +91,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMinimumNotNumber() throws Exception {
+    void testClassSchemaPropertyMinimumNotNumber() throws Exception {
         Index index = indexOf(MinimumNotNumber.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -107,7 +107,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMinLengthNegative() throws Exception {
+    void testClassSchemaPropertyMinLengthNegative() throws Exception {
         Index index = indexOf(MinLengthNegative.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -123,7 +123,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMaxLengthNegative() throws Exception {
+    void testClassSchemaPropertyMaxLengthNegative() throws Exception {
         Index index = indexOf(MaxLengthNegative.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -139,7 +139,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyPatternInvalid() throws Exception {
+    void testClassSchemaPropertyPatternInvalid() throws Exception {
         Index index = indexOf(PatternInvalid.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -155,7 +155,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMaxPropertiesNegative() throws Exception {
+    void testClassSchemaPropertyMaxPropertiesNegative() throws Exception {
         Index index = indexOf(MaxPropertiesNegative.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -171,7 +171,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMinPropertiesNegative() throws Exception {
+    void testClassSchemaPropertyMinPropertiesNegative() throws Exception {
         Index index = indexOf(MinPropertiesNegative.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -187,7 +187,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyRefWithOtherProps() throws Exception {
+    void testClassSchemaPropertyRefWithOtherProps() throws Exception {
         Index index = indexOf(RefWithOtherProps.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -203,7 +203,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyDefaultValueWrongType() throws Exception {
+    void testClassSchemaPropertyDefaultValueWrongType() throws Exception {
         Index index = indexOf(DefaultValueWrongType.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -219,7 +219,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMaxItemsNegative() throws Exception {
+    void testClassSchemaPropertyMaxItemsNegative() throws Exception {
         Index index = indexOf(MaxItemsNegative.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -235,7 +235,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyMinItemsNegative() throws Exception {
+    void testClassSchemaPropertyMinItemsNegative() throws Exception {
         Index index = indexOf(MinItemsNegative.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -255,7 +255,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyImplementationMissing() throws Exception {
+    void testClassSchemaPropertyImplementationMissing() throws Exception {
         Index index = indexOf(ImplementationMissing.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -271,7 +271,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyNotMissing() throws Exception {
+    void testClassSchemaPropertyNotMissing() throws Exception {
         Index index = indexOf(NotMissing.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -291,7 +291,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyOneOfMissing() throws Exception {
+    void testClassSchemaPropertyOneOfMissing() throws Exception {
         Index index = indexOf(OneOfMissing.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -311,7 +311,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyAnyOfMissing() throws Exception {
+    void testClassSchemaPropertyAnyOfMissing() throws Exception {
         Index index = indexOf(AnyOfMissing.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
@@ -331,7 +331,7 @@ public class SchemaPropertyNegativeTest extends IndexScannerTestBase {
     }
 
     @Test
-    public void testClassSchemaPropertyAllOfMissing() throws Exception {
+    void testClassSchemaPropertyAllOfMissing() throws Exception {
         Index index = indexOf(AllOfMissing.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
