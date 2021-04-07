@@ -20,6 +20,38 @@
         }
       }
     },
+    "/generic/retrieve": {
+      "post": {
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "format": "int32",
+                "type": "integer"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Apple"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/generic/save": {
       "post": {
         "requestBody": {
@@ -52,7 +84,8 @@
             "name": "q1",
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "Description for q1's schema"
             }
           }
         ],
