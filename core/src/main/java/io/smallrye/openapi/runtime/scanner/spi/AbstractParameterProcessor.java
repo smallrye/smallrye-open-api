@@ -469,46 +469,20 @@ public abstract class AbstractParameterProcessor {
     }
 
     private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
-        Parameter param;
-
-        if (context.oaiParam == null) {
-            param = new ParameterImpl();
-        } else {
-            param = context.oaiParam;
-        }
+        Parameter param = context.oaiParam != null ? context.oaiParam : new ParameterImpl();
 
         param.setName(context.name);
 
-        if (param.getIn() == null && context.location != null) {
-            param.setIn(context.location);
-        }
+        mapParameterIn(param, context);
 
         if (isIgnoredParameter(param, resourceMethod)) {
             return null;
         }
 
-        if (param.getIn() == In.PATH) {
-            param.setRequired(true);
-        }
-
-        if (param.getStyle() == null && context.frameworkParam != null) {
-            param.setStyle(context.frameworkParam.style);
-        }
-
-        if (!ModelUtil.parameterHasSchema(param) && context.targetType != null) {
-            Schema schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, extensions);
-            ModelUtil.setParameterSchema(param, schema);
-        }
-
-        if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
-            param.setDeprecated(Boolean.TRUE);
-        }
-
-        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context.target);
-
-        if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
-            param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
-        }
+        mapParameterStyle(param, context);
+        mapParameterSchema(param, context);
+        mapParameterDeprecated(param, context);
+        mapParameterExtensions(param, context);
 
         if (param.getSchema() != null) {
             augmentParamSchema(param, context);
@@ -519,6 +493,64 @@ public abstract class AbstractParameterProcessor {
         }
 
         return param;
+    }
+
+    void mapParameterIn(Parameter param, ParameterContext context) {
+        if (param.getIn() == null && context.location != null) {
+            param.setIn(context.location);
+        }
+
+        if (param.getIn() == In.PATH) {
+            param.setRequired(true);
+        }
+
+    }
+
+    void mapParameterStyle(Parameter param, ParameterContext context) {
+        if (param.getStyle() == null && context.frameworkParam != null) {
+            param.setStyle(context.frameworkParam.style);
+        }
+    }
+
+    void mapParameterSchema(Parameter param, ParameterContext context) {
+        if (ModelUtil.parameterHasSchema(param) || context.targetType == null) {
+            return;
+        }
+
+        AnnotationInstance schemaAnnotation = TypeUtil.getAnnotation(context.target, SchemaConstant.DOTNAME_SCHEMA);
+        Schema schema;
+
+        if (schemaAnnotation != null) {
+            Type paramType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
+            Map<String, Object> defaults;
+
+            if (JandexUtil.isArraySchema(schemaAnnotation)) {
+                defaults = Collections.emptyMap();
+            } else {
+                defaults = TypeUtil.getTypeAttributes(paramType);
+            }
+
+            // readSchema *may* replace the existing schema, so we must assign.
+            schema = SchemaFactory.readSchema(scannerContext, new SchemaImpl(), schemaAnnotation, defaults);
+        } else {
+            schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, extensions);
+        }
+
+        ModelUtil.setParameterSchema(param, schema);
+    }
+
+    void mapParameterDeprecated(Parameter param, ParameterContext context) {
+        if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
+            param.setDeprecated(Boolean.TRUE);
+        }
+    }
+
+    void mapParameterExtensions(Parameter param, ParameterContext context) {
+        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context.target);
+
+        if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
+            param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
+        }
     }
 
     /**
@@ -949,7 +981,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected List<DotName> getDefaultAnnotationNames() {
-        return null;
+        return Collections.emptyList();
     }
 
     protected String getDefaultAnnotationProperty() {

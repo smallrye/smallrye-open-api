@@ -153,6 +153,21 @@ public class JandexUtil {
     }
 
     /**
+     * Convenience method to retrieve the named parameter from an annotation.
+     * The value will be unwrapped from its containing {@link AnnotationValue}.
+     *
+     * @param <T> the type of the parameter being retrieved
+     * @param annotation the annotation from which to fetch the parameter
+     * @param name the name of the parameter
+     * @param defaultValue a default value to return if the parameter is not defined
+     * @return an unwrapped annotation parameter value
+     */
+    public static <T> T value(AnnotationInstance annotation, String name, T defaultValue) {
+        T value = JandexUtil.value(annotation, name);
+        return value != null ? value : defaultValue;
+    }
+
+    /**
      * Reads a String property value from the given annotation instance. If no value is found
      * this will return null.
      * 
