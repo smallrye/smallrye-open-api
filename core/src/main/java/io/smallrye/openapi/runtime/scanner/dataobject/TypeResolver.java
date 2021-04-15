@@ -335,7 +335,7 @@ public class TypeResolver {
      * @param fieldType type to resolve
      * @return resolved type (if found)
      */
-    public Type getResolvedType(Type fieldType) {
+    private Type getResolvedType(Type fieldType) {
         Type current = TypeUtil.resolveWildcard(fieldType);
 
         for (Map<String, Type> map : resolutionStack) {
@@ -373,7 +373,7 @@ public class TypeResolver {
      * @param type type to resolve
      * @return resolved type (if found)
      */
-    public Type getResolvedType(ParameterizedType type) {
+    private Type getResolvedType(ParameterizedType type) {
         if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
             return ParameterizedType.create(type.name(), resolveArguments(type, this::resolve), null);
         }

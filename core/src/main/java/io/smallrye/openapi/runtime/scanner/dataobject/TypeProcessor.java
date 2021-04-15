@@ -132,15 +132,17 @@ public class TypeProcessor {
         Schema itemSchema = new SchemaImpl();
         arraySchema.type(Schema.SchemaType.ARRAY);
 
+        Type componentType = typeResolver.resolve(arrayType.component());
+
         // Only use component (excludes the special name formatting for arrays).
-        TypeUtil.applyTypeAttributes(arrayType.component(), itemSchema);
+        TypeUtil.applyTypeAttributes(componentType, itemSchema);
 
         // If it's not a terminal type, then push for later inspection.
-        if (!isTerminalType(arrayType.component()) && index.containsClass(arrayType)) {
-            pushToStack(arrayType, itemSchema);
+        if (!isTerminalType(componentType) && index.containsClass(componentType)) {
+            pushToStack(componentType, itemSchema);
         }
 
-        itemSchema = SchemaRegistry.registerReference(arrayType.component(), typeResolver, itemSchema);
+        itemSchema = SchemaRegistry.registerReference(componentType, typeResolver, itemSchema);
 
         while (arrayType.dimensions() > 1) {
             Schema parentArrSchema = new SchemaImpl();
@@ -251,7 +253,7 @@ public class TypeProcessor {
 
     private Type resolveTypeVariable(Schema schema, Type fieldType, boolean pushToStack) {
         // Type variable (e.g. A in Foo<A>)
-        Type resolvedType = typeResolver.getResolvedType(fieldType);
+        Type resolvedType = typeResolver.resolve(fieldType);
         DataObjectLogging.logger.resolvedType(fieldType, resolvedType);
 
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
