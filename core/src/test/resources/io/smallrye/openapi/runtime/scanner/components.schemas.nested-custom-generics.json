@@ -10,9 +10,23 @@
           }
         }
       },
+      "Generic0String" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
       "Generic2String": {
         "type": "object",
         "properties": {
+          "arrayOfGeneric0" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Generic0String"
+            }
+          },
           "nested": {
             "$ref": "#/components/schemas/Generic1String"
           },

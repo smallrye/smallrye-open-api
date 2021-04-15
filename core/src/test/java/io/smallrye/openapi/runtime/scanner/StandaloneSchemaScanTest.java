@@ -405,11 +405,19 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testNestedCustomGenericSchemas() throws IOException, JSONException {
-        Index index = indexOf(Foo.class, Generic1.class, Generic2.class, CustomMap.class);
+        Index index = indexOf(Foo.class, Generic0.class, Generic1.class, Generic2.class, CustomMap.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.nested-custom-generics.json", result);
+    }
+
+    /*
+     * Do not annotate with @Schema - test relies on Generic0 registration
+     * only as an array component of Generic2#arrayOfGeneric0.
+     */
+    static class Generic0<T> {
+        T value;
     }
 
     static class Generic1<T> {
@@ -419,6 +427,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     static class Generic2<T> {
         Generic1<T> nested;
         CustomMap<T, T> nestedMap;
+        // Do not reference Generic0 other than from this field!
+        Generic0<T>[] arrayOfGeneric0;
     }
 
     @Schema
