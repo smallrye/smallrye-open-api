@@ -209,7 +209,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Now find all jax-rs endpoints
         Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context);
         for (ClassInfo resourceClass : resourceClasses) {
-            TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), resourceClass, null);
+            TypeResolver resolver = TypeResolver.forClass(context, resourceClass, null);
             context.getResolverStack().push(resolver);
             processResourceClass(context, openApi, resourceClass, null);
             context.getResolverStack().pop();
@@ -358,7 +358,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             this.currentAppPath = createPathFromSegments(this.currentAppPath, subResourcePath);
             this.subResourceStack.push(locator);
 
-            TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), subResourceClass, methodReturnType);
+            TypeResolver resolver = TypeResolver.forClass(context, subResourceClass, methodReturnType);
             context.getResolverStack().push(resolver);
 
             /*

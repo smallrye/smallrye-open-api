@@ -13,6 +13,36 @@ import org.jboss.jandex.DotName;
  */
 public class JsonbConstants {
 
+    /*
+     * See jakarta.json.bind.config.PropertyNamingStrategy#IDENTITY
+     */
+    public static final String IDENTITY = "IDENTITY";
+
+    /*
+     * See jakarta.json.bind.config.PropertyNamingStrategy#LOWER_CASE_WITH_DASHES
+     */
+    public static final String LOWER_CASE_WITH_DASHES = "LOWER_CASE_WITH_DASHES";
+
+    /*
+     * See jakarta.json.bind.config.PropertyNamingStrategy#LOWER_CASE_WITH_UNDERSCORES
+     */
+    public static final String LOWER_CASE_WITH_UNDERSCORES = "LOWER_CASE_WITH_UNDERSCORES";
+
+    /*
+     * See jakarta.json.bind.config.PropertyNamingStrategy#UPPER_CAMEL_CASE
+     */
+    public static final String UPPER_CAMEL_CASE = "UPPER_CAMEL_CASE";
+
+    /*
+     * See jakarta.json.bind.config.PropertyNamingStrategy#UPPER_CAMEL_CASE_WITH_SPACES
+     */
+    public static final String UPPER_CAMEL_CASE_WITH_SPACES = "UPPER_CAMEL_CASE_WITH_SPACES";
+
+    /*
+     * See jakarta.json.bind.config.PropertyNamingStrategy#CASE_INSENSITIVE
+     */
+    public static final String CASE_INSENSITIVE = "CASE_INSENSITIVE";
+
     public static final List<DotName> JSONB_PROPERTY = Arrays.asList(
             DotName.createSimple("javax.json.bind.annotation.JsonbProperty"),
             DotName.createSimple("jakarta.json.bind.annotation.JsonbProperty"));

@@ -1,0 +1,25 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "NameStrategyBean1": {
+        "type": "object",
+        "properties": {
+          "another-string": {
+            "type": "string",
+            "description": "Customize name locally"
+          },
+          "simple_integer_value": {
+            "format": "int32",
+            "maximum": 10,
+            "type": "integer",
+            "description": "Schema present, but name defaults to global config"
+          },
+          "simple_string_value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

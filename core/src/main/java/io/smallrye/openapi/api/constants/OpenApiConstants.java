@@ -23,6 +23,7 @@ public final class OpenApiConstants {
     public static final String SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS = "custom-schema-registry.class";
     public static final String SUFFIX_APP_PATH_DISABLE = "application-path.disable";
     public static final String SUFFIX_PRIVATE_PROPERTIES_ENABLE = "private-properties.enable";
+    public static final String SUFFIX_PROPERTY_NAMING_STRATEGY = "property-naming-strategy";
 
     public static final String SCAN_DEPENDENCIES_DISABLE = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCAN_DEPENDENCIES_DISABLE;
     public static final String SCAN_DEPENDENCIES_JARS = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCAN_DEPENDENCIES_JARS;
@@ -38,6 +39,7 @@ public final class OpenApiConstants {
     public static final String SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS = SMALLRYE_PREFIX + SUFFIX_CUSTOM_SCHEMA_REGISTRY_CLASS;
     public static final String SMALLRYE_APP_PATH_DISABLE = SMALLRYE_PREFIX + SUFFIX_APP_PATH_DISABLE;
     public static final String SMALLRYE_PRIVATE_PROPERTIES_ENABLE = SMALLRYE_PREFIX + SUFFIX_PRIVATE_PROPERTIES_ENABLE;
+    public static final String SMALLRYE_PROPERTY_NAMING_STRATEGY = SMALLRYE_PREFIX + SUFFIX_PROPERTY_NAMING_STRATEGY;
 
     public static final String VERSION = SMALLRYE_PREFIX + "openapi";
     public static final String INFO_TITLE = SMALLRYE_PREFIX + "info.title";
