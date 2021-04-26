@@ -50,6 +50,7 @@ public class TypeResolver {
     static final String METHOD_PREFIX_IS = "is";
     static final String METHOD_PREFIX_SET = "set";
 
+    private final UnaryOperator<String> nameTranslator;
     private final Deque<Map<String, Type>> resolutionStack;
     private final String propertyName;
     private FieldInfo field;
@@ -142,7 +143,9 @@ public class TypeResolver {
         return 0;
     }
 
-    private TypeResolver(String propertyName, FieldInfo field, Deque<Map<String, Type>> resolutionStack) {
+    private TypeResolver(UnaryOperator<String> nameTranslator, String propertyName, FieldInfo field,
+            Deque<Map<String, Type>> resolutionStack) {
+        this.nameTranslator = nameTranslator;
         this.propertyName = propertyName;
         this.field = field;
         this.resolutionStack = resolutionStack;
@@ -217,7 +220,7 @@ public class TypeResolver {
             return wrap(name);
         }
 
-        return wrap(this.propertyName);
+        return nameTranslator.apply(wrap(this.propertyName));
     }
 
     private String wrap(String name) {
@@ -412,12 +415,13 @@ public class TypeResolver {
      * Create a new TypeResolver for the given ClassInfo clazz and type. If the Type leaf if not
      * available, the type of the clazz will be used, without parameters.
      * 
-     * @param index class scanning index
+     * @param context current scanner context
      * @param clazz class to be resolved
      * @param leaf the type of clazz where referenced
      * @return a new TypeResolver
      */
-    public static TypeResolver forClass(IndexView index, ClassInfo clazz, Type leaf) {
+    public static TypeResolver forClass(AnnotationScannerContext context, ClassInfo clazz, Type leaf) {
+        final IndexView index = context.getAugmentedIndex();
         Type clazzType = leaf != null ? leaf : Type.create(clazz.name(), Type.Kind.CLASS);
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, clazz, clazzType);
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
@@ -437,7 +441,7 @@ public class TypeResolver {
             }
         }
 
-        return new TypeResolver(null, null, stack);
+        return new TypeResolver(getPropertyNameTranslator(context, clazz), null, null, stack);
     }
 
     public static Map<String, TypeResolver> getAllFields(AnnotationScannerContext context, Type leaf,
@@ -649,7 +653,8 @@ public class TypeResolver {
                 resolver.setField(field);
             }
         } else {
-            resolver = new TypeResolver(propertyName, field, new ArrayDeque<>(stack));
+            resolver = new TypeResolver(getPropertyNameTranslator(context, field), propertyName, field,
+                    new ArrayDeque<>(stack));
             properties.put(propertyName, resolver);
         }
 
@@ -724,7 +729,7 @@ public class TypeResolver {
         }
 
         if (propertyType != null) {
-            TypeResolver resolver = updateTypeResolvers(properties, stack, method, propertyType);
+            TypeResolver resolver = updateTypeResolvers(context, properties, stack, method, propertyType);
             if (resolver != null) {
                 resolver.processVisibility(method, reference, context.getIgnoreResolver());
             }
@@ -737,12 +742,14 @@ public class TypeResolver {
      * type as an existing property having the same name and the new method has a
      * higher priority than the current method of the same type (getter or setter).
      *
+     * @param context current scanner context
      * @param properties current map of properties discovered
      * @param stack type resolution stack for parameterized types
      * @param method the method to add/update in properties
      * @param propertyType the type of the property associated with the method
      */
-    private static TypeResolver updateTypeResolvers(Map<String, TypeResolver> properties,
+    private static TypeResolver updateTypeResolvers(AnnotationScannerContext context,
+            Map<String, TypeResolver> properties,
             Deque<Map<String, Type>> stack,
             MethodInfo method,
             Type propertyType) {
@@ -763,7 +770,8 @@ public class TypeResolver {
                 return resolver;
             }
         } else {
-            resolver = new TypeResolver(propertyName, null, new ArrayDeque<>(stack));
+            resolver = new TypeResolver(getPropertyNameTranslator(context, method), propertyName, null,
+                    new ArrayDeque<>(stack));
             properties.put(propertyName, resolver);
         }
 
@@ -890,6 +898,27 @@ public class TypeResolver {
         }
 
         return false;
+    }
+
+    private static UnaryOperator<String> getPropertyNameTranslator(AnnotationScannerContext context, AnnotationTarget target) {
+        ClassInfo clazz = target.kind() == Kind.CLASS ? target.asClass() : TypeUtil.getDeclaringClass(target);
+        AnnotationInstance jacksonNaming = clazz.classAnnotation(JacksonConstants.JSON_NAMING);
+        UnaryOperator<String> translator;
+
+        if (jacksonNaming != null) {
+            Type namingClass = JandexUtil.value(jacksonNaming, JacksonConstants.PROP_VALUE);
+
+            if (namingClass != null) {
+                translator = PropertyNamingStrategyFactory.getStrategy(namingClass.name().toString(), context.getClassLoader());
+            } else {
+                // Per Jackson @JsonNaming JavaDoc
+                translator = PropertyNamingStrategyFactory.getStrategy(JsonbConstants.IDENTITY, context.getClassLoader());
+            }
+        } else {
+            translator = context.getPropertyNameTranslator();
+        }
+
+        return translator;
     }
 
     /**

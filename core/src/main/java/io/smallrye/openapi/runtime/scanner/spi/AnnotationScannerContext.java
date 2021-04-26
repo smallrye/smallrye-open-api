@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
@@ -15,6 +16,7 @@ import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
+import io.smallrye.openapi.runtime.scanner.dataobject.PropertyNamingStrategyFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 
 /**
@@ -28,6 +30,7 @@ public class AnnotationScannerContext {
     private final IgnoreResolver ignoreResolver;
     private final List<AnnotationScannerExtension> extensions;
     private final OpenApiConfig config;
+    private final UnaryOperator<String> propertyNameTranslator;
     private final ClassLoader classLoader;
     private final OpenAPI openApi;
     private final Deque<Type> scanStack = new ArrayDeque<>();
@@ -44,6 +47,7 @@ public class AnnotationScannerContext {
         this.extensions = extensions;
         this.config = config;
         this.openApi = openApi;
+        this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
@@ -69,6 +73,10 @@ public class AnnotationScannerContext {
 
     public OpenApiConfig getConfig() {
         return config;
+    }
+
+    public UnaryOperator<String> getPropertyNameTranslator() {
+        return propertyNameTranslator;
     }
 
     public ClassLoader getClassLoader() {

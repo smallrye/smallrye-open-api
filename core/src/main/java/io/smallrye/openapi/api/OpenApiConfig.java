@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
@@ -84,6 +85,10 @@ public interface OpenApiConfig {
 
     default boolean privatePropertiesEnable() {
         return true;
+    }
+
+    default String propertyNamingStrategy() {
+        return JsonbConstants.IDENTITY;
     }
 
     default Map<String, String> getSchemas() {

@@ -22,8 +22,11 @@ mvn clean install
 * link:core[] - The core OpenAPI code, independent of entry point dependencies.
 * link:extension-jaxrs[] - The JAX-RS entry point. This module depends on JAX-RS and core.
 * link:extension-spring[] - The Spring entry point. This module depends on Spring and core.
+* link:extension-vertx[] - The Vert.x entry point. This module depends on Vert.x and core.
 * link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
-* link:tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
+* link:testsuite[] - Test suites.
+* link:testsuite/tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
+* link:testsuite/extra[] - Extra integration tests not related to the TCK.
 * link:tools/maven-plugin[] - Maven plugin that creates the OpenAPI Schema on build.
 
 === Links
@@ -31,3 +34,8 @@ mvn clean install
 * http://github.com/smallrye/smallrye-open-api/[Project Homepage]
 * {microprofile-open-api}[Eclipse MicroProfile OpenAPI]
 
+=== Configuration Extensions
+* `mp.openapi.extensions.smallrye.property-naming-strategy` - define a naming strategy to be used globally for all schema properties. Set to one of the following:
+** A standard JSON-B naming strategy (listed in `jakarta.json.bind.config.PropertyNamingStrategy`/`javax.json.bind.config.PropertyNamingStrategy`)
+** A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
+** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.

@@ -177,7 +177,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         SpringLogging.log.processingController(controllerClass.simpleName());
 
-        TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), controllerClass, null);
+        TypeResolver resolver = TypeResolver.forClass(context, controllerClass, null);
         context.getResolverStack().push(resolver);
 
         OpenAPI openApi = new OpenAPIImpl();

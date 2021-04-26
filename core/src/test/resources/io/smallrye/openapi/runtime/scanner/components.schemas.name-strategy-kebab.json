@@ -1,0 +1,19 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "NameStrategyKebab": {
+        "type": "object",
+        "properties": {
+          "simple-string-one": {
+            "type": "string"
+          },
+          "another-field": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

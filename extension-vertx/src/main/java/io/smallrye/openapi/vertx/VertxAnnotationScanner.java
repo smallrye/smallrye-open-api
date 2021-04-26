@@ -148,7 +148,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
         VertxLogging.log.processingRouteClass(routeClass.simpleName());
 
-        TypeResolver resolver = TypeResolver.forClass(context.getAugmentedIndex(), routeClass, null);
+        TypeResolver resolver = TypeResolver.forClass(context, routeClass, null);
         context.getResolverStack().push(resolver);
 
         OpenAPI openApi = new OpenAPIImpl();

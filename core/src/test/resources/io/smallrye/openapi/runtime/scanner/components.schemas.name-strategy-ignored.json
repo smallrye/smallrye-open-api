@@ -1,0 +1,19 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "NameStrategyBean2": {
+        "type": "object",
+        "properties": {
+          "simpleString1": {
+            "type": "string"
+          },
+          "anotherField": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

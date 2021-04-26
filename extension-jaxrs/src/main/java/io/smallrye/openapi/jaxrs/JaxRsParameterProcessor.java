@@ -210,7 +210,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
             if (targetType != null) {
                 ClassInfo beanParam = index.getClassByName(targetType.name());
-                this.scannerContext.getResolverStack().push(TypeResolver.forClass(index, beanParam, targetType));
+                this.scannerContext.getResolverStack().push(TypeResolver.forClass(this.scannerContext, beanParam, targetType));
                 readParametersInherited(beanParam, annotation, overriddenParametersOnly);
                 this.scannerContext.getResolverStack().pop();
             }

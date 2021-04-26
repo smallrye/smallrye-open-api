@@ -37,6 +37,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String customSchemaRegistryClass;
     private Boolean applicationPathDisable;
     private Boolean privatePropertiesEnable;
+    private String propertyNamingStrategy;
     private Map<String, String> schemas;
     private String version;
     private String infoTitle;
@@ -251,6 +252,17 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         }
 
         return privatePropertiesEnable;
+    }
+
+    @Override
+    public String propertyNamingStrategy() {
+        if (propertyNamingStrategy == null) {
+            propertyNamingStrategy = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY, String.class)
+                    .orElse(OpenApiConfig.super.propertyNamingStrategy());
+        }
+
+        return propertyNamingStrategy;
     }
 
     @Override
