@@ -1,0 +1,32 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: javax:javaee-api
+    versions:
+    - "< 9, >= 8.a"
+  - dependency-name: org.eclipse.jetty:jetty-bom
+    versions:
+    - ">= 10.a, < 11"
+  - dependency-name: org.eclipse.jetty:jetty-bom
+    versions:
+    - ">= 11.a, < 12"
+  - dependency-name: org.eclipse.jetty:jetty-bom
+    versions:
+    - ">= 9.4.a, < 9.5"
+  - dependency-name: org.eclipse.jetty:jetty-deploy
+    versions:
+    - ">= 10.a, < 11"
+  - dependency-name: org.eclipse.jetty:jetty-deploy
+    versions:
+    - ">= 11.a, < 12"
+  - dependency-name: org.eclipse.jetty:jetty-deploy
+    versions:
+    - ">= 9.4.a, < 9.5"
+  - dependency-name: jakarta.xml.bind:jakarta.xml.bind-api
+    versions:
+    - 3.0.0
