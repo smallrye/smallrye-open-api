@@ -3,7 +3,7 @@ package io.smallrye.openapi.spring;
 import static org.jboss.jandex.AnnotationTarget.Kind.CLASS;
 import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -143,8 +143,8 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
     }
 
     @Override
-    protected List<DotName> getDefaultAnnotationNames() {
-        return Arrays.asList(SpringConstants.QUERY_PARAM);
+    protected Set<DotName> getDefaultAnnotationNames() {
+        return Collections.singleton(SpringConstants.QUERY_PARAM);
     }
 
     @Override

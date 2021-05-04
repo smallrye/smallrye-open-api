@@ -3,6 +3,7 @@ package io.smallrye.openapi.jaxrs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -218,7 +219,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     @Override
-    protected List<DotName> getDefaultAnnotationNames() {
+    protected Set<DotName> getDefaultAnnotationNames() {
         return JaxRsConstants.DEFAULT_VALUE;
     }
 

@@ -670,7 +670,7 @@ public class TypeUtil {
                 .orElse(null);
     }
 
-    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, List<DotName> annotationNames) {
+    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, Collection<DotName> annotationNames) {
         if (annotationTarget == null) {
             return null;
         }

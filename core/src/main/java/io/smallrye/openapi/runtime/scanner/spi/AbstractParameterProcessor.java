@@ -980,8 +980,8 @@ public abstract class AbstractParameterProcessor {
         return valueString;
     }
 
-    protected List<DotName> getDefaultAnnotationNames() {
-        return Collections.emptyList();
+    protected Set<DotName> getDefaultAnnotationNames() {
+        return Collections.emptySet();
     }
 
     protected String getDefaultAnnotationProperty() {
@@ -997,7 +997,7 @@ public abstract class AbstractParameterProcessor {
      * @return the default value
      */
     protected Object getDefaultValue(AnnotationTarget target) {
-        List<DotName> defaultAnnotationNames = getDefaultAnnotationNames();
+        Set<DotName> defaultAnnotationNames = getDefaultAnnotationNames();
         String annotationProperty = getDefaultAnnotationProperty();
 
         if (defaultAnnotationNames == null || defaultAnnotationNames.isEmpty() || annotationProperty == null) {
