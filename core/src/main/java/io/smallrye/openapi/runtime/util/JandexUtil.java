@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -339,7 +340,7 @@ public class JandexUtil {
      * @param names List of DotNames
      * @return AnnotationInstance
      */
-    public static AnnotationInstance getClassAnnotation(ClassInfo ct, List<DotName> names) {
+    public static AnnotationInstance getClassAnnotation(ClassInfo ct, Collection<DotName> names) {
         if (names == null || names.isEmpty()) {
             return null;
         }
@@ -370,7 +371,7 @@ public class JandexUtil {
      * @param names DotName
      * @return AnnotationInstance
      */
-    public static AnnotationInstance getAnnotation(FieldInfo field, List<DotName> names) {
+    public static AnnotationInstance getAnnotation(FieldInfo field, Collection<DotName> names) {
         if (names == null || names.isEmpty()) {
             return null;
         }
@@ -392,7 +393,7 @@ public class JandexUtil {
      * @param names DotName
      * @return AnnotationInstance
      */
-    public static AnnotationInstance getAnnotation(MethodInfo mi, List<DotName> names) {
+    public static AnnotationInstance getAnnotation(MethodInfo mi, Collection<DotName> names) {
         if (names == null || names.isEmpty()) {
             return null;
         }
@@ -424,7 +425,7 @@ public class JandexUtil {
      * @param annotations
      * @return
      */
-    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, List<DotName> annotations) {
+    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, Collection<DotName> annotations) {
         for (DotName dotName : annotations) {
             if (method.hasAnnotation(dotName)) {
                 return true;

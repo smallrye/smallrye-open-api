@@ -473,7 +473,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, List<DotName> annotationName, String[] defaultValue) {
+    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, Set<DotName> annotationName, String[] defaultValue) {
         AnnotationInstance annotation = JandexUtil.getAnnotation(resourceMethod, annotationName);
 
         if (annotation == null) {

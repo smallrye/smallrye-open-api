@@ -1,7 +1,7 @@
 package io.smallrye.openapi.jaxrs;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.DotName;
@@ -46,22 +46,22 @@ public enum JaxRsParameter {
 
     final FrameworkParameter parameter;
 
-    private JaxRsParameter(List<DotName> names, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle,
+    private JaxRsParameter(Set<DotName> names, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle,
             String mediaType) {
         this.parameter = new FrameworkParameter(names, location, style, defaultStyle, mediaType);
     }
 
     private JaxRsParameter(DotName name, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle,
             String mediaType) {
-        this(Arrays.asList(name), location, style, defaultStyle, mediaType);
+        this(Collections.singleton(name), location, style, defaultStyle, mediaType);
     }
 
-    private JaxRsParameter(List<DotName> names, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle) {
+    private JaxRsParameter(Set<DotName> names, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle) {
         this(names, location, style, defaultStyle, null);
     }
 
     private JaxRsParameter(DotName name, Parameter.In location, Parameter.Style style, Parameter.Style defaultStyle) {
-        this(Arrays.asList(name), location, style, defaultStyle);
+        this(Collections.singleton(name), location, style, defaultStyle);
     }
 
     static FrameworkParameter forName(DotName annotationName) {
