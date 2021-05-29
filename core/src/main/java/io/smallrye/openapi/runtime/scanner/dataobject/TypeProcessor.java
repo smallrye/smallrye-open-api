@@ -79,12 +79,13 @@ public class TypeProcessor {
             type = resolveTypeVariable(schema, type, false);
         }
 
-        if (type.kind() == Type.Kind.ARRAY) {
-            readArrayType(type.asArrayType(), this.schema);
+        if (TypeUtil.isWrappedType(type)) {
+            // Unwrap and proceed using the wrapped type
+            type = TypeUtil.unwrapType(type);
         }
 
-        if (TypeUtil.isWrappedType(type)) {
-            return readWrappedType(type, this.schema);
+        if (type.kind() == Type.Kind.ARRAY) {
+            return readArrayType(type.asArrayType(), this.schema);
         }
 
         if (isA(type, ENUM_TYPE) && index.containsClass(type)) {
@@ -133,6 +134,11 @@ public class TypeProcessor {
         arraySchema.type(Schema.SchemaType.ARRAY);
 
         Type componentType = typeResolver.resolve(arrayType.component());
+        boolean isOptional = TypeUtil.isOptional(componentType);
+
+        if (isOptional) {
+            componentType = TypeUtil.unwrapType(componentType);
+        }
 
         // Only use component (excludes the special name formatting for arrays).
         TypeUtil.applyTypeAttributes(componentType, itemSchema);
@@ -153,19 +159,15 @@ public class TypeProcessor {
             arrayType = ArrayType.create(arrayType.component(), arrayType.dimensions() - 1);
         }
 
+        if (isOptional) {
+            itemSchema = new SchemaImpl()
+                    .addAllOf(itemSchema)
+                    .addAllOf(new SchemaImpl().nullable(Boolean.TRUE));
+        }
+
         arraySchema.setItems(itemSchema);
 
         return arrayType;
-    }
-
-    private Type readWrappedType(Type wrapperType, Schema schema) {
-        Type wrappedType = TypeUtil.unwrapType(wrapperType);
-
-        if (!isTerminalType(wrappedType) && index.containsClass(wrappedType)) {
-            pushToStack(wrappedType, schema);
-        }
-
-        return wrappedType;
     }
 
     private Type readParameterizedType(ParameterizedType pType, Schema schema) {
@@ -184,7 +186,19 @@ public class TypeProcessor {
 
             // Should only have one arg for collection.
             Type valueType = ancestorType.arguments().get(0);
-            schema.setItems(readGenericValueType(valueType, schema));
+            boolean isOptional = TypeUtil.isOptional(valueType);
+            if (isOptional) {
+                valueType = TypeUtil.unwrapType(valueType);
+            }
+            Schema valueSchema = readGenericValueType(valueType, schema);
+
+            if (isOptional) {
+                valueSchema = new SchemaImpl()
+                        .addAllOf(valueSchema)
+                        .addAllOf(new SchemaImpl().nullable(Boolean.TRUE));
+            }
+
+            schema.setItems(valueSchema);
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (isA(pType, MAP_TYPE)) {

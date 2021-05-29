@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -436,4 +437,32 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         Generic2<String> generic;
     }
 
+    /****************************************************************/
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/809
+     */
+    @Test
+    @SuppressWarnings("unused")
+    void testOptionalArrayTypes() throws IOException, JSONException {
+        @Schema(name = "B")
+        class B {
+            public UUID id;
+        }
+        @Schema(name = "A")
+        class A {
+            public UUID id;
+            public Optional<B> optionalOfB;
+            public List<B> listOfB;
+            public Optional<List<B>> optionalListOfB;
+            public Optional<B[]> optionalArrayOfB;
+            public Optional<B>[] arrayOfOptionalB;
+            public List<Optional<B>> listOfOptionalB;
+        }
+        Index index = indexOf(B.class, A.class, UUID.class, List.class, Optional.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.optional-arraytype.json", result);
+    }
 }

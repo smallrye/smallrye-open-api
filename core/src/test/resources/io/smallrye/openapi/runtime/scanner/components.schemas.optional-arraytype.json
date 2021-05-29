@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "A": {
+        "type": "object",
+        "properties": {
+          "arrayOfOptionalB": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/B"
+                },
+                {
+                  "nullable": true
+                }
+              ]
+            }
+          },
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "listOfB": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B"
+            }
+          },
+          "listOfOptionalB": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/B"
+                },
+                {
+                  "nullable": true
+                }
+              ]
+            }
+          },
+          "optionalArrayOfB": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B"
+            },
+            "nullable": true
+          },
+          "optionalListOfB": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B"
+            },
+            "nullable": true
+          },
+          "optionalOfB": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/B"
+              },
+              {
+                "nullable": true
+              }
+            ]
+          }
+        }
+      },
+      "B": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        }
+      },
+      "UUID": {
+        "format": "uuid",
+        "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+        "type": "string"
+      }
+    }
+  }
+}
