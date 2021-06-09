@@ -6,7 +6,6 @@ import org.jboss.jandex.MethodInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
@@ -66,16 +65,11 @@ public class OperationReader {
                     ExtensionReader.readExtensions(context,
                             annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
 
-            operation.setOperationId(JandexUtil.optionalStringValue(annotationInstance, OperationConstant.PROP_OPERATION_ID)
-                    .orElse(getOperationId(context, methodInfo)));
+            operation.setOperationId(JandexUtil.value(annotationInstance, OperationConstant.PROP_OPERATION_ID));
             operation
                     .setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
             // TODO: for non-callbacks: operation.setExtensions(ExtensionReader.readExtendsions(context, annotationInstance));
 
-            return operation;
-        } else if (shouldDoAutoGenerate(context)) {
-            Operation operation = new OperationImpl();
-            operation.setOperationId(getOperationId(context, methodInfo));
             return operation;
         } else {
             return null;
@@ -126,35 +120,4 @@ public class OperationReader {
         return method.annotation(OperationConstant.DOTNAME_OPERATION);
     }
 
-    /**
-     * This might (depending on config) auto generate a operation Id from the method and class names.
-     * Or not.
-     * 
-     * @return an operation id, maybe
-     */
-    private static String getOperationId(final AnnotationScannerContext context,
-            final MethodInfo method) {
-        if (shouldDoAutoGenerate(context) && method != null) {
-            OpenApiConfig.OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
-            switch (operationIdStrategy) {
-                case METHOD:
-                    return method.name();
-                case CLASS_METHOD:
-                    return method.declaringClass().name().withoutPackagePrefix() + "_" + method.name();
-                case PACKAGE_CLASS_METHOD:
-                    return method.declaringClass().name() + "_" + method.name();
-                default:
-                    return null;
-            }
-        }
-        return null;
-
-    }
-
-    private static boolean shouldDoAutoGenerate(final AnnotationScannerContext context) {
-        // Try from config
-        OpenApiConfig config = context.getConfig();
-        OpenApiConfig.OperationIdStrategy operationIdStrategy = config.getOperationIdStrategy();
-        return operationIdStrategy != null;
-    }
 }

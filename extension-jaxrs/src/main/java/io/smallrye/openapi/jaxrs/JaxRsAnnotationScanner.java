@@ -406,7 +406,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                         .orElse(null));
 
         // Process any @Operation annotation
-        Optional<Operation> maybeOperation = processOperation(context, method);
+        Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
         if (!maybeOperation.isPresent()) {
             return; // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
         }

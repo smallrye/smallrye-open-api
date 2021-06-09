@@ -37,6 +37,7 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.OperationImpl;
@@ -281,18 +282,45 @@ public interface AnnotationScanner {
      * While scanning JAX-RS/Spring method, find the operations
      * 
      * @param context the scanning context
+     * @param resourceClass the JAX-RS/Spring concrete resource class
      * @param method the JAX-RS/Spring method
      * @return Maybe an Operation model
      */
-    default Optional<Operation> processOperation(final AnnotationScannerContext context, final MethodInfo method) {
+    default Optional<Operation> processOperation(final AnnotationScannerContext context,
+            final ClassInfo resourceClass,
+            final MethodInfo method) {
         if (OperationReader.operationIsHidden(method)) {
             return Optional.empty();
         }
         AnnotationInstance operationAnnotation = OperationReader.getOperationAnnotation(method);
         Operation operation = OperationReader.readOperation(context, operationAnnotation, method);
+
         if (operation == null) {
             operation = new OperationImpl();
         }
+
+        OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
+
+        if (operationIdStrategy != null && operation.getOperationId() == null) {
+            String operationId = null;
+
+            switch (operationIdStrategy) {
+                case METHOD:
+                    operationId = method.name();
+                    break;
+                case CLASS_METHOD:
+                    operationId = resourceClass.name().withoutPackagePrefix() + "_" + method.name();
+                    break;
+                case PACKAGE_CLASS_METHOD:
+                    operationId = resourceClass.name() + "_" + method.name();
+                    break;
+                default:
+                    break;
+            }
+
+            operation.setOperationId(operationId);
+        }
+
         return Optional.of(operation);
     }
 
