@@ -82,6 +82,12 @@ class ApiResponseTests extends IndexScannerTestBase {
     }
 
     @Test
+    void testJakartaResponseGenerationJsonExampleApiResourceTestResource() throws IOException, JSONException {
+        test("responses.generation-json-example-api-response.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseGenerationJsonExampleApiResourceTestResource.class);
+    }
+
+    @Test
     void testJavaxResponseMultipartGeneration() throws IOException, JSONException {
         test("responses.multipart-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.ResponseMultipartGenerationTestResource.class);

@@ -1,0 +1,50 @@
+{
+  "openapi" : "3.0.3",
+  "paths" : {
+    "/pets/{id}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Description 200",
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "key" : "value"
+                },
+                "examples" : {
+                  "response_success_1" : {
+                    "value" : {
+                      "key" : "value"
+                    }
+                  },
+                  "response_success_2" : {
+                    "value" : {
+                      "key2" : 12
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

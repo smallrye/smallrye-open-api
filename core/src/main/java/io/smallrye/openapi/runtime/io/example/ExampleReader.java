@@ -92,7 +92,7 @@ public class ExampleReader {
         example.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.EXAMPLE));
         example.setSummary(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_SUMMARY));
         example.setDescription(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
-        example.setValue(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_VALUE));
+        example.setValue(JsonUtil.parseValue(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_VALUE)));
         example.setExternalValue(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_EXTERNAL_VALUE));
 
         return example;

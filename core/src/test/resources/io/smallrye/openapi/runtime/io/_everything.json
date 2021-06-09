@@ -118,6 +118,12 @@
 							},
 							"Example-2" : {
 								"$ref": "#/components/examples/Example-2"
+							},
+							"Example-3": {
+								"value": {
+									"name": "foo",
+									"id": 12
+								}
 							}
 						},
 						"content": {
