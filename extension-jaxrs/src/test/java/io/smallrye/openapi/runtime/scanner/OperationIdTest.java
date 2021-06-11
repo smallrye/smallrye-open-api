@@ -4,6 +4,7 @@ import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -12,6 +13,9 @@ import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
+import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.Salutation;
+import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.SalutationEnglish;
+import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.SalutationSpanish;
 
 /**
  * Basic tests to check the operation Id autogeneration
@@ -45,4 +49,16 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
         }
     }
 
+    @Test
+    void testInheritedOperationIdsUtilizeConcreteClassName() throws Exception {
+        try {
+            OpenApiConfig config = dynamicConfig(OpenApiConstants.OPERATION_ID_STRAGEGY, "CLASS_METHOD");
+            Index index = indexOf(Salutation.class, SalutationEnglish.class, SalutationSpanish.class);
+            OpenAPI result = OpenApiProcessor.bootstrap(config, index);
+            printToConsole(result);
+            assertJsonEquals("resource.testOperationIdWithInheritance.json", result);
+        } finally {
+            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
+        }
+    }
 }
