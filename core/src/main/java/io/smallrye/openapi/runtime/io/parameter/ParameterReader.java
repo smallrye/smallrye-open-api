@@ -180,8 +180,9 @@ public class ParameterReader {
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),
                         ContentDirection.PARAMETER));
-        parameter.setExamples(ExampleReader.readExamples(annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
-        parameter.setExample(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE));
+        parameter.setExamples(ExampleReader.readExamples(context, annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
+        parameter.setExample(
+                ExampleReader.parseValue(context, JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE)));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.PARAMETER));
 
         if (annotationInstance.target() != null) {
