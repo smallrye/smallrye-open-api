@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.encoding.EncodingReader;
 import io.smallrye.openapi.runtime.io.example.ExampleReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -45,8 +44,9 @@ public class MediaTypeReader {
         }
         IoLogging.logger.singleAnnotationAs("@Content", "MediaType");
         MediaType mediaType = new MediaTypeImpl();
-        mediaType.setExamples(ExampleReader.readExamples(annotationInstance.value(MediaTypeConstant.PROP_EXAMPLES)));
-        mediaType.setExample(JsonUtil.parseValue(JandexUtil.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
+        mediaType.setExamples(ExampleReader.readExamples(context, annotationInstance.value(MediaTypeConstant.PROP_EXAMPLES)));
+        mediaType.setExample(
+                ExampleReader.parseValue(context, JandexUtil.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
         mediaType.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(MediaTypeConstant.PROP_SCHEMA)));
         mediaType.setEncoding(EncodingReader.readEncodings(context, annotationInstance.value(MediaTypeConstant.PROP_ENCODING)));
         return mediaType;

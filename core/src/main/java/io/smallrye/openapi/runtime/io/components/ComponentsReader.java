@@ -52,7 +52,7 @@ public class ComponentsReader {
         // TODO for EVERY item below, handle the case where the annotation is ref-only.  then strip the ref path and use the final segment as the name
         components.setCallbacks(
                 CallbackReader.readCallbacks(context, nested.value(ComponentsConstant.PROP_CALLBACKS)));
-        components.setExamples(ExampleReader.readExamples(nested.value(ComponentsConstant.PROP_EXAMPLES)));
+        components.setExamples(ExampleReader.readExamples(context, nested.value(ComponentsConstant.PROP_EXAMPLES)));
         components.setHeaders(HeaderReader.readHeaders(context, nested.value(ComponentsConstant.PROP_HEADERS)));
         components.setLinks(LinkReader.readLinks(nested.value(ComponentsConstant.PROP_LINKS)));
         components.setParameters(

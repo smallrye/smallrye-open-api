@@ -63,6 +63,24 @@ public interface AnnotationScannerExtension {
      * @return the extension
      */
     default Object parseExtension(String key, String value) {
+        return parseValue(value);
+    }
+
+    /**
+     * Parse a string value as an Object.
+     * By default, try to parse the value from JSON
+     * The value may be:
+     *
+     * - JSON object - starts with '{'
+     * - JSON array - starts with '['
+     * - number
+     * - boolean
+     * - string
+     *
+     * @param value the string value
+     * @return the parsed value as Object
+     */
+    default Object parseValue(String value) {
         return JsonUtil.parseValue(value);
     }
 }
