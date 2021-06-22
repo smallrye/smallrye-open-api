@@ -474,15 +474,19 @@ class TypeResolverTests extends IndexScannerTestBase {
         class Test {
             private String field1;
             public String field2;
+            protected String field3;
+            String field4;
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
                 dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
-        assertEquals(2, properties.size());
+        assertEquals(4, properties.size());
         assertTrue(properties.get("field1").isIgnored());
         assertFalse(properties.get("field2").isIgnored());
+        assertTrue(properties.get("field3").isIgnored());
+        assertTrue(properties.get("field4").isIgnored());
     }
 
     @Test
@@ -492,15 +496,21 @@ class TypeResolverTests extends IndexScannerTestBase {
             @Schema(hidden = false)
             private String field1;
             public String field2;
+            @Schema(hidden = false)
+            protected String field3;
+            @Schema(hidden = false)
+            String field4;
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
                 dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
-        assertEquals(2, properties.size());
+        assertEquals(4, properties.size());
         assertFalse(properties.get("field1").isIgnored());
         assertFalse(properties.get("field2").isIgnored());
+        assertFalse(properties.get("field3").isIgnored());
+        assertFalse(properties.get("field4").isIgnored());
     }
 
     @Test
@@ -510,26 +520,40 @@ class TypeResolverTests extends IndexScannerTestBase {
             private String field1;
             @Schema(hidden = true)
             public String field2;
+            protected String field3;
+            String field4;
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
                 dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
-        assertEquals(2, properties.size());
+        assertEquals(4, properties.size());
         assertTrue(properties.get("field1").isIgnored());
         assertTrue(properties.get("field2").isIgnored());
+        assertTrue(properties.get("field3").isIgnored());
+        assertTrue(properties.get("field4").isIgnored());
     }
 
     @Test
-    void testPrivatePropertyVisibleWithProtectedGetter() {
+    void testPrivatePropertyVisibleWithPublicGetter() {
         @SuppressWarnings("unused")
         class Test {
             private String field1;
             public String field2;
+            protected String field3;
+            String field4;
 
             public String getField1() {
                 return field1;
+            }
+
+            public String getField3() {
+                return field3;
+            }
+
+            public String getField4() {
+                return field4;
             }
         }
 
@@ -537,9 +561,11 @@ class TypeResolverTests extends IndexScannerTestBase {
                 dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
-        assertEquals(2, properties.size());
+        assertEquals(4, properties.size());
         assertFalse(properties.get("field1").isIgnored());
         assertFalse(properties.get("field2").isIgnored());
+        assertFalse(properties.get("field3").isIgnored());
+        assertFalse(properties.get("field4").isIgnored());
     }
 
     @Test
@@ -548,6 +574,8 @@ class TypeResolverTests extends IndexScannerTestBase {
         class Test {
             private String field1;
             private String field2;
+            private String field3;
+            private String field4;
 
             public String getField1() {
                 return field1;
@@ -556,15 +584,25 @@ class TypeResolverTests extends IndexScannerTestBase {
             private String getField2() {
                 return field2;
             }
+
+            protected String getField3() {
+                return field3;
+            }
+
+            String getField4() {
+                return field4;
+            }
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
                 dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
-        assertEquals(2, properties.size());
+        assertEquals(4, properties.size());
         assertFalse(properties.get("field1").isIgnored());
         assertTrue(properties.get("field2").isIgnored());
+        assertTrue(properties.get("field3").isIgnored());
+        assertTrue(properties.get("field4").isIgnored());
     }
 
     @Test
@@ -580,15 +618,25 @@ class TypeResolverTests extends IndexScannerTestBase {
             private String getField2() {
                 return "field2";
             }
+
+            protected String getField3() {
+                return "field3";
+            }
+
+            String getField4() {
+                return "field4";
+            }
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
                 dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
-        assertEquals(2, properties.size());
+        assertEquals(4, properties.size());
         assertFalse(properties.get("field1").isIgnored());
         assertTrue(properties.get("field2").isIgnored());
+        assertTrue(properties.get("field3").isIgnored());
+        assertTrue(properties.get("field4").isIgnored());
     }
 
     @Test

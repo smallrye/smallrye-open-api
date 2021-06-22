@@ -495,9 +495,9 @@ public class TypeResolver {
             properties.values()
                     .stream()
                     .filter(TypeResolver::isExposedByDefault)
-                    .filter(resolver -> isPrivateOrAbsent(resolver.field))
-                    .filter(resolver -> isPrivateOrAbsent(resolver.readMethod))
-                    .filter(resolver -> isPrivateOrAbsent(resolver.writeMethod))
+                    .filter(resolver -> isNonPublicOrAbsent(resolver.field))
+                    .filter(resolver -> isNonPublicOrAbsent(resolver.readMethod))
+                    .filter(resolver -> isNonPublicOrAbsent(resolver.writeMethod))
                     .forEach(property -> property.ignored = true);
         }
 
@@ -512,12 +512,12 @@ public class TypeResolver {
         return !Modifier.isStatic(field.flags()) && !field.isSynthetic();
     }
 
-    private static boolean isPrivateOrAbsent(FieldInfo field) {
-        return field == null || Modifier.isPrivate(field.flags());
+    private static boolean isNonPublicOrAbsent(FieldInfo field) {
+        return field == null || !Modifier.isPublic(field.flags());
     }
 
-    private static boolean isPrivateOrAbsent(MethodInfo method) {
-        return method == null || Modifier.isPrivate(method.flags());
+    private static boolean isNonPublicOrAbsent(MethodInfo method) {
+        return method == null || !Modifier.isPublic(method.flags());
     }
 
     /**
