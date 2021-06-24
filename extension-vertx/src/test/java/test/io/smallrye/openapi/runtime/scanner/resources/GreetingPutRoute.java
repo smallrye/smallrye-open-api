@@ -9,8 +9,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import io.quarkus.vertx.web.Body;
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
+import io.quarkus.vertx.web.Route.HttpMethod;
 import io.quarkus.vertx.web.RouteBase;
-import io.vertx.core.http.HttpMethod;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
 /**

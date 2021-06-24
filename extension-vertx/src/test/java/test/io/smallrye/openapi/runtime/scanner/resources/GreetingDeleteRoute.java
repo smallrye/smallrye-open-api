@@ -4,8 +4,8 @@ import javax.enterprise.context.ApplicationScoped;
 
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
+import io.quarkus.vertx.web.Route.HttpMethod;
 import io.quarkus.vertx.web.RouteBase;
-import io.vertx.core.http.HttpMethod;
 
 /**
  * Vert.x
