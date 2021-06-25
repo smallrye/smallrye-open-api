@@ -22,7 +22,8 @@ public class GreetResource {
     @Operation(summary = "Returns a personalized greeting")
     @APIResponse(description = "Simple JSON containing the greeting", content = @Content(mediaType = "application/json", schema = @Schema(implementation = GreetingMessage.class)))
     @Produces(value = MediaType.APPLICATION_JSON)
-    public JsonObject getMessage(@Parameter(description = "The greeting name") @BeanParam @PathParam(value = "name") String name) {
+    public JsonObject getMessage(
+            @Parameter(description = "The greeting name") @BeanParam @PathParam(value = "name") String name) {
         return null;
     }
 
