@@ -208,9 +208,9 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             // This is a @BeanParam or a RESTEasy @MultipartForm
             setMediaType(frameworkParam);
             targetType = TypeUtil.unwrapType(targetType);
+            ClassInfo beanParam;
 
-            if (targetType != null) {
-                ClassInfo beanParam = index.getClassByName(targetType.name());
+            if (targetType != null && (beanParam = index.getClassByName(targetType.name())) != null) {
                 this.scannerContext.getResolverStack().push(TypeResolver.forClass(this.scannerContext, beanParam, targetType));
                 readParametersInherited(beanParam, annotation, overriddenParametersOnly);
                 this.scannerContext.getResolverStack().pop();
