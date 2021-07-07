@@ -30,8 +30,8 @@
 
         <version.arquillian.jetty>1.0.0.CR3</version.arquillian.jetty>
         <version.jetty>9.3.29.v20201019</version.jetty>
-        <version.resteasy>4.6.1.Final</version.resteasy>
-        <version.quarkus>2.0.0.Final</version.quarkus>
+        <version.resteasy>4.6.2.Final</version.resteasy>
+        <version.quarkus>2.0.1.Final</version.quarkus>
 
         <!--
             xmlReportPaths must contain an entry for each project that reports coverage.
