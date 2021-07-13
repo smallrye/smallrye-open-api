@@ -137,7 +137,7 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- Java EE / Jakarta EE -->
+            <!-- Jakarta EE -->
             <!-- CDI -->
             <dependency>
                 <groupId>jakarta.enterprise</groupId>
@@ -281,10 +281,10 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Java EE / Jakarta EE Test dependencies -->
-        <!-- We add the test dependencies here, to control the Java EE and Jakarta EE versions.
+        <!-- Jakarta EE Test dependencies -->
+        <!-- We add the test dependencies here, to control the Jakarta EE versions.
              This allows us to create both javax.* and jakarta.* namespace tests.
-             The implementation itself does not depend on any Java EE or Jakarta EE libraries -->
+             The implementation itself does not depend on any Jakarta EE libraries -->
         
         <!-- CDI -->
         <dependency>
