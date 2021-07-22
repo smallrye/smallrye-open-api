@@ -90,10 +90,15 @@
         "type": "object",
         "required": [
             "arrayListNotNullAndNotEmptyAndMaxItems",
+            "arrayListNullableAndMinItemsAndMaxItems",
             "booleanNotNull",
             "jacksonRequiredTrueString",
             "mapObjectNotNullAndNotEmptyAndMaxProperties",
-            "stringNotBlankNotNull"
+            "mapObjectNullableAndMinPropertiesAndMaxProperties",
+            "stringNotBlankDigits",
+            "stringNotBlankNotNull",
+            "stringNotEmptyMaxSize",
+            "stringNotEmptySizeRange"
         ],
         "properties": {
           "arrayListNotNullAndNotEmptyAndMaxItems": {
