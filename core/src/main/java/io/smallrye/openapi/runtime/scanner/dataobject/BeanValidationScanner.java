@@ -197,11 +197,11 @@ public class BeanValidationScanner {
         INSTANCE.decimalMax(target, schema);
         INSTANCE.decimalMin(target, schema);
         INSTANCE.digits(target, schema);
-        INSTANCE.notBlank(target, schema);
+        INSTANCE.notBlank(target, schema, propertyKey, handler);
         INSTANCE.notNull(target, schema, propertyKey, handler);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeString(target, schema);
-        INSTANCE.notEmptyString(target, schema);
+        INSTANCE.notEmptyString(target, schema, propertyKey, handler);
     }
 
     private static void applyObjectConstraints(AnnotationTarget target,
@@ -211,7 +211,7 @@ public class BeanValidationScanner {
         INSTANCE.notNull(target, schema, propertyKey, handler);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeObject(target, schema);
-        INSTANCE.notEmptyObject(target, schema);
+        INSTANCE.notEmptyObject(target, schema, propertyKey, handler);
     }
 
     private static void applyArrayConstraints(AnnotationTarget target,
@@ -221,7 +221,7 @@ public class BeanValidationScanner {
         INSTANCE.notNull(target, schema, propertyKey, handler);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeArray(target, schema);
-        INSTANCE.notEmptyArray(target, schema);
+        INSTANCE.notEmptyArray(target, schema, propertyKey, handler);
     }
 
     private static void applyNumberConstraints(AnnotationTarget target,
@@ -361,7 +361,7 @@ public class BeanValidationScanner {
         }
     }
 
-    void notBlank(AnnotationTarget target, Schema schema) {
+    void notBlank(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_BLANK);
 
         if (constraint != null) {
@@ -371,30 +371,40 @@ public class BeanValidationScanner {
             if (schema.getPattern() == null) {
                 schema.setPattern("\\S");
             }
+
+            handler.setRequired(target, propertyKey);
         }
     }
 
-    void notEmptyArray(AnnotationTarget target, Schema schema) {
+    void notEmptyArray(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_EMPTY);
 
-        if (constraint != null && schema.getMinItems() == null) {
-            schema.setMinItems(1);
+        if (constraint != null) {
+            if (schema.getMinItems() == null) {
+                schema.setMinItems(1);
+            }
+
+            handler.setRequired(target, propertyKey);
         }
     }
 
-    void notEmptyObject(AnnotationTarget target, Schema schema) {
+    void notEmptyObject(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
         if (!allowsAdditionalProperties(schema)) {
             return;
         }
 
         AnnotationInstance constraint = getConstraint(target, BV_NOT_EMPTY);
 
-        if (constraint != null && schema.getMinProperties() == null) {
-            schema.setMinProperties(1);
+        if (constraint != null) {
+            if (schema.getMinProperties() == null) {
+                schema.setMinProperties(1);
+            }
+
+            handler.setRequired(target, propertyKey);
         }
     }
 
-    void notEmptyString(AnnotationTarget target, Schema schema) {
+    void notEmptyString(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_EMPTY);
 
         if (constraint != null) {
@@ -405,6 +415,8 @@ public class BeanValidationScanner {
             if (schema.getMinLength() == null) {
                 schema.setMinLength(1);
             }
+
+            handler.setRequired(target, propertyKey);
         }
     }
 
