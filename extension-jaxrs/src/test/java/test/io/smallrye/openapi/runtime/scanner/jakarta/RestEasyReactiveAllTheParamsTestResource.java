@@ -11,6 +11,7 @@ import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestMatrix;
 import org.jboss.resteasy.reactive.RestPath;
 import org.jboss.resteasy.reactive.RestQuery;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
@@ -59,7 +60,7 @@ public class RestEasyReactiveAllTheParamsTestResource {
 
     @GET
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Widget get(@RestQuery(value = "q1") @Deprecated long q1, @RestQuery(value = "q2") String notQ2) {
+    public RestResponse<Widget> get(@RestQuery(value = "q1") @Deprecated long q1, @RestQuery(value = "q2") String notQ2) {
         return null;
     }
 

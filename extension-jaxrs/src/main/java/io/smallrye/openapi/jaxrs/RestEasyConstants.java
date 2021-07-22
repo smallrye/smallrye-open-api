@@ -42,6 +42,8 @@ public class RestEasyConstants {
             .createSimple("org.jboss.resteasy.reactive.RestHeader");
     public static final DotName REACTIVE_REST_MATRIX = DotName
             .createSimple("org.jboss.resteasy.reactive.RestMatrix");
+    public static final DotName REACTIVE_REST_RESPONSE = DotName
+            .createSimple("org.jboss.resteasy.reactive.RestResponse");
 
     // RestEasy multi-part form annotations
     public static final DotName MULTIPART_FORM = DotName

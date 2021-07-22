@@ -67,6 +67,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
+    public boolean isWrapperType(Type type) {
+        return type.name().equals(RestEasyConstants.REACTIVE_REST_RESPONSE)
+                && type.kind().equals(Type.Kind.PARAMETERIZED_TYPE);
+    }
+
+    @Override
     public boolean isAsyncResponse(final MethodInfo method) {
         return method.parameters()
                 .stream()
