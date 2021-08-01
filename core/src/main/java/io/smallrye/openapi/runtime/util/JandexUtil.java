@@ -74,6 +74,10 @@ public class JandexUtil {
     private JandexUtil() {
     }
 
+    public static String createUniqueMethodReference(MethodInfo methodInfo) {
+        return "" + methodInfo.hashCode();
+    }
+
     /**
      * Reads a string property named "ref" value from the given annotation and converts it
      * to a value appropriate for setting on a model's "$ref" property.

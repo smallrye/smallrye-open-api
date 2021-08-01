@@ -293,11 +293,13 @@ public interface AnnotationScanner {
             return Optional.empty();
         }
         AnnotationInstance operationAnnotation = OperationReader.getOperationAnnotation(method);
-        Operation operation = OperationReader.readOperation(context, operationAnnotation, method);
+        OperationImpl operation = (OperationImpl) OperationReader.readOperation(context, operationAnnotation, method);
 
         if (operation == null) {
             operation = new OperationImpl();
         }
+
+        operation.setMethodRef(JandexUtil.createUniqueMethodReference(method));
 
         OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
 

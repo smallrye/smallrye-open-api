@@ -19,7 +19,8 @@
         <script>
 
             window.onload = function() {
-                const ui = SwaggerUIBundle({
+                
+                const ui = {
                     ${urlSection},
                     dom_id: '${domId}',
                     deepLinking: ${deepLinking},
@@ -37,7 +38,6 @@
                     tagsSorter: ${tagsSorter},
                     onComplete: ${onComplete},
                     syntaxHighlight: ${syntaxHighlight},
-                    oauth2RedirectUrl: '${oauth2RedirectUrl}',
                     requestInterceptor: ${requestInterceptor},
                     request.curlOptions: ${requestCurlOptions},
                     responseInterceptor: ${responseInterceptor},
@@ -52,11 +52,20 @@
                     plugins: ${plugins},
                     layout: '${layout}',
                     ${preauthorizeSection}
-                })
-
+                };
+                
+                // If Url is relative, append the host and port
+                var oar = "${oauth2RedirectUrl}";
+                if(oar.startsWith("/")){
+                    oar = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + oar;
+                    ui.oauth2RedirectUrl = oar;
+                }else if(oar !== "-"){
+                    ui.oauth2RedirectUrl = oar;
+                }
+                
                 ${initOAuthSection}
                 
-                window.ui = ui
+                window.ui = SwaggerUIBundle(ui)
 
                 document.getElementsByClassName("link")[0].innerHTML = "<a href='${selfHref}'><img src='${logoHref}' alt='${title}' height='44' align='middle'></a>";
             }

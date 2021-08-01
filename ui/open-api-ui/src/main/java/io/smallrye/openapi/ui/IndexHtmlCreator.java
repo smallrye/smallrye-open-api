@@ -66,8 +66,11 @@ public class IndexHtmlCreator {
             if (variableOption != null) {
                 if (options != null && options.containsKey(variableOption)) {
                     String replacement = options.get(variableOption);
-
                     if (replacement == null) {
+                        // Special case for oauth2RedirectUrl
+                        if (variableOption.equals("oauth2RedirectUrl")) {
+                            return "-";
+                        }
                         // You want to remove this line
                         return null;
                     } else {

@@ -34,6 +34,7 @@ public class OpenApiDocument {
     private transient OpenAPI staticFileModel;
     private transient Map<String, OASFilter> filters = new HashMap<>();
     private transient String archiveName;
+    private transient String version;
 
     private transient OpenAPI model;
 
@@ -110,6 +111,10 @@ public class OpenApiDocument {
         set(() -> this.archiveName = archiveName);
     }
 
+    public void version(String version) {
+        set(() -> this.version = version);
+    }
+
     public void initialize() {
         synchronized (INSTANCE) {
             if (model != null) {
@@ -149,7 +154,7 @@ public class OpenApiDocument {
                 merged.getInfo().setTitle((archiveName == null ? "Generated" : archiveName) + " API");
             }
             if (merged.getInfo().getVersion() == null) {
-                merged.getInfo().setVersion("1.0");
+                merged.getInfo().setVersion((version == null ? "1.0" : version));
             }
 
             // Phase 7: Use Config values to add Servers (global, pathItem, operation)

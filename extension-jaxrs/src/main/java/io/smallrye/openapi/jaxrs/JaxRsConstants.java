@@ -106,7 +106,7 @@ public class JaxRsConstants {
         methods.addAll(PATCH);
     }
 
-    static final Set<DotName> HTTP_METHODS = Collections
+    public static final Set<DotName> HTTP_METHODS = Collections
             .unmodifiableSet(methods);
 
     private JaxRsConstants() {

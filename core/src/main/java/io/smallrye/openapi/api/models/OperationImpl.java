@@ -34,6 +34,16 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
     private List<SecurityRequirement> security;
     private List<Server> servers;
 
+    private String methodRef;
+
+    public OperationImpl() {
+
+    }
+
+    public OperationImpl(String methodRef) {
+        this.methodRef = methodRef;
+    }
+
     /**
      * @see org.eclipse.microprofile.openapi.models.Operation#getTags()
      */
@@ -310,6 +320,19 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
     @Override
     public void removeServer(Server server) {
         ModelUtil.remove(this.servers, server);
+    }
+
+    /**
+     * Implementation specific, set a reference to the Java Method, so that we can bind back to it later if needed
+     * 
+     * @return reference to the method that we scanned this on
+     */
+    public String getMethodRef() {
+        return methodRef;
+    }
+
+    public void setMethodRef(String methodRef) {
+        this.methodRef = methodRef;
     }
 
 }
