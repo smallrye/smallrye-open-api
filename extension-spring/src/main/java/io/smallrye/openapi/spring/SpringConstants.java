@@ -40,7 +40,7 @@ public class SpringConstants {
     public static final Set<DotName> MULTIPART_INPUTS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(MUTIPART_FILE)));
 
-    static final Set<DotName> HTTP_METHODS = Collections
+    public static final Set<DotName> HTTP_METHODS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(
                     GET_MAPPING,
                     PUT_MAPPING,
