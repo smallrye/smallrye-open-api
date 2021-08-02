@@ -1,6 +1,7 @@
 package test.io.smallrye.openapi.runtime.scanner;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import javax.validation.constraints.NotNull;
@@ -53,6 +54,12 @@ public class MultipartFormTestResource {
         @PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(hidden = true)
         private InputStream undocumentedFile;
+        @FormParam(value = "listOfFileStreams")
+        @Schema(description = "List of streams")
+        private List<InputStream> files1;
+        @FormParam(value = "listOfBinaryArrays")
+        @Schema(description = "List of byte arrays")
+        private List<byte[]> files2;
     }
 
     @POST

@@ -57,8 +57,24 @@
                     "format": "binary"
                   },
                   "file": {
-                    "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "listOfFileStreams": {
+                    "description": "List of streams",
+                    "type": "array",
+                    "items": {
+                      "format": "binary",
+                      "type": "string"
+                    }
+                  },
+                  "listOfBinaryArrays": {
+                    "description": "List of byte arrays",
+                    "type": "array",
+                    "items": {
+                      "format": "binary",
+                      "type": "string"
+                    }
                   }
                 }
               },

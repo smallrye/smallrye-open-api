@@ -73,11 +73,8 @@
                     "type": "string"
                   },
                   "icon": {
-                    "type": "array",
-                    "items": {
-                      "format": "byte",
-                      "type": "string"
-                    }
+                    "type" : "string",
+                    "format" : "binary"
                   }
                 }
               }
