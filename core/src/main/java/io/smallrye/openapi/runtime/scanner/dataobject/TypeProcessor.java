@@ -11,6 +11,7 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRIN
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ParameterizedType;
@@ -19,9 +20,11 @@ import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -84,7 +87,7 @@ public class TypeProcessor {
             type = TypeUtil.unwrapType(type);
         }
 
-        if (type.kind() == Type.Kind.ARRAY) {
+        if (isArrayType(type, annotationTarget)) {
             return readArrayType(type.asArrayType(), this.schema);
         }
 
@@ -292,5 +295,23 @@ public class TypeProcessor {
 
     private boolean isA(Type testSubject, Type test) {
         return TypeUtil.isA(context, testSubject, test);
+    }
+
+    private boolean isArrayType(Type type, AnnotationTarget annotationTarget) {
+        if (type.kind() != Kind.ARRAY) {
+            return false;
+        }
+
+        final AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(annotationTarget);
+
+        if (annotation != null) {
+            Schema.SchemaType schemaType = JandexUtil.enumValue(annotation, SchemaConstant.PROP_TYPE, Schema.SchemaType.class);
+
+            if (schemaType != null) {
+                return schemaType == Schema.SchemaType.ARRAY;
+            }
+        }
+
+        return true;
     }
 }
