@@ -318,6 +318,21 @@ public class TypeUtil {
     }
 
     /**
+     * Check if the default schema type that applies to the provided classType
+     * differs from any value specified by the user via schemaAnnotation.
+     * 
+     * @param classType class type to find a default schema type
+     * @param schemaAnnotation schema annotation (possibly null) which may have an overridden type value
+     * @return true if the annotation has a type specified that is different from the default type for classType, otherwise
+     *         false
+     */
+    public static boolean isTypeOverridden(Type classType, AnnotationInstance schemaAnnotation) {
+        SchemaType providedType = JandexUtil.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+        TypeWithFormat typeFormat = getTypeFormat(classType);
+        return providedType != null && !typeFormat.isSchemaType(providedType);
+    }
+
+    /**
      * Sets the default schema attributes for the given type on the provided schema
      * instance.
      * 

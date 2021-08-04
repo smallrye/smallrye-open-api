@@ -270,7 +270,7 @@ public class JandexUtil {
      * @return Value of property
      */
     public static <T extends Enum<?>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
-        AnnotationValue value = annotation.value(propertyName);
+        AnnotationValue value = annotation != null ? annotation.value(propertyName) : null;
         if (value == null) {
             return null;
         }

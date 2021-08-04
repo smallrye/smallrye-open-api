@@ -524,7 +524,7 @@ public abstract class AbstractParameterProcessor {
             Type paramType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
             Map<String, Object> defaults;
 
-            if (JandexUtil.isArraySchema(schemaAnnotation)) {
+            if (JandexUtil.isArraySchema(schemaAnnotation) || TypeUtil.isTypeOverridden(context.targetType, schemaAnnotation)) {
                 defaults = Collections.emptyMap();
             } else {
                 defaults = TypeUtil.getTypeAttributes(paramType);

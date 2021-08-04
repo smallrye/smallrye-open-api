@@ -139,7 +139,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             typeSchema = typeProcessor.getSchema();
 
             // Set any default values that apply to the type schema as a result of the TypeProcessor
-            TypeUtil.applyTypeAttributes(fieldType, typeSchema);
+            if (!TypeUtil.isTypeOverridden(fieldType, schemaAnnotation)) {
+                TypeUtil.applyTypeAttributes(fieldType, typeSchema);
+            }
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
             Type registrationType = TypeUtil.isWrappedType(entityType) ? fieldType : entityType;
@@ -315,7 +317,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         // Provide inferred type and format if relevant.
         Map<String, Object> defaults;
 
-        if (JandexUtil.isArraySchema(annotation)) {
+        if (JandexUtil.isArraySchema(annotation) || TypeUtil.isTypeOverridden(postProcessedField, annotation)) {
             defaults = Collections.emptyMap();
         } else {
             defaults = TypeUtil.getTypeAttributes(postProcessedField);
