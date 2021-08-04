@@ -471,9 +471,9 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Target(ElementType.TYPE_USE)
     @interface TestAnno {
-        
+
     }
-    
+
     /*
      * https://github.com/smallrye/smallrye-open-api/issues/831
      */
