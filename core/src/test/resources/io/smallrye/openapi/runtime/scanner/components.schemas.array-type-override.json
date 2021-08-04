@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "Sample": {
+        "type": "object",
+        "properties": {
+          "arrayFromSchema": {
+            "type": "array",
+            "items": {
+              "format": "byte",
+              "type": "string"
+            }
+          },
+          "arrayFromType": {
+            "type": "array",
+            "items": {
+              "format": "byte",
+              "type": "string"
+            }
+          },
+          "chars": {
+            "type": "string"
+          },
+          "data": {
+            "format": "base64",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
