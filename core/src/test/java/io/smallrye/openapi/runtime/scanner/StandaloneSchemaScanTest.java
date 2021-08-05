@@ -1,6 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -464,5 +467,34 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.optional-arraytype.json", result);
+    }
+
+    @Target(ElementType.TYPE_USE)
+    @interface TestAnno {
+
+    }
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/831
+     */
+    @Test
+    void testArraySchemaTypeOverridden() throws IOException, JSONException {
+        @Schema(name = "Sample")
+        class Sample {
+            @Schema(type = SchemaType.STRING, format = "base64")
+            public byte[] data;
+            @Schema(type = SchemaType.STRING)
+            public char[] chars;
+            @Schema(type = SchemaType.ARRAY)
+            public char[] arrayFromSchema;
+            @Schema
+            public char[] arrayFromType;
+        }
+
+        Index index = indexOf(Sample.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.array-type-override.json", result);
     }
 }

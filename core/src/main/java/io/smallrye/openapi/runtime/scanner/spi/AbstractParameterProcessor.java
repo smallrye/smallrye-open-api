@@ -524,7 +524,7 @@ public abstract class AbstractParameterProcessor {
             Type paramType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
             Map<String, Object> defaults;
 
-            if (JandexUtil.isArraySchema(schemaAnnotation)) {
+            if (JandexUtil.isArraySchema(schemaAnnotation) || TypeUtil.isTypeOverridden(context.targetType, schemaAnnotation)) {
                 defaults = Collections.emptyMap();
             } else {
                 defaults = TypeUtil.getTypeAttributes(paramType);
@@ -643,13 +643,21 @@ public abstract class AbstractParameterProcessor {
             String paramName = param.getKey();
             AnnotationTarget paramTarget = param.getValue().target();
             Type paramType = getType(paramTarget);
-            Schema paramSchema;
+            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, extensions);
 
-            if (schemaAnnotationSupported && TypeUtil.hasAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA)) {
-                paramSchema = SchemaFactory.readSchema(scannerContext,
-                        TypeUtil.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA));
-            } else {
-                paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, extensions);
+            if (schemaAnnotationSupported) {
+                AnnotationInstance schemaAnnotation = TypeUtil.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
+                if (schemaAnnotation != null) {
+                    Schema fromAnnotation = SchemaFactory.readSchema(scannerContext, schemaAnnotation);
+
+                    if (fromAnnotation == null) {
+                        // hidden
+                        continue;
+                    } else {
+                        // Generate `allOf` ?
+                        paramSchema = MergeUtil.mergeObjects(paramSchema, fromAnnotation);
+                    }
+                }
             }
 
             if (paramSchema == null) {

@@ -1,6 +1,7 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -32,7 +33,6 @@ public class MultipartFormTestResource {
     }
 
     public static class Bean {
-
         @org.jboss.resteasy.annotations.jaxrs.FormParam
         @DefaultValue(value = "f1-default")
         String formField1;
@@ -54,6 +54,12 @@ public class MultipartFormTestResource {
         @PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(hidden = true)
         private InputStream undocumentedFile;
+        @FormParam(value = "listOfFileStreams")
+        @Schema(description = "List of streams")
+        private List<InputStream> files1;
+        @FormParam(value = "listOfBinaryArrays")
+        @Schema(description = "List of byte arrays")
+        private List<byte[]> files2;
     }
 
     @POST
