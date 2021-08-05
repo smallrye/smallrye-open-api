@@ -375,11 +375,11 @@ public class SchemaFactory {
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.items(
+                schema.setItems(
                         readClassSchema(context, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
             } else {
                 // Recurse using the type of the array elements
-                schema.items(readClassSchema(context, componentType, schemaReferenceSupported));
+                schema.setItems(readClassSchema(context, componentType, schemaReferenceSupported));
             }
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
@@ -403,10 +403,14 @@ public class SchemaFactory {
 
         if (TypeUtil.isWrappedType(type)) {
             // Recurse using the optional's type
-            return typeToSchema(context, TypeUtil.unwrapType(type), extensions);
+            schema = typeToSchema(context, TypeUtil.unwrapType(type), extensions);
         } else if (CurrentScannerInfo.isWrapperType(type)) {
             // Recurse using the wrapped type
-            return typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);
+            schema = typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);
+        } else if (TypeUtil.isTerminalType(type)) {
+            schema = new SchemaImpl();
+            TypeUtil.applyTypeAttributes(type, schema);
+            schema = schemaRegistration(context, type, schema);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = new SchemaImpl().type(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
@@ -415,10 +419,10 @@ public class SchemaFactory {
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.items(typeToSchema(context, ArrayType.create(componentType, dimensions - 1), extensions));
+                schema.setItems(typeToSchema(context, ArrayType.create(componentType, dimensions - 1), extensions));
             } else {
                 // Recurse using the type of the array elements
-                schema.items(typeToSchema(context, componentType, extensions));
+                schema.setItems(typeToSchema(context, componentType, extensions));
             }
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(context, type.asClassType(), true);
@@ -575,7 +579,7 @@ public class SchemaFactory {
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements
-            schema.items(typeToSchema(context, componentType, extensions));
+            schema.setItems(typeToSchema(context, componentType, extensions));
             return schema;
         } else {
             Type asyncType = resolveAsyncType(context, type, extensions);

@@ -486,9 +486,9 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             @Schema(type = SchemaType.STRING)
             public char[] chars;
             @Schema(type = SchemaType.ARRAY)
-            public byte[] arrayFromSchema;
+            public char[] arrayFromSchema;
             @Schema
-            public byte[] arrayFromType;
+            public char[] arrayFromType;
         }
 
         Index index = indexOf(Sample.class);

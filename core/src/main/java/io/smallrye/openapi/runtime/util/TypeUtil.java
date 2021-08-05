@@ -53,6 +53,7 @@ public class TypeUtil {
     private static final Type OBJECT_TYPE = Type.create(DOTNAME_OBJECT, Type.Kind.CLASS);
     private static final String UUID_PATTERN = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
     private static final TypeWithFormat STRING_FORMAT = TypeWithFormat.of(SchemaType.STRING).build();
+    private static final TypeWithFormat BINARY_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BINARY).build();
     private static final TypeWithFormat BYTE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
     private static final TypeWithFormat CHAR_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
     private static final TypeWithFormat UUID_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.UUID)
@@ -113,6 +114,10 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(byte.class.getName()), BYTE_FORMAT);
         TYPE_MAP.put(DotName.createSimple(Character.class.getName()), CHAR_FORMAT);
         TYPE_MAP.put(DotName.createSimple(char.class.getName()), CHAR_FORMAT);
+
+        // Binary (any sequence of octets)
+        TYPE_MAP.put(DotName.createSimple(byte[].class.getName()), BINARY_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.io.InputStream.class.getName()), BINARY_FORMAT);
 
         // Number
         TYPE_MAP.put(DotName.createSimple(Number.class.getName()), NUMBER_FORMAT);
@@ -270,7 +275,7 @@ public class TypeUtil {
      */
     private static TypeWithFormat getTypeFormat(Type type) {
         if (type.kind() == Type.Kind.ARRAY) {
-            return arrayFormat();
+            return TYPE_MAP.getOrDefault(type.name(), arrayFormat());
         }
 
         return TYPE_MAP.getOrDefault(getName(type), objectFormat());
@@ -310,6 +315,21 @@ public class TypeUtil {
      */
     public static Map<String, Object> getTypeAttributes(Type classType) {
         return getTypeFormat(classType).getProperties();
+    }
+
+    /**
+     * Check if the default schema type that applies to the provided classType
+     * differs from any value specified by the user via schemaAnnotation.
+     * 
+     * @param classType class type to find a default schema type
+     * @param schemaAnnotation schema annotation (possibly null) which may have an overridden type value
+     * @return true if the annotation has a type specified that is different from the default type for classType, otherwise
+     *         false
+     */
+    public static boolean isTypeOverridden(Type classType, AnnotationInstance schemaAnnotation) {
+        SchemaType providedType = JandexUtil.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+        TypeWithFormat typeFormat = getTypeFormat(classType);
+        return providedType != null && !typeFormat.isSchemaType(providedType);
     }
 
     /**
@@ -448,19 +468,24 @@ public class TypeUtil {
     }
 
     public static boolean isTerminalType(Type type) {
-        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
-                type.kind() == Type.Kind.WILDCARD_TYPE ||
-                type.kind() == Type.Kind.ARRAY) {
-            return false;
+        boolean terminal;
+
+        switch (type.kind()) {
+            case PRIMITIVE:
+            case VOID:
+                terminal = true;
+                break;
+            case TYPE_VARIABLE:
+            case WILDCARD_TYPE:
+                terminal = false;
+                break;
+            default:
+                // If is known type.
+                terminal = !getTypeFormat(type).isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT);
+                break;
         }
 
-        if (type.kind() == Type.Kind.PRIMITIVE ||
-                type.kind() == Type.Kind.VOID) {
-            return true;
-        }
-
-        // If is known type.
-        return !getTypeFormat(type).isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT);
+        return terminal;
     }
 
     public static boolean isWrappedType(Type type) {
@@ -901,6 +926,7 @@ public class TypeUtil {
         static final String INT64 = "int64";
         static final String FLOAT = "float";
         static final String DOUBLE = "double";
+        static final String BINARY = "binary";
         static final String BYTE = "byte";
         static final String DATE = "date";
         static final String DATE_TIME = "date-time";
