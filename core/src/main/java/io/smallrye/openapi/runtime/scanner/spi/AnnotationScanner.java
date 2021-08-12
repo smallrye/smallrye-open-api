@@ -36,8 +36,10 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
+import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
+import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.OperationImpl;
@@ -410,8 +412,9 @@ public interface AnnotationScanner {
                 Schema schema;
 
                 if (isMultipartOutput(returnType)) {
-                    schema = new SchemaImpl();
-                    schema.setType(Schema.SchemaType.OBJECT);
+                    schema = new SchemaImpl().type(Schema.SchemaType.OBJECT);
+                } else if (isKotlinContinuation(method)) {
+                    schema = kotlinContinuationToSchema(context, method);
                 } else {
                     schema = SchemaFactory.typeToSchema(context, returnType, context.getExtensions());
                 }
@@ -490,6 +493,35 @@ public interface AnnotationScanner {
             }
         }
         return false;
+    }
+
+    default boolean isKotlinContinuation(MethodInfo method) {
+        if (method.parameters().size() != 1) {
+            return false;
+        }
+
+        return KotlinConstants.CONTINUATION.equals(method.parameters().get(0).name());
+    }
+
+    default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
+        Schema schema;
+        Type type = context.getResourceTypeResolver().resolve(method.parameters().get(0));
+
+        if (type.kind() == Kind.PARAMETERIZED_TYPE) {
+            type = type.asParameterizedType().arguments().get(0);
+
+            if (type.kind() == Kind.WILDCARD_TYPE) {
+                Type extendsBound = type.asWildcardType().extendsBound();
+                Type superBound = type.asWildcardType().superBound();
+                type = superBound != null ? superBound : extendsBound;
+            }
+
+            schema = SchemaFactory.typeToSchema(context, type, context.getExtensions());
+        } else {
+            schema = new SchemaImpl().type(Schema.SchemaType.OBJECT);
+        }
+
+        return schema;
     }
 
     /**
