@@ -237,4 +237,42 @@ class ApiResponseTests extends IndexScannerTestBase {
                 NavigableMap.class,
                 HashMap.class);
     }
+
+    @Test
+    void testKotlinContinuationStringResponse() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/hello")
+        class Resource {
+
+            /**
+             * Java equivalent of Kotlin function
+             * <code>
+             * suspend fun hello(): String {
+             *     return "Hello RESTEasy Reactive"
+             * }
+             * </code>
+             *
+             * @param completion maps to Kotlin string return type when using `suspend`
+             * @return nothing
+             */
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/async")
+            @jakarta.ws.rs.Produces({ "text/plain" })
+            public Object hello1(kotlin.coroutines.Continuation<? super String> completion) {
+                return null;
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/sync")
+            @jakarta.ws.rs.Produces({ "text/plain" })
+            public String hello2() {
+                return "Hello";
+            }
+        }
+
+        test("responses.kotlin-continuation.json",
+                Resource.class,
+                kotlin.coroutines.Continuation.class,
+                kotlin.coroutines.CoroutineContext.class);
+    }
+
 }
