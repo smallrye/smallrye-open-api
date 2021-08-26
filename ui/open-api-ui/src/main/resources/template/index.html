@@ -63,9 +63,9 @@
                     ui.oauth2RedirectUrl = oar;
                 }
                 
-                ${initOAuthSection}
-                
                 window.ui = SwaggerUIBundle(ui)
+
+                ${initOAuthSection}
 
                 document.getElementsByClassName("link")[0].innerHTML = "<a href='${selfHref}'><img src='${logoHref}' alt='${title}' height='44' align='middle'></a>";
             }
