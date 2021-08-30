@@ -472,12 +472,12 @@ public class TypeResolver {
             }
 
             // Store all field properties
-            currentClass.fields()
+            fields(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptField)
                     .forEach(field -> scanField(context, properties, field, stack, reference));
 
-            currentClass.methods()
+            methods(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptMethod)
                     .forEach(method -> scanMethod(context, properties, method, stack, reference));
@@ -487,7 +487,7 @@ public class TypeResolver {
                     .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .map(index::getClass)
                     .filter(Objects::nonNull)
-                    .flatMap(clazz -> clazz.methods().stream())
+                    .flatMap(clazz -> methods(context, clazz).stream())
                     .forEach(method -> scanMethod(context, properties, method, stack, reference));
         }
 
@@ -502,6 +502,20 @@ public class TypeResolver {
         }
 
         return sorted(properties, chain.keySet());
+    }
+
+    private static List<FieldInfo> fields(AnnotationScannerContext context, ClassInfo currentClass) {
+        if (context.getConfig().sortedPropertiesEnable()) {
+            return currentClass.fields();
+        }
+        return currentClass.unsortedFields();
+    }
+
+    private static List<MethodInfo> methods(AnnotationScannerContext context, ClassInfo currentClass) {
+        if (context.getConfig().sortedPropertiesEnable()) {
+            return currentClass.methods();
+        }
+        return currentClass.unsortedMethods();
     }
 
     private static boolean acceptMethod(MethodInfo method) {
@@ -944,6 +958,7 @@ public class TypeResolver {
                 .map(TypeResolver::propertyOrder)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+        List<DotName> chainClassNames = chain.stream().map(ClassInfo::name).collect(Collectors.toList());
 
         return properties.entrySet()
                 .stream()
@@ -976,8 +991,8 @@ public class TypeResolver {
                         return 1;
                     }
 
-                    int cIndex1 = chain.indexOf(c1);
-                    int cIndex2 = chain.indexOf(c2);
+                    int cIndex1 = chainClassNames.indexOf(c1.name());
+                    int cIndex2 = chainClassNames.indexOf(c2.name());
 
                     return Integer.compare(cIndex1, cIndex2);
                 })

@@ -91,14 +91,14 @@
         "required": [
             "arrayListNotNullAndNotEmptyAndMaxItems",
             "arrayListNullableAndMinItemsAndMaxItems",
-            "booleanNotNull",
-            "jacksonRequiredTrueString",
             "mapObjectNotNullAndNotEmptyAndMaxProperties",
             "mapObjectNullableAndMinPropertiesAndMaxProperties",
-            "stringNotBlankDigits",
             "stringNotBlankNotNull",
+            "stringNotBlankDigits",
             "stringNotEmptyMaxSize",
-            "stringNotEmptySizeRange"
+            "stringNotEmptySizeRange",
+            "booleanNotNull",
+            "jacksonRequiredTrueString"
         ],
         "properties": {
           "arrayListNotNullAndNotEmptyAndMaxItems": {

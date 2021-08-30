@@ -91,6 +91,10 @@ public interface OpenApiConfig {
         return JsonbConstants.IDENTITY;
     }
 
+    default boolean sortedPropertiesEnable() {
+        return false;
+    }
+
     default Map<String, String> getSchemas() {
         return new HashMap<>();
     }

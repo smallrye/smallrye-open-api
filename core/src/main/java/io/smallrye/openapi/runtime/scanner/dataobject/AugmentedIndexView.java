@@ -6,6 +6,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.ModuleInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -92,6 +93,23 @@ public class AugmentedIndexView implements IndexView {
     public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName, IndexView annotationIndex) {
         validateInput(annotationName, annotationIndex);
         return index.getAnnotationsWithRepeatable(annotationName, annotationIndex);
+    }
+
+    @Override
+    public Collection<ModuleInfo> getKnownModules() {
+        return index.getKnownModules();
+    }
+
+    @Override
+    public ModuleInfo getModuleByName(DotName moduleName) {
+        validateInput(moduleName);
+        return index.getModuleByName(moduleName);
+    }
+
+    @Override
+    public Collection<ClassInfo> getKnownUsers(DotName className) {
+        validateInput(className);
+        return index.getKnownUsers(className);
     }
 
     private void validateInput(Object... inputs) {

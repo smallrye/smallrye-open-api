@@ -22,8 +22,8 @@
     "schemas": {
       "Policy437": {
         "required": [
-          "conditions",
-          "name"
+          "name",
+          "conditions"
         ],
         "type": "object",
         "properties": {
