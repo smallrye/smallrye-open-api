@@ -10,6 +10,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.ModuleInfo;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 
@@ -225,7 +226,7 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<ClassInfo> getKnownClasses() {
-        return this.delegate.getKnownClasses().stream().filter(ci -> accepts(ci.name())).collect(Collectors.toList());
+        return filterClasses(this.delegate.getKnownClasses());
     }
 
     /**
@@ -245,8 +246,7 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<ClassInfo> getKnownDirectSubclasses(DotName className) {
-        return this.delegate.getKnownDirectSubclasses(className).stream().filter(ci -> accepts(ci.name()))
-                .collect(Collectors.toList());
+        return filterClasses(this.delegate.getKnownDirectSubclasses(className));
     }
 
     /**
@@ -254,8 +254,7 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<ClassInfo> getAllKnownSubclasses(DotName className) {
-        return this.delegate.getAllKnownSubclasses(className).stream().filter(ci -> accepts(ci.name()))
-                .collect(Collectors.toList());
+        return filterClasses(this.delegate.getAllKnownSubclasses(className));
     }
 
     /**
@@ -263,8 +262,7 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<ClassInfo> getKnownDirectImplementors(DotName className) {
-        return this.delegate.getKnownDirectImplementors(className).stream().filter(ci -> accepts(ci.name()))
-                .collect(Collectors.toList());
+        return filterClasses(this.delegate.getKnownDirectImplementors(className));
     }
 
     /**
@@ -272,8 +270,7 @@ public class FilteredIndexView implements IndexView {
      */
     @Override
     public Collection<ClassInfo> getAllKnownImplementors(DotName interfaceName) {
-        return this.delegate.getAllKnownImplementors(interfaceName).stream().filter(ci -> accepts(ci.name()))
-                .collect(Collectors.toList());
+        return filterClasses(this.delegate.getAllKnownImplementors(interfaceName));
     }
 
     /**
@@ -290,6 +287,21 @@ public class FilteredIndexView implements IndexView {
     @Override
     public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName, IndexView annotationIndex) {
         return filterInstances(this.delegate.getAnnotationsWithRepeatable(annotationName, annotationIndex));
+    }
+
+    @Override
+    public Collection<ModuleInfo> getKnownModules() {
+        return delegate.getKnownModules();
+    }
+
+    @Override
+    public ModuleInfo getModuleByName(DotName moduleName) {
+        return delegate.getModuleByName(moduleName);
+    }
+
+    @Override
+    public Collection<ClassInfo> getKnownUsers(DotName className) {
+        return filterClasses(this.delegate.getKnownUsers(className));
     }
 
     private Collection<AnnotationInstance> filterInstances(Collection<AnnotationInstance> annotations) {
@@ -317,4 +329,9 @@ public class FilteredIndexView implements IndexView {
         }
     }
 
+    private Collection<ClassInfo> filterClasses(Collection<ClassInfo> classes) {
+        return classes.stream()
+                .filter(classInfo -> accepts(classInfo.name()))
+                .collect(Collectors.toList());
+    }
 }

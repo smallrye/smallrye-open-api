@@ -1,8 +1,9 @@
 package io.smallrye.openapi.spi;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.Constructible;
@@ -77,38 +78,43 @@ import io.smallrye.openapi.api.models.tags.TagImpl;
  */
 public class OASFactoryResolverImpl extends OASFactoryResolver {
 
-    private static final Map<Class<? extends Constructible>, Class<? extends Constructible>> registry = new HashMap<>();
+    private static final Map<Class<? extends Constructible>, Supplier<? extends Constructible>> registry = new HashMap<>();
+
+    static <K extends Constructible, V extends K> void put(Class<K> key, Supplier<V> value) {
+        registry.put(key, value);
+    }
+
     static {
-        registry.put(APIResponse.class, APIResponseImpl.class);
-        registry.put(APIResponses.class, APIResponsesImpl.class);
-        registry.put(Callback.class, CallbackImpl.class);
-        registry.put(Components.class, ComponentsImpl.class);
-        registry.put(Contact.class, ContactImpl.class);
-        registry.put(Content.class, ContentImpl.class);
-        registry.put(Discriminator.class, DiscriminatorImpl.class);
-        registry.put(Encoding.class, EncodingImpl.class);
-        registry.put(Example.class, ExampleImpl.class);
-        registry.put(ExternalDocumentation.class, ExternalDocumentationImpl.class);
-        registry.put(Header.class, HeaderImpl.class);
-        registry.put(Info.class, InfoImpl.class);
-        registry.put(License.class, LicenseImpl.class);
-        registry.put(Link.class, LinkImpl.class);
-        registry.put(MediaType.class, MediaTypeImpl.class);
-        registry.put(OAuthFlow.class, OAuthFlowImpl.class);
-        registry.put(OAuthFlows.class, OAuthFlowsImpl.class);
-        registry.put(OpenAPI.class, OpenAPIImpl.class);
-        registry.put(Operation.class, OperationImpl.class);
-        registry.put(Parameter.class, ParameterImpl.class);
-        registry.put(PathItem.class, PathItemImpl.class);
-        registry.put(Paths.class, PathsImpl.class);
-        registry.put(RequestBody.class, RequestBodyImpl.class);
-        registry.put(Schema.class, SchemaImpl.class);
-        registry.put(SecurityRequirement.class, SecurityRequirementImpl.class);
-        registry.put(SecurityScheme.class, SecuritySchemeImpl.class);
-        registry.put(Server.class, ServerImpl.class);
-        registry.put(ServerVariable.class, ServerVariableImpl.class);
-        registry.put(Tag.class, TagImpl.class);
-        registry.put(XML.class, XMLImpl.class);
+        put(APIResponse.class, APIResponseImpl::new);
+        put(APIResponses.class, APIResponsesImpl::new);
+        put(Callback.class, CallbackImpl::new);
+        put(Components.class, ComponentsImpl::new);
+        put(Contact.class, ContactImpl::new);
+        put(Content.class, ContentImpl::new);
+        put(Discriminator.class, DiscriminatorImpl::new);
+        put(Encoding.class, EncodingImpl::new);
+        put(Example.class, ExampleImpl::new);
+        put(ExternalDocumentation.class, ExternalDocumentationImpl::new);
+        put(Header.class, HeaderImpl::new);
+        put(Info.class, InfoImpl::new);
+        put(License.class, LicenseImpl::new);
+        put(Link.class, LinkImpl::new);
+        put(MediaType.class, MediaTypeImpl::new);
+        put(OAuthFlow.class, OAuthFlowImpl::new);
+        put(OAuthFlows.class, OAuthFlowsImpl::new);
+        put(OpenAPI.class, OpenAPIImpl::new);
+        put(Operation.class, OperationImpl::new);
+        put(Parameter.class, ParameterImpl::new);
+        put(PathItem.class, PathItemImpl::new);
+        put(Paths.class, PathsImpl::new);
+        put(RequestBody.class, RequestBodyImpl::new);
+        put(Schema.class, SchemaImpl::new);
+        put(SecurityRequirement.class, SecurityRequirementImpl::new);
+        put(SecurityScheme.class, SecuritySchemeImpl::new);
+        put(Server.class, ServerImpl::new);
+        put(ServerVariable.class, ServerVariableImpl::new);
+        put(Tag.class, TagImpl::new);
+        put(XML.class, XMLImpl::new);
     }
 
     /**
@@ -117,22 +123,11 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Constructible> T createObject(Class<T> clazz) {
-        if (clazz == null) {
-            throw new NullPointerException();
-        }
-
-        Class<? extends Constructible> implClass = registry.get(clazz);
-
-        if (implClass == null) {
-            throw SpiMessages.msg.classNotConstructible(clazz.getName());
-        }
-
-        try {
-            return (T) implClass.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new IllegalArgumentException(e);
-        }
+        Objects.requireNonNull(clazz, "clazz");
+        return (T) registry.getOrDefault(clazz, () -> this.unknownType(clazz)).get();
     }
 
+    <T extends Constructible> T unknownType(Class<T> clazz) {
+        throw SpiMessages.msg.classNotConstructible(clazz.getName());
+    }
 }

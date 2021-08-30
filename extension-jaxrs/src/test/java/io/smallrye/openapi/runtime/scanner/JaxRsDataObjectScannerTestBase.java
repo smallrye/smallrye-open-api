@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -48,7 +49,8 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
 
     @BeforeEach
     public void createContext() {
-        context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(), emptyConfig());
+        context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                dynamicConfig(OpenApiConstants.SMALLRYE_SORTED_PROPERTIES_ENABLE, Boolean.TRUE));
     }
 
     @AfterEach
