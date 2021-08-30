@@ -40,8 +40,9 @@
                 ]
               },
               "length": {
-                "format": "int32",
-                "type": "integer"
+                "format": "double",
+                "type": "number",
+                "multipleOf": 0.1
               }
             }
           }

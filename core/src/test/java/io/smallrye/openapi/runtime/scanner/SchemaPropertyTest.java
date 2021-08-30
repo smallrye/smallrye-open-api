@@ -52,7 +52,8 @@ class SchemaPropertyTest extends IndexScannerTestBase {
             @SchemaProperty(name = "lengthUnits", defaultValue = "CM")
     })
     static class Snake extends Reptile {
-        int length;
+        @Schema(multipleOf = 0.1)
+        double length;
         @Schema(description = "The units of measure for length", defaultValue = "MM")
         LengthUnits lengthUnits;
     }
