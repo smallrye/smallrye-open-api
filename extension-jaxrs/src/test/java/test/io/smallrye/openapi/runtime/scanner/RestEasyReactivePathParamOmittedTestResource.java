@@ -29,4 +29,11 @@ public class RestEasyReactivePathParamOmittedTestResource {
         return null;
     }
 
+    @GET
+    @Produces(value = MediaType.APPLICATION_JSON)
+    @Path(value = "/params/{param4}")
+    public Widget get3(int param1, String param4) {
+        return null;
+    }
+
 }
