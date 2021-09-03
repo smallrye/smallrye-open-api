@@ -1,6 +1,24 @@
 {
   "openapi": "3.0.3",
   "paths": {
+    "/movies/{id2}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "id2",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    },    
     "/movies/{id}" : {
       "get" : {
         "parameters" : [ {
