@@ -362,6 +362,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     void testJavaxRestEasyReactivePathParamOmitted() throws IOException, JSONException {
         test("params.resteasy-reactive-missing-restpath.json",
                 test.io.smallrye.openapi.runtime.scanner.RestEasyReactivePathParamOmittedTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.RestEasyReactivePathParamOmittedTestResource2.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -369,6 +370,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     void testJakartaRestEasyReactivePathParamOmitted() throws IOException, JSONException {
         test("params.resteasy-reactive-missing-restpath.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.RestEasyReactivePathParamOmittedTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.RestEasyReactivePathParamOmittedTestResource2.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
