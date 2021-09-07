@@ -22,6 +22,7 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
@@ -813,7 +814,7 @@ public interface AnnotationScanner {
                 requestBodyType = JandexUtil.getMethodParameterType(method,
                         annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
-                requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
+                requestBodyType = getRequestBodyParameterClassType(context, method, params);
             }
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
@@ -849,7 +850,7 @@ public interface AnnotationScanner {
                 Schema schema = params.getFormBodySchema();
                 ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
             } else {
-                Type requestBodyType = getRequestBodyParameterClassType(method, context.getExtensions());
+                Type requestBodyType = getRequestBodyParameterClassType(context, method, params);
                 requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
 
                 if (requestBodyType != null && !isScannerInternalParameter(requestBodyType)) {
@@ -891,11 +892,14 @@ public interface AnnotationScanner {
      * Go through the method parameters looking for one that is not annotated with a jax-rs/spring
      * annotation.That will be the one that is the request body.
      * 
+     * @param context the scanning context
      * @param method MethodInfo
-     * @param extensions available extensions
+     * @param params the current parameters
      * @return Type
      */
-    default Type getRequestBodyParameterClassType(MethodInfo method, List<AnnotationScannerExtension> extensions) {
+    default Type getRequestBodyParameterClassType(final AnnotationScannerContext context, MethodInfo method,
+            final ResourceParameters params) {
+        List<AnnotationScannerExtension> extensions = context.getExtensions();
         List<Type> methodParams = method.parameters();
         if (methodParams.isEmpty()) {
             return null;
@@ -904,10 +908,25 @@ public interface AnnotationScanner {
             List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
             if (parameterAnnotations.isEmpty()
                     || !containsScannerAnnotations(parameterAnnotations, extensions)) {
-                return methodParams.get(i);
+                // Also check if there is a PathPatameter already with this
+                if (!isPathParameter(context, method.parameterName(i), params)) {
+                    return methodParams.get(i);
+                }
             }
         }
         return null;
+    }
+
+    default boolean isPathParameter(final AnnotationScannerContext context, String name, final ResourceParameters params) {
+        if (context.getConfig().allowNakedPathParameter().orElse(Boolean.FALSE)) {
+            List<Parameter> allParameters = params.getAllParameters();
+            for (Parameter p : allParameters) {
+                if (p.getIn().equals(Parameter.In.PATH) && p.getName().equals(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

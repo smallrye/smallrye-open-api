@@ -152,6 +152,13 @@ public interface OpenApiConfig {
         return Optional.empty();
     }
 
+    default Optional<Boolean> allowNakedPathParameter() {
+        return Optional.empty();
+    }
+
+    default void doAllowNakedPathParameter() {
+    }
+
     enum OperationIdStrategy {
         METHOD,
         CLASS_METHOD,
