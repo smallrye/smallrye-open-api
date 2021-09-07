@@ -53,6 +53,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private OperationIdStrategy operationIdStrategy;
     private Optional<String[]> defaultProduces = UNSET;
     private Optional<String[]> defaultConsumes = UNSET;
+    private Optional<Boolean> allowNakedPathParameter = Optional.empty();
 
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
@@ -387,6 +388,16 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             defaultProduces = getDefaultContentType(OpenApiConstants.DEFAULT_PRODUCES);
         }
         return defaultProduces;
+    }
+
+    @Override
+    public Optional<Boolean> allowNakedPathParameter() {
+        return allowNakedPathParameter;
+    }
+
+    @Override
+    public void doAllowNakedPathParameter() {
+        this.allowNakedPathParameter = Optional.of(true);
     }
 
     @Override
