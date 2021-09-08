@@ -23,7 +23,7 @@
                 // If Url is relative, append the host and port
                 var oar = "${oauth2RedirectUrl}";
                 if(oar.startsWith("/")){
-                    oar = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + oar;   
+                    oar = window.location.protocol + "//" + window.location.host + oar;   
                 }
                 
                 console.log(oar);
