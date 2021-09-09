@@ -10,6 +10,7 @@ public enum Option {
     urlSection,
     title,
     selfHref,
+    backHref,
     themeHref,
     logoHref,
     styleHref,
