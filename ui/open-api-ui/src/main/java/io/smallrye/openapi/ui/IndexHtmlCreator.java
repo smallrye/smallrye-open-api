@@ -283,6 +283,7 @@ public class IndexHtmlCreator {
         DEFAULT_OPTIONS.put(Option.url, "/openapi");
         DEFAULT_OPTIONS.put(Option.title, "SmallRye OpenAPI UI");
         DEFAULT_OPTIONS.put(Option.selfHref, "/openapi-ui");
+        DEFAULT_OPTIONS.put(Option.backHref, "/openapi-ui");
         DEFAULT_OPTIONS.put(Option.themeHref, ThemeHref.feeling_blue.toString());
         DEFAULT_OPTIONS.put(Option.logoHref, "logo.png");
         DEFAULT_OPTIONS.put(Option.styleHref, "style.css");
