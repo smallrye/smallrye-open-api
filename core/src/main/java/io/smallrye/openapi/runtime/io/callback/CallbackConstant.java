@@ -7,7 +7,7 @@ import org.jboss.jandex.DotName;
 /**
  * Constants related to Callback.
  * 
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#callbackObject">callbackObject</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject">callbackObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

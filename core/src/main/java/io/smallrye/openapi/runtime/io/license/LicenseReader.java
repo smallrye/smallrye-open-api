@@ -15,7 +15,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 /**
  * This reads the License from annotations or json
  * 
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#licenseObject">licenseObject</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#licenseObject">licenseObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

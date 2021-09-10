@@ -99,7 +99,7 @@ public class TypeUtil {
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
     private static final IndexView jdkIndex;
 
-    // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#dataTypeFormat
+    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#dataTypeFormat
     static {
         // String
         TYPE_MAP.put(DotName.createSimple(String.class.getName()), STRING_FORMAT);

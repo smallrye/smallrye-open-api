@@ -23,7 +23,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * Reading the Security from annotations or json
  * 
  * @see <a href=
- *      "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object">security-requirement-object</a>
+ *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object">security-requirement-object</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

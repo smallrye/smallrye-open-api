@@ -12,7 +12,7 @@ import io.smallrye.openapi.runtime.io.ObjectWriter;
  * Writing the Extension to json
  * 
  * @see <a href=
- *      "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specificationExtensions">specificationExtensions</a>
+ *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions">specificationExtensions</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

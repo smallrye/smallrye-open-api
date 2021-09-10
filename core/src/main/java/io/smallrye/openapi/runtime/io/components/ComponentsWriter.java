@@ -20,7 +20,7 @@ import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeWriter;
  * Writing the Components to json node
  * 
  * @see <a href=
- *      "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#componentsObject">componentsObject</a>
+ *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject">componentsObject</a>
  * 
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)

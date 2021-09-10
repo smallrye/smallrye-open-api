@@ -24,7 +24,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 /**
  * Reading the Example annotation
  *
- * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#exampleObject">exampleObject</a>
+ * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject">exampleObject</a>
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
