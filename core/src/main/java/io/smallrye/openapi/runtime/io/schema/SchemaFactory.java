@@ -265,10 +265,26 @@ public class SchemaFactory {
      */
     @SuppressWarnings("unchecked")
     static <T> T readAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults) {
+        return (T) readAttr(annotation, propertyName, (T) defaults.get(propertyName));
+    }
+
+    /**
+     * Reads the attribute named by propertyName from annotation. If no value was specified,
+     * an optional default value is retrieved from the defaults map using the propertyName as
+     * they key. Array-typed annotation values will be converted to List.
+     * 
+     * @param <T> the type of the annotation attribute value
+     * @param annotation the annotation to read
+     * @param propertyName the name of the attribute to read
+     * @param defaults the default value
+     * @return the annotation attribute value, a default value, or null
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T readAttr(AnnotationInstance annotation, String propertyName, T defaultValue) {
         Object value = JandexUtil.value(annotation, propertyName);
 
         if (value == null) {
-            value = defaults.get(propertyName);
+            value = defaultValue;
         } else if (value.getClass().isArray()) {
             value = Arrays.stream((T[]) value).collect(Collectors.toList());
         }
@@ -489,6 +505,14 @@ public class SchemaFactory {
             return null;
         }
 
+        ClassInfo classInfo = context.getAugmentedIndex().getClass(ctype);
+        if (classInfo != null) {
+            AnnotationInstance schemaAnnotation = classInfo.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
+            if (schemaAnnotation != null
+                    && Boolean.TRUE.equals(readAttr(schemaAnnotation, SchemaConstant.PROP_HIDDEN, false))) {
+                return null;
+            }
+        }
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
         if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype)) {
