@@ -18,8 +18,10 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
+import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
+import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.media.XMLImpl;
@@ -316,9 +318,31 @@ public class OpenApiDataObjectScanner {
     }
 
     private void resolveSpecial(DataObjectDeque.PathEntry root, Type type) {
+        if (typeArgumentMismatch(type, rootClassInfo)) {
+            /*
+             * The type's generic arguments are not in alignment with the type
+             * parameters of the stand-in collection type. For the purposes
+             * of obtaining the stand-in collection's schema, we discard the
+             * original type and determine the correct type parameter for the
+             * stand-in.
+             */
+            ParameterizedType standinInterface = rootClassInfo.interfaceTypes().get(0).asParameterizedType();
+            type = TypeResolver.resolveParameterizedAncestor(context,
+                    type.asParameterizedType(),
+                    standinInterface);
+        }
+
         Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(context, type, rootClassInfo,
                 root.getAnnotationTarget());
         rootSchema = preProcessSpecial(type, fieldResolution.values().iterator().next(), root);
+    }
+
+    private boolean typeArgumentMismatch(Type type, ClassInfo standin) {
+        if (type.kind() != Kind.PARAMETERIZED_TYPE) {
+            return false;
+        }
+
+        return standin.typeParameters().size() < type.asParameterizedType().arguments().size();
     }
 
     private Schema preProcessSpecial(Type type, TypeResolver typeResolver, DataObjectDeque.PathEntry currentPathEntry) {
