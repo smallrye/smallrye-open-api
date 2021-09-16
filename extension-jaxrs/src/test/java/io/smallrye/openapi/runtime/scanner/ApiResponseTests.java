@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -275,4 +276,28 @@ class ApiResponseTests extends IndexScannerTestBase {
                 kotlin.coroutines.CoroutineContext.class);
     }
 
+    @Test
+    void testStandinGenericTypeArgumentResolution() throws IOException, JSONException {
+        abstract class Either<L, R> implements Iterable<R> {
+            @Override
+            public Iterator<R> iterator() {
+                return null;
+            }
+        }
+
+        @jakarta.ws.rs.Path("/")
+        class Test {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/either")
+            @jakarta.ws.rs.Produces({ "text/plain" })
+            public Either<Integer, String> getEither() {
+                return null;
+            }
+        }
+        Index index = indexOf(Test.class, Either.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.standin-generic-type-resolved.json", result);
+    }
 }
