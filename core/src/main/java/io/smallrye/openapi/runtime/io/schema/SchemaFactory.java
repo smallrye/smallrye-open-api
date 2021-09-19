@@ -616,8 +616,7 @@ public class SchemaFactory {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
             if (pType.arguments().size() == 1 &&
-                    (TypeUtil.isA(context, type, JDKConstants.COMPLETION_STAGE_TYPE) ||
-                            TypeUtil.isA(context, type, MutinyConstants.UNI_TYPE))) {
+                    (TypeUtil.isA(context, type, JDKConstants.COMPLETION_STAGE_TYPE))) {
                 return pType.arguments().get(0);
             }
         }

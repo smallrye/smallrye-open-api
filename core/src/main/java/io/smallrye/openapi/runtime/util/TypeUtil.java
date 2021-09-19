@@ -38,6 +38,7 @@ import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
+import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
@@ -51,6 +52,9 @@ public class TypeUtil {
 
     private static final DotName DOTNAME_OBJECT = DotName.createSimple(Object.class.getName());
     private static final Type OBJECT_TYPE = Type.create(DOTNAME_OBJECT, Type.Kind.CLASS);
+
+    private static final DotName DOTNAME_VOID = DotName.createSimple(Void.class.getName());
+
     private static final String UUID_PATTERN = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
     private static final TypeWithFormat STRING_FORMAT = TypeWithFormat.of(SchemaType.STRING).build();
     private static final TypeWithFormat BINARY_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BINARY).build();
@@ -98,6 +102,7 @@ public class TypeUtil {
 
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
     private static final IndexView jdkIndex;
+    private static final Set<DotName> wrapperTypes = new HashSet<>();
 
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#dataTypeFormat
     static {
@@ -249,6 +254,9 @@ public class TypeUtil {
         index(indexer, java.util.concurrent.CompletableFuture.class);
 
         jdkIndex = indexer.complete();
+
+        wrapperTypes.addAll(JaxbConstants.JAXB_ELEMENT);
+        wrapperTypes.add(MutinyConstants.UNI_TYPE.name());
     }
 
     private static void index(Indexer indexer, Class<?> klazz) {
@@ -490,7 +498,7 @@ public class TypeUtil {
 
     public static boolean isWrappedType(Type type) {
         if (type != null) {
-            return isOptional(type) || JaxbConstants.JAXB_ELEMENT.contains(type.name());
+            return isOptional(type) || wrapperTypes.contains(type.name());
         }
         return false;
     }
@@ -500,12 +508,27 @@ public class TypeUtil {
             if (isOptional(type)) {
                 return getOptionalType(type);
             }
-            if (JaxbConstants.JAXB_ELEMENT.contains(type.name())) {
+            if (wrapperTypes.contains(type.name())) {
                 return type.asParameterizedType().arguments().get(0);
             }
         }
 
         return type;
+    }
+
+    public static boolean isVoid(Type type) {
+        if (type == null) {
+            return false;
+        }
+
+        switch (type.kind()) {
+            case VOID:
+                return true;
+            case CLASS:
+                return DOTNAME_VOID.equals(type.name());
+            default:
+                return false;
+        }
     }
 
     /**
