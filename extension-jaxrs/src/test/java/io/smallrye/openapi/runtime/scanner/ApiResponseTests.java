@@ -300,4 +300,33 @@ class ApiResponseTests extends IndexScannerTestBase {
         printToConsole(result);
         assertJsonEquals("responses.standin-generic-type-resolved.json", result);
     }
+
+    @Test
+    void testKotlinContinuationOpaqueResponse() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/")
+        class Resource {
+            @jakarta.ws.rs.POST
+            @jakarta.ws.rs.Produces({ "text/plain" })
+            @jakarta.ws.rs.Consumes({ "application/json" })
+            @jakarta.ws.rs.Path("1")
+            public Object wrongRequestBody(kotlin.Pair<String, String> var1,
+                    kotlin.coroutines.Continuation<? super jakarta.ws.rs.core.Response> $completion) {
+                return null;
+            }
+
+            @jakarta.ws.rs.POST
+            @jakarta.ws.rs.Produces({ "text/plain" })
+            @jakarta.ws.rs.Consumes({ "application/json" })
+            @jakarta.ws.rs.Path("2")
+            public jakarta.ws.rs.core.Response alsoWrong(kotlin.Pair<String, String> aPair) {
+                return null;
+            }
+        }
+
+        Index index = Index.of(Resource.class, kotlin.Pair.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.kotlin-continuation-opaque.json", result);
+    }
 }

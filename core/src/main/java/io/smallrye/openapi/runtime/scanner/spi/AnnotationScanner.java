@@ -268,7 +268,10 @@ public interface AnnotationScanner {
         List<MethodInfo> methods = new ArrayList<>();
 
         for (ClassInfo classInfo : chain.keySet()) {
-            methods.addAll(classInfo.methods());
+            classInfo.methods()
+                    .stream()
+                    .filter(method -> !method.isSynthetic())
+                    .forEach(methods::add);
 
             classInfo.interfaceTypes()
                     .stream()
@@ -406,7 +409,7 @@ public interface AnnotationScanner {
              * Only generate content if not already supplied in annotations and the
              * method does not return an opaque Scanner Response
              */
-            if (!isScannerInternalResponse(returnType) &&
+            if (!isScannerInternalResponse(returnType, context, method) &&
                     (ModelUtil.responses(operation).getAPIResponse(code) == null ||
                             ModelUtil.responses(operation).getAPIResponse(code).getContent() == null)) {
 
@@ -414,7 +417,7 @@ public interface AnnotationScanner {
 
                 if (isMultipartOutput(returnType)) {
                     schema = new SchemaImpl().type(Schema.SchemaType.OBJECT);
-                } else if (isKotlinContinuation(method)) {
+                } else if (hasKotlinContinuation(method)) {
                     schema = kotlinContinuationToSchema(context, method);
                 } else {
                     schema = SchemaFactory.typeToSchema(context, returnType, context.getExtensions());
@@ -496,17 +499,30 @@ public interface AnnotationScanner {
         return false;
     }
 
-    default boolean isKotlinContinuation(MethodInfo method) {
-        if (method.parameters().size() != 1) {
-            return false;
+    default boolean isScannerInternalResponse(Type returnType, AnnotationScannerContext context, MethodInfo method) {
+        if (isScannerInternalResponse(returnType)) {
+            return true;
         }
 
-        return KotlinConstants.CONTINUATION.equals(method.parameters().get(0).name());
+        return hasKotlinContinuation(method) &&
+                isScannerInternalResponse(getKotlinContinuationArgument(context, method));
     }
 
-    default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
-        Schema schema;
-        Type type = context.getResourceTypeResolver().resolve(method.parameters().get(0));
+    default boolean hasKotlinContinuation(MethodInfo method) {
+        return method.parameters().stream().anyMatch(this::isKotlinContinuation);
+    }
+
+    default boolean isKotlinContinuation(Type paramType) {
+        return KotlinConstants.CONTINUATION.equals(paramType.name());
+    }
+
+    default Type getKotlinContinuationArgument(AnnotationScannerContext context, MethodInfo method) {
+        Type type = method.parameters()
+                .stream()
+                .filter(this::isKotlinContinuation)
+                .findFirst()
+                .map(context.getResourceTypeResolver()::resolve)
+                .orElseThrow(() -> new IllegalStateException("Kotlin Continuation not present"));
 
         if (type.kind() == Kind.PARAMETERIZED_TYPE) {
             type = type.asParameterizedType().arguments().get(0);
@@ -516,13 +532,14 @@ public interface AnnotationScanner {
                 Type superBound = type.asWildcardType().superBound();
                 type = superBound != null ? superBound : extendsBound;
             }
-
-            schema = SchemaFactory.typeToSchema(context, type, context.getExtensions());
-        } else {
-            schema = new SchemaImpl().type(Schema.SchemaType.OBJECT);
         }
 
-        return schema;
+        return type;
+    }
+
+    default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
+        Type type = getKotlinContinuationArgument(context, method);
+        return SchemaFactory.typeToSchema(context, type, context.getExtensions());
     }
 
     /**
