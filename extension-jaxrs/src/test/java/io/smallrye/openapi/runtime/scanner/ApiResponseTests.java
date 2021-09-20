@@ -329,4 +329,28 @@ class ApiResponseTests extends IndexScannerTestBase {
         printToConsole(result);
         assertJsonEquals("responses.kotlin-continuation-opaque.json", result);
     }
+
+    @Test
+    void testMutinyUniTypes() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/item")
+        class TestResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces({ "text/plain" })
+            public io.smallrye.mutiny.Uni<String> getItem() {
+                return null;
+            }
+
+            @jakarta.ws.rs.DELETE
+            public io.smallrye.mutiny.Uni<Void> deleteItem() {
+                return null;
+            }
+        }
+
+        Index index = indexOf(TestResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.mutiny-uni.json", result);
+    }
+
 }
