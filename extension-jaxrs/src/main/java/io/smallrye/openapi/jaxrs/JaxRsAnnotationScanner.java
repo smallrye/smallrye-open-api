@@ -531,14 +531,14 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         FilteredIndexView filteredIndex = context.getIndex();
 
-        if (filteredIndex.getAllKnownImplementors(clazz.name()).stream().anyMatch(this::notAbstract)) {
+        if (filteredIndex.getAllKnownImplementors(clazz.name()).stream().anyMatch(this::neitherAbstractNorSynthetic)) {
             return true;
         }
 
         return filteredIndex.explicitlyAccepts(clazz.name());
     }
 
-    private boolean notAbstract(ClassInfo clazz) {
-        return !Modifier.isAbstract(clazz.flags());
+    private boolean neitherAbstractNorSynthetic(ClassInfo clazz) {
+        return !Modifier.isAbstract(clazz.flags()) && !clazz.isSynthetic();
     }
 }
