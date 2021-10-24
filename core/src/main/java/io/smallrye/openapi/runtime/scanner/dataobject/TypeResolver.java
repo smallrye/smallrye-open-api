@@ -519,7 +519,12 @@ public class TypeResolver {
     }
 
     private static boolean acceptMethod(MethodInfo method) {
-        return !Modifier.isStatic(method.flags()) && !method.name().equals("getClass");
+        if (Modifier.isStatic(method.flags())) {
+            return false;
+        }
+        String name = method.name();
+        // Ignore constructors
+        return !(name.equals("<init>") || name.equals("getClass"));
     }
 
     private static boolean acceptField(FieldInfo field) {

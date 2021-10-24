@@ -1,0 +1,18 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "SingleAnnotatedConstructorArgument": {
+        "description": "Data structure with a single property",
+        "type": "object",
+        "properties": {
+          "property1": {
+            "description": "The single property",
+            "type": "string",
+            "example": "some value"
+          }
+        }
+      }
+    }
+  }
+}

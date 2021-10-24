@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
+
 class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
@@ -496,5 +498,17 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.array-type-override.json", result);
+    }
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/937
+     */
+    @Test
+    void testSingleAnnotatedConstructorArgumentIgnored() throws IOException, JSONException {
+        Index index = indexOf(SingleAnnotatedConstructorArgument.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.annotated-constructor-arg-ignored.json", result);
     }
 }
