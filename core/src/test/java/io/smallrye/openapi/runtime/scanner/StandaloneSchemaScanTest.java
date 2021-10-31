@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -510,5 +511,33 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.annotated-constructor-arg-ignored.json", result);
+    }
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/944
+     */
+    @Test
+    void testParameterizedTypeWithNonparameterizedAncestryChainLink() throws IOException, JSONException {
+        class Tuple implements Iterable<Object> {
+            @Override
+            public Iterator<Object> iterator() {
+                return null;
+            }
+        }
+
+        class Pair<T1, T2> extends Tuple {
+        }
+
+        @Schema(name = "TestBean")
+        class Bean {
+            @SuppressWarnings("unused")
+            Pair<String, String> pair;
+        }
+
+        Index index = indexOf(Bean.class, Pair.class, Tuple.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.nonparameterized-ancestry-chain-link.json", result);
     }
 }
