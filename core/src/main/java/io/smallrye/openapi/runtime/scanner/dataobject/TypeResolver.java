@@ -1090,6 +1090,10 @@ public class TypeResolver {
     }
 
     private static ParameterizedType createParameterizedType(Type targetType, Map<String, Type> resolutionMap) {
+        if (targetType.kind() != Type.Kind.PARAMETERIZED_TYPE) {
+            return ParameterizedType.create(targetType.name(), Type.EMPTY_ARRAY, null);
+        }
+
         Type[] resolvedArgs = resolveArguments(targetType.asParameterizedType(), t -> resolveType(t, resolutionMap));
         return ParameterizedType.create(targetType.name(), resolvedArgs, null);
     }

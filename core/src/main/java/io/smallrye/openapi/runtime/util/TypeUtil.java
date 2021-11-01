@@ -487,6 +487,12 @@ public class TypeUtil {
             case WILDCARD_TYPE:
                 terminal = false;
                 break;
+            case CLASS:
+                if (DOTNAME_OBJECT.equals(type.name())) {
+                    terminal = true;
+                    break;
+                }
+                // Fall through
             default:
                 // If is known type.
                 terminal = !getTypeFormat(type).isSchemaType(SchemaType.ARRAY, SchemaType.OBJECT);
