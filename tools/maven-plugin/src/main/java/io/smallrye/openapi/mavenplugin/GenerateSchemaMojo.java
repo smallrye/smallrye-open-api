@@ -23,11 +23,13 @@ import java.util.stream.Stream;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.CompositeIndex;
@@ -175,6 +177,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
     @Parameter(property = "operationIdStrategy")
     private String operationIdStrategy;
+
+    @Parameter(property = "attachArtifacts")
+    private boolean attachArtifacts;
+
+    @Component
+    MavenProjectHelper mavenProjectHelper;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -413,8 +421,9 @@ public class GenerateSchemaMojo extends AbstractMojo {
                     Files.createDirectories(directory);
                 }
 
-                writeSchemaFile(directory, schemaFilename + ".yaml", yaml.getBytes());
-                writeSchemaFile(directory, schemaFilename + ".json", json.getBytes());
+                writeSchemaFile(directory, "yaml", yaml.getBytes());
+
+                writeSchemaFile(directory, "json", json.getBytes());
 
                 getLog().info("Wrote the schema files to " + outputDirectory.getAbsolutePath());
             }
@@ -423,8 +432,8 @@ public class GenerateSchemaMojo extends AbstractMojo {
         }
     }
 
-    private void writeSchemaFile(Path directory, String filename, byte[] contents) throws IOException {
-        Path file = Paths.get(directory.toString(), filename);
+    private void writeSchemaFile(Path directory, String type, byte[] contents) throws IOException {
+        Path file = Paths.get(directory.toString(), schemaFilename + "." + type);
         if (!Files.exists(file)) {
             Files.createFile(file);
         }
@@ -433,6 +442,10 @@ public class GenerateSchemaMojo extends AbstractMojo {
                 StandardOpenOption.WRITE,
                 StandardOpenOption.CREATE,
                 StandardOpenOption.TRUNCATE_EXISTING);
+
+        if (attachArtifacts) {
+            mavenProjectHelper.attachArtifact(mavenProject, type, schemaFilename, file.toFile());
+        }
     }
 
     private static final String META_INF_OPENAPI_YAML = "META-INF/openapi.yaml";
