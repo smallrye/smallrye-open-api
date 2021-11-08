@@ -28,8 +28,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-project</artifactId>
-            <version>2.2.1</version>
+            <artifactId>maven-core</artifactId>
         </dependency>
         
         <dependency>
@@ -64,6 +63,18 @@
                 <configuration>
                     <goalPrefix>smallrye-open-api</goalPrefix>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-component-metadata</artifactId>
+                <version>2.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
