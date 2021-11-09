@@ -75,13 +75,14 @@ public class MavenDependencyIndexCreator {
 
         List<Map.Entry<Artifact, Duration>> indexDurations = new ArrayList<>();
 
-        IndexView moduleIndex = timeAndCache(indexDurations, mavenProject.getArtifact(), () -> {
-            try {
-                return indexModuleClasses(mavenProject);
-            } catch (IOException e) {
-                throw new MojoExecutionException("Can't compute index", e);
-            }
-        });
+        // Don't' cache the moduleindex. Incremental compilation in IDE's would otherwise use the cached index instead of new one.
+        // Right now, support for incremental compilation inside eclipse is blocked by: https://github.com/eclipse-m2e/m2e-core/issues/364#issuecomment-939987848
+        IndexView moduleIndex;
+        try {
+            moduleIndex = indexModuleClasses(mavenProject);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Can't compute index", e);
+        }
 
         if (scanDependenciesDisable) {
             return moduleIndex;
