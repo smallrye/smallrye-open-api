@@ -34,7 +34,7 @@ public class MavenConfig implements OpenApiConfig {
 
     @Override
     public boolean scanDisable() {
-        return Boolean.valueOf(properties.getOrDefault(OASConfig.FILTER, "false"));
+        return Boolean.parseBoolean(properties.getOrDefault(OASConfig.FILTER, "false"));
     }
 
     @Override
@@ -74,12 +74,7 @@ public class MavenConfig implements OpenApiConfig {
 
     @Override
     public boolean scanDependenciesDisable() {
-        return Boolean.valueOf(properties.getOrDefault(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, "false"));
-    }
-
-    @Override
-    public Set<String> scanDependenciesJars() {
-        return asCsvSet(properties.getOrDefault(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS, null));
+        return Boolean.parseBoolean(properties.getOrDefault(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, "false"));
     }
 
     @Override
@@ -89,7 +84,7 @@ public class MavenConfig implements OpenApiConfig {
 
     @Override
     public boolean applicationPathDisable() {
-        return Boolean.valueOf(properties.getOrDefault(OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, "false"));
+        return Boolean.parseBoolean(properties.getOrDefault(OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, "false"));
     }
 
     @Override
