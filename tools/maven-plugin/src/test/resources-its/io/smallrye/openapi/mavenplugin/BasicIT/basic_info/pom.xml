@@ -1,0 +1,58 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.smallrye.openapi.mavenplugin</groupId>
+    <artifactId>basic_info</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <openApiVersion>custom-openapi-version</openApiVersion>
+        <infoTitle>Smallrye OpenAPI</infoTitle>
+        <infoVersion>2.1.15</infoVersion>
+        <infoDescription>Description of this schema</infoDescription>
+        <infoTermsOfService>custom-tos</infoTermsOfService>
+        <infoContactEmail>custom-info-email</infoContactEmail>
+        <infoContactName>Max Mustermann</infoContactName>
+        <infoContactUrl>https://example.com/contact</infoContactUrl>
+        <infoLicenseName>Apache License V2.0</infoLicenseName>
+        <infoLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</infoLicenseUrl>
+        <server1>https://prod.example.com</server1>
+        <server2>https://staging.example.com</server2>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>@project.groupId@</groupId>
+                <artifactId>@project.artifactId@</artifactId>
+                <version>@project.version@</version>
+                <goals>
+                    <goal>generate-schema</goal>
+                </goals>
+                <configuration>
+                    <openApiVersion>${openApiVersion}</openApiVersion>
+                    <infoTitle>${infoTitle}</infoTitle>
+                    <infoVersion>${infoVersion}</infoVersion>
+                    <infoDescription>${infoDescription}</infoDescription>
+                    <infoTermsOfService>${infoTermsOfService}</infoTermsOfService>
+                    <infoContactEmail>${infoContactEmail}</infoContactEmail>
+                    <infoContactName>${infoContactName}</infoContactName>
+                    <infoContactUrl>${infoContactUrl}</infoContactUrl>
+                    <infoLicenseName>${infoLicenseName}</infoLicenseName>
+                    <infoLicenseUrl>${infoLicenseUrl}</infoLicenseUrl>
+                    <servers>
+                        <server>
+                            ${server1}
+                        </server>
+                        <server>
+                            ${server2}
+                        </server>
+                    </servers>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

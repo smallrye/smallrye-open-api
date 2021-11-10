@@ -150,15 +150,20 @@ public class MavenDependencyIndexCreator {
 
     // index the classes of this Maven module
     private Index indexModuleClasses(MavenProject mavenProject) throws IOException {
+
         Indexer indexer = new Indexer();
 
-        try (Stream<Path> stream = Files.walk(new File(mavenProject.getBuild().getOutputDirectory()).toPath())) {
+        // Check first if the classes directory exists, before attempting to create an index for the classes
+        File outputDirectory = new File(mavenProject.getBuild().getOutputDirectory());
+        if (outputDirectory.exists()) {
+            try (Stream<Path> stream = Files.walk(outputDirectory.toPath())) {
 
-            List<Path> classFiles = stream
-                    .filter(path -> path.toString().endsWith(".class"))
-                    .collect(Collectors.toList());
-            for (Path path : classFiles) {
-                indexer.index(Files.newInputStream(path));
+                List<Path> classFiles = stream
+                        .filter(path -> path.toString().endsWith(".class"))
+                        .collect(Collectors.toList());
+                for (Path path : classFiles) {
+                    indexer.index(Files.newInputStream(path));
+                }
             }
         }
         return indexer.complete();
