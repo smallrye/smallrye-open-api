@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
@@ -53,7 +52,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
     /**
      * Filename of the schema
-     * Default to openapi. So the files created will be openapi.yaml and openapi.json.
+     * Defaults to openapi. So the files created will be openapi.yaml and openapi.json.
      */
     @Parameter(defaultValue = "openapi", property = "schemaFilename")
     private String schemaFilename;
@@ -73,63 +72,109 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(defaultValue = "jar", property = "includeDependenciesTypes")
     private List<String> includeDependenciesTypes;
 
-    @Parameter(defaultValue = "${project}", required = true)
-    private MavenProject mavenProject;
-
+    /**
+     * Skip execution of the plugin.
+     */
     @Parameter(defaultValue = "false", property = "skip")
     private boolean skip;
 
+    /**
+     * Disable scanning the project's dependencies for OpenAPI model classes too
+     */
+    @Parameter(defaultValue = "false", property = "scanDependenciesDisable")
+    private boolean scanDependenciesDisable;
+
+    /**
+     * Attach the built OpenAPI schema as build artifact.
+     */
+    @Parameter(defaultValue = "false", property = "attachArtifacts")
+    private boolean attachArtifacts;
+
+    /**
+     * Load any properties from a file. This file is loaded first, and gets overwritten by explicitly set properties in the
+     * maven configuration. Example `${basedir}/src/main/resources/application.properties`.
+     */
     @Parameter(property = "configProperties")
     private File configProperties;
 
     // Properies as per OpenAPI Config.
 
+    /**
+     * Configuration property to specify the fully qualified name of the OASModelReader implementation.
+     */
     @Parameter(property = "modelReader")
     private String modelReader;
 
+    /**
+     * Configuration property to specify the fully qualified name of the OASFilter implementation.
+     */
     @Parameter(property = "filter")
     private String filter;
 
+    /**
+     * Configuration property to disable annotation scanning.
+     */
     @Parameter(property = "scanDisabled")
     private Boolean scanDisabled;
 
+    /**
+     * Configuration property to specify the list of packages to scan.
+     */
     @Parameter(property = "scanPackages")
     private String scanPackages;
 
+    /**
+     * Configuration property to specify the list of classes to scan.
+     */
     @Parameter(property = "scanClasses")
     private String scanClasses;
 
+    /**
+     * Configuration property to specify the list of packages to exclude from scans.
+     */
     @Parameter(property = "scanExcludePackages")
     private String scanExcludePackages;
 
+    /**
+     * Configuration property to specify the list of classes to exclude from scans.
+     */
     @Parameter(property = "scanExcludeClasses")
     private String scanExcludeClasses;
 
+    /**
+     * Configuration property to specify the list of global servers that provide connectivity information.
+     */
     @Parameter(property = "servers")
     private List<String> servers;
 
+    /**
+     * Prefix of the configuration property to specify an alternative list of servers to service all operations in a path
+     */
     @Parameter(property = "pathServers")
     private List<String> pathServers;
 
+    /**
+     * Prefix of the configuration property to specify an alternative list of servers to service an operation.
+     */
     @Parameter(property = "operationServers")
     private List<String> operationServers;
 
-    @Parameter(property = "scanDependenciesDisable")
-    private boolean scanDependenciesDisable;
-
-    @Parameter(property = "scanDependenciesJars")
-    private List<String> scanDependenciesJars;
-
-    @Parameter(property = "schemaReferencesEnable")
-    private Boolean schemaReferencesEnable;
-
+    /**
+     * Fully qualified name of a CustomSchemaRegistry, which can be used to specify a custom schema for a type.
+     */
     @Parameter(property = "customSchemaRegistryClass")
     private String customSchemaRegistryClass;
 
-    @Parameter(property = "applicationPathDisable")
+    /**
+     * Disable scanning of the javax.ws.rs.Path (and jakarta.ws.rs.Path) for the application path.
+     */
+    @Parameter(defaultValue = "false", property = "applicationPathDisable")
     private Boolean applicationPathDisable;
 
-    @Parameter(property = "openApiVersion")
+    /**
+     * To specify a custom OpenAPI version.
+     */
+    @Parameter(defaultValue = OpenApiConstants.OPEN_API_VERSION, property = "openApiVersion")
     private String openApiVersion;
 
     @Parameter(property = "infoTitle")
@@ -159,17 +204,21 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "infoLicenseUrl")
     private String infoLicenseUrl;
 
+    /**
+     * Configuration property to specify how the operationid is generated. Can be used to minimize risk of collisions between
+     * operations.
+     */
     @Parameter(property = "operationIdStrategy")
     private String operationIdStrategy;
-
-    @Parameter(property = "attachArtifacts")
-    private boolean attachArtifacts;
 
     @Component
     private MavenDependencyIndexCreator mavenDependencyIndexCreator;
 
     @Component
     MavenProjectHelper mavenProjectHelper;
+
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    private MavenProject mavenProject;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -307,7 +356,6 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, OASConfig.SERVERS_PATH_PREFIX, pathServers);
         addToPropertyMap(cp, OASConfig.SERVERS_OPERATION_PREFIX, operationServers);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS, scanDependenciesJars);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
         addToPropertyMap(cp, OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
         addToPropertyMap(cp, OpenApiConstants.VERSION, openApiVersion);
@@ -339,7 +387,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
     private void addToPropertyMap(Map<String, String> map, String key, List<String> values) {
         if (values != null && !values.isEmpty()) {
-            map.put(key, values.stream().collect(Collectors.joining(",")));
+            map.put(key, String.join(",", values));
         }
     }
 

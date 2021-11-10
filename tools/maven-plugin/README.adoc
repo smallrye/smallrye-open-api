@@ -23,48 +23,65 @@ Add this to your pom.xml:
 
 The schema will appear as `target/generated/openapi.yaml` and `target/generated/openapi.json` by default. 
 
+== m2e integration
+
+This plugin offers integration with M2Eclipse.
+Incremental compilation is supported. This allows to instantly see any changes made to the schema, without manually triggering maven.
+
+image::https://user-images.githubusercontent.com/1223135/140787591-c92cc74a-0886-431b-9805-55511b6d4689.gif[]
+
 == Configuration options
 
-- `outputDirectory` - To override the default `target/generated/` outputDirectory where the json and yaml files will be created.
-- `schemaFilename` - To override the default `openapi` filename. This will be the name without the extension.
-- `scanDependenciesDisable` - Disable scanning the project's dependencies for OpenAPI model classes too. False by default.
-- `includeDependenciesScopes` - If the above `includeDependencies` is true, you can control what scopes should be included. Default is `compile, system`
-- `includeDependenciesTypes` - If the above `includeDependencies` is true, you can control what types should be included. Default is `jar`
-- `configProperties` - Load any properties from a file. Example `${basedir}/src/main/resources/application.properties`
-- `attachArtifacts` - Attach the built OpenAPI schema as build artifacts.
+Any option of type `List<String>` has to be specified as follows. The child elements name is the same as the parents, without the `s`.
+E.g. for includeDependenciesScopes could be configured as:
+----
+<includeDependenciesScopes>
+    <includeDependenciesScope>compile</includeDependenciesScope>
+    <includeDependenciesScope>system</includeDependenciesScope>
+</includeDependenciesScopes>
+----
+
+- `outputDirectory` (String) - To override the default `target/generated/` outputDirectory where the json and yaml files will be created.
+- `schemaFilename` (String) - To override the default `openapi` filename. This will be the name without the extension.
+- `scanDependenciesDisable` (boolean, default: false) - Disable scanning the project's dependencies for OpenAPI model classes too
+- `includeDependenciesScopes` (List<String>, default: compile, system) - If the above `scanDependenciesDisable` is true, you can control what scopes should be included.
+- `includeDependenciesTypes` (List<String>, default: jar) - If the above `scanDependenciesDisable` is true, you can control what types should be included.
+- `configProperties` (String) - Load any properties from a file. Example `${basedir}/src/main/resources/application.properties`.
+- `attachArtifacts` (boolean, default: false) - Attach the built OpenAPI schema as build artifact.
+- `skip` (boolean, default: false) - Skip execution of the plugin.
 
 == MicroProfile OpenAPI Properties
 
 All properties from the MicroProfile OpenAPI Spec is supported. Properties set here will override the properties from `configProperties`.
 
-- modelReader
-- filter
-- scanDisabled (true/false)
-- scanPackages (regex)
-- scanClasses (regex)
-- scanExcludePackages (regex)
-- scanExcludeClasses (regex)
-- servers (comma-separated)
-- pathServers (comma-separated)
-- operationServers (comma-separated)
+- `modelReader` (String) - Configuration property to specify the fully qualified name of the OASModelReader implementation.
+- `filter` (String) - Configuration property to specify the fully qualified name of the OASFilter implementation.
+- `scanDisabled` (boolean) - Configuration property to disable annotation scanning.
+- `scanPackages` (regex) - Configuration property to specify the list of packages to scan.
+- `scanClasses` (regex) - Configuration property to specify the list of classes to scan.
+- `scanExcludePackages` (regex) - Configuration property to specify the list of packages to exclude from scans.
+- `scanExcludeClasses` (regex) - Configuration property to specify the list of classes to exclude from scans.
+- `servers` (List<String>) - Configuration property to specify the list of global servers that provide connectivity information.
+- `pathServers` (List<String>) - Prefix of the configuration property to specify an alternative list of servers to service all operations in a path
+- `operationServers` (List<String>) -  Prefix of the configuration property to specify an alternative list of servers to service an operation.
 
 == SmallRye OpenAPI Properties
 
 All properties from the SmallRye OpenAPI Implementation is supported. Properties set here will override the properties from `configProperties`.
 
-- scanDependenciesDisable (true/false)
-- scanDependenciesJars (comma-separated)
-- schemaReferencesEnable (true/false)
-- customSchemaRegistryClass
-- applicationPathDisable (true/false)
-- openApiVersion
-- infoTitle
-- infoVersion
-- infoDescription
-- infoTermsOfService
-- infoContactEmail
-- infoContactName
-- infoContactUrl
-- infoLicenseName
-- infoLicenseUrl
-- operationIdStrategy (METHOD/CLASS_METHOD/PACKAGE_CLASS_METHOD)
+- `customSchemaRegistryClass` (String) - Fully qualified name of a CustomSchemaRegistry, which can be used to specify a custom schema for a type.
+- `applicationPathDisable` (boolean, default: false) - Disable scanning of the javax.ws.rs.Path (and jakarta.ws.rs.Path) for the application path.
+- `openApiVersion` (String, default: 3.0.3) - To specify a custom OpenAPI version.
+- `infoTitle` (String)
+- `infoVersion` (String)
+- `infoDescription` (String)
+- `infoTermsOfService` (String)
+- `infoContactEmail` (String)
+- `infoContactName` (String)
+- `infoContactUrl` (String)
+- `infoLicenseName` (String)
+- `infoLicenseUrl` (String)
+- `operationIdStrategy` (METHOD/CLASS_METHOD/PACKAGE_CLASS_METHOD) - Configuration property to specify how the operationid is generated. Can be used to minimize risk of collisions between operations.
+  - `METHOD` - The method name is used as operationId.
+  - `CLASS_METHOD` - The class name and method name is used as operationId.
+  - `PACKAGE_CLASS_METHOD` - The fully qualified class name and method name is used as operationId.
