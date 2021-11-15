@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.OASConfig;
+import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Index;
@@ -18,6 +21,7 @@ import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 import org.json.JSONException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -391,5 +395,52 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             schemaRegistry.register(uuidType, schema);
         }
 
+    }
+
+    /**************************************************************************/
+
+    @Test
+    void testIncludeProfile() {
+        Index index = indexOf(ProfileResource.class);
+        OpenApiConfig config = dynamicConfig(OpenApiConstants.SCAN_PROFILES,
+                "external");
+
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
+
+        OpenAPI result = scanner.scan();
+
+        Assertions.assertEquals(1, result.getPaths().getPathItems().size());
+        Assertions.assertTrue(result.getPaths().getPathItems().containsKey("/profile/{id}"));
+    }
+
+    @Test
+    void testExcludeProfile() {
+        Index index = indexOf(ProfileResource.class);
+        OpenApiConfig config = dynamicConfig(OpenApiConstants.SCAN_EXCLUDE_PROFILES,
+                "external");
+
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
+
+        OpenAPI result = scanner.scan();
+
+        Assertions.assertEquals(1, result.getPaths().getPathItems().size());
+        Assertions.assertTrue(result.getPaths().getPathItems().containsKey("/profile"));
+    }
+
+    @Path("/profile")
+    static class ProfileResource {
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        public String read() {
+            return "";
+        }
+
+        @Path("{id}")
+        @POST
+        @Produces(MediaType.APPLICATION_JSON)
+        @Extension(name = "x-smallrye-profile-external", value = "")
+        public String create(@PathParam("id") Long id) {
+            return "";
+        }
     }
 }
