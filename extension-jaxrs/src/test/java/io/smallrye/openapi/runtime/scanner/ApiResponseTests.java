@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 
+import kotlin.coroutines.Continuation;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
@@ -328,6 +330,29 @@ class ApiResponseTests extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.kotlin-continuation-opaque.json", result);
+    }
+
+    @Test
+    void testKotlinContinuationRequestBody() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/hello")
+        class Resource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces({"text/plain"})
+            public Object hello(Continuation<? super String> $completion) {
+                return hello$suspendImpl(this, $completion);
+            }
+
+            // This should be 'static'
+            Object hello$suspendImpl(Resource var0, Continuation<? super String> $completion) {
+                return "Hello";
+            }
+        }
+
+        Index index = Index.of(Resource.class, String.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.kotlin-continuation-no-body.json", result);
     }
 
     @Test
