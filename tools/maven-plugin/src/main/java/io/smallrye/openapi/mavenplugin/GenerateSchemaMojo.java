@@ -211,6 +211,18 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "operationIdStrategy")
     private String operationIdStrategy;
 
+    /**
+     * Profiles which explicitly include operations. Any operation without a matching profile is excluded.
+     */
+    @Parameter(property = "scanProfiles")
+    private List<String> scanProfiles;
+
+    /**
+     * Profiles which explicitly exclude operations. Any operation without a matching profile is included.
+     */
+    @Parameter(property = "scanExcludeProfiles")
+    private List<String> scanExcludeProfiles;
+
     @Component
     private MavenDependencyIndexCreator mavenDependencyIndexCreator;
 
@@ -369,6 +381,8 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_NAME, infoLicenseName);
         addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_URL, infoLicenseUrl);
         addToPropertyMap(cp, OpenApiConstants.OPERATION_ID_STRAGEGY, operationIdStrategy);
+        addToPropertyMap(cp, OpenApiConstants.SCAN_PROFILES, scanProfiles);
+        addToPropertyMap(cp, OpenApiConstants.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
 
         return cp;
     }

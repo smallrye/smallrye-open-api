@@ -42,6 +42,8 @@ public final class OpenApiConstants {
     public static final String SMALLRYE_PRIVATE_PROPERTIES_ENABLE = SMALLRYE_PREFIX + SUFFIX_PRIVATE_PROPERTIES_ENABLE;
     public static final String SMALLRYE_PROPERTY_NAMING_STRATEGY = SMALLRYE_PREFIX + SUFFIX_PROPERTY_NAMING_STRATEGY;
     public static final String SMALLRYE_SORTED_PROPERTIES_ENABLE = SMALLRYE_PREFIX + SUFFIX_SORTED_PROPERTIES_ENABLE;
+    public static final String SCAN_PROFILES = SMALLRYE_PREFIX + "scan.profiles";
+    public static final String SCAN_EXCLUDE_PROFILES = SMALLRYE_PREFIX + "scan.exclude.profiles";
 
     public static final String VERSION = SMALLRYE_PREFIX + "openapi";
     public static final String INFO_TITLE = SMALLRYE_PREFIX + "info.title";
@@ -107,6 +109,8 @@ public final class OpenApiConstants {
     public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> new String[] { "*/*" };
     // Used by both Jax-rs and openapi
     public static final String REF = "ref";
+
+    public static final String EXTENSION_PROFILE_PREFIX = "x-smallrye-profile-";
 
     /**
      * Constructor.

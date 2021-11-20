@@ -156,6 +156,14 @@ public interface OpenApiConfig {
         return Optional.empty();
     }
 
+    default Set<String> getScanProfiles() {
+        return new HashSet<>();
+    }
+
+    default Set<String> getScanExcludeProfiles() {
+        return new HashSet<>();
+    }
+
     default void doAllowNakedPathParameter() {
     }
 
