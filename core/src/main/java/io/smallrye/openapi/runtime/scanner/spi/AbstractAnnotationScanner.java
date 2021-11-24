@@ -1,13 +1,14 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
-import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
-import org.eclipse.microprofile.openapi.models.Extensible;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.microprofile.openapi.models.Extensible;
+
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Abstract base class for annotation scanners

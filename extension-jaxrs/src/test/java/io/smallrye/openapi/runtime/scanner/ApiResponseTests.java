@@ -242,6 +242,7 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testKotlinContinuationStringResponse() throws IOException, JSONException {
         @jakarta.ws.rs.Path("/hello")
+        @jakarta.ws.rs.Consumes({ "text/plain" })
         class Resource {
 
             /**
