@@ -1,16 +1,17 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
-import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.models.OperationImpl;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.models.OperationImpl;
 
 class AbstractAnnotationScannerTest {
     /**
