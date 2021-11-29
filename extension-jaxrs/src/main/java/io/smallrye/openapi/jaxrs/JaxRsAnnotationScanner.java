@@ -458,6 +458,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Now set the operation on the PathItem as appropriate based on the Http method type
         setOperationOnPathItem(methodType, pathItem, operation);
 
+        if (!processProfiles(context.getConfig(), operation)) {
+            return;
+        }
+
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
         final String path;
 

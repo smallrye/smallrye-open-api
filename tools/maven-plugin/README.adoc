@@ -85,3 +85,5 @@ All properties from the SmallRye OpenAPI Implementation is supported. Properties
   - `METHOD` - The method name is used as operationId.
   - `CLASS_METHOD` - The class name and method name is used as operationId.
   - `PACKAGE_CLASS_METHOD` - The fully qualified class name and method name is used as operationId.
+- `scanProfiles` (List<String>) - Profiles which explicitly include operations. Any operation without a matching profile is excluded.
+- `scanExcludeProfiles` (List<String>) - Profiles which explicitly exclude operations. Any operation without a matching profile is included.

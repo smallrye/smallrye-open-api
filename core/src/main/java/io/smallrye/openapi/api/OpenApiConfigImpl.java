@@ -51,6 +51,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String infoLicenseName;
     private String infoLicenseUrl;
     private OperationIdStrategy operationIdStrategy;
+    private Set<String> scanProfiles;
+    private Set<String> scanExcludeProfiles;
     private Optional<String[]> defaultProduces = UNSET;
     private Optional<String[]> defaultConsumes = UNSET;
     private Optional<Boolean> allowNakedPathParameter = Optional.empty();
@@ -406,6 +408,30 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             defaultConsumes = getDefaultContentType(OpenApiConstants.DEFAULT_CONSUMES);
         }
         return defaultConsumes;
+    }
+
+    @Override
+    public Set<String> getScanProfiles() {
+        if (scanProfiles == null) {
+            String classes = getStringConfigValue(OpenApiConstants.SCAN_PROFILES);
+            if (classes == null) {
+                classes = getStringConfigValue(OpenApiConstants.SCAN_PROFILES);
+            }
+            scanProfiles = asCsvSet(classes);
+        }
+        return scanProfiles;
+    }
+
+    @Override
+    public Set<String> getScanExcludeProfiles() {
+        if (scanExcludeProfiles == null) {
+            String classes = getStringConfigValue(OpenApiConstants.SCAN_EXCLUDE_PROFILES);
+            if (classes == null) {
+                classes = getStringConfigValue(OpenApiConstants.SCAN_EXCLUDE_PROFILES);
+            }
+            scanExcludeProfiles = asCsvSet(classes);
+        }
+        return scanExcludeProfiles;
     }
 
     /**

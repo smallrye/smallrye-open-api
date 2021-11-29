@@ -145,4 +145,14 @@ public class MavenConfig implements OpenApiConfig {
         }
         return null;
     }
+
+    @Override
+    public Set<String> getScanProfiles() {
+        return asCsvSet(properties.getOrDefault(OpenApiConstants.SCAN_PROFILES, null));
+    }
+
+    @Override
+    public Set<String> getScanExcludeProfiles() {
+        return asCsvSet(properties.getOrDefault(OpenApiConstants.SCAN_EXCLUDE_PROFILES, null));
+    }
 }

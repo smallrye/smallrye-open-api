@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -906,8 +907,9 @@ public interface AnnotationScanner {
     }
 
     /**
-     * Go through the method parameters looking for one that is not annotated with a jax-rs/spring
-     * annotation.That will be the one that is the request body.
+     * Go through the method parameters looking for one that is not a Kotlin Continuation,
+     * is not annotated with a jax-rs/spring annotation, and is not a known path parameter.
+     * That will be the one that is the request body.
      * 
      * @param context the scanning context
      * @param method MethodInfo
@@ -916,22 +918,19 @@ public interface AnnotationScanner {
      */
     default Type getRequestBodyParameterClassType(final AnnotationScannerContext context, MethodInfo method,
             final ResourceParameters params) {
-        List<AnnotationScannerExtension> extensions = context.getExtensions();
+
         List<Type> methodParams = method.parameters();
-        if (methodParams.isEmpty()) {
-            return null;
-        }
-        for (short i = 0; i < methodParams.size(); i++) {
-            List<AnnotationInstance> parameterAnnotations = JandexUtil.getParameterAnnotations(method, i);
-            if (parameterAnnotations.isEmpty()
-                    || !containsScannerAnnotations(parameterAnnotations, extensions)) {
-                // Also check if there is a PathPatameter already with this
-                if (!isPathParameter(context, method.parameterName(i), params)) {
-                    return methodParams.get(i);
-                }
-            }
-        }
-        return null;
+
+        return IntStream.range(0, methodParams.size())
+                .filter(position -> !isKotlinContinuation(methodParams.get(position)))
+                .filter(position -> !isPathParameter(context, method.parameterName(position), params))
+                .filter(position -> {
+                    List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(method, (short) position);
+                    return annotations.isEmpty() || !containsScannerAnnotations(annotations, context.getExtensions());
+                })
+                .mapToObj(methodParams::get)
+                .findFirst()
+                .orElse(null);
     }
 
     default boolean isPathParameter(final AnnotationScannerContext context, String name, final ResourceParameters params) {
