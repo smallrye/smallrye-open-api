@@ -12,8 +12,8 @@
     "build-prod": "webpack --mode=production"
   },
   "dependencies": {
-    "@rjsf/bootstrap-4": "^2.5.1",
-    "@rjsf/core": "^2.5.1",
+    "@rjsf/bootstrap-4": "^3.2.1",
+    "@rjsf/core": "^3.2.1",
     "react": "^16.14.0",
     "react-bootstrap": "^1.5.2",
     "react-dom": "^16.14.0",
