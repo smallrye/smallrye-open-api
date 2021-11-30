@@ -1,4 +1,4 @@
 name: SmallRye OpenAPI
 release:
-  current-version: 2.1.15
-  next-version: 2.1.16-SNAPSHOT
+  current-version: 2.1.16
+  next-version: 2.1.17-SNAPSHOT
