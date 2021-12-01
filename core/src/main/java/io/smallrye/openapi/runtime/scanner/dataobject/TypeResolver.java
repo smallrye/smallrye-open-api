@@ -328,6 +328,14 @@ public class TypeResolver {
         return ignored || (readOnly && readMethod == null) || (writeOnly && writeMethod == null);
     }
 
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public boolean isWriteOnly() {
+        return writeOnly;
+    }
+
     private boolean isExposedByDefault() {
         return !isIgnored() && !exposed;
     }

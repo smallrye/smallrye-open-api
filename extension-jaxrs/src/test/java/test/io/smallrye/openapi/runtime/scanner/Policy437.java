@@ -53,11 +53,11 @@ public class Policy437 {
         return mtime.toString();
     }
 
-    @JsonbTransient
     public void setLastTriggered(long tTime) {
         lastTriggered = tTime;
     }
 
+    @JsonbTransient
     public long getLastTriggered() {
         return lastTriggered;
     }

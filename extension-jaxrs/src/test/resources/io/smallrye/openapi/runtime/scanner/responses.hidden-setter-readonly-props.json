@@ -58,7 +58,8 @@
           },
           "lastTriggered": {
             "format": "int64",
-            "type": "integer"
+            "type": "integer",
+            "writeOnly": true
           },
           "mtime": {
             "format": "yyyy-MM-dd hh:mm:ss.ddd",
