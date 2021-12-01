@@ -178,6 +178,14 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema.setNullable(Boolean.TRUE);
         }
 
+        if (fieldSchema.getReadOnly() == null && typeResolver.isReadOnly()) {
+            fieldSchema.setReadOnly(Boolean.TRUE);
+        }
+
+        if (fieldSchema.getWriteOnly() == null && typeResolver.isWriteOnly()) {
+            fieldSchema.setWriteOnly(Boolean.TRUE);
+        }
+
         processFieldAnnotations(fieldSchema, typeResolver);
 
         Schema parentSchema = parentPathEntry.getSchema();
