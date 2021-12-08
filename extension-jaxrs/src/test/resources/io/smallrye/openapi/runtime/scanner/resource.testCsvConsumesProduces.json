@@ -1,0 +1,74 @@
+{
+  "openapi" : "3.0.3",
+  "paths" : {
+    "/multi-produce-consume" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "object"
+              }
+            },
+            "text/html" : {
+              "schema" : {
+                "type" : "object"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "type" : "object"
+              }
+            },
+            "application/xml" : {
+              "schema" : {
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              },
+              "text/plain" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

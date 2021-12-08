@@ -32,6 +32,8 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
+import test.io.smallrye.openapi.runtime.scanner.MultiProduceConsumeResource;
+import test.io.smallrye.openapi.runtime.scanner.MultiProduceConsumeResourceJakarta;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -443,4 +445,17 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             return "";
         }
     }
+
+    /**************************************************************************/
+
+    @Test
+    void testCsvProducesConsumes() throws IOException, JSONException {
+        assertJsonEquals("resource.testCsvConsumesProduces.json", MultiProduceConsumeResource.class);
+    }
+
+    @Test
+    void testCsvProducesConsumesJakarta() throws IOException, JSONException {
+        assertJsonEquals("resource.testCsvConsumesProduces.json", MultiProduceConsumeResourceJakarta.class);
+    }
+
 }
