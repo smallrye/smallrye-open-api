@@ -1,6 +1,5 @@
 package io.smallrye.openapi.mavenplugin;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -75,40 +74,36 @@ public class MavenDependencyIndexCreator {
 
         List<Map.Entry<Artifact, Duration>> indexDurations = new ArrayList<>();
 
-        // Don't' cache the moduleindex. Incremental compilation in IDE's would otherwise use the cached index instead of new one.
-        // Right now, support for incremental compilation inside eclipse is blocked by: https://github.com/eclipse-m2e/m2e-core/issues/364#issuecomment-939987848
-        IndexView moduleIndex;
-        try {
-            moduleIndex = indexModuleClasses(mavenProject);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Can't compute index", e);
-        }
-
-        if (scanDependenciesDisable) {
-            return moduleIndex;
+        List<Artifact> artifacts = new ArrayList<>();
+        artifacts.add(mavenProject.getArtifact());
+        if (!scanDependenciesDisable) {
+            artifacts.addAll(mavenProject.getArtifacts());
         }
 
         List<IndexView> indexes = new ArrayList<>();
-        indexes.add(moduleIndex);
-        for (Artifact artifact : mavenProject.getArtifacts()) {
+        for (Artifact artifact : artifacts) {
             if (isIgnored(artifact, includeDependenciesScopes, includeDependenciesTypes)) {
                 continue;
             }
 
-            IndexView artifactIndex = timeAndCache(indexDurations, artifact, () -> {
-                try {
-                    Result result = JarIndexer.createJarIndex(artifact.getFile(), new Indexer(),
-                            false, false, false);
-                    return result.getIndex();
-                } catch (Exception e) {
-                    logger.error("Can't compute index of " + artifact.getFile().getAbsolutePath() + ", skipping", e);
-                    return null;
+            try {
+                if (artifact.getFile().isDirectory()) {
+                    // Don't' cache local worskpace artifacts. Incremental compilation in IDE's would otherwise use the cached index instead of new one.
+                    // Right now, support for incremental compilation inside eclipse is blocked by: https://github.com/eclipse-m2e/m2e-core/issues/364#issuecomment-939987848
+                    // target/classes
+                    indexes.add(indexModuleClasses(artifact));
+                } else if (artifact.getFile().getName().endsWith(".jar")) {
+                    IndexView artifactIndex = timeAndCache(indexDurations, artifact, () -> {
+                        Result result = JarIndexer.createJarIndex(artifact.getFile(), new Indexer(),
+                                false, false, false);
+                        return result.getIndex();
+                    });
+                    indexes.add(artifactIndex);
                 }
-            });
-
-            if (artifactIndex != null) {
-                indexes.add(artifactIndex);
+            } catch (IOException | ExecutionException e) {
+                logger.error("Can't compute index of " + artifact.getFile().getAbsolutePath() + ", skipping", e);
             }
+
         }
 
         printIndexDurations(indexDurations);
@@ -130,6 +125,11 @@ public class MavenDependencyIndexCreator {
 
     private boolean isIgnored(Artifact artifact, List<String> includeDependenciesScopes,
             List<String> includeDependenciesTypes) {
+        if (artifact.getScope() == null && artifact.getFile() != null) {
+            // The artifact is the current mavenproject, which can never be ignored
+            // file can be null for projects with packaging type pom
+            return false;
+        }
         return !includeDependenciesScopes.contains(artifact.getScope())
                 || !includeDependenciesTypes.contains(artifact.getType())
                 || ignoredArtifacts.contains(artifact.getGroupId())
@@ -149,15 +149,13 @@ public class MavenDependencyIndexCreator {
     }
 
     // index the classes of this Maven module
-    private Index indexModuleClasses(MavenProject mavenProject) throws IOException {
+    private Index indexModuleClasses(Artifact artifact) throws IOException {
 
         Indexer indexer = new Indexer();
 
         // Check first if the classes directory exists, before attempting to create an index for the classes
-        File outputDirectory = new File(mavenProject.getBuild().getOutputDirectory());
-        if (outputDirectory.exists()) {
-            try (Stream<Path> stream = Files.walk(outputDirectory.toPath())) {
-
+        if (artifact.getFile().exists()) {
+            try (Stream<Path> stream = Files.walk(artifact.getFile().toPath())) {
                 List<Path> classFiles = stream
                         .filter(path -> path.toString().endsWith(".class"))
                         .collect(Collectors.toList());
