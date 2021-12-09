@@ -59,6 +59,7 @@ public class MavenDependencyIndexCreator {
         ignoredArtifacts.add("com.thoughtworks.xstream:xstream");
         ignoredArtifacts.add("com.github.javaparser:javaparser-core");
         ignoredArtifacts.add("org.jboss:jandex");
+        ignoredArtifacts.add("org.jboss.resteasy:resteasy-core");
 
         ignoredArtifacts.add("antlr");
         ignoredArtifacts.add("io.netty");
