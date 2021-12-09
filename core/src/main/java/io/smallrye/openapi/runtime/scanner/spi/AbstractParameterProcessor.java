@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,10 +46,12 @@ import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.ContentImpl;
+import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -74,6 +77,8 @@ public abstract class AbstractParameterProcessor {
 
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(
             Arrays.asList(ParameterConstant.DOTNAME_PARAMETER, ParameterConstant.DOTNAME_PARAMETERS));
+
+    protected static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     protected final AnnotationScannerContext scannerContext;
     protected final IndexView index;
@@ -724,22 +729,75 @@ public abstract class AbstractParameterProcessor {
         }
 
         Content content = new ContentImpl();
-        MediaType mediaType = new MediaTypeImpl();
-        Schema schema = new SchemaImpl();
-        Map<String, Encoding> encodings = new HashMap<>();
-        schema.setType(SchemaType.OBJECT);
 
-        mediaType.setSchema(schema);
-        setSchemaProperties(schema, encodings, formParams, true);
+        Arrays.stream(getFormMediaTypes(CurrentScannerInfo::getCurrentConsumes, this::getFormMediaType))
+                .forEach(mediaTypeName -> {
+                    MediaType mediaType = new MediaTypeImpl();
+                    Schema schema = new SchemaImpl();
+                    Map<String, Encoding> encodings = new HashMap<>();
+                    schema.setType(SchemaType.OBJECT);
+                    mediaType.setSchema(schema);
 
-        if (encodings.size() > 0) {
-            mediaType.setEncoding(encodings);
-        }
+                    if (APPLICATION_FORM_URLENCODED.equals(mediaTypeName)) {
+                        addFormParamEncodings(encodings);
+                    }
 
-        String mediaTypeName = formMediaType != null ? formMediaType : getDefaultFormMediaType();
-        content.addMediaType(mediaTypeName, mediaType);
+                    setSchemaProperties(schema, encodings, formParams, true);
+
+                    if (encodings.size() > 0) {
+                        mediaType.setEncoding(encodings);
+                    }
+
+                    content.addMediaType(mediaTypeName, mediaType);
+                });
 
         return content;
+    }
+
+    @SafeVarargs
+    final String[] getFormMediaTypes(Supplier<String[]>... mediaTypeSources) {
+        for (Supplier<String[]> souce : mediaTypeSources) {
+            String[] mediaTypes = souce.get();
+            if (mediaTypes != null) {
+                return mediaTypes;
+            }
+        }
+        return new String[] { getDefaultFormMediaType() };
+    }
+
+    String[] getFormMediaType() {
+        return formMediaType != null ? new String[] { formMediaType } : null;
+    }
+
+    void addFormParamEncodings(Map<String, Encoding> encodings) {
+        formParams.entrySet().stream()
+                .map(param -> {
+                    ParameterContextKey key = new ParameterContextKey(param.getKey(), null, Style.FORM);
+                    return getParameterContext(key, param.getValue().target());
+                })
+                .filter(context -> context != null && context.oaiParam != null)
+                .forEach(context -> {
+                    Encoding encoding = null;
+
+                    if (context.oaiParam.getStyle() != null) {
+                        encoding = new EncodingImpl();
+
+                        String styleString = context.oaiParam.getStyle().toString();
+                        Arrays.stream(Encoding.Style.values())
+                                .filter(encodingStyle -> encodingStyle.toString().equals(styleString))
+                                .findFirst()
+                                .ifPresent(encoding::setStyle);
+                    }
+
+                    if (context.oaiParam.getExplode() != null) {
+                        encoding = encoding != null ? encoding : new EncodingImpl();
+                        encoding.setExplode(context.oaiParam.getExplode());
+                    }
+
+                    if (encoding != null) {
+                        encodings.put(context.name, encoding);
+                    }
+                });
     }
 
     protected String getDefaultFormMediaType() {
@@ -1191,6 +1249,19 @@ public abstract class AbstractParameterProcessor {
                 null,
                 null,
                 annotation.target(),
+                overriddenParametersOnly);
+    }
+
+    protected void readFrameworkParameter(AnnotationInstance annotation, FrameworkParameter frameworkParam,
+            boolean overriddenParametersOnly) {
+        AnnotationTarget target = annotation.target();
+
+        readParameter(
+                new ParameterContextKey(paramName(annotation), frameworkParam.location, frameworkParam.defaultStyle),
+                null,
+                frameworkParam,
+                getDefaultValue(target),
+                target,
                 overriddenParametersOnly);
     }
 

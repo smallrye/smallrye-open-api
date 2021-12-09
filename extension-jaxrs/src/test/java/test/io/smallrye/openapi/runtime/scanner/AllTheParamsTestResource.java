@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -50,7 +51,8 @@ public class AllTheParamsTestResource {
     @POST
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(value = MediaType.APPLICATION_JSON)
-    public CompletionStage<Widget> upd(@FormParam(value = "f1") @DefaultValue(value = "42") int f1,
+    public CompletionStage<Widget> upd(
+            @Parameter(style = ParameterStyle.FORM, explode = Explode.TRUE) @FormParam(value = "f1") @DefaultValue(value = "42") int f1,
             @org.jboss.resteasy.annotations.jaxrs.FormParam @DefaultValue(value = "f2-default") @NotNull String f2,
             @HeaderParam(value = "h1") @Deprecated int h1,
             @org.jboss.resteasy.annotations.jaxrs.HeaderParam(value = "h2") String notH2) {

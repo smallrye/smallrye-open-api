@@ -138,7 +138,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected String getDefaultFormMediaType() {
-        return "application/x-www-form-urlencoded";
+        return APPLICATION_FORM_URLENCODED;
     }
 
     @Override
@@ -183,6 +183,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         if (frameworkParam.style == Style.FORM) {
             // Store the @FormParam for later processing
             formParams.put(paramName(annotation), annotation);
+            readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
         } else if (frameworkParam.style == Style.MATRIX) {
             // Store the @MatrixParam for later processing
             String pathSegment = beanParamAnnotation != null
@@ -196,14 +197,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
         } else if (frameworkParam.location != null) {
-            readParameter(
-                    new ParameterContextKey(paramName(annotation), frameworkParam.location,
-                            frameworkParam.defaultStyle),
-                    null,
-                    frameworkParam,
-                    getDefaultValue(target),
-                    target,
-                    overriddenParametersOnly);
+            readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
         } else if (target != null) {
             // This is a @BeanParam or a RESTEasy @MultipartForm
             setMediaType(frameworkParam);

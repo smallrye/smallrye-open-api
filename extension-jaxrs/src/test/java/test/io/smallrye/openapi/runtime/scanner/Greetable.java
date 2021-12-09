@@ -13,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
-import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
 public interface Greetable {
@@ -40,7 +39,7 @@ public interface Greetable {
     @Path(value = "/greet/{from}")
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(value = MediaType.TEXT_PLAIN)
-    @Parameter(name = "greetingName", style = ParameterStyle.FORM)
+    @Parameter(name = "greetingName")
     String greet(@BeanParam GreetingBean bean);
 
 }
