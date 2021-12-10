@@ -2,6 +2,7 @@ package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.util.concurrent.CompletionStage;
 
+import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -52,7 +53,8 @@ public class RestEasyReactiveAllTheParamsTestResource {
     @POST
     @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(value = MediaType.APPLICATION_JSON)
-    public CompletionStage<Widget> upd(@RestForm(value = "f1") @DefaultValue(value = "42") int f1,
+    public CompletionStage<Widget> upd(
+            @Parameter(style = ParameterStyle.FORM, explode = Explode.TRUE) @RestForm(value = "f1") @DefaultValue(value = "42") int f1,
             @RestForm @DefaultValue(value = "f2-default") @NotNull String f2, @RestHeader(value = "h1") @Deprecated int h1,
             @RestHeader(value = "h2") String notH2) {
         return null;

@@ -137,6 +137,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
             if (frameworkParam.style == Style.FORM) {
                 // Store the @FormParam for later processing
                 formParams.put(paramName(annotation), annotation);
+                readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
             } else if (frameworkParam.style == Style.MATRIX) {
                 // Store the @MatrixParam for later processing
                 String pathSegment = beanParamAnnotation != null
@@ -155,13 +156,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
                 //        matrixParams.put(pathSegment, new HashMap<>());
                 //   }
             } else if (frameworkParam.location != null) {
-                readParameter(
-                        new ParameterContextKey(paramName(annotation), frameworkParam.location, frameworkParam.defaultStyle),
-                        null,
-                        frameworkParam,
-                        null, /* defaultValue */
-                        target,
-                        overriddenParametersOnly);
+                readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
             } else if (target != null) {
                 // This is a @BeanParam or a RESTEasy @MultipartForm
                 setMediaType(frameworkParam);

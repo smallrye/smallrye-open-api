@@ -861,12 +861,11 @@ public interface AnnotationScanner {
         // method declares that it @Consumes data
         if ((requestBody == null || (requestBody.getContent() == null && requestBody.getRef() == null))
                 && getConsumes(context) != null) {
-            if (params.getFormBodySchema() != null) {
+            if (params.getFormBodyContent() != null) {
                 if (requestBody == null) {
                     requestBody = new RequestBodyImpl();
                 }
-                Schema schema = params.getFormBodySchema();
-                ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
+                requestBody.setContent(params.getFormBodyContent());
             } else {
                 Type requestBodyType = getRequestBodyParameterClassType(context, method, params);
                 requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
