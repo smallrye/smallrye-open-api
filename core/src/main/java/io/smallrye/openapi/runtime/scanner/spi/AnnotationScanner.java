@@ -306,7 +306,7 @@ public interface AnnotationScanner {
             operation = new OperationImpl();
         }
 
-        operation.setMethodRef(JandexUtil.createUniqueMethodReference(method));
+        operation.setMethodRef(JandexUtil.createUniqueMethodReference(resourceClass, method));
 
         OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
 
