@@ -74,8 +74,8 @@ public class JandexUtil {
     private JandexUtil() {
     }
 
-    public static String createUniqueMethodReference(MethodInfo methodInfo) {
-        return "" + methodInfo.hashCode();
+    public static String createUniqueMethodReference(ClassInfo classInfo, MethodInfo methodInfo) {
+        return "" + classInfo.hashCode() + "_" + methodInfo.hashCode();
     }
 
     /**
