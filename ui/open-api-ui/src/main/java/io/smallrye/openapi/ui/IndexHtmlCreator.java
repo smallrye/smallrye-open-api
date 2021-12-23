@@ -176,7 +176,6 @@ public class IndexHtmlCreator {
                 options.containsKey(Option.oauthAppName) ||
                 options.containsKey(Option.oauthScopeSeparator) ||
                 options.containsKey(Option.oauthScopes) ||
-                options.containsKey(Option.oauthAdditionalQueryStringParams) ||
                 options.containsKey(Option.oauthUseBasicAuthenticationWithAccessCodeGrant) ||
                 options.containsKey(Option.oauthUsePkceWithAuthorizationCodeGrant)) {
 

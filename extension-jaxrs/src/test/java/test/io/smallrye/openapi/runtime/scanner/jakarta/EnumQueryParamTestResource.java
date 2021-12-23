@@ -1,14 +1,14 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
-import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+
+import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Path(value = "/enum/formparam")
 public class EnumQueryParamTestResource {

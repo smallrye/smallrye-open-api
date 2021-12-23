@@ -1,8 +1,5 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
-import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
-import org.jboss.resteasy.reactive.RestPath;
-
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -10,6 +7,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Request;
+
+import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
+import org.jboss.resteasy.reactive.RestPath;
+
 import test.io.smallrye.openapi.runtime.scanner.Widget;
 
 @Path(value = "/path/{param1}")

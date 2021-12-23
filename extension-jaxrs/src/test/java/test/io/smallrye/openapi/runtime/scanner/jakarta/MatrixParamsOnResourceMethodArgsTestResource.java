@@ -9,6 +9,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
 import test.io.smallrye.openapi.runtime.scanner.Widget;
 
 @Path(value = "/matrix-params-on-resource-method-args/{id}")

@@ -1,8 +1,9 @@
 package test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-import jakarta.json.bind.annotation.JsonbProperty;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.Canine;
 

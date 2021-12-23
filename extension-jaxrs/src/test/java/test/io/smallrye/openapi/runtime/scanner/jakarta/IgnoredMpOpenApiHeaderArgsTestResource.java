@@ -5,6 +5,7 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
 import test.io.smallrye.openapi.runtime.scanner.Widget;
 
 @Path(value = "ignored-headers")

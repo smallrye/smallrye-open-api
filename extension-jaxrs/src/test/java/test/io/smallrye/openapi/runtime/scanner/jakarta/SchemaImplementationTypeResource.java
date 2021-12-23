@@ -2,16 +2,16 @@ package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.net.URI;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 @Path(value = "/hello")
 public class SchemaImplementationTypeResource {

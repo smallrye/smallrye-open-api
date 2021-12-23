@@ -1,11 +1,11 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
+
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 @Path(value = "multipart-form-data-input")
 public class ResteasyMultipartFormDataInputTestResource {

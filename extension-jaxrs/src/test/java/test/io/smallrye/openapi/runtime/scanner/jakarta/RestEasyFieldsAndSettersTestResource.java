@@ -1,9 +1,9 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
 /**
  * Test class from example in issue #197.

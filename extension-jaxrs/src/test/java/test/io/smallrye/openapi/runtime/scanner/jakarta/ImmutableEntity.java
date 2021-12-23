@@ -3,13 +3,13 @@ package test.io.smallrye.openapi.runtime.scanner.jakarta;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public interface ImmutableEntity {
 
