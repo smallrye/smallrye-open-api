@@ -2,11 +2,11 @@ package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.util.Map;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 public class BaseResource2<T, S> {
 

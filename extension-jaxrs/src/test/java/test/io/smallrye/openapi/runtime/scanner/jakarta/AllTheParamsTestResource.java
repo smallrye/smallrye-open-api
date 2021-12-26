@@ -2,11 +2,6 @@ package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.util.concurrent.CompletionStage;
 
-import org.eclipse.microprofile.openapi.annotations.enums.Explode;
-import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
-import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
@@ -21,6 +16,12 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+
+import org.eclipse.microprofile.openapi.annotations.enums.Explode;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+
 import test.io.smallrye.openapi.runtime.scanner.Widget;
 
 @Path(value = "/all/the/params/{id1}/{id2}")

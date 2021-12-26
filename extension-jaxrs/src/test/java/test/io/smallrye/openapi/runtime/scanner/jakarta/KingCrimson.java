@@ -2,9 +2,9 @@ package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.util.Date;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
 import jakarta.json.bind.annotation.JsonbDateFormat;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 public class KingCrimson extends BaseModel {
 

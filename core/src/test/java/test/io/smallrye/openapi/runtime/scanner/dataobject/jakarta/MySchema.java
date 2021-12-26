@@ -1,8 +1,8 @@
 package test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
 import jakarta.json.bind.annotation.JsonbPropertyOrder;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 // Out of order on purpose
 @JsonbPropertyOrder(value = { "field1", "field3", "field2" })

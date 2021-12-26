@@ -4,13 +4,14 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import test.io.smallrye.openapi.runtime.scanner.dataobject.TestEnum;
 
 public class BVTestResourceEntity {

@@ -1,12 +1,12 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
 
 @Path(value = "pets")
 public class ResponseGenerationJsonExampleApiResourceTestResource {

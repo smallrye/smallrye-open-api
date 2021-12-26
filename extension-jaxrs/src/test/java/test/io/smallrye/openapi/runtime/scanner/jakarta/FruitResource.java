@@ -9,6 +9,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
 import test.io.smallrye.openapi.runtime.scanner.Fruit;
 
 @Path(value = "/fruits")

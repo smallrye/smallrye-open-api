@@ -2,6 +2,12 @@ package test.io.smallrye.openapi.runtime.scanner.resources.jakarta;
 
 import java.util.UUID;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MediaType;
+
 import org.eclipse.microprofile.openapi.annotations.Components;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
@@ -9,11 +15,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.MediaType;
 import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.RequestBodyTestApplication.DifferentObject;
 
 /**
