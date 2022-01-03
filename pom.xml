@@ -26,7 +26,7 @@
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.skyscreamer>1.5.0</version.org.skyscreamer>
         <version.maven-resources-plugin>3.2.0</version.maven-resources-plugin>
-        <version.com.github.eirslett.frontend-maven-plugin>1.12.0</version.com.github.eirslett.frontend-maven-plugin>
+        <version.com.github.eirslett.frontend-maven-plugin>1.12.1</version.com.github.eirslett.frontend-maven-plugin>
 
         <version.arquillian.jetty>1.0.0.CR3</version.arquillian.jetty>
         <version.jetty>9.3.30.v20211001</version.jetty>
