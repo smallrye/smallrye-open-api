@@ -274,9 +274,10 @@ public interface AnnotationScanner {
                     .filter(method -> !method.isSynthetic())
                     .forEach(methods::add);
 
-            classInfo.interfaceTypes()
+            JandexUtil.interfaces(context.getAugmentedIndex(), classInfo)
                     .stream()
-                    .map(iface -> context.getIndex().getClassByName(TypeUtil.getName(iface)))
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
+                    .map(context.getAugmentedIndex()::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(iface -> iface.methods().stream())
                     .forEach(methods::add);

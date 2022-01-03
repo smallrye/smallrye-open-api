@@ -28,6 +28,7 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
         Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.GenericResource.class,
                 test.io.smallrye.openapi.runtime.scanner.ExampleResource1.class,
                 test.io.smallrye.openapi.runtime.scanner.ExampleResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.Conversation.class,
                 test.io.smallrye.openapi.runtime.scanner.Greetable.class,
                 test.io.smallrye.openapi.runtime.scanner.Greetable.GreetingBean.class);
 
@@ -39,6 +40,7 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
         Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.GenericResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ExampleResource1.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ExampleResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Conversation.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Greetable.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Greetable.GreetingBean.class);
 

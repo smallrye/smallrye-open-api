@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
-public interface Greetable {
+public interface Greetable extends Conversation {
 
     public static class GreetingBean {
 
