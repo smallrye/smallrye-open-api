@@ -3,6 +3,7 @@ package io.smallrye.openapi.jaxrs;
 import java.lang.reflect.Modifier;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -14,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -504,8 +504,6 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return Optional.empty();
     }
 
-    private static final Pattern MEDIATYPE_SPLIT_PATTERN = Pattern.compile("\\s*,\\s*");
-
     /**
      * Flattens and trims the list of media types from a {@code @Consumes} or {@code @Produces} annotation.
      * <p>
@@ -515,17 +513,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * @return elements of {@code mediaTypes} trimmed and with any comma separated values converted into separate elements
      */
     static String[] flattenAndTrimMediaTypes(String[] mediaTypes) {
-        List<String> result = new ArrayList<>(mediaTypes.length);
-        for (String element : mediaTypes) {
-            if (element.indexOf(',') == -1) {
-                result.add(element.trim());
-            } else {
-                for (String part : MEDIATYPE_SPLIT_PATTERN.split(element.trim())) {
-                    result.add(part);
-                }
-            }
-        }
-        return result.toArray(new String[result.size()]);
+        return Arrays.stream(mediaTypes)
+                .map(mediaType -> mediaType.split(","))
+                .flatMap(Arrays::stream)
+                .map(String::trim)
+                .toArray(String[]::new);
     }
 
     /**
