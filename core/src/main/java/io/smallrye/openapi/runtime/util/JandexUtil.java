@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
+import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -648,6 +651,29 @@ public class JandexUtil {
             default:
                 return t1.equals(t2);
         }
+    }
+
+    /**
+     * Retrieve the unique <code>Type</code>s that the given <code>ClassInfo</code>
+     * implements.
+     * 
+     * @param index
+     * @param klass
+     * @return the <code>Set</code> of interfaces
+     * 
+     */
+    public static Set<Type> interfaces(AugmentedIndexView index, ClassInfo klass) {
+        Set<Type> interfaces = new LinkedHashSet<>();
+
+        for (Type type : klass.interfaceTypes()) {
+            interfaces.add(type);
+
+            if (index.containsClass(type)) {
+                interfaces.addAll(interfaces(index, index.getClass(type)));
+            }
+        }
+
+        return interfaces;
     }
 
     public static boolean equals(ClassInfo c1, ClassInfo c2) {
