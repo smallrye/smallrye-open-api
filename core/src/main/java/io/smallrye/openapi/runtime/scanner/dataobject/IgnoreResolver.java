@@ -63,6 +63,18 @@ public class IgnoreResolver {
         return Visibility.UNSET;
     }
 
+    public Visibility getDescendantVisibility(String propertyName, List<ClassInfo> descendants) {
+        for (IgnoreAnnotationHandler handler : ignoreHandlers) {
+            Visibility v = handler.getDescendantVisibility(propertyName, descendants);
+
+            if (v != Visibility.UNSET) {
+                return v;
+            }
+        }
+
+        return Visibility.UNSET;
+    }
+
     public ClassInfo getClassInfoFromIndex(Type type) {
         return this.index.getClass(type);
     }
@@ -193,6 +205,20 @@ public class IgnoreResolver {
         @Override
         public List<DotName> getNames() {
             return Arrays.asList(JacksonConstants.JSON_IGNORE_PROPERTIES);
+        }
+
+        @Override
+        public Visibility getDescendantVisibility(String propertyName, List<ClassInfo> descendants) {
+            for (ClassInfo descendant : descendants) {
+                AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(descendant, getNames());
+                Visibility visibility = shouldIgnoreTarget(declaringClassJIP, propertyName);
+
+                if (visibility != Visibility.UNSET) {
+                    return visibility;
+                }
+            }
+
+            return Visibility.UNSET;
         }
     }
 
@@ -383,6 +409,10 @@ public class IgnoreResolver {
         Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference);
 
         List<DotName> getNames();
+
+        default Visibility getDescendantVisibility(String propertyName, List<ClassInfo> descendants) {
+            return Visibility.UNSET;
+        }
     }
 
 }
