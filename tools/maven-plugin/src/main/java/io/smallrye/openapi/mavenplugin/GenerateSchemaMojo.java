@@ -257,7 +257,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
         OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
 
-        OpenApiDocument document = OpenApiDocument.INSTANCE;
+        OpenApiDocument document = OpenApiDocument.newInstance();
 
         document.reset();
         document.config(openApiConfig);
