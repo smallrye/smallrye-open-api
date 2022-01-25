@@ -29,7 +29,7 @@
         <version.com.github.eirslett.frontend-maven-plugin>1.12.1</version.com.github.eirslett.frontend-maven-plugin>
 
         <version.arquillian.jetty>1.0.0.CR4</version.arquillian.jetty>
-        <version.jetty>9.3.30.v20211001</version.jetty>
+        <version.jetty>9.4.44.v20210927</version.jetty>
         <version.resteasy>4.7.5.Final</version.resteasy>
         <version.quarkus>2.6.3.Final</version.quarkus>
 
