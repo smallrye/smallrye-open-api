@@ -36,11 +36,9 @@
           <dependenciesToScan>
             <dependency>org.eclipse.microprofile.openapi:microprofile-openapi-tck</dependency>
           </dependenciesToScan>
-          <systemProperties>
-            <test.url>http://localhost:8080</test.url>
-          </systemProperties>
           <systemPropertyVariables>
             <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+            <test.url>http://localhost:8080</test.url>
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -64,7 +62,7 @@
 
     <dependency>
       <groupId>org.jboss.arquillian.container</groupId>
-      <artifactId>arquillian-jetty-embedded-9</artifactId>
+      <artifactId>${artifactId.arquillian.jetty}</artifactId>
       <version>${version.arquillian.jetty}</version>
       <scope>test</scope>
     </dependency>
@@ -127,8 +125,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-client-microprofile</artifactId>
+      <groupId>${groupId.resteasy.client}</groupId>
+      <artifactId>${artifactId.resteasy.client}</artifactId>
+      <version>${version.resteasy.client}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.smallrye.config</groupId>
+      <artifactId>smallrye-config</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

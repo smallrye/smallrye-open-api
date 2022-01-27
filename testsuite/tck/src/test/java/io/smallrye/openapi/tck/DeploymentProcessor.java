@@ -66,10 +66,12 @@ public class DeploymentProcessor implements ApplicationArchiveProcessor {
 
             // This sets the war name as the context root
             war.addAsWebInfResource(
-                    new StringAsset("<Configure class=\"org.eclipse.jetty.webapp.WebAppContext\">\n" +
-                            "  <Set name=\"contextPath\">/" + war.getName() + "</Set>\n" +
-                            "  ...\n" +
-                            "</Configure>"),
+                    new StringAsset("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                            "<!DOCTYPE Configure PUBLIC \"-//Jetty//Configure//EN\" \"http://www.eclipse" +
+                            ".org/jetty/configure.dtd\">\n" +
+                            "<Configure class=\"org.eclipse.jetty.webapp.WebAppContext\">\n" +
+                            "    <Set name=\"contextPath\">/" + war.getName() + "</Set>\n" +
+                            "</Configure>\n"),
                     ArchivePaths.create("jetty-web.xml"));
 
             // Add the required dependencies
