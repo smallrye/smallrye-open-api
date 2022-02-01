@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 public abstract class BaseResource<T extends BaseModel> {
 

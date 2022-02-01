@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner.dataobject;
 
-import javax.json.bind.annotation.JsonbPropertyOrder;
+import jakarta.json.bind.annotation.JsonbPropertyOrder;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 

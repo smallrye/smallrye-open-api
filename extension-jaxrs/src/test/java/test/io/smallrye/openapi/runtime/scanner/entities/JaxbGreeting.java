@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner.entities;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class JaxbGreeting {

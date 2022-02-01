@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.json.bind.annotation.JsonbTransient;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;

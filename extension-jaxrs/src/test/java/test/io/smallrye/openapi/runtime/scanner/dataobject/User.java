@@ -1,7 +1,7 @@
 package test.io.smallrye.openapi.runtime.scanner.dataobject;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Positive;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
 
 public interface User {
 

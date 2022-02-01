@@ -2,7 +2,7 @@ package test.io.smallrye.openapi.runtime.scanner;
 
 import java.util.Date;
 
-import javax.json.bind.annotation.JsonbDateFormat;
+import jakarta.json.bind.annotation.JsonbDateFormat;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 

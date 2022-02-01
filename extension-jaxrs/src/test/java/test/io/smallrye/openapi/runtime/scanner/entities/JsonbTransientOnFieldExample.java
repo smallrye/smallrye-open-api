@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner.entities;
 
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}

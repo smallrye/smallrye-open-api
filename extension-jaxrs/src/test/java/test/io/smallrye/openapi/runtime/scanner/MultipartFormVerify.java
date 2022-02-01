@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner;
 
-import javax.ws.rs.FormParam;
+import jakarta.ws.rs.FormParam;
 
 public class MultipartFormVerify {
 

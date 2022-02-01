@@ -2,7 +2,7 @@ package test.io.smallrye.openapi.runtime.scanner;
 
 import java.time.LocalDate;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 @Path(value = "/hi")
 public class ExampleResource1 extends GenericResource implements Greetable {

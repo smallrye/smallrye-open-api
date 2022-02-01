@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner;
 
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.QueryParam;
 
 public class BeanParamBase implements BeanParamAddon {
 

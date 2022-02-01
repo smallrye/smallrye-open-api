@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner;
 
-import javax.json.JsonString;
+import jakarta.json.JsonString;
 
 public class Pet {
 

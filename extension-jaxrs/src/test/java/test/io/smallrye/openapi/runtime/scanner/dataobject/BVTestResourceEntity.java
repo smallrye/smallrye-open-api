@@ -4,11 +4,11 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import javax.json.bind.annotation.JsonbProperty;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 

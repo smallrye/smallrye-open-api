@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner;
 
-import javax.ws.rs.HeaderParam;
+import jakarta.ws.rs.HeaderParam;
 
 public interface BeanParamAddon {
 

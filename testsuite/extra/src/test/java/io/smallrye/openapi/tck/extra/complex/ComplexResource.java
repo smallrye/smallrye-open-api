@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
 
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
