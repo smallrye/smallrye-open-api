@@ -458,6 +458,7 @@ public class TypeResolver {
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
         boolean skipPropertyScan = false;
+        List<ClassInfo> descendants = new ArrayList<>(chain.size());
 
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
@@ -482,12 +483,12 @@ public class TypeResolver {
             fields(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptField)
-                    .forEach(field -> scanField(context, properties, field, stack, reference));
+                    .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
 
             methods(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptMethod)
-                    .forEach(method -> scanMethod(context, properties, method, stack, reference));
+                    .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             JandexUtil.interfaces(index, currentClass)
                     .stream()
@@ -495,7 +496,9 @@ public class TypeResolver {
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> methods(context, clazz).stream())
-                    .forEach(method -> scanMethod(context, properties, method, stack, reference));
+                    .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
+
+            descendants.add(currentClass);
         }
 
         if (!context.getConfig().privatePropertiesEnable()) {
@@ -553,9 +556,11 @@ public class TypeResolver {
      * 
      * @param target the field or method to be checked for ignoring or exposure in the API
      * @param reference an annotated member (field or method) that referenced the type of target's declaring class
+     * @param descendants list of classes that descend from the class containing target
      * @param ignoreResolver resolver to determine if the field is ignored
      */
-    private void processVisibility(AnnotationTarget target, AnnotationTarget reference, IgnoreResolver ignoreResolver) {
+    private void processVisibility(AnnotationTarget target, AnnotationTarget reference, List<ClassInfo> descendants,
+            IgnoreResolver ignoreResolver) {
         if (this.exposed || this.ignored) {
             // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
             return;
@@ -567,9 +572,7 @@ public class TypeResolver {
             return;
         }
 
-        IgnoreResolver.Visibility visibility = ignoreResolver.isIgnore(target, reference);
-
-        switch (visibility) {
+        switch (getVisibility(target, reference, descendants, ignoreResolver)) {
             case EXPOSED:
                 this.exposed = true;
                 break;
@@ -591,6 +594,27 @@ public class TypeResolver {
             default:
                 break;
         }
+    }
+
+    /**
+     * Retrieve any property visibility configured on the target or overridden by descendant classes.
+     * 
+     * @param target the field or method to be checked for ignoring or exposure in the API
+     * @param reference an annotated member (field or method) that referenced the type of target's declaring class
+     * @param descendants list of classes that descend from the class containing target
+     * @param ignoreResolver resolver to determine if the field is ignored
+     */
+    private IgnoreResolver.Visibility getVisibility(AnnotationTarget target, AnnotationTarget reference,
+            List<ClassInfo> descendants,
+            IgnoreResolver ignoreResolver) {
+        // First check if a descendant class has hidden/exposed the property
+        IgnoreResolver.Visibility visibility = ignoreResolver.getDescendantVisibility(propertyName, descendants);
+
+        if (visibility == IgnoreResolver.Visibility.UNSET) {
+            visibility = ignoreResolver.isIgnore(target, reference);
+        }
+
+        return visibility;
     }
 
     /**
@@ -627,10 +651,12 @@ public class TypeResolver {
      * @param field the field to scan
      * @param stack type resolution stack for parameterized types
      * @param reference an annotated member (field or method) that referenced the type of field's declaring class
+     * @param descendants list of classes that descend from the class containing field
      */
     private static void scanField(AnnotationScannerContext context, Map<String, TypeResolver> properties, FieldInfo field,
             Deque<Map<String, Type>> stack,
-            AnnotationTarget reference) {
+            AnnotationTarget reference,
+            List<ClassInfo> descendants) {
         final String propertyName = field.name();
         final Type fieldType = field.type();
         final ClassInfo fieldClass = context.getAugmentedIndex().getClass(fieldType);
@@ -669,7 +695,7 @@ public class TypeResolver {
             // Ignored for getters/setters
             resolver.ignored = true;
         } else {
-            resolver.processVisibility(field, reference, context.getIgnoreResolver());
+            resolver.processVisibility(field, reference, descendants, context.getIgnoreResolver());
         }
     }
 
@@ -718,10 +744,12 @@ public class TypeResolver {
      * @param method the method to scan
      * @param stack type resolution stack for parameterized types
      * @param reference an annotated member (field or method) that referenced the type of method's declaring class
+     * @param descendants list of classes that descend from the class containing field
      */
     private static void scanMethod(AnnotationScannerContext context, Map<String, TypeResolver> properties, MethodInfo method,
             Deque<Map<String, Type>> stack,
-            AnnotationTarget reference) {
+            AnnotationTarget reference,
+            List<ClassInfo> descendants) {
         Type returnType = method.returnType();
         Type propertyType = null;
 
@@ -734,7 +762,7 @@ public class TypeResolver {
         if (propertyType != null) {
             TypeResolver resolver = updateTypeResolvers(context, properties, stack, method, propertyType);
             if (resolver != null) {
-                resolver.processVisibility(method, reference, context.getIgnoreResolver());
+                resolver.processVisibility(method, reference, descendants, context.getIgnoreResolver());
             }
         }
     }
