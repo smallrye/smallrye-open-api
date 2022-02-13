@@ -41,18 +41,20 @@ public class OpenApiDocument {
     private OpenApiDocument() {
     }
 
+    public static OpenApiDocument newInstance() {
+        return new OpenApiDocument();
+    }
+
     /**
      *
      * @return the final OpenAPI document produced during the startup of the app
      * @throws IllegalStateException If the final model is not initialized yet
      */
-    public OpenAPI get() {
-        synchronized (INSTANCE) {
-            if (model == null) {
-                throw ApiMessages.msg.modelNotInitialized();
-            }
-            return model;
+    public synchronized OpenAPI get() {
+        if (model == null) {
+            throw ApiMessages.msg.modelNotInitialized();
         }
+        return model;
     }
 
     /**
@@ -60,29 +62,23 @@ public class OpenApiDocument {
      *
      * @param model OpenAPI model instance
      */
-    public void set(OpenAPI model) {
-        synchronized (INSTANCE) {
-            this.model = model;
-        }
+    public synchronized void set(OpenAPI model) {
+        this.model = model;
     }
 
     /**
      * Reset the holder.
      */
-    public void reset() {
-        synchronized (INSTANCE) {
-            model = null;
-            clear();
-        }
+    public synchronized void reset() {
+        model = null;
+        clear();
     }
 
     /**
      * @return {@code true} if model initialized
      */
-    public boolean isSet() {
-        synchronized (INSTANCE) {
-            return model != null;
-        }
+    public synchronized boolean isSet() {
+        return model != null;
     }
 
     public synchronized void config(OpenApiConfig config) {
@@ -115,54 +111,52 @@ public class OpenApiDocument {
         set(() -> this.version = version);
     }
 
-    public void initialize() {
-        synchronized (INSTANCE) {
-            if (model != null) {
-                modelAlreadyInitialized();
-            }
-            // Check all the required parts are set
-            if (config == null) {
-                throw ApiMessages.msg.configMustBeSet();
-            }
-
-            // Phase 1: Use OASModelReader
-            OpenAPI merged = readerModel;
-
-            // Phase 2: Merge any static OpenAPI file packaged in the app
-            merged = MergeUtil.mergeObjects(merged, staticFileModel);
-
-            // Phase 3: Merge annotations
-            merged = MergeUtil.mergeObjects(merged, annotationsModel);
-
-            // Phase 4: Filter model via OASFilter
-            merged = filterModel(merged);
-
-            // Phase 5: Default empty document if model == null
-            if (merged == null) {
-                merged = new OpenAPIImpl();
-                merged.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
-            }
-
-            // Phase 6: Provide missing required elements using defaults
-            if (merged.getPaths() == null) {
-                merged.setPaths(new PathsImpl());
-            }
-            if (merged.getInfo() == null) {
-                merged.setInfo(new InfoImpl());
-            }
-            if (merged.getInfo().getTitle() == null) {
-                merged.getInfo().setTitle((archiveName == null ? "Generated" : archiveName) + " API");
-            }
-            if (merged.getInfo().getVersion() == null) {
-                merged.getInfo().setVersion((version == null ? "1.0" : version));
-            }
-
-            // Phase 7: Use Config values to add Servers (global, pathItem, operation)
-            ConfigUtil.applyConfig(config, merged);
-
-            model = merged;
-            clear();
+    public synchronized void initialize() {
+        if (model != null) {
+            modelAlreadyInitialized();
         }
+        // Check all the required parts are set
+        if (config == null) {
+            throw ApiMessages.msg.configMustBeSet();
+        }
+
+        // Phase 1: Use OASModelReader
+        OpenAPI merged = readerModel;
+
+        // Phase 2: Merge any static OpenAPI file packaged in the app
+        merged = MergeUtil.mergeObjects(merged, staticFileModel);
+
+        // Phase 3: Merge annotations
+        merged = MergeUtil.mergeObjects(merged, annotationsModel);
+
+        // Phase 4: Filter model via OASFilter
+        merged = filterModel(merged);
+
+        // Phase 5: Default empty document if model == null
+        if (merged == null) {
+            merged = new OpenAPIImpl();
+            merged.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        }
+
+        // Phase 6: Provide missing required elements using defaults
+        if (merged.getPaths() == null) {
+            merged.setPaths(new PathsImpl());
+        }
+        if (merged.getInfo() == null) {
+            merged.setInfo(new InfoImpl());
+        }
+        if (merged.getInfo().getTitle() == null) {
+            merged.getInfo().setTitle((archiveName == null ? "Generated" : archiveName) + " API");
+        }
+        if (merged.getInfo().getVersion() == null) {
+            merged.getInfo().setVersion((version == null ? "1.0" : version));
+        }
+
+        // Phase 7: Use Config values to add Servers (global, pathItem, operation)
+        ConfigUtil.applyConfig(config, merged);
+
+        model = merged;
+        clear();
     }
 
     /**
@@ -181,13 +175,11 @@ public class OpenApiDocument {
         return model;
     }
 
-    private void set(Runnable action) {
-        synchronized (INSTANCE) {
-            if (model != null) {
-                modelAlreadyInitialized();
-            }
-            action.run();
+    private synchronized void set(Runnable action) {
+        if (model != null) {
+            modelAlreadyInitialized();
         }
+        action.run();
     }
 
     private void modelAlreadyInitialized() {
