@@ -22,6 +22,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -549,7 +550,7 @@ public class BeanValidationScanner {
     AnnotationInstance getConstraint(AnnotationTarget target, List<DotName> annotationName) {
         AnnotationInstance constraint = getAnnotation(target, annotationName);
 
-        if (constraint != null) {
+        if (constraint != null && JandexUtil.equals(constraint.target(), target)) {
             AnnotationValue groupValue = constraint.value("groups");
 
             if (groupValue == null) {

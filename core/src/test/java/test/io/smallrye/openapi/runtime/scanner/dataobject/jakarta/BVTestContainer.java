@@ -38,7 +38,7 @@ public class BVTestContainer {
     Map<String, String> mapObjectNotNullAndNotEmptyAndMaxProperties;
     @NotEmpty
     @Size(min = 5, max = 20)
-    Map<String, String> mapObjectNullableAndMinPropertiesAndMaxProperties;
+    Map<String, @NotNull String> mapObjectNullableAndMinPropertiesAndMaxProperties;
     /**********************************************************************/
     @DecimalMax(value = "200.00")
     @Digits(integer = 3, fraction = 2)
