@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Locale;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
@@ -145,7 +146,7 @@ public class SchemaReader {
     private static Schema.SchemaType readSchemaType(final JsonNode node) {
         if (node != null && node.isTextual()) {
             String strval = node.asText();
-            return Schema.SchemaType.valueOf(strval.toUpperCase());
+            return Schema.SchemaType.valueOf(strval.toUpperCase(Locale.ROOT));
         }
         return null;
     }
