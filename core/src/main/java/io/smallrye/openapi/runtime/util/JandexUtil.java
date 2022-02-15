@@ -29,6 +29,7 @@ import org.jboss.jandex.Type;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * Some utility methods for working with Jandex objects.
@@ -686,6 +687,13 @@ public class JandexUtil {
 
     public static boolean equals(MethodParameterInfo p1, MethodParameterInfo p2) {
         return p1.method().equals(p2.method()) && p1.position() == p2.position();
+    }
+
+    public static List<FieldInfo> fields(AnnotationScannerContext context, ClassInfo currentClass) {
+        if (context.getConfig().sortedPropertiesEnable()) {
+            return currentClass.fields();
+        }
+        return currentClass.unsortedFields();
     }
 
 }
