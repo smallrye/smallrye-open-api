@@ -7,13 +7,14 @@ import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.media.Content;
-import org.eclipse.microprofile.openapi.models.media.MediaType;
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.Type;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -33,6 +34,7 @@ import io.smallrye.openapi.runtime.io.link.LinkReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the APIResponse annotation
@@ -179,25 +181,31 @@ public class ResponseReader {
      */
     public static APIResponse readResponseSchema(final AnnotationScannerContext context,
             final AnnotationInstance annotation) {
-        if (annotation == null || CurrentScannerInfo.getCurrentProduces() == null) {
-            // Only generate the APIResponse if the endpoint declares an @Produces media type
+        if (annotation == null) {
             return null;
         }
         IoLogging.logger.singleAnnotation("@APIResponseSchema");
-        Content content = new ContentImpl();
-
-        for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
-            MediaType type = new MediaTypeImpl();
-            type.setSchema(SchemaFactory.typeToSchema(context,
-                    JandexUtil.value(annotation, ResponseConstant.PROP_VALUE),
-                    context.getExtensions()));
-            content.addMediaType(mediaType, type);
-        }
 
         APIResponseImpl response = new APIResponseImpl();
         response.setDescription(JandexUtil.value(annotation, ResponseConstant.PROP_RESPONSE_DESCRIPTION));
-        response.setContent(content);
         response.setResponseCode(JandexUtil.value(annotation, ResponseConstant.PROP_RESPONSE_CODE));
+
+        Type responseType = JandexUtil.value(annotation, ResponseConstant.PROP_VALUE);
+
+        if (CurrentScannerInfo.getCurrentProduces() != null && !TypeUtil.isVoid(responseType)) {
+            // Only generate the content if the endpoint declares an @Produces media type
+            Content content = new ContentImpl();
+            Schema responseSchema = SchemaFactory.typeToSchema(context,
+                    responseType,
+                    context.getExtensions());
+
+            for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
+                content.addMediaType(mediaType, new MediaTypeImpl().schema(responseSchema));
+            }
+
+            response.setContent(content);
+        }
+
         return response;
     }
 

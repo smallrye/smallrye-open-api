@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
@@ -352,6 +354,45 @@ class ApiResponseTests extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("responses.mutiny-uni.json", result);
+    }
+
+    @Test
+    /*
+     * Test case for Smallrye OpenAPI issue #1026.
+     * 
+     * https://github.com/smallrye/smallrye-open-api/issues/1026
+     */
+    void testAPIResponseSchema() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/item/{id}")
+        class TestResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces({ "text/plain", "application/yaml" })
+            @APIResponseSchema(responseCode = "200", value = String.class, responseDescription = "Multiple types of string response content")
+            public java.util.concurrent.CompletionStage<jakarta.ws.rs.core.Response> getItem() {
+                return null;
+            }
+
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.Produces({ "text/plain", "application/yaml" })
+            @APIResponse(responseCode = "202", description = "No response content w/@Produces (content not specified + is not default '200' status)")
+            @APIResponseSchema(responseCode = "204", value = void.class, responseDescription = "No response content w/@Produces (schema is void + is not default '200' status)")
+            public java.util.concurrent.CompletionStage<jakarta.ws.rs.core.Response> updateItem(String item) {
+                return null;
+            }
+
+            @jakarta.ws.rs.DELETE
+            @APIResponseSchema(responseCode = "202", value = void.class, responseDescription = "No response content w/o @Produces")
+            @APIResponse(responseCode = "204", description = "No response content w/o @Produces (content not specified + is not default '200' status)")
+            public java.util.concurrent.CompletionStage<jakarta.ws.rs.core.Response> deleteItem() {
+                return null;
+            }
+        }
+
+        Index index = indexOf(TestResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.api-response-schema-variations.json", result);
     }
 
 }

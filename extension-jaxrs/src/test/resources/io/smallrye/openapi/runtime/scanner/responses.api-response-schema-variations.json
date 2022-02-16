@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/item/{id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Multiple types of string response content",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "responses": {
+          "202": {
+            "description": "No response content w/@Produces (content not specified + is not default '200' status)"
+          },
+          "204": {
+            "description": "No response content w/@Produces (schema is void + is not default '200' status)"
+          }
+        }
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "No response content w/o @Produces (content not specified + is not default '200' status)"
+          },
+          "202": {
+            "description": "No response content w/o @Produces"
+          }
+        }
+      }
+    }
+  }
+}
