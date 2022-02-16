@@ -480,7 +480,7 @@ public class TypeResolver {
             }
 
             // Store all field properties
-            fields(context, currentClass)
+            JandexUtil.fields(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptField)
                     .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
@@ -512,13 +512,6 @@ public class TypeResolver {
         }
 
         return sorted(properties, chain.keySet());
-    }
-
-    private static List<FieldInfo> fields(AnnotationScannerContext context, ClassInfo currentClass) {
-        if (context.getConfig().sortedPropertiesEnable()) {
-            return currentClass.fields();
-        }
-        return currentClass.unsortedFields();
     }
 
     private static List<MethodInfo> methods(AnnotationScannerContext context, ClassInfo currentClass) {

@@ -469,11 +469,10 @@ public class SchemaFactory {
         ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
-        List<Object> enumeration = enumKlazz.fields()
+        List<Object> enumeration = JandexUtil.fields(context, enumKlazz)
                 .stream()
                 .filter(field -> (field.flags() & ENUM) != 0)
                 .map(FieldInfo::name)
-                .sorted() // Make the order determinate
                 .collect(Collectors.toList());
 
         if (schemaAnnotation != null) {

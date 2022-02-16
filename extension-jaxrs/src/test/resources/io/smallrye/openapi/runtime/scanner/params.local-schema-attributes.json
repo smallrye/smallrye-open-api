@@ -48,9 +48,9 @@
     "schemas": {
       "MyEnum": {
         "enum": [
-          "BAR",
           "CAT",
           "DOG",
+          "BAR",
           "FOO"
         ],
         "type": "string"

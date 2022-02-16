@@ -51,8 +51,8 @@
       "LengthUnitsEnum": {
         "enum": [
           "CM",
-          "IN",
-          "MM"
+          "MM",
+          "IN"
         ],
         "type": "string"
       },
