@@ -223,6 +223,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "scanExcludeProfiles")
     private List<String> scanExcludeProfiles;
 
+    /**
+     * List of System properties available to the OAS model reader and/or filter (if configured).
+     */
+    @Parameter
+    private Map<String, String> systemPropertyVariables;
+
     @Component
     private MavenDependencyIndexCreator mavenDependencyIndexCreator;
 
@@ -248,6 +254,10 @@ public class GenerateSchemaMojo extends AbstractMojo {
     }
 
     private OpenApiDocument generateSchema(IndexView index) throws IOException, DependencyResolutionRequiredException {
+        if (systemPropertyVariables != null) {
+            systemPropertyVariables.forEach(System::setProperty);
+        }
+
         OpenApiConfig openApiConfig = new MavenConfig(getProperties());
 
         OpenAPI staticModel = generateStaticModel();
