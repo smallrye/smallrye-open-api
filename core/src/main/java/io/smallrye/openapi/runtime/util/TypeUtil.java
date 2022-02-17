@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.util;
 
+import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
@@ -875,6 +878,18 @@ public class TypeUtil {
                 .filter(annotation -> annotation.name().equals(annotationName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static void mapDeprecated(AnnotationTarget target, Supplier<Boolean> getDeprecated, Consumer<Boolean> setDeprecated) {
+        if (getDeprecated.get() != null) {
+            return;
+        }
+
+        AnnotationInstance deprecated = getAnnotation(target, DOTNAME_DEPRECATED);
+
+        if (deprecated != null && JandexUtil.equals(deprecated.target(), target)) {
+            setDeprecated.accept(Boolean.TRUE);
+        }
     }
 
     static final class TypeWithFormat {

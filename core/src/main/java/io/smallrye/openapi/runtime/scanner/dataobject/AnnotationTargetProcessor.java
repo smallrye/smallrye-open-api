@@ -186,6 +186,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema.setWriteOnly(Boolean.TRUE);
         }
 
+        TypeUtil.mapDeprecated(annotationTarget, fieldSchema::getDeprecated, fieldSchema::setDeprecated);
+
         processFieldAnnotations(fieldSchema, typeResolver);
 
         Schema parentSchema = parentPathEntry.getSchema();
