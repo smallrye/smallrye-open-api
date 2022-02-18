@@ -665,6 +665,7 @@ public abstract class AbstractParameterProcessor {
 
             addEncoding(encodings, paramName, paramTarget);
             setDefaultValue(paramSchema, getDefaultValue(paramTarget));
+            TypeUtil.mapDeprecated(paramTarget, paramSchema::getDeprecated, paramSchema::setDeprecated);
 
             BeanValidationScanner.applyConstraints(paramTarget,
                     paramSchema,

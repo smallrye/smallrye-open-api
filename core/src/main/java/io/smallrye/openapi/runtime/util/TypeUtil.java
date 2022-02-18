@@ -880,7 +880,8 @@ public class TypeUtil {
                 .orElse(null);
     }
 
-    public static void mapDeprecated(AnnotationTarget target, Supplier<Boolean> getDeprecated, Consumer<Boolean> setDeprecated) {
+    public static void mapDeprecated(AnnotationTarget target, Supplier<Boolean> getDeprecated,
+            Consumer<Boolean> setDeprecated) {
         if (getDeprecated.get() != null) {
             return;
         }
