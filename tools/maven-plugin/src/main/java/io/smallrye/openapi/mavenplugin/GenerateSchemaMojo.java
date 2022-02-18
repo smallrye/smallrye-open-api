@@ -259,12 +259,10 @@ public class GenerateSchemaMojo extends AbstractMojo {
         }
 
         OpenApiConfig openApiConfig = new MavenConfig(getProperties());
-
-        OpenAPI staticModel = generateStaticModel();
-        OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig);
-
         ClassLoader classLoader = getClassLoader();
 
+        OpenAPI staticModel = generateStaticModel();
+        OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, classLoader);
         OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
 
         OpenApiDocument document = OpenApiDocument.newInstance();
@@ -289,7 +287,9 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
     private ClassLoader getClassLoader() throws MalformedURLException, DependencyResolutionRequiredException {
         Set<URL> urls = new HashSet<>();
+
         for (String element : mavenProject.getCompileClasspathElements()) {
+            getLog().debug("Adding " + element + " to annotation scanner class loader");
             urls.add(new File(element).toURI().toURL());
         }
 
@@ -299,8 +299,8 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
     }
 
-    private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig) {
-        OpenApiAnnotationScanner openApiAnnotationScanner = new OpenApiAnnotationScanner(openApiConfig, indexView);
+    private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig, ClassLoader classLoader) {
+        OpenApiAnnotationScanner openApiAnnotationScanner = new OpenApiAnnotationScanner(openApiConfig, classLoader, indexView);
         return openApiAnnotationScanner.scan();
     }
 
