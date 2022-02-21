@@ -309,6 +309,10 @@ public interface AnnotationScanner {
 
         operation.setMethodRef(JandexUtil.createUniqueMethodReference(resourceClass, method));
 
+        // @Deprecrated may be on either the method or the class
+        TypeUtil.mapDeprecated(method, operation::getDeprecated, operation::setDeprecated);
+        TypeUtil.mapDeprecated(resourceClass, operation::getDeprecated, operation::setDeprecated);
+
         OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
 
         if (operationIdStrategy != null && operation.getOperationId() == null) {

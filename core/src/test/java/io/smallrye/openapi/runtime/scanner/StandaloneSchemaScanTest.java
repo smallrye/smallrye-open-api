@@ -1,5 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -539,5 +542,52 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.nonparameterized-ancestry-chain-link.json", result);
+    }
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/1049
+     */
+    @Test
+    @SuppressWarnings("unused")
+    void testSchemaDeprecation() throws IOException, JSONException {
+        @Schema(name = "Bean1")
+        @Deprecated
+        class Bean1 {
+            String prop1;
+            String prop2;
+        }
+
+        @Schema(name = "Bean2")
+        class Bean2 {
+            @Deprecated
+            String prop1;
+            String prop2;
+            Bean1 prop3;
+        }
+
+        @Schema(name = "Bean3")
+        class Bean3 {
+            String prop1;
+            String prop2;
+            Bean2 prop3;
+        }
+
+        Index index = indexOf(Bean1.class, Bean2.class, Bean3.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+
+        assertTrue(result.getComponents().getSchemas().get("Bean1").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean1").getProperties().get("prop1").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean1").getProperties().get("prop2").getDeprecated());
+
+        assertNull(result.getComponents().getSchemas().get("Bean2").getDeprecated());
+        assertTrue(result.getComponents().getSchemas().get("Bean2").getProperties().get("prop1").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean2").getProperties().get("prop2").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean2").getProperties().get("prop3").getDeprecated());
+
+        assertNull(result.getComponents().getSchemas().get("Bean3").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop1").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop2").getDeprecated());
+        assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop3").getDeprecated());
     }
 }

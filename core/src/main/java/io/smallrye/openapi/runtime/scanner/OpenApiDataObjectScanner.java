@@ -231,6 +231,7 @@ public class OpenApiDataObjectScanner {
 
             // First, handle class annotations (re-assign since readKlass may return new schema)
             currentSchema = readKlass(currentClass, currentType, currentSchema);
+            TypeUtil.mapDeprecated(currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
 
             if (currentSchema.getType() == null) {

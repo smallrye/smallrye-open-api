@@ -1,6 +1,5 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
-import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
 import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
 import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
@@ -486,7 +485,7 @@ public abstract class AbstractParameterProcessor {
 
         mapParameterStyle(param, context);
         mapParameterSchema(param, context);
-        mapParameterDeprecated(param, context);
+        TypeUtil.mapDeprecated(context.target, param::getDeprecated, param::setDeprecated);
         mapParameterExtensions(param, context);
 
         if (param.getSchema() != null) {
@@ -542,12 +541,6 @@ public abstract class AbstractParameterProcessor {
         }
 
         ModelUtil.setParameterSchema(param, schema);
-    }
-
-    void mapParameterDeprecated(Parameter param, ParameterContext context) {
-        if (param.getDeprecated() == null && TypeUtil.hasAnnotation(context.target, DOTNAME_DEPRECATED)) {
-            param.setDeprecated(Boolean.TRUE);
-        }
     }
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
@@ -672,6 +665,7 @@ public abstract class AbstractParameterProcessor {
 
             addEncoding(encodings, paramName, paramTarget);
             setDefaultValue(paramSchema, getDefaultValue(paramTarget));
+            TypeUtil.mapDeprecated(paramTarget, paramSchema::getDeprecated, paramSchema::setDeprecated);
 
             BeanValidationScanner.applyConstraints(paramTarget,
                     paramSchema,
