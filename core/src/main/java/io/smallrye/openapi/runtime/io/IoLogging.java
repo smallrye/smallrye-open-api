@@ -75,4 +75,9 @@ public interface IoLogging extends BasicLogger {
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 2015, value = "Processing a json array of %s json nodes.")
     void jsonArray(String of);
+
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 2016, value = "Failed to read enumeration values from enum %s method %s with `@JsonValue`: %s")
+    void exceptionReadingEnumJsonValue(String enumName, String methodName, Exception exception);
+
 }

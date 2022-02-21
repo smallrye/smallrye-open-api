@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.util.Locale;
+
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
@@ -11,7 +13,7 @@ class SchemaPropertyTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMergesWithFieldSchemas() throws Exception {
-        Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class, LengthUnits.class);
+        Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class, LengthUnits.class, Speed.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -33,11 +35,37 @@ class SchemaPropertyTest extends IndexScannerTestBase {
         private String type;
     }
 
+    // package private
     @Schema(name = "LengthUnitsEnum")
     static enum LengthUnits {
         CM,
         MM,
-        IN
+        IN;
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String toString() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    @Schema(name = "SpeedEnum")
+    public static enum Speed {
+        SLOW,
+        SLOWER,
+        SLOWEST;
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        final String notMethod = "junk";
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String toString() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue(false)
+        public String annotationValueIsFalse() {
+            return name().toLowerCase(Locale.ROOT);
+        }
     }
 
     @Schema(allOf = { Reptile.class, Lizard.class }, properties = {
@@ -61,5 +89,6 @@ class SchemaPropertyTest extends IndexScannerTestBase {
     @Schema(allOf = { Reptile.class, Turtle.class })
     static class Turtle extends Reptile {
         String shellPattern;
+        Speed speed;
     }
 }

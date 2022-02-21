@@ -858,9 +858,7 @@ public class TypeResolver {
      * @return true if the method is a Java bean getter, otherwise false
      */
     private static boolean isAccessor(MethodInfo method) {
-        Type returnType = method.returnType();
-
-        if (!method.parameters().isEmpty() || Type.Kind.VOID.equals(returnType.kind())) {
+        if (!JandexUtil.isSupplier(method)) {
             return false;
         }
 
@@ -869,7 +867,8 @@ public class TypeResolver {
         if (METHOD_PREFIX_GET.equals(namePrefix)) {
             return true;
         }
-        if (METHOD_PREFIX_IS.equals(namePrefix) && TypeUtil.equalTypes(returnType, BOOLEAN_TYPE)) {
+
+        if (METHOD_PREFIX_IS.equals(namePrefix) && TypeUtil.equalTypes(method.returnType(), BOOLEAN_TYPE)) {
             return true;
         }
 

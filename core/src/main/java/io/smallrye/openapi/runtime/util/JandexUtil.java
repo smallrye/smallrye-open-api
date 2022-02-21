@@ -696,4 +696,13 @@ public class JandexUtil {
         return currentClass.unsortedFields();
     }
 
+    public static boolean isSupplier(AnnotationTarget target) {
+        if (target.kind() != Kind.METHOD) {
+            return false;
+        }
+
+        MethodInfo method = target.asMethod();
+
+        return method.returnType().kind() != Type.Kind.VOID && method.parameters().isEmpty();
+    }
 }
