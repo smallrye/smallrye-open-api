@@ -35,9 +35,6 @@ jobs:
         with:
           java-version: ${{matrix.java}}
 
-      - name: Install graphviz
-        run: sudo apt install graphviz
-
       - name: maven cache
         uses: actions/cache@v1
         with:
@@ -46,7 +43,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B formatter:validate verify --file pom.xml
+        run: mvn -B formatter:validate impsort:check verify --file pom.xml
 
       - uses: actions/upload-artifact@v2
         name: tck-report
