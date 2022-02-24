@@ -16,6 +16,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.EncodingImpl;
@@ -126,7 +127,9 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                 if (!JaxRsAnnotationScanner.containsJavaxAnnotations(annotations) &&
                         !JaxRsAnnotationScanner.containsJakartaAnnotations(annotations)) {
                     // If the parameter has annotations, use the first entry's target for use later when searching for BV constraints and extensions
-                    AnnotationTarget target = annotations.isEmpty() ? null : annotations.get(0).target();
+                    // else if the parameter has no annotations, create the target so that it can be matched by filters
+                    AnnotationTarget target = annotations.isEmpty() ? MethodParameterInfo.create(resourceMethod, (short) i)
+                            : annotations.get(0).target();
                     Type arg = methodParameters.get(i);
                     return new ParameterContext(name, JaxRsParameter.RESTEASY_REACTIVE_PATH_PARAM.parameter, target, arg);
                 }

@@ -153,7 +153,7 @@ public class ParameterReader {
             return null;
         }
         IoLogging.logger.singleAnnotation("@Parameter");
-        Parameter parameter = new ParameterImpl();
+        ParameterImpl parameter = new ParameterImpl();
         parameter.setName(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_NAME));
         parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
@@ -199,6 +199,8 @@ public class ParameterReader {
                 default:
                     break;
             }
+
+            parameter.setParamRef(JandexUtil.createUniqueAnnotationTargetRef(annotationInstance.target()));
         }
 
         return parameter;

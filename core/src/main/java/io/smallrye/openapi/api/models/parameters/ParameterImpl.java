@@ -33,6 +33,8 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
     private Map<String, Example> examples;
     private Content content;
 
+    private String paramRef;
+
     /**
      * @see org.eclipse.microprofile.openapi.models.Reference#getRef()
      */
@@ -279,6 +281,23 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
             this.required = true;
         }
         this.in = in;
+    }
+
+    /**
+     * Implementation specific, set a reference to the Java method parameter, so that we can bind back to it later if needed
+     *
+     * @return reference to the method parameter that we scanned this on
+     */
+    public String getParamRef() {
+        return paramRef;
+    }
+
+    public void setParamRef(String paramRef) {
+        this.paramRef = paramRef;
+    }
+
+    static public String getParamRef(Parameter parameter) {
+        return (parameter instanceof ParameterImpl) ? ((ParameterImpl) parameter).getParamRef() : null;
     }
 
     public static boolean isHidden(Parameter parameter) {

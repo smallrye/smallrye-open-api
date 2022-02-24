@@ -335,4 +335,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
         this.methodRef = methodRef;
     }
 
+    static public String getMethodRef(Operation operation) {
+        return (operation instanceof OperationImpl) ? ((OperationImpl) operation).getMethodRef() : null;
+    }
 }

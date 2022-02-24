@@ -18,19 +18,25 @@ import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.Converter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Operation;
+import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.models.OperationImpl;
+import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
@@ -112,6 +118,39 @@ public class IndexScannerTestBase {
         // Remember to set debug level logging.
         LOG.debug(OpenApiSerializer.serialize(oai, Format.JSON));
         System.out.println(OpenApiSerializer.serialize(oai, Format.JSON));
+    }
+
+    public static void verifyMethodAndParamRefsPresent(OpenAPI oai) {
+        if (oai.getPaths() != null && oai.getPaths().getPathItems() != null) {
+            for (Map.Entry<String, PathItem> pathItemEntry : oai.getPaths().getPathItems().entrySet()) {
+                final PathItem pathItem = pathItemEntry.getValue();
+                if (pathItem.getOperations() != null) {
+                    for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : pathItem.getOperations().entrySet()) {
+                        final Operation operation = operationEntry.getValue();
+                        String opRef = operationEntry.getKey() + " " + pathItemEntry.getKey();
+                        Assertions.assertNotNull(OperationImpl.getMethodRef(operation), "methodRef: " + opRef);
+                        if (operation.getParameters() != null) {
+                            for (Parameter parameter : operation.getParameters()) {
+                                /*
+                                 * if @Parameter style=matrix was not specified at the same @Path segment
+                                 * a synthetic parameter is created which cannot be mapped to a field or method parameter
+                                 */
+                                if (!isPathMatrixObject(parameter)) {
+                                    // in all other cases paramRef should be set
+                                    String pRef = opRef + ", " + parameter.getIn() + ": " + parameter.getName();
+                                    Assertions.assertNotNull(ParameterImpl.getParamRef(parameter), "paramRef: " + pRef);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isPathMatrixObject(Parameter parameter) {
+        return parameter.getIn() == Parameter.In.PATH && parameter.getStyle() == Parameter.Style.MATRIX
+                && parameter.getSchema() != null && parameter.getSchema().getType() == Schema.SchemaType.OBJECT;
     }
 
     public static String schemaToString(String entityName, Schema schema) throws IOException {
