@@ -46,7 +46,8 @@
             "type": "string",
             "example": "Acme Air"
           }
-        }
+        },
+        "additionalProperties": true
       },
       "Flight": {
         "required": [
@@ -88,6 +89,9 @@
             "type": "string",
             "example": "On Schedule"
           }
+        },
+        "additionalProperties": {
+          "type": "string"
         }
       },
       "CreditCard": {
@@ -120,7 +124,8 @@
             "type": "string",
             "example": "VISA"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "Booking": {
         "required": [
