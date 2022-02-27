@@ -360,6 +360,10 @@ public interface AnnotationScanner {
             createResponseFromRestMethod(context, method, operation);
         }
 
+        if (apiResponses != null) {
+            ResponseReader.readResponsesExtensions(context, apiResponses, operation.getResponses());
+        }
+
         //Add api response using list of exceptions in the methods and exception mappers
         List<Type> methodExceptions = method.exceptions();
 

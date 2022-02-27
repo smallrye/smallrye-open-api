@@ -49,6 +49,7 @@ public class MediaTypeReader {
                 ExampleReader.parseValue(context, JandexUtil.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
         mediaType.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(MediaTypeConstant.PROP_SCHEMA)));
         mediaType.setEncoding(EncodingReader.readEncodings(context, annotationInstance.value(MediaTypeConstant.PROP_ENCODING)));
+        mediaType.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return mediaType;
     }
 

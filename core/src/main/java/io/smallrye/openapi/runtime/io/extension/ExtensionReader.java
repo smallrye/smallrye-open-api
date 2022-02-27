@@ -2,6 +2,8 @@ package io.smallrye.openapi.runtime.io.extension;
 
 import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,11 +78,22 @@ public class ExtensionReader {
 
     public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
             final AnnotationInstance extensible) {
-        AnnotationTarget target = extensible.target();
-        // target may be null - checked by JandexUtil methods
-        List<AnnotationInstance> extensions = JandexUtil.getRepeatableAnnotation(target,
-                ExtensionConstant.DOTNAME_EXTENSION,
-                ExtensionConstant.DOTNAME_EXTENSIONS);
+        AnnotationInstance[] nestedExtensions = JandexUtil.value(extensible, "extensions");
+        List<AnnotationInstance> extensions;
+
+        if (nestedExtensions != null) {
+            extensions = Arrays.asList(nestedExtensions);
+        } else if (extensible.value("extensions") != null) {
+            // Zero-length array
+            extensions = Collections.emptyList();
+        } else {
+            AnnotationTarget target = extensible.target();
+            // target may be null - checked by JandexUtil methods
+            extensions = JandexUtil.getRepeatableAnnotation(target,
+                    ExtensionConstant.DOTNAME_EXTENSION,
+                    ExtensionConstant.DOTNAME_EXTENSIONS);
+        }
+
         return extensions.isEmpty() ? null : readExtensions(context, extensions);
     }
 
