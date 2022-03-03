@@ -36,7 +36,7 @@
         <groupId.resteasy.client>org.jboss.resteasy</groupId.resteasy.client>
         <artifactId.resteasy.client>resteasy-client-microprofile</artifactId.resteasy.client>
         <version.resteasy.client>4.7.5.Final</version.resteasy.client>
-        <version.quarkus>2.7.2.Final</version.quarkus>
+        <version.quarkus>2.7.3.Final</version.quarkus>
 
         <!--
             xmlReportPaths must contain an entry for each project that reports coverage.
