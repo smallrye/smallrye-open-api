@@ -469,11 +469,12 @@ public abstract class AbstractParameterProcessor {
      * @return a new ParameterContext if the parameter is found, otherwise null
      */
     protected ParameterContext getUnannotatedPathParameter(MethodInfo resourceMethod, String name) {
+        System.out.println("getUnannotatedPathParameter()");
         return null;
     }
 
     private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
-        Parameter param = context.oaiParam != null ? context.oaiParam : new ParameterImpl();
+        ParameterImpl param = context.oaiParam != null ? (ParameterImpl) context.oaiParam : new ParameterImpl();
 
         param.setName(context.name);
 
@@ -494,6 +495,10 @@ public abstract class AbstractParameterProcessor {
 
         if (param.getRequired() == null && TypeUtil.isOptional(context.targetType)) {
             param.setRequired(Boolean.FALSE);
+        }
+
+        if (param.getParamRef() == null && context.target != null) {
+            param.setParamRef(JandexUtil.createUniqueAnnotationTargetRef(context.target));
         }
 
         return param;

@@ -26,6 +26,7 @@ class ParameterScanTests extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
+        verifyMethodAndParamRefsPresent(result);
     }
 
     @Test

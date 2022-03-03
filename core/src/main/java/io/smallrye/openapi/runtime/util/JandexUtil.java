@@ -78,8 +78,33 @@ public class JandexUtil {
     private JandexUtil() {
     }
 
+    public static String createUniqueAnnotationTargetRef(AnnotationTarget annotationTarget) {
+        switch (annotationTarget.kind()) {
+            case FIELD:
+                return JandexUtil.createUniqueFieldRef(annotationTarget.asField());
+            case METHOD:
+                ClassInfo classInfo = annotationTarget.asMethod().declaringClass();
+                return JandexUtil.createUniqueMethodReference(classInfo, annotationTarget.asMethod());
+            case METHOD_PARAMETER:
+                return JandexUtil.createUniqueMethodParameterRef(annotationTarget.asMethodParameter());
+            default:
+                return null;
+        }
+    }
+
+    public static String createUniqueFieldRef(FieldInfo fieldInfo) {
+        ClassInfo classInfo = fieldInfo.declaringClass();
+        return "f" + classInfo.hashCode() + "_" + fieldInfo.hashCode();
+    }
+
     public static String createUniqueMethodReference(ClassInfo classInfo, MethodInfo methodInfo) {
-        return "" + classInfo.hashCode() + "_" + methodInfo.hashCode();
+        return "m" + classInfo.hashCode() + "_" + methodInfo.hashCode();
+    }
+
+    public static String createUniqueMethodParameterRef(MethodParameterInfo methodParameter) {
+        final MethodInfo methodInfo = methodParameter.method();
+        final ClassInfo classInfo = methodInfo.declaringClass();
+        return "p" + classInfo.hashCode() + "_" + methodInfo.hashCode() + "_" + methodParameter.position();
     }
 
     /**
