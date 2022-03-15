@@ -8,12 +8,10 @@
           "arrayOfOptionalB": {
             "type": "array",
             "items": {
+              "nullable": true,
               "allOf": [
                 {
                   "$ref": "#/components/schemas/B"
-                },
-                {
-                  "nullable": true
                 }
               ]
             }
@@ -30,12 +28,10 @@
           "listOfOptionalB": {
             "type": "array",
             "items": {
+              "nullable": true,
               "allOf": [
                 {
                   "$ref": "#/components/schemas/B"
-                },
-                {
-                  "nullable": true
                 }
               ]
             }
@@ -55,12 +51,11 @@
             "nullable": true
           },
           "optionalOfB": {
+            "type": "object",
+            "nullable": true,
             "allOf": [
               {
                 "$ref": "#/components/schemas/B"
-              },
-              {
-                "nullable": true
               }
             ]
           }

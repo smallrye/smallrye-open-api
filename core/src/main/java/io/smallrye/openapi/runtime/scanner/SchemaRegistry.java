@@ -145,15 +145,10 @@ public class SchemaRegistry {
         return register(type, views, resolver, schema, (registry, key) -> registry.registerReference(key));
     }
 
-    static Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,
+    public static Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,
             BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
-        Type resolvedType;
 
-        if (resolver == null) {
-            resolvedType = type;
-        } else {
-            resolvedType = resolver.resolve(type);
-        }
+        final Type resolvedType = TypeResolver.resolve(type, resolver);
 
         switch (resolvedType.kind()) {
             case CLASS:
@@ -200,15 +195,7 @@ public class SchemaRegistry {
             return false;
         }
 
-        Type resolvedType;
-
-        if (resolver != null) {
-            resolvedType = resolver.resolve(type);
-        } else {
-            resolvedType = type;
-        }
-
-        return registry.hasSchema(resolvedType, views);
+        return registry.hasSchema(TypeResolver.resolve(type, resolver), views);
     }
 
     /**
@@ -432,7 +419,7 @@ public class SchemaRegistry {
      *
      * @author Michael Edgar {@literal <michael@xlate.io>}
      */
-    static class TypeKey {
+    public static final class TypeKey {
         private final Type type;
         private final Set<Type> views;
         private int hashCode = 0;

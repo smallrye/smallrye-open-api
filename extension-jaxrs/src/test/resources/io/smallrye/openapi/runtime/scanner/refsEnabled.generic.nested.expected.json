@@ -29,12 +29,11 @@
             "type": "integer"
           },
           "foo": {
+            "type": "object",
+            "maxLength": 123456,
             "allOf": [
               {
                 "$ref": "#/components/schemas/KustomPairStringString"
-              },
-              {
-                "maxLength": 123456
               }
             ]
           }

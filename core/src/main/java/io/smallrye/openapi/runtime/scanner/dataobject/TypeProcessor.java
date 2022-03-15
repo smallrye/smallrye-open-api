@@ -10,6 +10,9 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_T
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -41,6 +44,17 @@ public class TypeProcessor {
     private final DataObjectDeque objectStack;
     private final TypeResolver typeResolver;
     private final DataObjectDeque.PathEntry parentPathEntry;
+    private final List<StackEntry> objectStackInput = new ArrayList<>();
+
+    static class StackEntry {
+        final Type type;
+        final Schema schema;
+
+        public StackEntry(Type type, Schema schema) {
+            this.type = type;
+            this.schema = schema;
+        }
+    }
 
     // Type may be changed.
     private Type type;
@@ -163,9 +177,7 @@ public class TypeProcessor {
         }
 
         if (isOptional) {
-            itemSchema = new SchemaImpl()
-                    .addAllOf(itemSchema)
-                    .addAllOf(new SchemaImpl().nullable(Boolean.TRUE));
+            itemSchema = wrapOptionalItemSchema(itemSchema);
         }
 
         arraySchema.setItems(itemSchema);
@@ -196,9 +208,7 @@ public class TypeProcessor {
             Schema valueSchema = readGenericValueType(valueType, schema);
 
             if (isOptional) {
-                valueSchema = new SchemaImpl()
-                        .addAllOf(valueSchema)
-                        .addAllOf(new SchemaImpl().nullable(Boolean.TRUE));
+                valueSchema = wrapOptionalItemSchema(valueSchema);
             }
 
             schema.setItems(valueSchema);
@@ -227,6 +237,12 @@ public class TypeProcessor {
         }
 
         return typeRead;
+    }
+
+    private static Schema wrapOptionalItemSchema(Schema itemSchema) {
+        return new SchemaImpl()
+                .nullable(Boolean.TRUE)
+                .addAllOf(itemSchema);
     }
 
     private Schema readGenericValueType(Type valueType, Schema schema) {
@@ -290,7 +306,11 @@ public class TypeProcessor {
     }
 
     private void pushToStack(Type type, Schema schema) {
-        objectStack.push(annotationTarget, parentPathEntry, type, schema);
+        objectStackInput.add(new StackEntry(type, schema));
+    }
+
+    public void pushObjectStackInput() {
+        objectStackInput.forEach(e -> objectStack.push(annotationTarget, parentPathEntry, e.type, e.schema));
     }
 
     private boolean isA(Type testSubject, Type test) {

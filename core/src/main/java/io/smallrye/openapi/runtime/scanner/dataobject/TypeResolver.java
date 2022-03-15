@@ -152,6 +152,13 @@ public class TypeResolver {
         return 0;
     }
 
+    public static Type resolve(Type type, TypeResolver resolver) {
+        if (resolver != null) {
+            return resolver.resolve(type);
+        }
+        return type;
+    }
+
     private TypeResolver(UnaryOperator<String> nameTranslator, String propertyName, FieldInfo field,
             Deque<Map<String, Type>> resolutionStack) {
         this.nameTranslator = nameTranslator;

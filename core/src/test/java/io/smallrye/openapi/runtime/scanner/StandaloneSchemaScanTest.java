@@ -20,6 +20,7 @@ import java.util.UUID;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
@@ -589,5 +590,39 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop1").getDeprecated());
         assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop2").getDeprecated());
         assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop3").getDeprecated());
+    }
+
+    @Test
+    void testFieldSchemaOverridesTypeAssertion() throws IOException, JSONException {
+        @Schema(name = "OtherBean", description = "The first bean")
+        class OtherBean {
+            @Schema(maxLength = 5)
+            String prop1;
+
+            @SuppressWarnings("unused")
+            Object prop2;
+        }
+
+        @Schema(name = "Bean")
+        class Bean {
+            @Schema(title = "In-lined schema with overridden attributes", description = "Not 'The first bean'", properties = {
+                    @SchemaProperty(name = "prop1", maxLength = 4),
+                    @SchemaProperty(name = "prop2", type = SchemaType.INTEGER)
+            })
+            OtherBean first;
+
+            @Schema(title = "Property with `allOf` referring to `OtherBean`")
+            OtherBean second;
+
+            // Direct ref only
+            @Schema
+            OtherBean third;
+        }
+
+        Index index = indexOf(OtherBean.class, /* BeanTwo.class, BeanThree.class, */ Bean.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.field-overrides-type.json", result);
     }
 }

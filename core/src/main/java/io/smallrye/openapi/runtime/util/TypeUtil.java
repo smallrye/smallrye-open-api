@@ -378,7 +378,7 @@ public class TypeUtil {
      * @param typeSchema the schema for a class type
      */
     public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
-        clearIfEqual(fieldSchema.getType(), typeSchema.getType(), fieldSchema::setType);
+        //clearIfEqual(fieldSchema.getType(), typeSchema.getType(), fieldSchema::setType);
         clearIfEqual(fieldSchema.getFormat(), typeSchema.getFormat(), fieldSchema::setFormat);
         clearIfEqual(fieldSchema.getPattern(), typeSchema.getPattern(), fieldSchema::setPattern);
         clearIfEqual(fieldSchema.getExample(), typeSchema.getExample(), fieldSchema::setExample);
