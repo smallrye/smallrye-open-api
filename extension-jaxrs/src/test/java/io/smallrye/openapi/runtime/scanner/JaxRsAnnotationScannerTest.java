@@ -2,8 +2,10 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -463,11 +465,13 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     /* *************************************************************************/
     @Test
     void testSyntheticClassesAndInterfacesIgnoredByDefault() throws IOException, JSONException {
-        IndexReader reader = new IndexReader(
-                getClass().getResourceAsStream("/io/smallrye/openapi/runtime/resteasy-reactive-synthetic-client.idx"));
-        Index i = reader.read();
-        OpenAPI result = OpenApiProcessor.bootstrap(emptyConfig(), i);
-        printToConsole(result);
-        assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
+        String indexPath = "/io/smallrye/openapi/runtime/jandex-panache+reactive-client.idx.gz";
+        try (InputStream source = new GZIPInputStream(getClass().getResourceAsStream(indexPath))) {
+            IndexReader reader = new IndexReader(source);
+            Index i = reader.read();
+            OpenAPI result = OpenApiProcessor.bootstrap(emptyConfig(), i);
+            printToConsole(result);
+            assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
+        }
     }
 }

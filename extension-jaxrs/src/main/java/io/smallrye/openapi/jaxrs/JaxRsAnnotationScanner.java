@@ -42,6 +42,7 @@ import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
+import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
@@ -546,7 +547,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     private boolean hasImplementationOrIsIncluded(AnnotationScannerContext context, ClassInfo clazz) {
-        if (nonSyntheticClass(clazz)) {
+        if (neitherIterfaceNorSyntheticRestClient(context, clazz)) {
             return true;
         }
 
@@ -559,8 +560,31 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return filteredIndex.explicitlyAccepts(clazz.name());
     }
 
-    private boolean nonSyntheticClass(ClassInfo clazz) {
-        return !Modifier.isInterface(clazz.flags()) && !clazz.isSynthetic();
+    /**
+     * Determine whether the provided ClassInfo is an interface or a synthetic implementation
+     * of an interface annotated with {@code org.eclipse.microprofile.rest.client.inject.RegisterRestClient}.
+     * 
+     * @return {@code true} if the class is neither an interface nor a synthetic (generated) class annotated with
+     *         {@code org.eclipse.microprofile.rest.client.inject.RegisterRestClient}, otherwise {@code false}.
+     */
+    private boolean neitherIterfaceNorSyntheticRestClient(AnnotationScannerContext context, ClassInfo clazz) {
+        if (Modifier.isInterface(clazz.flags())) {
+            return false;
+        }
+
+        if (!clazz.isSynthetic()) {
+            return true;
+        }
+
+        final AugmentedIndexView index = context.getAugmentedIndex();
+
+        return JandexUtil.inheritanceChain(index, clazz, Type.create(clazz.name(), Type.Kind.CLASS))
+                .entrySet()
+                .stream()
+                .flatMap(e -> JandexUtil.interfaces(index, e.getKey()).stream())
+                .map(index::getClass)
+                .filter(Objects::nonNull)
+                .noneMatch(iface -> iface.classAnnotation(JaxRsConstants.REGISTER_REST_CLIENT) != null);
     }
 
     private boolean neitherAbstractNorSynthetic(ClassInfo clazz) {
