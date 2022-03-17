@@ -20,6 +20,7 @@ public class OperationConstant {
     public static final String PROP_EXTENSIONS = "extensions";
     public static final String PROP_DESCRIPTION = "description";
     public static final String PROP_SECURITY = "security";
+    public static final String PROP_SECURITY_SET = "securitySet";
     public static final String PROP_REQUEST_BODY = "requestBody";
     public static final String PROP_PARAMETERS = "parameters";
     public static final String PROP_SERVERS = "servers";

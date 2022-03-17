@@ -652,48 +652,66 @@ public interface AnnotationScanner {
     default void processSecurityRequirementAnnotation(final ClassInfo resourceClass, final MethodInfo method,
             Operation operation) {
 
-        List<AnnotationInstance> requirements;
+        List<AnnotationInstance> requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(method);
+        List<AnnotationInstance> requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(method);
+        boolean emptyContainerPresent = isEmptySecurityRequirements(method);
 
-        if (isEmptySecurityRequirements(method)) {
+        if (requirements.isEmpty() && requirementSets.isEmpty() && !emptyContainerPresent) {
+            requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(resourceClass);
+            requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(resourceClass);
+            emptyContainerPresent = isEmptySecurityRequirements(resourceClass);
+        }
+
+        for (AnnotationInstance annotation : requirements) {
+            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(annotation);
+            if (requirement != null) {
+                operation.addSecurityRequirement(requirement);
+            }
+        }
+
+        for (AnnotationInstance annotation : requirementSets) {
+            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirementsSet(annotation);
+            if (requirement != null) {
+                operation.addSecurityRequirement(requirement);
+            }
+        }
+
+        if (requirements.isEmpty() && requirementSets.isEmpty() && emptyContainerPresent) {
             operation.setSecurity(new ArrayList<>(0));
-        } else {
-            requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(method);
-
-            if (requirements.isEmpty()) {
-                if (isEmptySecurityRequirements(resourceClass)) {
-                    operation.setSecurity(new ArrayList<>(0));
-                } else {
-                    requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(resourceClass);
-                }
-            }
-
-            for (AnnotationInstance annotation : requirements) {
-                SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(annotation);
-                if (requirement != null) {
-                    operation.addSecurityRequirement(requirement);
-                }
-            }
         }
     }
 
     /**
      * Determines whether the target is annotated with an empty <code>@SecurityRequirements</code>
-     * annotation.
+     * or <code>@SecurityRequirementsSets</code> annotation.
      * 
      * @param target
      * @return true if an empty annotation is present, otherwise false
      */
     default boolean isEmptySecurityRequirements(AnnotationTarget target) {
-        AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(target);
+        boolean foundEmptyAnnotation = false;
 
+        AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(target);
         if (securityRequirements != null) {
             AnnotationInstance[] values = JandexUtil.value(securityRequirements, "value");
             if (values == null || values.length == 0) {
-                return true;
+                foundEmptyAnnotation = true;
+            } else {
+                return false;
             }
         }
 
-        return false;
+        AnnotationInstance securityRequirementsSets = SecurityRequirementReader.getSecurityRequirementsSetsAnnotation(target);
+        if (securityRequirementsSets != null) {
+            AnnotationInstance[] values = JandexUtil.value(securityRequirementsSets, "value");
+            if (values == null || values.length == 0) {
+                foundEmptyAnnotation = true;
+            } else {
+                return false;
+            }
+        }
+
+        return foundEmptyAnnotation;
     }
 
     /**
