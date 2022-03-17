@@ -60,7 +60,9 @@ public class OperationReader {
             operation.setResponses(ResponseReader.readResponses(context,
                     annotationInstance.value(OperationConstant.PROP_RESPONSES)));
             operation.setSecurity(SecurityRequirementReader
-                    .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY)).orElse(null));
+                    .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY),
+                            annotationInstance.value(OperationConstant.PROP_SECURITY_SET))
+                    .orElse(null));
             operation.setExtensions(
                     ExtensionReader.readExtensions(context,
                             annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
