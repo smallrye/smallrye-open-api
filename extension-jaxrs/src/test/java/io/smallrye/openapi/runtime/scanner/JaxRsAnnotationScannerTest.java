@@ -17,6 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Index;
+import org.jboss.jandex.IndexReader;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
@@ -30,6 +31,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 import test.io.smallrye.openapi.runtime.scanner.MultiProduceConsumeResource;
@@ -458,4 +460,14 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         assertJsonEquals("resource.testCsvConsumesProduces.json", MultiProduceConsumeResourceJakarta.class);
     }
 
+    /* *************************************************************************/
+    @Test
+    void testSyntheticClassesAndInterfacesIgnoredByDefault() throws IOException, JSONException {
+        IndexReader reader = new IndexReader(
+                getClass().getResourceAsStream("/io/smallrye/openapi/runtime/resteasy-reactive-synthetic-client.idx"));
+        Index i = reader.read();
+        OpenAPI result = OpenApiProcessor.bootstrap(emptyConfig(), i);
+        printToConsole(result);
+        assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
+    }
 }

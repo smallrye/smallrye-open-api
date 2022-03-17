@@ -546,7 +546,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     private boolean hasImplementationOrIsIncluded(AnnotationScannerContext context, ClassInfo clazz) {
-        if (!Modifier.isInterface(clazz.flags())) {
+        if (nonSyntheticClass(clazz)) {
             return true;
         }
 
@@ -557,6 +557,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         return filteredIndex.explicitlyAccepts(clazz.name());
+    }
+
+    private boolean nonSyntheticClass(ClassInfo clazz) {
+        return !Modifier.isInterface(clazz.flags()) && !clazz.isSynthetic();
     }
 
     private boolean neitherAbstractNorSynthetic(ClassInfo clazz) {
