@@ -18,7 +18,7 @@
 
     <properties>
         <version.buildhelper.plugin>3.3.0</version.buildhelper.plugin>
-        <version.com.fasterxml.jackson>2.13.2</version.com.fasterxml.jackson>
+        <jackson-bom.version>2.13.2.1</jackson-bom.version>
         <version.eclipse.microprofile.config>2.0.1</version.eclipse.microprofile.config>
         <version.io.smallrye.smallrye-config>2.9.2</version.io.smallrye.smallrye-config>
         <version.eclipse.microprofile.openapi>2.0.1</version.eclipse.microprofile.openapi>
@@ -119,19 +119,11 @@
 
             <!-- Third Party Libraries -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
 
             <!-- SmallRye Projects -->
