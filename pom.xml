@@ -18,7 +18,7 @@
 
     <properties>
         <version.buildhelper.plugin>3.3.0</version.buildhelper.plugin>
-        <jackson-bom.version>2.13.2.1</jackson-bom.version>
+        <jackson-bom.version>2.13.2.20220328</jackson-bom.version>
         <version.eclipse.microprofile.config>2.0.1</version.eclipse.microprofile.config>
         <version.io.smallrye.smallrye-config>2.9.2</version.io.smallrye.smallrye-config>
         <version.eclipse.microprofile.openapi>2.0.1</version.eclipse.microprofile.openapi>
