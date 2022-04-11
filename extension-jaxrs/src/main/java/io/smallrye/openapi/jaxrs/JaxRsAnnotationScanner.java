@@ -440,7 +440,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Process @APIResponse annotations
-        processResponse(context, method, operation, exceptionAnnotationMap);
+        processResponse(context, resourceClass, method, operation, exceptionAnnotationMap);
 
         // Process @SecurityRequirement annotations
         processSecurityRequirementAnnotation(resourceClass, method, operation);

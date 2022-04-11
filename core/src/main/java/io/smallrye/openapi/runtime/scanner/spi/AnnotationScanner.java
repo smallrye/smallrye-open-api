@@ -338,11 +338,18 @@ public interface AnnotationScanner {
         return Optional.of(operation);
     }
 
-    default void processResponse(final AnnotationScannerContext context, final MethodInfo method, Operation operation,
+    default void processResponse(final AnnotationScannerContext context, final ClassInfo resourceClass, final MethodInfo method,
+            Operation operation,
             Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
 
-        List<AnnotationInstance> apiResponseAnnotations = ResponseReader.getResponseAnnotations(method);
-        for (AnnotationInstance annotation : apiResponseAnnotations) {
+        List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(resourceClass);
+        for (AnnotationInstance annotation : classApiResponseAnnotations) {
+            addApiReponseFromAnnotation(context, annotation, operation);
+        }
+
+        // Method annotations override class annotations
+        List<AnnotationInstance> methodApiResponseAnnotations = ResponseReader.getResponseAnnotations(method);
+        for (AnnotationInstance annotation : methodApiResponseAnnotations) {
             addApiReponseFromAnnotation(context, annotation, operation);
         }
 
@@ -373,7 +380,7 @@ public interface AnnotationScanner {
                     && exceptionAnnotationMap.keySet().contains(exceptionDotName)) {
                 AnnotationInstance exMapperApiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
                 if (!this.responseCodeExistInMethodAnnotations(context, exMapperApiResponseAnnotation,
-                        apiResponseAnnotations)) {
+                        methodApiResponseAnnotations)) {
                     addApiReponseFromAnnotation(context, exMapperApiResponseAnnotation, operation);
                 }
             }
