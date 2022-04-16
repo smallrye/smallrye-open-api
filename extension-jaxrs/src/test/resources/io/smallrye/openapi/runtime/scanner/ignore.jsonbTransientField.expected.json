@@ -1,7 +1,7 @@
 {
   "components" : {
     "schemas" : {
-      "test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample" : {
+      "test.io.smallrye.openapi.runtime.scanner.entities.javax.JsonbTransientOnFieldExample" : {
         "type": "object",
         "properties" : {
           "serializedField" : {

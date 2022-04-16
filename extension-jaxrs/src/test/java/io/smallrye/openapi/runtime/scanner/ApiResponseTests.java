@@ -31,8 +31,8 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
         test("responses.generation-suppressed-by-api-responses-annotation.json",
-                test.io.smallrye.openapi.runtime.scanner.ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Pet.class, javax.json.JsonString.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
@@ -45,8 +45,8 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
         test("responses.generation-suppressed-by-supplied-default-api-response.json",
-                test.io.smallrye.openapi.runtime.scanner.ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Pet.class, javax.json.JsonString.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
@@ -59,8 +59,8 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
         test("responses.generation-suppressed-by-status-omission.json",
-                test.io.smallrye.openapi.runtime.scanner.ResponseGenerationSuppressedByStatusOmissionTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Pet.class, javax.json.JsonString.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationSuppressedByStatusOmissionTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
@@ -73,8 +73,8 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
         test("responses.generation-enabled-by-incomplete-api-response.json",
-                test.io.smallrye.openapi.runtime.scanner.ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Pet.class, javax.json.JsonString.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
@@ -93,7 +93,7 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxResponseMultipartGeneration() throws IOException, JSONException {
         test("responses.multipart-generation.json",
-                test.io.smallrye.openapi.runtime.scanner.ResponseMultipartGenerationTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResponseMultipartGenerationTestResource.class);
     }
 
     @Test
@@ -105,8 +105,8 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxVoidPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-post-response-generation.json",
-                test.io.smallrye.openapi.runtime.scanner.VoidPostResponseGenerationTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Pet.class, javax.json.JsonString.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.VoidPostResponseGenerationTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
@@ -119,7 +119,7 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxVoidNonPostResponseGeneration() throws IOException, JSONException {
         test("responses.void-nonpost-response-generation.json",
-                test.io.smallrye.openapi.runtime.scanner.VoidNonPostResponseGenerationTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.VoidNonPostResponseGenerationTestResource.class);
     }
 
     @Test
@@ -131,7 +131,7 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxVoidAsyncResponseGeneration() throws IOException, JSONException {
         test("responses.void-async-response-generation.json",
-                test.io.smallrye.openapi.runtime.scanner.VoidAsyncResponseGenerationTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.VoidAsyncResponseGenerationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.ServerError.class);
     }
 
@@ -145,8 +145,9 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     void testJavaxReferenceResponse() throws IOException, JSONException {
         test("responses.component-status-reuse.json",
-                test.io.smallrye.openapi.runtime.scanner.ReferenceResponseTestApp.class,
-                test.io.smallrye.openapi.runtime.scanner.ReferenceResponseTestResource.class, javax.json.JsonObject.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ReferenceResponseTestApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ReferenceResponseTestResource.class,
+                javax.json.JsonObject.class);
     }
 
     @Test
@@ -161,8 +162,8 @@ class ApiResponseTests extends IndexScannerTestBase {
     void testJavaxGenericTypeVariableResponses() throws IOException, JSONException {
         test("responses.generic-type-variables.json",
                 test.io.smallrye.openapi.runtime.scanner.Apple.class,
-                test.io.smallrye.openapi.runtime.scanner.BaseResource2.class,
-                test.io.smallrye.openapi.runtime.scanner.TestResource3.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.BaseResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.TestResource3.class);
     }
 
     @Test

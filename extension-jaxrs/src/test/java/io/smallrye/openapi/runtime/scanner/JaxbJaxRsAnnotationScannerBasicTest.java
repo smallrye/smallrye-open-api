@@ -24,10 +24,10 @@ class JaxbJaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase
     @Test
     void testJavaxBasicJaxRsGetDefinitionScanning() throws IOException, JSONException {
         Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/JaxbGreetingGetResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/JaxbGreetingGetResource.class");
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/Greeting.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/JaxbGreeting.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/JaxbWithNameGreeting.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/javax/JaxbGreeting.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/javax/JaxbWithNameGreeting.class");
 
         testBasicJaxRsGetDefinitionScanning(indexer.complete());
     }

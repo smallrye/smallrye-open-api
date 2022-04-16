@@ -14,7 +14,7 @@ class ExtensionParsingTests extends IndexScannerTestBase {
     @Test
     void testJavaxAllExpectedParseTypes() throws IOException, JSONException {
         assertJsonEquals("extensions.parsing.expected.json",
-                test.io.smallrye.openapi.runtime.scanner.ExtensionParsingTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ExtensionParsingTestResource.class);
     }
 
     @Test
@@ -26,8 +26,8 @@ class ExtensionParsingTests extends IndexScannerTestBase {
     @Test
     void testJavaxSiblingExtensionAnnotations() throws IOException, JSONException {
         assertJsonEquals("extensions.scan-siblings.expected.json",
-                test.io.smallrye.openapi.runtime.scanner.ExtensionPlacementTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.ExtensionPlacementTestResource.Model.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ExtensionPlacementTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExtensionPlacementTestResource.Model.class);
     }
 
     @Test

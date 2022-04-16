@@ -13,7 +13,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource;
+import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource;
 
 /**
  * Basic tests to check the setting of certain Info elements via config, using

@@ -37,10 +37,10 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxNestedSchemaOnParameter() throws IOException, JSONException {
-        IndexView i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.class,
-                test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.NestedParameterTestParent.class,
-                test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.NestedParameterTestChild.class,
-                test.io.smallrye.openapi.runtime.scanner.resources.NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
+        IndexView i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.NestedSchemaOnParameterResource.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.NestedSchemaOnParameterResource.NestedParameterTestParent.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.NestedSchemaOnParameterResource.NestedParameterTestChild.class,
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.NestedSchemaOnParameterResource.AnotherNestedChildWithSchemaName.class);
 
         testNestedSchemaOnParameter(i);
     }
@@ -75,9 +75,9 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         Indexer indexer = new Indexer();
 
         // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Foo.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/FooResource$Bar.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/FooResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/FooResource$Foo.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/FooResource$Bar.class");
 
         testSimpleNestedSchemaOnParameter(indexer.complete());
     }

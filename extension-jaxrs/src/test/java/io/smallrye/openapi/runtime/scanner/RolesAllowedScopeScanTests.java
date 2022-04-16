@@ -20,8 +20,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxClassRolesAllowedGeneratedScheme() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedResource1.class);
 
         testClassRolesAllowedGeneratedScheme(index);
     }
@@ -57,8 +57,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxPermitAllWithoutGeneratedScheme() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedResource1.class);
         testPermitAllWithoutGeneratedScheme(index);
     }
 
@@ -80,8 +80,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxGeneratedSchemeEmptyRoles() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedResource1.class);
         testGeneratedSchemeEmptyRoles(index);
     }
 
@@ -105,8 +105,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxMethodRolesAllowedGeneratedScheme() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource2.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedResource2.class);
         testMethodRolesAllowedGeneratedScheme(index);
     }
 
@@ -141,8 +141,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxNoEligibleScheme() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesNotAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.RolesAllowedResource1.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.RolesNotAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedResource1.class);
         testNoEligibleScheme(index);
     }
 
@@ -165,8 +165,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxDeclaredRolesMethodRolesAllowedGeneratedScheme() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.RolesAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.RolesDeclaredResource.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.RolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RolesDeclaredResource.class);
         testDeclaredRolesMethodRolesAllowedGeneratedScheme(index);
     }
 
@@ -206,8 +206,8 @@ class RolesAllowedScopeScanTests extends IndexScannerTestBase {
      */
     @Test
     void testJavaxSchemesWithoutRoles() throws IOException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.UndeclaredFlowsNoRolesAllowedApp.class,
-                test.io.smallrye.openapi.runtime.scanner.NoRolesResource.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.UndeclaredFlowsNoRolesAllowedApp.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.NoRolesResource.class);
         testSchemesWithoutRoles(index);
     }
 

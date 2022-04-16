@@ -25,12 +25,12 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxInheritedResourceMethod() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.GenericResource.class,
-                test.io.smallrye.openapi.runtime.scanner.ExampleResource1.class,
-                test.io.smallrye.openapi.runtime.scanner.ExampleResource2.class,
-                test.io.smallrye.openapi.runtime.scanner.Conversation.class,
-                test.io.smallrye.openapi.runtime.scanner.Greetable.class,
-                test.io.smallrye.openapi.runtime.scanner.Greetable.GreetingBean.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.GenericResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExampleResource1.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExampleResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Conversation.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Greetable.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Greetable.GreetingBean.class);
 
         testInheritedResourceMethod(i);
     }

@@ -17,10 +17,10 @@ class InterfaceInheritanceTest extends IndexScannerTestBase {
      */
     @Test
     void testJavaxInterfaceInheritance() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.ImmutableEntity.class,
-                test.io.smallrye.openapi.runtime.scanner.MutableEntity.class,
-                test.io.smallrye.openapi.runtime.scanner.Note.class,
-                test.io.smallrye.openapi.runtime.scanner.FruitResource2.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.ImmutableEntity.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MutableEntity.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Note.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.FruitResource2.class);
         testInterfaceInheritance(i);
     }
 

@@ -22,9 +22,9 @@ class HiddenScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxHideComponent() throws IOException, JSONException {
-        test("hidden.components.json", test.io.smallrye.openapi.runtime.scanner.FruitResource3.class,
-                test.io.smallrye.openapi.runtime.scanner.HiddenFruit.class,
-                test.io.smallrye.openapi.runtime.scanner.VisibleFruit.class);
+        test("hidden.components.json", test.io.smallrye.openapi.runtime.scanner.javax.FruitResource3.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.HiddenFruit.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.VisibleFruit.class);
     }
 
     @Test

@@ -26,10 +26,10 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
 
     @ParameterizedTest
     @CsvSource({
-            "METHOD, test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource, resource.testOperationIdMethod.json",
-            "CLASS_METHOD, test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource, resource.testOperationIdClassMethod.json",
-            "PACKAGE_CLASS_METHOD, test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource, resource.testOperationIdPackageClassMethod.json",
-            "METHOD, test.io.smallrye.openapi.runtime.scanner.resources.GreetingOperationResource, resource.testOperationIdMethodWithOperation.json"
+            "METHOD, test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource, resource.testOperationIdMethod.json",
+            "CLASS_METHOD, test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource, resource.testOperationIdClassMethod.json",
+            "PACKAGE_CLASS_METHOD, test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource, resource.testOperationIdPackageClassMethod.json",
+            "METHOD, test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingOperationResource, resource.testOperationIdMethodWithOperation.json"
     })
     void testOperationIdStrategies(String strategy, String resourceClass, String expectedResultResourceName)
             throws Exception {

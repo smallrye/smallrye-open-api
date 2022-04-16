@@ -28,7 +28,7 @@ class CustomExtensionParsingTests {
     @Test
     void testJavaxDefaultExtensionParseThrowsJacksonNotFound() {
         Index index = IndexScannerTestBase
-                .indexOf(test.io.smallrye.openapi.runtime.scanner.ExtensionParsingTestResource1.class);
+                .indexOf(test.io.smallrye.openapi.runtime.scanner.javax.ExtensionParsingTestResource1.class);
         testDefaultExtensionParseThrowsJacksonNotFound(index);
     }
 
@@ -49,7 +49,7 @@ class CustomExtensionParsingTests {
     @Test
     void testJavaxCustomAnnotationScannerExtension() {
         Index index = IndexScannerTestBase
-                .indexOf(test.io.smallrye.openapi.runtime.scanner.ExtensionParsingTestResource1.class);
+                .indexOf(test.io.smallrye.openapi.runtime.scanner.javax.ExtensionParsingTestResource1.class);
         testCustomAnnotationScannerExtension(index);
     }
 

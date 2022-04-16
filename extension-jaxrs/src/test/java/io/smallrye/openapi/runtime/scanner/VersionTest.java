@@ -34,7 +34,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxSettingViaProvidedSchema() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource.class, Greeting.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
         testSettingViaProvidedSchema(i);
     }
 
@@ -53,7 +53,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxSettingViaConfig() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource.class, Greeting.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
         testSettingViaConfig(i);
     }
 
@@ -79,7 +79,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource.class, Greeting.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
         testSettingViaConfigWhenStaticPresent(i);
     }
 

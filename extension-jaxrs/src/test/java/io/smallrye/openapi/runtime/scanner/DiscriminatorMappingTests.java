@@ -13,12 +13,12 @@ class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     void testJavaxDiscriminatorFullDeclaredInResponse() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator.json",
-                test.io.smallrye.openapi.runtime.scanner.DiscriminatorFullDeclaredInResponseTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
-                test.io.smallrye.openapi.runtime.scanner.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.Cat.class,
-                test.io.smallrye.openapi.runtime.scanner.Dog.class,
-                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.DiscriminatorFullDeclaredInResponseTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Lizard.class);
     }
 
     @Test
@@ -35,12 +35,12 @@ class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     void testJavaxDiscriminatorNoMappingTestResource() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping.json",
-                test.io.smallrye.openapi.runtime.scanner.DiscriminatorNoMappingTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
-                test.io.smallrye.openapi.runtime.scanner.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.Cat.class,
-                test.io.smallrye.openapi.runtime.scanner.Dog.class,
-                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.DiscriminatorNoMappingTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Lizard.class);
     }
 
     @Test
@@ -57,12 +57,12 @@ class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     void testJavaxDiscriminatorMappingNoSchema() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping-schema.json",
-                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingNoSchemaTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
-                test.io.smallrye.openapi.runtime.scanner.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.Cat.class,
-                test.io.smallrye.openapi.runtime.scanner.Dog.class,
-                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.DiscriminatorMappingNoSchemaTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Lizard.class);
     }
 
     @Test
@@ -79,12 +79,12 @@ class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     void testJavaxDiscriminatorMappingNoKey() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-mapping-key.json",
-                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingNoKeyTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
-                test.io.smallrye.openapi.runtime.scanner.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.Cat.class,
-                test.io.smallrye.openapi.runtime.scanner.Dog.class,
-                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.DiscriminatorMappingNoKeyTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Lizard.class);
     }
 
     @Test
@@ -101,12 +101,12 @@ class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     void testJavaxDiscriminatorMappingEmptyMapping() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-empty-mapping.json",
-                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingEmptyMappingTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
-                test.io.smallrye.openapi.runtime.scanner.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.Cat.class,
-                test.io.smallrye.openapi.runtime.scanner.Dog.class,
-                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.DiscriminatorMappingEmptyMappingTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Lizard.class);
     }
 
     @Test
@@ -123,12 +123,12 @@ class DiscriminatorMappingTests extends IndexScannerTestBase {
     @Test
     void testJavaxDiscriminatorMappingNoPropertyName() throws IOException, JSONException {
         assertJsonEquals("polymorphism.declared-discriminator-no-property-name.json",
-                test.io.smallrye.openapi.runtime.scanner.DiscriminatorMappingNoPropertyNameTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AbstractPet.class,
-                test.io.smallrye.openapi.runtime.scanner.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.Cat.class,
-                test.io.smallrye.openapi.runtime.scanner.Dog.class,
-                test.io.smallrye.openapi.runtime.scanner.Lizard.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.DiscriminatorMappingNoPropertyNameTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AbstractPet.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Canine.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Lizard.class);
     }
 
     @Test

@@ -267,7 +267,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testJavaxJaxbElementUnwrapped() throws IOException, JSONException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.JAXBElementDto.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.JAXBElementDto.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);

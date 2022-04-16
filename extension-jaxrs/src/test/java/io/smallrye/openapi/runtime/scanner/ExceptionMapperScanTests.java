@@ -21,10 +21,10 @@ class ExceptionMapperScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxExceptionMapper() throws IOException, JSONException {
         test("responses.exception-mapper-generation.json",
-                test.io.smallrye.openapi.runtime.scanner.TestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler1.class,
-                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler2.class,
-                test.io.smallrye.openapi.runtime.scanner.ResteasyReactiveExceptionMapper.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExceptionHandler1.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExceptionHandler2.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyReactiveExceptionMapper.class);
     }
 
     @Test
@@ -39,10 +39,10 @@ class ExceptionMapperScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxMethodAnnotationOverrideExceptionMapper() throws IOException, JSONException {
         test("responses.exception-mapper-overridden-by-method-annotation-generation.json",
-                test.io.smallrye.openapi.runtime.scanner.TestResource2.class,
-                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler1.class,
-                test.io.smallrye.openapi.runtime.scanner.ExceptionHandler2.class,
-                test.io.smallrye.openapi.runtime.scanner.ResteasyReactiveExceptionMapper.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.TestResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExceptionHandler1.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ExceptionHandler2.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyReactiveExceptionMapper.class);
     }
 
     @Test
