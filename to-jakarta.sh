@@ -1,12 +1,29 @@
 #!/usr/bin/env bash
 
+if [ "${OSTYPE}" = "darwin" ] ; then
+    SEDBACKUP="''"
+else
+    SEDBACKUP=""
+fi
+
 # move to jakarta parent
-find . -type f -name 'pom.xml' -exec sed -i '' 's/smallrye-parent/smallrye-jakarta-parent/g' {} +
-# java sources
-find . -type f -name '*.java' -exec sed -i '' 's/import javax./import jakarta./g' {} +
-find . -type f -name '*.java' -exec sed -i '' 's/import static javax./import static jakarta./g' {} +
-# service loader files
-find . -path "*/src/main/resources/META-INF/services/javax*" | sed -e 'p;s/javax/jakarta/g' | xargs -n2 git mv
+find . -type f -name 'pom.xml' -exec sed -i ${SEDBACKUP} 's/smallrye-parent/smallrye-jakarta-parent/g' {} +
+
+# java sources, excluding those in our own `javax` packages
+for SOURCEFILE in $(find . -type f -name '*.java') ; do
+    if [ $(grep javax ${SOURCEFILE} | wc -l) -gt 0 ] && [ $(grep -e '^package .*javax;$' ${SOURCEFILE} | wc -l) -eq 0 ] ; then
+        echo "Replacing javax with jakarta: ${SOURCEFILE}"
+        sed -i ${SEDBACKUP} 's/import javax./import jakarta./g' ${SOURCEFILE}
+        sed -i ${SEDBACKUP} 's/import static javax./import static jakarta./g' ${SOURCEFILE}
+
+        if [ $(grep javax ${SOURCEFILE} | wc -l) -gt 0 ] ; then
+            echo "WARNING: Source file still contains 'javax' text: ${SOURCEFILE}"
+        fi
+    fi
+done
+
+# service loader files (no javax services in smallrye-open-api
+#find . -path "*/src/main/resources/META-INF/services/javax*" | sed -e 'p;s/javax/jakarta/g' | xargs -n2 git mv
 
 # remove spring and vertx modules
 #find . -type f -name 'pom.xml' -exec sed -i '' 's/\<module\>extension-spring\<\/module\>/\<\!--\<module\>extension-spring\<\/module\>-->/g' {} +

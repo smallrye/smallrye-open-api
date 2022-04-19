@@ -47,10 +47,10 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxAnnotatedMethodOverridesParentSchema() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
 
         testAnnotatedMethodOverridesParentSchema(properties);
     }
@@ -79,10 +79,11 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxAnnotatedFieldsOverridesInterfaceSchema() {
-        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class,
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.Cat.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
         testAnnotatedFieldsOverridesInterfaceSchema(properties);
     }
 
@@ -106,10 +107,11 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxAnnotatedInterfaceMethodOverridesImplMethod() {
-        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Dog.class,
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.Dog.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class);
 
         testAnnotatedInterfaceMethodOverridesImplMethod(properties);
     }
@@ -158,8 +160,9 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxBareInterface() {
-        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.MySchema.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.MySchema.class);
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.MySchema.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.MySchema.class);
 
         testBareInterface(properties);
     }
@@ -224,8 +227,8 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxJaxbCustomPropertyOrder() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.JaxbCustomPropertyOrder.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.JaxbCustomPropertyOrder.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.JaxbCustomPropertyOrder.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.JaxbCustomPropertyOrder.class);
 
         testJaxbCustomPropertyOrder(properties);
     }
@@ -311,8 +314,8 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxXmlAccessTransientField() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientField.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientField.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlTransientField.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlTransientField.class);
 
         testXmlAccessTransientField(properties);
     }
@@ -340,8 +343,8 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxXmlAccessTransientClass() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientClass.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlTransientClass.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlTransientClass.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlTransientClass.class);
 
         testXmlAccessTransientClass(properties);
     }
@@ -375,8 +378,8 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxXmlAccessPublicMember() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePublicMember.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePublicMember.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlAccessTypePublicMember.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlAccessTypePublicMember.class);
 
         testXmlAccessPublicMember(properties);
     }
@@ -410,8 +413,8 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxXmlAccessTypeFieldOnly() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypeFieldOnly.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypeFieldOnly.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlAccessTypeFieldOnly.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlAccessTypeFieldOnly.class);
 
         testXmlAccessTypeFieldOnly(properties);
     }
@@ -441,8 +444,8 @@ class TypeResolverTests extends IndexScannerTestBase {
     @Test
     void testJavaxXmlAccessTypePropertyOnly() {
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePropertyOnly.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.XmlAccessTypePropertyOnly.class);
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlAccessTypePropertyOnly.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.XmlAccessTypePropertyOnly.class);
 
         testXmlAccessTypePropertyOnly(properties);
     }

@@ -21,10 +21,10 @@ class SubresourceScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartInput() throws IOException, JSONException {
         test("resource.subresources-with-params.json",
-                test.io.smallrye.openapi.runtime.scanner.MainTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Sub1TestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Sub2TestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.RecursiveLocatorResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.MainTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Sub1TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Sub2TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RecursiveLocatorResource.class);
     }
 
     @Test

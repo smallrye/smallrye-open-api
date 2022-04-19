@@ -17,9 +17,9 @@ class BeanValidationResourceTest extends IndexScannerTestBase {
 
     @Test
     void testJavaxBeanValidationDocument() throws IOException, JSONException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestResourceEntity.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestContainer.class,
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BVTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BVTestResourceEntity.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BVTestContainer.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.TestEnum.class);
         testBeanValidationDocument(index);
     }
@@ -42,9 +42,9 @@ class BeanValidationResourceTest extends IndexScannerTestBase {
 
     @Test
     void testJavaxInheritedBVConstraints() throws IOException, JSONException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.User.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.BaseUser.class,
-                test.io.smallrye.openapi.runtime.scanner.dataobject.UserImpl.class);
+        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.javax.User.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BaseUser.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.UserImpl.class);
 
         testInheritedBVConstraints(index);
     }

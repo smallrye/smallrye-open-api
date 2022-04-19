@@ -28,7 +28,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxParameterResource() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.ParameterResource.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.ParameterResource.class);
         testParameterResource(i);
     }
 
@@ -53,8 +53,8 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxPrimitiveArraySchema() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.PrimitiveArraySchemaTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.PrimitiveArraySchemaTestResource.PrimitiveArrayTestObject.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.PrimitiveArraySchemaTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.PrimitiveArraySchemaTestResource.PrimitiveArrayTestObject.class);
         testPrimitiveArraySchema(i);
     }
 
@@ -76,7 +76,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxPrimitiveArrayParameter() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.PrimitiveArrayParameterTestResource.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.PrimitiveArrayParameterTestResource.class);
         testPrimitiveArrayParameter(i);
     }
 
@@ -97,7 +97,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxPrimitiveArrayPolymorphism() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.PrimitiveArrayPolymorphismTestResource.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.PrimitiveArrayPolymorphismTestResource.class);
         testPrimitiveArrayPolymorphism(i);
     }
 
@@ -124,9 +124,9 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxSchemaImplementationType() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.SchemaImplementationTypeResource.class,
-                test.io.smallrye.openapi.runtime.scanner.SchemaImplementationTypeResource.GreetingMessage.class,
-                test.io.smallrye.openapi.runtime.scanner.SchemaImplementationTypeResource.SimpleString.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.SchemaImplementationTypeResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.SchemaImplementationTypeResource.GreetingMessage.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.SchemaImplementationTypeResource.SimpleString.class);
         testSchemaImplementationType(i);
     }
 
@@ -155,8 +155,8 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxTimeResource() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.TimeTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.TimeTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.TimeTestResource.UTC.class, LocalTime.class, OffsetTime.class);
         testTimeResource(i);
     }
 
@@ -182,8 +182,8 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxTypeVariableResponse() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.TypeVariableResponseTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.TypeVariableResponseTestResource.Dto.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.TypeVariableResponseTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.TypeVariableResponseTestResource.Dto.class);
         testTypeVariableResponse(i);
     }
 
@@ -212,7 +212,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     @Test
     void testJavaxResponseTypeUnindexed() throws IOException, JSONException {
         // Index is intentionally missing ResponseTypeUnindexedTestResource$ThirdPartyType
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.ResponseTypeUnindexedTestResource.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.ResponseTypeUnindexedTestResource.class);
         testResponseTypeUnindexed(i);
     }
 
@@ -238,7 +238,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxGenericSetResponseWithSetIndexed() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.FruitResource.class,
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.FruitResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Fruit.class, test.io.smallrye.openapi.runtime.scanner.Seed.class,
                 Set.class);
 
@@ -264,7 +264,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxGenericSetResponseWithSetIndexedWithoutArrayRefs() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.FruitResource.class,
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.FruitResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Fruit.class,
                 test.io.smallrye.openapi.runtime.scanner.Seed.class,
                 Set.class);
@@ -292,7 +292,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxGenericSetResponseWithSetUnindexed() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.FruitResource.class,
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.FruitResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Fruit.class,
                 test.io.smallrye.openapi.runtime.scanner.Seed.class);
 
@@ -323,12 +323,12 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxBeanParamMultipartFormInheritance() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.BeanParamMultipartFormInheritanceResource.class,
-                test.io.smallrye.openapi.runtime.scanner.MultipartFormVerify.class,
-                test.io.smallrye.openapi.runtime.scanner.MultipartFormUploadIconForm.class,
-                test.io.smallrye.openapi.runtime.scanner.BeanParamBase.class,
-                test.io.smallrye.openapi.runtime.scanner.BeanParamImpl.class,
-                test.io.smallrye.openapi.runtime.scanner.BeanParamAddon.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.BeanParamMultipartFormInheritanceResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormVerify.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormUploadIconForm.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.BeanParamBase.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.BeanParamImpl.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.BeanParamAddon.class);
         testBeanParamMultipartFormInheritance(i);
     }
 
@@ -359,8 +359,8 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxMethodTargetParametersWithoutJAXRS() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.MethodTargetParametersResource.class,
-                test.io.smallrye.openapi.runtime.scanner.MethodTargetParametersResource.PagedResponse.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.MethodTargetParametersResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MethodTargetParametersResource.PagedResponse.class);
         testMethodTargetParametersWithoutJAXRS(i);
     }
 
@@ -386,8 +386,8 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxJsonbTransientOnSetterGeneratesReadOnly() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.Policy437Resource.class,
-                test.io.smallrye.openapi.runtime.scanner.Policy437.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.Policy437Resource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Policy437.class);
         testJsonbTransientOnSetterGeneratesReadOnly(i);
     }
 

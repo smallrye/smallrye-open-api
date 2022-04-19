@@ -77,7 +77,8 @@ class IgnoreTests extends JaxRsDataObjectScannerTestBase {
     @Test
     void testJavaxIgnore_jsonbTransientField() throws IOException, JSONException {
         DotName name = DotName
-                .createSimple(test.io.smallrye.openapi.runtime.scanner.entities.JsonbTransientOnFieldExample.class.getName());
+                .createSimple(
+                        test.io.smallrye.openapi.runtime.scanner.entities.javax.JsonbTransientOnFieldExample.class.getName());
         testIgnore_jsonbTransientField(name, "ignore.jsonbTransientField.expected.json");
     }
 

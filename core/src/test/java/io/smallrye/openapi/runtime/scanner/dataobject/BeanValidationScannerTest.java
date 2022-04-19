@@ -40,12 +40,12 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     @BeforeEach
     void beforeEach() {
         testTarget = BeanValidationScanner.INSTANCE;
-        Index javaxIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestContainer.class);
+        Index javaxIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BVTestContainer.class);
         Index jakartaIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.BVTestContainer.class);
         methodsInvoked.clear();
         schema = new SchemaImpl();
         javaxTargetClass = javaxIndex.getClassByName(
-                componentize(test.io.smallrye.openapi.runtime.scanner.dataobject.BVTestContainer.class.getName()));
+                componentize(test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BVTestContainer.class.getName()));
 
         jakartaTargetClass = jakartaIndex.getClassByName(
                 componentize(test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.BVTestContainer.class.getName()));

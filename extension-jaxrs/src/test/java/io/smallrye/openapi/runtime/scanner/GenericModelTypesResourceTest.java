@@ -21,19 +21,19 @@ class GenericModelTypesResourceTest extends IndexScannerTestBase {
      */
     @Test
     void testJavaxGenericsApplication() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.BaseModel.class,
-                test.io.smallrye.openapi.runtime.scanner.BaseResource.class,
-                test.io.smallrye.openapi.runtime.scanner.KingCrimson.class,
-                test.io.smallrye.openapi.runtime.scanner.KingCrimsonResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Magma.class,
-                test.io.smallrye.openapi.runtime.scanner.MagmaResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Message.class,
-                test.io.smallrye.openapi.runtime.scanner.OpenAPIConfig.class,
-                test.io.smallrye.openapi.runtime.scanner.Residents.class,
-                test.io.smallrye.openapi.runtime.scanner.ResidentsResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Result.class,
-                test.io.smallrye.openapi.runtime.scanner.ResultList.class,
-                test.io.smallrye.openapi.runtime.scanner.POJO.class,
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.BaseModel.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.BaseResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.KingCrimson.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.KingCrimsonResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Magma.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MagmaResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Message.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.OpenAPIConfig.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Residents.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResidentsResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Result.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResultList.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.POJO.class,
                 List.class);
 
         testGenericsApplication(i);
@@ -68,19 +68,19 @@ class GenericModelTypesResourceTest extends IndexScannerTestBase {
 
     @Test
     void testJavaxGenericsApplicationWithoutArrayRefs() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.BaseModel.class,
-                test.io.smallrye.openapi.runtime.scanner.BaseResource.class,
-                test.io.smallrye.openapi.runtime.scanner.KingCrimson.class,
-                test.io.smallrye.openapi.runtime.scanner.KingCrimsonResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Magma.class,
-                test.io.smallrye.openapi.runtime.scanner.MagmaResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Message.class,
-                test.io.smallrye.openapi.runtime.scanner.OpenAPIConfig.class,
-                test.io.smallrye.openapi.runtime.scanner.Residents.class,
-                test.io.smallrye.openapi.runtime.scanner.ResidentsResource.class,
-                test.io.smallrye.openapi.runtime.scanner.Result.class,
-                test.io.smallrye.openapi.runtime.scanner.ResultList.class,
-                test.io.smallrye.openapi.runtime.scanner.POJO.class,
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.BaseModel.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.BaseResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.KingCrimson.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.KingCrimsonResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Magma.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MagmaResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Message.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.OpenAPIConfig.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Residents.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResidentsResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Result.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResultList.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.POJO.class,
                 List.class);
 
         testGenericsApplicationWithoutArrayRefs(i);

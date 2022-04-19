@@ -36,8 +36,6 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
-import test.io.smallrye.openapi.runtime.scanner.MultiProduceConsumeResource;
-import test.io.smallrye.openapi.runtime.scanner.MultiProduceConsumeResourceJakarta;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -49,8 +47,8 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Indexer indexer = new Indexer();
 
         // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/HiddenOperationResource.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/VisibleOperationResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/HiddenOperationResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/VisibleOperationResource.class");
 
         testHiddenOperationNotPresent(indexer.complete());
     }
@@ -80,7 +78,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Indexer indexer = new Indexer();
 
         // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/HiddenOperationResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/HiddenOperationResource.class");
 
         testHiddenOperationPathNotPresent(indexer.complete());
     }
@@ -109,11 +107,12 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Indexer indexer = new Indexer();
 
         // Test samples
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$SomeObject.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$DifferentObject.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/RequestBodyTestApplication.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/RequestBodyTestApplication$SomeObject.class");
         index(indexer,
-                "test/io/smallrye/openapi/runtime/scanner/resources/RequestBodyTestApplication$RequestBodyResource.class");
+                "test/io/smallrye/openapi/runtime/scanner/resources/javax/RequestBodyTestApplication$DifferentObject.class");
+        index(indexer,
+                "test/io/smallrye/openapi/runtime/scanner/resources/javax/RequestBodyTestApplication$RequestBodyResource.class");
 
         testRequestBodyComponentGeneration(indexer.complete());
     }
@@ -149,9 +148,9 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     void testJavaxPackageInfoDefinitionScanning() throws IOException, JSONException {
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/package-info.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/PackageInfoTestApplication.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/PackageInfoTestApplication.class");
         index(indexer,
-                "test/io/smallrye/openapi/runtime/scanner/resources/PackageInfoTestApplication$PackageInfoTestResource.class");
+                "test/io/smallrye/openapi/runtime/scanner/resources/javax/PackageInfoTestApplication$PackageInfoTestResource.class");
 
         testPackageInfoDefinitionScanning(indexer.complete());
     }
@@ -180,8 +179,8 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     void testJavaxTagScanning() throws IOException, JSONException {
 
         Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestResource1.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestResource2.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestResource1.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestResource2.class");
 
         testTagScanning(indexer.complete());
     }
@@ -206,9 +205,9 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     void testJavaxTagScanning_OrderGivenAnnotations() throws IOException, JSONException {
         Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestApp.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestResource1.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestResource2.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestApp.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestResource1.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestResource2.class");
 
         testTagScanning_OrderGivenAnnotations(indexer.complete());
     }
@@ -233,8 +232,8 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     void testJavaxTagScanning_OrderGivenStaticFile() throws IOException, JSONException {
         Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestResource1.class");
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/TagTestResource2.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestResource1.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/TagTestResource2.class");
 
         testTagScanning_OrderGivenStaticFile(indexer.complete());
     }
@@ -269,7 +268,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     void testJavaxEmptySecurityRequirements() throws IOException, JSONException {
         Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/EmptySecurityRequirementsResource.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/EmptySecurityRequirementsResource.class");
 
         testEmptySecurityRequirements(indexer.complete());
     }
@@ -454,12 +453,14 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testCsvProducesConsumes() throws IOException, JSONException {
-        assertJsonEquals("resource.testCsvConsumesProduces.json", MultiProduceConsumeResource.class);
+        assertJsonEquals("resource.testCsvConsumesProduces.json",
+                test.io.smallrye.openapi.runtime.scanner.javax.MultiProduceConsumeResource.class);
     }
 
     @Test
     void testCsvProducesConsumesJakarta() throws IOException, JSONException {
-        assertJsonEquals("resource.testCsvConsumesProduces.json", MultiProduceConsumeResourceJakarta.class);
+        assertJsonEquals("resource.testCsvConsumesProduces.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.MultiProduceConsumeResource.class);
     }
 
     /* *************************************************************************/

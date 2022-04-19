@@ -29,7 +29,8 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxVanilla() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.DefaultContentTypeResource.class, Greeting.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.DefaultContentTypeResource.class,
+                Greeting.class);
         testVanilla(i);
     }
 
@@ -56,7 +57,8 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxConfigured() throws IOException, JSONException {
-        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.DefaultContentTypeResource.class, Greeting.class);
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.resources.javax.DefaultContentTypeResource.class,
+                Greeting.class);
         testConfigured(i);
     }
 

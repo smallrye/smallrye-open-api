@@ -7,7 +7,7 @@
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {
-        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource_helloOptional",
+        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource_helloOptional",
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
@@ -32,7 +32,7 @@
     },
     "/greeting/helloPathVariable/{name}" : {
       "get" : {
-        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource_helloPathVariable",
+        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource_helloPathVariable",
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
@@ -57,7 +57,7 @@
     },
     "/greeting/helloPathVariableWithResponse/{name}" : {
       "get" : {
-        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource_helloPathVariableWithResponse",        
+        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource_helloPathVariableWithResponse",        
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
@@ -82,7 +82,7 @@
     },
     "/greeting/helloPathVariableWithResponseTyped/{name}" : {
       "get" : {
-        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource_helloPathVariableWithResponseTyped",        
+        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource_helloPathVariableWithResponseTyped",        
         "parameters" : [ {
           "name" : "name",
           "in" : "path",
@@ -107,7 +107,7 @@
     },
     "/greeting/helloRequestParam" : {
       "get" : {
-        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource_helloRequestParam",        
+        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource_helloRequestParam",        
         "parameters" : [ {
           "name" : "name",
           "in" : "query",
@@ -131,7 +131,7 @@
     },
     "/greeting/hellosPathVariable/{name}" : {
       "get" : {
-        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetResource_hellosPathVariable",        
+        "operationId" : "test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource_hellosPathVariable",        
         "parameters" : [ {
           "name" : "name",
           "in" : "path",

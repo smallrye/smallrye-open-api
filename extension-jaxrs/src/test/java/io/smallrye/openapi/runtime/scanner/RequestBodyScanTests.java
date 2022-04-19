@@ -21,7 +21,7 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartInput() throws IOException, JSONException {
         test("params.resteasy-multipart-mixed.json",
-                test.io.smallrye.openapi.runtime.scanner.ResteasyMultipartInputTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyMultipartInputTestResource.class);
     }
 
     @Test
@@ -33,7 +33,7 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartInputList() throws IOException, JSONException {
         test("params.resteasy-multipart-mixed-array.json",
-                test.io.smallrye.openapi.runtime.scanner.ResteasyMultipartMixedListTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyMultipartMixedListTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.RequestBodyWidget.class);
     }
 
@@ -47,7 +47,7 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartFormDataInput() throws IOException, JSONException {
         test("params.resteasy-multipart-form-data-input.json",
-                test.io.smallrye.openapi.runtime.scanner.ResteasyMultipartFormDataInputTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyMultipartFormDataInputTestResource.class);
     }
 
     @Test
@@ -59,7 +59,7 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartFormDataMap() throws IOException, JSONException {
         test("params.resteasy-multipart-form-data-map.json",
-                test.io.smallrye.openapi.runtime.scanner.ResteasyMultipartFormDataMapTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyMultipartFormDataMapTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.RequestBodyWidget.class);
     }
 
@@ -73,7 +73,7 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartRelatedInput() throws IOException, JSONException {
         test("params.resteasy-multipart-related-input.json",
-                test.io.smallrye.openapi.runtime.scanner.ResteasyMultipartRelatedInputTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ResteasyMultipartRelatedInputTestResource.class);
     }
 
     @Test

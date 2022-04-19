@@ -32,7 +32,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxIgnoredMpOpenApiHeaders() throws IOException, JSONException {
         test("params.ignored-mp-openapi-headers.json",
-                test.io.smallrye.openapi.runtime.scanner.IgnoredMpOpenApiHeaderArgsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.IgnoredMpOpenApiHeaderArgsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -46,7 +46,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxParameterOnMethod() throws IOException, JSONException {
         test("params.parameter-on-method.json",
-                test.io.smallrye.openapi.runtime.scanner.ParameterOnMethodTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterOnMethodTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -60,7 +60,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxParameterOnField() throws IOException, JSONException {
         test("params.parameter-on-field.json",
-                test.io.smallrye.openapi.runtime.scanner.ResourcePathParamTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ResourcePathParamTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -74,8 +74,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxParameterInBeanFromField() throws IOException, JSONException {
         test("params.parameter-in-bean-from-field.json",
-                test.io.smallrye.openapi.runtime.scanner.ParameterInBeanFromFieldTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.ParameterInBeanFromFieldTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterInBeanFromFieldTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterInBeanFromFieldTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -90,8 +90,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxParameterInBeanFromSetter() throws IOException, JSONException {
         test("params.parameter-in-bean-from-setter.json",
-                test.io.smallrye.openapi.runtime.scanner.ParameterInBeanFromSetterTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.ParameterInBeanFromSetterTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterInBeanFromSetterTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterInBeanFromSetterTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -106,7 +106,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxPathParamWithFormParams() throws IOException, JSONException {
         test("params.path-param-with-form-params.json",
-                test.io.smallrye.openapi.runtime.scanner.PathParamWithFormParamsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.PathParamWithFormParamsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -120,7 +120,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxMultipleContentTypesWithFormParams() throws IOException, JSONException {
         test("params.multiple-content-types-with-form-params.json",
-                test.io.smallrye.openapi.runtime.scanner.MultipleContentTypesWithFormParamsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MultipleContentTypesWithFormParamsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -134,8 +134,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxParametersInConstructor() throws IOException, JSONException {
         test("params.parameters-in-constructor.json",
-                test.io.smallrye.openapi.runtime.scanner.ParametersInConstructorTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.ParametersInConstructorTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParametersInConstructorTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParametersInConstructorTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -150,7 +150,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxMatrixParamsOnResourceMethodArgs() throws IOException, JSONException {
         test("params.matrix-params-on-resource-method-args.json",
-                test.io.smallrye.openapi.runtime.scanner.MatrixParamsOnResourceMethodArgsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MatrixParamsOnResourceMethodArgsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -164,7 +164,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxMatrixParamsOnResourceMethodCustomName() throws IOException, JSONException {
         test("params.matrix-params-on-resource-method-custom-name.json",
-                test.io.smallrye.openapi.runtime.scanner.MatrixParamsOnResourceMethodCustomNameTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MatrixParamsOnResourceMethodCustomNameTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -178,7 +178,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxMatrixParamsOnMethodAndFieldArgs() throws IOException, JSONException {
         test("params.matrix-params-on-method-and-field-args.json",
-                test.io.smallrye.openapi.runtime.scanner.MatrixParamsOnMethodAndFieldArgsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MatrixParamsOnMethodAndFieldArgsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -192,12 +192,12 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxAllTheParams() throws IOException, JSONException {
         test("params.all-the-params.json",
-                test.io.smallrye.openapi.runtime.scanner.AllTheParamsTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.AllTheParamsTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AllTheParamsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.AllTheParamsTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
         test("params.all-the-params.json",
-                test.io.smallrye.openapi.runtime.scanner.RestEasyReactiveAllTheParamsTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.RestEasyReactiveAllTheParamsTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RestEasyReactiveAllTheParamsTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RestEasyReactiveAllTheParamsTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -216,8 +216,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxMultipartForm() throws IOException, JSONException {
         test("params.multipart-form.json",
-                test.io.smallrye.openapi.runtime.scanner.MultipartFormTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.MultipartFormTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class,
                 InputStream.class);
     }
@@ -234,9 +234,9 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxEnumQueryParam() throws IOException, JSONException {
         test("params.enum-form-param.json",
-                test.io.smallrye.openapi.runtime.scanner.EnumQueryParamTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.EnumQueryParamTestResource.TestEnum.class,
-                test.io.smallrye.openapi.runtime.scanner.EnumQueryParamTestResource.TestEnumWithSchema.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.TestEnum.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.TestEnumWithSchema.class);
     }
 
     @Test
@@ -250,8 +250,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxUUIDQueryParam() throws IOException, JSONException {
         test("params.uuid-params-responses.json",
-                test.io.smallrye.openapi.runtime.scanner.UUIDQueryParamTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.UUIDQueryParamTestResource.WrappedUUID.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.UUIDQueryParamTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.UUIDQueryParamTestResource.WrappedUUID.class);
     }
 
     @Test
@@ -264,7 +264,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxRestEasyFieldsAndSetters() throws IOException, JSONException {
         test("params.resteasy-fields-and-setters.json",
-                test.io.smallrye.openapi.runtime.scanner.RestEasyFieldsAndSettersTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.RestEasyFieldsAndSettersTestResource.class);
     }
 
     @Test
@@ -276,8 +276,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxCharSequenceArrayParam() throws IOException, JSONException {
         test("params.char-sequence-arrays.json",
-                test.io.smallrye.openapi.runtime.scanner.CharSequenceArrayParamTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.CharSequenceArrayParamTestResource.EchoResult.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.CharSequenceArrayParamTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.CharSequenceArrayParamTestResource.EchoResult.class);
     }
 
     @Test
@@ -290,10 +290,10 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxOptionalParam() throws IOException, JSONException {
         test("params.optional-types.json",
-                test.io.smallrye.openapi.runtime.scanner.OptionalParamTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.OptionalParamTestResource.Bean.class,
-                test.io.smallrye.openapi.runtime.scanner.OptionalParamTestResource.NestedBean.class,
-                test.io.smallrye.openapi.runtime.scanner.OptionalParamTestResource.OptionalWrapper.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.Bean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.NestedBean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.OptionalWrapper.class,
                 Optional.class,
                 OptionalDouble.class,
                 OptionalLong.class);
@@ -314,7 +314,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxPathParamTemplateRegex() throws IOException, JSONException {
         test("params.path-param-templates.json",
-                test.io.smallrye.openapi.runtime.scanner.PathParamTemplateRegexTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.PathParamTemplateRegexTestResource.class);
     }
 
     @Test
@@ -326,7 +326,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxPathSegmentMatrix() throws IOException, JSONException {
         test("params.path-segment-param.json",
-                test.io.smallrye.openapi.runtime.scanner.PathSegmentMatrixTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.PathSegmentMatrixTestResource.class);
     }
 
     @Test
@@ -338,7 +338,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxParamNameOverride() throws IOException, JSONException {
         test("params.param-name-override.json",
-                test.io.smallrye.openapi.runtime.scanner.ParamNameOverrideTestResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.ParamNameOverrideTestResource.class);
     }
 
     @Test
@@ -350,7 +350,7 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxCommonTargetMethodParameter() throws IOException, JSONException {
         test("params.common-annotation-target-method.json",
-                test.io.smallrye.openapi.runtime.scanner.CommonTargetMethodParameterResource.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.CommonTargetMethodParameterResource.class);
     }
 
     @Test
@@ -362,8 +362,8 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxRestEasyReactivePathParamOmitted() throws IOException, JSONException {
         test("params.resteasy-reactive-missing-restpath.json",
-                test.io.smallrye.openapi.runtime.scanner.RestEasyReactivePathParamOmittedTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.RestEasyReactivePathParamOmittedTestResource2.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RestEasyReactivePathParamOmittedTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.RestEasyReactivePathParamOmittedTestResource2.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
     }
 
@@ -377,8 +377,8 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxSerializedIndexParameterAnnotations() throws IOException, JSONException {
-        Index i1 = indexOf(test.io.smallrye.openapi.runtime.scanner.GreetResource.class,
-                test.io.smallrye.openapi.runtime.scanner.GreetResource.GreetingMessage.class);
+        Index i1 = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.GreetResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.GreetResource.GreetingMessage.class);
         testSerializedIndexParameterAnnotations(i1);
     }
 
@@ -403,8 +403,9 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxParameterRefOnly() throws IOException, JSONException {
-        test("params.parameter-ref-property.json", test.io.smallrye.openapi.runtime.scanner.ParameterRefTestApplication.class,
-                test.io.smallrye.openapi.runtime.scanner.ParameterRefTestResource.class);
+        test("params.parameter-ref-property.json",
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterRefTestApplication.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.ParameterRefTestResource.class);
     }
 
     @Test
@@ -416,8 +417,9 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxDefaultEnumValue() throws IOException, JSONException {
-        test("params.local-schema-attributes.json", test.io.smallrye.openapi.runtime.scanner.DefaultEnumTestResource.class,
-                test.io.smallrye.openapi.runtime.scanner.DefaultEnumTestResource.MyEnum.class);
+        test("params.local-schema-attributes.json",
+                test.io.smallrye.openapi.runtime.scanner.javax.DefaultEnumTestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.DefaultEnumTestResource.MyEnum.class);
     }
 
     @Test
@@ -429,9 +431,9 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxGenericTypeVariableResource() throws IOException, JSONException {
-        test("params.generic-type-variables.json", test.io.smallrye.openapi.runtime.scanner.BaseGenericResource.class,
-                test.io.smallrye.openapi.runtime.scanner.BaseGenericResource.GenericBean.class,
-                test.io.smallrye.openapi.runtime.scanner.IntegerStringUUIDResource.class);
+        test("params.generic-type-variables.json", test.io.smallrye.openapi.runtime.scanner.javax.BaseGenericResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.BaseGenericResource.GenericBean.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.IntegerStringUUIDResource.class);
     }
 
     @Test
