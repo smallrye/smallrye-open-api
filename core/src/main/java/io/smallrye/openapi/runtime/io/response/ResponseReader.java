@@ -13,6 +13,7 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
@@ -258,12 +259,12 @@ public class ResponseReader {
                 ResponseConstant.DOTNAME_API_RESPONSES);
     }
 
-    public static boolean hasResponseCodeValue(final MethodInfo method) {
-        if (method.hasAnnotation(ResponseConstant.DOTNAME_API_RESPONSE)) {
-            AnnotationInstance annotation = getResponseAnnotation(method);
-            return annotation.value(ResponseConstant.PROP_RESPONSE_CODE) != null;
-        }
-        return false;
+    public static boolean hasResponseCodeValue(final AnnotationInstance responseAnnotation) {
+        return responseAnnotation.value(ResponseConstant.PROP_RESPONSE_CODE) != null;
+    }
+
+    public static AnnotationInstance getResponseAnnotation(final ClassInfo classInfo) {
+        return classInfo.classAnnotation(ResponseConstant.DOTNAME_API_RESPONSE);
     }
 
     public static AnnotationInstance getResponseAnnotation(final MethodInfo method) {

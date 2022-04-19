@@ -304,16 +304,36 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     private Stream<Entry<DotName, AnnotationInstance>> exceptionResponseAnnotations(ClassInfo classInfo) {
-        return classInfo.interfaceTypes()
+
+        Type exceptionType = classInfo.interfaceTypes()
                 .stream()
                 .filter(it -> JaxRsConstants.EXCEPTION_MAPPER.contains(it.name()))
                 .filter(it -> Type.Kind.PARAMETERIZED_TYPE.equals(it.kind()))
                 .map(Type::asParameterizedType)
-                .map(type -> type.arguments().get(0)) // ExceptionMapper<?> has a single type argument
-                .map(type -> entryOf(type.name(), classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME, type)))
-                .filter(entry -> Objects.nonNull(entry.getValue()))
-                .filter(entry -> ResponseReader.hasResponseCodeValue(entry.getValue()))
-                .map(entry -> entryOf(entry.getKey(), ResponseReader.getResponseAnnotation(entry.getValue())));
+                .map(type -> type.arguments().get(0))
+                .findAny()
+                .orElse(null);
+
+        if (exceptionType == null) {
+            return Stream.empty();
+        }
+
+        AnnotationInstance methodAnnotation = Stream.of(classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME, exceptionType))
+                .filter(Objects::nonNull)
+                .map(ResponseReader::getResponseAnnotation)
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(null);
+        if (methodAnnotation != null && ResponseReader.hasResponseCodeValue(methodAnnotation)) {
+            return Stream.of(entryOf(exceptionType.name(), methodAnnotation));
+        }
+
+        AnnotationInstance classAnnotation = ResponseReader.getResponseAnnotation(classInfo);
+        if (classAnnotation != null && ResponseReader.hasResponseCodeValue(classAnnotation)) {
+            return Stream.of(entryOf(exceptionType.name(), classAnnotation));
+        }
+
+        return Stream.empty();
     }
 
     // Replace with Map.entry when available (Java 9+)
