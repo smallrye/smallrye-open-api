@@ -16,7 +16,7 @@
 
 package io.smallrye.openapi.tck.extra.extensions;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extensions;
