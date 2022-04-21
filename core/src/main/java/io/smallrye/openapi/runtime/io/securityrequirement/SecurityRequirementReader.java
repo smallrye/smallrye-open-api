@@ -102,6 +102,7 @@ public class SecurityRequirementReader {
         SecurityRequirement requirement = new SecurityRequirementImpl();
         addSecurityRequirement(requirement, annotationInstance);
         if (requirement.getSchemes().isEmpty()) {
+            // Should only happen if the annotation was missing the required "name" property
             return null;
         } else {
             return requirement;
