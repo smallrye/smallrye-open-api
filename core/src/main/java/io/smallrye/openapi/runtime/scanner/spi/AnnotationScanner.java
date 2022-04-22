@@ -340,7 +340,7 @@ public interface AnnotationScanner {
 
     default void processResponse(final AnnotationScannerContext context, final ClassInfo resourceClass, final MethodInfo method,
             Operation operation,
-            Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
+            Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap) {
 
         List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(resourceClass);
         for (AnnotationInstance annotation : classApiResponseAnnotations) {
@@ -377,11 +377,12 @@ public interface AnnotationScanner {
         for (Type type : methodExceptions) {
             DotName exceptionDotName = type.name();
             if (exceptionAnnotationMap != null && !exceptionAnnotationMap.isEmpty()
-                    && exceptionAnnotationMap.keySet().contains(exceptionDotName)) {
-                AnnotationInstance exMapperApiResponseAnnotation = exceptionAnnotationMap.get(exceptionDotName);
-                if (!this.responseCodeExistInMethodAnnotations(context, exMapperApiResponseAnnotation,
-                        methodApiResponseAnnotations)) {
-                    addApiReponseFromAnnotation(context, exMapperApiResponseAnnotation, operation);
+                    && exceptionAnnotationMap.containsKey(exceptionDotName)) {
+                for (AnnotationInstance exMapperApiResponseAnnotation : exceptionAnnotationMap.get(exceptionDotName)) {
+                    if (!this.responseCodeExistInMethodAnnotations(context, exMapperApiResponseAnnotation,
+                            methodApiResponseAnnotations)) {
+                        addApiReponseFromAnnotation(context, exMapperApiResponseAnnotation, operation);
+                    }
                 }
             }
         }

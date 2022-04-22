@@ -53,4 +53,11 @@ class ExceptionMapperScanTests extends IndexScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler2.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResteasyReactiveExceptionMapper.class);
     }
+
+    @Test
+    void testJakartaExceptionMapperMultipleResponse() throws IOException, JSONException {
+        test("responses.exception-mapper-multiple-response-generation.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler3.class);
+    }
 }

@@ -264,7 +264,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
 
         // Process exception mapper to auto generate api response based on method exceptions
-        Map<DotName, AnnotationInstance> exceptionAnnotationMap = processExceptionMappers(context);
+        Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap = processExceptionMappers(context);
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
             final AtomicInteger resourceCount = new AtomicInteger(0);
@@ -290,7 +290,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * Build a map between exception class name and its corresponding @ApiResponse annotation in the jax-rs exception mapper
      * 
      */
-    private Map<DotName, AnnotationInstance> processExceptionMappers(final AnnotationScannerContext context) {
+    private Map<DotName, List<AnnotationInstance>> processExceptionMappers(final AnnotationScannerContext context) {
         Collection<ClassInfo> exceptionMappers = new ArrayList<>();
 
         for (DotName dn : JaxRsConstants.EXCEPTION_MAPPER) {
@@ -303,7 +303,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    private Stream<Entry<DotName, AnnotationInstance>> exceptionResponseAnnotations(ClassInfo classInfo) {
+    private Stream<Entry<DotName, List<AnnotationInstance>>> exceptionResponseAnnotations(ClassInfo classInfo) {
 
         Type exceptionType = classInfo.interfaceTypes()
                 .stream()
@@ -318,22 +318,24 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             return Stream.empty();
         }
 
-        AnnotationInstance methodAnnotation = Stream.of(classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME, exceptionType))
+        Stream<AnnotationInstance> methodAnnotations = Stream
+                .of(classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME, exceptionType))
                 .filter(Objects::nonNull)
-                .map(ResponseReader::getResponseAnnotation)
-                .filter(Objects::nonNull)
-                .findAny()
-                .orElse(null);
-        if (methodAnnotation != null && ResponseReader.hasResponseCodeValue(methodAnnotation)) {
-            return Stream.of(entryOf(exceptionType.name(), methodAnnotation));
-        }
+                .flatMap(m -> ResponseReader.getResponseAnnotations(m).stream());
 
-        AnnotationInstance classAnnotation = ResponseReader.getResponseAnnotation(classInfo);
-        if (classAnnotation != null && ResponseReader.hasResponseCodeValue(classAnnotation)) {
-            return Stream.of(entryOf(exceptionType.name(), classAnnotation));
-        }
+        Stream<AnnotationInstance> classAnnotations = ResponseReader.getResponseAnnotations(classInfo).stream();
 
-        return Stream.empty();
+        // Later annotations will eventually override earlier ones, so put class before method
+        List<AnnotationInstance> annotations = Stream
+                .concat(classAnnotations, methodAnnotations)
+                .filter(ResponseReader::hasResponseCodeValue)
+                .collect(Collectors.toList());
+
+        if (annotations.isEmpty()) {
+            return Stream.empty();
+        } else {
+            return Stream.of(entryOf(exceptionType.name(), annotations));
+        }
     }
 
     // Replace with Map.entry when available (Java 9+)
@@ -421,7 +423,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             final PathItem.HttpMethod methodType,
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters,
-            Map<DotName, AnnotationInstance> exceptionAnnotationMap) {
+            Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap) {
 
         JaxRsLogging.log.processingMethod(method.toString());
 
