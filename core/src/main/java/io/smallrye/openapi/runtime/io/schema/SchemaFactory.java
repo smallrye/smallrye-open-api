@@ -207,6 +207,18 @@ public class SchemaFactory {
                     return propertySchemas;
                 }, defaults));
 
+        Type additionalProperties = readAttr(annotation, "additionalProperties", defaults);
+
+        if (additionalProperties != null) {
+            if (additionalProperties.name().equals(SchemaConstant.DOTNAME_TRUE_SCHEMA)) {
+                schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
+            } else if (additionalProperties.name().equals(SchemaConstant.DOTNAME_FALSE_SCHEMA)) {
+                schema.setAdditionalPropertiesBoolean(Boolean.FALSE);
+            } else {
+                schema.setAdditionalPropertiesSchema(readClassSchema(context, additionalProperties, true));
+            }
+        }
+
         List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
 
         if (enumeration != null && !enumeration.isEmpty()) {
@@ -558,11 +570,13 @@ public class SchemaFactory {
         }
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype)) {
-            return schemaRegistry.lookupRef(ctype);
-        } else if (!schemaReferenceSupported && schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
-            // Clone the schema from the registry using mergeObjects
-            return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
+        if (schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
+            if (schemaReferenceSupported) {
+                return schemaRegistry.lookupRef(ctype);
+            } else {
+                // Clone the schema from the registry using mergeObjects
+                return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
+            }
         } else if (context.getScanStack().contains(ctype)) {
             // Protect against stack overflow when the type is in the process of being scanned.
             return SchemaRegistry.registerReference(ctype, null, new SchemaImpl());

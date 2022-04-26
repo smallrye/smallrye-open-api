@@ -18,6 +18,8 @@ import org.jboss.jandex.DotName;
 public class SchemaConstant {
 
     public static final DotName DOTNAME_SCHEMA = DotName.createSimple(Schema.class.getName());
+    public static final DotName DOTNAME_TRUE_SCHEMA = DotName.createSimple(Schema.class.getName() + "$True");
+    public static final DotName DOTNAME_FALSE_SCHEMA = DotName.createSimple(Schema.class.getName() + "$False");
     public static final String PROP_DISCRIMINATOR = "discriminator";
     public static final String PROP_XML = "xml";
     public static final String PROP_NAME = "name";
