@@ -74,6 +74,26 @@ public class ResponseReader {
         return responses;
     }
 
+    public static APIResponses readResponsesExtensions(final AnnotationScannerContext context,
+            final AnnotationInstance responsesAnnotation,
+            APIResponses responses) {
+        if (responsesAnnotation == null) {
+            return null;
+        }
+
+        IoLogging.logger.singleAnnotationAs("@APIResponses", "Extensible");
+        Map<String, Object> extensions = ExtensionReader.readExtensions(context, responsesAnnotation);
+
+        if (extensions != null && !extensions.isEmpty()) {
+            if (responses == null) {
+                responses = new APIResponsesImpl();
+            }
+            responses.setExtensions(extensions);
+        }
+
+        return responses;
+    }
+
     /**
      * Reads a {@link APIResponses} OpenAPI node.
      * 
@@ -87,6 +107,7 @@ public class ResponseReader {
         IoLogging.logger.jsonList("APIResponse");
         APIResponses model = new APIResponsesImpl();
         model.setDefaultValue(readResponse(node.get(ResponseConstant.PROP_DEFAULT)));
+        ExtensionReader.readExtensions(node, model);
         for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
             String fieldName = fieldNames.next();
             if (ResponseConstant.PROP_DEFAULT.equals(fieldName)) {

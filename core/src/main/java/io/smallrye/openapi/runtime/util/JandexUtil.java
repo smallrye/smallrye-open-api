@@ -525,7 +525,9 @@ public class JandexUtil {
                     OpenApiConstants.VALUE);
 
             if (nestedArray != null) {
-                annotations.addAll(Arrays.asList(nestedArray));
+                Arrays.stream(nestedArray)
+                        .map(a -> AnnotationInstance.create(a.name(), target, a.values()))
+                        .forEach(annotations::add);
             }
         }
 

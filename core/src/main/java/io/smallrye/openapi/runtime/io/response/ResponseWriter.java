@@ -57,6 +57,7 @@ public class ResponseWriter {
             return;
         }
         ObjectNode node = parent.putObject(ComponentsConstant.PROP_RESPONSES);
+        ExtensionWriter.writeExtensions(node, model);
         writeAPIResponse(node, model.getDefaultValue(), ResponseConstant.PROP_DEFAULT);
         if (model.getAPIResponses() != null) {
             Set<Map.Entry<String, APIResponse>> entrySet = model.getAPIResponses().entrySet();
