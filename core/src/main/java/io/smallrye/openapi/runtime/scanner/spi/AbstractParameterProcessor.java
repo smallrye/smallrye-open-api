@@ -529,7 +529,9 @@ public abstract class AbstractParameterProcessor {
         AnnotationInstance schemaAnnotation = TypeUtil.getAnnotation(context.target, SchemaConstant.DOTNAME_SCHEMA);
         Schema schema;
 
-        if (schemaAnnotation != null) {
+        if (schemaAnnotation != null && Boolean.TRUE.equals(JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
+            schema = null;
+        } else if (schemaAnnotation != null) {
             Type paramType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
             Map<String, Object> defaults;
 
