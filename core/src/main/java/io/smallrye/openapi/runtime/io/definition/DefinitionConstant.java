@@ -21,7 +21,7 @@ public class DefinitionConstant {
     public static final String PROP_TAGS = "tags";
     public static final String PROP_COMPONENTS = "components";
     public static final String PROP_SECURITY = "security";
-    public static final String PROP_SECURITY_SET = "securitySet";
+    public static final String PROP_SECURITY_SETS = "securitySets";
     public static final String PROP_OPENAPI = "openapi";
 
     private DefinitionConstant() {

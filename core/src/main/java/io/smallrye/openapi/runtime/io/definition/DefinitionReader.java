@@ -51,7 +51,7 @@ public class DefinitionReader {
                 ServerReader.readServers(annotationInstance.value(DefinitionConstant.PROP_SERVERS)).orElse(null));
         openApi.setSecurity(SecurityRequirementReader
                 .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY),
-                        annotationInstance.value(DefinitionConstant.PROP_SECURITY_SET))
+                        annotationInstance.value(DefinitionConstant.PROP_SECURITY_SETS))
                 .orElse(null));
         openApi.setExternalDocs(
                 ExternalDocsReader
