@@ -286,7 +286,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             }
 
             // Process @APIResponse annotations
-            processResponse(context, method, operation, null);
+            processResponse(context, resourceClass, method, operation, null);
 
             // Process @SecurityRequirement annotations
             processSecurityRequirementAnnotation(resourceClass, method, operation);

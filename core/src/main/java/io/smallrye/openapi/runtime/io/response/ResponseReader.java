@@ -258,17 +258,17 @@ public class ResponseReader {
                 ResponseConstant.DOTNAME_API_RESPONSES);
     }
 
-    public static boolean hasResponseCodeValue(final MethodInfo method) {
-        if (method.hasAnnotation(ResponseConstant.DOTNAME_API_RESPONSE)) {
-            AnnotationInstance annotation = getResponseAnnotation(method);
-            return annotation.value(ResponseConstant.PROP_RESPONSE_CODE) != null;
-        }
-        return false;
+    public static boolean hasResponseCodeValue(final AnnotationInstance responseAnnotation) {
+        return responseAnnotation.value(ResponseConstant.PROP_RESPONSE_CODE) != null;
     }
 
-    public static AnnotationInstance getResponseAnnotation(final MethodInfo method) {
-        return method.annotation(ResponseConstant.DOTNAME_API_RESPONSE);
-    }
+    //    public static AnnotationInstance getResponseAnnotation(final ClassInfo classInfo) {
+    //        return classInfo.classAnnotation(ResponseConstant.DOTNAME_API_RESPONSE);
+    //    }
+    //
+    //    public static AnnotationInstance getResponseAnnotation(final MethodInfo method) {
+    //        return method.annotation(ResponseConstant.DOTNAME_API_RESPONSE);
+    //    }
 
     public static AnnotationInstance getResponsesAnnotation(final MethodInfo method) {
         return method.annotation(ResponseConstant.DOTNAME_API_RESPONSES);

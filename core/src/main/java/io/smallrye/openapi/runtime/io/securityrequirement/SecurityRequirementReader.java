@@ -34,26 +34,43 @@ public class SecurityRequirementReader {
     }
 
     /**
-     * Reads any SecurityRequirement annotations. The annotation value is an array of
-     * SecurityRequirement annotations.
+     * Reads any SecurityRequirement and SecurityRequirementsSet annotations.
      * 
-     * @param annotationValue Array of {@literal @}SecurityRequirement annotations
+     * @param securityRequirements Array of {@literal @}SecurityRequirement annotations
+     * @param securityRequirementsSets Array of {@literal @}SecurityRequirementsSet annotation
      * @return List of SecurityRequirement models
      */
-    public static Optional<List<SecurityRequirement>> readSecurityRequirements(final AnnotationValue annotationValue) {
-        if (annotationValue != null) {
+    public static Optional<List<SecurityRequirement>> readSecurityRequirements(final AnnotationValue securityRequirements,
+            final AnnotationValue securityRequirementsSets) {
+        if (securityRequirements == null && securityRequirementsSets == null) {
+            return Optional.empty();
+        }
+
+        List<SecurityRequirement> requirements = new ArrayList<>();
+
+        if (securityRequirements != null) {
             IoLogging.logger.annotationsArray("@SecurityRequirement");
-            AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
-            List<SecurityRequirement> requirements = new ArrayList<>();
+            AnnotationInstance[] nestedArray = securityRequirements.asNestedArray();
             for (AnnotationInstance requirementAnno : nestedArray) {
                 SecurityRequirement requirement = readSecurityRequirement(requirementAnno);
                 if (requirement != null) {
                     requirements.add(requirement);
                 }
             }
-            return Optional.of(requirements);
         }
-        return Optional.empty();
+
+        if (securityRequirementsSets != null) {
+            IoLogging.logger.annotationsArray("@SecurityRequirementsSet");
+            AnnotationInstance[] nestedArray = securityRequirementsSets.asNestedArray();
+            for (AnnotationInstance requirementSetAnno : nestedArray) {
+                SecurityRequirement requirement = readSecurityRequirementsSet(requirementSetAnno);
+                if (requirement != null) {
+                    requirements.add(requirement);
+                }
+            }
+        }
+
+        return Optional.of(requirements);
     }
 
     /**
@@ -82,19 +99,44 @@ public class SecurityRequirementReader {
      * @return SecurityRequirement model
      */
     public static SecurityRequirement readSecurityRequirement(AnnotationInstance annotationInstance) {
+        SecurityRequirement requirement = new SecurityRequirementImpl();
+        addSecurityRequirement(requirement, annotationInstance);
+        if (requirement.getSchemes().isEmpty()) {
+            // Should only happen if the annotation was missing the required "name" property
+            return null;
+        } else {
+            return requirement;
+        }
+    }
+
+    /**
+     * Reads a single SecurityRequirementsSet annotation
+     * 
+     * @param annotationInstance the {@literal @}SecurityRequirementsSet annotation
+     * @return SecurityRequirement model
+     */
+    public static SecurityRequirement readSecurityRequirementsSet(AnnotationInstance annotationInstance) {
+        AnnotationValue value = annotationInstance.value();
+        SecurityRequirement requirement = new SecurityRequirementImpl();
+        if (value != null) {
+            for (AnnotationInstance securityRequirementInstance : value.asNestedArray()) {
+                addSecurityRequirement(requirement, securityRequirementInstance);
+            }
+        }
+        return requirement;
+    }
+
+    private static void addSecurityRequirement(SecurityRequirement requirement, AnnotationInstance annotationInstance) {
         String name = JandexUtil.stringValue(annotationInstance, SecurityRequirementConstant.PROP_NAME);
         if (name != null) {
             Optional<List<String>> maybeScopes = JandexUtil.stringListValue(annotationInstance,
                     SecurityRequirementConstant.PROP_SCOPES);
-            SecurityRequirement requirement = new SecurityRequirementImpl();
             if (maybeScopes.isPresent()) {
                 requirement.addScheme(name, maybeScopes.get());
             } else {
                 requirement.addScheme(name);
             }
-            return requirement;
         }
-        return null;
     }
 
     /**
@@ -132,5 +174,17 @@ public class SecurityRequirementReader {
         return JandexUtil.getRepeatableAnnotation(target,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENT,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
+    }
+
+    // helper methods for scanners
+    public static AnnotationInstance getSecurityRequirementsSetsAnnotation(final AnnotationTarget target) {
+        return TypeUtil.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
+    }
+
+    // helper methods for scanners
+    public static List<AnnotationInstance> getSecurityRequirementsSetAnnotations(final AnnotationTarget target) {
+        return JandexUtil.getRepeatableAnnotation(target,
+                SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SET,
+                SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
     }
 }
