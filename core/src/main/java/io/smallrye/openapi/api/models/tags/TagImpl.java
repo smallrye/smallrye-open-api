@@ -74,12 +74,14 @@ public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
             return false;
         }
         TagImpl tag = (TagImpl) o;
-        return Objects.equals(name, tag.name) && Objects.equals(description, tag.description)
-                && Objects.equals(externalDocs, tag.externalDocs);
+        return Objects.equals(name, tag.name)
+                && Objects.equals(description, tag.description)
+                && Objects.equals(externalDocs, tag.externalDocs)
+                && Objects.equals(getExtensions(), tag.getExtensions());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, externalDocs);
+        return Objects.hash(name, description, externalDocs, getExtensions());
     }
 }
