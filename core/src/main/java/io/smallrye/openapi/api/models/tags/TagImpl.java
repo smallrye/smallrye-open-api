@@ -1,5 +1,7 @@
 package io.smallrye.openapi.api.models.tags;
 
+import java.util.Objects;
+
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
@@ -63,4 +65,23 @@ public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
         this.externalDocs = externalDocs;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TagImpl tag = (TagImpl) o;
+        return Objects.equals(name, tag.name)
+                && Objects.equals(description, tag.description)
+                && Objects.equals(externalDocs, tag.externalDocs)
+                && Objects.equals(getExtensions(), tag.getExtensions());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, externalDocs, getExtensions());
+    }
 }
