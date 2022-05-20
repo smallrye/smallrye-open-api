@@ -1,8 +1,6 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import static io.smallrye.openapi.runtime.util.JandexUtil.booleanValue;
-import static io.smallrye.openapi.runtime.util.JandexUtil.intValue;
-import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
+import static io.smallrye.openapi.runtime.util.JandexUtil.value;
 import static io.smallrye.openapi.runtime.util.TypeUtil.getAnnotation;
 import static org.jboss.jandex.DotName.createComponentized;
 
@@ -10,7 +8,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -36,6 +33,8 @@ public class BeanValidationScanner {
 
     public static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
     static final Set<DotName> CONSTRAINTS = new HashSet<>();
+    private static final String VALUE = "value";
+    private static final String INCLUSIVE = "inclusive";
 
     static final BigDecimal NEGATIVE_ONE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
@@ -85,6 +84,9 @@ public class BeanValidationScanner {
     static final List<DotName> BV_NOT_NULL = Arrays.asList(
             createConstraintName(BV_JAVAX_CONTRAINTS, "NotNull"),
             createConstraintName(BV_JAKARTA_CONTRAINTS, "NotNull"));
+    static final List<DotName> BV_PATTERN = Arrays.asList(
+            createConstraintName(BV_JAVAX_CONTRAINTS, "Pattern"),
+            createConstraintName(BV_JAKARTA_CONTRAINTS, "Pattern"));
     static final List<DotName> BV_POSITIVE = Arrays.asList(
             createConstraintName(BV_JAVAX_CONTRAINTS, "Positive"),
             createConstraintName(BV_JAKARTA_CONTRAINTS, "Positive"));
@@ -197,6 +199,7 @@ public class BeanValidationScanner {
             RequirementHandler handler) {
         decimalMax(target, schema);
         decimalMin(target, schema);
+        pattern(target, schema);
         digits(target, schema);
         notBlank(target, schema, propertyKey, handler);
         notNull(target, schema, propertyKey, handler);
@@ -246,14 +249,14 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_DECIMAL_MAX);
 
         if (constraint != null && schema.getMaximum() == null) {
-            String decimalValue = stringValue(constraint, VALUE);
+            String decimalValue = value(constraint, VALUE);
             try {
                 BigDecimal decimal = new BigDecimal(decimalValue);
                 schema.setMaximum(decimal);
 
-                Optional<Boolean> inclusive = booleanValue(constraint, INCLUSIVE);
+                Boolean inclusive = value(constraint, INCLUSIVE);
 
-                if (schema.getExclusiveMaximum() == null && inclusive.isPresent() && !inclusive.get().booleanValue()) {
+                if (schema.getExclusiveMaximum() == null && Boolean.FALSE.equals(inclusive)) {
                     schema.setExclusiveMaximum(Boolean.TRUE);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
@@ -266,13 +269,13 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_DECIMAL_MIN);
 
         if (constraint != null && schema.getMinimum() == null) {
-            String decimalValue = stringValue(constraint, VALUE);
+            String decimalValue = value(constraint, VALUE);
             try {
                 BigDecimal decimal = new BigDecimal(decimalValue);
                 schema.setMinimum(decimal);
-                Optional<Boolean> inclusive = booleanValue(constraint, INCLUSIVE);
+                Boolean inclusive = value(constraint, INCLUSIVE);
 
-                if (schema.getExclusiveMinimum() == null && inclusive.isPresent() && !inclusive.get().booleanValue()) {
+                if (schema.getExclusiveMinimum() == null && Boolean.FALSE.equals(inclusive)) {
                     schema.setExclusiveMinimum(Boolean.TRUE);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
@@ -287,8 +290,8 @@ public class BeanValidationScanner {
 
         if (constraint != null && schema.getPattern() == null) {
             // Both attributes are required - safe to use primitives.
-            final int integerPart = intValue(constraint, "integer");
-            final int fractionPart = intValue(constraint, "fraction");
+            final int integerPart = value(constraint, "integer");
+            final int fractionPart = value(constraint, "fraction");
             final StringBuilder pattern = new StringBuilder(50);
 
             pattern.append('^');
@@ -434,6 +437,14 @@ public class BeanValidationScanner {
         }
     }
 
+    void pattern(AnnotationTarget target, Schema schema) {
+        AnnotationInstance constraint = getConstraint(target, BV_PATTERN);
+
+        if (constraint != null && schema.getPattern() == null) {
+            schema.setPattern(value(constraint, "regexp"));
+        }
+    }
+
     void positive(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_POSITIVE);
 
@@ -475,8 +486,8 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_SIZE);
 
         if (constraint != null) {
-            Integer min = intValue(constraint, "min");
-            Integer max = intValue(constraint, "max");
+            Integer min = value(constraint, "min");
+            Integer max = value(constraint, "max");
 
             if (min != null && schema.getMinItems() == null) {
                 schema.setMinItems(min);
@@ -496,8 +507,8 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_SIZE);
 
         if (constraint != null) {
-            Integer min = intValue(constraint, "min");
-            Integer max = intValue(constraint, "max");
+            Integer min = value(constraint, "min");
+            Integer max = value(constraint, "max");
 
             if (min != null && schema.getMinProperties() == null) {
                 schema.setMinProperties(min);
@@ -513,8 +524,8 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_SIZE);
 
         if (constraint != null) {
-            Integer min = intValue(constraint, "min");
-            Integer max = intValue(constraint, "max");
+            Integer min = value(constraint, "min");
+            Integer max = value(constraint, "max");
 
             if (min != null && schema.getMinLength() == null) {
                 schema.setMinLength(min);
@@ -574,6 +585,4 @@ public class BeanValidationScanner {
         return null;
     }
 
-    private static final String VALUE = "value";
-    private static final String INCLUSIVE = "inclusive";
 }
