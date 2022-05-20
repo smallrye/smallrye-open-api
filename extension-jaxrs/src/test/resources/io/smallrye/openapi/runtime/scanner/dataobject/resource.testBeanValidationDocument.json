@@ -13,13 +13,13 @@
           "Test"
         ],
         "requestBody": {
-           "content": {
-           "application/json": {
-           "schema": {
-             "$ref": "#/components/schemas/BVTestResourceEntity"
-           }
-           }
-           }
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BVTestResourceEntity"
+              }
+            }
+          }
         },
         "responses": {
           "200": {
@@ -38,13 +38,18 @@
   },
   "components": {
     "schemas": {
-      "TestEnum" : {
-        "enum" : [ "ABC", "DEF" ],
-        "type" : "string"
+      "TestEnum": {
+        "enum": [
+          "ABC",
+          "DEF"
+        ],
+        "type": "string"
       },
       "BVTestResourceEntity": {
         "type": "object",
-        "required" : [ "enumValue" ],
+        "required": [
+          "enumValue"
+        ],
         "properties": {
           "string_no_bean_constraints": {
             "type": "string",
@@ -77,28 +82,31 @@
               "type": "string"
             }
           },
-          "enumValue" : {
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/TestEnum"
-            }, {
-              "nullable" : false
-            } ]
+          "enumValue": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestEnum"
+              },
+              {
+                "nullable": false
+              }
+            ]
           }
         }
       },
       "BVTestContainer": {
         "type": "object",
         "required": [
-            "arrayListNotNullAndNotEmptyAndMaxItems",
-            "arrayListNullableAndMinItemsAndMaxItems",
-            "mapObjectNotNullAndNotEmptyAndMaxProperties",
-            "mapObjectNullableAndMinPropertiesAndMaxProperties",
-            "stringNotBlankNotNull",
-            "stringNotBlankDigits",
-            "stringNotEmptyMaxSize",
-            "stringNotEmptySizeRange",
-            "booleanNotNull",
-            "jacksonRequiredTrueString"
+          "arrayListNotNullAndNotEmptyAndMaxItems",
+          "arrayListNullableAndMinItemsAndMaxItems",
+          "mapObjectNotNullAndNotEmptyAndMaxProperties",
+          "mapObjectNullableAndMinPropertiesAndMaxProperties",
+          "stringNotBlankNotNull",
+          "stringNotBlankDigits",
+          "stringNotEmptyMaxSize",
+          "stringNotEmptySizeRange",
+          "booleanNotNull",
+          "jacksonRequiredTrueString"
         ],
         "properties": {
           "arrayListNotNullAndNotEmptyAndMaxItems": {
@@ -226,11 +234,15 @@
             "minLength": 100,
             "maxLength": 2000
           },
-          "jacksonRequiredTrueString" : {
-            "type" : "string"
+          "jacksonRequiredTrueString": {
+            "type": "string"
           },
-          "jacksonDefaultString" : {
-            "type" : "string"
+          "jacksonDefaultString": {
+            "type": "string"
+          },
+          "patternFromBV": {
+            "type": "string",
+            "pattern": "^something$"
           }
         }
       }

@@ -778,4 +778,18 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         assertNull(parentSchema.getRequired());
     }
 
+    @Test
+    void testJavaxPatternFields() {
+        testPatternFields(javaxTargetClass.field("patternFromBV"), "^something$");
+    }
+
+    @Test
+    void testJakartaPatternFields() {
+        testPatternFields(jakartaTargetClass.field("patternFromBV"), "^something$");
+    }
+
+    void testPatternFields(FieldInfo targetField, String expectedPattern) {
+        testTarget.pattern(targetField, schema);
+        assertEquals(expectedPattern, schema.getPattern());
+    }
 }
