@@ -82,9 +82,17 @@ public class TypeUtil {
     private static final TypeWithFormat ARRAY_OPAQUE_FORMAT = TypeWithFormat.of(SchemaType.ARRAY).opaque().build();
     private static final TypeWithFormat OBJECT_OPAQUE_FORMAT = TypeWithFormat.of(SchemaType.OBJECT).opaque().build();
 
-    private static final TypeWithFormat DATE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE).build();
-    private static final TypeWithFormat DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE_TIME)
-            .build();
+    private static final TypeWithFormat DATE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DATE)
+            .example("2022-03-10").build();
+    private static final TypeWithFormat LOCAL_DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING)
+            .format(DataFormat.DATE_TIME)
+            .example("2022-03-10T12:15:50").build();
+    private static final TypeWithFormat OFFSET_DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING)
+            .format(DataFormat.DATE_TIME)
+            .example("2022-03-10T12:15:50-04:00").build();
+    private static final TypeWithFormat INSTANT_DATE_TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING)
+            .format(DataFormat.DATE_TIME)
+            .example("2022-03-10T16:15:50Z").build();
     /*
      * This is used both for Java Period and Duration according to
      * https://docs.oracle.com/javase/8/docs/api/java/time/Period.html
@@ -156,10 +164,10 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(java.time.LocalDate.class.getName()), DATE_FORMAT);
 
         // Date Time
-        TYPE_MAP.put(DotName.createSimple(java.time.LocalDateTime.class.getName()), DATE_TIME_FORMAT);
-        TYPE_MAP.put(DotName.createSimple(java.time.ZonedDateTime.class.getName()), DATE_TIME_FORMAT);
-        TYPE_MAP.put(DotName.createSimple(java.time.OffsetDateTime.class.getName()), DATE_TIME_FORMAT);
-        TYPE_MAP.put(DotName.createSimple(java.time.Instant.class.getName()), DATE_TIME_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.LocalDateTime.class.getName()), LOCAL_DATE_TIME_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.ZonedDateTime.class.getName()), OFFSET_DATE_TIME_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.OffsetDateTime.class.getName()), OFFSET_DATE_TIME_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.time.Instant.class.getName()), INSTANT_DATE_TIME_FORMAT);
 
         // Duration
         TYPE_MAP.put(DotName.createSimple(java.time.Duration.class.getName()), DURATION_FORMAT);
@@ -711,6 +719,7 @@ public class TypeUtil {
                         .filter(a -> a.target().asMethodParameter().position() == parameter.position())
                         .anyMatch(a -> a.name().equals(annotationName));
             case TYPE:
+            case RECORD_COMPONENT:
                 break;
         }
 
@@ -837,6 +846,7 @@ public class TypeUtil {
                         .filter(a -> a.target().asMethodParameter().position() == parameter.position())
                         .collect(Collectors.toList());
             case TYPE:
+            case RECORD_COMPONENT:
                 break;
         }
         return Collections.emptyList();
@@ -853,6 +863,7 @@ public class TypeUtil {
                 return parameter.method().declaringClass();
             case CLASS:
             case TYPE:
+            case RECORD_COMPONENT:
                 break;
         }
 

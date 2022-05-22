@@ -28,16 +28,19 @@
         "properties": {
           "qAgain": {
             "format": "date",
-            "type": "string"
+            "type": "string",
+            "example": "2022-03-10"
           },
           "qAgain3": {
             "format": "date",
-            "type": "string"
+            "type": "string",
+            "example": "2022-03-10"
           },
           "qValue": {
             "format": "date",
             "description": "Ah, Q, my favourite variable!",
-            "type": "string"
+            "type": "string",
+            "example": "2022-03-10"
           },
           "tAgain2": {
             "type": "string"
