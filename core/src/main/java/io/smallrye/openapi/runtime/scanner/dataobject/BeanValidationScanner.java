@@ -538,16 +538,15 @@ public class BeanValidationScanner {
 
     /**
      * Retrieves a constraint {@link AnnotationInstance} from the current
-     * target. If the annotation is found and applies to multiple bean
-     * validation groups or to a single group other than the {@link Default},
-     * returns null.
+     * target. If the annotation is found and does not apply to the {@link Default}
+     * group, returns null.
      *
      * @param target
      *        the object from which to retrieve the constraint annotation
      * @param annotationName
      *        name of the annotation
-     * @return the first occurrence of the named constraint if no groups or only
-     *         the {@link Default} group is specified, or null
+     * @return the first occurrence of the named constraint if it applies to the
+     *         {@link Default} group, otherwise null
      */
     AnnotationInstance getConstraint(AnnotationTarget target, List<DotName> annotationName) {
         AnnotationInstance constraint = getAnnotation(target, annotationName);
@@ -561,16 +560,14 @@ public class BeanValidationScanner {
 
             Type[] groups = groupValue.asClassArray();
 
-            switch (groups.length) {
-                case 0:
+            if (groups.length == 0) {
+                return constraint;
+            }
+
+            for (Type group : groups) {
+                if (group.name().equals(BV_JAVAX_DEFAULT_GROUP) || group.name().equals(BV_JAKARTA_DEFAULT_GROUP)) {
                     return constraint;
-                case 1:
-                    if (groups[0].name().equals(BV_JAVAX_DEFAULT_GROUP) || groups[0].name().equals(BV_JAKARTA_DEFAULT_GROUP)) {
-                        return constraint;
-                    }
-                    break;
-                default:
-                    break;
+                }
             }
         }
 
