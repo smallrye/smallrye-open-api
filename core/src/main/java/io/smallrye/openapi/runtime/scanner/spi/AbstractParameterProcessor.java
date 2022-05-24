@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -84,6 +85,7 @@ public abstract class AbstractParameterProcessor {
     protected final ClassLoader cl;
     protected final Function<AnnotationInstance, Parameter> readerFunction;
     protected final List<AnnotationScannerExtension> extensions;
+    protected final Optional<BeanValidationScanner> beanValidationScanner;
 
     /**
      * Collection of parameters scanned at the current level. This map contains
@@ -227,6 +229,7 @@ public abstract class AbstractParameterProcessor {
         this.cl = scannerContext.getClassLoader();
         this.readerFunction = reader;
         this.extensions = extensions;
+        this.beanValidationScanner = scannerContext.getBeanValidationScanner();
     }
 
     protected void reset() {
@@ -610,12 +613,12 @@ public abstract class AbstractParameterProcessor {
 
         int modCount = SchemaImpl.getModCount(localSchema);
 
-        BeanValidationScanner.applyConstraints(context.target, localSchema, param.getName(),
+        beanValidationScanner.ifPresent(s -> s.applyConstraints(context.target, localSchema, param.getName(),
                 (target, name) -> {
                     if (param.getRequired() == null) {
                         param.setRequired(Boolean.TRUE);
                     }
-                });
+                }));
 
         setDefaultValue(localSchema, context.defaultValue);
 
@@ -674,10 +677,12 @@ public abstract class AbstractParameterProcessor {
             setDefaultValue(paramSchema, getDefaultValue(paramTarget));
             TypeUtil.mapDeprecated(paramTarget, paramSchema::getDeprecated, paramSchema::setDeprecated);
 
-            BeanValidationScanner.applyConstraints(paramTarget,
-                    paramSchema,
-                    paramName,
-                    (target, name) -> setRequired(name, schema));
+            if (beanValidationScanner.isPresent()) {
+                beanValidationScanner.get().applyConstraints(paramTarget,
+                        paramSchema,
+                        paramName,
+                        (target, name) -> setRequired(name, schema));
+            }
 
             if (paramSchema.getNullable() == null && TypeUtil.isOptional(paramType)) {
                 paramSchema.setNullable(Boolean.TRUE);

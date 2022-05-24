@@ -34,7 +34,7 @@ public class BeanValidationScanner {
         void setRequired(AnnotationTarget target, String propertyKey);
     }
 
-    static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
+    public static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
     static final Set<DotName> CONSTRAINTS = new HashSet<>();
 
     static final BigDecimal NEGATIVE_ONE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
@@ -115,7 +115,7 @@ public class BeanValidationScanner {
      * @param target the annotation target to scan
      * @return true if annotations from the Bean Validation package are present, otherwise false.
      */
-    public static boolean hasConstraints(AnnotationTarget target) {
+    public boolean hasConstraints(AnnotationTarget target) {
         return TypeUtil.getAnnotations(target)
                 .stream()
                 .map(AnnotationInstance::name)
@@ -153,7 +153,7 @@ public class BeanValidationScanner {
      *        the handler to be called when a
      *        bean validation @NotNull constraint is encountered.
      */
-    public static void applyConstraints(AnnotationTarget target,
+    public void applyConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
@@ -173,8 +173,8 @@ public class BeanValidationScanner {
                 applyArrayConstraints(target, schema, propertyKey, handler);
                 break;
             case BOOLEAN:
-                INSTANCE.notNull(target, schema, propertyKey, handler);
-                INSTANCE.requiredJackson(target, propertyKey, handler);
+                notNull(target, schema, propertyKey, handler);
+                requiredJackson(target, propertyKey, handler);
                 break;
             case INTEGER:
                 applyNumberConstraints(target, schema, propertyKey, handler);
@@ -191,55 +191,55 @@ public class BeanValidationScanner {
         }
     }
 
-    private static void applyStringConstraints(AnnotationTarget target,
+    private void applyStringConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.decimalMax(target, schema);
-        INSTANCE.decimalMin(target, schema);
-        INSTANCE.digits(target, schema);
-        INSTANCE.notBlank(target, schema, propertyKey, handler);
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.sizeString(target, schema);
-        INSTANCE.notEmptyString(target, schema, propertyKey, handler);
+        decimalMax(target, schema);
+        decimalMin(target, schema);
+        digits(target, schema);
+        notBlank(target, schema, propertyKey, handler);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        sizeString(target, schema);
+        notEmptyString(target, schema, propertyKey, handler);
     }
 
-    private static void applyObjectConstraints(AnnotationTarget target,
+    private void applyObjectConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.sizeObject(target, schema);
-        INSTANCE.notEmptyObject(target, schema, propertyKey, handler);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        sizeObject(target, schema);
+        notEmptyObject(target, schema, propertyKey, handler);
     }
 
-    private static void applyArrayConstraints(AnnotationTarget target,
+    private void applyArrayConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.sizeArray(target, schema);
-        INSTANCE.notEmptyArray(target, schema, propertyKey, handler);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        sizeArray(target, schema);
+        notEmptyArray(target, schema, propertyKey, handler);
     }
 
-    private static void applyNumberConstraints(AnnotationTarget target,
+    private void applyNumberConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.decimalMax(target, schema);
-        INSTANCE.decimalMin(target, schema);
-        INSTANCE.digits(target, schema);
-        INSTANCE.max(target, schema);
-        INSTANCE.min(target, schema);
-        INSTANCE.negative(target, schema);
-        INSTANCE.negativeOrZero(target, schema);
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.positive(target, schema);
-        INSTANCE.positiveOrZero(target, schema);
+        decimalMax(target, schema);
+        decimalMin(target, schema);
+        digits(target, schema);
+        max(target, schema);
+        min(target, schema);
+        negative(target, schema);
+        negativeOrZero(target, schema);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        positive(target, schema);
+        positiveOrZero(target, schema);
     }
 
     void decimalMax(AnnotationTarget target, Schema schema) {
@@ -340,8 +340,9 @@ public class BeanValidationScanner {
         if (constraint != null && schema.getMaximum() == null) {
             Boolean exclusive = schema.getExclusiveMaximum();
 
-            if (exclusive != null && exclusive) {
+            if (exclusive == null || exclusive) {
                 schema.setMaximum(BigDecimal.ZERO);
+                schema.setExclusiveMaximum(Boolean.TRUE);
             } else {
                 schema.setMaximum(NEGATIVE_ONE);
             }
@@ -439,8 +440,9 @@ public class BeanValidationScanner {
         if (constraint != null && schema.getMinimum() == null) {
             Boolean exclusive = schema.getExclusiveMinimum();
 
-            if (exclusive != null && exclusive) {
+            if (exclusive == null || exclusive) {
                 schema.setMinimum(BigDecimal.ZERO);
+                schema.setExclusiveMinimum(Boolean.TRUE);
             } else {
                 schema.setMinimum(BigDecimal.ONE);
             }

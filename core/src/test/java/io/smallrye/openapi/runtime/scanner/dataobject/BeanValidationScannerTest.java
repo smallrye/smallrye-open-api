@@ -83,7 +83,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
     @Test
     void testJavaxNullSchemaIgnored() {
-        BeanValidationScanner.applyConstraints(javaxTargetClass,
+        testTarget.applyConstraints(javaxTargetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);
@@ -95,7 +95,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
     @Test
     void testJakartaNullSchemaIgnored() {
-        BeanValidationScanner.applyConstraints(jakartaTargetClass,
+        testTarget.applyConstraints(jakartaTargetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);
@@ -109,7 +109,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     void testJavaxRefSchemaIgnored() {
         schema.setType(SchemaType.OBJECT);
         schema.setRef("#/components/schemas/Anything");
-        BeanValidationScanner.applyConstraints(javaxTargetClass,
+        testTarget.applyConstraints(javaxTargetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);
@@ -123,7 +123,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     void testJakartaRefSchemaIgnored() {
         schema.setType(SchemaType.OBJECT);
         schema.setRef("#/components/schemas/Anything");
-        BeanValidationScanner.applyConstraints(jakartaTargetClass,
+        testTarget.applyConstraints(jakartaTargetClass,
                 proxySchema(schema, methodsInvoked),
                 null,
                 null);

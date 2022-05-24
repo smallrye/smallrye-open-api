@@ -680,7 +680,7 @@ public class TypeResolver {
             properties.put(propertyName, resolver);
         }
 
-        if (BeanValidationScanner.hasConstraints(field)) {
+        if (context.getBeanValidationScanner().map(s -> s.hasConstraints(field)).orElse(false)) {
             resolver.constraintTargets.add(field);
         }
 
@@ -811,7 +811,7 @@ public class TypeResolver {
             }
         }
 
-        if (BeanValidationScanner.hasConstraints(method)) {
+        if (context.getBeanValidationScanner().map(s -> s.hasConstraints(method)).orElse(false)) {
             resolver.constraintTargets.add(method);
         }
 

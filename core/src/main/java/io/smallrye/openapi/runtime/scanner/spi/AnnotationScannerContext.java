@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -15,6 +16,7 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.PropertyNamingStrategyFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
@@ -35,6 +37,7 @@ public class AnnotationScannerContext {
     private final OpenAPI openApi;
     private final Deque<Type> scanStack = new ArrayDeque<>();
     private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
+    private final Optional<BeanValidationScanner> beanValidationScanner;
 
     public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
@@ -48,6 +51,8 @@ public class AnnotationScannerContext {
         this.config = config;
         this.openApi = openApi;
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
+        this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(BeanValidationScanner.INSTANCE)
+                : Optional.empty();
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
@@ -97,6 +102,10 @@ public class AnnotationScannerContext {
 
     public TypeResolver getResourceTypeResolver() {
         return resolverStack.peek();
+    }
+
+    public Optional<BeanValidationScanner> getBeanValidationScanner() {
+        return beanValidationScanner;
     }
 
 }
