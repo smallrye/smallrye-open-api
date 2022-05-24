@@ -166,7 +166,8 @@
           "integerNegativeNotZeroMinValue": {
             "type": "integer",
             "format": "int64",
-            "maximum": -1,
+            "maximum": 0,
+            "exclusiveMaximum": true,
             "minimum": -1000000
           },
           "integerNegativeOrZeroMinValue": {
@@ -179,7 +180,8 @@
             "type": "integer",
             "format": "int64",
             "maximum": 1000,
-            "minimum": 1
+            "minimum": 0,
+            "exclusiveMinimum": true
           },
           "integerPositiveOrZeroMaxValue": {
             "type": "integer",

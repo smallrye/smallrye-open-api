@@ -453,8 +453,8 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.max(targetField, schema);
         testTarget.positive(targetField, schema);
 
-        assertEquals(new BigDecimal("1"), schema.getMinimum());
-        assertEquals(null, schema.getExclusiveMinimum());
+        assertEquals(new BigDecimal("0"), schema.getMinimum());
+        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
         assertEquals(new BigDecimal("1000"), schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
     }
@@ -549,8 +549,8 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.min(targetField, schema);
         testTarget.negative(targetField, schema);
 
-        assertEquals(new BigDecimal("-1"), schema.getMaximum());
-        assertEquals(null, schema.getExclusiveMaximum());
+        assertEquals(new BigDecimal("0"), schema.getMaximum());
+        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
         assertEquals(new BigDecimal("-1000000"), schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
     }
