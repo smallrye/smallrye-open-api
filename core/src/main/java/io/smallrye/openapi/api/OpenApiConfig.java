@@ -33,22 +33,20 @@ public interface OpenApiConfig {
         return false;
     }
 
-    default Pattern scanPackages() {
+    default Set<String> scanPackages() {
         return null;
     }
 
-    default Pattern scanClasses() {
+    default Set<String> scanClasses() {
         return null;
     }
 
-    default Pattern scanExcludePackages() {
-        return Pattern.compile(
-                "(" + OpenApiConstants.NEVER_SCAN_PACKAGES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
+    default Set<String> scanExcludePackages() {
+        return OpenApiConstants.NEVER_SCAN_PACKAGES;
     }
 
-    default Pattern scanExcludeClasses() {
-        return Pattern.compile(
-                "(" + OpenApiConstants.NEVER_SCAN_CLASSES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
+    default Set<String> scanExcludeClasses() {
+        return OpenApiConstants.NEVER_SCAN_CLASSES;
     }
 
     default boolean scanBeanValidation() {

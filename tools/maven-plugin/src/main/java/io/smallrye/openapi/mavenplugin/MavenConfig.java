@@ -2,7 +2,6 @@ package io.smallrye.openapi.mavenplugin;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.microprofile.openapi.OASConfig;
 
@@ -38,23 +37,27 @@ public class MavenConfig implements OpenApiConfig {
     }
 
     @Override
-    public Pattern scanPackages() {
-        return patternOf(properties.getOrDefault(OASConfig.SCAN_PACKAGES, null));
+    public Set<String> scanPackages() {
+        return asCsvSet(properties.getOrDefault(OASConfig.SCAN_PACKAGES, null));
     }
 
     @Override
-    public Pattern scanClasses() {
-        return patternOf(properties.getOrDefault(OASConfig.SCAN_CLASSES, null));
+    public Set<String> scanClasses() {
+        return asCsvSet(properties.getOrDefault(OASConfig.SCAN_CLASSES, null));
     }
 
     @Override
-    public Pattern scanExcludePackages() {
-        return patternOf(properties.getOrDefault(OASConfig.SCAN_EXCLUDE_PACKAGES, null), OpenApiConstants.NEVER_SCAN_PACKAGES);
+    public Set<String> scanExcludePackages() {
+        Set<String> result = asCsvSet(properties.getOrDefault(OASConfig.SCAN_EXCLUDE_PACKAGES, null));
+        result.addAll(OpenApiConstants.NEVER_SCAN_PACKAGES);
+        return result;
     }
 
     @Override
-    public Pattern scanExcludeClasses() {
-        return patternOf(properties.getOrDefault(OASConfig.SCAN_EXCLUDE_CLASSES, null), OpenApiConstants.NEVER_SCAN_CLASSES);
+    public Set<String> scanExcludeClasses() {
+        Set<String> result = asCsvSet(properties.getOrDefault(OASConfig.SCAN_EXCLUDE_CLASSES, null));
+        result.addAll(OpenApiConstants.NEVER_SCAN_CLASSES);
+        return result;
     }
 
     @Override
