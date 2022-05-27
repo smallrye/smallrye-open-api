@@ -125,7 +125,7 @@ class FilteredIndexViewTest {
     }
 
     @Test
-    void testAccepts_IncludedSimpleClassPattern_ExcludedPackagePatternDoesNotMatch() {
+    void testAccepts_IncludedSimpleClassPattern_ExcludedPackagePattern() {
         Map<String, Object> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "(?:pkgA.MyBean)$");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "example.pkg[AB]$");
@@ -133,8 +133,20 @@ class FilteredIndexViewTest {
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
         assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyBean")));
-        assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyClass")));
-        assertTrue(view.accepts(DotName.createSimple("org.example.pkgB.MyImpl")));
+        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.MyClass")));
+        assertFalse(view.accepts(DotName.createSimple("org.example.pkgB.MyImpl")));
+    }
+
+    @Test
+    void testAccepts_IncludedSimpleClassPattern_ExcludedSimpleClass() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(OASConfig.SCAN_CLASSES, "Resource$");
+        properties.put(OASConfig.SCAN_EXCLUDE_CLASSES, "BarResource");
+        OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
+        FilteredIndexView view = new FilteredIndexView(null, config);
+        assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.FooResource")));
+        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.BarResource")));
+        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.BazDataObject")));
     }
 
     @Test
@@ -151,14 +163,14 @@ class FilteredIndexViewTest {
     }
 
     @Test
-    void testAccepts_IncludedPackageDoesNotMatch() {
+    void testAccepts_IncludedPackagePatternEndAnchor() {
         Map<String, Object> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "example.pkgA$");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
-        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.MyBean")));
-        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.MyClass")));
-        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.MyImpl")));
+        assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyBean")));
+        assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyClass")));
+        assertFalse(view.accepts(DotName.createSimple("com.example.pkgA.pkgB.MyImpl")));
     }
 
     @Test
@@ -194,6 +206,30 @@ class FilteredIndexViewTest {
         assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyBean")));
         assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyClass")));
         assertFalse(view.accepts(DotName.createSimple("com.example.pkgB.MyImpl")));
+    }
+
+    @Test
+    void testAccepts_IncludedPackageAroundExcludedPackage() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(OASConfig.SCAN_PACKAGES, "org.example.a, org.example.a.b.c");
+        properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "org.example.a.b");
+        OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
+        FilteredIndexView view = new FilteredIndexView(null, config);
+        assertTrue(view.accepts(DotName.createSimple("org.example.a.MyClassA")));
+        assertFalse(view.accepts(DotName.createSimple("org.example.a.b.MyClassB")));
+        assertTrue(view.accepts(DotName.createSimple("org.example.a.b.c.MyClassC")));
+    }
+
+    @Test
+    void testAccepts_ExcludedPackageAroundIncludedPackage() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(OASConfig.SCAN_PACKAGES, "org.example.a.b");
+        properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "org.example.a, org.example.a.b.c");
+        OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
+        FilteredIndexView view = new FilteredIndexView(null, config);
+        assertFalse(view.accepts(DotName.createSimple("org.example.a.MyClassA")));
+        assertTrue(view.accepts(DotName.createSimple("org.example.a.b.MyClassB")));
+        assertFalse(view.accepts(DotName.createSimple("org.example.a.b.c.MyClassC")));
     }
 
     @Test
