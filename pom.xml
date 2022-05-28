@@ -29,7 +29,7 @@
         <version.com.github.eirslett.frontend-maven-plugin>1.12.1</version.com.github.eirslett.frontend-maven-plugin>
 
         <artifactId.arquillian.jetty>arquillian-jetty-embedded-11</artifactId.arquillian.jetty>
-        <version.arquillian.jetty>1.0.0.CR4</version.arquillian.jetty>
+        <version.arquillian.jetty>1.0.0.Final</version.arquillian.jetty>
         <version.jetty>11.0.7</version.jetty>
         <version.resteasy>6.0.0.Final</version.resteasy>
         <!-- RESTEasy REST Client relocated to another GAV, so these props are for jakarta auto migration -->
