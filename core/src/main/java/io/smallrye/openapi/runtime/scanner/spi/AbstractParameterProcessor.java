@@ -613,12 +613,14 @@ public abstract class AbstractParameterProcessor {
 
         int modCount = SchemaImpl.getModCount(localSchema);
 
-        beanValidationScanner.ifPresent(s -> s.applyConstraints(context.target, localSchema, param.getName(),
-                (target, name) -> {
-                    if (param.getRequired() == null) {
-                        param.setRequired(Boolean.TRUE);
-                    }
-                }));
+        if (beanValidationScanner.isPresent()) {
+            beanValidationScanner.get().applyConstraints(context.target, localSchema, param.getName(),
+                    (target, name) -> {
+                        if (param.getRequired() == null) {
+                            param.setRequired(Boolean.TRUE);
+                        }
+                    });
+        }
 
         setDefaultValue(localSchema, context.defaultValue);
 
