@@ -36,7 +36,7 @@
         <!-- Test Only Dependencies -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-vertx-web</artifactId>
+            <artifactId>quarkus-reactive-routes</artifactId>
             <version>${version.quarkus}</version>
             <scope>test</scope>
         </dependency>
