@@ -51,6 +51,10 @@ public interface OpenApiConfig {
                 "(" + OpenApiConstants.NEVER_SCAN_CLASSES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
     }
 
+    default boolean scanBeanValidation() {
+        return true;
+    }
+
     default Set<String> servers() {
         return new HashSet<>();
     }

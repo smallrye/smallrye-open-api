@@ -30,6 +30,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Pattern scanClasses;
     private Pattern scanExcludePackages;
     private Pattern scanExcludeClasses;
+    private Boolean scanBeanValidation;
     private Set<String> servers;
     private Boolean scanDependenciesDisable;
     private Set<String> scanDependenciesJars;
@@ -155,6 +156,16 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                     OpenApiConstants.NEVER_SCAN_CLASSES);
         }
         return scanExcludeClasses;
+    }
+
+    @Override
+    public boolean scanBeanValidation() {
+        if (scanBeanValidation == null) {
+            scanBeanValidation = getConfig()
+                    .getOptionalValue(OASConfig.SCAN_BEANVALIDATION, Boolean.class)
+                    .orElse(Boolean.TRUE);
+        }
+        return scanBeanValidation;
     }
 
     /**

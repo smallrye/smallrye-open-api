@@ -34,7 +34,7 @@ public class BeanValidationScanner {
         void setRequired(AnnotationTarget target, String propertyKey);
     }
 
-    static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
+    public static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
     static final Set<DotName> CONSTRAINTS = new HashSet<>();
 
     static final BigDecimal NEGATIVE_ONE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
@@ -115,7 +115,7 @@ public class BeanValidationScanner {
      * @param target the annotation target to scan
      * @return true if annotations from the Bean Validation package are present, otherwise false.
      */
-    public static boolean hasConstraints(AnnotationTarget target) {
+    public boolean hasConstraints(AnnotationTarget target) {
         return TypeUtil.getAnnotations(target)
                 .stream()
                 .map(AnnotationInstance::name)
@@ -153,7 +153,7 @@ public class BeanValidationScanner {
      *        the handler to be called when a
      *        bean validation @NotNull constraint is encountered.
      */
-    public static void applyConstraints(AnnotationTarget target,
+    public void applyConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
@@ -173,8 +173,8 @@ public class BeanValidationScanner {
                 applyArrayConstraints(target, schema, propertyKey, handler);
                 break;
             case BOOLEAN:
-                INSTANCE.notNull(target, schema, propertyKey, handler);
-                INSTANCE.requiredJackson(target, propertyKey, handler);
+                notNull(target, schema, propertyKey, handler);
+                requiredJackson(target, propertyKey, handler);
                 break;
             case INTEGER:
                 applyNumberConstraints(target, schema, propertyKey, handler);
@@ -191,55 +191,55 @@ public class BeanValidationScanner {
         }
     }
 
-    private static void applyStringConstraints(AnnotationTarget target,
+    private void applyStringConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.decimalMax(target, schema);
-        INSTANCE.decimalMin(target, schema);
-        INSTANCE.digits(target, schema);
-        INSTANCE.notBlank(target, schema, propertyKey, handler);
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.sizeString(target, schema);
-        INSTANCE.notEmptyString(target, schema, propertyKey, handler);
+        decimalMax(target, schema);
+        decimalMin(target, schema);
+        digits(target, schema);
+        notBlank(target, schema, propertyKey, handler);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        sizeString(target, schema);
+        notEmptyString(target, schema, propertyKey, handler);
     }
 
-    private static void applyObjectConstraints(AnnotationTarget target,
+    private void applyObjectConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.sizeObject(target, schema);
-        INSTANCE.notEmptyObject(target, schema, propertyKey, handler);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        sizeObject(target, schema);
+        notEmptyObject(target, schema, propertyKey, handler);
     }
 
-    private static void applyArrayConstraints(AnnotationTarget target,
+    private void applyArrayConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.sizeArray(target, schema);
-        INSTANCE.notEmptyArray(target, schema, propertyKey, handler);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        sizeArray(target, schema);
+        notEmptyArray(target, schema, propertyKey, handler);
     }
 
-    private static void applyNumberConstraints(AnnotationTarget target,
+    private void applyNumberConstraints(AnnotationTarget target,
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.decimalMax(target, schema);
-        INSTANCE.decimalMin(target, schema);
-        INSTANCE.digits(target, schema);
-        INSTANCE.max(target, schema);
-        INSTANCE.min(target, schema);
-        INSTANCE.negative(target, schema);
-        INSTANCE.negativeOrZero(target, schema);
-        INSTANCE.notNull(target, schema, propertyKey, handler);
-        INSTANCE.requiredJackson(target, propertyKey, handler);
-        INSTANCE.positive(target, schema);
-        INSTANCE.positiveOrZero(target, schema);
+        decimalMax(target, schema);
+        decimalMin(target, schema);
+        digits(target, schema);
+        max(target, schema);
+        min(target, schema);
+        negative(target, schema);
+        negativeOrZero(target, schema);
+        notNull(target, schema, propertyKey, handler);
+        requiredJackson(target, propertyKey, handler);
+        positive(target, schema);
+        positiveOrZero(target, schema);
     }
 
     void decimalMax(AnnotationTarget target, Schema schema) {
@@ -340,8 +340,9 @@ public class BeanValidationScanner {
         if (constraint != null && schema.getMaximum() == null) {
             Boolean exclusive = schema.getExclusiveMaximum();
 
-            if (exclusive != null && exclusive) {
+            if (exclusive == null || exclusive) {
                 schema.setMaximum(BigDecimal.ZERO);
+                schema.setExclusiveMaximum(Boolean.TRUE);
             } else {
                 schema.setMaximum(NEGATIVE_ONE);
             }
@@ -439,8 +440,9 @@ public class BeanValidationScanner {
         if (constraint != null && schema.getMinimum() == null) {
             Boolean exclusive = schema.getExclusiveMinimum();
 
-            if (exclusive != null && exclusive) {
+            if (exclusive == null || exclusive) {
                 schema.setMinimum(BigDecimal.ZERO);
+                schema.setExclusiveMinimum(Boolean.TRUE);
             } else {
                 schema.setMinimum(BigDecimal.ONE);
             }
@@ -536,16 +538,15 @@ public class BeanValidationScanner {
 
     /**
      * Retrieves a constraint {@link AnnotationInstance} from the current
-     * target. If the annotation is found and applies to multiple bean
-     * validation groups or to a single group other than the {@link Default},
-     * returns null.
+     * target. If the annotation is found and does not apply to the {@link Default}
+     * group, returns null.
      *
      * @param target
      *        the object from which to retrieve the constraint annotation
      * @param annotationName
      *        name of the annotation
-     * @return the first occurrence of the named constraint if no groups or only
-     *         the {@link Default} group is specified, or null
+     * @return the first occurrence of the named constraint if it applies to the
+     *         {@link Default} group, otherwise null
      */
     AnnotationInstance getConstraint(AnnotationTarget target, List<DotName> annotationName) {
         AnnotationInstance constraint = getAnnotation(target, annotationName);
@@ -559,16 +560,14 @@ public class BeanValidationScanner {
 
             Type[] groups = groupValue.asClassArray();
 
-            switch (groups.length) {
-                case 0:
+            if (groups.length == 0) {
+                return constraint;
+            }
+
+            for (Type group : groups) {
+                if (group.name().equals(BV_JAVAX_DEFAULT_GROUP) || group.name().equals(BV_JAKARTA_DEFAULT_GROUP)) {
                     return constraint;
-                case 1:
-                    if (groups[0].name().equals(BV_JAVAX_DEFAULT_GROUP) || groups[0].name().equals(BV_JAKARTA_DEFAULT_GROUP)) {
-                        return constraint;
-                    }
-                    break;
-                default:
-                    break;
+                }
             }
         }
 
