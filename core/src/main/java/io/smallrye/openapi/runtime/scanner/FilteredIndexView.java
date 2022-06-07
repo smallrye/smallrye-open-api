@@ -1,6 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,10 +26,15 @@ public class FilteredIndexView implements IndexView {
 
     private final IndexView delegate;
 
-    private final Pattern scanClasses;
-    private final Pattern scanPackages;
-    private final Pattern scanExcludeClasses;
-    private final Pattern scanExcludePackages;
+    private final Set<String> scanClasses;
+    private final Set<Pattern> scanClassesPatterns;
+    private final Set<String> scanPackages;
+    private final Set<Pattern> scanPackagesPatterns;
+    private final Set<String> scanExcludeClasses;
+    private final Set<Pattern> scanExcludeClassesPatterns;
+    private final Set<String> scanExcludePackages;
+    private final Set<Pattern> scanExcludePackagesPatterns;
+    private boolean anyIncludesConfigured;
 
     /**
      * Constructor.
@@ -38,11 +45,34 @@ public class FilteredIndexView implements IndexView {
     public FilteredIndexView(IndexView delegate, OpenApiConfig config) {
         this.delegate = delegate;
 
-        scanClasses = config.scanClasses();
-        scanPackages = config.scanPackages();
-        scanExcludeClasses = config.scanExcludeClasses();
-        scanExcludePackages = config.scanExcludePackages();
+        scanClasses = new HashSet<>();
+        scanClassesPatterns = new HashSet<>();
+        processConfigStrings(config.scanClasses(), scanClasses, scanClassesPatterns);
 
+        scanPackages = new HashSet<>();
+        scanPackagesPatterns = new HashSet<>();
+        processConfigStrings(config.scanPackages(), scanPackages, scanPackagesPatterns);
+
+        scanExcludeClasses = new HashSet<>();
+        scanExcludeClassesPatterns = new HashSet<>();
+        processConfigStrings(config.scanExcludeClasses(), scanExcludeClasses, scanExcludeClassesPatterns);
+
+        scanExcludePackages = new HashSet<>();
+        scanExcludePackagesPatterns = new HashSet<>();
+        processConfigStrings(config.scanExcludePackages(), scanExcludePackages, scanExcludePackagesPatterns);
+
+        anyIncludesConfigured = !scanClasses.isEmpty() || !scanClassesPatterns.isEmpty() || !scanPackages.isEmpty()
+                || !scanPackagesPatterns.isEmpty();
+    }
+
+    private static void processConfigStrings(Set<String> inputs, Set<String> strings, Set<Pattern> patterns) {
+        for (String input : inputs) {
+            if (input.startsWith("^") || input.endsWith("$")) {
+                patterns.add(Pattern.compile(input));
+            } else {
+                strings.add(input);
+            }
+        }
     }
 
     /**
@@ -76,149 +106,147 @@ public class FilteredIndexView implements IndexView {
      * @return true if the inclusion/exclusion configuration allows scanning of the class name
      */
     public boolean accepts(DotName className, boolean allowImpliedInclusion) {
-        final boolean accept;
-        final MatchHandler match = new MatchHandler(className);
 
-        if (match.isQualifiedNameExcluded()) {
-            /*
-             * A FQCN or pattern that *fully* matched the FQCN was given in
-             * `mp.openapi.scan.exclude.classes`.
-             */
-            accept = false;
-        } else if (match.isQualifiedNameIncluded()) {
-            /*
-             * A FQCN or pattern that *fully* matched the FQCN was given in
-             * `mp.openapi.scan.classes`.
-             */
-            accept = true;
-        } else if (match.isSimpleNameExcluded()) {
-            /*
-             * A pattern or partial class name was given in `mp.openapi.scan.exclude.classes`
-             * where the matching part of the configuration ends with the simple class name
-             * *AND* no match exists for the simple class name in `mp.openapi.scan.classes`
-             * with a more complete package specified.
-             */
-            accept = false;
-        } else if (match.isSimpleNameIncluded()) {
-            /*
-             * A pattern or partial class name was given in `mp.openapi.scan.classes`
-             * where the matching part of the configuration ends with the simple class name
-             */
-            accept = true;
-        } else if (match.isPackageExcluded()) {
-            /*
-             * A package or package pattern given in `mp.openapi.scan.exclude.packages`
-             * matches the start of the FQCN's package and a more complete match in
-             * `mp.openapi.scan.packages` was not given.
-             */
-            accept = false;
-        } else if (match.isPackageIncluded()) {
-            /*
-             * A package or package pattern given in `mp.openapi.scan.packages`
-             * matches the start of the FQCN's package.
-             */
-            accept = true;
-        } else if (allowImpliedInclusion && match.isImpliedInclusion()) {
-            /*
-             * No value has been specified for either `mp.openapi.scan.classes`
-             * or `mp.openapi.scan.packages`.
-             */
-            accept = true;
-        } else {
-            /*
-             * A value is specified for `mp.openapi.scan.classes` or `mp.openapi.scan.packages`
-             * which does not match this FQCN in any way.
-             */
-            accept = false;
-        }
+        String fqcn = className.toString();
+        String simpleName = className.withoutPackagePrefix();
+        int index = fqcn.lastIndexOf('.');
+        String packageName = index > -1 ? fqcn.substring(0, index) : "";
 
-        return accept;
-    }
-
-    class MatchHandler {
-        final DotName className;
-        final String fqcn;
-        final String simpleName;
-        final String packageName;
-
-        final String classExclGroup;
-        final String classInclGroup;
-        final String pkgExclGroup;
-        final String pkgInclGroup;
-
-        public MatchHandler(DotName className) {
-            this.className = className;
-            this.fqcn = className.toString();
-            this.simpleName = className.withoutPackagePrefix();
-            final int index = fqcn.lastIndexOf('.');
-            this.packageName = index > -1 ? fqcn.substring(0, index) : "";
-
-            this.classExclGroup = matchingGroup(fqcn, scanExcludeClasses);
-            this.classInclGroup = matchingGroup(fqcn, scanClasses);
-            this.pkgExclGroup = matchingGroup(packageName, scanExcludePackages);
-            this.pkgInclGroup = matchingGroup(packageName, scanPackages);
-        }
-
-        public boolean isQualifiedNameExcluded() {
-            return fqcn.equals(classExclGroup);
-        }
-
-        public boolean isQualifiedNameIncluded() {
-            return fqcn.equals(classInclGroup);
-        }
-
-        public boolean isSimpleNameExcluded() {
-            if (classExclGroup.endsWith(simpleName)) {
-                if (isSimpleNameIncluded()) {
-                    return classExclGroup.length() >= classInclGroup.length();
-                }
-                return true;
-            }
+        // Check for an exact class name match in the exclude list
+        if (scanExcludeClasses.contains(fqcn)) {
             return false;
         }
 
-        public boolean isSimpleNameIncluded() {
-            return classInclGroup.endsWith(simpleName);
+        // Check for an exact class name match in the include list
+        if (scanClasses.contains(fqcn)) {
+            return true;
         }
 
-        public boolean isPackageExcluded() {
-            if (pkgExclGroup.isEmpty()) {
-                return false;
-            }
-            if (packageName.equals(pkgExclGroup)) {
-                return true;
-            }
-            if (packageName.startsWith(pkgExclGroup)) {
-                if (isPackageIncluded()) {
-                    return (pkgExclGroup.length() >= pkgInclGroup.length());
-                }
-                return true;
-            }
+        // Find the longest entry from the class exclude list which is a suffix of the fqcn and includes the full simple class name
+        String simpleNameExcludeMatch = longestSuffixMatch(fqcn, scanExcludeClasses);
+        if (!simpleNameExcludeMatch.endsWith(simpleName)) {
+            simpleNameExcludeMatch = "";
+        }
+        // Find the longest regex match from the class exclude list
+        simpleNameExcludeMatch = longest(simpleNameExcludeMatch, longestRegexMatch(fqcn, scanExcludeClassesPatterns));
+
+        // Find the longest entry from the class include list which is a suffix of the fqcn and includes the full simple class name
+        String simpleNameIncludeMatch = longestSuffixMatch(fqcn, scanClasses);
+        if (!simpleNameIncludeMatch.endsWith(simpleName)) {
+            simpleNameIncludeMatch = "";
+        }
+        // Find the longest regex match from the class include list
+        simpleNameIncludeMatch = longest(simpleNameIncludeMatch, longestRegexMatch(fqcn, scanClassesPatterns));
+
+        if (simpleNameExcludeMatch.length() > 0 && simpleNameExcludeMatch.length() >= simpleNameIncludeMatch.length()) {
+            // There is an exclude match and it's more complete than any include match
             return false;
         }
 
-        public boolean isPackageIncluded() {
-            if (pkgInclGroup.isEmpty()) {
-                return false;
-            }
-            if (packageName.equals(pkgInclGroup)) {
-                return true;
-            }
-            return packageName.startsWith(pkgInclGroup);
+        if (simpleNameIncludeMatch.length() > 0) {
+            // There is an include match
+            return true;
         }
 
-        public boolean isImpliedInclusion() {
-            return (scanClasses == null || scanClasses.pattern().isEmpty())
-                    && (scanPackages == null || scanPackages.pattern().isEmpty());
+        // Find the longest string prefix match or regex match from the include package list
+        String packageIncludeMatch = longest(longestPrefixMatch(packageName, scanPackages),
+                longestRegexMatch(packageName, scanPackagesPatterns));
+
+        // Find the longest string prefix match or regex match from the exclude package list
+        String packageExcludeMatch = longest(longestPrefixMatch(packageName, scanExcludePackages),
+                longestRegexMatch(packageName, scanExcludePackagesPatterns));
+
+        if (packageExcludeMatch.length() > 0 && packageExcludeMatch.length() >= packageIncludeMatch.length()) {
+            // There is a package exclude match and it's more complete than any include match
+            return false;
         }
+
+        if (packageIncludeMatch.length() > 0) {
+            // There is a package include match
+            return true;
+        }
+
+        if (allowImpliedInclusion && !anyIncludesConfigured) {
+            return true;
+        }
+
+        return false;
     }
 
-    String matchingGroup(String value, Pattern pattern) {
-        if (pattern == null || pattern.pattern().isEmpty() || value.isEmpty()) {
-            return "";
+    /**
+     * Find the longest string from {@code prefixes} which is a prefix of {@code name}
+     * 
+     * @param name the name
+     * @param prefixes a set of potential prefixes of {@code name}
+     * @return the longest element of {@code prefixes} which is a prefix of {@code name}, or the empty string if there are none
+     */
+    private static String longestPrefixMatch(String name, Set<String> prefixes) {
+        String longestPrefix = "";
+        for (String prefix : prefixes) {
+            if (name.startsWith(prefix)) {
+                if (prefix.length() > longestPrefix.length()) {
+                    longestPrefix = prefix;
+                }
+            }
         }
-        Matcher m = pattern.matcher(value);
-        return m.find() ? m.group() : "";
+        return longestPrefix;
+    }
+
+    /**
+     * Find the longest string from {@code suffixes} which is a suffix of {@code name}
+     * 
+     * @param name the name
+     * @param suffixes a set of potential suffixes of {@code name}
+     * @return the longest element of {@code suffixes} which is a suffix of {@code name}, or the empty string if there are none
+     */
+    private static String longestSuffixMatch(String name, Set<String> suffixes) {
+        String longestSuffix = "";
+        for (String suffix : suffixes) {
+            if (name.endsWith(suffix)) {
+                if (suffix.length() > longestSuffix.length()) {
+                    longestSuffix = suffix;
+                }
+            }
+        }
+        return longestSuffix;
+    }
+
+    /**
+     * Attempts to find each element of {@code patterns} in {@code name} and returns the longest match
+     * 
+     * @param name the name to match against
+     * @param patterns the patterns to try
+     * @return the longest result returned by {@link Matcher#group()} after successfully finding a pattern in {@code name}, or
+     *         the empty string if no patterns matched
+     */
+    private static String longestRegexMatch(String name, Set<Pattern> patterns) {
+        String longestMatch = "";
+        for (Pattern pattern : patterns) {
+            Matcher m = pattern.matcher(name);
+            if (m.find()) {
+                String match = m.group();
+                if (match.length() > longestMatch.length()) {
+                    longestMatch = match;
+                }
+            }
+        }
+        return longestMatch;
+    }
+
+    /**
+     * Returns the longest argument
+     * 
+     * @param strings an array of strings
+     * @return the longest element of {@code strings}
+     */
+    private static String longest(String... strings) {
+        String longest = "";
+        for (String string : strings) {
+            if (string.length() > longest.length()) {
+                longest = string;
+            }
+        }
+        return longest;
     }
 
     /**

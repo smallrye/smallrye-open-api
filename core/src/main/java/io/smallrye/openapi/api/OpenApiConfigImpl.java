@@ -1,9 +1,10 @@
 package io.smallrye.openapi.api;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -26,10 +27,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String modelReader;
     private String filter;
     private Boolean scanDisable;
-    private Pattern scanPackages;
-    private Pattern scanClasses;
-    private Pattern scanExcludePackages;
-    private Pattern scanExcludeClasses;
+    private Set<String> scanPackages;
+    private Set<String> scanClasses;
+    private Set<String> scanExcludePackages;
+    private Set<String> scanExcludeClasses;
     private Boolean scanBeanValidation;
     private Set<String> servers;
     private Boolean scanDependenciesDisable;
@@ -116,9 +117,11 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanPackages()
      */
     @Override
-    public Pattern scanPackages() {
+    public Set<String> scanPackages() {
         if (scanPackages == null) {
-            scanPackages = patternOf(getStringConfigValue(OASConfig.SCAN_PACKAGES));
+            scanPackages = getConfig().getOptionalValue(OASConfig.SCAN_PACKAGES, String.class)
+                    .map(this::asCsvSet)
+                    .orElseGet(Collections::emptySet);
         }
         return scanPackages;
     }
@@ -127,9 +130,11 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanClasses()
      */
     @Override
-    public Pattern scanClasses() {
+    public Set<String> scanClasses() {
         if (scanClasses == null) {
-            scanClasses = patternOf(getStringConfigValue(OASConfig.SCAN_CLASSES));
+            scanClasses = getConfig().getOptionalValue(OASConfig.SCAN_CLASSES, String.class)
+                    .map(this::asCsvSet)
+                    .orElseGet(Collections::emptySet);
         }
         return scanClasses;
     }
@@ -138,10 +143,12 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanExcludePackages()
      */
     @Override
-    public Pattern scanExcludePackages() {
+    public Set<String> scanExcludePackages() {
         if (scanExcludePackages == null) {
-            scanExcludePackages = patternOf(getStringConfigValue(OASConfig.SCAN_EXCLUDE_PACKAGES),
-                    OpenApiConstants.NEVER_SCAN_PACKAGES);
+            scanExcludePackages = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_PACKAGES, String.class)
+                    .map(this::asCsvSet)
+                    .orElseGet(HashSet::new);
+            scanExcludePackages.addAll(OpenApiConstants.NEVER_SCAN_PACKAGES);
         }
         return scanExcludePackages;
     }
@@ -150,10 +157,12 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#scanExcludeClasses()
      */
     @Override
-    public Pattern scanExcludeClasses() {
+    public Set<String> scanExcludeClasses() {
         if (scanExcludeClasses == null) {
-            scanExcludeClasses = patternOf(getStringConfigValue(OASConfig.SCAN_EXCLUDE_CLASSES),
-                    OpenApiConstants.NEVER_SCAN_CLASSES);
+            scanExcludeClasses = getConfig().getOptionalValue(OASConfig.SCAN_EXCLUDE_CLASSES, String.class)
+                    .map(this::asCsvSet)
+                    .orElseGet(HashSet::new);
+            scanExcludeClasses.addAll(OpenApiConstants.NEVER_SCAN_CLASSES);
         }
         return scanExcludeClasses;
     }
