@@ -17,6 +17,7 @@ import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.servervariable.ServerVariableReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -38,13 +39,14 @@ public class ServerReader {
      * @param annotationValue an Array of {@literal @}Server annotations
      * @return a List of Server models
      */
-    public static Optional<List<Server>> readServers(final AnnotationValue annotationValue) {
+    public static Optional<List<Server>> readServers(final AnnotationScannerContext context,
+            final AnnotationValue annotationValue) {
         if (annotationValue != null) {
             IoLogging.logger.annotationsArray("@Server");
             AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
             List<Server> servers = new ArrayList<>();
             for (AnnotationInstance serverAnno : nestedArray) {
-                servers.add(readServer(serverAnno));
+                servers.add(readServer(context, serverAnno));
             }
             return Optional.of(servers);
         }
@@ -76,9 +78,9 @@ public class ServerReader {
      * @param annotationValue the {@literal @}Server annotation
      * @return a Server model
      */
-    public static Server readServer(final AnnotationValue annotationValue) {
+    public static Server readServer(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue != null) {
-            return readServer(annotationValue.asNested());
+            return readServer(context, annotationValue.asNested());
         }
         return null;
     }
@@ -89,14 +91,15 @@ public class ServerReader {
      * @param annotationInstance the {@literal @}Server annotations instance
      * @return Server model
      */
-    public static Server readServer(final AnnotationInstance annotationInstance) {
+    public static Server readServer(final AnnotationScannerContext context, final AnnotationInstance annotationInstance) {
         if (annotationInstance != null) {
             IoLogging.logger.singleAnnotation("@Server");
             Server server = new ServerImpl();
             server.setUrl(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_URL));
             server.setDescription(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
             server.setVariables(
-                    ServerVariableReader.readServerVariables(annotationInstance.value(ServerConstant.PROP_VARIABLES)));
+                    ServerVariableReader.readServerVariables(context, annotationInstance.value(ServerConstant.PROP_VARIABLES)));
+            server.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
             return server;
         }
         return null;

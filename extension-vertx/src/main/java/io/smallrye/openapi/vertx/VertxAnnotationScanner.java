@@ -171,7 +171,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processSecuritySchemeAnnotation(context, routeClass, openApi);
 
         // Process @Server annotations
-        processServerAnnotation(routeClass, openApi);
+        processServerAnnotation(context, routeClass, openApi);
 
         // Process Java security
         processJavaSecurity(routeClass, openApi);
@@ -295,7 +295,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             processCallback(context, method, operation);
 
             // Process @Server annotations
-            processServerAnnotation(method, operation);
+            processServerAnnotation(context, method, operation);
 
             // Process @Extension annotations
             processExtensions(context, method, operation);

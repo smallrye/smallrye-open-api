@@ -18,6 +18,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -39,7 +40,7 @@ public class LinkReader {
      * @param annotationValue map of {@literal @}Link annotations
      * @return Map of Link model
      */
-    public static Map<String, Link> readLinks(final AnnotationValue annotationValue) {
+    public static Map<String, Link> readLinks(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -52,7 +53,7 @@ public class LinkReader {
                 name = JandexUtil.nameFromRef(nested);
             }
             if (name != null) {
-                links.put(name, readLink(nested));
+                links.put(name, readLink(context, nested));
             }
         }
         return links;
@@ -85,7 +86,7 @@ public class LinkReader {
      * @param annotationInstance {@literal @}Link annotation
      * @return Link model
      */
-    private static Link readLink(final AnnotationInstance annotationInstance) {
+    private static Link readLink(final AnnotationScannerContext context, final AnnotationInstance annotationInstance) {
         if (annotationInstance == null) {
             return null;
         }
@@ -96,8 +97,9 @@ public class LinkReader {
         link.setParameters(readLinkParameters(annotationInstance.value(LinkConstant.PROP_PARAMETERS)));
         link.setDescription(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_DESCRIPTION));
         link.setRequestBody(JandexUtil.stringValue(annotationInstance, LinkConstant.PROP_REQUEST_BODY));
-        link.setServer(ServerReader.readServer(annotationInstance.value(LinkConstant.PROP_SERVER)));
+        link.setServer(ServerReader.readServer(context, annotationInstance.value(LinkConstant.PROP_SERVER)));
         link.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.LINK));
+        link.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return link;
     }
 

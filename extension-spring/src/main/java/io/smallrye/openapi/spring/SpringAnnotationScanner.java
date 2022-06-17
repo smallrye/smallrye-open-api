@@ -200,7 +200,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processSecuritySchemeAnnotation(context, controllerClass, openApi);
 
         // Process @Server annotations
-        processServerAnnotation(controllerClass, openApi);
+        processServerAnnotation(context, controllerClass, openApi);
 
         // Process Java security
         processJavaSecurity(controllerClass, openApi);
@@ -333,7 +333,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processCallback(context, method, operation);
 
         // Process @Server annotations
-        processServerAnnotation(method, operation);
+        processServerAnnotation(context, method, operation);
 
         // Process @Extension annotations
         processExtensions(context, method, operation);

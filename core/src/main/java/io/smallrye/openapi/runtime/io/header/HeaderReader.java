@@ -105,6 +105,7 @@ public class HeaderReader {
         header.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
         header.setAllowEmptyValue(
                 JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
+        header.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return header;
     }
 

@@ -168,10 +168,10 @@ public interface AnnotationScanner {
      * @param targetClass the class that contain the server annotation
      * @param openApi the current OpenApi model being created
      */
-    default void processServerAnnotation(final ClassInfo targetClass, OpenAPI openApi) {
+    default void processServerAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass, OpenAPI openApi) {
         List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(targetClass);
         for (AnnotationInstance annotation : serverAnnotations) {
-            Server server = ServerReader.readServer(annotation);
+            Server server = ServerReader.readServer(context, annotation);
             openApi.addServer(server);
         }
     }
@@ -754,13 +754,13 @@ public interface AnnotationScanner {
      * @param method the method that contain the server annotation
      * @param operation the current Operation model being created
      */
-    default void processServerAnnotation(final MethodInfo method, Operation operation) {
+    default void processServerAnnotation(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
         List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(method);
         if (serverAnnotations.isEmpty()) {
             serverAnnotations.addAll(ServerReader.getServerAnnotations(method.declaringClass()));
         }
         for (AnnotationInstance annotation : serverAnnotations) {
-            Server server = ServerReader.readServer(annotation);
+            Server server = ServerReader.readServer(context, annotation);
             operation.addServer(server);
         }
     }

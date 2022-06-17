@@ -95,6 +95,7 @@ public class EncodingReader {
                 JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED).orElse(null));
         encoding.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(EncodingConstant.PROP_HEADERS)));
+        encoding.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return encoding;
     }
 
