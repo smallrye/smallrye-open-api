@@ -515,7 +515,7 @@ public interface AnnotationScanner {
     }
 
     default boolean hasKotlinContinuation(MethodInfo method) {
-        return method.parameters().stream().anyMatch(this::isKotlinContinuation);
+        return method.parameterTypes().stream().anyMatch(this::isKotlinContinuation);
     }
 
     default boolean isKotlinContinuation(Type paramType) {
@@ -523,7 +523,7 @@ public interface AnnotationScanner {
     }
 
     default Type getKotlinContinuationArgument(AnnotationScannerContext context, MethodInfo method) {
-        Type type = method.parameters()
+        Type type = method.parameterTypes()
                 .stream()
                 .filter(this::isKotlinContinuation)
                 .findFirst()
@@ -923,7 +923,7 @@ public interface AnnotationScanner {
     default Type getRequestBodyParameterClassType(final AnnotationScannerContext context, MethodInfo method,
             final ResourceParameters params) {
 
-        List<Type> methodParams = method.parameters();
+        List<Type> methodParams = method.parameterTypes();
 
         return IntStream.range(0, methodParams.size())
                 .filter(position -> !isKotlinContinuation(methodParams.get(position)))

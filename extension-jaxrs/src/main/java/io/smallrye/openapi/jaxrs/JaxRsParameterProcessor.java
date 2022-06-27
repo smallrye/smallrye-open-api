@@ -118,7 +118,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected ParameterContext getUnannotatedPathParameter(MethodInfo resourceMethod, String name) {
-        List<Type> methodParameters = resourceMethod.parameters();
+        List<Type> methodParameters = resourceMethod.parameterTypes();
 
         for (int i = 0, m = methodParameters.size(); i < m; i++) {
             if (name.equals(resourceMethod.parameterName(i))) {

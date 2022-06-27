@@ -540,7 +540,7 @@ public class JandexUtil {
      * @return Type
      */
     public static Type getMethodParameterType(MethodInfo method, short position) {
-        return method.parameters().get(position);
+        return method.parameterType(position);
     }
 
     /**
@@ -550,7 +550,7 @@ public class JandexUtil {
      * @return Type
      */
     public static Type getMethodParameterType(MethodParameterInfo parameter) {
-        return parameter.method().parameters().get(parameter.position());
+        return parameter.method().parameterType(parameter.position());
     }
 
     /**
@@ -728,6 +728,6 @@ public class JandexUtil {
 
         MethodInfo method = target.asMethod();
 
-        return method.returnType().kind() != Type.Kind.VOID && method.parameters().isEmpty();
+        return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
     }
 }
