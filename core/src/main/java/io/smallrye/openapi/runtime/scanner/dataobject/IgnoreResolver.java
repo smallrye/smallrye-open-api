@@ -259,12 +259,12 @@ public class IgnoreResolver {
                 case METHOD:
                     MethodInfo method = target.asMethod();
                     if (method.returnType().kind().equals(Type.Kind.VOID)) {
-                        if (method.parameters().isEmpty()) {
+                        if (method.parameterTypes().isEmpty()) {
                             // Constructor or other method without type information
                             return Visibility.IGNORED;
                         } else {
                             // Setter method
-                            classType = method.parameters().get(0);
+                            classType = method.parameterType(0);
                         }
                     } else {
                         // Getter method

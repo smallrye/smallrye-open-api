@@ -76,7 +76,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isAsyncResponse(final MethodInfo method) {
-        return method.parameters()
+        return method.parameterTypes()
                 .stream()
                 .map(Type::name)
                 .anyMatch(JaxRsConstants.ASYNC_RESPONSE::contains);

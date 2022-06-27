@@ -1037,7 +1037,7 @@ public abstract class AbstractParameterProcessor {
             case METHOD:
                 // This is a bean property setter
                 MethodInfo method = target.asMethod();
-                if (method.parameters().size() == 1) {
+                if (method.parametersCount() == 1) {
                     String methodName = method.name();
 
                     if (methodName.startsWith("set")) {
@@ -1229,7 +1229,7 @@ public abstract class AbstractParameterProcessor {
                 type = target.asField().type();
                 break;
             case METHOD:
-                List<Type> methodParams = target.asMethod().parameters();
+                List<Type> methodParams = target.asMethod().parameterTypes();
                 if (methodParams.size() == 1) {
                     // This is a bean property setter
                     type = methodParams.get(0);
@@ -1483,7 +1483,7 @@ public abstract class AbstractParameterProcessor {
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     protected void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
-        clazz.annotations()
+        clazz.annotationsMap()
                 .entrySet()
                 .stream()
                 .filter(e -> ParameterConstant.DOTNAME_PARAMETER.equals(e.getKey()) || isParameter(e.getKey()))

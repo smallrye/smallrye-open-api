@@ -500,7 +500,7 @@ public class SchemaFactory {
         AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
 
-        List<Object> enumeration = enumKlazz.annotations()
+        List<Object> enumeration = enumKlazz.annotationsMap()
                 .getOrDefault(JacksonConstants.JSON_VALUE, Collections.emptyList())
                 .stream()
                 // @JsonValue#value (default = true) allows for the functionality to be disabled
