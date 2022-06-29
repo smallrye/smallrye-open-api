@@ -309,7 +309,7 @@ public class TypeResolver {
         this.writeMethod = writeMethod;
 
         if (writeMethod != null) {
-            this.leaf = writeMethod.parameters().get(0);
+            this.leaf = writeMethod.parameterType(0);
             targets.add(writeMethod);
         }
     }
@@ -749,7 +749,7 @@ public class TypeResolver {
         if (isAccessor(method)) {
             propertyType = returnType;
         } else if (isMutator(method)) {
-            propertyType = method.parameters().get(0);
+            propertyType = method.parameterType(0);
         }
 
         if (propertyType != null) {
@@ -885,7 +885,7 @@ public class TypeResolver {
     private static boolean isMutator(MethodInfo method) {
         Type returnType = method.returnType();
 
-        if (method.parameters().size() != 1 || !Type.Kind.VOID.equals(returnType.kind())) {
+        if (method.parametersCount() != 1 || !Type.Kind.VOID.equals(returnType.kind())) {
             return false;
         }
 
