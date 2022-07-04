@@ -10,6 +10,7 @@ import io.smallrye.openapi.api.models.info.LicenseImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -31,7 +32,7 @@ public class LicenseReader {
      * @param annotationValue the {@literal @}License annotation
      * @return License model
      */
-    public static License readLicense(final AnnotationValue annotationValue) {
+    public static License readLicense(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -40,6 +41,7 @@ public class LicenseReader {
         License license = new LicenseImpl();
         license.setName(JandexUtil.stringValue(nested, LicenseConstant.PROP_NAME));
         license.setUrl(JandexUtil.stringValue(nested, LicenseConstant.PROP_URL));
+        license.setExtensions(ExtensionReader.readExtensions(context, nested));
         return license;
     }
 

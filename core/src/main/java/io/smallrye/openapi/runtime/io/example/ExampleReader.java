@@ -100,6 +100,7 @@ public class ExampleReader {
         example.setDescription(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
         example.setValue(parseValue(context, JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_VALUE)));
         example.setExternalValue(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_EXTERNAL_VALUE));
+        example.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
 
         return example;
     }

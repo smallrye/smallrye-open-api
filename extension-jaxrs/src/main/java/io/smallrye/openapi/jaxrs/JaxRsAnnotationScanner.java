@@ -208,7 +208,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processSecuritySchemeAnnotation(context, applicationClass, openApi);
 
         // Process @Server annotations
-        processServerAnnotation(applicationClass, openApi);
+        processServerAnnotation(context, applicationClass, openApi);
 
         return openApi;
     }
@@ -471,7 +471,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processCallback(context, method, operation);
 
         // Process @Server annotations
-        processServerAnnotation(method, operation);
+        processServerAnnotation(context, method, operation);
 
         // Process @Extension annotations
         processExtensions(context, method, operation);

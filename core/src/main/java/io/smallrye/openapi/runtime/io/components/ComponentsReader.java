@@ -54,7 +54,7 @@ public class ComponentsReader {
                 CallbackReader.readCallbacks(context, nested.value(ComponentsConstant.PROP_CALLBACKS)));
         components.setExamples(ExampleReader.readExamples(context, nested.value(ComponentsConstant.PROP_EXAMPLES)));
         components.setHeaders(HeaderReader.readHeaders(context, nested.value(ComponentsConstant.PROP_HEADERS)));
-        components.setLinks(LinkReader.readLinks(nested.value(ComponentsConstant.PROP_LINKS)));
+        components.setLinks(LinkReader.readLinks(context, nested.value(ComponentsConstant.PROP_LINKS)));
         components.setParameters(
                 ParameterReader.readParameters(context, nested.value(ComponentsConstant.PROP_PARAMETERS)));
         components.setRequestBodies(RequestBodyReader.readRequestBodies(context,
@@ -64,6 +64,7 @@ public class ComponentsReader {
         components.setSchemas(SchemaReader.readSchemas(context, nested.value(ComponentsConstant.PROP_SCHEMAS)));
         components.setSecuritySchemes(
                 SecuritySchemeReader.readSecuritySchemes(context, nested.value(ComponentsConstant.PROP_SECURITY_SCHEMES)));
+        components.setExtensions(ExtensionReader.readExtensions(context, nested));
 
         return components;
     }

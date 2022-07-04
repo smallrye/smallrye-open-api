@@ -12,6 +12,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.contact.ContactReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.license.LicenseReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -33,7 +34,7 @@ public class InfoReader {
      * @param annotationValue the {@literal @}Info annotation
      * @return Info model
      */
-    public static Info readInfo(final AnnotationValue annotationValue) {
+    public static Info readInfo(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -44,9 +45,10 @@ public class InfoReader {
         info.setTitle(JandexUtil.stringValue(nested, InfoConstant.PROP_TITLE));
         info.setDescription(JandexUtil.stringValue(nested, InfoConstant.PROP_DESCRIPTION));
         info.setTermsOfService(JandexUtil.stringValue(nested, InfoConstant.PROP_TERMS_OF_SERVICE));
-        info.setContact(ContactReader.readContact(nested.value(InfoConstant.PROP_CONTACT)));
-        info.setLicense(LicenseReader.readLicense(nested.value(InfoConstant.PROP_LICENSE)));
+        info.setContact(ContactReader.readContact(context, nested.value(InfoConstant.PROP_CONTACT)));
+        info.setLicense(LicenseReader.readLicense(context, nested.value(InfoConstant.PROP_LICENSE)));
         info.setVersion(JandexUtil.stringValue(nested, InfoConstant.PROP_VERSION));
+        info.setExtensions(ExtensionReader.readExtensions(context, nested));
         return info;
     }
 

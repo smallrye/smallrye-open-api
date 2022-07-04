@@ -183,7 +183,7 @@ public class ResponseReader {
         response.setDescription(JandexUtil.stringValue(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
         response.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(ResponseConstant.PROP_HEADERS)));
-        response.setLinks(LinkReader.readLinks(annotationInstance.value(ResponseConstant.PROP_LINKS)));
+        response.setLinks(LinkReader.readLinks(context, annotationInstance.value(ResponseConstant.PROP_LINKS)));
         response.setContent(
                 ContentReader.readContent(context, annotationInstance.value(ResponseConstant.PROP_CONTENT),
                         ContentDirection.OUTPUT));

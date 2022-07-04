@@ -18,6 +18,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -40,7 +41,7 @@ public class OAuthReader {
      * @param annotationValue the annotation value
      * @return OAuthFlows model
      */
-    public static OAuthFlows readOAuthFlows(final AnnotationValue annotationValue) {
+    public static OAuthFlows readOAuthFlows(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -51,6 +52,7 @@ public class OAuthReader {
         flows.setPassword(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_PASSWORD)));
         flows.setClientCredentials(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_CLIENT_CREDENTIALS)));
         flows.setAuthorizationCode(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_AUTHORIZATION_CODE)));
+        flows.setExtensions(ExtensionReader.readExtensions(context, annotation));
         return flows;
     }
 
@@ -91,6 +93,7 @@ public class OAuthReader {
         flow.setTokenUrl(JandexUtil.stringValue(annotation, SecuritySchemeConstant.PROP_TOKEN_URL));
         flow.setRefreshUrl(JandexUtil.stringValue(annotation, SecuritySchemeConstant.PROP_REFRESH_URL));
         flow.setScopes(readOAuthScopes(annotation.value(SecuritySchemeConstant.PROP_SCOPES)));
+        flow.setExtensions(ExtensionReader.readExtensions(null, annotation));
         return flow;
     }
 

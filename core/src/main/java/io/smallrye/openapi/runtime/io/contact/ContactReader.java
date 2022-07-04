@@ -10,6 +10,7 @@ import io.smallrye.openapi.api.models.info.ContactImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -31,7 +32,7 @@ public class ContactReader {
      * @param annotationValue the {@literal @}Contact annotation
      * @return Contact model
      */
-    public static Contact readContact(final AnnotationValue annotationValue) {
+    public static Contact readContact(final AnnotationScannerContext context, final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -41,6 +42,7 @@ public class ContactReader {
         contact.setName(JandexUtil.stringValue(nested, ContactConstant.PROP_NAME));
         contact.setUrl(JandexUtil.stringValue(nested, ContactConstant.PROP_URL));
         contact.setEmail(JandexUtil.stringValue(nested, ContactConstant.PROP_EMAIL));
+        contact.setExtensions(ExtensionReader.readExtensions(context, nested));
         return contact;
     }
 

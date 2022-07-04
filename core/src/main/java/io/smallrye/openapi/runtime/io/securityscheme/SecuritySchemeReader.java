@@ -107,7 +107,8 @@ public class SecuritySchemeReader {
         securityScheme.setScheme(JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
         securityScheme.setBearerFormat(
                 JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
-        securityScheme.setFlows(OAuthReader.readOAuthFlows(annotationInstance.value(SecuritySchemeConstant.PROP_FLOWS)));
+        securityScheme
+                .setFlows(OAuthReader.readOAuthFlows(context, annotationInstance.value(SecuritySchemeConstant.PROP_FLOWS)));
         securityScheme
                 .setOpenIdConnectUrl(
                         JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));

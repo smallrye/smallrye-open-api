@@ -17,6 +17,7 @@ import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -40,7 +41,8 @@ public class ServerVariableReader {
      * @param annotationValue an arrays of {@literal @}ServerVariable annotations
      * @return a Map of Variable name and ServerVariable model
      */
-    public static Map<String, ServerVariable> readServerVariables(final AnnotationValue annotationValue) {
+    public static Map<String, ServerVariable> readServerVariables(final AnnotationScannerContext context,
+            final AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -50,7 +52,7 @@ public class ServerVariableReader {
         for (AnnotationInstance serverVariableAnno : nestedArray) {
             String name = JandexUtil.stringValue(serverVariableAnno, ServerVariableConstant.PROP_NAME);
             if (name != null) {
-                variables.put(name, readServerVariable(serverVariableAnno));
+                variables.put(name, readServerVariable(context, serverVariableAnno));
             }
         }
         return variables;
@@ -85,7 +87,8 @@ public class ServerVariableReader {
      * @param annotationInstance the {@literal @}ServerVariable annotation
      * @return the ServerVariable model
      */
-    private static ServerVariable readServerVariable(final AnnotationInstance annotationInstance) {
+    private static ServerVariable readServerVariable(final AnnotationScannerContext context,
+            final AnnotationInstance annotationInstance) {
         if (annotationInstance == null) {
             return null;
         }
@@ -97,6 +100,7 @@ public class ServerVariableReader {
                 JandexUtil.stringListValue(annotationInstance, ServerVariableConstant.PROP_ENUMERATION).orElse(null));
         variable.setDefaultValue(
                 JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
+        variable.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return variable;
     }
 

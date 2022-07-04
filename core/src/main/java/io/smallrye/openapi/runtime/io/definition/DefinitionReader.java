@@ -45,10 +45,10 @@ public class DefinitionReader {
             final AnnotationInstance annotationInstance) {
         IoLogging.logger.annotation("@OpenAPIDefinition");
 
-        openApi.setInfo(InfoReader.readInfo(annotationInstance.value(DefinitionConstant.PROP_INFO)));
+        openApi.setInfo(InfoReader.readInfo(context, annotationInstance.value(DefinitionConstant.PROP_INFO)));
         openApi.setTags(TagReader.readTags(context, annotationInstance.value(DefinitionConstant.PROP_TAGS)).orElse(null));
         openApi.setServers(
-                ServerReader.readServers(annotationInstance.value(DefinitionConstant.PROP_SERVERS)).orElse(null));
+                ServerReader.readServers(context, annotationInstance.value(DefinitionConstant.PROP_SERVERS)).orElse(null));
         openApi.setSecurity(SecurityRequirementReader
                 .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY),
                         annotationInstance.value(DefinitionConstant.PROP_SECURITY_SETS))
