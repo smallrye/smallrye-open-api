@@ -29,6 +29,12 @@ public class RestEasyConstants {
     public static final DotName MATRIX_PARAM = DotName
             .createSimple("org.jboss.resteasy.annotations.jaxrs.MatrixParam");
 
+    // RestEasy multi-part form annotations
+    public static final DotName MULTIPART_FORM = DotName
+            .createSimple("org.jboss.resteasy.annotations.providers.multipart.MultipartForm");
+    public static final DotName PART_TYPE = DotName
+            .createSimple("org.jboss.resteasy.annotations.providers.multipart.PartType");
+
     // RestEasy reactive parameter extension annotations
     public static final DotName REACTIVE_REST_QUERY = DotName
             .createSimple("org.jboss.resteasy.reactive.RestQuery");
@@ -45,11 +51,14 @@ public class RestEasyConstants {
     public static final DotName REACTIVE_REST_RESPONSE = DotName
             .createSimple("org.jboss.resteasy.reactive.RestResponse");
 
-    // RestEasy multi-part form annotations
-    public static final DotName MULTIPART_FORM = DotName
-            .createSimple("org.jboss.resteasy.annotations.providers.multipart.MultipartForm");
-    public static final DotName PART_TYPE = DotName
-            .createSimple("org.jboss.resteasy.annotations.providers.multipart.PartType");
+    // RestEasy reactive multi-part form annotations
+    public static final DotName REACTIVE_MULTIPART_FORM = DotName
+            .createSimple("org.jboss.resteasy.reactive.MultipartForm");
+    public static final DotName REACTIVE_PART_TYPE = DotName
+            .createSimple("org.jboss.resteasy.reactive.PartType");
+
+    public static final Set<DotName> PART_TYPES = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(PART_TYPE, REACTIVE_PART_TYPE)));
 
     // RestEasy multi-part request body types
     public static final DotName MULTIPART_INPUT = DotName
