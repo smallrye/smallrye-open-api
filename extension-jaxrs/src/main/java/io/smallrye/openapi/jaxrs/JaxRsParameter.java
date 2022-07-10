@@ -42,7 +42,8 @@ public enum JaxRsParameter {
     RESTEASY_REACTIVE_QUERY_PARAM(RestEasyConstants.REACTIVE_REST_QUERY, Parameter.In.QUERY, null, Parameter.Style.FORM),
     RESTEASY_REACTIVE_FORM_PARAM(RestEasyConstants.REACTIVE_REST_FORM, null, Parameter.Style.FORM, Parameter.Style.FORM),
     RESTEASY_REACTIVE_HEADER_PARAM(RestEasyConstants.REACTIVE_REST_HEADER, Parameter.In.HEADER, null, Parameter.Style.SIMPLE),
-    RESTEASY_REACTIVE_COOKIE_PARAM(RestEasyConstants.REACTIVE_REST_COOKIE, Parameter.In.COOKIE, null, Parameter.Style.FORM);
+    RESTEASY_REACTIVE_COOKIE_PARAM(RestEasyConstants.REACTIVE_REST_COOKIE, Parameter.In.COOKIE, null, Parameter.Style.FORM),
+    RESTEASY_REACTIVE_MULITIPART_FORM(RestEasyConstants.REACTIVE_MULTIPART_FORM, null, null, null, "multipart/form-data");
 
     final FrameworkParameter parameter;
 
