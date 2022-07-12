@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -224,6 +228,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
     private List<String> scanExcludeProfiles;
 
     /**
+     * Output encoding for openapi document.
+     */
+    @Parameter(property = "encoding")
+    private String encoding;
+
+    /**
      * List of System properties available to the OAS model reader and/or filter (if configured).
      */
     @Parameter
@@ -428,9 +438,21 @@ public class GenerateSchemaMojo extends AbstractMojo {
                     Files.createDirectories(directory);
                 }
 
-                writeSchemaFile(directory, "yaml", yaml.getBytes());
+                Charset charset = Charset.defaultCharset();
 
-                writeSchemaFile(directory, "json", json.getBytes());
+                if (!StringUtils.isBlank(encoding)) {
+                    try {
+                        charset = Charset.forName(encoding.trim());
+                    } catch (IllegalCharsetNameException e) {
+                        throw new MojoExecutionException("encoding parameter does not define a legal charset name", e);
+                    } catch (UnsupportedCharsetException e) {
+                        throw new MojoExecutionException("encoding parameter does not define a supported charset", e);
+                    }
+                }
+
+                writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
+
+                writeSchemaFile(directory, "json", json.getBytes(charset));
 
                 getLog().info("Wrote the schema files to " + outputDirectory.getAbsolutePath());
             }
