@@ -20,7 +20,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Encoding;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
 import test.io.smallrye.openapi.runtime.scanner.Widget;
@@ -39,20 +38,20 @@ public class MultipartFormTestResource {
         String formField1;
         @FormParam(value = "f2")
         @DefaultValue(value = "default2")
-        @PartType(value = "text/plain")
+        @org.jboss.resteasy.annotations.providers.multipart.PartType(value = "text/plain")
         String formField2;
         @FormParam(value = "data")
         private InputPart data;
         @FormParam(value = "binaryData")
-        @PartType(value = MediaType.APPLICATION_OCTET_STREAM)
+        @org.jboss.resteasy.annotations.providers.multipart.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(type = SchemaType.STRING, format = "binary")
         private byte[] binaryData;
         @FormParam(value = "file")
-        @PartType(value = MediaType.APPLICATION_OCTET_STREAM)
+        @org.jboss.resteasy.reactive.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(type = SchemaType.STRING, format = "binary")
         private InputStream file;
         @FormParam(value = "undocumentedFile")
-        @PartType(value = MediaType.APPLICATION_OCTET_STREAM)
+        @org.jboss.resteasy.annotations.providers.multipart.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(hidden = true)
         private InputStream undocumentedFile;
         @FormParam(value = "listOfFileStreams")
