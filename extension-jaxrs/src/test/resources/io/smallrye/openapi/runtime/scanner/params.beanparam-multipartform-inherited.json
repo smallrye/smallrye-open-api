@@ -73,8 +73,38 @@
                     "type": "string"
                   },
                   "icon": {
-                    "type" : "string",
-                    "format" : "binary"
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/uploadIcon/reactive": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "os": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "format": "binary"
                   }
                 }
               }
