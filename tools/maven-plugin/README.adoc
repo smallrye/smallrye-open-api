@@ -49,6 +49,7 @@ E.g. for includeDependenciesScopes could be configured as:
 - `configProperties` (String) - Load any properties from a file. Example `${basedir}/src/main/resources/application.properties`.
 - `attachArtifacts` (boolean, default: false) - Attach the built OpenAPI schema as build artifact.
 - `skip` (boolean, default: false) - Skip execution of the plugin.
+- `encoding` (String) - Encoding of output OpenAPI files.
 
 == MicroProfile OpenAPI Properties
 
