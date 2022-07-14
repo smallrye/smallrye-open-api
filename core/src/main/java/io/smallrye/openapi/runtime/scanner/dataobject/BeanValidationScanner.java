@@ -369,9 +369,6 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_BLANK);
 
         if (constraint != null) {
-            if (schema.getNullable() == null) {
-                schema.setNullable(Boolean.FALSE);
-            }
             if (schema.getPattern() == null) {
                 schema.setPattern("\\S");
             }
@@ -412,10 +409,6 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_EMPTY);
 
         if (constraint != null) {
-            if (schema.getNullable() == null) {
-                schema.setNullable(Boolean.FALSE);
-            }
-
             if (schema.getMinLength() == null) {
                 schema.setMinLength(1);
             }
@@ -428,10 +421,6 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_NULL);
 
         if (constraint != null) {
-            if (schema.getNullable() == null) {
-                schema.setNullable(Boolean.FALSE);
-            }
-
             handler.setRequired(target, propertyKey);
         }
     }

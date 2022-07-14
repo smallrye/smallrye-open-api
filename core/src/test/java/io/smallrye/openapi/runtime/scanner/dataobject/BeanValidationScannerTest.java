@@ -155,7 +155,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
-        assertEquals(Boolean.FALSE, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Integer.valueOf(1), schema.getMinItems());
         assertEquals(Integer.valueOf(20), schema.getMaxItems());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
@@ -181,7 +181,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
-        assertEquals(null, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Integer.valueOf(5), schema.getMinItems());
         assertEquals(Integer.valueOf(20), schema.getMaxItems());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
@@ -211,7 +211,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
-        assertEquals(Boolean.FALSE, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Integer.valueOf(1), schema.getMinProperties());
         assertEquals(Integer.valueOf(20), schema.getMaxProperties());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
@@ -239,7 +239,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
-        assertEquals(null, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Integer.valueOf(5), schema.getMinProperties());
         assertEquals(Integer.valueOf(20), schema.getMaxProperties());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
@@ -265,7 +265,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema, propertyKey, requirementHandlerFail());
 
-        assertEquals(null, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(null, schema.getMinProperties());
         assertEquals(null, schema.getMaxProperties());
         assertNull(parentSchema.getRequired());
@@ -649,7 +649,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.notNull(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
         assertEquals("\\S", schema.getPattern());
-        assertEquals(Boolean.FALSE, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 
@@ -673,7 +673,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.notBlank(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
         assertEquals("^\\d{1,8}([.]\\d{1,10})?$", schema.getPattern());
-        assertEquals(Boolean.FALSE, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 
@@ -698,7 +698,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
         assertEquals(Integer.valueOf(1), schema.getMinLength());
         assertEquals(Integer.valueOf(2000), schema.getMaxLength());
-        assertEquals(Boolean.FALSE, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 
@@ -723,7 +723,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
         assertEquals(Integer.valueOf(100), schema.getMinLength());
         assertEquals(Integer.valueOf(2000), schema.getMaxLength());
-        assertEquals(Boolean.FALSE, schema.getNullable());
+        assertNull(schema.getNullable());
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }
 

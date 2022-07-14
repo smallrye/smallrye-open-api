@@ -116,8 +116,7 @@
                   },
                   "f2": {
                     "type": "string",
-                    "default": "f2-default",
-                    "nullable": false
+                    "default": "f2-default"
                   }
                 }
               },

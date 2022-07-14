@@ -46,8 +46,7 @@
                     "default": 3
                   },
                   "formField4": {
-                    "type": "string",
-                    "nullable": false
+                    "type": "string"
                   },
                   "data": {
                     "type": "object"

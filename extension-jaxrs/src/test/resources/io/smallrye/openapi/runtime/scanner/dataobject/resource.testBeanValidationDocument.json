@@ -83,14 +83,7 @@
             }
           },
           "enumValue": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TestEnum"
-              },
-              {
-                "nullable": false
-              }
-            ]
+            "$ref": "#/components/schemas/TestEnum"
           }
         }
       },
@@ -111,7 +104,6 @@
         "properties": {
           "arrayListNotNullAndNotEmptyAndMaxItems": {
             "type": "array",
-            "nullable": false,
             "minItems": 1,
             "maxItems": 20,
             "items": {
@@ -127,8 +119,7 @@
             }
           },
           "booleanNotNull": {
-            "type": "boolean",
-            "nullable": false
+            "type": "boolean"
           },
           "decimalMaxBigDecimalExclusiveDigits": {
             "type": "number",
@@ -197,7 +188,6 @@
           },
           "mapObjectNotNullAndNotEmptyAndMaxProperties": {
             "type": "object",
-            "nullable": false,
             "minProperties": 1,
             "maxProperties": 20,
             "additionalProperties": {
@@ -214,23 +204,19 @@
           },
           "stringNotBlankDigits": {
             "type": "string",
-            "nullable": false,
             "pattern": "^\\d{1,8}([.]\\d{1,10})?$"
           },
           "stringNotBlankNotNull": {
             "type": "string",
-            "nullable": false,
             "pattern": "\\S"
           },
           "stringNotEmptyMaxSize": {
             "type": "string",
-            "nullable": false,
             "minLength": 1,
             "maxLength": 2000
           },
           "stringNotEmptySizeRange": {
             "type": "string",
-            "nullable": false,
             "minLength": 100,
             "maxLength": 2000
           },
