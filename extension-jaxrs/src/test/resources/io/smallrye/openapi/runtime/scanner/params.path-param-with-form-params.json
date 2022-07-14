@@ -10,7 +10,6 @@
           "schema": {
             "type": "string",
             "default": "12345",
-            "nullable": false,
             "minLength": 1,
             "maxLength": 12
           }

@@ -42,8 +42,7 @@
           "in": "cookie",
           "required": true,
           "schema": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           }
         }
       ],

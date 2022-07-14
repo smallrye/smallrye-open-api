@@ -35,8 +35,7 @@
             "description": "Condition string.",
             "minLength": 1,
             "type": "string",
-            "example": "arch = \"x86_64\"",
-            "nullable": false
+            "example": "arch = \"x86_64\""
           },
           "ctime": {
             "format": "yyyy-MM-dd hh:mm:ss.ddd",
@@ -71,8 +70,7 @@
             "description": "Name of the rule. Must be unique per customer account.",
             "maxLength": 150,
             "minLength": 1,
-            "type": "string",
-            "nullable": false
+            "type": "string"
           }
         }
       }
