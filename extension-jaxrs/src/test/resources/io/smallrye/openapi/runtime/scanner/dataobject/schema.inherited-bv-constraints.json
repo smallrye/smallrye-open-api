@@ -13,8 +13,7 @@
             "description": "The user identifier",
             "maximum": 9999,
             "minimum": 15,
-            "type": "integer",
-            "nullable": false
+            "type": "integer"
           }
         }
       }

@@ -34,7 +34,6 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
@@ -181,7 +180,7 @@ public class SchemaFactory {
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(context, externalDocsAnnotation));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
         schema.setType(readSchemaType(annotation, schema, defaults));
-        schema.setExample(parseSchemaAttr(annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
+        schema.setExample(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
         schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
         schema.setDiscriminator(
                 readDiscriminator(context,
@@ -302,21 +301,28 @@ public class SchemaFactory {
      * they key. Array-typed annotation values will be converted to List.
      *
      * @param <T> the type of the annotation attribute value
+     * @param context scanning context
      * @param annotation the annotation to read
      * @param propertyName the name of the attribute to read
      * @param defaults map of default values
      * @param schemaType related schema type for this attribute
      * @return the annotation attribute value, a default value, or null
      */
-    static Object parseSchemaAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults,
-            SchemaType schemaType) {
+    static Object parseSchemaAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
+            Map<String, Object> defaults, SchemaType schemaType) {
         return readAttr(annotation, propertyName, value -> {
             if (!(value instanceof String)) {
                 return value;
             }
             String stringValue = ((String) value);
             if (schemaType != SchemaType.STRING) {
-                return JsonUtil.parseValue(stringValue);
+                Object parsedValue;
+                for (AnnotationScannerExtension e : context.getExtensions()) {
+                    parsedValue = e.parseValue(stringValue);
+                    if (parsedValue != null) {
+                        return parsedValue;
+                    }
+                }
             }
             return stringValue;
         }, defaults);

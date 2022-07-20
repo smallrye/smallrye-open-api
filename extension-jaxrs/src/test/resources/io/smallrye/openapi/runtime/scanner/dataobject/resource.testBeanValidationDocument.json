@@ -13,13 +13,13 @@
           "Test"
         ],
         "requestBody": {
-           "content": {
-           "application/json": {
-           "schema": {
-             "$ref": "#/components/schemas/BVTestResourceEntity"
-           }
-           }
-           }
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BVTestResourceEntity"
+              }
+            }
+          }
         },
         "responses": {
           "200": {
@@ -38,13 +38,18 @@
   },
   "components": {
     "schemas": {
-      "TestEnum" : {
-        "enum" : [ "ABC", "DEF" ],
-        "type" : "string"
+      "TestEnum": {
+        "enum": [
+          "ABC",
+          "DEF"
+        ],
+        "type": "string"
       },
       "BVTestResourceEntity": {
         "type": "object",
-        "required" : [ "enumValue" ],
+        "required": [
+          "enumValue"
+        ],
         "properties": {
           "string_no_bean_constraints": {
             "type": "string",
@@ -77,33 +82,28 @@
               "type": "string"
             }
           },
-          "enumValue" : {
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/TestEnum"
-            }, {
-              "nullable" : false
-            } ]
+          "enumValue": {
+            "$ref": "#/components/schemas/TestEnum"
           }
         }
       },
       "BVTestContainer": {
         "type": "object",
         "required": [
-            "arrayListNotNullAndNotEmptyAndMaxItems",
-            "arrayListNullableAndMinItemsAndMaxItems",
-            "mapObjectNotNullAndNotEmptyAndMaxProperties",
-            "mapObjectNullableAndMinPropertiesAndMaxProperties",
-            "stringNotBlankNotNull",
-            "stringNotBlankDigits",
-            "stringNotEmptyMaxSize",
-            "stringNotEmptySizeRange",
-            "booleanNotNull",
-            "jacksonRequiredTrueString"
+          "arrayListNotNullAndNotEmptyAndMaxItems",
+          "arrayListNullableAndMinItemsAndMaxItems",
+          "mapObjectNotNullAndNotEmptyAndMaxProperties",
+          "mapObjectNullableAndMinPropertiesAndMaxProperties",
+          "stringNotBlankNotNull",
+          "stringNotBlankDigits",
+          "stringNotEmptyMaxSize",
+          "stringNotEmptySizeRange",
+          "booleanNotNull",
+          "jacksonRequiredTrueString"
         ],
         "properties": {
           "arrayListNotNullAndNotEmptyAndMaxItems": {
             "type": "array",
-            "nullable": false,
             "minItems": 1,
             "maxItems": 20,
             "items": {
@@ -119,8 +119,7 @@
             }
           },
           "booleanNotNull": {
-            "type": "boolean",
-            "nullable": false
+            "type": "boolean"
           },
           "decimalMaxBigDecimalExclusiveDigits": {
             "type": "number",
@@ -189,7 +188,6 @@
           },
           "mapObjectNotNullAndNotEmptyAndMaxProperties": {
             "type": "object",
-            "nullable": false,
             "minProperties": 1,
             "maxProperties": 20,
             "additionalProperties": {
@@ -206,31 +204,31 @@
           },
           "stringNotBlankDigits": {
             "type": "string",
-            "nullable": false,
             "pattern": "^\\d{1,8}([.]\\d{1,10})?$"
           },
           "stringNotBlankNotNull": {
             "type": "string",
-            "nullable": false,
             "pattern": "\\S"
           },
           "stringNotEmptyMaxSize": {
             "type": "string",
-            "nullable": false,
             "minLength": 1,
             "maxLength": 2000
           },
           "stringNotEmptySizeRange": {
             "type": "string",
-            "nullable": false,
             "minLength": 100,
             "maxLength": 2000
           },
-          "jacksonRequiredTrueString" : {
-            "type" : "string"
+          "jacksonRequiredTrueString": {
+            "type": "string"
           },
-          "jacksonDefaultString" : {
-            "type" : "string"
+          "jacksonDefaultString": {
+            "type": "string"
+          },
+          "patternFromBV": {
+            "type": "string",
+            "pattern": "^something$"
           }
         }
       }

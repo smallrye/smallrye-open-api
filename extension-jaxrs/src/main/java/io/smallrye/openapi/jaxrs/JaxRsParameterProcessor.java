@@ -150,7 +150,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             return;
         }
 
-        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, RestEasyConstants.PART_TYPE);
+        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, RestEasyConstants.PART_TYPES);
 
         if (type != null) {
             Encoding encoding = new EncodingImpl();

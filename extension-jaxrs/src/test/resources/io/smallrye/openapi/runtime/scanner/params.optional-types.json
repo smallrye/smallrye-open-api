@@ -246,8 +246,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "nullable": false
+              "type": "string"
             }
           }
         ],
@@ -274,7 +273,7 @@
         "properties": {
           "title": {
             "type": "string",
-            "nullable": false
+            "nullable": true
           }
         }
       },
