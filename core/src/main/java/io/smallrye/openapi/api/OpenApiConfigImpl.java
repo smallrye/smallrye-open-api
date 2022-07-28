@@ -402,6 +402,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         this.allowNakedPathParameter = Optional.of(true);
     }
 
+    public void setAllowNakedPathParameter(Boolean allowNakedPathParameter) {
+        this.allowNakedPathParameter = Optional.ofNullable(allowNakedPathParameter);
+    }
+
     @Override
     public Optional<String[]> getDefaultConsumes() {
         if (defaultConsumes == UNSET) {

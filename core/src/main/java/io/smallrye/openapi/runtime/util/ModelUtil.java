@@ -12,6 +12,7 @@ import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.Paths;
+import org.eclipse.microprofile.openapi.models.Reference;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -83,6 +84,14 @@ public class ModelUtil {
             openApi.setComponents(new ComponentsImpl());
         }
         return openApi.getComponents();
+    }
+
+    public static <T extends Reference<T>> T dereference(OpenAPI openApi, T model) {
+        if (model.getRef() == null) {
+            return model;
+        }
+        T component = getComponent(openApi, model.getRef());
+        return component != null ? component : model;
     }
 
     /**
