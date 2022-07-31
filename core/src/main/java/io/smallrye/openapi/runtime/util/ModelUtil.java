@@ -421,4 +421,8 @@ public class ModelUtil {
             list.remove(value);
         }
     }
+
+    public static <T> T supply(Supplier<T> source) {
+        return source.get();
+    }
 }

@@ -48,6 +48,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     void testJavaxAnnotatedMethodOverridesParentSchema() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
@@ -59,6 +60,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     void testJakartaAnnotatedMethodOverridesParentSchema() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
@@ -73,7 +75,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("type", schema.value("name").asString());
         assertEquals(false, schema.value("required").asBoolean());
         assertEquals("Cat", schema.value("example").asString());
-        assertArrayEquals(new String[] { "age", "type", "name", "extinct" },
+        assertArrayEquals(new String[] { "age", "type", "name", "speciesName", "extinct" },
                 properties.values().stream().map(TypeResolver::getPropertyName).toArray());
     }
 
@@ -81,6 +83,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     void testJavaxAnnotatedFieldsOverridesInterfaceSchema() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
@@ -91,6 +94,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     void testJakartaAnnotatedFieldsOverridesInterfaceSchema() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
@@ -109,6 +113,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     void testJavaxAnnotatedInterfaceMethodOverridesImplMethod() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class);
@@ -120,6 +125,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     void testJakartaAnnotatedInterfaceMethodOverridesImplMethod() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class);
@@ -128,20 +134,23 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     void testAnnotatedInterfaceMethodOverridesImplMethod(Map<String, TypeResolver> properties) {
-        assertEquals(5, properties.size());
-        TypeResolver resolver = properties.get("name");
-        assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
-        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
+        assertEquals(6, properties.size());
+        TypeResolver speciesNameResolver = properties.get("speciesName");
+        assertEquals(Kind.METHOD, speciesNameResolver.getAnnotationTarget().kind());
+        TypeResolver nameResolver = properties.get("name");
+        assertEquals(Kind.METHOD, nameResolver.getAnnotationTarget().kind());
+        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(nameResolver.getAnnotationTarget());
         assertEquals("c_name", schema.value("name").asString());
         assertEquals(50, schema.value("maxLength").asInt());
         assertEquals("The name of the canine", schema.value("description").asString());
-        assertArrayEquals(new String[] { "age", "type", "c_name", "bark", "extinct" },
+        assertArrayEquals(new String[] { "age", "type", "c_name", "bark", "speciesName", "extinct" },
                 properties.values().stream().map(TypeResolver::getPropertyName).toArray());
     }
 
     @Test
     void testAnnotatedInterfaceMethodOverridesStaticField() {
         Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Reptile.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class);
