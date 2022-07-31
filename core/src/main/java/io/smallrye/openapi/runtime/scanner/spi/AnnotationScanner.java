@@ -969,12 +969,11 @@ public interface AnnotationScanner {
 
     default boolean isPathParameter(final AnnotationScannerContext context, String name, final ResourceParameters params) {
         if (context.getConfig().allowNakedPathParameter().orElse(Boolean.FALSE)) {
-            List<Parameter> allParameters = params.getAllParameters();
-            for (Parameter p : allParameters) {
-                if (p.getIn().equals(Parameter.In.PATH) && p.getName().equals(name)) {
-                    return true;
-                }
-            }
+            return params.getAllParameters()
+                    .stream()
+                    .map(p -> ModelUtil.dereference(context.getOpenApi(), p))
+                    .filter(p -> Objects.equals(p.getName(), name))
+                    .anyMatch(p -> Objects.equals(p.getIn(), Parameter.In.PATH));
         }
         return false;
     }

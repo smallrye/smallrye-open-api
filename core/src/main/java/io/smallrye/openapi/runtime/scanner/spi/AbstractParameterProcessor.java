@@ -479,6 +479,12 @@ public abstract class AbstractParameterProcessor {
     private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
         ParameterImpl param = context.oaiParam != null ? (ParameterImpl) context.oaiParam : new ParameterImpl();
 
+        if (context.frameworkParam == null) {
+            String paramIn = String.valueOf(context.oaiParam.getIn());
+            ScannerSPILogging.log.missingFrameworkParam(CurrentScannerInfo.getCurrentAnnotationScanner().getName(),
+                    resourceMethod.declaringClass().toString(), resourceMethod.toString(), context.oaiParam.getName(), paramIn);
+        }
+
         param.setName(context.name);
 
         mapParameterIn(param, context);
