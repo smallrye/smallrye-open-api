@@ -33,7 +33,7 @@ public class Sub1TestResource<T> {
         return;
     }
 
-    @Path(value = "/sub2")
+    @Path(value = "/sub2/{sub2-id}")
     public Sub2TestResource<T> getSub2() {
         return new Sub2TestResource<T>();
     }

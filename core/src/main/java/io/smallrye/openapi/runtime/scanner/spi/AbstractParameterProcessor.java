@@ -80,6 +80,7 @@ public abstract class AbstractParameterProcessor {
     protected static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     protected final AnnotationScannerContext scannerContext;
+    protected final String contextPath;
     protected final IndexView index;
     protected final ClassLoader cl;
     protected final Function<AnnotationInstance, Parameter> readerFunction;
@@ -220,9 +221,11 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
+            String contextPath,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         this.scannerContext = scannerContext;
+        this.contextPath = contextPath;
         this.index = scannerContext.getIndex();
         this.cl = scannerContext.getClassLoader();
         this.readerFunction = reader;
@@ -1154,8 +1157,8 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Find the full path of the target. Method-level targets will include
-     * both the path to the resource and the path to the method joined with a '/'.
+     * Find the full path of the target, including parent resources if the annotation target is a member of a sub-resource
+     * class. Method-level targets will include both the path to the resource and the path to the method joined with a '/'.
      *
      * @param target target item for which the path is being generated
      * @return full path (excluding application path) of the target
@@ -1177,7 +1180,7 @@ public abstract class AbstractParameterProcessor {
                 break;
         }
 
-        return pathSegment;
+        return contextPath + '/' + pathSegment;
     }
 
     /**
