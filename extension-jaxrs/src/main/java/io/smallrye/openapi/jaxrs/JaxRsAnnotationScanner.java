@@ -372,7 +372,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         if (subResourceClass != null && !this.subResourceStack.contains(locator)) {
             Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-            ResourceParameters params = JaxRsParameterProcessor.process(context, resourceClass, method,
+            ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
                     reader, context.getExtensions());
 
             final String originalAppPath = this.currentAppPath;
@@ -448,7 +448,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Parameter annotations.
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-        ResourceParameters params = JaxRsParameterProcessor.process(context, resourceClass, method,
+        ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
                 reader, context.getExtensions());
         operation.setParameters(params.getOperationParameters());
 

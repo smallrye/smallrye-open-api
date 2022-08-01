@@ -9,7 +9,7 @@ public class Sub2TestResource<T> {
 
     @GET
     @Path(value = "{subsubid}")
-    public T getSub2(@PathParam(value = "subsubid") String subsubid) {
+    public T getSub2(@PathParam("sub2-id") String sub2Id, @PathParam(value = "subsubid") String subsubid) {
         return null;
     }
 

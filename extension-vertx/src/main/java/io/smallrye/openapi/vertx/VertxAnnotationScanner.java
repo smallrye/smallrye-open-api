@@ -272,7 +272,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             PathItem pathItem = new PathItemImpl();
             Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-            ResourceParameters params = VertxParameterProcessor.process(context, resourceClass,
+            ResourceParameters params = VertxParameterProcessor.process(context, currentAppPath, resourceClass,
                     method, reader,
                     context.getExtensions());
             operation.setParameters(params.getOperationParameters());

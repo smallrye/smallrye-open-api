@@ -203,9 +203,17 @@
         }
       ]
     },
-    "/resource{resource}/sub/{id}{idMatrix}/sub2/{subsubid}": {
+    "/resource{resource}/sub/{id}{idMatrix}/sub2/{sub2-id}/{subsubid}": {
       "get": {
         "parameters": [
+          {
+            "name": "sub2-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "subsubid",
             "in": "path",
