@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static io.smallrye.openapi.runtime.util.ModelUtil.supply;
+
 import java.lang.reflect.Modifier;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,13 @@ public class TypeResolver {
     static final String METHOD_PREFIX_GET = "get";
     static final String METHOD_PREFIX_IS = "is";
     static final String METHOD_PREFIX_SET = "set";
+    static final Set<DotName> PROPERTY_METHOD_ANNOTATIONS = supply(() -> {
+        Set<DotName> value = new HashSet<>();
+        value.add(SchemaConstant.DOTNAME_SCHEMA);
+        value.addAll(JsonbConstants.JSONB_PROPERTY);
+        value.add(JacksonConstants.JSON_PROPERTY);
+        return value;
+    });
 
     private final UnaryOperator<String> nameTranslator;
     private final Deque<Map<String, Type>> resolutionStack;
@@ -872,7 +882,7 @@ public class TypeResolver {
             return true;
         }
 
-        return TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
+        return isAnnotatedProperty(method);
     }
 
     /**
@@ -889,8 +899,12 @@ public class TypeResolver {
             return false;
         }
 
-        return METHOD_PREFIX_SET.equals(methodNamePrefix(method))
-                || TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
+        return METHOD_PREFIX_SET.equals(methodNamePrefix(method)) || isAnnotatedProperty(method);
+    }
+
+    static boolean isAnnotatedProperty(MethodInfo method) {
+        return PROPERTY_METHOD_ANNOTATIONS.stream()
+                .anyMatch(annotation -> TypeUtil.hasAnnotation(method, annotation));
     }
 
     private static String methodNamePrefix(MethodInfo method) {
