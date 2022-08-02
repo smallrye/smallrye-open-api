@@ -310,7 +310,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-        ResourceParameters params = SpringParameterProcessor.process(context, resourceClass,
+        ResourceParameters params = SpringParameterProcessor.process(context, currentAppPath, resourceClass,
                 method, reader,
                 context.getExtensions());
         operation.setParameters(params.getOperationParameters());

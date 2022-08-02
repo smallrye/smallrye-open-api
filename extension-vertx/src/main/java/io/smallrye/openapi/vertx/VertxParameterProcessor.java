@@ -44,9 +44,10 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
             .compile(":[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)"); //NOSONAR
 
     private VertxParameterProcessor(AnnotationScannerContext scannerContext,
+            String contextPath,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, reader, extensions);
+        super(scannerContext, contextPath, reader, extensions);
     }
 
     /**
@@ -56,6 +57,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
      * are only applicable to the method-level in this component.
      *
      * @param context the AnnotationScannerContext
+     * @param contextPath context path for the resource class and method
      * @param resourceClass the class info
      * @param resourceMethod the Vert.x resource method, annotated with one of the
      *        Vert.x HTTP annotations
@@ -66,12 +68,13 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
      *         object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
+            String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
-        VertxParameterProcessor processor = new VertxParameterProcessor(context, reader, extensions);
+        VertxParameterProcessor processor = new VertxParameterProcessor(context, contextPath, reader, extensions);
         return processor.process(resourceClass, resourceMethod);
     }
 

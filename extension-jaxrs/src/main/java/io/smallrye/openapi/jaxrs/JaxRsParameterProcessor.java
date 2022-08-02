@@ -52,9 +52,10 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}"); //NOSONAR
 
     private JaxRsParameterProcessor(AnnotationScannerContext scannerContext,
+            String contextPath,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, reader, extensions);
+        super(scannerContext, contextPath, reader, extensions);
     }
 
     /**
@@ -64,6 +65,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
      * are only applicable to the method-level in this component.
      *
      * @param context the AnnotationScannerContext
+     * @param contextPath context path for the resource class and method
      * @param resourceClass the class info
      * @param resourceMethod the JAX-RS resource method, annotated with one of the
      *        JAX-RS HTTP annotations
@@ -74,12 +76,13 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
      *         object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
+            String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
-        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, reader, extensions);
+        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, contextPath, reader, extensions);
         return processor.process(resourceClass, resourceMethod);
     }
 
