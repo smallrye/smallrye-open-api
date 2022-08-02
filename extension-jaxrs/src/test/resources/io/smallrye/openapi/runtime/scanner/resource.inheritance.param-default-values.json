@@ -1,0 +1,58 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/1/alpha": {
+      "get": {
+        "parameters": [
+          {
+            "name": "omega",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "default": 10,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/1/beta": {
+      "get": {
+        "parameters": [
+          {
+            "name": "upsilon",
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
