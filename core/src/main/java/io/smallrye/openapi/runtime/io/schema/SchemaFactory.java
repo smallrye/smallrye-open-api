@@ -181,7 +181,8 @@ public class SchemaFactory {
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
         schema.setType(readSchemaType(annotation, schema, defaults));
         schema.setExample(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
-        schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
+        schema.setDefaultValue(
+                parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, schema.getType()));
         schema.setDiscriminator(
                 readDiscriminator(context,
                         JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
@@ -218,7 +219,22 @@ public class SchemaFactory {
             }
         }
 
-        List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
+        final Schema.SchemaType type = schema.getType();
+
+        List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, (Object[] values) -> {
+            List<Object> parsed = new ArrayList<>(values.length);
+
+            if (type == Schema.SchemaType.STRING) {
+                parsed.addAll(Arrays.asList(values));
+            } else {
+                Arrays.stream(values)
+                        .map(String.class::cast)
+                        .map(v -> parseValue(context, v, type))
+                        .forEach(parsed::add);
+            }
+
+            return parsed;
+        }, defaults);
 
         if (enumeration != null && !enumeration.isEmpty()) {
             schema.setEnumeration(enumeration);
@@ -323,21 +339,24 @@ public class SchemaFactory {
     static Object parseSchemaAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
             Map<String, Object> defaults, SchemaType schemaType) {
         return readAttr(annotation, propertyName, value -> {
-            if (!(value instanceof String)) {
-                return value;
+            if (value instanceof String) {
+                return parseValue(context, (String) value, schemaType);
             }
-            String stringValue = ((String) value);
-            if (schemaType != SchemaType.STRING) {
-                Object parsedValue;
-                for (AnnotationScannerExtension e : context.getExtensions()) {
-                    parsedValue = e.parseValue(stringValue);
-                    if (parsedValue != null) {
-                        return parsedValue;
-                    }
+            return value;
+        }, defaults);
+    }
+
+    static Object parseValue(AnnotationScannerContext context, String stringValue, SchemaType schemaType) {
+        if (schemaType != SchemaType.STRING) {
+            Object parsedValue;
+            for (AnnotationScannerExtension e : context.getExtensions()) {
+                parsedValue = e.parseValue(stringValue);
+                if (parsedValue != null) {
+                    return parsedValue;
                 }
             }
-            return stringValue;
-        }, defaults);
+        }
+        return stringValue;
     }
 
     /**
