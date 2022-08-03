@@ -48,12 +48,12 @@
             "in": "query",
             "description": "Filtering policies by the is_enabled field.Defaults to true if no operand is given.",
             "schema": {
-              "default": "true",
+              "default": true,
               "enum": [
-                "true",
-                "false"
+                true,
+                false
               ],
-              "type": "string"
+              "type": "boolean"
             }
           },
           {
@@ -105,6 +105,22 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "name": "X-Session-Info",
+            "in": "cookie",
+            "description": "Data about the session",
+            "schema": {
+              "enum": [
+                {
+                  "status": "active"
+                },
+                {
+                  "status": "expired"
+                }
+              ],
+              "type": "object"
+            }
           }
         ],
         "responses": {
@@ -145,10 +161,11 @@
       "PagedResponse": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object"
+          "meta": {
+            "type": "object",
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
             }
           },
           "links": {
@@ -157,11 +174,10 @@
               "type": "string"
             }
           },
-          "meta": {
-            "type": "object",
-            "additionalProperties": {
-              "format": "int64",
-              "type": "integer"
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
             }
           }
         }

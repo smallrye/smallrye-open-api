@@ -53,8 +53,13 @@ public class MethodTargetParametersResource {
             @Parameter(name = "filter:op[description]", in = ParameterIn.QUERY, description = "Operations used with the filter", schema = @Schema(type = SchemaType.STRING, enumeration = {
                     "equal", "like", "ilike", "not_equal" }, defaultValue = "equal")),
             @Parameter(name = "filter[is_enabled]", in = ParameterIn.QUERY, description = "Filtering policies by the is_enabled field."
-                    + "Defaults to true if no operand is given.", schema = @Schema(type = SchemaType.STRING, defaultValue = "true", enumeration = {
-                            "true", "false" })) })
+                    + "Defaults to true if no operand is given.", schema = @Schema(type = SchemaType.BOOLEAN, defaultValue = "true", enumeration = {
+                            "true", "false" })),
+            @Parameter(name = "X-Session-Info", in = ParameterIn.COOKIE, description = "Data about the session", schema = @Schema(type = SchemaType.OBJECT, enumeration = {
+                    "{ \"status\": \"active\" }",
+                    "{ \"status\": \"expired\" }"
+            })),
+    })
     @APIResponse(responseCode = "400", description = "Bad parameter for sorting was passed")
     @APIResponse(responseCode = "404", description = "No policies found for customer")
     @APIResponse(responseCode = "403", description = "Individual permissions missing to complete action")
