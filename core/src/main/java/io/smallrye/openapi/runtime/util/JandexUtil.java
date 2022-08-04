@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -731,5 +732,51 @@ public class JandexUtil {
         MethodInfo method = target.asMethod();
 
         return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
+    }
+
+    public static Map<ClassInfo, MethodInfo> ancestry(MethodInfo method, AugmentedIndexView index) {
+        ClassInfo declaringClass = method.declaringClass();
+        Type resourceType = Type.create(declaringClass.name(), Type.Kind.CLASS);
+        Map<ClassInfo, Type> chain = inheritanceChain(index, declaringClass, resourceType);
+        Map<ClassInfo, MethodInfo> ancestry = new LinkedHashMap<>();
+
+        for (ClassInfo classInfo : chain.keySet()) {
+            ancestry.put(classInfo, null);
+
+            classInfo.methods()
+                    .stream()
+                    .filter(m -> !m.isSynthetic())
+                    .filter(m -> isSameSignature(method, m))
+                    .findFirst()
+                    .ifPresent(m -> ancestry.put(classInfo, m));
+
+            interfaces(index, classInfo)
+                    .stream()
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
+                    .map(index::getClass)
+                    .filter(Objects::nonNull)
+                    .map(iface -> {
+                        ancestry.put(iface, null);
+                        return iface;
+                    })
+                    .flatMap(iface -> iface.methods().stream())
+                    .filter(m -> isSameSignature(method, m))
+                    .forEach(m -> ancestry.put(m.declaringClass(), m));
+        }
+
+        return ancestry;
+    }
+
+    public static List<MethodInfo> overriddenMethods(MethodInfo method, List<MethodInfo> candidates) {
+        return candidates.stream()
+                .filter(m -> !method.equals(m))
+                .filter(m -> isSameSignature(method, m))
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
+        return Objects.equals(m1.name(), m2.name())
+                && m1.parametersCount() == m2.parametersCount()
+                && Objects.equals(m1.parameterTypes(), m2.parameterTypes());
     }
 }

@@ -262,16 +262,29 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected void processOperationParameters(MethodInfo resourceMethod, ResourceParameters parameters) {
-        // Phase II - Read method argument @Parameter and framework's annotations
-        resourceMethod.annotations()
+        List<MethodInfo> candidateMethods = JandexUtil.ancestry(resourceMethod, scannerContext.getAugmentedIndex())
+                .entrySet()
                 .stream()
-                .filter(a -> !JandexUtil.equals(a.target(), resourceMethod))
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        /*
+         * Phase II - Read method arguments: @Parameter and framework's annotations
+         * 
+         * Read the resource method and any method super classes/interfaces that it may override
+         */
+        candidateMethods.stream()
+                .flatMap(m -> m.annotations().stream().filter(a -> !JandexUtil.equals(a.target(), m)))
                 .forEach(this::readAnnotatedType);
 
-        // Phase III - Read method @Parameter(s) annotations
-        resourceMethod.annotations()
-                .stream()
-                .filter(a -> JandexUtil.equals(a.target(), resourceMethod))
+        /*
+         * Phase III - Read @Parameter(s) annotations directly on the recourd method
+         * 
+         * Read the resource method and any method super classes/interfaces that it may override
+         */
+        candidateMethods.stream()
+                .flatMap(m -> m.annotations().stream().filter(a -> JandexUtil.equals(a.target(), m)))
                 .filter(a -> openApiParameterAnnotations.contains(a.name()))
                 .forEach(this::readParameterAnnotation);
 

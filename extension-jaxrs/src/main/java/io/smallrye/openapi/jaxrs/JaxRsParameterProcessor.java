@@ -3,6 +3,7 @@ package io.smallrye.openapi.jaxrs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -237,7 +238,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                 path = JandexUtil.getClassAnnotation(target.asClass(), JaxRsConstants.PATH);
                 break;
             case METHOD:
-                path = JandexUtil.getAnnotation(target.asMethod(), JaxRsConstants.PATH);
+                path = pathOf(target.asMethod());
                 break;
             default:
                 break;
@@ -260,6 +261,18 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         return "";
     }
 
+    AnnotationInstance pathOf(MethodInfo method) {
+        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .map(m -> JandexUtil.getAnnotation(m, JaxRsConstants.PATH))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
     @Override
     protected boolean isSubResourceLocator(MethodInfo method) {
         switch (method.returnType().kind()) {
@@ -277,8 +290,12 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
-        return method.annotations()
+        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+                .entrySet()
                 .stream()
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .flatMap(m -> m.annotations().stream())
                 .map(AnnotationInstance::name)
                 .anyMatch(JaxRsConstants.HTTP_METHODS::contains);
     }
