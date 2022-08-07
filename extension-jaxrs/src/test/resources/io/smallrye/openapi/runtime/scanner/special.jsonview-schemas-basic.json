@@ -1,0 +1,148 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Generated API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/item/{id}/internal": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanName_Internal_Public"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/item/{id}/public": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanName_Public"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeanName_WriteOnly_Public"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanName_Public"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BeanName_Internal_Public": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "inner1": {
+            "$ref": "#/components/schemas/Inner1_Internal_Public"
+          }
+        }
+      },
+      "BeanName_Public": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "inner1": {
+            "$ref": "#/components/schemas/Inner1_Public"
+          }
+        }
+      },
+      "BeanName_WriteOnly_Public": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "inner1": {
+            "$ref": "#/components/schemas/Inner1_WriteOnly_Public"
+          }
+        }
+      },
+      "Inner1_Internal_Public": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "inner2": {
+            "$ref": "#/components/schemas/Inner2"
+          }
+        }
+      },
+      "Inner1_Public": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "inner2": {
+            "$ref": "#/components/schemas/Inner2"
+          }
+        }
+      },
+      "Inner1_WriteOnly_Public": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "inner2": {
+            "$ref": "#/components/schemas/Inner2"
+          }
+        }
+      },
+      "Inner2": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

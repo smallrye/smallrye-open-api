@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
@@ -397,7 +398,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             schema.setTitle("UUID");
             schema.setDescription("Universally Unique Identifier");
             schema.setExample("de8681db-b4d6-4c47-a428-4b959c1c8e9a");
-            schemaRegistry.register(uuidType, schema);
+            schemaRegistry.register(uuidType, Collections.emptySet(), schema);
         }
 
     }

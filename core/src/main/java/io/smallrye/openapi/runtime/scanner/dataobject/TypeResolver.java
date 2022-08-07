@@ -493,11 +493,13 @@ public class TypeResolver {
             JandexUtil.fields(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptField)
+                    .filter(field -> isViewable(context, field))
                     .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
 
             methods(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptMethod)
+                    .filter(method -> isViewable(context, method))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             JandexUtil.interfaces(index, currentClass)
@@ -506,6 +508,7 @@ public class TypeResolver {
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> methods(context, clazz).stream())
+                    .filter(method -> isViewable(context, method))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             descendants.add(currentClass);
@@ -550,6 +553,22 @@ public class TypeResolver {
 
     private static boolean isNonPublicOrAbsent(MethodInfo method) {
         return method == null || !Modifier.isPublic(method.flags());
+    }
+
+    private static boolean isViewable(AnnotationScannerContext context, AnnotationTarget propertySource) {
+        Set<Type> activeViews = context.getJsonViews();
+
+        if (activeViews.isEmpty()) {
+            return true;
+        }
+
+        Type[] applicableViews = TypeUtil.getDeclaredAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
+
+        if (applicableViews != null && applicableViews.length > 0) {
+            return Arrays.stream(applicableViews).anyMatch(activeViews::contains);
+        }
+
+        return true;
     }
 
     /**

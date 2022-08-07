@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
@@ -37,7 +38,7 @@ class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
 
         Schema result = scanner.process();
-        registry.register(type, result);
+        registry.register(type, Collections.emptySet(), result);
 
         printToConsole(oai);
         assertJsonEquals(expectedResourceName, oai);
@@ -53,7 +54,7 @@ class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
-        registry.register(parentType, result);
+        registry.register(parentType, Collections.emptySet(), result);
 
         printToConsole(oai);
         assertJsonEquals(expectedResourceName, oai);

@@ -137,6 +137,10 @@ public class JandexUtil {
         return ref;
     }
 
+    public static <T> T value(AnnotationInstance annotation) {
+        return annotation != null ? value(annotation, OpenApiConstants.VALUE) : null;
+    }
+
     /**
      * Convenience method to retrieve the named parameter from an annotation.
      * The value will be unwrapped from its containing {@link AnnotationValue}.
@@ -340,7 +344,7 @@ public class JandexUtil {
      * @return Whether it's a "ref"
      */
     public static boolean isRef(AnnotationInstance annotation) {
-        return annotation.value(OpenApiConstants.REF) != null;
+        return annotation != null && annotation.value(OpenApiConstants.REF) != null;
     }
 
     /**
@@ -565,14 +569,28 @@ public class JandexUtil {
      */
     public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {
-        for (AnnotationInstance annotation : method.annotations()) {
-            if (annotation.target().kind() == Kind.METHOD_PARAMETER &&
-                    annotation.target().asMethodParameter().position() == parameterIndex &&
-                    annotation.name().equals(annotationName)) {
-                return annotation;
-            }
-        }
-        return null;
+        return method.annotations(annotationName)
+                .stream()
+                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
+                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Finds an annotation (if present) with the given name, on a particular parameter of a
+     * method based on the identity of the parameterType. Returns null if not found.
+     * 
+     * @param method the method
+     * @param parameterType the parameter type
+     * @param annotationName name of annotation we are looking for
+     * @return the Annotation instance
+     */
+    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, Type parameterType,
+            DotName annotationName) {
+        // parameterType must be the same object as in the method's parameter type array
+        int parameterIndex = method.parameterTypes().indexOf(parameterType);
+        return getMethodParameterAnnotation(method, parameterIndex, annotationName);
     }
 
     public static List<AnnotationValue> schemaDisplayValues(AnnotationInstance annotation) {

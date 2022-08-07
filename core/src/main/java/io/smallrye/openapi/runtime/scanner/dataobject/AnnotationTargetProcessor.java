@@ -149,10 +149,17 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             if (typeSchema.getType() != SchemaType.ARRAY) {
                 // Only register a reference to the type schema. The full schema will be added by subsequent
                 // items on the stack (if not already present in the registry).
-                registeredTypeSchema = SchemaRegistry.registerReference(registrationType, typeResolver, typeSchema);
+                if (JandexUtil.isRef(schemaAnnotation)) {
+                    registeredTypeSchema = null;
+                } else {
+                    registeredTypeSchema = SchemaRegistry.registerReference(registrationType, context.getJsonViews(),
+                            typeResolver,
+                            typeSchema);
+                }
             } else {
                 // Allow registration of arrays since we may not encounter a List<CurrentType> again.
-                registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, typeResolver, typeSchema);
+                registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, context.getJsonViews(), typeResolver,
+                        typeSchema);
             }
         }
 
@@ -210,8 +217,11 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             } else {
                 fieldSchema = registeredTypeSchema; // Reference to the type schema
             }
-        } else {
-            // Registration did not occur, overlay anything defined by the field on the type's schema
+        } else if (!JandexUtil.isRef(schemaAnnotation)) {
+            /*
+             * Registration did not occur and the user did not indicate this schema is a simple reference,
+             * overlay anything defined by the field on the type's schema
+             */
             fieldSchema = MergeUtil.mergeObjects(typeSchema, fieldSchema);
         }
 
@@ -311,7 +321,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
      * @return true if the schemas are not the same (i.e. registration occurred), otherwise false
      */
     private boolean registrationSuccessful(Schema typeSchema, Schema registeredTypeSchema) {
-        return (typeSchema != registeredTypeSchema);
+        return (registeredTypeSchema != null && typeSchema != registeredTypeSchema);
     }
 
     private Schema readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation, Type postProcessedField) {

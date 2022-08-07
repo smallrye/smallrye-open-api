@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.scanner;
 
 import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -106,8 +107,8 @@ public class SchemaRegistry {
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the given Type
      */
-    public static Schema checkRegistration(Type type, TypeResolver resolver, Schema schema) {
-        return register(type, resolver, schema, (registry, key) -> registry.register(key, schema, null));
+    public static Schema checkRegistration(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
+        return register(type, views, resolver, schema, (registry, key) -> registry.register(key, schema, null));
     }
 
     /**
@@ -140,11 +141,11 @@ public class SchemaRegistry {
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the given Type
      */
-    public static Schema registerReference(Type type, TypeResolver resolver, Schema schema) {
-        return register(type, resolver, schema, (registry, key) -> registry.registerReference(key));
+    public static Schema registerReference(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
+        return register(type, views, resolver, schema, (registry, key) -> registry.registerReference(key));
     }
 
-    static Schema register(Type type, TypeResolver resolver, Schema schema,
+    static Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,
             BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
         Type resolvedType;
 
@@ -170,7 +171,7 @@ public class SchemaRegistry {
             return schema;
         }
 
-        TypeKey key = new TypeKey(resolvedType);
+        TypeKey key = new TypeKey(resolvedType, views);
 
         if (registry.hasRef(key)) {
             schema = registry.lookupRef(key);
@@ -192,7 +193,7 @@ public class SchemaRegistry {
      * @param resolver resolver for type parameter
      * @return true when schema references are enabled and the type is present in the registry, otherwise false
      */
-    public static boolean hasSchema(Type type, TypeResolver resolver) {
+    public static boolean hasSchema(Type type, Set<Type> views, TypeResolver resolver) {
         SchemaRegistry registry = currentInstance();
 
         if (registry == null) {
@@ -207,7 +208,7 @@ public class SchemaRegistry {
             resolvedType = type;
         }
 
-        return registry.hasSchema(resolvedType);
+        return registry.hasSchema(resolvedType, views);
     }
 
     /**
@@ -267,7 +268,7 @@ public class SchemaRegistry {
             }
 
             Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
-            this.register(new TypeKey(type), schema, ((SchemaImpl) schema).getName());
+            this.register(new TypeKey(type, Collections.emptySet()), schema, ((SchemaImpl) schema).getName());
             ScannerLogging.logger.configSchemaRegistered(className);
         });
     }
@@ -279,12 +280,14 @@ public class SchemaRegistry {
      *
      * @param entityType
      *        the type the {@link Schema} applies to
+     * @param views
+     * 
      * @param schema
      *        {@link Schema} to add to the registry
      * @return a reference to the newly registered {@link Schema}
      */
-    public Schema register(Type entityType, Schema schema) {
-        TypeKey key = new TypeKey(entityType);
+    public Schema register(Type entityType, Set<Type> views, Schema schema) {
+        TypeKey key = new TypeKey(entityType, views);
 
         if (hasRef(key)) {
             // This is a replacement registration
@@ -349,7 +352,7 @@ public class SchemaRegistry {
         }
 
         String nameBase = schemaName != null ? schemaName : key.defaultName();
-        String name = nameBase;
+        String name = nameBase + key.viewSuffix();
         int idx = 1;
         while (this.names.contains(name)) {
             name = nameBase + idx++;
@@ -358,20 +361,20 @@ public class SchemaRegistry {
         return name;
     }
 
-    public Schema lookupRef(Type instanceType) {
-        return lookupRef(new TypeKey(instanceType));
+    public Schema lookupRef(Type instanceType, Set<Type> views) {
+        return lookupRef(new TypeKey(instanceType, views));
     }
 
-    public boolean hasRef(Type instanceType) {
-        return hasRef(new TypeKey(instanceType));
+    public boolean hasRef(Type instanceType, Set<Type> views) {
+        return hasRef(new TypeKey(instanceType, views));
     }
 
-    public Schema lookupSchema(Type instanceType) {
-        return lookupSchema(new TypeKey(instanceType));
+    public Schema lookupSchema(Type instanceType, Set<Type> views) {
+        return lookupSchema(new TypeKey(instanceType, views));
     }
 
-    public boolean hasSchema(Type instanceType) {
-        return hasSchema(new TypeKey(instanceType));
+    public boolean hasSchema(Type instanceType, Set<Type> views) {
+        return hasSchema(new TypeKey(instanceType, views));
     }
 
     public boolean isTypeRegistrationSupported(Type type, Schema schema) {
@@ -431,11 +434,19 @@ public class SchemaRegistry {
      */
     static class TypeKey {
         private final Type type;
+        private final Set<Type> views;
         private int hashCode = 0;
 
-        TypeKey(Type type) {
+        TypeKey(Type type, Set<Type> views) {
             this.type = type;
+            this.views = new LinkedHashSet<>(views);
         }
+
+        /*
+         * TypeKey(Type type) {
+         * this(type, Collections.emptySet());
+         * }
+         */
 
         public String defaultName() {
             StringBuilder name = new StringBuilder(type.name().local());
@@ -452,6 +463,21 @@ public class SchemaRegistry {
             }
 
             return name.toString();
+        }
+
+        public String viewSuffix() {
+            if (views.isEmpty()) {
+                return "";
+            }
+
+            StringBuilder suffix = new StringBuilder();
+
+            for (Type view : views) {
+                suffix.append('_');
+                suffix.append(view.name().local());
+            }
+
+            return suffix.toString();
         }
 
         static void appendParameterNames(StringBuilder name, ParameterizedType type) {
@@ -519,6 +545,10 @@ public class SchemaRegistry {
                 return false;
             }
 
+            if (!views.equals(other.views)) {
+                return false;
+            }
+
             if (type instanceof ParameterizedType) {
                 ParameterizedType paramType = (ParameterizedType) type;
                 ParameterizedType otherType = (ParameterizedType) other.type;
@@ -565,6 +595,7 @@ public class SchemaRegistry {
             }
 
             hash = type.name().hashCode();
+            hash = 31 * hash + views.hashCode();
 
             if (type instanceof ParameterizedType) {
                 ParameterizedType paramType = (ParameterizedType) type;
