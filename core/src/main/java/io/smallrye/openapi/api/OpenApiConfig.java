@@ -164,6 +164,10 @@ public interface OpenApiConfig {
         return new HashSet<>();
     }
 
+    default boolean removeUnusedSchemas() {
+        return false;
+    }
+
     default void doAllowNakedPathParameter() {
     }
 
