@@ -25,6 +25,7 @@ public final class OpenApiConstants {
     public static final String SUFFIX_PRIVATE_PROPERTIES_ENABLE = "private-properties.enable";
     public static final String SUFFIX_PROPERTY_NAMING_STRATEGY = "property-naming-strategy";
     public static final String SUFFIX_SORTED_PROPERTIES_ENABLE = "sorted-properties.enable";
+    public static final String SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE = "remove-unused-schemas.enable";
 
     public static final String SCAN_DEPENDENCIES_DISABLE = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCAN_DEPENDENCIES_DISABLE;
     public static final String SCAN_DEPENDENCIES_JARS = OASConfig.EXTENSIONS_PREFIX + SUFFIX_SCAN_DEPENDENCIES_JARS;
@@ -42,6 +43,7 @@ public final class OpenApiConstants {
     public static final String SMALLRYE_PRIVATE_PROPERTIES_ENABLE = SMALLRYE_PREFIX + SUFFIX_PRIVATE_PROPERTIES_ENABLE;
     public static final String SMALLRYE_PROPERTY_NAMING_STRATEGY = SMALLRYE_PREFIX + SUFFIX_PROPERTY_NAMING_STRATEGY;
     public static final String SMALLRYE_SORTED_PROPERTIES_ENABLE = SMALLRYE_PREFIX + SUFFIX_SORTED_PROPERTIES_ENABLE;
+    public static final String SMALLRYE_REMOVE_UNUSED_SCHEMAS = SMALLRYE_PREFIX + SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE;
     public static final String SCAN_PROFILES = SMALLRYE_PREFIX + "scan.profiles";
     public static final String SCAN_EXCLUDE_PROFILES = SMALLRYE_PREFIX + "scan.exclude.profiles";
 
