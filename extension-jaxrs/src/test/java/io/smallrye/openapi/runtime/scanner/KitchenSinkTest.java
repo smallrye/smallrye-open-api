@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -66,7 +67,7 @@ class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
         SchemaRegistry registry = SchemaRegistry.newInstance(context);
 
         Schema result = scanner.process();
-        registry.register(type, result);
+        registry.register(type, Collections.emptySet(), result);
 
         printToConsole(oai);
         assertJsonEquals("refsEnabled.kitchenSink.expected.json", oai);

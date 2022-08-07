@@ -22,10 +22,12 @@ public class JacksonConstants {
             .createSimple("com.fasterxml.jackson.annotation.JsonPropertyOrder");
     public static final DotName JSON_UNWRAPPED = DotName
             .createSimple("com.fasterxml.jackson.annotation.JsonUnwrapped");
-    public static final DotName JSON_NAMING = DotName
-            .createSimple("com.fasterxml.jackson.databind.annotation.JsonNaming");
     public static final DotName JSON_VALUE = DotName
             .createSimple("com.fasterxml.jackson.annotation.JsonValue");
+    public static final DotName JSON_VIEW = DotName
+            .createSimple("com.fasterxml.jackson.annotation.JsonView");
+    public static final DotName JSON_NAMING = DotName
+            .createSimple("com.fasterxml.jackson.databind.annotation.JsonNaming");
 
     public static final String PROP_VALUE = "value";
 

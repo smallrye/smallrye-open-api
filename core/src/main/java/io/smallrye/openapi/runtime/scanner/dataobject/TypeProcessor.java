@@ -68,7 +68,7 @@ public class TypeProcessor {
     public Type processType() {
         // If it's a terminal type.
         if (isTerminalType(type)) {
-            SchemaRegistry.checkRegistration(type, typeResolver, schema);
+            SchemaRegistry.checkRegistration(type, context.getJsonViews(), typeResolver, schema);
             return type;
         }
 
@@ -151,7 +151,7 @@ public class TypeProcessor {
             pushToStack(componentType, itemSchema);
         }
 
-        itemSchema = SchemaRegistry.registerReference(componentType, typeResolver, itemSchema);
+        itemSchema = SchemaRegistry.registerReference(componentType, context.getJsonViews(), typeResolver, itemSchema);
 
         while (arrayType.dimensions() > 1) {
             Schema parentArrSchema = new SchemaImpl();
@@ -250,7 +250,7 @@ public class TypeProcessor {
             Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
-                propsSchema = SchemaRegistry.registerReference(valueType, typeResolver, propsSchema);
+                propsSchema = SchemaRegistry.registerReference(valueType, context.getJsonViews(), typeResolver, propsSchema);
             }
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
@@ -262,7 +262,7 @@ public class TypeProcessor {
                 pushToStack(valueType, propsSchema);
             }
 
-            propsSchema = SchemaRegistry.registerReference(valueType, typeResolver, propsSchema);
+            propsSchema = SchemaRegistry.registerReference(valueType, context.getJsonViews(), typeResolver, propsSchema);
         }
 
         return propsSchema;

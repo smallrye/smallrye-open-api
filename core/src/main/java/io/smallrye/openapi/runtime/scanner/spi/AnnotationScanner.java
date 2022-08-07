@@ -41,6 +41,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
+import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
@@ -66,6 +67,7 @@ import io.smallrye.openapi.runtime.io.tag.TagConstant;
 import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
+import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -338,9 +340,33 @@ public interface AnnotationScanner {
         return Optional.of(operation);
     }
 
+    default void setJsonViewContext(AnnotationScannerContext context, Type[] views) {
+        clearJsonViewContext(context);
+
+        if (views != null && views.length > 0) {
+            AugmentedIndexView index = context.getAugmentedIndex();
+
+            Arrays.stream(views)
+                    .map(viewType -> {
+                        if (index.containsClass(viewType)) {
+                            return JandexUtil.inheritanceChain(index, index.getClass(viewType), viewType).values();
+                        }
+                        return Collections.singleton(viewType);
+                    })
+                    .flatMap(Collection::stream)
+                    .forEach(context.getJsonViews()::add);
+        }
+    }
+
+    default void clearJsonViewContext(AnnotationScannerContext context) {
+        context.getJsonViews().clear();
+    }
+
     default void processResponse(final AnnotationScannerContext context, final ClassInfo resourceClass, final MethodInfo method,
             Operation operation,
             Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap) {
+
+        setJsonViewContext(context, TypeUtil.getDeclaredAnnotationValue(method, JacksonConstants.JSON_VIEW));
 
         List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(resourceClass);
         for (AnnotationInstance annotation : classApiResponseAnnotations) {
@@ -386,6 +412,8 @@ public interface AnnotationScanner {
                 }
             }
         }
+
+        clearJsonViewContext(context);
     }
 
     /**
@@ -872,6 +900,9 @@ public interface AnnotationScanner {
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
             if (requestBodyType != null && requestBody.getRef() == null) {
+                Type[] views = JandexUtil
+                        .value(JandexUtil.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
+                setJsonViewContext(context, views);
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
                     requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
                     Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
@@ -906,6 +937,9 @@ public interface AnnotationScanner {
                 requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
 
                 if (requestBodyType != null && !isScannerInternalParameter(requestBodyType)) {
+                    Type[] views = JandexUtil.value(
+                            JandexUtil.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
+                    setJsonViewContext(context, views);
                     Schema schema = null;
 
                     if (isMultipartInput(requestBodyType)) {
@@ -929,6 +963,9 @@ public interface AnnotationScanner {
                 }
             }
         }
+
+        clearJsonViewContext(context);
+
         return requestBody;
     }
 
