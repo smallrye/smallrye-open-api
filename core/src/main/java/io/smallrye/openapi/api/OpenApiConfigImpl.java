@@ -55,6 +55,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private OperationIdStrategy operationIdStrategy;
     private Set<String> scanProfiles;
     private Set<String> scanExcludeProfiles;
+    private Boolean removeUnusedSchemas;
     private Optional<String[]> defaultProduces = UNSET;
     private Optional<String[]> defaultConsumes = UNSET;
     private Optional<Boolean> allowNakedPathParameter = Optional.empty();
@@ -456,6 +457,16 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             scanExcludeProfiles = asCsvSet(classes);
         }
         return scanExcludeProfiles;
+    }
+
+    @Override
+    public boolean removeUnusedSchemas() {
+        if (removeUnusedSchemas == null) {
+            removeUnusedSchemas = getConfig()
+                    .getOptionalValue(OpenApiConstants.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.class)
+                    .orElse(OpenApiConfig.super.removeUnusedSchemas());
+        }
+        return removeUnusedSchemas;
     }
 
     /**

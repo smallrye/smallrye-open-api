@@ -39,3 +39,4 @@ mvn clean install
 ** A standard JSON-B naming strategy (listed in `jakarta.json.bind.config.PropertyNamingStrategy`/`javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
+* `mp.openapi.extensions.smallrye.remove-unused-schemas.enable` - Set to `true` enable automatic removal of unused schemas from `components/schemas` in the OpenAPI model. Unused schemas will be removed following annotation scanning but prior to running any `OASFilter` that may be configured. Default value is `false`.
