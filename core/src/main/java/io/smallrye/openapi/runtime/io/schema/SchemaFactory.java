@@ -595,16 +595,16 @@ public class SchemaFactory {
         }
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
+        if (schemaRegistry != null && schemaRegistry.hasSchema(ctype, context.getJsonViews())) {
             if (schemaReferenceSupported) {
-                return schemaRegistry.lookupRef(ctype);
+                return schemaRegistry.lookupRef(ctype, context.getJsonViews());
             } else {
                 // Clone the schema from the registry using mergeObjects
-                return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
+                return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype, context.getJsonViews()));
             }
         } else if (context.getScanStack().contains(ctype)) {
             // Protect against stack overflow when the type is in the process of being scanned.
-            return SchemaRegistry.registerReference(ctype, null, new SchemaImpl());
+            return SchemaRegistry.registerReference(ctype, context.getJsonViews(), null, new SchemaImpl());
         } else {
             Schema schema = OpenApiDataObjectScanner.process(context, ctype);
 
@@ -628,9 +628,9 @@ public class SchemaFactory {
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
         if (allowRegistration(context, schemaRegistry, type, schema)) {
-            schema = schemaRegistry.register(type, schema);
-        } else if (schemaRegistry != null && schemaRegistry.hasRef(type)) {
-            schema = schemaRegistry.lookupRef(type);
+            schema = schemaRegistry.register(type, context.getJsonViews(), schema);
+        } else if (schemaRegistry != null && schemaRegistry.hasRef(type, context.getJsonViews())) {
+            schema = schemaRegistry.lookupRef(type, context.getJsonViews());
         }
 
         return schema;
@@ -657,7 +657,7 @@ public class SchemaFactory {
         /*
          * Only register if the type is not already registered
          */
-        return !registry.hasSchema(type);
+        return !registry.hasSchema(type, context.getJsonViews());
     }
 
     /**

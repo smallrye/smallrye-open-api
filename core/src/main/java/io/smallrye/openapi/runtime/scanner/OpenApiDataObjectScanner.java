@@ -221,7 +221,7 @@ public class OpenApiDataObjectScanner {
 
             Type currentType = currentPathEntry.getClazzType();
 
-            if (SchemaRegistry.hasSchema(currentType, null)) {
+            if (SchemaRegistry.hasSchema(currentType, context.getJsonViews(), null)) {
                 // This type has already been scanned and registered, don't do it again!
                 continue;
             }
@@ -292,9 +292,9 @@ public class OpenApiDataObjectScanner {
                 this.rootSchema = enclosingSchema;
             }
 
-            if (SchemaRegistry.hasSchema(currentType, null)) {
+            if (SchemaRegistry.hasSchema(currentType, context.getJsonViews(), null)) {
                 // Replace the registered schema if one is present
-                SchemaRegistry.currentInstance().register(currentType, enclosingSchema);
+                SchemaRegistry.currentInstance().register(currentType, context.getJsonViews(), enclosingSchema);
             }
         }
     }

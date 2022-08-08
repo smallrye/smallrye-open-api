@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -29,7 +30,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
-        registry.register(parentType, result);
+        registry.register(parentType, Collections.emptySet(), result);
 
         printToConsole(oai);
         assertJsonEquals("refsEnabled.nested.schema.family.expected.json", oai);
