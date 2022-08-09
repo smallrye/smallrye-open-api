@@ -179,6 +179,23 @@
         }
       }
     },
+    "/greeting/helloAgainRegex" : {
+      "get" : {
+        "operationId" : "id-to-select-with-filter",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/greeting/helloOptional/{name}" : {
       "get" : {
         "parameters" : [ {
