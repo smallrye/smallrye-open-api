@@ -372,6 +372,7 @@ public class FilterUtil {
                     model::setAdditionalPropertiesSchema);
             filter(filter, model.getAllOf(), FilterUtil::filterSchema, filter::filterSchema, model::removeAllOf);
             filter(filter, model.getAnyOf(), FilterUtil::filterSchema, filter::filterSchema, model::removeAnyOf);
+            filter(filter, model.getOneOf(), FilterUtil::filterSchema, filter::filterSchema, model::removeOneOf);
             filter(filter, model.getItems(), FilterUtil::filterSchema, filter::filterSchema, model::setItems);
             filter(filter, model.getNot(), FilterUtil::filterSchema, filter::filterSchema, model::setNot);
             filter(filter, model.getProperties(), FilterUtil::filterSchema, filter::filterSchema, model::removeProperty);

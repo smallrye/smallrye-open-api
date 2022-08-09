@@ -1,10 +1,13 @@
 package io.smallrye.openapi.jaxrs;
 
+import static io.smallrye.openapi.runtime.util.JandexUtil.overriddenMethods;
+
 import java.lang.reflect.Modifier;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -265,13 +268,20 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process exception mapper to auto generate api response based on method exceptions
         Map<DotName, AnnotationInstance> exceptionAnnotationMap = processExceptionMappers(context);
+        List<MethodInfo> methods = getResourceMethods(context, resourceClass);
+        Collections.reverse(methods);
 
-        for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
+        for (MethodInfo methodInfo : methods) {
             final AtomicInteger resourceCount = new AtomicInteger(0);
 
             JaxRsConstants.HTTP_METHODS
                     .stream()
-                    .filter(methodInfo::hasAnnotation)
+                    .filter(httpMethod -> {
+                        if (methodInfo.hasAnnotation(httpMethod)) {
+                            return true;
+                        }
+                        return overriddenMethods(methodInfo, methods).stream().anyMatch(m -> m.hasAnnotation(httpMethod));
+                    })
                     .map(DotName::withoutPackagePrefix)
                     .map(PathItem.HttpMethod::valueOf)
                     .forEach(httpMethod -> {
@@ -350,7 +360,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         if (subResourceClass != null && !this.subResourceStack.contains(locator)) {
             Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-            ResourceParameters params = JaxRsParameterProcessor.process(context, resourceClass, method,
+            ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
                     reader, context.getExtensions());
 
             final String originalAppPath = this.currentAppPath;
@@ -406,12 +416,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES,
-                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
-                        .orElse(null));
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES,
-                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get()))
-                        .orElse(null));
+        String[] defaultConsumes = context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(context, method, JaxRsConstants.CONSUMES, defaultConsumes));
+
+        String[] defaultProduces = context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(context, method, JaxRsConstants.PRODUCES, defaultProduces));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -426,7 +435,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Parameter annotations.
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-        ResourceParameters params = JaxRsParameterProcessor.process(context, resourceClass, method,
+        ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
                 reader, context.getExtensions());
         operation.setParameters(params.getOperationParameters());
 
@@ -485,24 +494,45 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, Set<DotName> annotationName, String[] defaultValue) {
-        AnnotationInstance annotation = JandexUtil.getAnnotation(resourceMethod, annotationName);
+    /**
+     * Search for {@code annotationName} on {@code resourceMethod} or any of the methods it overrides. If
+     * not found, search for {@code annotationName} on {@code resourceMethod}'s containing class or any
+     * of its super-classes or interfaces.
+     */
+    static String[] getMediaTypes(AnnotationScannerContext context, MethodInfo resourceMethod, Set<DotName> annotationName,
+            String[] defaultValue) {
+
+        return JandexUtil.ancestry(resourceMethod, context.getAugmentedIndex()).entrySet()
+                .stream()
+                .map(e -> getMediaTypeAnnotation(e.getKey(), e.getValue(), annotationName))
+                .filter(Objects::nonNull)
+                .map(annotation -> mediaTypeValue(annotation, defaultValue))
+                .findFirst()
+                .orElse(null);
+    }
+
+    static AnnotationInstance getMediaTypeAnnotation(ClassInfo clazz, MethodInfo method, Set<DotName> annotationName) {
+        AnnotationInstance annotation = null;
+
+        if (method != null) {
+            annotation = JandexUtil.getAnnotation(method, annotationName);
+        }
 
         if (annotation == null) {
-            annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), annotationName);
+            annotation = JandexUtil.getClassAnnotation(clazz, annotationName);
         }
 
-        if (annotation != null) {
-            AnnotationValue annotationValue = annotation.value();
+        return annotation;
+    }
 
-            if (annotationValue != null) {
-                return Optional.of(flattenAndTrimMediaTypes(annotationValue.asStringArray()));
-            }
+    static String[] mediaTypeValue(AnnotationInstance mediaTypeAnnotation, String[] defaultValue) {
+        AnnotationValue annotationValue = mediaTypeAnnotation.value();
 
-            return Optional.of(defaultValue);
+        if (annotationValue != null) {
+            return flattenAndTrimMediaTypes(annotationValue.asStringArray());
         }
 
-        return Optional.empty();
+        return defaultValue;
     }
 
     /**

@@ -32,7 +32,7 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.javax.Greetable.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Greetable.GreetingBean.class);
 
-        testInheritedResourceMethod(i);
+        testInheritedResourceMethod(i, "resource.inheritance.params.json");
     }
 
     @Test
@@ -44,16 +44,22 @@ class ResourceInheritanceTests extends JaxRsDataObjectScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Greetable.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Greetable.GreetingBean.class);
 
-        testInheritedResourceMethod(i);
+        testInheritedResourceMethod(i, "resource.inheritance.params.json");
     }
 
-    void testInheritedResourceMethod(Index i) throws IOException, JSONException {
+    @Test
+    void testJakartaInheritedResources() throws IOException, JSONException {
+        Index i = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterDefaultValueInheritance.CLASSES);
+        testInheritedResourceMethod(i, "resource.inheritance.param-default-values.json");
+    }
+
+    void testInheritedResourceMethod(Index i, String expectedResource) throws IOException, JSONException {
         OpenApiConfig config = emptyConfig();
         IndexView filtered = new FilteredIndexView(i, config);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, filtered);
         OpenAPI result = scanner.scan();
         printToConsole(result);
-        assertJsonEquals("resource.inheritance.params.json", result);
+        assertJsonEquals(expectedResource, result);
     }
 
 }

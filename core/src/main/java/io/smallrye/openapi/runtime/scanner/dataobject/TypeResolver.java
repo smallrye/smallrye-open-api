@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static io.smallrye.openapi.runtime.util.ModelUtil.supply;
+
 import java.lang.reflect.Modifier;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,13 @@ public class TypeResolver {
     static final String METHOD_PREFIX_GET = "get";
     static final String METHOD_PREFIX_IS = "is";
     static final String METHOD_PREFIX_SET = "set";
+    static final Set<DotName> PROPERTY_METHOD_ANNOTATIONS = supply(() -> {
+        Set<DotName> value = new HashSet<>();
+        value.add(SchemaConstant.DOTNAME_SCHEMA);
+        value.addAll(JsonbConstants.JSONB_PROPERTY);
+        value.add(JacksonConstants.JSON_PROPERTY);
+        return value;
+    });
 
     private final UnaryOperator<String> nameTranslator;
     private final Deque<Map<String, Type>> resolutionStack;
@@ -483,11 +493,13 @@ public class TypeResolver {
             JandexUtil.fields(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptField)
+                    .filter(field -> isViewable(context, field))
                     .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
 
             methods(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptMethod)
+                    .filter(method -> isViewable(context, method))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             JandexUtil.interfaces(index, currentClass)
@@ -496,6 +508,7 @@ public class TypeResolver {
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> methods(context, clazz).stream())
+                    .filter(method -> isViewable(context, method))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             descendants.add(currentClass);
@@ -540,6 +553,22 @@ public class TypeResolver {
 
     private static boolean isNonPublicOrAbsent(MethodInfo method) {
         return method == null || !Modifier.isPublic(method.flags());
+    }
+
+    private static boolean isViewable(AnnotationScannerContext context, AnnotationTarget propertySource) {
+        Set<Type> activeViews = context.getJsonViews();
+
+        if (activeViews.isEmpty()) {
+            return true;
+        }
+
+        Type[] applicableViews = TypeUtil.getDeclaredAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
+
+        if (applicableViews != null && applicableViews.length > 0) {
+            return Arrays.stream(applicableViews).anyMatch(activeViews::contains);
+        }
+
+        return true;
     }
 
     /**
@@ -872,7 +901,7 @@ public class TypeResolver {
             return true;
         }
 
-        return TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
+        return isAnnotatedProperty(method);
     }
 
     /**
@@ -889,8 +918,12 @@ public class TypeResolver {
             return false;
         }
 
-        return METHOD_PREFIX_SET.equals(methodNamePrefix(method))
-                || TypeUtil.hasAnnotation(method, SchemaConstant.DOTNAME_SCHEMA);
+        return METHOD_PREFIX_SET.equals(methodNamePrefix(method)) || isAnnotatedProperty(method);
+    }
+
+    static boolean isAnnotatedProperty(MethodInfo method) {
+        return PROPERTY_METHOD_ANNOTATIONS.stream()
+                .anyMatch(annotation -> TypeUtil.hasAnnotation(method, annotation));
     }
 
     private static String methodNamePrefix(MethodInfo method) {

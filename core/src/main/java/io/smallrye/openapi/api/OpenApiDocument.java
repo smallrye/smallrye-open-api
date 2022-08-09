@@ -13,6 +13,7 @@ import io.smallrye.openapi.api.models.info.InfoImpl;
 import io.smallrye.openapi.api.util.ConfigUtil;
 import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.api.util.UnusedSchemaFilter;
 
 /**
  * Holds the final OpenAPI document produced during the startup of the app.
@@ -166,8 +167,11 @@ public class OpenApiDocument {
      * @param model
      */
     private OpenAPI filterModel(OpenAPI model) {
-        if (model == null || filters.isEmpty()) {
+        if (model == null) {
             return model;
+        }
+        if (config.removeUnusedSchemas()) {
+            model = FilterUtil.applyFilter(new UnusedSchemaFilter(), model);
         }
         for (OASFilter filter : filters.values()) {
             model = FilterUtil.applyFilter(filter, model);

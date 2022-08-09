@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>smallrye-open-api-parent</artifactId>
-    <version>2.1.23</version>
+    <version>2.2.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <name>SmallRye: OpenAPI Parent</name>
@@ -26,7 +26,7 @@
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.jboss.jandex>2.4.3.Final</version.org.jboss.jandex> <!-- won't be needed with SmallRye Parent v36 -->
         <version.org.skyscreamer>1.5.1</version.org.skyscreamer>
-        <version.maven-resources-plugin>3.2.0</version.maven-resources-plugin>
+        <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
         <version.com.github.eirslett.frontend-maven-plugin>1.12.1</version.com.github.eirslett.frontend-maven-plugin>
 
         <artifactId.arquillian.jetty>arquillian-jetty-embedded-9</artifactId.arquillian.jetty>
@@ -37,7 +37,7 @@
         <groupId.resteasy.client>org.jboss.resteasy</groupId.resteasy.client>
         <artifactId.resteasy.client>resteasy-client-microprofile</artifactId.resteasy.client>
         <version.resteasy.client>4.7.6.Final</version.resteasy.client>
-        <version.quarkus>2.10.3.Final</version.quarkus>
+        <version.quarkus>2.11.2.Final</version.quarkus>
 
         <!--
             xmlReportPaths must contain an entry for each project that reports coverage.
@@ -173,7 +173,7 @@
             <dependency>
                 <groupId>jakarta.json</groupId>
                 <artifactId>jakarta.json-api</artifactId>
-                <version>2.0.1</version>
+                <version>2.1.1</version>
             </dependency>
             <dependency>
                 <groupId>javax.json</groupId>

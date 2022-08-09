@@ -181,7 +181,8 @@ public class SchemaFactory {
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
         schema.setType(readSchemaType(annotation, schema, defaults));
         schema.setExample(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
-        schema.setDefaultValue(readAttr(annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults));
+        schema.setDefaultValue(
+                parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, schema.getType()));
         schema.setDiscriminator(
                 readDiscriminator(context,
                         JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
@@ -206,7 +207,22 @@ public class SchemaFactory {
                     return propertySchemas;
                 }, defaults));
 
-        List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, defaults);
+        final Schema.SchemaType type = schema.getType();
+
+        List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, (Object[] values) -> {
+            List<Object> parsed = new ArrayList<>(values.length);
+
+            if (type == Schema.SchemaType.STRING) {
+                parsed.addAll(Arrays.asList(values));
+            } else {
+                Arrays.stream(values)
+                        .map(String.class::cast)
+                        .map(v -> parseValue(context, v, type))
+                        .forEach(parsed::add);
+            }
+
+            return parsed;
+        }, defaults);
 
         if (enumeration != null && !enumeration.isEmpty()) {
             schema.setEnumeration(enumeration);
@@ -311,21 +327,24 @@ public class SchemaFactory {
     static Object parseSchemaAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
             Map<String, Object> defaults, SchemaType schemaType) {
         return readAttr(annotation, propertyName, value -> {
-            if (!(value instanceof String)) {
-                return value;
+            if (value instanceof String) {
+                return parseValue(context, (String) value, schemaType);
             }
-            String stringValue = ((String) value);
-            if (schemaType != SchemaType.STRING) {
-                Object parsedValue;
-                for (AnnotationScannerExtension e : context.getExtensions()) {
-                    parsedValue = e.parseValue(stringValue);
-                    if (parsedValue != null) {
-                        return parsedValue;
-                    }
+            return value;
+        }, defaults);
+    }
+
+    static Object parseValue(AnnotationScannerContext context, String stringValue, SchemaType schemaType) {
+        if (schemaType != SchemaType.STRING) {
+            Object parsedValue;
+            for (AnnotationScannerExtension e : context.getExtensions()) {
+                parsedValue = e.parseValue(stringValue);
+                if (parsedValue != null) {
+                    return parsedValue;
                 }
             }
-            return stringValue;
-        }, defaults);
+        }
+        return stringValue;
     }
 
     /**
@@ -564,14 +583,15 @@ public class SchemaFactory {
         }
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
-        if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype)) {
-            return schemaRegistry.lookupRef(ctype);
-        } else if (!schemaReferenceSupported && schemaRegistry != null && schemaRegistry.hasSchema(ctype)) {
+        if (schemaReferenceSupported && schemaRegistry.hasSchema(ctype, context.getJsonViews())) {
+            return schemaRegistry.lookupRef(ctype, context.getJsonViews());
+        } else if (!schemaReferenceSupported && schemaRegistry != null
+                && schemaRegistry.hasSchema(ctype, context.getJsonViews())) {
             // Clone the schema from the registry using mergeObjects
-            return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype));
+            return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype, context.getJsonViews()));
         } else if (context.getScanStack().contains(ctype)) {
             // Protect against stack overflow when the type is in the process of being scanned.
-            return SchemaRegistry.registerReference(ctype, null, new SchemaImpl());
+            return SchemaRegistry.registerReference(ctype, context.getJsonViews(), null, new SchemaImpl());
         } else {
             Schema schema = OpenApiDataObjectScanner.process(context, ctype);
 
@@ -595,9 +615,9 @@ public class SchemaFactory {
         SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
 
         if (allowRegistration(context, schemaRegistry, type, schema)) {
-            schema = schemaRegistry.register(type, schema);
-        } else if (schemaRegistry != null && schemaRegistry.hasRef(type)) {
-            schema = schemaRegistry.lookupRef(type);
+            schema = schemaRegistry.register(type, context.getJsonViews(), schema);
+        } else if (schemaRegistry != null && schemaRegistry.hasRef(type, context.getJsonViews())) {
+            schema = schemaRegistry.lookupRef(type, context.getJsonViews());
         }
 
         return schema;
@@ -624,7 +644,7 @@ public class SchemaFactory {
         /*
          * Only register if the type is not already registered
          */
-        return !registry.hasSchema(type);
+        return !registry.hasSchema(type, context.getJsonViews());
     }
 
     /**

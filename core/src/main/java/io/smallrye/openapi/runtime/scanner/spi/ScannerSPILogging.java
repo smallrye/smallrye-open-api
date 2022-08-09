@@ -17,4 +17,8 @@ interface ScannerSPILogging { // NOSONAR (use of constants in an interface)
     @Message(id = 7901, value = "Matrix parameter references missing path segment: %s")
     void missingPathSegment(String segment);
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 7902, value = "@Parameter annotation missing %s parameter. Class: %s, Method: %s, Parameter.name: %s, Parameter.in: %s")
+    void missingFrameworkParam(String frameworkName, String className, String method, String paramName, String paramIn);
+
 }

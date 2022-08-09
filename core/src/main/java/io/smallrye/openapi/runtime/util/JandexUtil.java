@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -134,6 +135,10 @@ public class JandexUtil {
         }
 
         return ref;
+    }
+
+    public static <T> T value(AnnotationInstance annotation) {
+        return annotation != null ? value(annotation, OpenApiConstants.VALUE) : null;
     }
 
     /**
@@ -339,7 +344,7 @@ public class JandexUtil {
      * @return Whether it's a "ref"
      */
     public static boolean isRef(AnnotationInstance annotation) {
-        return annotation.value(OpenApiConstants.REF) != null;
+        return annotation != null && annotation.value(OpenApiConstants.REF) != null;
     }
 
     /**
@@ -564,14 +569,28 @@ public class JandexUtil {
      */
     public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {
-        for (AnnotationInstance annotation : method.annotations()) {
-            if (annotation.target().kind() == Kind.METHOD_PARAMETER &&
-                    annotation.target().asMethodParameter().position() == parameterIndex &&
-                    annotation.name().equals(annotationName)) {
-                return annotation;
-            }
-        }
-        return null;
+        return method.annotations(annotationName)
+                .stream()
+                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
+                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Finds an annotation (if present) with the given name, on a particular parameter of a
+     * method based on the identity of the parameterType. Returns null if not found.
+     * 
+     * @param method the method
+     * @param parameterType the parameter type
+     * @param annotationName name of annotation we are looking for
+     * @return the Annotation instance
+     */
+    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, Type parameterType,
+            DotName annotationName) {
+        // parameterType must be the same object as in the method's parameter type array
+        int parameterIndex = method.parameterTypes().indexOf(parameterType);
+        return getMethodParameterAnnotation(method, parameterIndex, annotationName);
     }
 
     public static List<AnnotationValue> schemaDisplayValues(AnnotationInstance annotation) {
@@ -729,5 +748,51 @@ public class JandexUtil {
         MethodInfo method = target.asMethod();
 
         return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
+    }
+
+    public static Map<ClassInfo, MethodInfo> ancestry(MethodInfo method, AugmentedIndexView index) {
+        ClassInfo declaringClass = method.declaringClass();
+        Type resourceType = Type.create(declaringClass.name(), Type.Kind.CLASS);
+        Map<ClassInfo, Type> chain = inheritanceChain(index, declaringClass, resourceType);
+        Map<ClassInfo, MethodInfo> ancestry = new LinkedHashMap<>();
+
+        for (ClassInfo classInfo : chain.keySet()) {
+            ancestry.put(classInfo, null);
+
+            classInfo.methods()
+                    .stream()
+                    .filter(m -> !m.isSynthetic())
+                    .filter(m -> isSameSignature(method, m))
+                    .findFirst()
+                    .ifPresent(m -> ancestry.put(classInfo, m));
+
+            interfaces(index, classInfo)
+                    .stream()
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
+                    .map(index::getClass)
+                    .filter(Objects::nonNull)
+                    .map(iface -> {
+                        ancestry.put(iface, null);
+                        return iface;
+                    })
+                    .flatMap(iface -> iface.methods().stream())
+                    .filter(m -> isSameSignature(method, m))
+                    .forEach(m -> ancestry.put(m.declaringClass(), m));
+        }
+
+        return ancestry;
+    }
+
+    public static List<MethodInfo> overriddenMethods(MethodInfo method, List<MethodInfo> candidates) {
+        return candidates.stream()
+                .filter(m -> !method.equals(m))
+                .filter(m -> isSameSignature(method, m))
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
+        return Objects.equals(m1.name(), m2.name())
+                && m1.parametersCount() == m2.parametersCount()
+                && Objects.equals(m1.parameterTypes(), m2.parameterTypes());
     }
 }

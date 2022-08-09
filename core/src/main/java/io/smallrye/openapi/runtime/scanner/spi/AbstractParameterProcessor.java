@@ -80,6 +80,7 @@ public abstract class AbstractParameterProcessor {
     protected static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     protected final AnnotationScannerContext scannerContext;
+    protected final String contextPath;
     protected final IndexView index;
     protected final ClassLoader cl;
     protected final Function<AnnotationInstance, Parameter> readerFunction;
@@ -220,9 +221,11 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
+            String contextPath,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         this.scannerContext = scannerContext;
+        this.contextPath = contextPath;
         this.index = scannerContext.getIndex();
         this.cl = scannerContext.getClassLoader();
         this.readerFunction = reader;
@@ -256,16 +259,29 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected void processOperationParameters(MethodInfo resourceMethod, ResourceParameters parameters) {
-        // Phase II - Read method argument @Parameter and framework's annotations
-        resourceMethod.annotations()
+        List<MethodInfo> candidateMethods = JandexUtil.ancestry(resourceMethod, scannerContext.getAugmentedIndex())
+                .entrySet()
                 .stream()
-                .filter(a -> !JandexUtil.equals(a.target(), resourceMethod))
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        /*
+         * Phase II - Read method arguments: @Parameter and framework's annotations
+         * 
+         * Read the resource method and any method super classes/interfaces that it may override
+         */
+        candidateMethods.stream()
+                .flatMap(m -> m.annotations().stream().filter(a -> !JandexUtil.equals(a.target(), m)))
                 .forEach(this::readAnnotatedType);
 
-        // Phase III - Read method @Parameter(s) annotations
-        resourceMethod.annotations()
-                .stream()
-                .filter(a -> JandexUtil.equals(a.target(), resourceMethod))
+        /*
+         * Phase III - Read @Parameter(s) annotations directly on the recourd method
+         * 
+         * Read the resource method and any method super classes/interfaces that it may override
+         */
+        candidateMethods.stream()
+                .flatMap(m -> m.annotations().stream().filter(a -> JandexUtil.equals(a.target(), m)))
                 .filter(a -> openApiParameterAnnotations.contains(a.name()))
                 .forEach(this::readParameterAnnotation);
 
@@ -469,12 +485,17 @@ public abstract class AbstractParameterProcessor {
      * @return a new ParameterContext if the parameter is found, otherwise null
      */
     protected ParameterContext getUnannotatedPathParameter(MethodInfo resourceMethod, String name) {
-        System.out.println("getUnannotatedPathParameter()");
         return null;
     }
 
     private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
         ParameterImpl param = context.oaiParam != null ? (ParameterImpl) context.oaiParam : new ParameterImpl();
+
+        if (context.frameworkParam == null) {
+            String paramIn = String.valueOf(context.oaiParam.getIn());
+            ScannerSPILogging.log.missingFrameworkParam(CurrentScannerInfo.getCurrentAnnotationScanner().getName(),
+                    resourceMethod.declaringClass().toString(), resourceMethod.toString(), context.oaiParam.getName(), paramIn);
+        }
 
         param.setName(context.name);
 
@@ -1148,8 +1169,8 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Find the full path of the target. Method-level targets will include
-     * both the path to the resource and the path to the method joined with a '/'.
+     * Find the full path of the target, including parent resources if the annotation target is a member of a sub-resource
+     * class. Method-level targets will include both the path to the resource and the path to the method joined with a '/'.
      *
      * @param target target item for which the path is being generated
      * @return full path (excluding application path) of the target
@@ -1171,7 +1192,7 @@ public abstract class AbstractParameterProcessor {
                 break;
         }
 
-        return pathSegment;
+        return contextPath + '/' + pathSegment;
     }
 
     /**

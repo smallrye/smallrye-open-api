@@ -3,6 +3,7 @@ package io.smallrye.openapi.jaxrs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -52,9 +53,10 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}"); //NOSONAR
 
     private JaxRsParameterProcessor(AnnotationScannerContext scannerContext,
+            String contextPath,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, reader, extensions);
+        super(scannerContext, contextPath, reader, extensions);
     }
 
     /**
@@ -64,6 +66,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
      * are only applicable to the method-level in this component.
      *
      * @param context the AnnotationScannerContext
+     * @param contextPath context path for the resource class and method
      * @param resourceClass the class info
      * @param resourceMethod the JAX-RS resource method, annotated with one of the
      *        JAX-RS HTTP annotations
@@ -74,12 +77,13 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
      *         object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
+            String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
 
-        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, reader, extensions);
+        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, contextPath, reader, extensions);
         return processor.process(resourceClass, resourceMethod);
     }
 
@@ -234,7 +238,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                 path = JandexUtil.getClassAnnotation(target.asClass(), JaxRsConstants.PATH);
                 break;
             case METHOD:
-                path = JandexUtil.getAnnotation(target.asMethod(), JaxRsConstants.PATH);
+                path = pathOf(target.asMethod());
                 break;
             default:
                 break;
@@ -257,6 +261,18 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         return "";
     }
 
+    AnnotationInstance pathOf(MethodInfo method) {
+        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .map(m -> JandexUtil.getAnnotation(m, JaxRsConstants.PATH))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
     @Override
     protected boolean isSubResourceLocator(MethodInfo method) {
         switch (method.returnType().kind()) {
@@ -274,8 +290,12 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
-        return method.annotations()
+        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+                .entrySet()
                 .stream()
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .flatMap(m -> m.annotations().stream())
                 .map(AnnotationInstance::name)
                 .anyMatch(JaxRsConstants.HTTP_METHODS::contains);
     }

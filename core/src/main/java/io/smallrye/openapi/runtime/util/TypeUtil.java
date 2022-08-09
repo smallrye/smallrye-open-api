@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -850,6 +851,58 @@ public class TypeUtil {
                 break;
         }
         return Collections.emptyList();
+    }
+
+    public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName, String propertyName) {
+        AnnotationInstance annotation = getDeclaredAnnotation(type, annotationName);
+        T value = null;
+
+        if (annotation != null) {
+            value = JandexUtil.value(annotation, propertyName);
+        }
+
+        return value;
+    }
+
+    public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName) {
+        return getDeclaredAnnotationValue(type, annotationName, OpenApiConstants.VALUE);
+    }
+
+    public static AnnotationInstance getDeclaredAnnotation(AnnotationTarget type, DotName annotationName) {
+        Function<DotName, AnnotationInstance> lookup;
+
+        switch (type.kind()) {
+            case CLASS:
+                lookup = type.asClass()::classAnnotation;
+                break;
+            case FIELD:
+                lookup = type.asField()::annotation;
+                break;
+            case METHOD:
+                lookup = name -> type.asMethod().annotations(name).stream().filter(a -> type.equals(a.target())).findFirst()
+                        .orElse(null);
+                break;
+            case METHOD_PARAMETER:
+                MethodParameterInfo parameter = type.asMethodParameter();
+                lookup = name -> parameter
+                        .method()
+                        .annotations(name)
+                        .stream()
+                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .findFirst()
+                        .orElse(null);
+                break;
+            case RECORD_COMPONENT:
+                lookup = type.asRecordComponent()::annotation;
+                break;
+            case TYPE:
+            default:
+                lookup = name -> null;
+                break;
+        }
+
+        return lookup.apply(annotationName);
     }
 
     public static ClassInfo getDeclaringClass(AnnotationTarget type) {

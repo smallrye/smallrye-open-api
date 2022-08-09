@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -24,7 +25,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
  * Vert.x.
  * Some basic test, comparing with what we get in the JAX-RS version.
  * See the GreetingGetResource in the JAX-RS test
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @ApplicationScoped
@@ -59,7 +60,7 @@ public class GreetingGetRoute {
     @Route(path = "/helloPathVariableWithResponse/:name", methods = HttpMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public void helloPathVariableWithResponse(@Param("name") String name) {
-        // 
+        //
     }
 
     // 6) Failure should not end up the schema
@@ -78,5 +79,18 @@ public class GreetingGetRoute {
     @Route
     public Greeting helloPath(@Param("name") String name) {
         return new Greeting("Hello " + name);
+    }
+
+    // 9) Ignored due to use of `regex`
+    @Route(regex = "\\/old-path")
+    public Greeting helloRegex(RoutingContext context) {
+        return new Greeting("Hello " + context.request().uri());
+    }
+
+    // 10) Included due to @Operation
+    @Route(regex = "\\/complicated\\/path", methods = HttpMethod.GET)
+    @Operation(operationId = "id-to-select-with-filter")
+    public Greeting helloAgainRegex(RoutingContext context) {
+        return new Greeting("Hello " + context.request().uri());
     }
 }
