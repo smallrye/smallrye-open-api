@@ -488,7 +488,6 @@ public abstract class AbstractParameterProcessor {
      * @return a new ParameterContext if the parameter is found, otherwise null
      */
     protected ParameterContext getUnannotatedPathParameter(MethodInfo resourceMethod, String name) {
-        System.out.println("getUnannotatedPathParameter()");
         return null;
     }
 

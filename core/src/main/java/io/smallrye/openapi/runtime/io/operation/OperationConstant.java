@@ -13,7 +13,7 @@ import org.jboss.jandex.DotName;
  */
 public class OperationConstant {
 
-    static final DotName DOTNAME_OPERATION = DotName.createSimple(Operation.class.getName());
+    public static final DotName DOTNAME_OPERATION = DotName.createSimple(Operation.class.getName());
 
     public static final String PROP_OPERATION_ID = "operationId";
     public static final String PROP_TAGS = "tags";
