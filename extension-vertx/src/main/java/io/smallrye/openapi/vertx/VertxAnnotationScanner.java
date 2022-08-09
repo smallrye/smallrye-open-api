@@ -27,6 +27,7 @@ import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
+import io.smallrye.openapi.runtime.io.operation.OperationConstant;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
@@ -36,6 +37,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Scanner that scan Vertx routes.
@@ -200,34 +202,18 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         // Process tags (both declarations and references).
         Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
 
-        for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
-            if (methodInfo.annotations().size() > 0) {
-                // Try @Route annotations
-                if (methodInfo.hasAnnotation(VertxConstants.ROUTE)) {
-                    AnnotationInstance requestMappingAnnotation = methodInfo.annotation(VertxConstants.ROUTE);
-                    AnnotationValue methodValue = requestMappingAnnotation.value("methods");
-                    if (methodValue != null) {
-                        String[] enumArray = methodValue.asEnumArray();
-                        for (String enumValue : enumArray) {
-                            if (enumValue != null) {
-                                PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(enumValue.toUpperCase());
-                                processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
-                                        locatorPathParameters);
-                            }
-                        }
-                    } else {
-                        // Default to ALL
-                        PathItem.HttpMethod[] all = PathItem.HttpMethod.values();
-                        for (PathItem.HttpMethod httpMethod : all) {
-                            processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
-                                    locatorPathParameters);
-                        }
-                    }
-                } else {
-                    // TODO: Default ? Look at RouteBase
-                }
-            }
-        }
+        getResourceMethods(context, resourceClass)
+                .stream()
+                .filter(m -> m.hasAnnotation(VertxConstants.ROUTE))
+                .filter(this::shouldScan)
+                .forEach(methodInfo -> {
+                    Optional.ofNullable(TypeUtil.<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE, "methods"))
+                            .map(methods -> Arrays.stream(methods).map(PathItem.HttpMethod::valueOf))
+                            .orElseGet(() -> Arrays.stream(PathItem.HttpMethod.values()))
+                            .forEach(httpMethod -> processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi,
+                                    tagRefs,
+                                    locatorPathParameters));
+                });
     }
 
     /**
@@ -248,92 +234,104 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             Set<String> resourceTags,
             List<Parameter> locatorPathParameters) {
 
-        if (shouldScan(method)) {
+        VertxLogging.log.processingMethod(method.toString());
 
-            VertxLogging.log.processingMethod(method.toString());
+        // Figure out the current @Produces and @Consumes (if any)
+        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
+                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
+                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
-            // Figure out the current @Produces and @Consumes (if any)
-            CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
-                    context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
-            CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
-                    context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+        // Process any @Operation annotation
+        Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
+        if (!maybeOperation.isPresent()) {
+            return; // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
+        }
+        final Operation operation = maybeOperation.get();
 
-            // Process any @Operation annotation
-            Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
-            if (!maybeOperation.isPresent()) {
-                return; // If the operation is marked as hidden, just bail here because we don't want it as part of the model.
-            }
-            final Operation operation = maybeOperation.get();
+        // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
+        processOperationTags(context, method, openApi, resourceTags, operation);
 
-            // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
-            processOperationTags(context, method, openApi, resourceTags, operation);
+        // Process @Parameter annotations.
+        PathItem pathItem = new PathItemImpl();
+        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
 
-            // Process @Parameter annotations.
-            PathItem pathItem = new PathItemImpl();
-            Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+        ResourceParameters params = VertxParameterProcessor.process(context, currentAppPath, resourceClass,
+                method, reader,
+                context.getExtensions());
+        operation.setParameters(params.getOperationParameters());
 
-            ResourceParameters params = VertxParameterProcessor.process(context, currentAppPath, resourceClass,
-                    method, reader,
-                    context.getExtensions());
-            operation.setParameters(params.getOperationParameters());
+        pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
 
-            pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
+        // Process any @RequestBody annotation (note: the @RequestBody annotation can be found on a method argument *or* on the method)
+        RequestBody requestBody = processRequestBody(context, method, params);
+        if (requestBody != null) {
+            operation.setRequestBody(requestBody);
+        }
 
-            // Process any @RequestBody annotation (note: the @RequestBody annotation can be found on a method argument *or* on the method)
-            RequestBody requestBody = processRequestBody(context, method, params);
-            if (requestBody != null) {
-                operation.setRequestBody(requestBody);
-            }
+        // Process @APIResponse annotations
+        processResponse(context, resourceClass, method, operation, null);
 
-            // Process @APIResponse annotations
-            processResponse(context, resourceClass, method, operation, null);
+        // Process @SecurityRequirement annotations
+        processSecurityRequirementAnnotation(resourceClass, method, operation);
 
-            // Process @SecurityRequirement annotations
-            processSecurityRequirementAnnotation(resourceClass, method, operation);
+        // Process @Callback annotations
+        processCallback(context, method, operation);
 
-            // Process @Callback annotations
-            processCallback(context, method, operation);
+        // Process @Server annotations
+        processServerAnnotation(context, method, operation);
 
-            // Process @Server annotations
-            processServerAnnotation(context, method, operation);
+        // Process @Extension annotations
+        processExtensions(context, method, operation);
 
-            // Process @Extension annotations
-            processExtensions(context, method, operation);
+        // Process Security Roles
+        JavaSecurityProcessor.processSecurityRoles(method, operation);
 
-            // Process Security Roles
-            JavaSecurityProcessor.processSecurityRoles(method, operation);
+        // Now set the operation on the PathItem as appropriate based on the Http method type
+        setOperationOnPathItem(methodType, pathItem, operation);
 
-            // Now set the operation on the PathItem as appropriate based on the Http method type
-            setOperationOnPathItem(methodType, pathItem, operation);
+        if (!processProfiles(context.getConfig(), operation)) {
+            return;
+        }
 
-            if (!processProfiles(context.getConfig(), operation)) {
-                return;
-            }
+        // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
+        String path = super.makePath(params.getOperationPath());
 
-            // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-            String path = super.makePath(params.getOperationPath());
+        // Get or create a PathItem to hold the operation
+        PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
 
-            // Get or create a PathItem to hold the operation
-            PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
-
-            if (existingPath == null) {
-                ModelUtil.paths(openApi).addPathItem(path, pathItem);
-            } else {
-                // Changes applied to 'existingPath', no need to re-assign or add to OAI.
-                MergeUtil.mergeObjects(existingPath, pathItem);
-            }
+        if (existingPath == null) {
+            ModelUtil.paths(openApi).addPathItem(path, pathItem);
+        } else {
+            // Changes applied to 'existingPath', no need to re-assign or add to OAI.
+            MergeUtil.mergeObjects(existingPath, pathItem);
         }
     }
 
-    static boolean shouldScan(MethodInfo resourceMethod) {
-        DotName annotationName = VertxConstants.ROUTE;
-        AnnotationInstance annotation = resourceMethod.annotation(annotationName);
-        if (annotation != null && annotation.value("type") != null) {
-            AnnotationValue annotationValue = annotation.value("type");
-            if (annotationValue.asEnum().equals("FAILURE")) {
-                return false;
-            }
+    /**
+     * Determine if the route method should be scanned or skipped.
+     *
+     * Skip when:
+     * <ol>
+     * <li>The route's {@code type} is {@code FAILURE}
+     * <li>The route specifies a {@code regex} pattern, unless also annotated with
+     * {@link org.eclipse.microprofile.openapi.annotations.Operation @Operation}.
+     * </ol>
+     *
+     * @param resourceMethod a resource method annotated with {@code @Route}
+     * @return true if the method should be scanned, otherwise false
+     */
+    boolean shouldScan(MethodInfo resourceMethod) {
+        AnnotationInstance route = resourceMethod.annotation(VertxConstants.ROUTE);
+
+        if ("FAILURE".equals(JandexUtil.value(route, "type"))) {
+            return false;
         }
+
+        if (JandexUtil.value(route, "regex") != null) {
+            return resourceMethod.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
+        }
+
         return true;
     }
 
