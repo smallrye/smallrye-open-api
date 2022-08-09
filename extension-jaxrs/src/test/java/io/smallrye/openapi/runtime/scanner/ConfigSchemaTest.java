@@ -2,7 +2,7 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
 
-import javax.json.Json;
+import jakarta.json.Json;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
