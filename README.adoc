@@ -19,15 +19,16 @@ mvn clean install
 
 === Project structure
 
-* link:core[] - The core OpenAPI code, independent of entry point dependencies.
-* link:extension-jaxrs[] - The JAX-RS entry point. This module depends on JAX-RS and core.
-* link:extension-spring[] - The Spring entry point. This module depends on Spring and core.
-* link:extension-vertx[] - The Vert.x entry point. This module depends on Vert.x and core.
-* link:implementation[] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
-* link:testsuite[] - Test suites.
-* link:testsuite/tck[] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
-* link:testsuite/extra[] - Extra integration tests not related to the TCK.
-* link:tools/maven-plugin[] - Maven plugin that creates the OpenAPI Schema on build.
+* link:core[core] - The core OpenAPI code, independent of entry point dependencies.
+* link:extension-jaxrs[extension-jaxrs] - The JAX-RS entry point. This module depends on JAX-RS and core.
+* link:extension-spring[extension-spring] - The Spring entry point. This module depends on Spring and core.
+* link:extension-vertx[extension-vertx] - The Vert.x entry point. This module depends on Vert.x and core.
+* link:implementation[implementation] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
+* link:testsuite[testsuite] - Test Suites and Data
+** link:testsuite/tck[tck] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
+** link:testsuite/extra[extra] - Extra integration tests not related to the TCK.
+** link:testsuite/data[data] - Classes for use by unit tests
+* link:tools/maven-plugin[maven-plugin] - Maven plugin that creates the OpenAPI Schema on build.
 
 === Links
 
