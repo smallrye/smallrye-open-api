@@ -590,4 +590,16 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop2").getDeprecated());
         assertNull(result.getComponents().getSchemas().get("Bean3").getProperties().get("prop3").getDeprecated());
     }
+
+    @Test
+    void testKotlinPropertyName() throws IOException, JSONException {
+        Index index = indexOf(io.smallrye.openapi.testdata.kotlin.KotlinBean.class,
+                io.smallrye.openapi.testdata.kotlin.KotlinLongValue.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.kotlin-value-class-propname.json", result);
+    }
 }
