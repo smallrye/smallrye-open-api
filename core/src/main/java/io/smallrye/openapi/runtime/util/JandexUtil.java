@@ -595,6 +595,23 @@ public class JandexUtil {
         return getMethodParameterAnnotation(method, parameterIndex, annotationName);
     }
 
+    /**
+     * Finds all annotations on a particular parameter of a method based on the identity of the parameterType.
+     * 
+     * @param method the method
+     * @param parameterType the parameter type
+     * @return the list of annotations, never null
+     */
+    public static List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, Type parameterType) {
+        // parameterType must be the same object as in the method's parameter type array
+        int parameterIndex = method.parameterTypes().indexOf(parameterType);
+        return method.annotations()
+                .stream()
+                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
+                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
+                .collect(Collectors.toList());
+    }
+
     public static List<AnnotationValue> schemaDisplayValues(AnnotationInstance annotation) {
         return annotation.values()
                 .stream()
