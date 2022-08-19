@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.3",
+  "paths": {
+    "/bars": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "text/plain": {
+              "schema": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/foos": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "text/plain": {
+              "schema": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  }
+}

@@ -68,6 +68,7 @@ import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -885,6 +886,8 @@ public interface AnnotationScanner {
                 if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
                     requestBody.setRequired(Boolean.FALSE);
                 }
+
+                setRequestBodyConstraints(context, requestBody, method, requestBodyType);
             }
         }
 
@@ -930,6 +933,8 @@ public interface AnnotationScanner {
                     if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
                         requestBody.setRequired(Boolean.FALSE);
                     }
+
+                    setRequestBodyConstraints(context, requestBody, method, requestBodyType);
                 }
             }
         }
@@ -972,6 +977,30 @@ public interface AnnotationScanner {
                 .mapToObj(methodParams::get)
                 .findFirst()
                 .orElse(null);
+    }
+
+    default void setRequestBodyConstraints(AnnotationScannerContext context, RequestBody requestBody, MethodInfo method,
+            Type requestBodyType) {
+        List<AnnotationInstance> paramAnnotations = JandexUtil.getMethodParameterAnnotations(method, requestBodyType);
+
+        if (!paramAnnotations.isEmpty()) {
+            AnnotationTarget paramTarget = paramAnnotations.iterator().next().target();
+
+            Optional.ofNullable(requestBody.getContent())
+                    .map(Content::getMediaTypes)
+                    .map(Map::entrySet)
+                    .orElseGet(Collections::emptySet)
+                    .stream()
+                    .map(Map.Entry::getValue)
+                    .map(MediaType::getSchema)
+                    .filter(Objects::nonNull)
+                    .forEach(schema -> BeanValidationScanner.applyConstraints(paramTarget, schema, null,
+                            (target, name) -> {
+                                if (requestBody.getRequired() == null) {
+                                    requestBody.setRequired(Boolean.TRUE);
+                                }
+                            }));
+        }
     }
 
     default boolean isPathParameter(final AnnotationScannerContext context, String name, final ResourceParameters params) {
