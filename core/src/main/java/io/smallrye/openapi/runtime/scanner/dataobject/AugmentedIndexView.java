@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
@@ -72,6 +73,18 @@ public class AugmentedIndexView implements IndexView {
     }
 
     @Override
+    public Collection<ClassInfo> getKnownDirectSubinterfaces(DotName interfaceName) {
+        validateInput(interfaceName);
+        return index.getKnownDirectSubinterfaces(interfaceName);
+    }
+
+    @Override
+    public Collection<ClassInfo> getAllKnownSubinterfaces(DotName interfaceName) {
+        validateInput(interfaceName);
+        return index.getAllKnownSubinterfaces(interfaceName);
+    }
+
+    @Override
     public Collection<ClassInfo> getKnownDirectImplementors(DotName className) {
         validateInput(className);
         return index.getKnownDirectImplementors(className);
@@ -110,6 +123,18 @@ public class AugmentedIndexView implements IndexView {
     public Collection<ClassInfo> getKnownUsers(DotName className) {
         validateInput(className);
         return index.getKnownUsers(className);
+    }
+
+    @Override
+    public Collection<ClassInfo> getClassesInPackage(DotName packageName) {
+        validateInput(packageName);
+        return index.getClassesInPackage(packageName);
+    }
+
+    @Override
+    public Set<DotName> getSubpackages(DotName packageName) {
+        validateInput(packageName);
+        return index.getSubpackages(packageName);
     }
 
     private void validateInput(Object... inputs) {
