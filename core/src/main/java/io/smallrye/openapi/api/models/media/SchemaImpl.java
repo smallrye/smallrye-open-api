@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
@@ -13,7 +15,9 @@ import org.eclipse.microprofile.openapi.models.media.XML;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
+import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -59,7 +63,10 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     private Boolean nullable;
     private Boolean writeOnly;
     private Boolean deprecated;
+
+    // Non-standard
     private int modCount;
+    private List<Schema> typeObservers;
 
     public static boolean isNamed(Schema schema) {
         return schema instanceof SchemaImpl && ((SchemaImpl) schema).name != null;
@@ -67,6 +74,65 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
 
     public static int getModCount(Schema schema) {
         return schema instanceof SchemaImpl ? ((SchemaImpl) schema).modCount : -1;
+    }
+
+    public static void addTypeObserver(Schema observable, Schema observer) {
+        if (observable instanceof SchemaImpl) {
+            SchemaImpl obs = (SchemaImpl) observable;
+            obs.typeObservers = ModelUtil.add(observer, obs.typeObservers, ArrayList<Schema>::new);
+        }
+
+        observer.setType(observable.getType());
+    }
+
+    public static SchemaImpl copyOf(Schema other) {
+        SchemaImpl clone = (SchemaImpl) MergeUtil.mergeObjects(new SchemaImpl(), other);
+        clone.required = copy(clone.required, () -> new ArrayList<>(clone.required));
+        clone.enumeration = copy(clone.enumeration, () -> new ArrayList<>(clone.enumeration));
+        clone.items = copy(clone.items, () -> copyOf(clone.items));
+
+        clone.allOf = copy(clone.allOf, () -> clone.allOf
+                .stream()
+                .map(SchemaImpl::copyOf)
+                .collect(Collectors.toList()));
+
+        clone.properties = copy(clone.properties, () -> clone.properties.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> copyOf(e.getValue()),
+                        (u, v) -> {
+                            throw new IllegalStateException(String.format("Duplicate key %s", u));
+                        },
+                        LinkedHashMap::new)));
+
+        clone.additionalPropertiesSchema = copy(clone.additionalPropertiesSchema,
+                () -> copyOf(clone.additionalPropertiesSchema));
+
+        clone.xml = copy(clone.xml, () -> MergeUtil.mergeObjects(new XMLImpl(), clone.xml));
+        clone.externalDocs = copy(clone.externalDocs,
+                () -> MergeUtil.mergeObjects(new ExternalDocumentationImpl(), clone.externalDocs));
+
+        clone.oneOf = copy(clone.oneOf, () -> clone.oneOf
+                .stream()
+                .map(SchemaImpl::copyOf)
+                .collect(Collectors.toList()));
+
+        clone.anyOf = copy(clone.anyOf, () -> clone.anyOf
+                .stream()
+                .map(SchemaImpl::copyOf)
+                .collect(Collectors.toList()));
+
+        clone.not = copy(clone.not, () -> copyOf(clone.not));
+
+        return clone;
+    }
+
+    private static <T> T copy(T property, Supplier<T> copySupplier) {
+        if (property != null) {
+            return copySupplier.get();
+        }
+        return null;
     }
 
     public SchemaImpl(String name) {
@@ -464,6 +530,10 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     public void setType(SchemaType type) {
         incrementModCount();
         this.type = type;
+
+        if (typeObservers != null) {
+            typeObservers.forEach(o -> o.setType(type));
+        }
     }
 
     /**

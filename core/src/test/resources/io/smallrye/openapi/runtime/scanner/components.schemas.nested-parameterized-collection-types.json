@@ -16,10 +16,10 @@
             }
           },
           "b_multivaluedEntryMap" : {
+            "type": "object",
+            "description" : "Reference to `MultivaluedMapStringEntryBean",
             "allOf" : [ {
               "$ref" : "#/components/schemas/MultivaluedMapStringEntryBean"
-            }, {
-              "description" : "Reference to `MultivaluedMapStringEntryBean"
             } ]
           },
           "c_mapStringListEntryBean" : {
@@ -62,10 +62,10 @@
             }
           },
           "f_listOfStringLists" : {
+            "type": "array",
+            "description" : "Reference to `MultivaluedCollectionString`",
             "allOf" : [ {
               "$ref" : "#/components/schemas/MultivaluedCollectionString"
-            }, {
-              "description" : "Reference to `MultivaluedCollectionString`"
             } ]
           }
         }

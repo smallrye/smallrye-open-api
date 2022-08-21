@@ -29,13 +29,12 @@
             "type": "object",
             "properties": {
               "lengthUnits": {
+                "type": "string",
+                "description": "The units of measure for length",
+                "default": "CM",
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/LengthUnitsEnum"
-                  },
-                  {
-                    "description": "The units of measure for length",
-                    "default": "CM"
                   }
                 ]
               },

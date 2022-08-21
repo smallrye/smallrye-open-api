@@ -20,12 +20,11 @@
             "example": "F176f717c7a71"
           },
           "data": {
+            "type": "object",
+            "description": "The business data object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/MessageDataItemsAnimal"
-              },
-              {
-                "description": "The business data object"
               }
             ]
           },

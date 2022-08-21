@@ -26,12 +26,11 @@
         "type": "object",
         "properties": {
           "message": {
+            "type": "string",
+            "description": "Used to send a message",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SimpleString"
-              },
-              {
-                "description": "Used to send a message"
               }
             ]
           },

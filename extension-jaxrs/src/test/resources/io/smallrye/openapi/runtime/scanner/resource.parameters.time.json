@@ -113,12 +113,11 @@
         "type": "object",
         "properties": {
           "utc": {
+            "type": "string",
+            "description": "Current time at offset '00:00'",
             "allOf": [
               {
                 "$ref": "#/components/schemas/OffsetTime"
-              },
-              {
-                "description": "Current time at offset '00:00'"
               }
             ]
           }

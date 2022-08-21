@@ -255,20 +255,28 @@ public class SchemaFactory {
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            Schema implSchema = readClassSchema(context,
-                    JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
-                    false);
+            schema = includeTypeSchema(context, schema, JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION));
+        }
 
-            if (schema.getType() == Schema.SchemaType.ARRAY && implSchema != null) {
-                // If the @Schema annotation indicates an array type, then use the Schema
-                // generated from the implementation Class as the "items" for the array.
-                schema.setItems(implSchema);
-            } else if (implSchema != null) {
-                // If there is an impl class - merge the @Schema properties *onto* the schema
-                // generated from the Class so that the annotation properties override the class
-                // properties (as required by the MP+OAI spec).
-                schema = MergeUtil.mergeObjects(implSchema, schema);
-            }
+        return schema;
+    }
+
+    public static Schema includeTypeSchema(AnnotationScannerContext context, Schema schema, Type type) {
+        Schema implSchema = null;
+
+        if (type != null /* && type.kind() == Kind.CLASS */) {
+            implSchema = readClassSchema(context, type, false);
+        }
+
+        if (schema.getType() == Schema.SchemaType.ARRAY && implSchema != null) {
+            // If the @Schema annotation indicates an array type, then use the Schema
+            // generated from the implementation Class as the "items" for the array.
+            schema.setItems(implSchema);
+        } else if (implSchema != null) {
+            // If there is an impl class - merge the @Schema properties *onto* the schema
+            // generated from the Class so that the annotation properties override the class
+            // properties (as required by the MP+OAI spec).
+            schema = MergeUtil.mergeObjects(implSchema, schema);
         }
 
         return schema;
@@ -599,8 +607,8 @@ public class SchemaFactory {
             if (schemaReferenceSupported) {
                 return schemaRegistry.lookupRef(ctype, context.getJsonViews());
             } else {
-                // Clone the schema from the registry using mergeObjects
-                return MergeUtil.mergeObjects(new SchemaImpl(), schemaRegistry.lookupSchema(ctype, context.getJsonViews()));
+                // Clone the schema from the registry
+                return SchemaImpl.copyOf(schemaRegistry.lookupSchema(ctype, context.getJsonViews()));
             }
         } else if (context.getScanStack().contains(ctype)) {
             // Protect against stack overflow when the type is in the process of being scanned.

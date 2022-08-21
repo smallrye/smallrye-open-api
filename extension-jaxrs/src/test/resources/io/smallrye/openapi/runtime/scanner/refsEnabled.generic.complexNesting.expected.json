@@ -12,12 +12,11 @@
             "type": "object"
           },
           "foo": {
+            "type": "object",
+            "maxLength": 123456,
             "allOf": [
               {
                 "$ref": "#/components/schemas/FuzzStringDate"
-              },
-              {
-                "maxLength": 123456
               }
             ]
           }

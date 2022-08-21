@@ -1,16 +1,25 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import static io.smallrye.openapi.api.constants.JaxbConstants.*;
+import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ELEMENT;
+import static io.smallrye.openapi.api.constants.JaxbConstants.XML_WRAPPERELEMENT;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Objects;
+import java.util.function.Function;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
-import org.jboss.jandex.*;
+import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.FieldInfo;
+import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.media.XMLImpl;
@@ -120,46 +129,45 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         final AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
         final String propertyKey = typeResolver.getPropertyName();
 
+        final TypeProcessor typeProcessor;
         final Schema typeSchema;
-        final Schema registeredTypeSchema;
         final Type fieldType;
+        final Type registrationType;
+        final boolean registrationCandidate;
 
         if (schemaAnnotation != null && JandexUtil.hasImplementation(schemaAnnotation)) {
+            typeProcessor = null;
             typeSchema = null;
-            registeredTypeSchema = null;
             fieldType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
+            registrationType = null;
+            registrationCandidate = false;
         } else {
             // Process the type of the field to derive the typeSchema
-            TypeProcessor typeProcessor = new TypeProcessor(context, objectStack, parentPathEntry, typeResolver, entityType,
+            typeProcessor = new TypeProcessor(context, objectStack, parentPathEntry, typeResolver, entityType,
                     new SchemaImpl(), annotationTarget);
 
             // Type could be replaced (e.g. generics)
             fieldType = typeProcessor.processType();
 
-            typeSchema = typeProcessor.getSchema();
+            Schema initTypeSchema = typeProcessor.getSchema();
 
             // Set any default values that apply to the type schema as a result of the TypeProcessor
             if (!TypeUtil.isTypeOverridden(fieldType, schemaAnnotation)) {
-                TypeUtil.applyTypeAttributes(fieldType, typeSchema);
+                TypeUtil.applyTypeAttributes(fieldType, initTypeSchema);
             }
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
-            Type registrationType = TypeUtil.isWrappedType(entityType) ? fieldType : entityType;
+            registrationType = TypeUtil.isWrappedType(entityType) ? fieldType : entityType;
+            registrationCandidate = !JandexUtil.isRef(schemaAnnotation) &&
+                    SchemaRegistry.register(registrationType, context.getJsonViews(), typeResolver,
+                            initTypeSchema,
+                            (reg, key) -> null) != initTypeSchema;
 
-            if (typeSchema.getType() != SchemaType.ARRAY) {
-                // Only register a reference to the type schema. The full schema will be added by subsequent
-                // items on the stack (if not already present in the registry).
-                if (JandexUtil.isRef(schemaAnnotation)) {
-                    registeredTypeSchema = null;
-                } else {
-                    registeredTypeSchema = SchemaRegistry.registerReference(registrationType, context.getJsonViews(),
-                            typeResolver,
-                            typeSchema);
-                }
+            if (registrationCandidate && SchemaRegistry.hasSchema(registrationType, context.getJsonViews(), typeResolver)) {
+                typeSchema = SchemaRegistry.currentInstance()
+                        .lookupSchema(TypeResolver.resolve(registrationType, typeResolver), context.getJsonViews());
             } else {
-                // Allow registration of arrays since we may not encounter a List<CurrentType> again.
-                registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, context.getJsonViews(), typeResolver,
-                        typeSchema);
+                typeSchema = initTypeSchema;
             }
         }
 
@@ -168,7 +176,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (schemaAnnotation != null) {
             // Handle field annotated with @Schema.
             fieldSchema = readSchemaAnnotatedField(propertyKey, schemaAnnotation, fieldType);
-        } else if (registrationSuccessful(typeSchema, registeredTypeSchema)) {
+        } else if (registrationCandidate) {
             // The type schema was registered, start with empty schema for the field using the type from the field type's schema
             fieldSchema = new SchemaImpl().type(typeSchema.getType());
         } else {
@@ -207,23 +215,42 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = MergeUtil.mergeObjects(fieldSchema, existingFieldSchema);
         }
 
-        // Only when registration was successful (ref is present and the registered type is a different instance)
-        if (registrationSuccessful(typeSchema, registeredTypeSchema)) {
-            // Check if the field specifies something additional or different from the type's schema
-            if (fieldOverridesType(fieldSchema, typeSchema)) {
-                TypeUtil.clearMatchingDefaultAttributes(fieldSchema, typeSchema); // Remove duplicates
-                Schema composition = new SchemaImpl();
-                composition.addAllOf(registeredTypeSchema); // Reference to the type schema
-                composition.addAllOf(fieldSchema);
-                fieldSchema = composition;
+        if (registrationCandidate) {
+            if (fieldAssertionConflicts(fieldSchema, typeSchema)) {
+                fieldSchema = SchemaFactory.includeTypeSchema(context, fieldSchema, fieldType);
             } else {
-                fieldSchema = registeredTypeSchema; // Reference to the type schema
+                typeProcessor.pushObjectStackInput();
+                Schema registeredTypeSchema;
+
+                if (typeSchema.getType() != SchemaType.ARRAY) {
+                    // Only register a reference to the type schema. The full schema will be added by subsequent
+                    // items on the stack (if not already present in the registry).
+                    registeredTypeSchema = SchemaRegistry.registerReference(registrationType, context.getJsonViews(),
+                            typeResolver, typeSchema);
+                } else {
+                    // Allow registration of arrays since we may not encounter a List<CurrentType> again.
+                    registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, context.getJsonViews(),
+                            typeResolver, typeSchema);
+                }
+
+                if (fieldSchema.getAllOf() == null && (fieldAssertionsOverrideType(fieldSchema, typeSchema)
+                        || fieldSpecifiesAnnotation(fieldSchema, typeSchema))) {
+                    // Field declaration overrides a schema annotation (non-validating), add referenced type to `allOf` if not user-provided
+                    TypeUtil.clearMatchingDefaultAttributes(fieldSchema, typeSchema);
+                    fieldSchema.addAllOf(registeredTypeSchema);
+                    SchemaImpl.addTypeObserver(typeSchema, fieldSchema);
+                } else {
+                    fieldSchema = registeredTypeSchema; // Reference to the type schema
+                }
             }
         } else if (!JandexUtil.isRef(schemaAnnotation)) {
             /*
              * Registration did not occur and the user did not indicate this schema is a simple reference,
              * overlay anything defined by the field on the type's schema
              */
+            if (typeProcessor != null) {
+                typeProcessor.pushObjectStackInput();
+            }
             fieldSchema = MergeUtil.mergeObjects(typeSchema, fieldSchema);
         }
 
@@ -314,18 +341,6 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
     }
 
-    /**
-     * A successful registration results in the registered type schema being a distinct
-     * Schema instance containing only a <code>ref</code> to the original type schema.
-     *
-     * @param typeSchema schema for a type
-     * @param registeredTypeSchema a (potential) reference schema to typeSchema
-     * @return true if the schemas are not the same (i.e. registration occurred), otherwise false
-     */
-    private boolean registrationSuccessful(Schema typeSchema, Schema registeredTypeSchema) {
-        return (registeredTypeSchema != null && typeSchema != registeredTypeSchema);
-    }
-
     private Schema readSchemaAnnotatedField(String propertyKey, AnnotationInstance annotation, Type postProcessedField) {
         DataObjectLogging.logger.processingFieldAnnotation(annotation, propertyKey);
 
@@ -349,78 +364,92 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         return SchemaFactory.readSchema(context, new SchemaImpl(), annotation, defaults);
     }
 
-    /**
-     * Determine if the fieldSchema defines any attributes that are not present or
-     * different from the attributes in the typeSchema.
-     *
-     * @param fieldSchema
-     * @param typeSchema
-     * @return true if fieldSchema defines new attributes or different attributes from typeSchema, otherwise false
-     */
-    boolean fieldOverridesType(Schema fieldSchema, Schema typeSchema) {
-        List<Supplier<Object>> typeAttributes = getAttributeSuppliers(typeSchema);
-        List<Supplier<Object>> fieldAttributes = getAttributeSuppliers(fieldSchema);
+    boolean fieldAssertionConflicts(Schema fieldSchema, Schema typeSchema) {
+        return SCHEMA_ASSERTION_PROVIDERS.stream()
+                .map(provider -> {
+                    Object fieldAttr = provider.apply(fieldSchema);
 
-        for (int i = 0, m = typeAttributes.size(); i < m; i++) {
-            Object fieldAttr = fieldAttributes.get(i).get();
+                    if (fieldAttr != null) {
+                        Object typeAttr = provider.apply(typeSchema);
 
-            if (fieldAttr != null) {
-                Object typeAttr = typeAttributes.get(i).get();
+                        if (typeAttr != null && !fieldAttr.equals(typeAttr)) {
+                            return true;
+                        }
+                    }
 
-                if (typeAttr == null || !fieldAttr.equals(typeAttr)) {
-                    return true;
-                }
-            }
-        }
+                    return false;
+                })
+                .anyMatch(Boolean.TRUE::equals);
+    }
 
-        return false;
+    boolean fieldAssertionsOverrideType(Schema fieldSchema, Schema typeSchema) {
+        return SCHEMA_ASSERTION_PROVIDERS.stream()
+                .map(provider -> {
+                    Object fieldAttr = provider.apply(fieldSchema);
+
+                    if (fieldAttr != null) {
+                        return !fieldAttr.equals(provider.apply(typeSchema));
+                    }
+
+                    return false;
+                })
+                .anyMatch(Boolean.TRUE::equals);
+    }
+
+    boolean fieldSpecifiesAnnotation(Schema fieldSchema, Schema typeSchema) {
+        return null != SCHEMA_ANNOTATION_PROVIDERS.stream()
+                .map(provider -> provider.apply(fieldSchema))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
-     * Get accessors/suppliers for all schema attributes that are relevant to comparing two
-     * schemas.
-     *
-     * @param schema the schema
-     * @return a list of suppliers (i.e. getters) for the schema's attributes
+     * @see https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.7.6
      */
-    List<Supplier<Object>> getAttributeSuppliers(Schema schema) {
-        return Arrays.asList(schema::getAdditionalPropertiesBoolean,
-                schema::getAdditionalPropertiesSchema,
-                schema::getAllOf,
-                schema::getAnyOf,
-                schema::getDefaultValue,
-                schema::getDeprecated,
-                schema::getDescription,
-                schema::getDiscriminator,
-                schema::getEnumeration,
-                schema::getExample,
-                schema::getExclusiveMaximum,
-                schema::getExclusiveMinimum,
-                schema::getExtensions,
-                schema::getExternalDocs,
-                schema::getFormat,
-                schema::getItems,
-                schema::getMaximum,
-                schema::getMaxItems,
-                schema::getMaxLength,
-                schema::getMaxProperties,
-                schema::getMinimum,
-                schema::getMinItems,
-                schema::getMinLength,
-                schema::getMinProperties,
-                schema::getMultipleOf,
-                schema::getNot,
-                schema::getNullable,
-                schema::getOneOf,
-                schema::getPattern,
-                schema::getProperties,
-                schema::getReadOnly,
-                schema::getRef,
-                schema::getRequired,
-                schema::getTitle,
-                schema::getType,
-                schema::getUniqueItems,
-                schema::getWriteOnly,
-                schema::getXml);
-    }
+    private static final List<Function<Schema, Object>> SCHEMA_ASSERTION_PROVIDERS = Arrays.asList(
+            Schema::getAdditionalPropertiesBoolean,
+            Schema::getAdditionalPropertiesSchema,
+            Schema::getAllOf,
+            Schema::getAnyOf,
+            Schema::getDiscriminator,
+            Schema::getEnumeration,
+            Schema::getExclusiveMaximum,
+            Schema::getExclusiveMinimum,
+            Schema::getFormat,
+            Schema::getItems,
+            Schema::getMaximum,
+            Schema::getMaxItems,
+            Schema::getMaxLength,
+            Schema::getMaxProperties,
+            Schema::getMinimum,
+            Schema::getMinItems,
+            Schema::getMinLength,
+            Schema::getMinProperties,
+            Schema::getMultipleOf,
+            Schema::getNot,
+            Schema::getNullable,
+            Schema::getOneOf,
+            Schema::getPattern,
+            Schema::getProperties,
+            Schema::getRef,
+            Schema::getRequired,
+            //Schema::getType,
+            Schema::getUniqueItems,
+            Schema::getXml);
+
+    /**
+     * @see https://json-schema.org/draft/2020-12/json-schema-core.html#annotations
+     */
+    private static final List<Function<Schema, Object>> SCHEMA_ANNOTATION_PROVIDERS = Arrays.asList(
+            Schema::getDefaultValue,
+            Schema::getDeprecated,
+            Schema::getDescription,
+            Schema::getExample,
+            Schema::getExtensions,
+            Schema::getExternalDocs,
+            Schema::getReadOnly,
+            Schema::getTitle,
+            Schema::getWriteOnly);
+
 }

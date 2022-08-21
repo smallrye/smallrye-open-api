@@ -59,12 +59,11 @@
         "type": "object",
         "properties": {
           "theUUID": {
+            "type": "string",
+            "description": "test",
             "allOf": [
               {
                 "$ref": "#/components/schemas/UUID"
-              },
-              {
-                "description": "test"
               }
             ]
           }
