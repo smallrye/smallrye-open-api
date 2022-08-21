@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
@@ -80,5 +81,25 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     void testJakartaResteasyMultipartRelatedInput() throws IOException, JSONException {
         test("params.resteasy-multipart-related-input.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResteasyMultipartRelatedInputTestResource.class);
+    }
+
+    @Test
+    void testRequestBodyMethodParameterConstraints() throws Exception {
+        @jakarta.ws.rs.Path("/")
+        class Resource {
+            @jakarta.ws.rs.POST
+            @jakarta.ws.rs.Consumes("text/plain")
+            @jakarta.ws.rs.Path("foos")
+            public void addFoo(@jakarta.validation.constraints.NotEmpty String foo) {
+            }
+
+            @jakarta.ws.rs.POST
+            @jakarta.ws.rs.Consumes("text/plain")
+            @jakarta.ws.rs.Path("bars")
+            @RequestBody(required = false)
+            public void addBar(@jakarta.validation.constraints.NotEmpty String foo) {
+            }
+        }
+        test("params.request-body-constraints.json", Resource.class);
     }
 }
