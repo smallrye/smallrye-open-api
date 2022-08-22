@@ -58,6 +58,12 @@ jobs:
           name: tck-report
           path: testsuite/tck/target/surefire-reports
 
+      ## Store information about the build context for Sonar scan in separate job
+      - name: Save Build Context
+        run: echo "$GITHUB_CONTEXT" > target/build-context.json
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
       ## Attach target directories for safe Sonar scan in separate job
       - name: Attach Build Output
         if: matrix.java == '11'
@@ -66,4 +72,5 @@ jobs:
           name: target
           path: |
             **/target/
+            !**/target/node/**/*
             !**/target/**/*.jar
