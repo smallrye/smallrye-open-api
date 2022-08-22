@@ -50,7 +50,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B formatter:validate impsort:check javadoc:javadoc verify
+        run: mvn -B formatter:validate impsort:check javadoc:javadoc verify -Pcoverage
 
       - uses: actions/upload-artifact@v2
         name: tck-report
@@ -74,3 +74,4 @@ jobs:
             **/target/
             !**/target/node/**/*
             !**/target/**/*.jar
+            !**/target/**/*.war
