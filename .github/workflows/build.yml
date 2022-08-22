@@ -2,8 +2,11 @@ name: SmallRye Build
 
 on:
   push:
-    branches-ignore:
-      - 'dependabot/**'
+    branches:
+      - 'main'
+      - '[1-9].[0-9].x'
+      - '1.x'
+      - '!dependabot/**'
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
@@ -11,6 +14,10 @@ on:
       - 'NOTICE'
       - 'README*'
   pull_request:
+    branches:
+      - 'main'
+      - '[1-9].[0-9].x'
+      - '1.x'
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
@@ -23,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [11, 17]
+        java: [ 11, 17 ]
     name: build with jdk ${{matrix.java}}
 
     steps:
@@ -43,7 +50,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B formatter:validate impsort:check verify --file pom.xml
+        run: mvn -B formatter:validate impsort:check javadoc:javadoc verify
 
       - uses: actions/upload-artifact@v2
         name: tck-report
@@ -51,37 +58,12 @@ jobs:
           name: tck-report
           path: testsuite/tck/target/surefire-reports
 
-  quality:
-    needs: [build]
-    if: github.event_name == 'push' && github.repository == 'smallrye/smallrye-open-api'
-    runs-on: ubuntu-latest
-    name: quality
-
-    steps:
-      - uses: actions/checkout@v2
-      - run: |
-          git fetch --prune --unshallow --tags --force
-
-      - uses: actions/setup-java@v1.4.3
+      ## Attach target directories for safe Sonar scan in separate job
+      - name: Attach Build Output
+        if: matrix.java == '11'
+        uses: actions/upload-artifact@v2
         with:
-          java-version: 11
-
-      - name: cache sonar
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: maven cache
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: sonar
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
-        run: mvn -B verify --file pom.xml -Pcoverage javadoc:javadoc sonar:sonar -Dsonar.projectKey=smallrye_smallrye-open-api -Dsonar.login=$SONAR_TOKEN
+          name: target
+          path: |
+            **/target/
+            !**/target/**/*.jar
