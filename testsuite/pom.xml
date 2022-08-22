@@ -26,11 +26,12 @@
   <artifactId>smallrye-open-api-testsuite</artifactId>
   <packaging>pom</packaging>
 
-  <name>SmallRye: MicroProfile OpenAPI Test Suite</name>
+  <name>SmallRye: OpenAPI Test Suites and Data</name>
 
   <modules>
     <module>tck</module>
     <module>extra</module>
+    <module>data</module>
   </modules>
 
   <build>

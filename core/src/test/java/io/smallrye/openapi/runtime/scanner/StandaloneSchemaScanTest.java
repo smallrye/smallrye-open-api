@@ -625,4 +625,16 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         printToConsole(result);
         assertJsonEquals("components.schemas.field-overrides-type.json", result);
     }
+
+    @Test
+    void testKotlinPropertyName() throws IOException, JSONException {
+        Index index = indexOf(io.smallrye.openapi.testdata.kotlin.KotlinBean.class,
+                io.smallrye.openapi.testdata.kotlin.KotlinLongValue.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.kotlin-value-class-propname.json", result);
+    }
 }
