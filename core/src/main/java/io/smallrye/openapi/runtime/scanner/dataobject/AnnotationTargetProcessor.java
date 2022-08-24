@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -184,10 +185,12 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = MergeUtil.mergeObjects(new SchemaImpl(), typeSchema);
         }
 
-        if (context.getBeanValidationScanner().isPresent()) {
+        Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
+
+        if (constraintScanner.isPresent()) {
             for (AnnotationTarget contraintTarget : typeResolver.getConstraintTargets()) {
                 // Apply constraints from all bean properties associated with the schema property
-                context.getBeanValidationScanner().get().applyConstraints(contraintTarget, fieldSchema, propertyKey, this);
+                constraintScanner.get().applyConstraints(contraintTarget, fieldSchema, propertyKey, this);
             }
         }
 

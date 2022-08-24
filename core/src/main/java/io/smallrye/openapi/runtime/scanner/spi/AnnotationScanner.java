@@ -1012,9 +1012,9 @@ public interface AnnotationScanner {
     default void setRequestBodyConstraints(AnnotationScannerContext context, RequestBody requestBody, MethodInfo method,
             Type requestBodyType) {
         List<AnnotationInstance> paramAnnotations = JandexUtil.getMethodParameterAnnotations(method, requestBodyType);
+        Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
 
-        if (!paramAnnotations.isEmpty() && context.getBeanValidationScanner().isPresent()) {
-            BeanValidationScanner constraintScanner = context.getBeanValidationScanner().get();
+        if (!paramAnnotations.isEmpty() && constraintScanner.isPresent()) {
             AnnotationTarget paramTarget = paramAnnotations.iterator().next().target();
 
             Optional.ofNullable(requestBody.getContent())
@@ -1025,7 +1025,7 @@ public interface AnnotationScanner {
                     .map(Map.Entry::getValue)
                     .map(MediaType::getSchema)
                     .filter(Objects::nonNull)
-                    .forEach(schema -> constraintScanner.applyConstraints(paramTarget, schema, null,
+                    .forEach(schema -> constraintScanner.get().applyConstraints(paramTarget, schema, null,
                             (target, name) -> {
                                 if (requestBody.getRequired() == null) {
                                     requestBody.setRequired(Boolean.TRUE);
