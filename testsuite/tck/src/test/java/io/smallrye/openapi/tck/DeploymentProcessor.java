@@ -22,8 +22,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
-import org.jboss.arquillian.test.spi.TestClass;
+import org.jboss.arquillian.container.spi.client.deployment.DeploymentDescription;
+import org.jboss.arquillian.container.spi.event.container.BeforeDeploy;
+import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
@@ -47,12 +48,21 @@ import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 
-public class DeploymentProcessor implements ApplicationArchiveProcessor {
+public class DeploymentProcessor {
     private static Logger LOGGER = Logger.getLogger(DeploymentProcessor.class.getName());
     public static volatile ClassLoader classLoader;
 
-    @Override
-    public void process(Archive<?> archive, TestClass testClass) {
+    public void observeDeployment(@Observes final BeforeDeploy beforeDeploy) {
+        DeploymentDescription deployment = beforeDeploy.getDeployment();
+        Archive<?> testableArchive = deployment.getTestableArchive();
+        if (testableArchive != null) {
+            process(testableArchive);
+        } else {
+            process(deployment.getArchive());
+        }
+    }
+
+    private void process(Archive<?> archive) {
         if (classLoader == null) {
             classLoader = Thread.currentThread().getContextClassLoader();
         }
