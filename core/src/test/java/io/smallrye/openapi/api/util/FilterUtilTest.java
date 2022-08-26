@@ -1,15 +1,19 @@
 package io.smallrye.openapi.api.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -78,6 +82,38 @@ class FilterUtilTest {
         String expected = loadResource(afterUrl);
 
         assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void testCyclicReferencesSafe() {
+        Schema schema1 = OASFactory.createSchema();
+        Schema schema2 = OASFactory.createSchema();
+        Schema schema3 = OASFactory.createSchema();
+
+        // Cycle in lists
+        schema1.addAllOf(schema2);
+        schema2.addAllOf(schema3);
+        schema3.addAllOf(schema1);
+
+        // Cycle in map
+        Schema schema4 = OASFactory.createSchema();
+        schema4.addProperty("prop1", schema1);
+        schema4.addProperty("prop4", schema4);
+
+        // Cycle in simple object reference
+        Schema schema5 = OASFactory.createSchema();
+        schema5.setNot(schema5);
+
+        OpenAPI model = OASFactory.createOpenAPI()
+                .info(OASFactory.createInfo())
+                .components(OASFactory.createComponents()
+                        .addSchema("Schema1", schema1)
+                        .addSchema("Schema2", schema2)
+                        .addSchema("Schema3", schema3)
+                        .addSchema("Schema4", schema4)
+                        .addSchema("Schema5", schema5));
+
+        assertDoesNotThrow(() -> FilterUtil.applyFilter(filter(), model));
     }
 
     /**
