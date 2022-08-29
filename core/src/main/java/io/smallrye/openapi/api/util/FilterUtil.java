@@ -2,6 +2,7 @@ package io.smallrye.openapi.api.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponses;
  */
 public class FilterUtil {
 
+    private final Map<Object, Object> stack = new IdentityHashMap<>();
+
     private FilterUtil() {
     }
 
@@ -45,12 +48,16 @@ public class FilterUtil {
      * @return Filtered OpenAPI model
      */
     public static final OpenAPI applyFilter(OASFilter filter, OpenAPI model) {
+        return new FilterUtil().filter(filter, model);
+    }
+
+    private OpenAPI filter(OASFilter filter, OpenAPI model) {
         filterComponents(filter, model.getComponents());
 
         if (model.getPaths() != null) {
             filter(filter,
                     model.getPaths().getPathItems(),
-                    FilterUtil::filterPathItem,
+                    this::filterPathItem,
                     filter::filterPathItem,
                     model.getPaths()::removePathItem);
         }
@@ -69,19 +76,31 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterComponents(OASFilter filter, Components model) {
+    private void filterComponents(OASFilter filter, Components model) {
         if (model != null) {
-            filter(filter, model.getCallbacks(), FilterUtil::filterCallback, filter::filterCallback, model::removeCallback);
-            filter(filter, model.getHeaders(), FilterUtil::filterHeader, filter::filterHeader, model::removeHeader);
-            filter(filter, model.getLinks(), FilterUtil::filterLink, filter::filterLink, model::removeLink);
-            filter(filter, model.getParameters(), FilterUtil::filterParameter, filter::filterParameter, model::removeParameter);
-            filter(filter, model.getRequestBodies(), FilterUtil::filterRequestBody, filter::filterRequestBody,
+            filter(filter, model.getCallbacks(), this::filterCallback, filter::filterCallback, model::removeCallback);
+            filter(filter, model.getHeaders(), this::filterHeader, filter::filterHeader, model::removeHeader);
+            filter(filter, model.getLinks(), this::filterLink, filter::filterLink, model::removeLink);
+            filter(filter, model.getParameters(), this::filterParameter, filter::filterParameter, model::removeParameter);
+            filter(filter, model.getRequestBodies(), this::filterRequestBody, filter::filterRequestBody,
                     model::removeRequestBody);
-            filter(filter, model.getResponses(), FilterUtil::filterAPIResponse, filter::filterAPIResponse,
+            filter(filter, model.getResponses(), this::filterAPIResponse, filter::filterAPIResponse,
                     model::removeResponse);
-            filter(filter, model.getSchemas(), FilterUtil::filterSchema, filter::filterSchema, model::removeSchema);
+            filter(filter, model.getSchemas(), this::filterSchema, filter::filterSchema, model::removeSchema);
             filter(filter, model.getSecuritySchemes(), null, filter::filterSecurityScheme, model::removeSecurityScheme);
         }
+    }
+
+    boolean push(Object model) {
+        boolean cyclicReference = stack.containsKey(model);
+
+        if (cyclicReference) {
+            UtilLogging.logger.cylicReferenceDetected();
+        } else {
+            stack.put(model, model);
+        }
+
+        return !cyclicReference;
     }
 
     /**
@@ -94,7 +113,7 @@ public class FilterUtil {
      * @param remover
      *        reference to the containing model's method for removing models
      */
-    private static <K, V> void filter(OASFilter filter,
+    private <K, V> void filter(OASFilter filter,
             Map<K, V> models,
             BiConsumer<OASFilter, V> contentFilter,
             UnaryOperator<V> modelFilter,
@@ -105,6 +124,10 @@ public class FilterUtil {
             for (Map.Entry<K, V> entry : new LinkedHashSet<>(models.entrySet())) {
                 V model = entry.getValue();
 
+                if (!push(model)) {
+                    continue;
+                }
+
                 if (contentFilter != null) {
                     contentFilter.accept(filter, model);
                 }
@@ -112,6 +135,8 @@ public class FilterUtil {
                 if (modelFilter.apply(model) == null) {
                     remover.accept(entry.getKey());
                 }
+
+                stack.remove(model);
             }
         }
     }
@@ -126,7 +151,7 @@ public class FilterUtil {
      * @param remover
      *        reference to the containing model's method for removing models
      */
-    private static <T> void filter(OASFilter filter,
+    private <T> void filter(OASFilter filter,
             List<T> models,
             BiConsumer<OASFilter, T> contentFilter,
             UnaryOperator<T> modelFilter,
@@ -135,6 +160,10 @@ public class FilterUtil {
         if (models != null) {
             // The collection must be copied since the original may be modified via the remover
             for (T model : new ArrayList<>(models)) {
+                if (!push(model)) {
+                    continue;
+                }
+
                 if (contentFilter != null) {
                     contentFilter.accept(filter, model);
                 }
@@ -142,6 +171,8 @@ public class FilterUtil {
                 if (modelFilter.apply(model) == null) {
                     remover.accept(model);
                 }
+
+                stack.remove(model);
             }
         }
     }
@@ -156,18 +187,23 @@ public class FilterUtil {
      * @param mutator
      *        reference to the containing model's method for updating the model
      */
-    private static <T> void filter(OASFilter filter,
+    private <T> void filter(OASFilter filter,
             T model,
             BiConsumer<OASFilter, T> contentFilter,
             UnaryOperator<T> modelFilter,
             Consumer<T> mutator) {
 
         if (model != null) {
+            if (!push(model)) {
+                return;
+            }
+
             if (contentFilter != null) {
                 contentFilter.accept(filter, model);
             }
 
             mutator.accept(modelFilter.apply(model));
+            stack.remove(model);
         }
     }
 
@@ -177,7 +213,7 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterCallback(OASFilter filter, Callback model) {
+    private void filterCallback(OASFilter filter, Callback model) {
         if (model != null) {
             Collection<String> keys = new ArrayList<>(model.getPathItems().keySet());
             for (String key : keys) {
@@ -197,9 +233,9 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterPathItem(OASFilter filter, PathItem model) {
+    private void filterPathItem(OASFilter filter, PathItem model) {
         if (model != null) {
-            filter(filter, model.getParameters(), FilterUtil::filterParameter, filter::filterParameter, model::removeParameter);
+            filter(filter, model.getParameters(), this::filterParameter, filter::filterParameter, model::removeParameter);
 
             filterOperation(filter, model.getDELETE(), model::setDELETE);
             filterOperation(filter, model.getGET(), model::setGET);
@@ -220,16 +256,16 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterOperation(OASFilter filter, Operation model, Consumer<Operation> mutator) {
+    private void filterOperation(OASFilter filter, Operation model, Consumer<Operation> mutator) {
         if (model != null) {
-            filter(filter, model.getCallbacks(), FilterUtil::filterCallback, filter::filterCallback, model::removeCallback);
-            filter(filter, model.getParameters(), FilterUtil::filterParameter, filter::filterParameter, model::removeParameter);
-            filter(filter, model.getRequestBody(), FilterUtil::filterRequestBody, filter::filterRequestBody,
+            filter(filter, model.getCallbacks(), this::filterCallback, filter::filterCallback, model::removeCallback);
+            filter(filter, model.getParameters(), this::filterParameter, filter::filterParameter, model::removeParameter);
+            filter(filter, model.getRequestBody(), this::filterRequestBody, filter::filterRequestBody,
                     model::setRequestBody);
 
             if (model.getResponses() != null) {
                 APIResponses responses = model.getResponses();
-                filter(filter, responses.getAPIResponses(), FilterUtil::filterAPIResponse, filter::filterAPIResponse,
+                filter(filter, responses.getAPIResponses(), this::filterAPIResponse, filter::filterAPIResponse,
                         responses::removeAPIResponse);
             }
 
@@ -245,10 +281,10 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterHeader(OASFilter filter, Header model) {
+    private void filterHeader(OASFilter filter, Header model) {
         if (model != null) {
             filterContent(filter, model.getContent());
-            filter(filter, model.getSchema(), FilterUtil::filterSchema, filter::filterSchema, model::setSchema);
+            filter(filter, model.getSchema(), this::filterSchema, filter::filterSchema, model::setSchema);
         }
     }
 
@@ -258,7 +294,7 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterContent(OASFilter filter, Content model) {
+    private void filterContent(OASFilter filter, Content model) {
         if (model != null && model.getMediaTypes() != null) {
             Collection<String> keys = new ArrayList<>(model.getMediaTypes().keySet());
             for (String key : keys) {
@@ -274,10 +310,10 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterMediaType(OASFilter filter, MediaType model) {
+    private void filterMediaType(OASFilter filter, MediaType model) {
         if (model != null) {
             filterEncoding(filter, model.getEncoding());
-            filter(filter, model.getSchema(), FilterUtil::filterSchema, filter::filterSchema, model::setSchema);
+            filter(filter, model.getSchema(), this::filterSchema, filter::filterSchema, model::setSchema);
         }
     }
 
@@ -287,7 +323,7 @@ public class FilterUtil {
      * @param filter
      * @param models
      */
-    private static void filterEncoding(OASFilter filter, Map<String, Encoding> models) {
+    private void filterEncoding(OASFilter filter, Map<String, Encoding> models) {
         if (models != null) {
             Collection<String> keys = new ArrayList<>(models.keySet());
             for (String key : keys) {
@@ -303,9 +339,9 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterEncoding(OASFilter filter, Encoding model) {
+    private void filterEncoding(OASFilter filter, Encoding model) {
         if (model != null) {
-            filter(filter, model.getHeaders(), FilterUtil::filterHeader, filter::filterHeader, model::removeHeader);
+            filter(filter, model.getHeaders(), this::filterHeader, filter::filterHeader, model::removeHeader);
         }
     }
 
@@ -315,7 +351,7 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterLink(OASFilter filter, Link model) {
+    private void filterLink(OASFilter filter, Link model) {
         if (model != null && model.getServer() != null) {
             model.setServer(filter.filterServer(model.getServer()));
         }
@@ -327,10 +363,10 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterParameter(OASFilter filter, Parameter model) {
+    private void filterParameter(OASFilter filter, Parameter model) {
         if (model != null) {
             filterContent(filter, model.getContent());
-            filter(filter, model.getSchema(), FilterUtil::filterSchema, filter::filterSchema, model::setSchema);
+            filter(filter, model.getSchema(), this::filterSchema, filter::filterSchema, model::setSchema);
         }
     }
 
@@ -340,7 +376,7 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterRequestBody(OASFilter filter, RequestBody model) {
+    private void filterRequestBody(OASFilter filter, RequestBody model) {
         if (model != null) {
             filterContent(filter, model.getContent());
         }
@@ -352,11 +388,11 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterAPIResponse(OASFilter filter, APIResponse model) {
+    private void filterAPIResponse(OASFilter filter, APIResponse model) {
         if (model != null) {
             filterContent(filter, model.getContent());
-            filter(filter, model.getHeaders(), FilterUtil::filterHeader, filter::filterHeader, model::removeHeader);
-            filter(filter, model.getLinks(), FilterUtil::filterLink, filter::filterLink, model::removeLink);
+            filter(filter, model.getHeaders(), this::filterHeader, filter::filterHeader, model::removeHeader);
+            filter(filter, model.getLinks(), this::filterLink, filter::filterLink, model::removeLink);
         }
     }
 
@@ -366,16 +402,16 @@ public class FilterUtil {
      * @param filter
      * @param model
      */
-    private static void filterSchema(OASFilter filter, Schema model) {
+    private void filterSchema(OASFilter filter, Schema model) {
         if (model != null) {
-            filter(filter, model.getAdditionalPropertiesSchema(), FilterUtil::filterSchema, filter::filterSchema,
+            filter(filter, model.getAdditionalPropertiesSchema(), this::filterSchema, filter::filterSchema,
                     model::setAdditionalPropertiesSchema);
-            filter(filter, model.getAllOf(), FilterUtil::filterSchema, filter::filterSchema, model::removeAllOf);
-            filter(filter, model.getAnyOf(), FilterUtil::filterSchema, filter::filterSchema, model::removeAnyOf);
-            filter(filter, model.getOneOf(), FilterUtil::filterSchema, filter::filterSchema, model::removeOneOf);
-            filter(filter, model.getItems(), FilterUtil::filterSchema, filter::filterSchema, model::setItems);
-            filter(filter, model.getNot(), FilterUtil::filterSchema, filter::filterSchema, model::setNot);
-            filter(filter, model.getProperties(), FilterUtil::filterSchema, filter::filterSchema, model::removeProperty);
+            filter(filter, model.getAllOf(), this::filterSchema, filter::filterSchema, model::removeAllOf);
+            filter(filter, model.getAnyOf(), this::filterSchema, filter::filterSchema, model::removeAnyOf);
+            filter(filter, model.getOneOf(), this::filterSchema, filter::filterSchema, model::removeOneOf);
+            filter(filter, model.getItems(), this::filterSchema, filter::filterSchema, model::setItems);
+            filter(filter, model.getNot(), this::filterSchema, filter::filterSchema, model::setNot);
+            filter(filter, model.getProperties(), this::filterSchema, filter::filterSchema, model::removeProperty);
         }
     }
 }
