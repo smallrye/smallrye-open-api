@@ -6,7 +6,6 @@
         "required" : [ "bar", "foo" ],
         "properties" : {
           "bar" : {
-            "type" : "object"
           },
           "foo" : {
             "format" : "int32",

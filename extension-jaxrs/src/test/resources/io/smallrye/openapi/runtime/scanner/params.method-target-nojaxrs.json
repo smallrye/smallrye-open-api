@@ -177,7 +177,6 @@
           "data": {
             "type": "array",
             "items": {
-              "type": "object"
             }
           }
         }

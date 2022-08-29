@@ -42,7 +42,6 @@
             "type": "string"
           },
           "prop2": {
-            "type": "object"
           }
         }
       }

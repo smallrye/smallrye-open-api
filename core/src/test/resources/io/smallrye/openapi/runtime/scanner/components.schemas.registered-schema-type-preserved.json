@@ -115,8 +115,7 @@
             "example": "F176f717c7a71"
           },
           "data": {
-            "description": "The business data object",
-            "type": "object"
+            "description": "The business data object"
           },
           "kind": {
             "description": "The class-name of the business data object",

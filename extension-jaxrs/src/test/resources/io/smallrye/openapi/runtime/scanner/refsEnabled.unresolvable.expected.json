@@ -14,13 +14,11 @@
         "type": "object",
         "properties": {
           "theQ": {
-            "type": "object"
           },
           "theT": {
             "$ref": "#/components/schemas/Baz"
           },
           "ultimateTShouldBeQ": {
-            "type": "object"
           }
         }
       }

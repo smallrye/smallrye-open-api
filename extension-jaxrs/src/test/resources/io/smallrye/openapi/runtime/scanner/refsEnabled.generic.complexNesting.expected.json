@@ -9,7 +9,6 @@
         "type": "object",
         "properties": {
           "bar": {
-            "type": "object"
           },
           "foo": {
             "type": "object",

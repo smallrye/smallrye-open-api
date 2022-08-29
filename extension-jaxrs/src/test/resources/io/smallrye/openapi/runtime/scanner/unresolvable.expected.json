@@ -1,23 +1,21 @@
 {
-  "components" : {
-    "schemas" : {
-      "test.io.smallrye.openapi.runtime.scanner.entities.Bar" : {
+  "components": {
+    "schemas": {
+      "test.io.smallrye.openapi.runtime.scanner.entities.Bar": {
         "type": "object",
-        "properties" : {
-          "theQ" : {
-            "type" : "object"
+        "properties": {
+          "theQ": {
           },
-          "theT" : {
-            "type" : "object",
-            "properties" : {
-              "an_integer_value" : {
-                "format" : "int32",
-                "type" : "integer"
+          "theT": {
+            "type": "object",
+            "properties": {
+              "an_integer_value": {
+                "format": "int32",
+                "type": "integer"
               }
             }
           },
-          "ultimateTShouldBeQ" : {
-            "type" : "object"
+          "ultimateTShouldBeQ": {
           }
         }
       }
