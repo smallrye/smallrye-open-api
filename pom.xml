@@ -70,7 +70,7 @@
         <connection>scm:git:git@github.com:smallrye/smallrye-open-api.git</connection>
         <developerConnection>scm:git:git@github.com:smallrye/smallrye-open-api.git</developerConnection>
         <url>https://github.com/smallrye/smallrye-open-api/</url>
-        <tag>2.1.23</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
