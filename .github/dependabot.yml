@@ -30,3 +30,8 @@ updates:
   - dependency-name: jakarta.xml.bind:jakarta.xml.bind-api
     versions:
     - 3.0.0
+- package-ecosystem: gradle
+  directory: "/tools/gradle-plugin"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
