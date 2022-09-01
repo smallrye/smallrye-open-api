@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-jakarta-parent</artifactId>
-        <version>35</version>
+        <version>36</version>
     </parent>
 
     <artifactId>smallrye-open-api-parent</artifactId>
