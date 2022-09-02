@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -396,4 +397,52 @@ class ApiResponseTests extends IndexScannerTestBase {
         assertJsonEquals("responses.api-response-schema-variations.json", result);
     }
 
+    @Test
+    /*
+     * Test case for Smallrye OpenAPI issue #1234.
+     * 
+     * https://github.com/smallrye/smallrye-open-api/issues/1234
+     */
+    void testNonJaxRsMethodsSkipped() throws IOException, JSONException {
+        @Schema(name = "Reference")
+        abstract class Reference {
+            abstract String getName();
+        }
+        @Schema(name = "ReferencesResponse")
+        abstract class ReferencesResponse {
+            abstract List<Reference> getReferences();
+        }
+        abstract class TreeApi {
+            abstract ReferencesResponse getAllReferences();
+
+            @APIResponseSchema(value = ReferencesResponse.class, responseDescription = "Will not be scanned")
+            abstract Reference getDefaultBranch();
+        }
+        @jakarta.ws.rs.Path("trees")
+        class HttpTreeApi extends TreeApi {
+
+            @Override
+            @jakarta.ws.rs.GET
+            public ReferencesResponse getAllReferences() {
+                return null;
+            }
+
+            @Override
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("tree")
+            public Reference getDefaultBranch() {
+                return null;
+            }
+        }
+
+        Index index = indexOf(
+                TreeApi.class,
+                HttpTreeApi.class,
+                Reference.class,
+                ReferencesResponse.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("responses.nonjaxrs-methods-skipped.json", result);
+    }
 }

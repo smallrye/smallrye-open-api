@@ -783,13 +783,6 @@ public class JandexUtil {
         return ancestry;
     }
 
-    public static List<MethodInfo> overriddenMethods(MethodInfo method, List<MethodInfo> candidates) {
-        return candidates.stream()
-                .filter(m -> !method.equals(m))
-                .filter(m -> isSameSignature(method, m))
-                .collect(Collectors.toList());
-    }
-
     public static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
         return Objects.equals(m1.name(), m2.name())
                 && m1.parametersCount() == m2.parametersCount()
