@@ -38,6 +38,7 @@
         <artifactId.resteasy.client>resteasy-client-microprofile</artifactId.resteasy.client>
         <version.resteasy.client>4.7.6.Final</version.resteasy.client>
         <version.quarkus>2.12.0.Final</version.quarkus>
+        <version.testng>6.14.3</version.testng>
 
         <!--
             xmlReportPaths must contain an entry for each project that reports coverage.
