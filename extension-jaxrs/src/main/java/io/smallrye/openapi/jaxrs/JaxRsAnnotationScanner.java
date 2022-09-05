@@ -1,7 +1,5 @@
 package io.smallrye.openapi.jaxrs;
 
-import static io.smallrye.openapi.runtime.util.JandexUtil.overriddenMethods;
-
 import java.lang.reflect.Modifier;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -276,12 +274,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
             JaxRsConstants.HTTP_METHODS
                     .stream()
-                    .filter(httpMethod -> {
-                        if (methodInfo.hasAnnotation(httpMethod)) {
-                            return true;
-                        }
-                        return overriddenMethods(methodInfo, methods).stream().anyMatch(m -> m.hasAnnotation(httpMethod));
-                    })
+                    .filter(methodInfo::hasAnnotation)
                     .map(DotName::withoutPackagePrefix)
                     .map(PathItem.HttpMethod::valueOf)
                     .forEach(httpMethod -> {
