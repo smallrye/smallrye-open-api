@@ -1,0 +1,19 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "KotlinBean": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

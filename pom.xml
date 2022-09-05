@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>35</version>
+        <version>36</version>
     </parent>
 
     <artifactId>smallrye-open-api-parent</artifactId>
@@ -37,7 +37,8 @@
         <groupId.resteasy.client>org.jboss.resteasy</groupId.resteasy.client>
         <artifactId.resteasy.client>resteasy-client-microprofile</artifactId.resteasy.client>
         <version.resteasy.client>4.7.6.Final</version.resteasy.client>
-        <version.quarkus>2.11.2.Final</version.quarkus>
+        <version.quarkus>2.12.0.Final</version.quarkus>
+        <version.testng>6.14.3</version.testng>
 
         <!--
             xmlReportPaths must contain an entry for each project that reports coverage.
@@ -273,6 +274,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>smallrye-open-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>smallrye-open-api-testsuite-data</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

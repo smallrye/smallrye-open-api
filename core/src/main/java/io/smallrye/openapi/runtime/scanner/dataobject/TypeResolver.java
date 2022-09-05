@@ -494,12 +494,14 @@ public class TypeResolver {
                     .stream()
                     .filter(TypeResolver::acceptField)
                     .filter(field -> isViewable(context, field))
+                    .filter(field -> field.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
 
             methods(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptMethod)
                     .filter(method -> isViewable(context, method))
+                    .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             JandexUtil.interfaces(index, currentClass)
@@ -509,6 +511,7 @@ public class TypeResolver {
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> methods(context, clazz).stream())
                     .filter(method -> isViewable(context, method))
+                    .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
             descendants.add(currentClass);

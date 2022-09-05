@@ -19,4 +19,8 @@ interface UtilLogging extends BasicLogger {
     @Message(id = 1001, value = "Schema with zero references removed from #/components/schemas: %s")
     void unusedSchemaRemoved(String name);
 
+    @LogMessage(level = Logger.Level.INFO)
+    @Message(id = 1002, value = "Cyclic object reference detected in OpenAPI model, skipping current node")
+    void cylicReferenceDetected();
+
 }
