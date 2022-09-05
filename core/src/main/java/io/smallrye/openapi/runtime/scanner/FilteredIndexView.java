@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -258,6 +259,22 @@ public class FilteredIndexView implements IndexView {
     }
 
     /**
+     * @see org.jboss.jandex.IndexView#getKnownDirectSubinterfaces(org.jboss.jandex.DotName)
+     */
+    @Override
+    public Collection<ClassInfo> getKnownDirectSubinterfaces(DotName interfaceName) {
+        return filterClasses(this.delegate.getKnownDirectSubinterfaces(interfaceName));
+    }
+
+    /**
+     * @see org.jboss.jandex.IndexView#getAllKnownSubinterfaces(org.jboss.jandex.DotName)
+     */
+    @Override
+    public Collection<ClassInfo> getAllKnownSubinterfaces(DotName interfaceName) {
+        return filterClasses(this.delegate.getAllKnownSubinterfaces(interfaceName));
+    }
+
+    /**
      * @see org.jboss.jandex.IndexView#getKnownDirectImplementors(org.jboss.jandex.DotName)
      */
     @Override
@@ -302,6 +319,16 @@ public class FilteredIndexView implements IndexView {
     @Override
     public Collection<ClassInfo> getKnownUsers(DotName className) {
         return filterClasses(this.delegate.getKnownUsers(className));
+    }
+
+    @Override
+    public Collection<ClassInfo> getClassesInPackage(DotName packageName) {
+        return filterClasses(this.delegate.getClassesInPackage(packageName));
+    }
+
+    @Override
+    public Set<DotName> getSubpackages(DotName packageName) {
+        return delegate.getSubpackages(packageName);
     }
 
     private Collection<AnnotationInstance> filterInstances(Collection<AnnotationInstance> annotations) {
