@@ -1,6 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner.resources;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import io.quarkus.vertx.web.Param;
 import io.quarkus.vertx.web.Route;
