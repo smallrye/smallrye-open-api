@@ -7,5 +7,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 data class KotlinBean (
     @field:Schema(type = SchemaType.INTEGER, implementation = Long::class, name = "id")
     val id: KotlinLongValue? = null,
-    val name: String? = null
+    val name: String? = null,
+    val description: String = ""
 )

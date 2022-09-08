@@ -19,6 +19,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
+import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -100,6 +101,10 @@ public class BeanValidationScanner {
     // Jackson Constraints
     static final DotName JACKSON_JSONPROPERTY = createConstraintName(JacksonConstants.JSON_PROPERTY);
 
+    // Kotlin Constraints
+    static final DotName KOTLIN_NULLABLE = createConstraintName(KotlinConstants.JETBRAINS_NULLABLE);
+    static final DotName KOTLIN_NOT_NULL = createConstraintName(KotlinConstants.JETBRAINS_NOT_NULL);
+
     static DotName createConstraintName(DotName packageName, String className) {
         return createConstraintName(createComponentized(packageName, className));
     }
@@ -175,8 +180,7 @@ public class BeanValidationScanner {
                 applyArrayConstraints(target, schema, propertyKey, handler);
                 break;
             case BOOLEAN:
-                notNull(target, schema, propertyKey, handler);
-                requiredJackson(target, propertyKey, handler);
+                applyBooleanConstraints(target, schema, propertyKey, handler);
                 break;
             case INTEGER:
                 applyNumberConstraints(target, schema, propertyKey, handler);
@@ -202,7 +206,9 @@ public class BeanValidationScanner {
         pattern(target, schema);
         digits(target, schema);
         notBlank(target, schema, propertyKey, handler);
-        notNull(target, schema, propertyKey, handler);
+        notNull(target, propertyKey, handler);
+        notNullKotlin(target, propertyKey, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         sizeString(target, schema);
         notEmptyString(target, schema, propertyKey, handler);
@@ -212,7 +218,9 @@ public class BeanValidationScanner {
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        notNull(target, schema, propertyKey, handler);
+        notNull(target, propertyKey, handler);
+        notNullKotlin(target, propertyKey, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         sizeObject(target, schema);
         notEmptyObject(target, schema, propertyKey, handler);
@@ -222,7 +230,9 @@ public class BeanValidationScanner {
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        notNull(target, schema, propertyKey, handler);
+        notNull(target, propertyKey, handler);
+        notNullKotlin(target, propertyKey, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         sizeArray(target, schema);
         notEmptyArray(target, schema, propertyKey, handler);
@@ -239,10 +249,22 @@ public class BeanValidationScanner {
         min(target, schema);
         negative(target, schema);
         negativeOrZero(target, schema);
-        notNull(target, schema, propertyKey, handler);
+        notNull(target, propertyKey, handler);
+        notNullKotlin(target, propertyKey, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         positive(target, schema);
         positiveOrZero(target, schema);
+    }
+
+    private void applyBooleanConstraints(AnnotationTarget target,
+            Schema schema,
+            String propertyKey,
+            RequirementHandler handler) {
+        notNull(target, propertyKey, handler);
+        notNullKotlin(target, propertyKey, handler);
+        nullableKotlin(target, schema);
+        requiredJackson(target, propertyKey, handler);
     }
 
     void decimalMax(AnnotationTarget target, Schema schema) {
@@ -418,11 +440,23 @@ public class BeanValidationScanner {
         }
     }
 
-    void notNull(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
+    void notNull(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_NULL);
 
         if (constraint != null) {
             handler.setRequired(target, propertyKey);
+        }
+    }
+
+    void notNullKotlin(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
+        if (TypeUtil.hasAnnotation(target, KOTLIN_NOT_NULL)) {
+            handler.setRequired(target, propertyKey);
+        }
+    }
+
+    void nullableKotlin(AnnotationTarget target, Schema schema) {
+        if (TypeUtil.hasAnnotation(target, KOTLIN_NULLABLE) && schema.getNullable() == null) {
+            schema.setNullable(Boolean.TRUE);
         }
     }
 
