@@ -15,7 +15,7 @@ dependencies {
     implementation("io.smallrye:smallrye-open-api-spring:$version")
     implementation("io.smallrye:smallrye-open-api-vertx:$version")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     testImplementation(gradleTestKit())
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
