@@ -177,6 +177,9 @@
                                 <goals>
                                     <goal>report-aggregate</goal>
                                 </goals>
+                                <configuration>
+                                    <formats>XML</formats>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
