@@ -208,7 +208,7 @@ public class BeanValidationScanner {
         notBlank(target, schema, propertyKey, handler);
         notNull(target, propertyKey, handler);
         notNullKotlin(target, propertyKey, handler);
-        nullableKotlin(target, schema, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         sizeString(target, schema);
         notEmptyString(target, schema, propertyKey, handler);
@@ -220,7 +220,7 @@ public class BeanValidationScanner {
             RequirementHandler handler) {
         notNull(target, propertyKey, handler);
         notNullKotlin(target, propertyKey, handler);
-        nullableKotlin(target, schema, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         sizeObject(target, schema);
         notEmptyObject(target, schema, propertyKey, handler);
@@ -232,7 +232,7 @@ public class BeanValidationScanner {
             RequirementHandler handler) {
         notNull(target, propertyKey, handler);
         notNullKotlin(target, propertyKey, handler);
-        nullableKotlin(target, schema, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         sizeArray(target, schema);
         notEmptyArray(target, schema, propertyKey, handler);
@@ -251,7 +251,7 @@ public class BeanValidationScanner {
         negativeOrZero(target, schema);
         notNull(target, propertyKey, handler);
         notNullKotlin(target, propertyKey, handler);
-        nullableKotlin(target, schema, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         positive(target, schema);
         positiveOrZero(target, schema);
@@ -263,7 +263,7 @@ public class BeanValidationScanner {
             RequirementHandler handler) {
         notNull(target, propertyKey, handler);
         notNullKotlin(target, propertyKey, handler);
-        nullableKotlin(target, schema, handler);
+        nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
     }
 
@@ -454,11 +454,9 @@ public class BeanValidationScanner {
         }
     }
 
-    void nullableKotlin(AnnotationTarget target, Schema schema, RequirementHandler handler) {
-        if (TypeUtil.hasAnnotation(target, KOTLIN_NULLABLE)) {
-            if (schema.getNullable() == null) {
-                schema.setNullable(Boolean.TRUE);
-            }
+    void nullableKotlin(AnnotationTarget target, Schema schema) {
+        if (TypeUtil.hasAnnotation(target, KOTLIN_NULLABLE) && schema.getNullable() == null) {
+            schema.setNullable(Boolean.TRUE);
         }
     }
 
