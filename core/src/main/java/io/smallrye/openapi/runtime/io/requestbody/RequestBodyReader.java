@@ -124,7 +124,7 @@ public class RequestBodyReader {
                 .setContent(ContentReader.readContent(context,
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),
                         ContentDirection.INPUT));
-        requestBody.setRequired(Annotations.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED).orElse(null));
+        requestBody.setRequired(Annotations.value(annotationInstance, RequestBodyConstant.PROP_REQUIRED));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.REQUEST_BODY));
         requestBody.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return requestBody;

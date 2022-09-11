@@ -160,23 +160,21 @@ public class ParameterReader {
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
 
         // Params can be hidden. Skip if that's the case.
-        Optional<Boolean> isHidden = Annotations.booleanValue(annotationInstance, ParameterConstant.PROP_HIDDEN);
-        if (isHidden.isPresent() && isHidden.get()) {
+        Boolean isHidden = Annotations.value(annotationInstance, ParameterConstant.PROP_HIDDEN);
+        if (Boolean.TRUE.equals(isHidden)) {
             ParameterImpl.setHidden(parameter, true);
             return parameter;
         }
 
         parameter.setDescription(Annotations.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
-        parameter.setRequired(Annotations.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
-        parameter.setDeprecated(Annotations.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
-        parameter.setAllowEmptyValue(
-                Annotations.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
+        parameter.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
+        parameter.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));
+        parameter.setAllowEmptyValue(Annotations.value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
         parameter.setStyle(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_STYLE,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
         parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_EXPLODE,
                 org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
-        parameter.setAllowReserved(
-                Annotations.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
+        parameter.setAllowReserved(Annotations.value(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED));
         parameter.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),

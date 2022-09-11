@@ -68,9 +68,7 @@ public class OperationReader {
                             annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
 
             operation.setOperationId(Annotations.value(annotationInstance, OperationConstant.PROP_OPERATION_ID));
-            operation
-                    .setDeprecated(
-                            Annotations.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
+            operation.setDeprecated(Annotations.value(annotationInstance, OperationConstant.PROP_DEPRECATED));
             // TODO: for non-callbacks: operation.setExtensions(ExtensionReader.readExtendsions(context, annotationInstance));
 
             return operation;

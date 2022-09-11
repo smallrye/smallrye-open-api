@@ -102,10 +102,9 @@ public class HeaderReader {
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.HEADER));
         header.setDescription(Annotations.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
         header.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
-        header.setRequired(Annotations.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
-        header.setDeprecated(Annotations.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
-        header.setAllowEmptyValue(
-                Annotations.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
+        header.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
+        header.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));
+        header.setAllowEmptyValue(Annotations.value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
         header.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return header;
     }

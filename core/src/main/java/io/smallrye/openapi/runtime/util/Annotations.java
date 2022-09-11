@@ -190,22 +190,6 @@ public final class Annotations {
     }
 
     /**
-     * Reads a Boolean property value from the given annotation instance. If no value is found
-     * this will return null.
-     * 
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return Boolean value
-     */
-    public static Optional<Boolean> booleanValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value != null) {
-            return Optional.of(value.asBoolean());
-        }
-        return Optional.empty();
-    }
-
-    /**
      * Reads a String array property value from the given annotation instance. If no value is found
      * this will return null.
      * 

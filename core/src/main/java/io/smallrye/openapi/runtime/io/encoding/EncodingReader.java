@@ -91,9 +91,8 @@ public class EncodingReader {
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(Annotations.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
-        encoding.setExplode(Annotations.booleanValue(annotationInstance, EncodingConstant.PROP_EXPLODE).orElse(null));
-        encoding.setAllowReserved(
-                Annotations.booleanValue(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED).orElse(null));
+        encoding.setExplode(Annotations.value(annotationInstance, EncodingConstant.PROP_EXPLODE));
+        encoding.setAllowReserved(Annotations.value(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED));
         encoding.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(EncodingConstant.PROP_HEADERS)));
         encoding.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
