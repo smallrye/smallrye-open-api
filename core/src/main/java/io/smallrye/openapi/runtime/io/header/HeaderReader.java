@@ -23,6 +23,7 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -54,7 +55,7 @@ public class HeaderReader {
         Map<String, Header> headers = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, Parameterizable.PROP_NAME);
+            String name = Annotations.stringValue(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -99,12 +100,12 @@ public class HeaderReader {
         IoLogging.logger.singleAnnotation("@Header");
         Header header = new HeaderImpl();
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.HEADER));
-        header.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
+        header.setDescription(Annotations.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
         header.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
-        header.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
-        header.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
+        header.setRequired(Annotations.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
+        header.setDeprecated(Annotations.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
         header.setAllowEmptyValue(
-                JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
+                Annotations.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
         header.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return header;
     }

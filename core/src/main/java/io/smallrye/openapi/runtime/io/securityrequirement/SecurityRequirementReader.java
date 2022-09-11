@@ -16,8 +16,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Security from annotations or json
@@ -127,9 +126,9 @@ public class SecurityRequirementReader {
     }
 
     private static void addSecurityRequirement(SecurityRequirement requirement, AnnotationInstance annotationInstance) {
-        String name = JandexUtil.stringValue(annotationInstance, SecurityRequirementConstant.PROP_NAME);
+        String name = Annotations.stringValue(annotationInstance, SecurityRequirementConstant.PROP_NAME);
         if (name != null) {
-            Optional<List<String>> maybeScopes = JandexUtil.stringListValue(annotationInstance,
+            Optional<List<String>> maybeScopes = Annotations.stringListValue(annotationInstance,
                     SecurityRequirementConstant.PROP_SCOPES);
             if (maybeScopes.isPresent()) {
                 requirement.addScheme(name, maybeScopes.get());
@@ -166,24 +165,24 @@ public class SecurityRequirementReader {
 
     // helper methods for scanners
     public static AnnotationInstance getSecurityRequirementsAnnotation(final AnnotationTarget target) {
-        return TypeUtil.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
+        return Annotations.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
     }
 
     // helper methods for scanners
     public static List<AnnotationInstance> getSecurityRequirementAnnotations(final AnnotationTarget target) {
-        return JandexUtil.getRepeatableAnnotation(target,
+        return Annotations.getRepeatableAnnotation(target,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENT,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
     }
 
     // helper methods for scanners
     public static AnnotationInstance getSecurityRequirementsSetsAnnotation(final AnnotationTarget target) {
-        return TypeUtil.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
+        return Annotations.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
     }
 
     // helper methods for scanners
     public static List<AnnotationInstance> getSecurityRequirementsSetAnnotations(final AnnotationTarget target) {
-        return JandexUtil.getRepeatableAnnotation(target,
+        return Annotations.getRepeatableAnnotation(target,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SET,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
     }

@@ -17,6 +17,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.header.HeaderReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -48,7 +49,7 @@ public class EncodingReader {
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
-            String name = JandexUtil.stringValue(annotation, EncodingConstant.PROP_NAME);
+            String name = Annotations.stringValue(annotation, EncodingConstant.PROP_NAME);
             if (name != null) {
                 encodings.put(name, readEncoding(context, annotation));
             }
@@ -88,11 +89,11 @@ public class EncodingReader {
         }
         IoLogging.logger.singleAnnotation("@Encoding");
         Encoding encoding = new EncodingImpl();
-        encoding.setContentType(JandexUtil.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
+        encoding.setContentType(Annotations.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
-        encoding.setExplode(JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_EXPLODE).orElse(null));
+        encoding.setExplode(Annotations.booleanValue(annotationInstance, EncodingConstant.PROP_EXPLODE).orElse(null));
         encoding.setAllowReserved(
-                JandexUtil.booleanValue(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED).orElse(null));
+                Annotations.booleanValue(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED).orElse(null));
         encoding.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(EncodingConstant.PROP_HEADERS)));
         encoding.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));

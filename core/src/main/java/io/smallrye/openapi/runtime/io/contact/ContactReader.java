@@ -11,7 +11,7 @@ import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * This reads the Contact from annotations or json
@@ -39,9 +39,9 @@ public class ContactReader {
         IoLogging.logger.singleAnnotation("@Contact");
         AnnotationInstance nested = annotationValue.asNested();
         Contact contact = new ContactImpl();
-        contact.setName(JandexUtil.stringValue(nested, ContactConstant.PROP_NAME));
-        contact.setUrl(JandexUtil.stringValue(nested, ContactConstant.PROP_URL));
-        contact.setEmail(JandexUtil.stringValue(nested, ContactConstant.PROP_EMAIL));
+        contact.setName(Annotations.stringValue(nested, ContactConstant.PROP_NAME));
+        contact.setUrl(Annotations.stringValue(nested, ContactConstant.PROP_URL));
+        contact.setEmail(Annotations.stringValue(nested, ContactConstant.PROP_EMAIL));
         contact.setExtensions(ExtensionReader.readExtensions(context, nested));
         return contact;
     }

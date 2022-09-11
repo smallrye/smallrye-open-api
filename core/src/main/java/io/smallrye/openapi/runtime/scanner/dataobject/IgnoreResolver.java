@@ -22,7 +22,7 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -85,9 +85,9 @@ public class IgnoreResolver {
     private final class SchemaHiddenHandler implements IgnoreAnnotationHandler {
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getNames());
+            AnnotationInstance annotationInstance = Annotations.getAnnotation(target, getNames());
             if (annotationInstance != null) {
-                Boolean hidden = JandexUtil.value(annotationInstance, SchemaConstant.PROP_HIDDEN);
+                Boolean hidden = Annotations.value(annotationInstance, SchemaConstant.PROP_HIDDEN);
 
                 if (hidden != null) {
                     return hidden.booleanValue() ? Visibility.IGNORED : Visibility.EXPOSED;
@@ -108,7 +108,7 @@ public class IgnoreResolver {
     private final class JsonbTransientHandler implements IgnoreAnnotationHandler {
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            return TypeUtil.hasAnnotation(target, getNames()) ? Visibility.IGNORED : Visibility.UNSET;
+            return Annotations.hasAnnotation(target, getNames()) ? Visibility.IGNORED : Visibility.UNSET;
         }
 
         @Override
@@ -149,7 +149,7 @@ public class IgnoreResolver {
          * @return
          */
         private Visibility declaringClassIgnore(AnnotationTarget target) {
-            AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(TypeUtil.getDeclaringClass(target), getNames());
+            AnnotationInstance declaringClassJIP = Annotations.getAnnotation(TypeUtil.getDeclaringClass(target), getNames());
             return shouldIgnoreTarget(declaringClassJIP, propertyName(target));
         }
 
@@ -178,7 +178,7 @@ public class IgnoreResolver {
             if (nesting == null) {
                 return Visibility.UNSET;
             }
-            AnnotationInstance nestedTypeJIP = TypeUtil.getAnnotation(nesting, getNames());
+            AnnotationInstance nestedTypeJIP = Annotations.getAnnotation(nesting, getNames());
             return shouldIgnoreTarget(nestedTypeJIP, propertyName);
         }
 
@@ -210,7 +210,7 @@ public class IgnoreResolver {
         @Override
         public Visibility getDescendantVisibility(String propertyName, List<ClassInfo> descendants) {
             for (ClassInfo descendant : descendants) {
-                AnnotationInstance declaringClassJIP = TypeUtil.getAnnotation(descendant, getNames());
+                AnnotationInstance declaringClassJIP = Annotations.getAnnotation(descendant, getNames());
                 Visibility visibility = shouldIgnoreTarget(declaringClassJIP, propertyName);
 
                 if (visibility != Visibility.UNSET) {
@@ -229,7 +229,7 @@ public class IgnoreResolver {
 
         @Override
         public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(target, getNames());
+            AnnotationInstance annotationInstance = Annotations.getAnnotation(target, getNames());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 return Visibility.IGNORED;
             }
@@ -292,7 +292,7 @@ public class IgnoreResolver {
                 return Visibility.IGNORED;
             }
 
-            AnnotationInstance annotationInstance = TypeUtil.getAnnotation(classInfo, getNames());
+            AnnotationInstance annotationInstance = Annotations.getAnnotation(classInfo, getNames());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 // Add the ignored field or class name
                 DataObjectLogging.logger.ignoringTypeAndAddingToSet(classInfo.name());
@@ -318,7 +318,7 @@ public class IgnoreResolver {
                     // Unless field is annotated with @Schema to explicitly un-hide it.
                     AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
                     if (schemaAnnotation != null) {
-                        Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
+                        Boolean hidden = Annotations.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
                         if (hidden != null && !hidden) {
                             return Visibility.EXPOSED;
                         }
@@ -375,11 +375,11 @@ public class IgnoreResolver {
         }
 
         boolean hasXmlTransient(AnnotationTarget target) {
-            return TypeUtil.hasAnnotation(target, JaxbConstants.XML_TRANSIENT);
+            return Annotations.hasAnnotation(target, JaxbConstants.XML_TRANSIENT);
         }
 
         Visibility getXmlVisibility(ClassInfo declaringClass, String accessTypeRequired, int flags) {
-            String xmlAccessType = TypeUtil.getAnnotationValue(declaringClass, JaxbConstants.XML_ACCESSOR_TYPE);
+            String xmlAccessType = Annotations.getAnnotationValue(declaringClass, JaxbConstants.XML_ACCESSOR_TYPE);
 
             if (xmlAccessType == null) {
                 return Visibility.UNSET;

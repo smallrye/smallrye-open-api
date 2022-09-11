@@ -15,7 +15,7 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Media type object annotation and json
@@ -46,7 +46,7 @@ public class MediaTypeReader {
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setExamples(ExampleReader.readExamples(context, annotationInstance.value(MediaTypeConstant.PROP_EXAMPLES)));
         mediaType.setExample(
-                ExampleReader.parseValue(context, JandexUtil.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
+                ExampleReader.parseValue(context, Annotations.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
         mediaType.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(MediaTypeConstant.PROP_SCHEMA)));
         mediaType.setEncoding(EncodingReader.readEncodings(context, annotationInstance.value(MediaTypeConstant.PROP_ENCODING)));
         mediaType.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));

@@ -49,6 +49,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
@@ -86,12 +87,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.POST);
+        return Annotations.hasAnyOneOfAnnotation(method, JaxRsConstants.POST);
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.DELETE);
+        return Annotations.hasAnyOneOfAnnotation(method, JaxRsConstants.DELETE);
     }
 
     @Override
@@ -196,10 +197,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
-        AnnotationInstance applicationPathAnnotation = JandexUtil.getClassAnnotation(applicationClass,
+        AnnotationInstance applicationPathAnnotation = Annotations.getClassAnnotation(applicationClass,
                 JaxRsConstants.APPLICATION_PATH);
         if (applicationPathAnnotation == null || context.getConfig().applicationPathDisable()) {
-            applicationPathAnnotation = JandexUtil.getClassAnnotation(applicationClass, JaxRsConstants.PATH);
+            applicationPathAnnotation = Annotations.getClassAnnotation(applicationClass, JaxRsConstants.PATH);
         }
         // TODO: Add support for Application selection when there are more than one
         if (applicationPathAnnotation != null) {
@@ -292,7 +293,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                                 locatorPathParameters, exceptionAnnotationMap);
                     });
 
-            if (resourceCount.get() == 0 && JandexUtil.hasAnyOneOfAnnotation(methodInfo, JaxRsConstants.PATH)) {
+            if (resourceCount.get() == 0 && Annotations.hasAnyOneOfAnnotation(methodInfo, JaxRsConstants.PATH)) {
                 processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters);
             }
         }
@@ -559,11 +560,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         AnnotationInstance annotation = null;
 
         if (method != null) {
-            annotation = JandexUtil.getAnnotation(method, annotationName);
+            annotation = Annotations.getAnnotation(method, annotationName);
         }
 
         if (annotation == null) {
-            annotation = JandexUtil.getClassAnnotation(clazz, annotationName);
+            annotation = Annotations.getClassAnnotation(clazz, annotationName);
         }
 
         return annotation;

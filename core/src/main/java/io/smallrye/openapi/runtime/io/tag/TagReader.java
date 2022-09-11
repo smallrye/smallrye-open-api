@@ -20,8 +20,8 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the Tag from annotation or json
@@ -89,8 +89,8 @@ public class TagReader {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
         IoLogging.logger.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
-        tag.setName(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_NAME));
-        tag.setDescription(JandexUtil.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
+        tag.setName(Annotations.stringValue(annotationInstance, TagConstant.PROP_NAME));
+        tag.setDescription(Annotations.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
         tag.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(context,
                         annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
@@ -116,12 +116,12 @@ public class TagReader {
 
     // Helpers for scanner classes
     public static boolean hasTagAnnotation(final AnnotationTarget target) {
-        return TypeUtil.hasAnnotation(target, TagConstant.DOTNAME_TAG) ||
-                TypeUtil.hasAnnotation(target, TagConstant.DOTNAME_TAGS);
+        return Annotations.hasAnnotation(target, TagConstant.DOTNAME_TAG) ||
+                Annotations.hasAnnotation(target, TagConstant.DOTNAME_TAGS);
     }
 
     public static List<AnnotationInstance> getTagAnnotations(final AnnotationTarget target) {
-        return JandexUtil.getRepeatableAnnotation(target,
+        return Annotations.getRepeatableAnnotation(target,
                 TagConstant.DOTNAME_TAG,
                 TagConstant.DOTNAME_TAGS);
     }

@@ -41,6 +41,7 @@ import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -176,7 +177,7 @@ public class SchemaFactory {
         schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        AnnotationInstance externalDocsAnnotation = JandexUtil.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
+        AnnotationInstance externalDocsAnnotation = Annotations.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(context, externalDocsAnnotation));
         schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
         schema.setType(readSchemaType(annotation, schema, defaults));
@@ -185,8 +186,8 @@ public class SchemaFactory {
                 parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, schema.getType()));
         schema.setDiscriminator(
                 readDiscriminator(context,
-                        JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
-                        JandexUtil.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
+                        Annotations.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
+                        Annotations.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
         schema.setMaxItems(readAttr(annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
         schema.setMinItems(readAttr(annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
@@ -199,7 +200,7 @@ public class SchemaFactory {
                     }
                     Map<String, Schema> propertySchemas = new LinkedHashMap<>(properties.length);
                     for (AnnotationInstance propAnnotation : properties) {
-                        String key = JandexUtil.value(propAnnotation, SchemaConstant.PROP_NAME);
+                        String key = Annotations.value(propAnnotation, SchemaConstant.PROP_NAME);
                         Schema value = readSchema(context, new SchemaImpl(), propAnnotation, Collections.emptyMap());
                         propertySchemas.put(key, value);
                     }
@@ -244,18 +245,18 @@ public class SchemaFactory {
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
             Schema implSchema = readClassSchema(context,
-                    JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
+                    Annotations.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     !namedComponent);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(annotation)) {
             Schema implSchema = readClassSchema(context,
-                    JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
+                    Annotations.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     !namedComponent);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            schema = includeTypeSchema(context, schema, JandexUtil.value(annotation, SchemaConstant.PROP_IMPLEMENTATION));
+            schema = includeTypeSchema(context, schema, Annotations.value(annotation, SchemaConstant.PROP_IMPLEMENTATION));
         }
 
         return schema;
@@ -320,7 +321,7 @@ public class SchemaFactory {
      */
     @SuppressWarnings("unchecked")
     static <T> T readAttr(AnnotationInstance annotation, String propertyName, T defaultValue) {
-        Object value = JandexUtil.value(annotation, propertyName);
+        Object value = Annotations.value(annotation, propertyName);
 
         if (value == null) {
             value = defaultValue;
@@ -383,7 +384,7 @@ public class SchemaFactory {
     @SuppressWarnings("unchecked")
     static <R, T> T readAttr(AnnotationInstance annotation, String propertyName, Function<R, T> converter,
             Map<String, Object> defaults) {
-        R rawValue = JandexUtil.value(annotation, propertyName);
+        R rawValue = Annotations.value(annotation, propertyName);
         T value;
 
         if (rawValue == null) {
@@ -549,7 +550,7 @@ public class SchemaFactory {
                 .getOrDefault(JacksonConstants.JSON_VALUE, Collections.emptyList())
                 .stream()
                 // @JsonValue#value (default = true) allows for the functionality to be disabled
-                .filter(atJsonValue -> JandexUtil.value(atJsonValue, JacksonConstants.PROP_VALUE, true))
+                .filter(atJsonValue -> Annotations.value(atJsonValue, JacksonConstants.PROP_VALUE, true))
                 .map(AnnotationInstance::target)
                 .filter(JandexUtil::isSupplier)
                 .map(valueTarget -> {
@@ -779,8 +780,8 @@ public class SchemaFactory {
 
     private static void readDiscriminatorMapping(AnnotationScannerContext context, Discriminator discriminator,
             AnnotationInstance mapping) {
-        String propertyValue = JandexUtil.value(mapping, SchemaConstant.PROP_VALUE);
-        Type schemaType = JandexUtil.value(mapping, SchemaConstant.PROP_SCHEMA);
+        String propertyValue = Annotations.value(mapping, SchemaConstant.PROP_VALUE);
+        Type schemaType = Annotations.value(mapping, SchemaConstant.PROP_SCHEMA);
 
         String schemaRef;
 

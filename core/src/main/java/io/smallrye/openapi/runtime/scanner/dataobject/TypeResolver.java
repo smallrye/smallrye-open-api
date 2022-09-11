@@ -41,6 +41,7 @@ import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -137,8 +138,8 @@ public class TypeResolver {
     private Queue<AnnotationTarget> targets = new PriorityQueue<>(targetComparator);
 
     private static int compareAnnotation(AnnotationTarget t1, AnnotationTarget t2, DotName annotationName) {
-        boolean hasAnno1 = TypeUtil.hasAnnotation(t1, annotationName);
-        boolean hasAnno2 = TypeUtil.hasAnnotation(t2, annotationName);
+        boolean hasAnno1 = Annotations.hasAnnotation(t1, annotationName);
+        boolean hasAnno2 = Annotations.hasAnnotation(t2, annotationName);
 
         // Element with @Schema is top priority
         if (hasAnno1) {
@@ -220,19 +221,19 @@ public class TypeResolver {
         AnnotationTarget target = getAnnotationTarget();
         String name;
 
-        if ((name = TypeUtil.getAnnotationValue(target,
+        if ((name = Annotations.getAnnotationValue(target,
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_NAME)) != null) {
             return wrap(name);
         }
 
-        if ((name = TypeUtil.getAnnotationValue(target,
+        if ((name = Annotations.getAnnotationValue(target,
                 JsonbConstants.JSONB_PROPERTY,
                 JsonbConstants.PROP_VALUE)) != null) {
             return wrap(name);
         }
 
-        if ((name = TypeUtil.getAnnotationValue(target,
+        if ((name = Annotations.getAnnotationValue(target,
                 JacksonConstants.JSON_PROPERTY,
                 JacksonConstants.PROP_VALUE)) != null) {
             return wrap(name);
@@ -580,7 +581,7 @@ public class TypeResolver {
             return true;
         }
 
-        Type[] applicableViews = TypeUtil.getDeclaredAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
+        Type[] applicableViews = Annotations.getDeclaredAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
 
         if (applicableViews != null && applicableViews.length > 0) {
             return Arrays.stream(applicableViews).anyMatch(activeViews::contains);
@@ -668,7 +669,7 @@ public class TypeResolver {
             AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
 
             if (schemaAnnotation != null) {
-                Boolean hidden = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
+                Boolean hidden = Annotations.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
 
                 if (hidden == null || !hidden.booleanValue()) {
                     return true;
@@ -745,9 +746,9 @@ public class TypeResolver {
             ClassInfo memberClass) {
 
         Map<String, TypeResolver> unwrappedProperties = getAllFields(context, memberType, memberClass, member);
-        AnnotationInstance jsonUnwrapped = TypeUtil.getAnnotation(member, JacksonConstants.JSON_UNWRAPPED);
-        String unwrapPrefix = JandexUtil.value(jsonUnwrapped, "prefix");
-        String unwrapSuffix = JandexUtil.value(jsonUnwrapped, "suffix");
+        AnnotationInstance jsonUnwrapped = Annotations.getAnnotation(member, JacksonConstants.JSON_UNWRAPPED);
+        String unwrapPrefix = Annotations.value(jsonUnwrapped, "prefix");
+        String unwrapSuffix = Annotations.value(jsonUnwrapped, "suffix");
 
         return unwrappedProperties.entrySet()
                 .stream()
@@ -941,7 +942,7 @@ public class TypeResolver {
 
     static boolean isAnnotatedProperty(MethodInfo method) {
         return PROPERTY_METHOD_ANNOTATIONS.stream()
-                .anyMatch(annotation -> TypeUtil.hasAnnotation(method, annotation));
+                .anyMatch(annotation -> Annotations.hasAnnotation(method, annotation));
     }
 
     private static String methodNamePrefix(MethodInfo method) {
@@ -980,7 +981,7 @@ public class TypeResolver {
         UnaryOperator<String> translator;
 
         if (jacksonNaming != null) {
-            Type namingClass = JandexUtil.value(jacksonNaming, JacksonConstants.PROP_VALUE);
+            Type namingClass = Annotations.value(jacksonNaming, JacksonConstants.PROP_VALUE);
 
             if (namingClass != null) {
                 translator = PropertyNamingStrategyFactory.getStrategy(namingClass.name().toString(), context.getClassLoader());
@@ -1072,9 +1073,9 @@ public class TypeResolver {
         AnnotationInstance propertyOrder;
         AnnotationValue orderArray = null;
 
-        if ((propertyOrder = JandexUtil.getClassAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
+        if ((propertyOrder = Annotations.getClassAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
-        } else if ((propertyOrder = JandexUtil.getClassAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
+        } else if ((propertyOrder = Annotations.getClassAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
             orderArray = propertyOrder.value("propOrder");
         } else if ((propertyOrder = clazz.classAnnotation(JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();

@@ -30,6 +30,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -139,7 +140,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (schemaAnnotation != null && JandexUtil.hasImplementation(schemaAnnotation)) {
             typeProcessor = null;
             typeSchema = null;
-            fieldType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
+            fieldType = Annotations.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
             registrationType = null;
             registrationCandidate = false;
         } else {
@@ -268,9 +269,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (field != null) {
             if (processXmlAttr(name,
                     fieldSchema,
-                    JandexUtil.getAnnotation(field, XML_ATTRIBUTE),
-                    JandexUtil.getAnnotation(field, XML_ELEMENT),
-                    JandexUtil.getAnnotation(field, XML_WRAPPERELEMENT))) {
+                    Annotations.getAnnotation(field, XML_ATTRIBUTE),
+                    Annotations.getAnnotation(field, XML_ELEMENT),
+                    Annotations.getAnnotation(field, XML_WRAPPERELEMENT))) {
                 return;
             }
         }
@@ -278,9 +279,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (readMethod != null) {
             if (processXmlAttr(name,
                     fieldSchema,
-                    JandexUtil.getAnnotation(readMethod, XML_ATTRIBUTE),
-                    JandexUtil.getAnnotation(readMethod, XML_ELEMENT),
-                    JandexUtil.getAnnotation(readMethod, XML_WRAPPERELEMENT))) {
+                    Annotations.getAnnotation(readMethod, XML_ATTRIBUTE),
+                    Annotations.getAnnotation(readMethod, XML_ELEMENT),
+                    Annotations.getAnnotation(readMethod, XML_WRAPPERELEMENT))) {
                 return;
             }
         }
@@ -288,9 +289,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (writeMethod != null) {
             if (processXmlAttr(name,
                     fieldSchema,
-                    JandexUtil.getAnnotation(writeMethod, XML_ATTRIBUTE),
-                    JandexUtil.getAnnotation(writeMethod, XML_ELEMENT),
-                    JandexUtil.getAnnotation(writeMethod, XML_WRAPPERELEMENT))) {
+                    Annotations.getAnnotation(writeMethod, XML_ATTRIBUTE),
+                    Annotations.getAnnotation(writeMethod, XML_ELEMENT),
+                    Annotations.getAnnotation(writeMethod, XML_WRAPPERELEMENT))) {
                 return;
             }
         }
@@ -349,7 +350,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
-        if (JandexUtil.booleanValueWithDefault(annotation, SchemaConstant.PROP_REQUIRED)) {
+        if (Annotations.booleanValueWithDefault(annotation, SchemaConstant.PROP_REQUIRED)) {
             parentPathEntry.getSchema().addRequired(propertyKey);
         }
 
