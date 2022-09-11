@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -19,9 +18,9 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
-
 public final class Annotations {
+
+    private static final String VALUE = "value";
 
     private Annotations() {
     }
@@ -104,7 +103,7 @@ public final class Annotations {
     }
 
     public static <T> T value(AnnotationInstance annotation) {
-        return annotation != null ? value(annotation, OpenApiConstants.VALUE) : null;
+        return annotation != null ? value(annotation, VALUE) : null;
     }
 
     /**
@@ -173,22 +172,6 @@ public final class Annotations {
     }
 
     /**
-     * Reads a String array property value from the given annotation instance. If no value is found
-     * this will return null.
-     * 
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return List of Strings
-     */
-    public static Optional<List<String>> stringListValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value != null) {
-            return Optional.of(new ArrayList<>(Arrays.asList(value.asStringArray())));
-        }
-        return Optional.empty();
-    }
-
-    /**
      * Return if any one of the listed annotations exist
      * 
      * @param method
@@ -247,7 +230,7 @@ public final class Annotations {
         if (repeatableAnnotationName != null) {
             AnnotationInstance[] nestedArray = getAnnotationValue(target,
                     repeatableAnnotationName,
-                    OpenApiConstants.VALUE);
+                    VALUE);
 
             if (nestedArray != null) {
                 Arrays.stream(nestedArray)
@@ -373,7 +356,7 @@ public final class Annotations {
      * @return an unwrapped annotation parameter value
      */
     public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
-        return getAnnotationValue(target, annotationNames, OpenApiConstants.VALUE, null);
+        return getAnnotationValue(target, annotationNames, VALUE, null);
     }
 
     /**
@@ -432,7 +415,7 @@ public final class Annotations {
     }
 
     public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName) {
-        return getDeclaredAnnotationValue(type, annotationName, OpenApiConstants.VALUE);
+        return getDeclaredAnnotationValue(type, annotationName, VALUE);
     }
 
     public static AnnotationInstance getAnnotation(Type type, DotName annotationName) {

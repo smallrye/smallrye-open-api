@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.io.securityrequirement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -128,10 +129,10 @@ public class SecurityRequirementReader {
     private static void addSecurityRequirement(SecurityRequirement requirement, AnnotationInstance annotationInstance) {
         String name = Annotations.value(annotationInstance, SecurityRequirementConstant.PROP_NAME);
         if (name != null) {
-            Optional<List<String>> maybeScopes = Annotations.stringListValue(annotationInstance,
-                    SecurityRequirementConstant.PROP_SCOPES);
-            if (maybeScopes.isPresent()) {
-                requirement.addScheme(name, maybeScopes.get());
+            String[] scopes = Annotations.value(annotationInstance, SecurityRequirementConstant.PROP_SCOPES);
+
+            if (scopes != null) {
+                requirement.addScheme(name, new ArrayList<>(Arrays.asList(scopes)));
             } else {
                 requirement.addScheme(name);
             }

@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.io.servervariable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,8 +97,10 @@ public class ServerVariableReader {
         ServerVariable variable = new ServerVariableImpl();
         variable.setDescription(
                 Annotations.value(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
-        variable.setEnumeration(
-                Annotations.stringListValue(annotationInstance, ServerVariableConstant.PROP_ENUMERATION).orElse(null));
+        String[] enumeration = Annotations.value(annotationInstance, ServerVariableConstant.PROP_ENUMERATION);
+        if (enumeration != null) {
+            variable.setEnumeration(new ArrayList<>(Arrays.asList(enumeration)));
+        }
         variable.setDefaultValue(
                 Annotations.value(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
         variable.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
