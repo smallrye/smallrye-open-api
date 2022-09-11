@@ -57,8 +57,8 @@ public class ExternalDocsReader {
         IoLogging.logger.annotation("@ExternalDocumentation");
         ExternalDocumentation externalDoc = new ExternalDocumentationImpl();
         externalDoc.setDescription(
-                Annotations.stringValue(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));
-        externalDoc.setUrl(Annotations.stringValue(annotationInstance, ExternalDocsConstant.PROP_URL));
+                Annotations.value(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));
+        externalDoc.setUrl(Annotations.value(annotationInstance, ExternalDocsConstant.PROP_URL));
         externalDoc.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return externalDoc;
     }

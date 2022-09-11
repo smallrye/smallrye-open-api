@@ -107,7 +107,7 @@ public class CallbackReader {
         IoLogging.logger.singleAnnotation("@Callback");
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.CALLBACK));
-        String expression = Annotations.stringValue(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
+        String expression = Annotations.value(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
                 PathsReader.readPathItem(context, annotation.value(CallbackConstant.PROP_OPERATIONS), null));
         callback.setExtensions(ExtensionReader.readExtensions(context, annotation));
@@ -147,6 +147,6 @@ public class CallbackReader {
     }
 
     public static String getCallbackName(AnnotationInstance annotation) {
-        return Annotations.stringValue(annotation, CallbackConstant.PROP_NAME);
+        return Annotations.value(annotation, CallbackConstant.PROP_NAME);
     }
 }

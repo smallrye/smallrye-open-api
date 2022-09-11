@@ -55,7 +55,7 @@ public class HeaderReader {
         Map<String, Header> headers = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, Parameterizable.PROP_NAME);
+            String name = Annotations.value(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -100,7 +100,7 @@ public class HeaderReader {
         IoLogging.logger.singleAnnotation("@Header");
         Header header = new HeaderImpl();
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.HEADER));
-        header.setDescription(Annotations.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
+        header.setDescription(Annotations.value(annotationInstance, Parameterizable.PROP_DESCRIPTION));
         header.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         header.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
         header.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));

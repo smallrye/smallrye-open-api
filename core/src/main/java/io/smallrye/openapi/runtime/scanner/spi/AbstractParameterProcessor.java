@@ -1095,7 +1095,7 @@ public abstract class AbstractParameterProcessor {
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
-            String defaultValueString = Annotations.stringValue(defaultValueAnno, annotationProperty);
+            String defaultValueString = Annotations.value(defaultValueAnno, annotationProperty);
             defaultValue = defaultValueString;
             Type targetType = getType(target);
 

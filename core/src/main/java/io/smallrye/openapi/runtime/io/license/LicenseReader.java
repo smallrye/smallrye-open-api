@@ -39,8 +39,8 @@ public class LicenseReader {
         IoLogging.logger.singleAnnotation("@License");
         AnnotationInstance nested = annotationValue.asNested();
         License license = new LicenseImpl();
-        license.setName(Annotations.stringValue(nested, LicenseConstant.PROP_NAME));
-        license.setUrl(Annotations.stringValue(nested, LicenseConstant.PROP_URL));
+        license.setName(Annotations.value(nested, LicenseConstant.PROP_NAME));
+        license.setUrl(Annotations.value(nested, LicenseConstant.PROP_URL));
         license.setExtensions(ExtensionReader.readExtensions(context, nested));
         return license;
     }

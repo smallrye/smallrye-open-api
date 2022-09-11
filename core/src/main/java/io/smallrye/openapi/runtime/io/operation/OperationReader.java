@@ -48,8 +48,8 @@ public class OperationReader {
         if (annotationInstance != null) {
             IoLogging.logger.singleAnnotation("@Operation");
             Operation operation = new OperationImpl();
-            operation.setSummary(Annotations.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
-            operation.setDescription(Annotations.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
+            operation.setSummary(Annotations.value(annotationInstance, OperationConstant.PROP_SUMMARY));
+            operation.setDescription(Annotations.value(annotationInstance, OperationConstant.PROP_DESCRIPTION));
             operation.setExternalDocs(
                     ExternalDocsReader.readExternalDocs(context,
                             annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));

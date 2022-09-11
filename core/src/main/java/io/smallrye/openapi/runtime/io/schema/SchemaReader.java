@@ -60,7 +60,7 @@ public class SchemaReader {
         Map<String, Schema> map = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, SchemaConstant.PROP_NAME);
+            String name = Annotations.value(nested, SchemaConstant.PROP_NAME);
 
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);

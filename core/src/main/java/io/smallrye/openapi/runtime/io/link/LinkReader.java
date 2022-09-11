@@ -49,7 +49,7 @@ public class LinkReader {
         Map<String, Link> links = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, LinkConstant.PROP_NAME);
+            String name = Annotations.value(nested, LinkConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -93,11 +93,11 @@ public class LinkReader {
         }
         IoLogging.logger.singleAnnotation("@Link");
         Link link = new LinkImpl();
-        link.setOperationRef(Annotations.stringValue(annotationInstance, LinkConstant.PROP_OPERATION_REF));
-        link.setOperationId(Annotations.stringValue(annotationInstance, LinkConstant.PROP_OPERATION_ID));
+        link.setOperationRef(Annotations.value(annotationInstance, LinkConstant.PROP_OPERATION_REF));
+        link.setOperationId(Annotations.value(annotationInstance, LinkConstant.PROP_OPERATION_ID));
         link.setParameters(readLinkParameters(annotationInstance.value(LinkConstant.PROP_PARAMETERS)));
-        link.setDescription(Annotations.stringValue(annotationInstance, LinkConstant.PROP_DESCRIPTION));
-        link.setRequestBody(Annotations.stringValue(annotationInstance, LinkConstant.PROP_REQUEST_BODY));
+        link.setDescription(Annotations.value(annotationInstance, LinkConstant.PROP_DESCRIPTION));
+        link.setRequestBody(Annotations.value(annotationInstance, LinkConstant.PROP_REQUEST_BODY));
         link.setServer(ServerReader.readServer(context, annotationInstance.value(LinkConstant.PROP_SERVER)));
         link.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.LINK));
         link.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
@@ -141,9 +141,9 @@ public class LinkReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, Object> linkParams = new LinkedHashMap<>();
         for (AnnotationInstance annotation : nestedArray) {
-            String name = Annotations.stringValue(annotation, LinkConstant.PROP_NAME);
+            String name = Annotations.value(annotation, LinkConstant.PROP_NAME);
             if (name != null) {
-                String expression = Annotations.stringValue(annotation, LinkConstant.PROP_EXPRESSION);
+                String expression = Annotations.value(annotation, LinkConstant.PROP_EXPRESSION);
                 linkParams.put(name, expression);
             }
         }

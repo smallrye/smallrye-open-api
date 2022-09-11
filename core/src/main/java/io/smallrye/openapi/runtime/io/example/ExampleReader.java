@@ -51,7 +51,7 @@ public class ExampleReader {
         Map<String, Example> examples = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, ExampleConstant.PROP_NAME);
+            String name = Annotations.value(nested, ExampleConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -97,10 +97,10 @@ public class ExampleReader {
         IoLogging.logger.singleAnnotation("@ExampleObject");
         Example example = new ExampleImpl();
         example.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.EXAMPLE));
-        example.setSummary(Annotations.stringValue(annotationInstance, ExampleConstant.PROP_SUMMARY));
-        example.setDescription(Annotations.stringValue(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
-        example.setValue(parseValue(context, Annotations.stringValue(annotationInstance, ExampleConstant.PROP_VALUE)));
-        example.setExternalValue(Annotations.stringValue(annotationInstance, ExampleConstant.PROP_EXTERNAL_VALUE));
+        example.setSummary(Annotations.value(annotationInstance, ExampleConstant.PROP_SUMMARY));
+        example.setDescription(Annotations.value(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
+        example.setValue(parseValue(context, Annotations.value(annotationInstance, ExampleConstant.PROP_VALUE)));
+        example.setExternalValue(Annotations.value(annotationInstance, ExampleConstant.PROP_EXTERNAL_VALUE));
         example.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
 
         return example;

@@ -88,7 +88,7 @@ public class PathsReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         PathItem pathItem = new PathItemImpl();
         for (AnnotationInstance operationAnno : nestedArray) {
-            String method = Annotations.stringValue(operationAnno, PathsConstant.PROP_METHOD);
+            String method = Annotations.value(operationAnno, PathsConstant.PROP_METHOD);
             if (method == null) {
                 continue;
             }

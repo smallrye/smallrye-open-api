@@ -52,7 +52,7 @@ public class ExtensionReader {
         Map<String, Object> e = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
-            String extName = Annotations.stringValue(annotation, ExtensionConstant.PROP_NAME);
+            String extName = Annotations.value(annotation, ExtensionConstant.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
         return e;
@@ -70,7 +70,7 @@ public class ExtensionReader {
         IoLogging.logger.annotationsMap("@Extension");
         Map<String, Object> e = new LinkedHashMap<>();
         for (AnnotationInstance annotation : extensions) {
-            String extName = Annotations.stringValue(annotation, ExtensionConstant.PROP_NAME);
+            String extName = Annotations.value(annotation, ExtensionConstant.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
         return e;
@@ -111,7 +111,7 @@ public class ExtensionReader {
     public static Object readExtensionValue(final AnnotationScannerContext context, final String name,
             final AnnotationInstance annotationInstance) {
         IoLogging.logger.annotation("@Extension");
-        String extValue = Annotations.stringValue(annotationInstance, ExtensionConstant.PROP_VALUE);
+        String extValue = Annotations.value(annotationInstance, ExtensionConstant.PROP_VALUE);
         boolean parseValue = Annotations.value(annotationInstance, ExtensionConstant.PROP_PARSE_VALUE, Boolean.FALSE);
         Object parsedValue = extValue;
         if (parseValue) {
@@ -150,6 +150,6 @@ public class ExtensionReader {
     }
 
     public static String getExtensionName(final AnnotationInstance annotation) {
-        return Annotations.stringValue(annotation, ExtensionConstant.PROP_NAME);
+        return Annotations.value(annotation, ExtensionConstant.PROP_NAME);
     }
 }

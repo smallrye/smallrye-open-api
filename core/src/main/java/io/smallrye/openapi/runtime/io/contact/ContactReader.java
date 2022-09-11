@@ -39,9 +39,9 @@ public class ContactReader {
         IoLogging.logger.singleAnnotation("@Contact");
         AnnotationInstance nested = annotationValue.asNested();
         Contact contact = new ContactImpl();
-        contact.setName(Annotations.stringValue(nested, ContactConstant.PROP_NAME));
-        contact.setUrl(Annotations.stringValue(nested, ContactConstant.PROP_URL));
-        contact.setEmail(Annotations.stringValue(nested, ContactConstant.PROP_EMAIL));
+        contact.setName(Annotations.value(nested, ContactConstant.PROP_NAME));
+        contact.setUrl(Annotations.value(nested, ContactConstant.PROP_URL));
+        contact.setEmail(Annotations.value(nested, ContactConstant.PROP_EMAIL));
         contact.setExtensions(ExtensionReader.readExtensions(context, nested));
         return contact;
     }

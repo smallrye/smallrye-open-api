@@ -173,23 +173,6 @@ public final class Annotations {
     }
 
     /**
-     * Reads a String property value from the given annotation instance. If no value is found
-     * this will return null.
-     * 
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return String value
-     */
-    public static String stringValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        } else {
-            return value.asString();
-        }
-    }
-
-    /**
      * Reads a String array property value from the given annotation instance. If no value is found
      * this will return null.
      * 

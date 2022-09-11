@@ -59,7 +59,7 @@ public class RequestBodyReader {
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, RequestBodyConstant.PROP_NAME);
+            String name = Annotations.value(nested, RequestBodyConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -119,7 +119,7 @@ public class RequestBodyReader {
         }
         IoLogging.logger.singleAnnotation("@RequestBody");
         RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(Annotations.stringValue(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
+        requestBody.setDescription(Annotations.value(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody
                 .setContent(ContentReader.readContent(context,
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),

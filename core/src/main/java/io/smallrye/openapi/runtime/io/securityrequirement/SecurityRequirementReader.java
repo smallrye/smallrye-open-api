@@ -126,7 +126,7 @@ public class SecurityRequirementReader {
     }
 
     private static void addSecurityRequirement(SecurityRequirement requirement, AnnotationInstance annotationInstance) {
-        String name = Annotations.stringValue(annotationInstance, SecurityRequirementConstant.PROP_NAME);
+        String name = Annotations.value(annotationInstance, SecurityRequirementConstant.PROP_NAME);
         if (name != null) {
             Optional<List<String>> maybeScopes = Annotations.stringListValue(annotationInstance,
                     SecurityRequirementConstant.PROP_SCOPES);

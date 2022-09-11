@@ -89,8 +89,8 @@ public class TagReader {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
         IoLogging.logger.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
-        tag.setName(Annotations.stringValue(annotationInstance, TagConstant.PROP_NAME));
-        tag.setDescription(Annotations.stringValue(annotationInstance, TagConstant.PROP_DESCRIPTION));
+        tag.setName(Annotations.value(annotationInstance, TagConstant.PROP_NAME));
+        tag.setDescription(Annotations.value(annotationInstance, TagConstant.PROP_DESCRIPTION));
         tag.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(context,
                         annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));

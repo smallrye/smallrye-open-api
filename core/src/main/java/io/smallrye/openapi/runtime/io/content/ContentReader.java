@@ -49,7 +49,7 @@ public class ContentReader {
         Content content = new ContentImpl();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String contentType = Annotations.stringValue(nested, OpenApiConstants.PROP_MEDIA_TYPE);
+            String contentType = Annotations.value(nested, OpenApiConstants.PROP_MEDIA_TYPE);
             MediaType mediaTypeModel = MediaTypeReader.readMediaType(context, nested);
             if (contentType == null) {
                 for (String mimeType : getDefaultMimeTypes(direction)) {

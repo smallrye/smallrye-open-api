@@ -89,9 +89,9 @@ public class OAuthReader {
         IoLogging.logger.singleAnnotation("@OAuthFlow");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlow flow = new OAuthFlowImpl();
-        flow.setAuthorizationUrl(Annotations.stringValue(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
-        flow.setTokenUrl(Annotations.stringValue(annotation, SecuritySchemeConstant.PROP_TOKEN_URL));
-        flow.setRefreshUrl(Annotations.stringValue(annotation, SecuritySchemeConstant.PROP_REFRESH_URL));
+        flow.setAuthorizationUrl(Annotations.value(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
+        flow.setTokenUrl(Annotations.value(annotation, SecuritySchemeConstant.PROP_TOKEN_URL));
+        flow.setRefreshUrl(Annotations.value(annotation, SecuritySchemeConstant.PROP_REFRESH_URL));
         flow.setScopes(readOAuthScopes(annotation.value(SecuritySchemeConstant.PROP_SCOPES)));
         flow.setExtensions(ExtensionReader.readExtensions(null, annotation));
         return flow;
@@ -131,9 +131,9 @@ public class OAuthReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, String> scopes = new LinkedHashMap<>();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, SecuritySchemeConstant.PROP_NAME);
+            String name = Annotations.value(nested, SecuritySchemeConstant.PROP_NAME);
             if (name != null) {
-                String description = Annotations.stringValue(nested, SecuritySchemeConstant.PROP_DESCRIPTION);
+                String description = Annotations.value(nested, SecuritySchemeConstant.PROP_DESCRIPTION);
                 scopes.put(name, description);
             }
         }

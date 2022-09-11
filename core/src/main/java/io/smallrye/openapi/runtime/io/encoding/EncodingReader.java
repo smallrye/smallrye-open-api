@@ -49,7 +49,7 @@ public class EncodingReader {
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
-            String name = Annotations.stringValue(annotation, EncodingConstant.PROP_NAME);
+            String name = Annotations.value(annotation, EncodingConstant.PROP_NAME);
             if (name != null) {
                 encodings.put(name, readEncoding(context, annotation));
             }
@@ -89,7 +89,7 @@ public class EncodingReader {
         }
         IoLogging.logger.singleAnnotation("@Encoding");
         Encoding encoding = new EncodingImpl();
-        encoding.setContentType(Annotations.stringValue(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
+        encoding.setContentType(Annotations.value(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
         encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
         encoding.setExplode(Annotations.value(annotationInstance, EncodingConstant.PROP_EXPLODE));
         encoding.setAllowReserved(Annotations.value(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED));

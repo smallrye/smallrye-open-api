@@ -105,7 +105,7 @@ public class ParameterReader {
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, Parameterizable.PROP_NAME);
+            String name = Annotations.value(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -155,7 +155,7 @@ public class ParameterReader {
         }
         IoLogging.logger.singleAnnotation("@Parameter");
         ParameterImpl parameter = new ParameterImpl();
-        parameter.setName(Annotations.stringValue(annotationInstance, Parameterizable.PROP_NAME));
+        parameter.setName(Annotations.value(annotationInstance, Parameterizable.PROP_NAME));
         parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
                 org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
 
@@ -166,7 +166,7 @@ public class ParameterReader {
             return parameter;
         }
 
-        parameter.setDescription(Annotations.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
+        parameter.setDescription(Annotations.value(annotationInstance, Parameterizable.PROP_DESCRIPTION));
         parameter.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
         parameter.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));
         parameter.setAllowEmptyValue(Annotations.value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
@@ -181,7 +181,7 @@ public class ParameterReader {
                         ContentDirection.PARAMETER));
         parameter.setExamples(ExampleReader.readExamples(context, annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
         parameter.setExample(
-                ExampleReader.parseValue(context, Annotations.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE)));
+                ExampleReader.parseValue(context, Annotations.value(annotationInstance, Parameterizable.PROP_EXAMPLE)));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.PARAMETER));
 
         if (annotationInstance.target() != null) {

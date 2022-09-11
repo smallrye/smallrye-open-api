@@ -50,7 +50,7 @@ public class ServerVariableReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (AnnotationInstance serverVariableAnno : nestedArray) {
-            String name = Annotations.stringValue(serverVariableAnno, ServerVariableConstant.PROP_NAME);
+            String name = Annotations.value(serverVariableAnno, ServerVariableConstant.PROP_NAME);
             if (name != null) {
                 variables.put(name, readServerVariable(context, serverVariableAnno));
             }
@@ -95,11 +95,11 @@ public class ServerVariableReader {
         IoLogging.logger.singleAnnotation("@ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
         variable.setDescription(
-                Annotations.stringValue(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
+                Annotations.value(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
         variable.setEnumeration(
                 Annotations.stringListValue(annotationInstance, ServerVariableConstant.PROP_ENUMERATION).orElse(null));
         variable.setDefaultValue(
-                Annotations.stringValue(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
+                Annotations.value(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
         variable.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return variable;
     }

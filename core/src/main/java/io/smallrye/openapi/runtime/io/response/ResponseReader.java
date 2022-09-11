@@ -66,7 +66,7 @@ public class ResponseReader {
         APIResponses responses = new APIResponsesImpl();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String responseCode = Annotations.stringValue(nested, ResponseConstant.PROP_RESPONSE_CODE);
+            String responseCode = Annotations.value(nested, ResponseConstant.PROP_RESPONSE_CODE);
             if (responseCode != null) {
                 responses.addAPIResponse(responseCode,
                         ResponseReader.readResponse(context, nested));
@@ -135,7 +135,7 @@ public class ResponseReader {
         Map<String, APIResponse> responses = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, ResponseConstant.PROP_NAME);
+            String name = Annotations.value(nested, ResponseConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -181,7 +181,7 @@ public class ResponseReader {
         }
         IoLogging.logger.singleAnnotation("@APIResponse");
         APIResponseImpl response = new APIResponseImpl();
-        response.setDescription(Annotations.stringValue(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
+        response.setDescription(Annotations.value(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
         response.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(ResponseConstant.PROP_HEADERS)));
         response.setLinks(LinkReader.readLinks(context, annotationInstance.value(ResponseConstant.PROP_LINKS)));
@@ -281,7 +281,7 @@ public class ResponseReader {
     }
 
     public static String getResponseName(AnnotationScannerContext context, AnnotationInstance annotation) {
-        String responseCode = Annotations.stringValue(annotation, ResponseConstant.PROP_RESPONSE_CODE);
+        String responseCode = Annotations.value(annotation, ResponseConstant.PROP_RESPONSE_CODE);
 
         if (responseCode != null) {
             return responseCode;

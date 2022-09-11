@@ -95,8 +95,8 @@ public class ServerReader {
         if (annotationInstance != null) {
             IoLogging.logger.singleAnnotation("@Server");
             Server server = new ServerImpl();
-            server.setUrl(Annotations.stringValue(annotationInstance, ServerConstant.PROP_URL));
-            server.setDescription(Annotations.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
+            server.setUrl(Annotations.value(annotationInstance, ServerConstant.PROP_URL));
+            server.setDescription(Annotations.value(annotationInstance, ServerConstant.PROP_DESCRIPTION));
             server.setVariables(
                     ServerVariableReader.readServerVariables(context, annotationInstance.value(ServerConstant.PROP_VARIABLES)));
             server.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));

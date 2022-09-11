@@ -338,7 +338,7 @@ public class SchemaRegistry {
             AnnotationInstance schemaAnnotation = targetSchema != null ? getSchemaAnnotation(targetSchema) : null;
 
             if (schemaAnnotation != null) {
-                schemaName = Annotations.stringValue(schemaAnnotation, SchemaConstant.PROP_NAME);
+                schemaName = Annotations.value(schemaAnnotation, SchemaConstant.PROP_NAME);
             }
         }
 

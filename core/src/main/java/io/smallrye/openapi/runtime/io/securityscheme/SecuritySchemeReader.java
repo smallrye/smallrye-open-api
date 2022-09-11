@@ -54,7 +54,7 @@ public class SecuritySchemeReader {
         Map<String, SecurityScheme> securitySchemes = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.stringValue(nested, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
+            String name = Annotations.value(nested, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -102,17 +102,17 @@ public class SecuritySchemeReader {
         securityScheme
                 .setType(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, Type.class));
         securityScheme
-                .setDescription(Annotations.stringValue(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
-        securityScheme.setName(Annotations.stringValue(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
+                .setDescription(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
+        securityScheme.setName(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
         securityScheme.setIn(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN, In.class));
-        securityScheme.setScheme(Annotations.stringValue(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
+        securityScheme.setScheme(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
         securityScheme.setBearerFormat(
-                Annotations.stringValue(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
+                Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
         securityScheme
                 .setFlows(OAuthReader.readOAuthFlows(context, annotationInstance.value(SecuritySchemeConstant.PROP_FLOWS)));
         securityScheme
                 .setOpenIdConnectUrl(
-                        Annotations.stringValue(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
+                        Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
         securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SECURITY_SCHEME));
         securityScheme.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return securityScheme;
@@ -176,7 +176,7 @@ public class SecuritySchemeReader {
     }
 
     public static String getSecuritySchemeName(AnnotationInstance annotation) {
-        return Annotations.stringValue(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
+        return Annotations.value(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
     }
 
     private static final Map<String, Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();

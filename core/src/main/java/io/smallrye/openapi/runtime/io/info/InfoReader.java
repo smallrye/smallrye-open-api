@@ -42,12 +42,12 @@ public class InfoReader {
         AnnotationInstance nested = annotationValue.asNested();
 
         Info info = new InfoImpl();
-        info.setTitle(Annotations.stringValue(nested, InfoConstant.PROP_TITLE));
-        info.setDescription(Annotations.stringValue(nested, InfoConstant.PROP_DESCRIPTION));
-        info.setTermsOfService(Annotations.stringValue(nested, InfoConstant.PROP_TERMS_OF_SERVICE));
+        info.setTitle(Annotations.value(nested, InfoConstant.PROP_TITLE));
+        info.setDescription(Annotations.value(nested, InfoConstant.PROP_DESCRIPTION));
+        info.setTermsOfService(Annotations.value(nested, InfoConstant.PROP_TERMS_OF_SERVICE));
         info.setContact(ContactReader.readContact(context, nested.value(InfoConstant.PROP_CONTACT)));
         info.setLicense(LicenseReader.readLicense(context, nested.value(InfoConstant.PROP_LICENSE)));
-        info.setVersion(Annotations.stringValue(nested, InfoConstant.PROP_VERSION));
+        info.setVersion(Annotations.value(nested, InfoConstant.PROP_VERSION));
         info.setExtensions(ExtensionReader.readExtensions(context, nested));
         return info;
     }

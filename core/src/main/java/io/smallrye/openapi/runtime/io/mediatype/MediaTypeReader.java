@@ -46,7 +46,7 @@ public class MediaTypeReader {
         MediaType mediaType = new MediaTypeImpl();
         mediaType.setExamples(ExampleReader.readExamples(context, annotationInstance.value(MediaTypeConstant.PROP_EXAMPLES)));
         mediaType.setExample(
-                ExampleReader.parseValue(context, Annotations.stringValue(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
+                ExampleReader.parseValue(context, Annotations.value(annotationInstance, MediaTypeConstant.PROP_EXAMPLE)));
         mediaType.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(MediaTypeConstant.PROP_SCHEMA)));
         mediaType.setEncoding(EncodingReader.readEncodings(context, annotationInstance.value(MediaTypeConstant.PROP_ENCODING)));
         mediaType.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
