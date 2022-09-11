@@ -156,7 +156,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RouteBase info and save it for later
-        AnnotationInstance routeBaseAnnotation = Annotations.getClassAnnotation(routeClass,
+        AnnotationInstance routeBaseAnnotation = Annotations.getAnnotation(routeClass,
                 VertxConstants.ROUTE_BASE);
 
         if (routeBaseAnnotation != null) {
@@ -340,7 +340,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
         if (annotation == null || annotation.value(property) == null) {
-            annotation = Annotations.getClassAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
+            annotation = Annotations.getAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
         }
 
         if (annotation != null) {

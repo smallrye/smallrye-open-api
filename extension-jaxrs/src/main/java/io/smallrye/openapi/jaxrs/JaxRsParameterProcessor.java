@@ -234,7 +234,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
         switch (target.kind()) {
             case CLASS:
-                path = Annotations.getClassAnnotation(target.asClass(), JaxRsConstants.PATH);
+                path = Annotations.getAnnotation(target, JaxRsConstants.PATH);
                 pathValue = scannerContext.getConfig().getScanResourceClasses().get(target.asClass().name().toString());
                 break;
             case METHOD:

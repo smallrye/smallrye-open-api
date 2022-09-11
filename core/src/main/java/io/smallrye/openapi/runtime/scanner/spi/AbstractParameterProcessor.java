@@ -1249,7 +1249,7 @@ public abstract class AbstractParameterProcessor {
                 }
                 break;
             case METHOD_PARAMETER:
-                type = Annotations.getMethodParameterType(target.asMethodParameter());
+                type = target.asMethodParameter().method().parameterType(target.asMethodParameter().position());
                 break;
             default:
                 break;

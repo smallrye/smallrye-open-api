@@ -87,7 +87,6 @@ public class DefinitionReader {
 
     // helper methods for scanners
     public static AnnotationInstance getDefinitionAnnotation(final ClassInfo targetClass) {
-        return Annotations.getClassAnnotation(targetClass,
-                DefinitionConstant.DOTNAME_OPEN_API_DEFINITION);
+        return Annotations.getAnnotation(targetClass, DefinitionConstant.DOTNAME_OPEN_API_DEFINITION);
     }
 }

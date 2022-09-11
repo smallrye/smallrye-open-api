@@ -184,7 +184,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RequestMapping info and save it for later
-        AnnotationInstance requestMappingAnnotation = Annotations.getClassAnnotation(controllerClass,
+        AnnotationInstance requestMappingAnnotation = Annotations.getAnnotation(controllerClass,
                 SpringConstants.REQUEST_MAPPING);
 
         if (requestMappingAnnotation != null) {
@@ -378,7 +378,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Check class
-        AnnotationInstance annotation = Annotations.getClassAnnotation(resourceMethod.declaringClass(),
+        AnnotationInstance annotation = Annotations.getAnnotation(resourceMethod.declaringClass(),
                 SpringConstants.REQUEST_MAPPING);
         if (annotation != null) {
             AnnotationValue annotationValue = annotation.value(property);

@@ -8,16 +8,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
-import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
-import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
@@ -27,6 +24,83 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 public final class Annotations {
 
     private Annotations() {
+    }
+
+    public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget target) {
+        if (target == null) {
+            return Collections.emptyList();
+        }
+
+        switch (target.kind()) {
+            case CLASS:
+                return target.asClass().classAnnotations();
+            case FIELD:
+                return target.asField().annotations();
+            case METHOD:
+                return target.asMethod().annotations();
+            case METHOD_PARAMETER:
+                MethodParameterInfo parameter = target.asMethodParameter();
+                return parameter
+                        .method()
+                        .annotations()
+                        .stream()
+                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .collect(Collectors.toList());
+            case TYPE:
+            case RECORD_COMPONENT:
+                break;
+        }
+
+        return Collections.emptyList();
+    }
+
+    public static AnnotationInstance getDeclaredAnnotation(AnnotationTarget target, DotName name) {
+        if (target == null) {
+            return null;
+        }
+
+        AnnotationInstance annotation;
+
+        switch (target.kind()) {
+            case CLASS:
+                annotation = target.asClass().classAnnotation(name);
+                break;
+            case FIELD:
+                annotation = target.asField()
+                        .annotations(name)
+                        .stream()
+                        .filter(a -> target.equals(a.target())).findFirst()
+                        .orElse(null);
+                break;
+            case METHOD:
+                annotation = target.asMethod()
+                        .annotations(name)
+                        .stream()
+                        .filter(a -> target.equals(a.target())).findFirst()
+                        .orElse(null);
+                break;
+            case METHOD_PARAMETER:
+                MethodParameterInfo parameter = target.asMethodParameter();
+                annotation = parameter
+                        .method()
+                        .annotations(name)
+                        .stream()
+                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .findFirst()
+                        .orElse(null);
+                break;
+            case RECORD_COMPONENT:
+                annotation = target.asRecordComponent().annotation(name);
+                break;
+            case TYPE:
+            default:
+                annotation = null;
+                break;
+        }
+
+        return annotation;
     }
 
     public static <T> T value(AnnotationInstance annotation) {
@@ -94,7 +168,7 @@ public final class Annotations {
      * @return an unwrapped annotation parameter value
      */
     public static <T> T value(AnnotationInstance annotation, String name, T defaultValue) {
-        T value = Annotations.value(annotation, name);
+        T value = value(annotation, name);
         return value != null ? value : defaultValue;
     }
 
@@ -113,14 +187,6 @@ public final class Annotations {
         } else {
             return value.asString();
         }
-    }
-
-    public static Optional<String> optionalStringValue(AnnotationInstance annotation, String propertyName) {
-        String value = stringValue(annotation, propertyName);
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(value);
     }
 
     /**
@@ -153,23 +219,6 @@ public final class Annotations {
     }
 
     /**
-     * Reads a Integer property value from the given annotation instance. If no value is found
-     * this will return null.
-     * 
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return Integer value
-     */
-    public static Integer intValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        } else {
-            return value.asInt();
-        }
-    }
-
-    /**
      * Reads a String array property value from the given annotation instance. If no value is found
      * this will return null.
      * 
@@ -183,100 +232,6 @@ public final class Annotations {
             return Optional.of(new ArrayList<>(Arrays.asList(value.asStringArray())));
         }
         return Optional.empty();
-    }
-
-    /**
-     * Gets a single class annotation from the given class. Returns null if no matching annotation
-     * is found.
-     * 
-     * @param ct ClassInfo
-     * @param name DotName
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getClassAnnotation(ClassInfo ct, DotName name) {
-        return getClassAnnotation(ct, Arrays.asList(name));
-    }
-
-    /**
-     * Gets a single class annotation from the given class. Returns null if no matching annotation
-     * is found.
-     * 
-     * @param ct ClassInfo
-     * @param names List of DotNames
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getClassAnnotation(ClassInfo ct, Collection<DotName> names) {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-
-        for (DotName dn : names) {
-            AnnotationInstance classAnnotation = ct.classAnnotation(dn);
-            if (classAnnotation != null) {
-                return classAnnotation;
-            }
-        }
-
-        return null;
-    }
-
-    public static AnnotationInstance getAnnotation(MethodInfo mi, DotName... names) {
-        return getAnnotation(mi, Arrays.asList(names));
-    }
-
-    /**
-     * Gets a single annotation from the given field. Returns null if no matching annotation
-     * is found.
-     * 
-     * @param field FieldInfo
-     * @param names DotName
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getAnnotation(FieldInfo field, Collection<DotName> names) {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-
-        for (DotName dn : names) {
-            AnnotationInstance annotation = field.annotation(dn);
-            if (annotation != null)
-                return annotation;
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets a single annotation from the given method. Returns null if no matching annotation
-     * is found.
-     * 
-     * @param mi MethodInfo
-     * @param names DotName
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getAnnotation(MethodInfo mi, Collection<DotName> names) {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-
-        for (DotName dn : names) {
-            AnnotationInstance annotation = mi.annotation(dn);
-            if (annotation != null)
-                return annotation;
-        }
-
-        return null;
-    }
-
-    /**
-     * Return if any one of the listed annotations exist
-     * 
-     * @param method
-     * @param annotations
-     * @return
-     */
-    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, DotName... annotations) {
-        return hasAnyOneOfAnnotation(method, Arrays.asList(annotations));
     }
 
     /**
@@ -329,14 +284,14 @@ public final class Annotations {
 
         List<AnnotationInstance> annotations = new ArrayList<>();
 
-        AnnotationInstance annotation = Annotations.getAnnotation(target, singleAnnotationName);
+        AnnotationInstance annotation = getAnnotation(target, singleAnnotationName);
 
         if (annotation != null) {
             annotations.add(annotation);
         }
 
         if (repeatableAnnotationName != null) {
-            AnnotationInstance[] nestedArray = Annotations.getAnnotationValue(target,
+            AnnotationInstance[] nestedArray = getAnnotationValue(target,
                     repeatableAnnotationName,
                     OpenApiConstants.VALUE);
 
@@ -348,27 +303,6 @@ public final class Annotations {
         }
 
         return annotations;
-    }
-
-    /**
-     * Returns the class type of the method parameter at the given position.
-     * 
-     * @param method MethodInfo
-     * @param position parameter position
-     * @return Type
-     */
-    public static Type getMethodParameterType(MethodInfo method, short position) {
-        return method.parameterType(position);
-    }
-
-    /**
-     * Returns the class type of the method parameter.
-     *
-     * @param parameter the {@link MethodParameterInfo parameter}
-     * @return Type
-     */
-    public static Type getMethodParameterType(MethodParameterInfo parameter) {
-        return parameter.method().parameterType(parameter.position());
     }
 
     /**
@@ -460,25 +394,19 @@ public final class Annotations {
     }
 
     public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
-        if (annotationTarget == null) {
-            return null;
-        }
-        return getAnnotations(annotationTarget).stream()
+        return getAnnotations(annotationTarget)
+                .stream()
                 .filter(annotation -> annotation.name().equals(annotationName))
                 .findFirst()
                 .orElse(null);
     }
 
     public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, Collection<DotName> annotationNames) {
-        if (annotationTarget == null) {
-            return null;
-        }
-        for (DotName dn : annotationNames) {
-            AnnotationInstance ai = getAnnotation(annotationTarget, dn);
-            if (ai != null)
-                return ai;
-        }
-        return null;
+        return getAnnotations(annotationTarget)
+                .stream()
+                .filter(annotation -> annotationNames.contains(annotation.name()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -487,13 +415,9 @@ public final class Annotations {
      *
      * @param <T> the type of the parameter being retrieved
      * @param target the target object annotated with the annotation named by annotationName
-     * @param annotationName name of the annotation from which to retrieve the value
+     * @param annotationNames names of annotations from which to retrieve the value
      * @return an unwrapped annotation parameter value
      */
-    public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName) {
-        return getAnnotationValue(target, Arrays.asList(annotationName), OpenApiConstants.VALUE);
-    }
-
     public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
         return getAnnotationValue(target, annotationNames, OpenApiConstants.VALUE, null);
     }
@@ -542,49 +466,6 @@ public final class Annotations {
         return value != null ? value : defaultValue;
     }
 
-    /**
-     * Convenience method to retrieve the named parameter from an annotation bound to the target.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param target the target object annotated with the annotation named by annotationName
-     * @param annotationName name of the annotation from which to retrieve the value
-     * @param propertyName the name of the parameter/property in the annotation
-     * @param defaultValue a default value to return if either the annotation or the value are missing
-     * @return an unwrapped annotation parameter value
-     */
-    public static <T> T getAnnotationValue(AnnotationTarget target,
-            DotName annotationName,
-            String propertyName,
-            T defaultValue) {
-
-        return getAnnotationValue(target, Arrays.asList(annotationName), propertyName, defaultValue);
-    }
-
-    public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget type) {
-        switch (type.kind()) {
-            case CLASS:
-                return type.asClass().classAnnotations();
-            case FIELD:
-                return type.asField().annotations();
-            case METHOD:
-                return type.asMethod().annotations();
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = type.asMethodParameter();
-                return parameter
-                        .method()
-                        .annotations()
-                        .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
-                        .collect(Collectors.toList());
-            case TYPE:
-            case RECORD_COMPONENT:
-                break;
-        }
-        return Collections.emptyList();
-    }
-
     public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName, String propertyName) {
         AnnotationInstance annotation = getDeclaredAnnotation(type, annotationName);
         T value = null;
@@ -600,59 +481,8 @@ public final class Annotations {
         return getDeclaredAnnotationValue(type, annotationName, OpenApiConstants.VALUE);
     }
 
-    public static AnnotationInstance getDeclaredAnnotation(AnnotationTarget type, DotName annotationName) {
-        Function<DotName, AnnotationInstance> lookup;
-
-        switch (type.kind()) {
-            case CLASS:
-                lookup = type.asClass()::classAnnotation;
-                break;
-            case FIELD:
-                lookup = type.asField()::annotation;
-                break;
-            case METHOD:
-                lookup = name -> type.asMethod().annotations(name).stream().filter(a -> type.equals(a.target())).findFirst()
-                        .orElse(null);
-                break;
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = type.asMethodParameter();
-                lookup = name -> parameter
-                        .method()
-                        .annotations(name)
-                        .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
-                        .findFirst()
-                        .orElse(null);
-                break;
-            case RECORD_COMPONENT:
-                lookup = type.asRecordComponent()::annotation;
-                break;
-            case TYPE:
-            default:
-                lookup = name -> null;
-                break;
-        }
-
-        return lookup.apply(annotationName);
-    }
-
     public static AnnotationInstance getAnnotation(Type type, DotName annotationName) {
         return type.annotations().stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static AnnotationInstance getAnnotation(ClassInfo field, DotName annotationName) {
-        return field.classAnnotations().stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static AnnotationInstance getAnnotation(FieldInfo field, DotName annotationName) {
-        return field.annotations().stream()
                 .filter(annotation -> annotation.name().equals(annotationName))
                 .findFirst()
                 .orElse(null);

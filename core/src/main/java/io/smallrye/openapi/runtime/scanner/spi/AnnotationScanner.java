@@ -918,8 +918,7 @@ public interface AnnotationScanner {
 
             Type requestBodyType = null;
             if (annotation.target().kind() == METHOD_PARAMETER) {
-                requestBodyType = Annotations.getMethodParameterType(method,
-                        annotation.target().asMethodParameter().position());
+                requestBodyType = method.parameterType(annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
                 requestBodyType = getRequestBodyParameterClassType(context, method, params);
             }

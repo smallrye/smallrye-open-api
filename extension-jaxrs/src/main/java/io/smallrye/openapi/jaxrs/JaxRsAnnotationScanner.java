@@ -197,10 +197,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
-        AnnotationInstance applicationPathAnnotation = Annotations.getClassAnnotation(applicationClass,
+        AnnotationInstance applicationPathAnnotation = Annotations.getAnnotation(applicationClass,
                 JaxRsConstants.APPLICATION_PATH);
         if (applicationPathAnnotation == null || context.getConfig().applicationPathDisable()) {
-            applicationPathAnnotation = Annotations.getClassAnnotation(applicationClass, JaxRsConstants.PATH);
+            applicationPathAnnotation = Annotations.getAnnotation(applicationClass, JaxRsConstants.PATH);
         }
         // TODO: Add support for Application selection when there are more than one
         if (applicationPathAnnotation != null) {
@@ -564,7 +564,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         if (annotation == null) {
-            annotation = Annotations.getClassAnnotation(clazz, annotationName);
+            annotation = Annotations.getAnnotation(clazz, annotationName);
         }
 
         return annotation;

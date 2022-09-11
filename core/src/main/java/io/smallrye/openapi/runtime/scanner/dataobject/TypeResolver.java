@@ -977,7 +977,7 @@ public class TypeResolver {
 
     private static UnaryOperator<String> getPropertyNameTranslator(AnnotationScannerContext context, AnnotationTarget target) {
         ClassInfo clazz = target.kind() == Kind.CLASS ? target.asClass() : TypeUtil.getDeclaringClass(target);
-        AnnotationInstance jacksonNaming = clazz.classAnnotation(JacksonConstants.JSON_NAMING);
+        AnnotationInstance jacksonNaming = Annotations.getAnnotation(clazz, JacksonConstants.JSON_NAMING);
         UnaryOperator<String> translator;
 
         if (jacksonNaming != null) {
@@ -1073,11 +1073,11 @@ public class TypeResolver {
         AnnotationInstance propertyOrder;
         AnnotationValue orderArray = null;
 
-        if ((propertyOrder = Annotations.getClassAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
+        if ((propertyOrder = Annotations.getAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
-        } else if ((propertyOrder = Annotations.getClassAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
+        } else if ((propertyOrder = Annotations.getAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
             orderArray = propertyOrder.value("propOrder");
-        } else if ((propertyOrder = clazz.classAnnotation(JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
+        } else if ((propertyOrder = Annotations.getAnnotation(clazz, JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
         }
 
