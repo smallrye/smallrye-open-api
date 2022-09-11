@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
@@ -43,8 +42,7 @@ public final class Annotations {
                         .method()
                         .annotations()
                         .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .filter(a -> targetsMethodParameter(a, parameter.position()))
                         .collect(Collectors.toList());
             case TYPE:
             case RECORD_COMPONENT:
@@ -85,8 +83,7 @@ public final class Annotations {
                         .method()
                         .annotations(name)
                         .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .filter(a -> targetsMethodParameter(a, parameter.position()))
                         .findFirst()
                         .orElse(null);
                 break;
@@ -197,11 +194,7 @@ public final class Annotations {
     public static List<AnnotationInstance> getParameterAnnotations(MethodInfo method, short paramPosition) {
         return method.annotations()
                 .stream()
-                .filter(annotation -> {
-                    AnnotationTarget target = annotation.target();
-                    return target != null && target.kind() == Kind.METHOD_PARAMETER
-                            && target.asMethodParameter().position() == paramPosition;
-                })
+                .filter(a -> targetsMethodParameter(a, paramPosition))
                 .collect(toList());
     }
 
@@ -255,8 +248,7 @@ public final class Annotations {
             DotName annotationName) {
         return method.annotations(annotationName)
                 .stream()
-                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
-                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
+                .filter(a -> targetsMethodParameter(a, parameterIndex))
                 .findFirst()
                 .orElse(null);
     }
@@ -289,8 +281,7 @@ public final class Annotations {
         int parameterIndex = method.parameterTypes().indexOf(parameterType);
         return method.annotations()
                 .stream()
-                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
-                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
+                .filter(a -> targetsMethodParameter(a, parameterIndex))
                 .collect(Collectors.toList());
     }
 
@@ -319,8 +310,7 @@ public final class Annotations {
                 return parameter.method()
                         .annotations()
                         .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
+                        .filter(a -> targetsMethodParameter(a, parameter.position()))
                         .anyMatch(a -> a.name().equals(annotationName));
             case TYPE:
             case RECORD_COMPONENT:
@@ -418,11 +408,10 @@ public final class Annotations {
         return getDeclaredAnnotationValue(type, annotationName, VALUE);
     }
 
-    public static AnnotationInstance getAnnotation(Type type, DotName annotationName) {
-        return type.annotations().stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
+    static boolean targetsMethodParameter(AnnotationInstance annotation, int position) {
+        AnnotationTarget target = annotation.target();
 
+        return target.kind() == AnnotationTarget.Kind.METHOD_PARAMETER
+                && target.asMethodParameter().position() == position;
+    }
 }

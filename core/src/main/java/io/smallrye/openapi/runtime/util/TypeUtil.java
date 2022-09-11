@@ -26,7 +26,6 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
-import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.MethodParameterInfo;
@@ -678,18 +677,6 @@ public class TypeUtil {
 
     public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
         return Annotations.getAnnotation(annotationTarget, SchemaConstant.DOTNAME_SCHEMA);
-    }
-
-    public static AnnotationInstance getSchemaAnnotation(ClassInfo field) {
-        return Annotations.getAnnotation(field, SchemaConstant.DOTNAME_SCHEMA);
-    }
-
-    public static AnnotationInstance getSchemaAnnotation(FieldInfo field) {
-        return Annotations.getAnnotation(field, SchemaConstant.DOTNAME_SCHEMA);
-    }
-
-    public static AnnotationInstance getSchemaAnnotation(Type type) {
-        return Annotations.getAnnotation(type, SchemaConstant.DOTNAME_SCHEMA);
     }
 
     public static boolean isIncludedAllOf(ClassInfo annotatedClass, Type type) {
