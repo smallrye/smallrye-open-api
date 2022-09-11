@@ -112,8 +112,7 @@ public class ExtensionReader {
             final AnnotationInstance annotationInstance) {
         IoLogging.logger.annotation("@Extension");
         String extValue = Annotations.stringValue(annotationInstance, ExtensionConstant.PROP_VALUE);
-        boolean parseValue = Annotations.booleanValueWithDefault(annotationInstance,
-                ExtensionConstant.PROP_PARSE_VALUE);
+        boolean parseValue = Annotations.value(annotationInstance, ExtensionConstant.PROP_PARSE_VALUE, Boolean.FALSE);
         Object parsedValue = extValue;
         if (parseValue) {
             for (AnnotationScannerExtension e : context.getExtensions()) {

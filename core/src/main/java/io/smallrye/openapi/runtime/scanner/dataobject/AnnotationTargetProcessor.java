@@ -350,7 +350,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
-        if (Annotations.booleanValueWithDefault(annotation, SchemaConstant.PROP_REQUIRED)) {
+        if (Annotations.value(annotation, SchemaConstant.PROP_REQUIRED, Boolean.FALSE)) {
             parentPathEntry.getSchema().addRequired(propertyKey);
         }
 
