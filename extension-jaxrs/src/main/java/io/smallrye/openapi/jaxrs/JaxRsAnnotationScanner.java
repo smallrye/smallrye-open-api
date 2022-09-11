@@ -87,12 +87,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        return Annotations.hasAnyOneOfAnnotation(method, JaxRsConstants.POST);
+        return Annotations.hasAnnotation(method, JaxRsConstants.POST);
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        return Annotations.hasAnyOneOfAnnotation(method, JaxRsConstants.DELETE);
+        return Annotations.hasAnnotation(method, JaxRsConstants.DELETE);
     }
 
     @Override
@@ -293,7 +293,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                                 locatorPathParameters, exceptionAnnotationMap);
                     });
 
-            if (resourceCount.get() == 0 && Annotations.hasAnyOneOfAnnotation(methodInfo, JaxRsConstants.PATH)) {
+            if (resourceCount.get() == 0 && Annotations.hasAnnotation(methodInfo, JaxRsConstants.PATH)) {
                 processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters);
             }
         }

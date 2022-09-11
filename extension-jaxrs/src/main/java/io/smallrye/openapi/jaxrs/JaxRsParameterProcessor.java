@@ -280,7 +280,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         switch (method.returnType().kind()) {
             case CLASS:
             case PARAMETERIZED_TYPE:
-                return Annotations.hasAnyOneOfAnnotation(method, JaxRsConstants.PATH) &&
+                return Annotations.hasAnnotation(method, JaxRsConstants.PATH) &&
                         method.annotations()
                                 .stream()
                                 .map(AnnotationInstance::name)

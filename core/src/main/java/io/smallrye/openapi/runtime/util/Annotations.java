@@ -169,22 +169,6 @@ public final class Annotations {
     }
 
     /**
-     * Return if any one of the listed annotations exist
-     * 
-     * @param method
-     * @param annotations
-     * @return
-     */
-    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, Collection<DotName> annotations) {
-        for (DotName dotName : annotations) {
-            if (method.hasAnnotation(dotName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns all annotations configured for a single parameter of a method.
      * 
      * @param method MethodInfo
@@ -285,7 +269,7 @@ public final class Annotations {
                 .collect(Collectors.toList());
     }
 
-    public static boolean hasAnnotation(AnnotationTarget target, List<DotName> annotationNames) {
+    public static boolean hasAnnotation(AnnotationTarget target, Collection<DotName> annotationNames) {
         for (DotName dn : annotationNames) {
             if (hasAnnotation(target, dn)) {
                 return true;
