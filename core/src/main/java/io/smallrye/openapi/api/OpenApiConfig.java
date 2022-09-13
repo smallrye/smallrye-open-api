@@ -15,7 +15,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  * Accessor to OpenAPI configuration options.
  *
  * Reference:
- * https://github.com/eclipse/microprofile-open-api/blob/master/spec/src/main/asciidoc/microprofile-openapi-spec.adoc#31-list-of-configurable-items
+ * https://github.com/eclipse/microprofile-open-api/blob/master/spec/src/main/asciidoc/microprofile-openapi-spec.asciidoc#list-of-configurable-items
  *
  * @author eric.wittmann@gmail.com
  */
