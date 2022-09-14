@@ -674,7 +674,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .flatMap(e -> JandexUtil.interfaces(index, e.getKey()).stream())
                 .map(index::getClass)
                 .filter(Objects::nonNull)
-                .noneMatch(iface -> iface.classAnnotation(JaxRsConstants.REGISTER_REST_CLIENT) != null);
+                .noneMatch(iface -> Annotations.getAnnotation(iface, JaxRsConstants.REGISTER_REST_CLIENT) != null);
     }
 
     private boolean neitherAbstractNorSynthetic(ClassInfo clazz) {

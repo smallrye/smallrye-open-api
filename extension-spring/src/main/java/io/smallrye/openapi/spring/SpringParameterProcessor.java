@@ -26,6 +26,7 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -156,7 +157,7 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
 
         if (target.kind().equals(CLASS)) {
             for (DotName possiblePath : paths) {
-                AnnotationInstance classAnnotation = target.asClass().classAnnotation(possiblePath);
+                AnnotationInstance classAnnotation = Annotations.getAnnotation(target, possiblePath);
                 if (classAnnotation != null && (classAnnotation.value() != null || classAnnotation.value("path") != null)) {
                     path = classAnnotation;
                 }

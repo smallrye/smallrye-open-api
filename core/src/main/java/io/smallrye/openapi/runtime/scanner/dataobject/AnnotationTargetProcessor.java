@@ -238,7 +238,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
                 }
 
                 if (fieldSchema.getAllOf() == null && (fieldAssertionsOverrideType(fieldSchema, typeSchema)
-                        || fieldSpecifiesAnnotation(fieldSchema, typeSchema))) {
+                        || fieldSpecifiesAnnotation(fieldSchema))) {
                     // Field declaration overrides a schema annotation (non-validating), add referenced type to `allOf` if not user-provided
                     TypeUtil.clearMatchingDefaultAttributes(fieldSchema, typeSchema);
                     fieldSchema.addAllOf(registeredTypeSchema);
@@ -350,7 +350,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
-        if (Annotations.value(annotation, SchemaConstant.PROP_REQUIRED, Boolean.FALSE)) {
+        if (Annotations.value(annotation, SchemaConstant.PROP_REQUIRED, Boolean.FALSE).booleanValue()) {
             parentPathEntry.getSchema().addRequired(propertyKey);
         }
 
@@ -400,7 +400,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
                 .anyMatch(Boolean.TRUE::equals);
     }
 
-    boolean fieldSpecifiesAnnotation(Schema fieldSchema, Schema typeSchema) {
+    boolean fieldSpecifiesAnnotation(Schema fieldSchema) {
         return null != SCHEMA_ANNOTATION_PROVIDERS.stream()
                 .map(provider -> provider.apply(fieldSchema))
                 .filter(Objects::nonNull)

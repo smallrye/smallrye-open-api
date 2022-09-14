@@ -543,7 +543,7 @@ public class SchemaFactory {
         IoLogging.logger.enumProcessing(enumType);
         final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
         ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
-        AnnotationInstance schemaAnnotation = enumKlazz.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
+        AnnotationInstance schemaAnnotation = Annotations.getAnnotation(enumKlazz, SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
 
         List<Object> enumeration = enumKlazz.annotationsMap()
@@ -614,7 +614,7 @@ public class SchemaFactory {
 
         ClassInfo classInfo = context.getAugmentedIndex().getClass(ctype);
         if (classInfo != null) {
-            AnnotationInstance schemaAnnotation = classInfo.classAnnotation(SchemaConstant.DOTNAME_SCHEMA);
+            AnnotationInstance schemaAnnotation = Annotations.getAnnotation(classInfo, SchemaConstant.DOTNAME_SCHEMA);
             if (schemaAnnotation != null
                     && Boolean.TRUE.equals(readAttr(schemaAnnotation, SchemaConstant.PROP_HIDDEN, false))) {
                 return null;

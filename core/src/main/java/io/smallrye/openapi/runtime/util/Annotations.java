@@ -31,7 +31,7 @@ public final class Annotations {
 
         switch (target.kind()) {
             case CLASS:
-                return target.asClass().classAnnotations();
+                return target.asClass().declaredAnnotations();
             case FIELD:
                 return target.asField().annotations();
             case METHOD:
@@ -61,7 +61,7 @@ public final class Annotations {
 
         switch (target.kind()) {
             case CLASS:
-                annotation = target.asClass().classAnnotation(name);
+                annotation = target.asClass().declaredAnnotation(name);
                 break;
             case FIELD:
                 annotation = target.asField()
@@ -284,7 +284,7 @@ public final class Annotations {
         }
         switch (target.kind()) {
             case CLASS:
-                return target.asClass().classAnnotation(annotationName) != null;
+                return target.asClass().declaredAnnotation(annotationName) != null;
             case FIELD:
                 return target.asField().hasAnnotation(annotationName);
             case METHOD:

@@ -205,14 +205,13 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                 .stream()
                 .filter(m -> m.hasAnnotation(VertxConstants.ROUTE))
                 .filter(this::shouldScan)
-                .forEach(methodInfo -> {
-                    Optional.ofNullable(Annotations.<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE, "methods"))
-                            .map(methods -> Arrays.stream(methods).map(PathItem.HttpMethod::valueOf))
-                            .orElseGet(() -> Arrays.stream(PathItem.HttpMethod.values()))
-                            .forEach(httpMethod -> processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi,
-                                    tagRefs,
-                                    locatorPathParameters));
-                });
+                .forEach(methodInfo -> Optional
+                        .ofNullable(Annotations.<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE, "methods"))
+                        .map(methods -> Arrays.stream(methods).map(PathItem.HttpMethod::valueOf))
+                        .orElseGet(() -> Arrays.stream(PathItem.HttpMethod.values()))
+                        .forEach(httpMethod -> processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi,
+                                tagRefs,
+                                locatorPathParameters)));
     }
 
     /**

@@ -452,8 +452,6 @@ public interface AnnotationScanner {
      * If there not a return value (void return type) then either a 201 or 204 is returned,
      * depending on the type of request.
      *
-     * TODO: generate responses for each checked exception?
-     *
      * @param context the scanning context
      * @param method the current method
      * @param operation the current operation
@@ -609,7 +607,7 @@ public interface AnnotationScanner {
 
     default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
         Type type = getKotlinContinuationArgument(context, method);
-        AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, type,
+        AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, type,
                 SchemaConstant.DOTNAME_SCHEMA);
         return SchemaFactory.typeToSchema(context, type, schemaAnnotation, context.getExtensions());
     }
@@ -930,7 +928,7 @@ public interface AnnotationScanner {
                 setJsonViewContext(context, views);
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
                     requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
-                    AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, requestBodyType,
+                    AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, requestBodyType,
                             SchemaConstant.DOTNAME_SCHEMA);
                     Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
                             context.getExtensions());
@@ -976,7 +974,7 @@ public interface AnnotationScanner {
                         schema = new SchemaImpl();
                         schema.setType(Schema.SchemaType.OBJECT);
                     } else {
-                        AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, requestBodyType,
+                        AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, requestBodyType,
                                 SchemaConstant.DOTNAME_SCHEMA);
                         schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
                                 context.getExtensions());
