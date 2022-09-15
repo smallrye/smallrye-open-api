@@ -452,7 +452,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
                 reader, context.getExtensions());
-        operation.setParameters(params.getOperationParameters());
+        List<Parameter> operationParams = params.getOperationParameters();
+        operation.setParameters(operationParams);
+        if (locatorPathParameters != null && operationParams != null) {
+            locatorPathParameters = excludeOperationParameters(locatorPathParameters, operationParams);
+        }
 
         PathItem pathItem = new PathItemImpl();
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -507,6 +511,22 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
+    }
+
+    /**
+     * Remove from the list of locator parameters and parameter present in the list of operation parameters.
+     * Parameters are considered the same if they have the same value for name and {@code in}.
+     * 
+     * @param locatorParams list of locator parameters
+     * @param operationParams list of operation parameters
+     * @return
+     */
+    static List<Parameter> excludeOperationParameters(List<Parameter> locatorParams, List<Parameter> operationParams) {
+        return locatorParams.stream()
+                .filter(param -> operationParams.stream()
+                        .noneMatch(oParam -> Objects.equals(param.getName(), oParam.getName()) &&
+                                Objects.equals(param.getIn(), oParam.getIn())))
+                .collect(Collectors.toList());
     }
 
     /**
