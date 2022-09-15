@@ -7,6 +7,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
@@ -34,7 +35,7 @@ public class Sub1TestResource<T> {
     }
 
     @Path(value = "/sub2/{sub2-id}")
-    public Sub2TestResource<T> getSub2() {
+    public Sub2TestResource<T> getSub2(@PathParam("sub2-id") String sub2Id) {
         return new Sub2TestResource<T>();
     }
 
