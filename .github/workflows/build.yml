@@ -105,7 +105,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B package -DskipTests
+        run: mvn -B install -DskipTests
 
       - name: execute tck
         run: mvn -B test -f testsuite/tck/pom.xml -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }} -Dversion.testng=${{ matrix.testng-version }}
