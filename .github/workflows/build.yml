@@ -76,3 +76,36 @@ jobs:
             !**/target/node/**/*
             !**/target/**/*.jar
             !**/target/**/*.war
+
+  tck-additional:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - tck-version: "2.0.1"
+          testng-version: "6.14.3"
+        - tck-version: "3.0"
+          testng-version: "6.14.3"
+
+    name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
+
+      - uses: actions/setup-java@v1.4.3
+        name: set up jdk
+        with:
+          java-version: 11
+
+      - name: maven cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: build with maven
+        run: mvn -B package -DskipTests
+
+      - name: execute tck
+        run: mvn -B test -f testsuite/tck/pom.xml -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }} -Dversion.testng=${{ matrix.testng-version }}
