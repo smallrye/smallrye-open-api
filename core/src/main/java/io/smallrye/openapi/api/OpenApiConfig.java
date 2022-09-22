@@ -1,20 +1,15 @@
 package io.smallrye.openapi.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * Accessor to OpenAPI configuration options.
@@ -25,36 +20,6 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  * @author eric.wittmann@gmail.com
  */
 public interface OpenApiConfig {
-
-    static final String[] MP_VERSION = ModelUtil.supply(() -> {
-        try (InputStream pomProperties = OpenApiConfig.class.getResourceAsStream(
-                "/META-INF/maven/org.eclipse.microprofile.openapi/microprofile-openapi-api/pom.properties")) {
-            Properties p = new Properties();
-            p.load(pomProperties);
-            String version = p.getProperty("version");
-            int suffix = version.indexOf('-');
-            return (suffix > -1 ? version.substring(0, suffix) : version).split("\\.");
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    });
-
-    static int compareMicroProfileVersion(String checkVersion) {
-        String[] checkComponents = checkVersion.split("\\.");
-        int max = Math.max(MP_VERSION.length, checkComponents.length);
-        int result = 0;
-
-        for (int i = 0; i < max; i++) {
-            Integer mp = i < MP_VERSION.length ? Integer.parseInt(MP_VERSION[i]) : 0;
-            Integer cv = i < checkComponents.length ? Integer.parseInt(checkComponents[i]) : 0;
-
-            if ((result = mp.compareTo(cv)) != 0) {
-                break;
-            }
-        }
-
-        return result;
-    }
 
     default String modelReader() {
         return null;

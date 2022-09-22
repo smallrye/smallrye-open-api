@@ -5,9 +5,9 @@ import java.util.Objects;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
-import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.api.util.VersionUtil;
 
 /**
  * An implementation of the {@link Tag} OpenAPI model interface.
@@ -71,7 +71,7 @@ public class TagImpl extends ExtensibleImpl<Tag> implements Tag, ModelImpl {
         if (this == o) {
             return true;
         }
-        if (OpenApiConfig.compareMicroProfileVersion("3.0") < 0) {
+        if (VersionUtil.compareMicroProfileVersion("3.0") < 0) {
             // TCK versions before MP OpenAPI release 3.0 check Tag instances are not equal
             return false;
         }
