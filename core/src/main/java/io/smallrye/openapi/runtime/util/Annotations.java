@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
@@ -24,6 +25,16 @@ public final class Annotations {
     private Annotations() {
     }
 
+    @SuppressWarnings("deprecation")
+    static Collection<AnnotationInstance> declaredAnnotation(ClassInfo target) {
+        return target.classAnnotations();
+    }
+
+    @SuppressWarnings("deprecation")
+    static AnnotationInstance declaredAnnotation(ClassInfo target, DotName name) {
+        return target.classAnnotation(name);
+    }
+
     public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget target) {
         if (target == null) {
             return Collections.emptyList();
@@ -31,7 +42,7 @@ public final class Annotations {
 
         switch (target.kind()) {
             case CLASS:
-                return target.asClass().declaredAnnotations();
+                return declaredAnnotation(target.asClass());
             case FIELD:
                 return target.asField().annotations();
             case METHOD:
@@ -61,12 +72,13 @@ public final class Annotations {
 
         switch (target.kind()) {
             case CLASS:
-                annotation = target.asClass().declaredAnnotation(name);
+                annotation = declaredAnnotation(target.asClass(), name);
                 break;
             case FIELD:
                 annotation = target.asField()
-                        .annotations(name)
+                        .annotations()
                         .stream()
+                        .filter(a -> name.equals(a.name()))
                         .filter(a -> target.equals(a.target())).findFirst()
                         .orElse(null);
                 break;
@@ -170,7 +182,7 @@ public final class Annotations {
 
     /**
      * Returns all annotations configured for a single parameter of a method.
-     * 
+     *
      * @param method MethodInfo
      * @param paramPosition parameter position
      * @return List of AnnotationInstance's
@@ -186,7 +198,7 @@ public final class Annotations {
      * Many OAI annotations can either be found singly or as a wrapped array. This method will
      * look for both and return a list of all found. Both the single and wrapper annotation names
      * must be provided.
-     * 
+     *
      * @param target the annotated target (e.g. ClassInfo, MethodInfo)
      * @param singleAnnotationName DotName
      * @param repeatableAnnotationName DotName
@@ -222,7 +234,7 @@ public final class Annotations {
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
      * method.Returns null if not found.
-     * 
+     *
      * @param method the method
      * @param parameterIndex the parameter index
      * @param annotationName name of annotation we are looking for
@@ -240,7 +252,7 @@ public final class Annotations {
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
      * method based on the identity of the parameterType. Returns null if not found.
-     * 
+     *
      * @param method the method
      * @param parameterType the parameter type
      * @param annotationName name of annotation we are looking for
@@ -255,7 +267,7 @@ public final class Annotations {
 
     /**
      * Finds all annotations on a particular parameter of a method based on the identity of the parameterType.
-     * 
+     *
      * @param method the method
      * @param parameterType the parameter type
      * @return the list of annotations, never null
@@ -284,7 +296,7 @@ public final class Annotations {
         }
         switch (target.kind()) {
             case CLASS:
-                return target.asClass().declaredAnnotation(annotationName) != null;
+                return declaredAnnotation(target.asClass(), annotationName) != null;
             case FIELD:
                 return target.asField().hasAnnotation(annotationName);
             case METHOD:

@@ -31,7 +31,7 @@ class OpenApiDataObjectScannerTest {
             "java.util.stream.LongStream  , INTEGER, int64",
             "java.util.stream.Stream      ,        , ",
     })
-    void testStreams(Class<?> type, Schema.SchemaType itemType, String itemFormat) throws IOException {
+    void testStreams(String type, Schema.SchemaType itemType, String itemFormat) throws IOException {
         IndexView index = Index.of(new Class<?>[0]);
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 IndexScannerTestBase.emptyConfig());
