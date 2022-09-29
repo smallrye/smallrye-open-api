@@ -24,10 +24,29 @@ import org.eclipse.microprofile.openapi.models.parameters.Parameter;
  */
 public class ResourceParameters {
 
-    public static final Comparator<Parameter> PARAMETER_COMPARATOR = Comparator
-            .comparing(Parameter::getRef, Comparator.nullsFirst(Comparator.naturalOrder()))
-            .thenComparing(Parameter::getIn, Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(Parameter::getName, Comparator.nullsLast(Comparator.naturalOrder()));
+    private static int position(List<Parameter> preferredOrder, Parameter p) {
+        int pos = preferredOrder.indexOf(p);
+        return pos >= 0 ? pos : Integer.MAX_VALUE;
+    }
+
+    public static Comparator<Parameter> parameterComparator(List<Parameter> preferredOrder) {
+        Comparator<Parameter> primaryComparator;
+
+        if (preferredOrder != null) {
+            Comparator<Parameter> preferredComparator = (p1, p2) -> Integer.compare(position(preferredOrder, p1),
+                    position(preferredOrder, p2));
+
+            primaryComparator = preferredComparator
+                    .thenComparing(Parameter::getRef, Comparator.nullsFirst(Comparator.naturalOrder()));
+        } else {
+            primaryComparator = Comparator
+                    .comparing(Parameter::getRef, Comparator.nullsFirst(Comparator.naturalOrder()));
+        }
+
+        return primaryComparator
+                .thenComparing(Parameter::getIn, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(Parameter::getName, Comparator.nullsLast(Comparator.naturalOrder()));
+    }
 
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern.compile("\\{(\\w[\\w\\.-]*)\\}");
 
@@ -108,12 +127,14 @@ public class ResourceParameters {
         this.formBodyContent = formBodyContent;
     }
 
-    public void sort() {
+    public void sort(List<Parameter> preferredOrder) {
+        Comparator<Parameter> comparator = parameterComparator(preferredOrder);
+
         if (pathItemParameters != null) {
-            pathItemParameters.sort(PARAMETER_COMPARATOR);
+            pathItemParameters.sort(comparator);
         }
         if (operationParameters != null) {
-            operationParameters.sort(PARAMETER_COMPARATOR);
+            operationParameters.sort(comparator);
         }
     }
 
