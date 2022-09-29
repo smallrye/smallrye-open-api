@@ -1,9 +1,5 @@
 package io.smallrye.openapi.runtime.io.securityrequirement;
 
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirements;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSet;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSets;
 import org.jboss.jandex.DotName;
 
 /**
@@ -17,10 +13,14 @@ import org.jboss.jandex.DotName;
  */
 public class SecurityRequirementConstant {
 
-    static final DotName DOTNAME_SECURITY_REQUIREMENT = DotName.createSimple(SecurityRequirement.class.getName());
-    static final DotName DOTNAME_SECURITY_REQUIREMENTS = DotName.createSimple(SecurityRequirements.class.getName());
-    static final DotName DOTNAME_SECURITY_REQUIREMENTS_SET = DotName.createSimple(SecurityRequirementsSet.class.getName());
-    static final DotName DOTNAME_SECURITY_REQUIREMENTS_SETS = DotName.createSimple(SecurityRequirementsSets.class.getName());
+    static final DotName DOTNAME_SECURITY_REQUIREMENT = DotName
+            .createSimple("org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement");
+    static final DotName DOTNAME_SECURITY_REQUIREMENTS = DotName
+            .createSimple("org.eclipse.microprofile.openapi.annotations.security.SecurityRequirements");
+    static final DotName DOTNAME_SECURITY_REQUIREMENTS_SET = DotName
+            .createSimple("org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSet");
+    static final DotName DOTNAME_SECURITY_REQUIREMENTS_SETS = DotName
+            .createSimple("org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSets");
 
     public static final String PROP_NAME = "name";
     public static final String PROP_SCOPES = "scopes";
