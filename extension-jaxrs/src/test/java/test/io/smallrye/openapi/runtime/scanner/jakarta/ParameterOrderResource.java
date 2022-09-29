@@ -45,13 +45,13 @@ public class ParameterOrderResource {
                 @Parameter(ref = "fields"),
                 @Parameter(name = "page-size", in = ParameterIn.QUERY, description = "The max number of results to return.", schema = @Schema(implementation = Integer.class, defaultValue = "3", minimum = "1", maximum = "20")),
                 @Parameter(name = "page-state", ref = "page-state"),
-                @Parameter(name = "profile", ref = "profile"),
-                @Parameter(name = "raw", ref = "raw"),
+                @Parameter(name = "profile", ref = "profile")
+                // `raw` parameter omitted, should appear last anyway due to default ordering
         })
         @GET
         public String get(
                 // Order purposefully different than parameters listed in `@Parameters` on method
-                @QueryParam("raw") boolean raw,
+                @Parameter(ref = "raw") @QueryParam("raw") boolean raw,
                 @QueryParam("collection") String collection,
                 @QueryParam("fields") List<String> fields,
                 @QueryParam("namespace") String namespace,
