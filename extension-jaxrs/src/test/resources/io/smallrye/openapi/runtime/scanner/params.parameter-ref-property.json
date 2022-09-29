@@ -55,9 +55,6 @@
             }
           },
           {
-            "$ref": "#/components/parameters/pathParam2"
-          },
-          {
             "$ref": "#/components/parameters/queryParam1"
           }
         ],

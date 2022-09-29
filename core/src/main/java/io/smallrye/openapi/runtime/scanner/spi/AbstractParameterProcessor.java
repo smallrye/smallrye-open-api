@@ -113,6 +113,7 @@ public abstract class AbstractParameterProcessor {
     protected Map<String, Map<String, AnnotationInstance>> matrixParams = new LinkedHashMap<>();
 
     private Set<String> processedMatrixSegments = new HashSet<>();
+    private List<Parameter> preferredOrder;
 
     /**
      * Used for collecting and merging any scanned {@link Parameter} annotations
@@ -276,7 +277,7 @@ public abstract class AbstractParameterProcessor {
                 .forEach(this::readAnnotatedType);
 
         /*
-         * Phase III - Read @Parameter(s) annotations directly on the recourd method
+         * Phase III - Read @Parameter(s) annotations directly on the record method
          * 
          * Read the resource method and any method super classes/interfaces that it may override
          */
@@ -309,7 +310,7 @@ public abstract class AbstractParameterProcessor {
                 .forEach(parameters::addOperationParameter);
 
         // Re-sort (names of matrix parameters may have changed)
-        parameters.sort();
+        parameters.sort(preferredOrder);
 
         parameters.setFormBodyContent(getFormBodyContent());
     }
@@ -424,7 +425,7 @@ public abstract class AbstractParameterProcessor {
                 .stream()
                 .map(context -> this.mapParameter(resourceMethod, context))
                 .filter(Objects::nonNull)
-                .sorted(ResourceParameters.PARAMETER_COMPARATOR)
+                .sorted(ResourceParameters.parameterComparator(preferredOrder))
                 .collect(Collectors.toList());
 
         return parameters.isEmpty() ? null : parameters;
@@ -936,11 +937,14 @@ public abstract class AbstractParameterProcessor {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
+                AnnotationInstance[] parameters = annotationValue.asNestedArray();
+                preferredOrder = new ArrayList<>(parameters.length);
+
                 /*
                  * Unwrap annotations wrapped by @Parameters and
                  * identify the target as the target of the @Parameters annotation
                  */
-                for (AnnotationInstance nested : annotationValue.asNestedArray()) {
+                for (AnnotationInstance nested : parameters) {
                     readAnnotatedType(AnnotationInstance.create(nested.name(),
                             annotation.target(),
                             nested.values()),
@@ -1264,6 +1268,13 @@ public abstract class AbstractParameterProcessor {
     protected void readParameterAnnotation(AnnotationInstance annotation, boolean overriddenParametersOnly) {
         Parameter oaiParam = readerFunction.apply(annotation);
 
+        if (oaiParam.getRef() != null) {
+            Parameter commonParam = ModelUtil.dereference(scannerContext.getOpenApi(), oaiParam);
+            oaiParam.setName(commonParam.getName());
+            oaiParam.setIn(commonParam.getIn());
+            oaiParam.setStyle(commonParam.getStyle());
+        }
+
         readParameter(new ParameterContextKey(oaiParam),
                 oaiParam,
                 null,
@@ -1362,6 +1373,10 @@ public abstract class AbstractParameterProcessor {
 
         if (addParam) {
             params.put(new ParameterContextKey(context), context);
+        }
+
+        if (preferredOrder != null) {
+            preferredOrder.add(context.oaiParam);
         }
     }
 
