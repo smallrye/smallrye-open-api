@@ -11,7 +11,7 @@
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
-        <kotlin.version>1.7.10</kotlin.version>
+        <kotlin.version>1.7.20</kotlin.version>
         <maven.compiler.release>11</maven.compiler.release>
     </properties>
 
