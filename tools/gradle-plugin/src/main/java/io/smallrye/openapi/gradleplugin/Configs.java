@@ -15,6 +15,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
@@ -50,6 +51,7 @@ class Configs {
     final Property<String> infoLicenseName;
     final Property<String> infoLicenseUrl;
     final Property<OperationIdStrategy> operationIdStrategy;
+    final Property<DuplicateOperationIdBehavior> duplicateOperationIdBehavior;
     final SetProperty<String> scanProfiles;
     final SetProperty<String> scanExcludeProfiles;
     final Property<String> encoding;
@@ -81,6 +83,7 @@ class Configs {
         infoLicenseName = objects.property(String.class);
         infoLicenseUrl = objects.property(String.class);
         operationIdStrategy = objects.property(OperationIdStrategy.class);
+        duplicateOperationIdBehavior = objects.property(DuplicateOperationIdBehavior.class);
         scanProfiles = objects.setProperty(String.class);
         scanExcludeProfiles = objects.setProperty(String.class);
         encoding = objects.property(String.class).convention(StandardCharsets.UTF_8.name());
@@ -113,6 +116,7 @@ class Configs {
         infoLicenseName = objects.property(String.class).convention(ext.getInfoLicenseName());
         infoLicenseUrl = objects.property(String.class).convention(ext.getInfoLicenseUrl());
         operationIdStrategy = objects.property(OperationIdStrategy.class).convention(ext.getOperationIdStrategy());
+        duplicateOperationIdBehavior = objects.property(DuplicateOperationIdBehavior.class);
         scanProfiles = objects.setProperty(String.class).convention(ext.getScanProfiles());
         scanExcludeProfiles = objects.setProperty(String.class).convention(ext.scanExcludeProfiles);
         encoding = objects.property(String.class).convention(ext.encoding);
@@ -238,6 +242,11 @@ class Configs {
             @Override
             public OperationIdStrategy getOperationIdStrategy() {
                 return operationIdStrategy.getOrNull();
+            }
+
+            @Override
+            public DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
+                return duplicateOperationIdBehavior.getOrElse(OpenApiConfig.DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT);
             }
 
             @Override

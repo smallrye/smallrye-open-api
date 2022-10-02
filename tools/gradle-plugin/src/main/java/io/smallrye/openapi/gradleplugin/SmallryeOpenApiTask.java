@@ -48,6 +48,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.jandex.IndexView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
@@ -524,6 +525,13 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     @Override
     public Property<OperationIdStrategy> getOperationIdStrategy() {
         return properties.operationIdStrategy;
+    }
+
+    @Input
+    @Optional
+    @Override
+    public Property<DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior() {
+        return properties.duplicateOperationIdBehavior;
     }
 
     @Input

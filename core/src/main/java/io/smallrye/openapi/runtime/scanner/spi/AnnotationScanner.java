@@ -40,6 +40,7 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
+import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
@@ -336,6 +337,26 @@ public interface AnnotationScanner {
             }
 
             operation.setOperationId(operationId);
+        }
+
+        // validate operationId
+        String operationId = operation.getOperationId();
+        if (operationId != null) {
+            final MethodInfo conflictingMethod = context.getOperationIdMap().putIfAbsent(operationId, method);
+            if (conflictingMethod != null) {
+                final ClassInfo conflictingClass = conflictingMethod.declaringClass();
+                final String className = resourceClass.name().toString();
+                final String methodName = method.toString();
+                final String conflictingClassName = conflictingClass.name().toString();
+                final String conflictingMethodName = conflictingMethod.toString();
+                if (context.getConfig().getDuplicateOperationIdBehavior() == DuplicateOperationIdBehavior.WARN) {
+                    ScannerSPILogging.log.duplicateOperationId(operationId, className, methodName,
+                            conflictingClassName, conflictingMethodName);
+                } else {
+                    throw ScannerSPIMessages.msg.duplicateOperationId(operationId, className, methodName,
+                            conflictingClassName, conflictingMethodName);
+                }
+            }
         }
 
         return Optional.of(operation);

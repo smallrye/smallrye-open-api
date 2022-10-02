@@ -150,6 +150,13 @@ public class MavenConfig implements OpenApiConfig {
     }
 
     @Override
+    public DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
+        String behavior = properties.getOrDefault(OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR,
+                OpenApiConfig.DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT.name());
+        return DuplicateOperationIdBehavior.valueOf(behavior);
+    }
+
+    @Override
     public Set<String> getScanProfiles() {
         return asCsvSet(properties.getOrDefault(OpenApiConstants.SCAN_PROFILES, null));
     }

@@ -6,6 +6,7 @@ import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 
+import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 
 public interface SmallryeOpenApiProperties {
@@ -121,6 +122,11 @@ public interface SmallryeOpenApiProperties {
      * risk of collisions between operations.
      */
     Property<OperationIdStrategy> getOperationIdStrategy();
+
+    /**
+     * Configuration property to specify what should happen if duplicate operationIds occur.
+     */
+    Property<DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior();
 
     /**
      * Profiles which explicitly include operations. Any operation without a matching profile is

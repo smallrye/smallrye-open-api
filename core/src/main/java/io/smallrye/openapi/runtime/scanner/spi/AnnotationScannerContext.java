@@ -3,14 +3,17 @@ package io.smallrye.openapi.runtime.scanner.spi;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -41,6 +44,8 @@ public class AnnotationScannerContext {
     private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
     private final Optional<BeanValidationScanner> beanValidationScanner;
     private final Set<Type> jsonViews = new LinkedHashSet<>();
+
+    private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
     public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
@@ -113,5 +118,9 @@ public class AnnotationScannerContext {
 
     public Set<Type> getJsonViews() {
         return jsonViews;
+    }
+
+    public Map<String, MethodInfo> getOperationIdMap() {
+        return operationIdMap;
     }
 }
