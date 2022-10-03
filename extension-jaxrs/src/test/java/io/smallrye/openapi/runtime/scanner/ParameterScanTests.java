@@ -442,4 +442,10 @@ class ParameterScanTests extends IndexScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.BaseGenericResource.GenericBean.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.IntegerStringUUIDResource.class);
     }
+
+    @Test
+    void testPreferredParameterOrderWithAnnotation() throws IOException, JSONException {
+        test("params.annotation-preferred-order.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterOrderResource.CLASSES);
+    }
 }
