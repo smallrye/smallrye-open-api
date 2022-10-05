@@ -37,7 +37,7 @@
         <groupId.resteasy.client>org.jboss.resteasy.microprofile</groupId.resteasy.client>
         <artifactId.resteasy.client>microprofile-rest-client</artifactId.resteasy.client>
         <version.resteasy.client>2.0.0.Final</version.resteasy.client>
-        <version.quarkus>2.13.0.Final</version.quarkus>
+        <version.quarkus>2.13.1.Final</version.quarkus>
         <version.testng>7.4.0</version.testng>
 
         <!--
