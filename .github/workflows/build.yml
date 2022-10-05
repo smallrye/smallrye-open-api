@@ -139,4 +139,4 @@ jobs:
         name: tck-report
         with:
           name: "tck-report-${{ matrix.tck-version }}"
-          path: "testsuite/tck/target/surefire-reports/emailable-report.html"
+          path: "testsuite/tck/target/surefire-reports/microprofile-openapi-tck-report.html"
