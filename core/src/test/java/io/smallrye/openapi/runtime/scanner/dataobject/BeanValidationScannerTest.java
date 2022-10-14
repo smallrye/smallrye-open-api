@@ -151,7 +151,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = targetField.name();
 
-        testTarget.notNull(targetField, schema, propertyKey, requirementHandler(parentSchema));
+        testTarget.notNull(targetField, propertyKey, requirementHandler(parentSchema));
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
@@ -177,7 +177,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = targetField.name();
 
-        testTarget.notNull(targetField, schema, propertyKey, requirementHandlerFail());
+        testTarget.notNull(targetField, propertyKey, requirementHandlerFail());
         testTarget.sizeArray(targetField, schema);
         testTarget.notEmptyArray(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
@@ -207,7 +207,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = targetField.name();
 
-        testTarget.notNull(targetField, schema, propertyKey, requirementHandler(parentSchema));
+        testTarget.notNull(targetField, propertyKey, requirementHandler(parentSchema));
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
@@ -235,7 +235,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = targetField.name();
 
-        testTarget.notNull(targetField, schema, propertyKey, requirementHandlerFail());
+        testTarget.notNull(targetField, propertyKey, requirementHandlerFail());
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
@@ -261,7 +261,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = new SchemaImpl();
         String propertyKey = targetField.name();
 
-        testTarget.notNull(targetField, schema, propertyKey, requirementHandlerFail());
+        testTarget.notNull(targetField, propertyKey, requirementHandlerFail());
         testTarget.sizeObject(targetField, schema);
         testTarget.notEmptyObject(targetField, schema, propertyKey, requirementHandlerFail());
 
@@ -646,7 +646,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         String propertyKey = targetField.name();
 
         testTarget.notBlank(targetField, schema, propertyKey, requirementHandler(parentSchema));
-        testTarget.notNull(targetField, schema, propertyKey, requirementHandler(parentSchema));
+        testTarget.notNull(targetField, propertyKey, requirementHandler(parentSchema));
 
         assertEquals("\\S", schema.getPattern());
         assertNull(schema.getNullable());

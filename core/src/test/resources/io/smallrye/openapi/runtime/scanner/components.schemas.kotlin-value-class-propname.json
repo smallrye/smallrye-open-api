@@ -3,13 +3,21 @@
   "components": {
     "schemas": {
       "KotlinBean": {
+        "required": [
+          "description"
+        ],
         "type": "object",
         "properties": {
           "id": {
             "format": "int64",
-            "type": "integer"
+            "type": "integer",
+            "nullable": true
           },
           "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
             "type": "string"
           }
         }

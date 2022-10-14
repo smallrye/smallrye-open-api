@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI UI</name>
 
     <properties>
-        <swagger-ui.version>4.14.0</swagger-ui.version>
+        <swagger-ui.version>4.14.3</swagger-ui.version>
         <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
         <path.swagger-ui>openapi-ui</path.swagger-ui>
         <sonar.skip>true</sonar.skip>

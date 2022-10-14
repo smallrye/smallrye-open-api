@@ -6,76 +6,17 @@
         "summary": "Return all policies for a given account",
         "parameters": [
           {
-            "name": "filter:op[description]",
+            "name": "offset",
             "in": "query",
-            "description": "Operations used with the filter",
+            "description": "Page number, starts 0, if not specified uses 0.",
             "schema": {
-              "default": "equal",
-              "enum": [
-                "equal",
-                "like",
-                "ilike",
-                "not_equal"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter:op[name]",
-            "in": "query",
-            "description": "Operations used with the filter",
-            "schema": {
-              "default": "equal",
-              "enum": [
-                "equal",
-                "like",
-                "ilike",
-                "not_equal"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[description]",
-            "in": "query",
-            "description": "Filtering policies by the description depending on the Filter operator used.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[is_enabled]",
-            "in": "query",
-            "description": "Filtering policies by the is_enabled field.Defaults to true if no operand is given.",
-            "schema": {
-              "default": true,
-              "enum": [
-                true,
-                false
-              ],
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "filter[name]",
-            "in": "query",
-            "description": "Filtering policies by the name depending on the Filter operator used.",
-            "schema": {
-              "type": "string"
+              "type": "integer"
             }
           },
           {
             "name": "limit",
             "in": "query",
             "description": "Number of items per page, if not specified uses 10. NO_LIMIT can be used to specify an unlimited page, when specified it ignores the offset",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "description": "Page number, starts 0, if not specified uses 0.",
             "schema": {
               "type": "integer"
             }
@@ -104,6 +45,65 @@
                 "desc"
               ],
               "type": "string"
+            }
+          },
+          {
+            "name": "filter[name]",
+            "in": "query",
+            "description": "Filtering policies by the name depending on the Filter operator used.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter:op[name]",
+            "in": "query",
+            "description": "Operations used with the filter",
+            "schema": {
+              "default": "equal",
+              "enum": [
+                "equal",
+                "like",
+                "ilike",
+                "not_equal"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[description]",
+            "in": "query",
+            "description": "Filtering policies by the description depending on the Filter operator used.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter:op[description]",
+            "in": "query",
+            "description": "Operations used with the filter",
+            "schema": {
+              "default": "equal",
+              "enum": [
+                "equal",
+                "like",
+                "ilike",
+                "not_equal"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[is_enabled]",
+            "in": "query",
+            "description": "Filtering policies by the is_enabled field.Defaults to true if no operand is given.",
+            "schema": {
+              "default": true,
+              "enum": [
+                true,
+                false
+              ],
+              "type": "boolean"
             }
           },
           {

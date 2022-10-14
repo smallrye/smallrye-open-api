@@ -18,7 +18,7 @@
 
     <properties>
         <version.buildhelper.plugin>3.3.0</version.buildhelper.plugin>
-        <jackson-bom.version>2.13.3</jackson-bom.version>
+        <jackson-bom.version>2.13.4</jackson-bom.version>
         <version.eclipse.microprofile.config>2.0.1</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.0.1</version.io.smallrye.jandex>
         <version.io.smallrye.smallrye-config>2.10.1</version.io.smallrye.smallrye-config>
@@ -37,7 +37,7 @@
         <groupId.resteasy.client>org.jboss.resteasy</groupId.resteasy.client>
         <artifactId.resteasy.client>resteasy-client-microprofile</artifactId.resteasy.client>
         <version.resteasy.client>4.7.6.Final</version.resteasy.client>
-        <version.quarkus>2.12.0.Final</version.quarkus>
+        <version.quarkus>2.13.1.Final</version.quarkus>
         <version.testng>6.14.3</version.testng>
 
         <!--

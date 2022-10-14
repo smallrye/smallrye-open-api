@@ -19,6 +19,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
+import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -100,6 +101,10 @@ public class BeanValidationScanner {
     // Jackson Constraints
     static final DotName JACKSON_JSONPROPERTY = createConstraintName(JacksonConstants.JSON_PROPERTY);
 
+    // Kotlin Constraints
+    static final DotName KOTLIN_NULLABLE = createConstraintName(KotlinConstants.JETBRAINS_NULLABLE);
+    static final DotName KOTLIN_NOT_NULL = createConstraintName(KotlinConstants.JETBRAINS_NOT_NULL);
+
     static DotName createConstraintName(DotName packageName, String className) {
         return createConstraintName(createComponentized(packageName, className));
     }
@@ -175,8 +180,7 @@ public class BeanValidationScanner {
                 applyArrayConstraints(target, schema, propertyKey, handler);
                 break;
             case BOOLEAN:
-                INSTANCE.notNull(target, schema, propertyKey, handler);
-                INSTANCE.requiredJackson(target, propertyKey, handler);
+                applyBooleanConstraints(target, schema, propertyKey, handler);
                 break;
             case INTEGER:
                 applyNumberConstraints(target, schema, propertyKey, handler);
@@ -202,7 +206,9 @@ public class BeanValidationScanner {
         INSTANCE.pattern(target, schema);
         INSTANCE.digits(target, schema);
         INSTANCE.notBlank(target, schema, propertyKey, handler);
-        INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.notNull(target, propertyKey, handler);
+        INSTANCE.notNullKotlin(target, propertyKey, handler);
+        INSTANCE.nullableKotlin(target, schema);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeString(target, schema);
         INSTANCE.notEmptyString(target, schema, propertyKey, handler);
@@ -212,7 +218,9 @@ public class BeanValidationScanner {
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.notNull(target, propertyKey, handler);
+        INSTANCE.notNullKotlin(target, propertyKey, handler);
+        INSTANCE.nullableKotlin(target, schema);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeObject(target, schema);
         INSTANCE.notEmptyObject(target, schema, propertyKey, handler);
@@ -222,7 +230,9 @@ public class BeanValidationScanner {
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
-        INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.notNull(target, propertyKey, handler);
+        INSTANCE.notNullKotlin(target, propertyKey, handler);
+        INSTANCE.nullableKotlin(target, schema);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.sizeArray(target, schema);
         INSTANCE.notEmptyArray(target, schema, propertyKey, handler);
@@ -239,10 +249,22 @@ public class BeanValidationScanner {
         INSTANCE.min(target, schema);
         INSTANCE.negative(target, schema);
         INSTANCE.negativeOrZero(target, schema);
-        INSTANCE.notNull(target, schema, propertyKey, handler);
+        INSTANCE.notNull(target, propertyKey, handler);
+        INSTANCE.notNullKotlin(target, propertyKey, handler);
+        INSTANCE.nullableKotlin(target, schema);
         INSTANCE.requiredJackson(target, propertyKey, handler);
         INSTANCE.positive(target, schema);
         INSTANCE.positiveOrZero(target, schema);
+    }
+
+    private static void applyBooleanConstraints(AnnotationTarget target,
+            Schema schema,
+            String propertyKey,
+            RequirementHandler handler) {
+        INSTANCE.notNull(target, propertyKey, handler);
+        INSTANCE.notNullKotlin(target, propertyKey, handler);
+        INSTANCE.nullableKotlin(target, schema);
+        INSTANCE.requiredJackson(target, propertyKey, handler);
     }
 
     void decimalMax(AnnotationTarget target, Schema schema) {
@@ -417,11 +439,23 @@ public class BeanValidationScanner {
         }
     }
 
-    void notNull(AnnotationTarget target, Schema schema, String propertyKey, RequirementHandler handler) {
+    void notNull(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_NULL);
 
         if (constraint != null) {
             handler.setRequired(target, propertyKey);
+        }
+    }
+
+    void notNullKotlin(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
+        if (TypeUtil.hasAnnotation(target, KOTLIN_NOT_NULL)) {
+            handler.setRequired(target, propertyKey);
+        }
+    }
+
+    void nullableKotlin(AnnotationTarget target, Schema schema) {
+        if (TypeUtil.hasAnnotation(target, KOTLIN_NULLABLE) && schema.getNullable() == null) {
+            schema.setNullable(Boolean.TRUE);
         }
     }
 

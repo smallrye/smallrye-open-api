@@ -1,0 +1,109 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Parameter Order",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/1": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/namespace"
+          },
+          {
+            "$ref": "#/components/parameters/collection"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          },
+          {
+            "$ref": "#/components/parameters/fields"
+          },
+          {
+            "name": "page-size",
+            "in": "query",
+            "description": "The max number of results to return.",
+            "schema": {
+              "format": "int32",
+              "default": 3,
+              "maximum": 20,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/page-state"
+          },
+          {
+            "$ref": "#/components/parameters/profile"
+          },
+          {
+            "$ref": "#/components/parameters/raw"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "collection": {
+        "name": "collection",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "fields": {
+        "name": "fields",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "namespace": {
+        "name": "namespace",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "page-state": {
+        "name": "page-state",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "profile": {
+        "name": "profile",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "raw": {
+        "name": "raw",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "where": {
+        "name": "where",
+        "schema": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

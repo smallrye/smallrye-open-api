@@ -5,20 +5,20 @@
       "get": {
         "parameters": [
           {
+            "name": "X-Custom-Header",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "default": "000"
-            }
-          },
-          {
-            "name": "X-Custom-Header",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
             }
           }
         ],

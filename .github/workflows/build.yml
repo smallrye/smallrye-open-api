@@ -72,6 +72,7 @@ jobs:
           name: target
           path: |
             **/target/
+            !**/target/site/apidocs/**/*
             !**/target/node/**/*
             !**/target/**/*.jar
             !**/target/**/*.war

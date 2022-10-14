@@ -12,6 +12,12 @@ public class KotlinConstants {
     public static final DotName CONTINUATION = DotName
             .createSimple("kotlin.coroutines.Continuation");
 
+    public static final DotName JETBRAINS_NULLABLE = DotName
+            .createSimple("org.jetbrains.annotations.Nullable");
+
+    public static final DotName JETBRAINS_NOT_NULL = DotName
+            .createSimple("org.jetbrains.annotations.NotNull");
+
     private KotlinConstants() {
     }
 }
