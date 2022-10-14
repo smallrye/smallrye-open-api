@@ -40,4 +40,4 @@ mvn versions:update-property -Dproperty=version.jetty -DnewVersion=[11.0.7] -N
 mvn versions:set-property -Dproperty=version.resteasy -DnewVersion=6.0.0.Final -N
 mvn versions:set-property -Dproperty=groupId.resteasy.client -DnewVersion=org.jboss.resteasy.microprofile -N
 mvn versions:set-property -Dproperty=artifactId.resteasy.client -DnewVersion=microprofile-rest-client -N
-mvn versions:set-property -Dproperty=version.resteasy.client -DnewVersion=2.0.0.Beta1 -N
+mvn versions:set-property -Dproperty=version.resteasy.client -DnewVersion=2.0.0.Final -N
