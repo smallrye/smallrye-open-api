@@ -30,6 +30,13 @@ jobs:
         with:
           java-version: 11
 
+      - name: maven cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
       - name: maven release ${{steps.metadata.outputs.current-version}}
         run: |
           java -version
@@ -65,3 +72,68 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           milestone-title: ${{steps.metadata.outputs.current-version}}
+
+  tck-reporting:
+    runs-on: ubuntu-latest
+    needs: release
+
+    strategy:
+      matrix:
+        include:
+        - tck-version: "2.0.1"
+          testng-version: "6.14.3"
+          default-properties: false
+        - tck-version: "3.0"
+          testng-version: "6.14.3"
+          default-properties: false
+        - tck-version: "3.1"
+          default-properties: true
+
+    name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
+    steps:
+      - uses: radcortez/project-metadata-action@main
+        name: retrieve project metadata
+        id: metadata
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          metadata-file-path: '.github/project.yml'
+
+      - uses: actions/checkout@v2
+        name: checkout
+        with:
+          ref: ${{ steps.metadata.outputs.current-version }}
+
+      - uses: actions/setup-java@v1.4.3
+        name: set up jdk
+        with:
+          java-version: 11
+
+      - name: maven cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: build with maven
+        run: mvn -B -pl 'core,extension-jaxrs,testsuite/data,testsuite/tck' install -DskipTests
+
+      - name: execute specific tck
+        if: ${{ matrix.default-properties == false }}
+        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }} -Dversion.testng=${{ matrix.testng-version }}
+
+      - name: execute default tck
+        if: ${{ matrix.default-properties == true }}
+        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD)
+
+      - name: stage tck report
+        run: mv testsuite/tck/target/surefire-reports/microprofile-openapi-tck-report.html ./microprofile-openapi-tck-report-${{ matrix.tck-version }}.html
+
+      - uses: meeDamian/github-release@2.0
+        name: upload tck asset to release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.metadata.outputs.current-version }}
+          allow_override: true
+          gzip: false
+          files: microprofile-openapi-tck-report-${{ matrix.tck-version }}.html

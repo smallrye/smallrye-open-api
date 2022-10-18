@@ -129,11 +129,11 @@ jobs:
 
       - name: execute specific tck
         if: ${{ matrix.default-properties == false }}
-        run: mvn -B test -f testsuite/tck/pom.xml -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }} -Dversion.testng=${{ matrix.testng-version }}
+        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }} -Dversion.testng=${{ matrix.testng-version }}
 
       - name: execute default tck
         if: ${{ matrix.default-properties == true }}
-        run: mvn -B test -f testsuite/tck/pom.xml
+        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD)
 
       - uses: actions/upload-artifact@v2
         name: tck-report

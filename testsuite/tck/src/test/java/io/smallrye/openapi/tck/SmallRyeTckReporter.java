@@ -32,6 +32,7 @@ import org.testng.xml.XmlSuite.ParallelMode;
 public class SmallRyeTckReporter implements IReporter {
 
     private static final Logger LOG = Logger.getLogger(SmallRyeTckReporter.class);
+    private static final String SPEC_TEMPLATE = "https://download.eclipse.org/microprofile/microprofile-open-api-%1$s/microprofile-openapi-spec-%1$s.html";
 
     protected PrintWriter writer;
 
@@ -118,11 +119,39 @@ public class SmallRyeTckReporter implements IReporter {
     }
 
     protected void writeBody() {
+        final String mpVersion = System.getProperty("microprofile.version");
+        final String srVersion = System.getProperty("smallrye.version");
+        final String srCommit = System.getProperty("smallrye.commit");
+
         writer.println("<body>");
         writer.println("<div class=\"content\">");
         writer.printf("<img style=\"height: 4em;\" alt=\"SmallRye\" src=\"%s\">\n", SMALLRYE_LOGO);
-        writer.printf("<h1>SmallRye OpenAPI %s</h1>\n", System.getProperty("smallrye.version"));
-        writer.printf("<h2>MicroProfile OpenAPI %s TCK Test Report</h2>\n", System.getProperty("microprofile.version"));
+        writer.printf("<h1>SmallRye OpenAPI %s</h1>\n", srVersion);
+        writer.printf("<h2>MicroProfile OpenAPI %s TCK Test Report</h2>\n", mpVersion);
+
+        writer.println("<hr/>");
+        writer.println("<h3>Certification Summary</h3>");
+        writer.println("<ul>");
+
+        writer.println("<li>Product Name and Version:");
+        writer.printf("<p>SmallRye OpenAPI %s (commit %s)</p>\n", srVersion, srCommit);
+        writer.println("</li>");
+
+        writer.println("<li>Specification Name, Version and download URL:");
+        writer.printf("<p><a href=\"%s\">MicroProfile OpenAPI %s</a></p>\n", String.format(SPEC_TEMPLATE, mpVersion),
+                mpVersion);
+        writer.println("</li>");
+
+        writer.println("<li>Java runtime used to run the implementation:");
+        writer.printf("<p>Java %s: %s</p>\n", System.getProperty("java.version"), System.getProperty("java.vendor"));
+        writer.println("</li>");
+
+        writer.println("<li>Summary of the information for the certification environment:");
+        writer.printf("<p>%s %s %s</p>\n", System.getProperty("os.name"), System.getProperty("os.arch"),
+                System.getProperty("os.version"));
+        writer.println("</li>");
+
+        writer.println("</ul>");
 
         writer.println("<h3>Suite Summary</h3>");
         writeSuiteSummary();
