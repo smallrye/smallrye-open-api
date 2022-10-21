@@ -10,7 +10,6 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
         url = uri("file:./target/dependencies")
