@@ -29,7 +29,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
     @Test
     void testBasicGetRouteDefinitionScanning() throws IOException, JSONException {
         Index i = indexOf(GreetingGetRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -46,7 +46,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
     @Test
     void testBasicPostRouteDefinitionScanning() throws IOException, JSONException {
         Index i = indexOf(GreetingPostRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -63,7 +63,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
     @Test
     void testBasicPutRouteDefinitionScanning() throws IOException, JSONException {
         Index i = indexOf(GreetingPutRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
 
         OpenAPI result = scanner.scan();
 
@@ -80,7 +80,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
     @Test
     void testBasicDeleteRouteDefinitionScanning() throws IOException, JSONException {
         Index i = indexOf(GreetingDeleteRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
 
         OpenAPI result = scanner.scan();
 

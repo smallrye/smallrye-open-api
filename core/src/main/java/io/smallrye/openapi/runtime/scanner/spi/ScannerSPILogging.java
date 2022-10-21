@@ -21,4 +21,8 @@ interface ScannerSPILogging { // NOSONAR (use of constants in an interface)
     @Message(id = 7902, value = "@Parameter annotation missing %s parameter. Class: %s, Method: %s, Parameter.name: %s, Parameter.in: %s")
     void missingFrameworkParam(String frameworkName, String className, String method, String paramName, String paramIn);
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 7903, value = "Duplicate operationId: %s produced by Class: %s, Method: %s and Class: %s, Method: %s")
+    void duplicateOperationId(String operationId, String className, String method, String conflictingClassName,
+            String conflictingMethod);
 }

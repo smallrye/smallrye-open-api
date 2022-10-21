@@ -1,8 +1,8 @@
 package io.smallrye.openapi.vertx;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -120,7 +120,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         // Get all Vert.x routes and convert them to OpenAPI models (and merge them into a single one)
         Collection<AnnotationInstance> routeAnnotations = context.getIndex()
                 .getAnnotations(VertxConstants.ROUTE);
-        List<ClassInfo> applications = new ArrayList<>();
+        Set<ClassInfo> applications = new LinkedHashSet<>();
         for (AnnotationInstance annotationInstance : routeAnnotations) {
             if (annotationInstance.target().kind().equals(AnnotationTarget.Kind.METHOD)) {
                 ClassInfo classInfo = annotationInstance.target().asMethod().declaringClass();

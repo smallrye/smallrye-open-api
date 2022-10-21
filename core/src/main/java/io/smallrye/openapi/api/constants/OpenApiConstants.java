@@ -58,6 +58,7 @@ public final class OpenApiConstants {
     public static final String INFO_LICENSE_NAME = SMALLRYE_PREFIX + "info.license.name";
     public static final String INFO_LICENSE_URL = SMALLRYE_PREFIX + "info.license.url";
     public static final String OPERATION_ID_STRAGEGY = SMALLRYE_PREFIX + "operationIdStrategy";
+    public static final String DUPLICATE_OPERATION_ID_BEHAVIOR = SMALLRYE_PREFIX + "duplicateOperationIdBehavior";
     public static final String DEFAULT_PRODUCES = SMALLRYE_PREFIX + "defaultProduces";
     public static final String DEFAULT_CONSUMES = SMALLRYE_PREFIX + "defaultConsumes";
 

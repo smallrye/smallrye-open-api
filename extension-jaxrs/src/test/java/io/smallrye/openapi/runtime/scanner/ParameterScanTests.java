@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,7 +15,12 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexReader;
 import org.jboss.jandex.IndexWriter;
 import org.json.JSONException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import io.smallrye.openapi.api.OpenApiConfig;
+import test.io.smallrye.openapi.runtime.scanner.Widget;
+import test.io.smallrye.openapi.runtime.scanner.jakarta.MultipleContentTypesWithFormParamsTestResource;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -23,6 +30,16 @@ class ParameterScanTests extends IndexScannerTestBase {
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals(expectedResource, result);
+        verifyMethodAndParamRefsPresent(result);
+    }
+
+    private static void test(OpenApiConfig config, String expectedResource, Class<?>... classes)
+            throws IOException, JSONException {
+        Index index = indexOf(classes);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
@@ -132,6 +149,23 @@ class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
+    void testFailOnDuplicateOperationIds() {
+        final OpenApiConfig config = failOnDuplicateOperationIdsConfig();
+        final IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> test(config, "params.multiple-content-types-with-form-params.json",
+                        MultipleContentTypesWithFormParamsTestResource.class, Widget.class));
+        assertStartsWith(exception.getMessage(), "SROAP07950: Duplicate operationId:", "Exception message");
+    }
+
+    private static void assertStartsWith(String actual, String expectedStart, String description) {
+        final boolean condition = actual != null && actual.startsWith(expectedStart);
+        if (!condition) {
+            Assertions
+                    .fail(String.format("%s is expected to start with: <%s> but was <%s>", description, expectedStart, actual));
+        }
+    }
+
+    @Test
     void testJavaxParametersInConstructor() throws IOException, JSONException {
         test("params.parameters-in-constructor.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ParametersInConstructorTestResource.class,
@@ -191,8 +225,7 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxAllTheParams() throws IOException, JSONException {
-        test("params.all-the-params.json",
-                test.io.smallrye.openapi.runtime.scanner.javax.AllTheParamsTestResource.class,
+        test("params.all-the-params.json", test.io.smallrye.openapi.runtime.scanner.javax.AllTheParamsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.AllTheParamsTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
         test("params.all-the-params.json",
@@ -203,8 +236,7 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJakartaAllTheParams() throws IOException, JSONException {
-        test("params.all-the-params.json",
-                test.io.smallrye.openapi.runtime.scanner.jakarta.AllTheParamsTestResource.class,
+        test("params.all-the-params.json", test.io.smallrye.openapi.runtime.scanner.jakarta.AllTheParamsTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.AllTheParamsTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
         test("params.all-the-params.json",
@@ -215,34 +247,28 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxMultipartForm() throws IOException, JSONException {
-        test("params.multipart-form.json",
-                test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormTestResource.class,
+        test("params.multipart-form.json", test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.MultipartFormTestResource.Bean.class,
-                test.io.smallrye.openapi.runtime.scanner.Widget.class,
-                InputStream.class);
+                test.io.smallrye.openapi.runtime.scanner.Widget.class, InputStream.class);
     }
 
     @Test
     void testJakartaMultipartForm() throws IOException, JSONException {
-        test("params.multipart-form.json",
-                test.io.smallrye.openapi.runtime.scanner.jakarta.MultipartFormTestResource.class,
+        test("params.multipart-form.json", test.io.smallrye.openapi.runtime.scanner.jakarta.MultipartFormTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.MultipartFormTestResource.Bean.class,
-                test.io.smallrye.openapi.runtime.scanner.Widget.class,
-                InputStream.class);
+                test.io.smallrye.openapi.runtime.scanner.Widget.class, InputStream.class);
     }
 
     @Test
     void testJavaxEnumQueryParam() throws IOException, JSONException {
-        test("params.enum-form-param.json",
-                test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.class,
+        test("params.enum-form-param.json", test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.TestEnum.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.EnumQueryParamTestResource.TestEnumWithSchema.class);
     }
 
     @Test
     void testJakartaEnumQueryParam() throws IOException, JSONException {
-        test("params.enum-form-param.json",
-                test.io.smallrye.openapi.runtime.scanner.jakarta.EnumQueryParamTestResource.class,
+        test("params.enum-form-param.json", test.io.smallrye.openapi.runtime.scanner.jakarta.EnumQueryParamTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.EnumQueryParamTestResource.TestEnum.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.EnumQueryParamTestResource.TestEnumWithSchema.class);
     }
@@ -289,26 +315,20 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxOptionalParam() throws IOException, JSONException {
-        test("params.optional-types.json",
-                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.class,
+        test("params.optional-types.json", test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.NestedBean.class,
-                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.OptionalWrapper.class,
-                Optional.class,
-                OptionalDouble.class,
-                OptionalLong.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.OptionalParamTestResource.OptionalWrapper.class, Optional.class,
+                OptionalDouble.class, OptionalLong.class);
     }
 
     @Test
     void testJakartaOptionalParam() throws IOException, JSONException {
-        test("params.optional-types.json",
-                test.io.smallrye.openapi.runtime.scanner.jakarta.OptionalParamTestResource.class,
+        test("params.optional-types.json", test.io.smallrye.openapi.runtime.scanner.jakarta.OptionalParamTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.OptionalParamTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.OptionalParamTestResource.NestedBean.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.OptionalParamTestResource.OptionalWrapper.class,
-                Optional.class,
-                OptionalDouble.class,
-                OptionalLong.class);
+                Optional.class, OptionalDouble.class, OptionalLong.class);
     }
 
     @Test

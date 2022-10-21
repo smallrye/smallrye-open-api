@@ -53,6 +53,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private String infoLicenseName;
     private String infoLicenseUrl;
     private OperationIdStrategy operationIdStrategy;
+    private DuplicateOperationIdBehavior duplicateOperationIdBehavior;
     private Set<String> scanProfiles;
     private Set<String> scanExcludeProfiles;
     private Boolean removeUnusedSchemas;
@@ -403,6 +404,18 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             }
         }
         return null;
+    }
+
+    @Override
+    public DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
+        if (duplicateOperationIdBehavior == null) {
+            duplicateOperationIdBehavior = getConfig()
+                    .getOptionalValue(OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR, String.class)
+                    .map(DuplicateOperationIdBehavior::valueOf)
+                    .orElseGet(OpenApiConfig.super::getDuplicateOperationIdBehavior);
+
+        }
+        return duplicateOperationIdBehavior;
     }
 
     @Override

@@ -21,6 +21,8 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  */
 public interface OpenApiConfig {
 
+    DuplicateOperationIdBehavior DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT = DuplicateOperationIdBehavior.WARN;
+
     default String modelReader() {
         return null;
     }
@@ -146,6 +148,10 @@ public interface OpenApiConfig {
         return null;
     }
 
+    default DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
+        return DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT;
+    }
+
     default Optional<String[]> getDefaultProduces() {
         return Optional.empty();
     }
@@ -177,6 +183,11 @@ public interface OpenApiConfig {
         METHOD,
         CLASS_METHOD,
         PACKAGE_CLASS_METHOD
+    }
+
+    enum DuplicateOperationIdBehavior {
+        FAIL,
+        WARN
     }
 
     default Pattern patternOf(String configValue) {

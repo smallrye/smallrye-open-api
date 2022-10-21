@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static io.smallrye.openapi.api.constants.OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -202,6 +204,10 @@ public class IndexScannerTestBase {
         Map<String, Object> config = new HashMap<>(1);
         config.put(key, value);
         return dynamicConfig(config);
+    }
+
+    public static OpenApiConfig failOnDuplicateOperationIdsConfig() {
+        return dynamicConfig(DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.name());
     }
 
     @SuppressWarnings("unchecked")

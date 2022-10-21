@@ -1,3 +1,8 @@
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 plugins {
     `java-gradle-plugin`
     id("com.gradle.plugin-publish") version "1.0.0"
@@ -5,8 +10,10 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
+    maven {
+        url = uri("file:./target/dependencies")
+    }
 }
 
 dependencies {

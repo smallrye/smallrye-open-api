@@ -9,6 +9,7 @@ import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 
+import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 
 /**
@@ -153,6 +154,11 @@ public class SmallryeOpenApiExtension extends Configs implements SmallryeOpenApi
     @Override
     public Property<OperationIdStrategy> getOperationIdStrategy() {
         return operationIdStrategy;
+    }
+
+    @Override
+    public Property<DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior() {
+        return duplicateOperationIdBehavior;
     }
 
     @Override
