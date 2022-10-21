@@ -40,6 +40,28 @@
 
     <build>
         <plugins>
+            <!-- copy all dependencies to target/dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <useBaseVersion>true</useBaseVersion>
+                            <addParentPoms>true</addParentPoms>
+                            <copyPom>true</copyPom>
+                            <useRepositoryLayout>true</useRepositoryLayout>
+                            <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
