@@ -116,7 +116,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B -pl 'core,extension-jaxrs,testsuite/data,testsuite/tck' install -DskipTests
+        run: mvn -B -pl '!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
 
       - name: execute specific tck
         if: ${{ matrix.default-properties == false }}
