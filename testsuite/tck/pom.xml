@@ -33,12 +33,24 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <properties>
+            <property>
+              <name>suitename</name>
+              <value>MicroProfile OpenAPI TCK</value>
+            </property>
+            <property>
+              <name>reporter</name>
+              <value>io.smallrye.openapi.tck.SmallRyeTckReporter</value>
+            </property>
+          </properties>
           <dependenciesToScan>
             <dependency>org.eclipse.microprofile.openapi:microprofile-openapi-tck</dependency>
           </dependenciesToScan>
           <systemPropertyVariables>
             <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
             <test.url>http://localhost:8080</test.url>
+            <microprofile.version>${version.eclipse.microprofile.openapi}</microprofile.version>
+            <smallrye.version>${project.version}</smallrye.version>
           </systemPropertyVariables>
         </configuration>
       </plugin>
