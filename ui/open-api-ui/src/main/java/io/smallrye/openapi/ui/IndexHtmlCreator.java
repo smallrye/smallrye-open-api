@@ -68,38 +68,38 @@ public class IndexHtmlCreator {
                     String replacement = options.get(variableOption);
                     if (replacement == null) {
                         // Special case for oauth2RedirectUrl
-                        if (variableOption.equals("oauth2RedirectUrl")) {
-                            return "-";
+                        if (!variableOption.equals(Option.oauth2RedirectUrl)) {
+                            // You want to remove this line
+                            return null;
                         }
-                        // You want to remove this line
-                        return null;
-                    } else {
-                        // Some properties can be boolean or String, if String we need to add '
-                        replacement = replacement.trim();
-                        if (BOOLEAN_OR_STRING_KEYS.contains(variableOption)) {
-                            if (!replacement.equals("true") && !replacement.equals("false")) {
-                                replacement = "'" + replacement + "'";
-                            }
-                        }
-                        // Some properties can be a String or a function, if String we need to add '
-                        replacement = replacement.trim();
-                        if (STRING_OR_FUNCTION_KEYS.contains(variableOption)) {
-                            if (!replacement.startsWith("function")) {
-                                replacement = "'" + replacement + "'";
-                            }
-                        }
-                        // Some properties are string arrays, and we need to add the ' per element
-                        if (STRING_ARRAY_KEYS.contains(variableOption)) {
-                            List<String> newArray = new ArrayList<>();
-                            String[] parts = replacement.replace("[", "").replace("]", "").split(",");
-                            for (String part : parts) {
-                                newArray.add("'" + part.trim() + "'");
-                            }
-                            replacement = Arrays.toString(newArray.toArray(new String[] {}));
-                        }
-
-                        line = line.replace(VAR_BEGIN + variableOption + VAR_END, replacement);
+                        // Use a harmless default value for oauth2RedirectUrl.
+                        replacement = "-";
                     }
+                    // Some properties can be boolean or String, if String we need to add '
+                    replacement = replacement.trim();
+                    if (BOOLEAN_OR_STRING_KEYS.contains(variableOption)) {
+                        if (!replacement.equals("true") && !replacement.equals("false")) {
+                            replacement = "'" + replacement + "'";
+                        }
+                    }
+                    // Some properties can be a String or a function, if String we need to add '
+                    replacement = replacement.trim();
+                    if (STRING_OR_FUNCTION_KEYS.contains(variableOption)) {
+                        if (!replacement.startsWith("function")) {
+                            replacement = "'" + replacement + "'";
+                        }
+                    }
+                    // Some properties are string arrays, and we need to add the ' per element
+                    if (STRING_ARRAY_KEYS.contains(variableOption)) {
+                        List<String> newArray = new ArrayList<>();
+                        String[] parts = replacement.replace("[", "").replace("]", "").split(",");
+                        for (String part : parts) {
+                            newArray.add("'" + part.trim() + "'");
+                        }
+                        replacement = Arrays.toString(newArray.toArray(new String[] {}));
+                    }
+
+                    line = line.replace(VAR_BEGIN + variableOption + VAR_END, replacement);
                 }
                 // Check if there is more varibles
                 return replace(line, urls, urlsPrimaryName, options);

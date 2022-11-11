@@ -199,4 +199,16 @@ class IndexCreatorTest {
         assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
         assertTrue(s.contains("ui.preauthorizeBasic('basicAuth', 'username', 'password');"));
     }
+
+    @Test
+    void testOauth2RedirectReplacement() throws IOException {
+        String title = "Test Title";
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.title, title);
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+
+        String html = new String(indexHtml);
+
+        assertTrue(html.contains("var oar"), "Missing declaration of 'oar'");
+    }
 }
