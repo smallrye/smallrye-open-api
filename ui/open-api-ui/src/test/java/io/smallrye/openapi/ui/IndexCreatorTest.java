@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -198,5 +199,17 @@ class IndexCreatorTest {
         assertTrue(s.contains("ui.preauthorizeApiKey('api_key', 'abcde12345');"));
         assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
         assertTrue(s.contains("ui.preauthorizeBasic('basicAuth', 'username', 'password');"));
+    }
+
+    @Test
+    void testOauth2RedirectReplacement() throws IOException {
+        String title = "Test Title";
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.title, title);
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+
+        String html = new String(indexHtml);
+
+        assertTrue(html.contains("var oar"), "Missing declaration of 'oar'");
     }
 }
