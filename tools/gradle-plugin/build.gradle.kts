@@ -5,7 +5,7 @@ java {
 
 plugins {
     `java-gradle-plugin`
-    id("com.gradle.plugin-publish") version "1.0.0"
+    id("com.gradle.plugin-publish") version "1.1.0"
     id("com.github.vlsi.jandex") version "1.82"
 }
 
