@@ -25,7 +25,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
     testImplementation(gradleTestKit())
     testImplementation("org.assertj:assertj-core:3.23.1")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
 }
 
 gradlePlugin {
