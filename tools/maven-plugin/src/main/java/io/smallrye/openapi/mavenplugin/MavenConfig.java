@@ -1,5 +1,6 @@
 package io.smallrye.openapi.mavenplugin;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,18 +62,18 @@ public class MavenConfig implements OpenApiConfig {
     }
 
     @Override
-    public Set<String> servers() {
-        return asCsvSet(properties.getOrDefault(OASConfig.SERVERS, null));
+    public List<String> servers() {
+        return asCsvList(properties.getOrDefault(OASConfig.SERVERS, null));
     }
 
     @Override
-    public Set<String> pathServers(String path) {
-        return asCsvSet(properties.getOrDefault(OASConfig.SERVERS_PATH_PREFIX + path, null));
+    public List<String> pathServers(String path) {
+        return asCsvList(properties.getOrDefault(OASConfig.SERVERS_PATH_PREFIX + path, null));
     }
 
     @Override
-    public Set<String> operationServers(String operationId) {
-        return asCsvSet(properties.getOrDefault(OASConfig.SERVERS_OPERATION_PREFIX + operationId, null));
+    public List<String> operationServers(String operationId) {
+        return asCsvList(properties.getOrDefault(OASConfig.SERVERS_OPERATION_PREFIX + operationId, null));
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.smallrye.openapi.api;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Set<String> scanExcludePackages;
     private Set<String> scanExcludeClasses;
     private Boolean scanBeanValidation;
-    private Set<String> servers;
+    private List<String> servers;
     private Boolean scanDependenciesDisable;
     private Set<String> scanDependenciesJars;
     private Boolean arrayReferencesEnable;
@@ -183,10 +184,10 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#servers()
      */
     @Override
-    public Set<String> servers() {
+    public List<String> servers() {
         if (servers == null) {
             String theServers = getStringConfigValue(OASConfig.SERVERS);
-            servers = asCsvSet(theServers);
+            servers = asCsvList(theServers);
         }
         return servers;
     }
@@ -195,18 +196,18 @@ public class OpenApiConfigImpl implements OpenApiConfig {
      * @see io.smallrye.openapi.api.OpenApiConfig#pathServers(java.lang.String)
      */
     @Override
-    public Set<String> pathServers(String path) {
+    public List<String> pathServers(String path) {
         String pathServers = getStringConfigValue(OASConfig.SERVERS_PATH_PREFIX + path);
-        return asCsvSet(pathServers);
+        return asCsvList(pathServers);
     }
 
     /**
      * @see io.smallrye.openapi.api.OpenApiConfig#operationServers(java.lang.String)
      */
     @Override
-    public Set<String> operationServers(String operationId) {
+    public List<String> operationServers(String operationId) {
         String opServers = getStringConfigValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId);
-        return asCsvSet(opServers);
+        return asCsvList(opServers);
     }
 
     /**
