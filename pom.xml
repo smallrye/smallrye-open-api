@@ -96,17 +96,6 @@
               <enabled>true</enabled>
            </snapshots>
         </repository>
-        <repository>
-            <id>microprofile-3.1-staging</id>
-            <name>MicroProfile OpenAPI 3.1 - Sonatype OSS Staging</name>
-            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1611/</url>
-            <releases>
-               <enabled>true</enabled>
-            </releases>
-            <snapshots>
-              <enabled>false</enabled>
-           </snapshots>
-        </repository>
     </repositories>
 
     <dependencyManagement>
