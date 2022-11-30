@@ -5,6 +5,7 @@ import static java.util.Collections.emptySet;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.gradle.api.file.RegularFileProperty;
@@ -160,18 +161,18 @@ class Configs {
             }
 
             @Override
-            public Set<String> servers() {
-                return new HashSet<>(servers.getOrElse(emptyList()));
+            public List<String> servers() {
+                return servers.getOrElse(emptyList());
             }
 
             @Override
-            public Set<String> pathServers(String path) {
-                return asCsvSet(pathServers.getting(path).getOrNull());
+            public List<String> pathServers(String path) {
+                return asCsvList(pathServers.getting(path).getOrNull());
             }
 
             @Override
-            public Set<String> operationServers(String operationId) {
-                return asCsvSet(operationServers.getting(operationId).getOrNull());
+            public List<String> operationServers(String operationId) {
+                return asCsvList(operationServers.getting(operationId).getOrNull());
             }
 
             @Override

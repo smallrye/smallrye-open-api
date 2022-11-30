@@ -1,8 +1,8 @@
 package io.smallrye.openapi.api.util;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
@@ -85,7 +85,7 @@ public class ConfigUtil {
 
     protected static final void configureServers(OpenApiConfig config, OpenAPI oai) {
         // Start with the global servers.
-        Set<String> servers = config.servers();
+        List<String> servers = config.servers();
         if (servers != null && !servers.isEmpty()) {
             oai.servers(new ArrayList<>());
             for (String server : servers) {
@@ -114,7 +114,7 @@ public class ConfigUtil {
             return;
         }
 
-        Set<String> pathServers = config.pathServers(pathName);
+        List<String> pathServers = config.pathServers(pathName);
         if (pathServers != null && !pathServers.isEmpty()) {
             pathItem.servers(new ArrayList<>());
             for (String pathServer : pathServers) {
@@ -148,7 +148,7 @@ public class ConfigUtil {
             return;
         }
 
-        Set<String> operationServers = config.operationServers(operation.getOperationId());
+        List<String> operationServers = config.operationServers(operation.getOperationId());
         if (operationServers != null && !operationServers.isEmpty()) {
             operation.servers(new ArrayList<>());
             for (String operationServer : operationServers) {

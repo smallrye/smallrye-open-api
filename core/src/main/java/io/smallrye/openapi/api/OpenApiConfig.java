@@ -1,7 +1,9 @@
 package io.smallrye.openapi.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -55,16 +57,16 @@ public interface OpenApiConfig {
         return true;
     }
 
-    default Set<String> servers() {
-        return new HashSet<>();
+    default List<String> servers() {
+        return new ArrayList<>();
     }
 
-    default Set<String> pathServers(String path) {
-        return new HashSet<>();
+    default List<String> pathServers(String path) {
+        return new ArrayList<>();
     }
 
-    default Set<String> operationServers(String operationId) {
-        return new HashSet<>();
+    default List<String> operationServers(String operationId) {
+        return new ArrayList<>();
     }
 
     default boolean scanDependenciesDisable() {
@@ -216,6 +218,17 @@ public interface OpenApiConfig {
 
     default Set<String> asCsvSet(String items) {
         Set<String> rval = new HashSet<>();
+        if (items != null) {
+            String[] split = items.split(",");
+            for (String item : split) {
+                rval.add(item.trim());
+            }
+        }
+        return rval;
+    }
+
+    default List<String> asCsvList(String items) {
+        List<String> rval = new ArrayList<>();
         if (items != null) {
             String[] split = items.split(",");
             for (String item : split) {
