@@ -13,7 +13,7 @@ public final class VersionUtil {
     }
 
     static final String MP_VERSION = ModelUtil.supply(() -> {
-        try (InputStream pomProperties = VersionUtil.class.getResourceAsStream(
+        try (InputStream pomProperties = org.eclipse.microprofile.openapi.models.OpenAPI.class.getResourceAsStream(
                 "/META-INF/maven/org.eclipse.microprofile.openapi/microprofile-openapi-api/pom.properties")) {
             Properties p = new Properties();
             p.load(pomProperties);
