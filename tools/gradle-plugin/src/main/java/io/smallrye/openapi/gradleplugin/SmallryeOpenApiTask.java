@@ -111,7 +111,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
 
             Configuration config = configProvider.get();
 
-            PublishArtifactSet allArtifacts = properties.scanDependenciesDisable.get() ? config.getAllArtifacts() : null;
+            PublishArtifactSet allArtifacts = properties.scanDependenciesDisable.get() ? null : config.getAllArtifacts();
 
             IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(allArtifacts,
                     classesDirs);
