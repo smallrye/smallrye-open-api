@@ -6,11 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.ClassInfo;
@@ -696,5 +701,66 @@ class TypeResolverTests extends IndexScannerTestBase {
         assertEquals(first, keys.next());
         assertEquals(second, keys.next());
         assertEquals(third, keys.next());
+    }
+
+    static class TestForClassWithGenericInterfaceClasses {
+        static final Class<?>[] NESTED = {
+                Fruit.class,
+                FruitResource.class,
+                FruitResourceImpl.class,
+                Apple.class,
+                AppleResource.class,
+                AppleResourceImpl.class
+        };
+
+        abstract static class Fruit implements Serializable {
+            private static final long serialVersionUID = 1L;
+            Long id;
+        }
+
+        interface FruitResource<DTO extends Fruit> {
+            @GET
+            DTO get();
+        }
+
+        abstract static class FruitResourceImpl<DTO extends Fruit> implements FruitResource<DTO> {
+            @Override
+            public DTO get() {
+                return null;
+            }
+        }
+
+        static class Apple extends Fruit {
+            private static final long serialVersionUID = 1L;
+            String name;
+            String desc;
+        }
+
+        @Path("/rest/apple")
+        interface AppleResource extends FruitResource<Apple> {
+        }
+
+        @Path("/rest/apple")
+        @Tag(name = "AppleResource")
+        static class AppleResourceImpl extends FruitResourceImpl<Apple> implements AppleResource {
+        }
+    }
+
+    @Test
+    /*
+     * Issue: https://github.com/smallrye/smallrye-open-api/issues/1336
+     */
+    void testForClassWithGenericInterface() {
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        AnnotationScannerContext context = new AnnotationScannerContext(indexOf(TestForClassWithGenericInterfaceClasses.NESTED),
+                loader, emptyConfig());
+        ClassInfo leafKlazz = context.getIndex()
+                .getClassByName(componentize(TestForClassWithGenericInterfaceClasses.AppleResource.class.getName()));
+        Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
+        TypeResolver resolver = TypeResolver.forClass(context, leafKlazz, leaf);
+        Type resolved = resolver.resolve(context.getIndex()
+                .getClassByName(componentize(TestForClassWithGenericInterfaceClasses.FruitResource.class.getName()))
+                .method("get").returnType());
+        assertEquals(componentize(TestForClassWithGenericInterfaceClasses.Apple.class.getName()), resolved.name());
     }
 }

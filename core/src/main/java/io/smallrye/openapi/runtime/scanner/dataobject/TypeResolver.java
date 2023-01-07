@@ -28,7 +28,6 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
@@ -445,7 +444,7 @@ public class TypeResolver {
      * @return a new TypeResolver
      */
     public static TypeResolver forClass(AnnotationScannerContext context, ClassInfo clazz, Type leaf) {
-        final IndexView index = context.getAugmentedIndex();
+        final AugmentedIndexView index = context.getAugmentedIndex();
         Type clazzType = leaf != null ? leaf : Type.create(clazz.name(), Type.Kind.CLASS);
         Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, clazz, clazzType);
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
@@ -459,6 +458,15 @@ public class TypeResolver {
                 Map<String, Type> resMap = buildParamTypeResolutionMap(currentClass, currentType.asParameterizedType());
                 stack.push(resMap);
             }
+
+            // Add parameter type information from any interfaces implemented by this class/interface
+            JandexUtil.interfaces(index, currentClass)
+                    .stream()
+                    .filter(type -> type.kind() == Type.Kind.PARAMETERIZED_TYPE)
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
+                    .filter(index::containsClass)
+                    .map(type -> buildParamTypeResolutionMap(index.getClass(type), type.asParameterizedType()))
+                    .forEach(stack::push);
 
             if (allOfMatch || (!currentType.equals(clazzType) && TypeUtil.isIncludedAllOf(clazz, currentType))) {
                 allOfMatch = true;
