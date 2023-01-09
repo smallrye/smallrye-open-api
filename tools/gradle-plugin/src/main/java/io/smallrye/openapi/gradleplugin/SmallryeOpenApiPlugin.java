@@ -10,7 +10,7 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
-import org.gradle.language.jvm.tasks.ProcessResources;
+import org.gradle.jvm.tasks.Jar;
 
 /**
  * Gradle schema generator plugin.
@@ -69,11 +69,9 @@ public class SmallryeOpenApiPlugin implements Plugin<Project> {
                     t.getInputs().files(configProvider).withPathSensitivity(PathSensitivity.RELATIVE);
                 });
 
-        project.getTasks().named(sourceSet.getProcessResourcesTaskName(), ProcessResources.class)
-                .configure(t -> {
-                    t.dependsOn(genTaskName);
-                    t.from(project.getTasks().getByName(genTaskName).getOutputs().getFiles());
-                });
+        project.getTasks().named(sourceSet.getJarTaskName(), Jar.class)
+                // Adds the generated YAML + JSON files
+                .configure(t -> t.from(project.getTasks().getByName(genTaskName)));
 
         project.getConfigurations().create(CONFIG_NAME, c -> {
             c.setCanBeConsumed(true);

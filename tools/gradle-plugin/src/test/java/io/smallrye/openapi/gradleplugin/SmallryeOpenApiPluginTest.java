@@ -1,14 +1,17 @@
 package io.smallrye.openapi.gradleplugin;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Function;
+import java.util.zip.ZipFile;
 
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -131,7 +134,27 @@ class SmallryeOpenApiPluginTest {
     }
 
     @Test
-    void smokeProject(@TempDir Path buildDir) throws Exception {
+    void simpleProject(@TempDir Path buildDir) throws Exception {
+        // "Simple" Gradle project
+        smokeProject(buildDir, false, SmallryeOpenApiPlugin.TASK_NAME);
+    }
+
+    @Test
+    void quarkusProjectGenApiOnly(@TempDir Path buildDir) throws Exception {
+        // Quarkus Gradle project, just call the generateOpenApiSpec task
+        smokeProject(buildDir, true, SmallryeOpenApiPlugin.TASK_NAME);
+    }
+
+    @Test
+    void quarkusProject(@TempDir Path buildDir) throws Exception {
+        // Quarkus Gradle project, perform a "full Quarkus build"
+        smokeProject(buildDir, true, "quarkusBuild");
+    }
+
+    void smokeProject(Path buildDir, boolean withQuarkus, String taskName) throws Exception {
+        Files.write(buildDir.resolve("settings.gradle"),
+                singletonList("rootProject.name = 'smoke-test-project'"));
+
         Files.write(buildDir.resolve("build.gradle"),
                 asList(
                         "import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy",
@@ -139,6 +162,7 @@ class SmallryeOpenApiPluginTest {
                         "plugins {",
                         "    id 'java-library'",
                         "    id 'io.smallrye.openapi'",
+                        withQuarkus ? "    id 'io.quarkus' version '2.15.2.Final'" : "",
                         "}",
                         "",
                         "repositories {",
@@ -194,14 +218,28 @@ class SmallryeOpenApiPluginTest {
                         "    }",
                         "}"));
 
-        GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(buildDir.toFile())
-                .withArguments("--build-cache", "--info", "--stacktrace",
-                        SmallryeOpenApiPlugin.TASK_NAME)
-                .withDebug(true)
-                .forwardOutput().build();
+        runGradleTask(buildDir, taskName);
 
+        checkGeneratedFiles(buildDir);
+
+        checkJarContents(buildDir);
+    }
+
+    private static void checkJarContents(Path buildDir) throws Exception {
+        runGradleTask(buildDir, "jar");
+
+        Path jarFile = buildDir.resolve("build/libs/smoke-test-project.jar");
+        assertThat(jarFile).isRegularFile();
+
+        try (ZipFile zipFile = new ZipFile(jarFile.toFile())) {
+            assertThat(zipFile.getEntry("my-openapi-schema-file.yaml")).isNotNull();
+            assertThat(zipFile.getEntry("my-openapi-schema-file.json")).isNotNull();
+            assertThat(zipFile.getEntry("testcases/DummyJaxRs.class")).isNotNull();
+            assertThat(zipFile.getEntry("META-INF/MANIFEST.MF")).isNotNull();
+        }
+    }
+
+    private static void checkGeneratedFiles(Path buildDir) throws IOException {
         Path targetOpenapiDir = buildDir.resolve("build/generated/openapi");
         assertThat(targetOpenapiDir).isDirectory();
         assertThat(targetOpenapiDir.resolve("my-openapi-schema-file.yaml")).isRegularFile();
@@ -227,5 +265,20 @@ class SmallryeOpenApiPluginTest {
 
         JsonNode paths = root.get("paths");
         assertThat(paths.get("/mypath").get("get").get("operationId").asText()).isEqualTo("dummyThing");
+    }
+
+    private static void runGradleTask(Path buildDir, String taskName) {
+        GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(buildDir.toFile())
+                .withArguments(
+                        "--build-cache",
+                        // Quarkus plugin just needs this property to be present
+                        "-Dquarkus.native.builder-image=x",
+                        "--info",
+                        "--stacktrace",
+                        taskName)
+                .withDebug(true)
+                .forwardOutput().build();
     }
 }
