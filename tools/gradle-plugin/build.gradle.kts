@@ -46,4 +46,8 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
+tasks.named("pluginUnderTestMetadata") {
+    dependsOn("processJandexIndex")
+}
+
 group = "io.smallrye"
