@@ -17,15 +17,18 @@ repositories {
 }
 
 dependencies {
+    val versionJackson: String by project
+    val versionJunit5: String by project
+
     implementation("io.smallrye:smallrye-open-api-core:$version")
     implementation("io.smallrye:smallrye-open-api-jaxrs:$version")
     implementation("io.smallrye:smallrye-open-api-spring:$version")
     implementation("io.smallrye:smallrye-open-api-vertx:$version")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit5}")
     testImplementation(gradleTestKit())
     testImplementation("org.assertj:assertj-core:3.24.1")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:${versionJackson}")
 }
 
 gradlePlugin {
