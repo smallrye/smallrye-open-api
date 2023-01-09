@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
@@ -46,6 +48,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 public class IndexScannerTestBase {
 
     private static final Logger LOG = Logger.getLogger(IndexScannerTestBase.class);
+    static final Pattern PATTERN_CLASS_DOTNAME_COMPONENTIZE = Pattern.compile("([\\.$]|$)");
 
     @AfterEach
     public void removeSchemaRegistry() {
@@ -92,22 +95,21 @@ public class IndexScannerTestBase {
     }
 
     protected static DotName componentize(String className) {
-        boolean innerClass = className.contains("$");
-        DotName prefix = null;
-        String[] components = className.split("[\\.$]");
-        int lastIndex = components.length - 1;
+        Matcher matcher = PATTERN_CLASS_DOTNAME_COMPONENTIZE.matcher(className);
+        String previousDelimiter = null;
+        int previousEnd = 0;
+        DotName name = null;
 
-        for (int i = 0; i < components.length; i++) {
-            String localName = components[i];
+        while (matcher.find()) {
+            String localName = className.substring(previousEnd, matcher.start());
+            boolean innerClass = "$".equals(previousDelimiter);
+            name = DotName.createComponentized(name, localName, innerClass);
 
-            if (i < lastIndex) {
-                prefix = DotName.createComponentized(prefix, localName);
-            } else {
-                prefix = DotName.createComponentized(prefix, localName, innerClass);
-            }
+            previousDelimiter = matcher.group();
+            previousEnd = matcher.end();
         }
 
-        return prefix;
+        return name;
     }
 
     public static void printToConsole(String entityName, Schema schema) throws IOException {
