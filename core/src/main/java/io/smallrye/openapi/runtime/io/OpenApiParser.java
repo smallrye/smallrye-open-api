@@ -7,10 +7,12 @@ import java.net.URL;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.yaml.snakeyaml.LoaderOptions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
@@ -71,7 +73,9 @@ public class OpenApiParser {
         if (format == Format.JSON) {
             mapper = new ObjectMapper();
         } else {
-            mapper = new ObjectMapper(new YAMLFactory());
+            LoaderOptions loaderOptions = new LoaderOptions();
+            loaderOptions.setCodePointLimit(64 * 1024 * 1024);
+            mapper = new ObjectMapper(new YAMLFactoryBuilder(new YAMLFactory()).loaderOptions(loaderOptions).build());
         }
         JsonNode tree = mapper.readTree(stream);
 
