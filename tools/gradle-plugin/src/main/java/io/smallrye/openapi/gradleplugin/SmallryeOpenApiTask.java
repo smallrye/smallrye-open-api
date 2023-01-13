@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +28,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.PublishArtifactSet;
+import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.ProjectLayout;
@@ -111,9 +112,11 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
 
             Configuration config = configProvider.get();
 
-            PublishArtifactSet allArtifacts = properties.scanDependenciesDisable.get() ? null : config.getAllArtifacts();
+            Set<ResolvedArtifact> dependencies = properties.scanDependenciesDisable.get().booleanValue()
+                    ? Collections.emptySet()
+                    : config.getResolvedConfiguration().getResolvedArtifacts();
 
-            IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(allArtifacts,
+            IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(dependencies,
                     classesDirs);
             OpenApiDocument schema = generateSchema(index, resourcesSrcDirs, config);
             write(schema);
