@@ -112,7 +112,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <!-- Overriding version from smallrye-jakarta-parent. JUnit 5 Tests not executed otherwise. -->
-                    <version>3.0.0-M7</version>
+                    <version>3.0.0-M8</version>
                 </plugin>
             </plugins>
         </pluginManagement>
