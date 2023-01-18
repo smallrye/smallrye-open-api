@@ -25,11 +25,6 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
     public static void createIndex() {
         Indexer indexer = new Indexer();
 
-        // Stand-in stuff
-        index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/IterableStandin.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
-
         // Test samples
         indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/");
         indexDirectory(indexer, "test/io/smallrye/openapi/runtime/scanner/entities/jakarta/");

@@ -14,8 +14,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
@@ -636,5 +641,36 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.kotlin-value-class-propname.json", result);
+    }
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/1359
+     */
+    @Test
+    @SuppressWarnings("unused")
+    void testStreamTypes() throws IOException, JSONException {
+        @SuppressWarnings("serial")
+        @Schema(name = "StringArray")
+        class StringArray extends ArrayList<String> {
+
+        }
+
+        @Schema(name = "TestBean")
+        class Bean {
+            Stream<String> stringArrayFromStream;
+            IntStream intArrayFromStream;
+            Properties anyValueMapFromProperties;
+            StringArray stringArrayFromIterator;
+            LongStream longArrayFromStream;
+            DoubleStream doubleArrayFromStream;
+            @SuppressWarnings("rawtypes")
+            Collection anyArrayFromRawCollection;
+        }
+
+        Index index = indexOf(Bean.class, StringArray.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.iterator-stream-map-types.json", result);
     }
 }

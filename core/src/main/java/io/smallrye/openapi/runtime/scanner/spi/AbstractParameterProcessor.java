@@ -1481,7 +1481,7 @@ public abstract class AbstractParameterProcessor {
      */
     protected void readParametersInherited(ClassInfo clazz, AnnotationInstance beanParamAnnotation,
             boolean overriddenParametersOnly) {
-        AugmentedIndexView augmentedIndex = AugmentedIndexView.augment(index);
+        AugmentedIndexView augmentedIndex = scannerContext.getAugmentedIndex();
         List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, clazz, null).keySet());
         /*
          * Process parent class(es) before the resource method class to allow for overridden parameter attributes.

@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -26,8 +27,10 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.CompositeIndex;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
+import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
@@ -455,17 +458,15 @@ public class TypeResolver {
             Type currentType = entry.getValue();
 
             if (currentType.kind() == Type.Kind.PARAMETERIZED_TYPE) {
-                Map<String, Type> resMap = buildParamTypeResolutionMap(currentClass, currentType.asParameterizedType());
-                stack.push(resMap);
+                stack.push(buildParamTypeResolutionMap(currentClass, currentType));
             }
 
             // Add parameter type information from any interfaces implemented by this class/interface
             JandexUtil.interfaces(index, currentClass)
                     .stream()
                     .filter(type -> type.kind() == Type.Kind.PARAMETERIZED_TYPE)
-                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .filter(index::containsClass)
-                    .map(type -> buildParamTypeResolutionMap(index.getClass(type), type.asParameterizedType()))
+                    .map(type -> buildParamTypeResolutionMap(index.getClass(type), type))
                     .forEach(stack::push);
 
             if (allOfMatch || (!currentType.equals(clazzType) && TypeUtil.isIncludedAllOf(clazz, currentType))) {
@@ -490,8 +491,7 @@ public class TypeResolver {
             Type currentType = entry.getValue();
 
             if (currentType.kind() == Type.Kind.PARAMETERIZED_TYPE) {
-                Map<String, Type> resMap = buildParamTypeResolutionMap(currentClass, currentType.asParameterizedType());
-                stack.push(resMap);
+                stack.push(buildParamTypeResolutionMap(currentClass, currentType));
             }
 
             if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))
@@ -1105,13 +1105,22 @@ public class TypeResolver {
         return resolutionMap;
     }
 
-    public static ParameterizedType resolveParameterizedAncestor(AnnotationScannerContext context, ParameterizedType pType,
-            Type seekType) {
-        ParameterizedType cursor = pType;
-        boolean seekContinue = true;
+    private static Map<String, Type> buildParamTypeResolutionMap(ClassInfo klazz, Type type) {
+        if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+            return buildParamTypeResolutionMap(klazz, type.asParameterizedType());
+        }
+        return Collections.emptyMap();
+    }
 
-        while (context.getAugmentedIndex().containsClass(cursor) && seekContinue) {
-            ClassInfo cursorClass = context.getIndex().getClassByName(cursor.name());
+    public static Optional<ParameterizedType> resolveParameterizedAncestor(AnnotationScannerContext context,
+            Type type,
+            Type seekType) {
+        IndexView index = CompositeIndex.create(context.getAugmentedIndex(), TypeUtil.jdkIndex);
+        Type cursor = type;
+        boolean seekContinue = true;
+        ClassInfo cursorClass;
+
+        while ((cursorClass = index.getClassByName(cursor.name())) != null && seekContinue) {
             Map<String, Type> resolutionMap = buildParamTypeResolutionMap(cursorClass, cursor);
             List<Type> interfaces = getInterfacesOfType(context, cursorClass, seekType);
 
@@ -1137,7 +1146,7 @@ public class TypeResolver {
             }
         }
 
-        return cursor;
+        return cursor.kind() == Type.Kind.PARAMETERIZED_TYPE ? Optional.of(cursor.asParameterizedType()) : Optional.empty();
     }
 
     private static List<Type> getInterfacesOfType(AnnotationScannerContext context, ClassInfo clazz, Type seekType) {

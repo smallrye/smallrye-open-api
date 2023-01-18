@@ -20,7 +20,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 class TypeUtilTest extends IndexScannerTestBase {
 
-    private static final Type TYPE_COLLECTION = OpenApiDataObjectScanner.COLLECTION_TYPE;
+    private static final Type ITERABLE_TYPE = OpenApiDataObjectScanner.ITERABLE_TYPE;
     private static final Type TYPE_ENUM = OpenApiDataObjectScanner.ENUM_TYPE;
     private static final Type TYPE_MAP = OpenApiDataObjectScanner.MAP_TYPE;
 
@@ -29,7 +29,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(subjectClass, Collection.class);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertTrue(result);
     }
 
@@ -38,7 +38,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertTrue(result);
     }
 
@@ -47,7 +47,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ArrayCollection.class;
         Index index = indexOf(Collection.class);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertTrue(result);
     }
 
@@ -56,7 +56,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = CustomCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertTrue(result);
     }
 
@@ -65,7 +65,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = CustomMap.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);
     }
 
@@ -74,7 +74,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = ChildCollection.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertTrue(result);
     }
 
@@ -83,7 +83,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = UnrelatedType.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);
     }
 
@@ -92,7 +92,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = int.class;
         Index index = indexOf();
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.PRIMITIVE);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);
     }
 
@@ -102,7 +102,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final DotName subjectName = DotName.createSimple(subjectClass.getName());
         Index index = indexOf();
         Type testSubject = Type.create(subjectName, Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);
     }
 
@@ -111,7 +111,7 @@ class TypeUtilTest extends IndexScannerTestBase {
         final Class<?> subjectClass = Object.class;
         Index index = indexOf(subjectClass);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.CLASS);
-        boolean result = isA(index, testSubject, TYPE_COLLECTION);
+        boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);
     }
 

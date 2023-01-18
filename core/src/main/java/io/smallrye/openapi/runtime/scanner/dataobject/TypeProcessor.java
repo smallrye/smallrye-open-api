@@ -1,11 +1,11 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ARRAY_TYPE_OBJECT;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.COLLECTION_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ITERABLE_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_TYPE;
+import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STREAM_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
 
@@ -115,19 +115,25 @@ public class TypeProcessor {
             return readParameterizedType(type.asParameterizedType(), this.schema);
         }
 
-        // Raw Collection
-        if (isA(type, COLLECTION_TYPE)) {
-            return ARRAY_TYPE_OBJECT;
-        }
-
         // Raw Iterable
         if (isA(type, ITERABLE_TYPE)) {
-            return ARRAY_TYPE_OBJECT;
+            return TypeResolver.resolveParameterizedAncestor(context, type, ITERABLE_TYPE)
+                    .map(p -> readParameterizedType(p.asParameterizedType(), this.schema))
+                    .orElse(ARRAY_TYPE_OBJECT);
+        }
+
+        // Raw Stream
+        if (isA(type, STREAM_TYPE)) {
+            return TypeResolver.resolveParameterizedAncestor(context, type, STREAM_TYPE)
+                    .map(p -> readParameterizedType(p.asParameterizedType(), this.schema))
+                    .orElse(ARRAY_TYPE_OBJECT);
         }
 
         // Raw Map
         if (isA(type, MAP_TYPE)) {
-            return MAP_TYPE;
+            return TypeResolver.resolveParameterizedAncestor(context, type, MAP_TYPE)
+                    .map(p -> readParameterizedType(p.asParameterizedType(), this.schema))
+                    .orElse(MAP_TYPE);
         }
 
         // Simple case: bare class or primitive type.
@@ -187,18 +193,20 @@ public class TypeProcessor {
     private Type readParameterizedType(ParameterizedType pType, Schema schema) {
         DataObjectLogging.logger.processingParametrizedType(pType);
         Type typeRead = pType;
+        Type seekType = resolveSeekType(pType);
 
-        // If it's a collection, we should treat it as an array.
-        if (isA(pType, COLLECTION_TYPE) || isA(pType, ITERABLE_TYPE)) {
-            DataObjectLogging.logger.processingTypeAs("Java Collection", "Array");
+        // If it's a collection, iterable, or a stream, we should treat it as an array.
+        if (seekType != null && seekType != MAP_TYPE) {
+            DataObjectLogging.logger.processingTypeAs("Java Iterable or Stream", "Array");
             schema.type(Schema.SchemaType.ARRAY);
-            ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, ITERABLE_TYPE);
+            ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, seekType)
+                    .orElse(pType);
 
             if (TypeUtil.isA(context, pType, SET_TYPE)) {
                 schema.setUniqueItems(Boolean.TRUE);
             }
 
-            // Should only have one arg for collection.
+            // Should only have one argument for Iterable and Stream uses first argument of BaseStream.
             Type valueType = ancestorType.arguments().get(0);
             boolean isOptional = TypeUtil.isOptional(valueType);
             if (isOptional) {
@@ -213,10 +221,11 @@ public class TypeProcessor {
             schema.setItems(valueSchema);
 
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
-        } else if (isA(pType, MAP_TYPE)) {
+        } else if (seekType == MAP_TYPE) {
             DataObjectLogging.logger.processingTypeAs("Map", "object");
             schema.type(Schema.SchemaType.OBJECT);
-            ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, MAP_TYPE);
+            ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, seekType)
+                    .orElse(pType);
 
             if (ancestorType.arguments().size() == 2) {
                 Type valueType = ancestorType.arguments().get(1);
@@ -236,6 +245,19 @@ public class TypeProcessor {
         }
 
         return typeRead;
+    }
+
+    private Type resolveSeekType(ParameterizedType pType) {
+        if (isA(pType, ITERABLE_TYPE)) {
+            return ITERABLE_TYPE;
+        }
+        if (isA(pType, MAP_TYPE)) {
+            return MAP_TYPE;
+        }
+        if (isA(pType, STREAM_TYPE)) {
+            return STREAM_TYPE;
+        }
+        return null;
     }
 
     private static Schema wrapOptionalItemSchema(Schema itemSchema) {

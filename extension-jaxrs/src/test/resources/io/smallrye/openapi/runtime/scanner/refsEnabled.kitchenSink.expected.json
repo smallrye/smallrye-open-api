@@ -21,11 +21,13 @@
         "type": "object",
         "properties": {
           "theQ": {
+            
           },
           "theT": {
             "$ref": "#/components/schemas/Baz"
           },
           "ultimateTShouldBeQ": {
+            
           }
         }
       },
@@ -184,8 +186,10 @@
         "type": "object",
         "properties": {
           "qAgain": {
+            
           },
           "qAgain3": {
+            
           },
           "qValue": {
             "description": "Ah, Q, my favourite variable!"
@@ -301,6 +305,7 @@
         "type": "object",
         "properties": {
           "bar": {
+            
           },
           "foo": {
             "maxLength": 123456,
@@ -412,10 +417,14 @@
           "barSuper": {
             "type": "array",
             "items": {
+              
             }
           },
           "bareCollection": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              
+            }
           },
           "bareEnum": {
             "type": "array",
@@ -426,6 +435,7 @@
           "blahMap": {
             "type": "object",
             "additionalProperties": {
+              
             }
           },
           "booking": {
@@ -498,7 +508,10 @@
             "$ref": "#/components/schemas/KustomPairStringInteger"
           },
           "unsafeList": {
-            "type": "array"
+            "type": "array",
+            "items" : {
+            
+            }
           },
           "voidField": {
             "type": "object"

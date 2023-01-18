@@ -1,6 +1,7 @@
 package test.io.smallrye.openapi.runtime.scanner.javax;
 
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
@@ -67,4 +68,11 @@ public class RestEasyReactiveAllTheParamsTestResource {
         return null;
     }
 
+    @GET
+    @Path("stream")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public RestResponse<Stream<Widget>> getAll(@RestQuery(value = "q1") @Deprecated long q1,
+            @RestQuery(value = "q2") String notQ2) {
+        return null;
+    }
 }

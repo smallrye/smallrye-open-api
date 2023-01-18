@@ -30,7 +30,10 @@
             "name": "sort",
             "in": "query",
             "schema": {
-              "type": "array"
+              "type": "array",
+              "items": {
+              
+              }
             }
           }
         ],

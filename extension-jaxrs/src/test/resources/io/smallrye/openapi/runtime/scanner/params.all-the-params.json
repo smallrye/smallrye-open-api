@@ -142,6 +142,90 @@
           }
         }
       }
+    },
+    "/all/the/params/{id1}/{id2}{id2Matrix}/stream": {
+      "parameters": [
+        {
+          "name": "id1",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        {
+          "name": "id2",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id2Matrix",
+          "in": "path",
+          "style": "matrix",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "matrixF1": {
+                "type": "string",
+                "default": "BEAN1"
+              },
+              "matrixF2": {
+                "type": "string",
+                "default": "BEAN2"
+              }
+            }
+          }
+        },
+        {
+          "name": "cookieF1",
+          "in": "cookie",
+          "deprecated": true,
+          "schema": {
+            "type": "string",
+            "default": "COOKIE1"
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "name": "q1",
+            "in": "query",
+            "deprecated": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "q2",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Widget"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
