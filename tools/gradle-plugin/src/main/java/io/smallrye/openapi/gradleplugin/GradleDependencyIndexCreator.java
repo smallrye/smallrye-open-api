@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.gradle.api.artifacts.PublishArtifact;
-import org.gradle.api.artifacts.PublishArtifactSet;
+import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.Logger;
 import org.jboss.jandex.CompositeIndex;
@@ -34,23 +34,20 @@ public class GradleDependencyIndexCreator {
         this.logger = logger;
     }
 
-    IndexView createIndex(PublishArtifactSet allArtifacts, FileCollection classesDirs)
+    IndexView createIndex(Set<ResolvedArtifact> dependencies, FileCollection classesDirs)
             throws Exception {
-        List<Entry<PublishArtifact, Duration>> indexDurations = new ArrayList<>();
-        List<PublishArtifact> artifacts = new ArrayList<>();
-        if (allArtifacts != null) {
-            artifacts.addAll(allArtifacts);
-        }
+
+        List<Entry<ResolvedArtifact, Duration>> indexDurations = new ArrayList<>();
         List<IndexView> indexes = new ArrayList<>();
 
         for (File f : classesDirs.getFiles()) {
             indexes.add(indexModuleClasses(f));
         }
 
-        for (PublishArtifact artifact : artifacts) {
+        for (ResolvedArtifact artifact : dependencies) {
             try {
                 if (artifact.getFile().isDirectory()) {
-                    // Don't cache local worskpace artifacts. Incremental compilation in IDE's would
+                    // Don't cache local workspace artifacts. Incremental compilation in IDE's would
                     // otherwise use the cached index instead of new one.
                     // Right now, support for incremental compilation inside eclipse is blocked by:
                     // https://github.com/eclipse-m2e/m2e-core/issues/364#issuecomment-939987848
@@ -70,30 +67,29 @@ public class GradleDependencyIndexCreator {
         return CompositeIndex.create(indexes);
     }
 
-    private Index index(PublishArtifact artifact) throws IOException {
+    private Index index(ResolvedArtifact artifact) throws IOException {
         Result result = JarIndexer.createJarIndex(artifact.getFile(), new Indexer(), false,
                 false, false);
         return result.getIndex();
     }
 
-    private void printIndexDurations(List<Map.Entry<PublishArtifact, Duration>> indexDurations) {
+    private void printIndexDurations(List<Map.Entry<ResolvedArtifact, Duration>> indexDurations) {
         if (logger.isDebugEnabled()) {
             indexDurations.sort(Map.Entry.comparingByValue());
 
             indexDurations.forEach(e -> {
                 if (e.getValue().toMillis() > 25) {
-                    PublishArtifact artifact = e.getKey();
-                    logger.debug("Indexing took {} for {}, {}, {}, {}, {}, {}", e.getValue(), artifact.getName(),
-                            artifact.getExtension(), artifact.getClassifier(), artifact.getType(), artifact.getDate(),
-                            artifact.getFile());
+                    ResolvedArtifact artifact = e.getKey();
+                    logger.debug("Indexing took {} for {}, {}, {}, {}, {}", e.getValue(), artifact.getName(),
+                            artifact.getExtension(), artifact.getClassifier(), artifact.getType(), artifact.getFile());
                 }
             });
         }
     }
 
     private IndexView timedIndex(
-            List<Map.Entry<PublishArtifact, Duration>> indexDurations,
-            PublishArtifact artifact) throws Exception {
+            List<Map.Entry<ResolvedArtifact, Duration>> indexDurations,
+            ResolvedArtifact artifact) throws Exception {
         LocalDateTime start = LocalDateTime.now();
         IndexView result = index(artifact);
         LocalDateTime end = LocalDateTime.now();
@@ -102,7 +98,7 @@ public class GradleDependencyIndexCreator {
         return result;
     }
 
-    private Index indexModuleClasses(PublishArtifact artifact) throws IOException {
+    private Index indexModuleClasses(ResolvedArtifact artifact) throws IOException {
         return indexModuleClasses(artifact.getFile());
     }
 
