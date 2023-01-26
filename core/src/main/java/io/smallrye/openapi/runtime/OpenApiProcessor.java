@@ -63,7 +63,7 @@ public class OpenApiProcessor {
         // Load all static files
         if (staticFiles != null && staticFiles.length > 0) {
             for (OpenApiStaticFile staticFile : staticFiles) {
-                OpenApiDocument.INSTANCE.modelFromStaticFile(modelFromStaticFile(staticFile));
+                OpenApiDocument.INSTANCE.modelFromStaticFile(modelFromStaticFile(config, staticFile));
             }
         }
         // Scan annotations
@@ -93,12 +93,12 @@ public class OpenApiProcessor {
      * @param staticFile OpenApiStaticFile to be parsed
      * @return OpenApiImpl
      */
-    public static OpenAPI modelFromStaticFile(OpenApiStaticFile staticFile) {
+    public static OpenAPI modelFromStaticFile(OpenApiConfig config, OpenApiStaticFile staticFile) {
         if (staticFile == null) {
             return null;
         }
         try {
-            return OpenApiParser.parse(staticFile.getContent(), staticFile.getFormat());
+            return OpenApiParser.parse(staticFile.getContent(), staticFile.getFormat(), config.getMaximumStaticFileSize());
         } catch (IOException e) {
             throw new OpenApiRuntimeException(e);
         }

@@ -134,7 +134,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         OpenApiConfig openApiConfig = properties.asOpenApiConfig();
         ClassLoader classLoader = getClassLoader(config);
 
-        OpenAPI staticModel = generateStaticModel(resourcesSrcDirs);
+        OpenAPI staticModel = generateStaticModel(openApiConfig, resourcesSrcDirs);
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, SmallryeOpenApiTask.class.getClassLoader());
         OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
 
@@ -214,13 +214,13 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         return openApiAnnotationScanner.scan();
     }
 
-    private OpenAPI generateStaticModel(FileCollection resourcesSrcDirs) throws IOException {
+    private OpenAPI generateStaticModel(OpenApiConfig openApiConfig, FileCollection resourcesSrcDirs) throws IOException {
         Path staticFile = getStaticFile(resourcesSrcDirs);
         if (staticFile != null) {
             try (InputStream is = Files.newInputStream(staticFile)) {
                 try (OpenApiStaticFile openApiStaticFile = new OpenApiStaticFile(is,
                         getFormat(staticFile))) {
-                    return OpenApiProcessor.modelFromStaticFile(openApiStaticFile);
+                    return OpenApiProcessor.modelFromStaticFile(openApiConfig, openApiStaticFile);
                 }
             }
         }

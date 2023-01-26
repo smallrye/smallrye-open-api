@@ -42,3 +42,5 @@ mvn clean install
 ** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
 * `mp.openapi.extensions.smallrye.remove-unused-schemas.enable` - Set to `true` enable automatic removal of unused schemas from `components/schemas` in the OpenAPI model. Unused schemas will be removed following annotation scanning but prior to running any `OASFilter` that may be configured. Default value is `false`.
 * `mp.openapi.extensions.smallrye.duplicateOperationIdBehavior` - Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log warnings when the build encounters duplicate operationIds. Default value is `WARN`.
+* `mp.openapi.extensions.smallrye.maximumStaticFileSize` - Set this value in order to change the maximum threshold for
+processed static files, when generating model from them. If not set, it will default to 3 MB.

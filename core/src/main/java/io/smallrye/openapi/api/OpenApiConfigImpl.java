@@ -61,6 +61,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private Optional<String[]> defaultProduces = UNSET;
     private Optional<String[]> defaultConsumes = UNSET;
     private Optional<Boolean> allowNakedPathParameter = Optional.empty();
+    private Integer maximumStaticFileSize;
 
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
@@ -481,6 +482,16 @@ public class OpenApiConfigImpl implements OpenApiConfig {
                     .orElse(OpenApiConfig.super.removeUnusedSchemas());
         }
         return removeUnusedSchemas;
+    }
+
+    @Override
+    public Integer getMaximumStaticFileSize() {
+        if (maximumStaticFileSize == null) {
+            maximumStaticFileSize = getConfig()
+                    .getOptionalValue(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE, Integer.class)
+                    .orElse(OpenApiConfig.super.getMaximumStaticFileSize());
+        }
+        return maximumStaticFileSize;
     }
 
     /**
