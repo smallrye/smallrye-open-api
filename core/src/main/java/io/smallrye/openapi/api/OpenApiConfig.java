@@ -21,6 +21,8 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  */
 public interface OpenApiConfig {
 
+    Integer MAXIMUM_STATIC_FILE_SIZE_DEFAULT = 3 * 1024 * 1024;
+
     default String modelReader() {
         return null;
     }
@@ -165,6 +167,10 @@ public interface OpenApiConfig {
     }
 
     default void doAllowNakedPathParameter() {
+    }
+
+    default Integer getMaximumStaticFileSize() {
+        return MAXIMUM_STATIC_FILE_SIZE_DEFAULT;
     }
 
     enum OperationIdStrategy {

@@ -65,22 +65,30 @@ public class OpenApiParser {
      * 
      * @param stream InputStream containing an OpenAPI document
      * @param format Format of the stream
+     * @param maximumStaticFileSize Integer to change (usually to increase) the maximum static file size
      * @return OpenAPIImpl parsed from the stream
      * @throws IOException Errors in reading the stream
      */
-    public static final OpenAPI parse(InputStream stream, Format format) throws IOException {
+    public static final OpenAPI parse(InputStream stream, Format format, final Integer maximumStaticFileSize)
+            throws IOException {
         ObjectMapper mapper;
         if (format == Format.JSON) {
             mapper = new ObjectMapper();
         } else {
             LoaderOptions loaderOptions = new LoaderOptions();
-            loaderOptions.setCodePointLimit(64 * 1024 * 1024);
+            if (maximumStaticFileSize != null) {
+                loaderOptions.setCodePointLimit(maximumStaticFileSize);
+            }
             mapper = new ObjectMapper(new YAMLFactoryBuilder(new YAMLFactory()).loaderOptions(loaderOptions).build());
         }
         JsonNode tree = mapper.readTree(stream);
 
         OpenApiParser parser = new OpenApiParser(tree);
         return parser.parse();
+    }
+
+    public static final OpenAPI parse(InputStream stream, Format format) throws IOException {
+        return parse(stream, format, null);
     }
 
     /**
