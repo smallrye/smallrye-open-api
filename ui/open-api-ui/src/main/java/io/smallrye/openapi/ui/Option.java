@@ -62,5 +62,6 @@ public enum Option {
     preauthorizeBasicUsername,
     preauthorizeBasicPassword,
     preauthorizeApiKeyAuthDefinitionKey,
+    queryConfigEnabled,
     preauthorizeApiKeyApiKeyValue
 }

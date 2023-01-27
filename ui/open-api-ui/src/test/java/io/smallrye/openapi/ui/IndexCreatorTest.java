@@ -31,6 +31,8 @@ class IndexCreatorTest {
         assertTrue(s.contains("<img src='logo.png' alt='SmallRye OpenAPI UI'"));
         assertTrue(s.contains("dom_id: '#swagger-ui',"));
         assertTrue(s.contains("deepLinking: true,"));
+        assertFalse(s.contains("queryConfigEnabled"));
+
     }
 
     @Test
@@ -73,6 +75,7 @@ class IndexCreatorTest {
         assertTrue(s.contains("deepLinking: true,"));
         assertTrue(s.contains("filter: 'bla',"));
         assertTrue(s.contains("syntaxHighlight: false,"));
+
     }
 
     @Test
