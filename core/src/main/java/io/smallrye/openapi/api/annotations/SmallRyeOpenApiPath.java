@@ -7,7 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to include a class to the path section of the generated OpenAPI specification, with the specified value as the path.
+ * Annotation to include a class to the path section of the generated OpenAPI specification, with the specified value as the
+ * path.
  * <p>
  * Currently, this annotation is only supported by the JAX-RS extension.
  * </p>

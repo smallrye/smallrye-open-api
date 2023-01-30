@@ -1,6 +1,8 @@
 package test.io.smallrye.openapi.runtime.scanner.smallrye;
 
-import io.smallrye.openapi.api.annotations.SmallRyeOpenApiPath;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -8,8 +10,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
+
+import io.smallrye.openapi.api.annotations.SmallRyeOpenApiPath;
 import test.io.smallrye.openapi.runtime.scanner.Fruit;
 
 @SmallRyeOpenApiPath("/fruits")
