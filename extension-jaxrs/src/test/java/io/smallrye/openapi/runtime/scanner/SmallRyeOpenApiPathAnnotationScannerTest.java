@@ -13,7 +13,8 @@ class SmallRyeOpenApiPathAnnotationScannerTest extends JaxRsDataObjectScannerTes
         // given
         Indexer indexer = new Indexer();
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/smallrye/ExampleResource.class");
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), indexer.complete());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()),
+                indexer.complete());
 
         // when
         OpenAPI result = scanner.scan();
