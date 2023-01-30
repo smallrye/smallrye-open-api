@@ -271,7 +271,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         OpenApiConfig openApiConfig = new MavenConfig(getProperties());
         ClassLoader classLoader = getClassLoader();
 
-        OpenAPI staticModel = generateStaticModel();
+        OpenAPI staticModel = generateStaticModel(openApiConfig);
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, classLoader);
         OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
 
@@ -314,12 +314,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
         return openApiAnnotationScanner.scan();
     }
 
-    private OpenAPI generateStaticModel() throws IOException {
+    private OpenAPI generateStaticModel(OpenApiConfig openApiConfig) throws IOException {
         Path staticFile = getStaticFile();
         if (staticFile != null) {
             try (InputStream is = Files.newInputStream(staticFile);
                     OpenApiStaticFile openApiStaticFile = new OpenApiStaticFile(is, getFormat(staticFile))) {
-                return OpenApiProcessor.modelFromStaticFile(openApiStaticFile);
+                return OpenApiProcessor.modelFromStaticFile(openApiConfig, openApiStaticFile);
             }
         }
         return null;
