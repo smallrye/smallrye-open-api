@@ -8,9 +8,11 @@ import java.util.TreeSet;
 
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.api.annotations.SmallRyeOpenApiPath;
+
 /**
  * Constants related to JAX-RS
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -24,7 +26,8 @@ public class JaxRsConstants {
             DotName.createSimple("jakarta.ws.rs.ApplicationPath")));
     static final Set<DotName> PATH = new TreeSet<>(Arrays.asList(
             DotName.createSimple("javax.ws.rs.Path"),
-            DotName.createSimple("jakarta.ws.rs.Path")));
+            DotName.createSimple("jakarta.ws.rs.Path"),
+            DotName.createSimple(SmallRyeOpenApiPath.class)));
     static final Set<DotName> PRODUCES = new TreeSet<>(Arrays.asList(
             DotName.createSimple("javax.ws.rs.Produces"),
             DotName.createSimple("jakarta.ws.rs.Produces")));
@@ -96,6 +99,7 @@ public class JaxRsConstants {
     static final String TO_RESPONSE_METHOD_NAME = "toResponse";
 
     private static final Set<DotName> methods = new LinkedHashSet<>();
+
     static {
         methods.addAll(GET);
         methods.addAll(PUT);
