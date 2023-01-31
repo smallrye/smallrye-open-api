@@ -67,27 +67,31 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class OpenApiDataObjectScanner {
 
-    // Object
-    public static final Type OBJECT_TYPE = Type.create(DotName.createSimple(java.lang.Object.class.getName()), Type.Kind.CLASS);
     // Collection (list-type things)
     public static final DotName COLLECTION_INTERFACE_NAME = DotName.createSimple(Collection.class.getName());
     public static final Type COLLECTION_TYPE = Type.create(COLLECTION_INTERFACE_NAME, Type.Kind.CLASS);
+
     // Iterable (also list-type things)
     public static final DotName ITERABLE_INTERFACE_NAME = DotName.createSimple(Iterable.class.getName());
     public static final Type ITERABLE_TYPE = Type.create(ITERABLE_INTERFACE_NAME, Type.Kind.CLASS);
+
     // Map
     public static final DotName MAP_INTERFACE_NAME = DotName.createSimple(Map.class.getName());
     public static final Type MAP_TYPE = Type.create(MAP_INTERFACE_NAME, Type.Kind.CLASS);
+
     // Set
     public static final DotName SET_INTERFACE_NAME = DotName.createSimple(java.util.Set.class.getName());
     public static final Type SET_TYPE = Type.create(SET_INTERFACE_NAME, Type.Kind.CLASS);
+
     // Enum
     public static final DotName ENUM_INTERFACE_NAME = DotName.createSimple(Enum.class.getName());
     public static final Type ENUM_TYPE = Type.create(ENUM_INTERFACE_NAME, Type.Kind.CLASS);
+
     // String type
     public static final Type STRING_TYPE = Type.create(DotName.createSimple(String.class.getName()), Type.Kind.CLASS);
+
     // Array type
-    public static final Type ARRAY_TYPE_OBJECT = Type.create(DotName.createSimple("[Ljava.lang.Object;"), Type.Kind.ARRAY);
+    public static final Type ARRAY_TYPE_OBJECT = Type.create(DotName.createSimple(Map[].class.getName()), Type.Kind.ARRAY);
 
     private static ClassInfo collectionStandin;
     private static ClassInfo iterableStandin;

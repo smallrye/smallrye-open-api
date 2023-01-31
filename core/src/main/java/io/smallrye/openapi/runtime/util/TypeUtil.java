@@ -60,6 +60,7 @@ public class TypeUtil {
     private static final DotName DOTNAME_VOID = DotName.createSimple(Void.class.getName());
 
     private static final String UUID_PATTERN = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
+    private static final TypeWithFormat ANY = TypeWithFormat.anyType().build();
     private static final TypeWithFormat STRING_FORMAT = TypeWithFormat.of(SchemaType.STRING).build();
     private static final TypeWithFormat BINARY_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BINARY).build();
     private static final TypeWithFormat BYTE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
@@ -118,6 +119,8 @@ public class TypeUtil {
 
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#dataTypeFormat
     static {
+        TYPE_MAP.put(DOTNAME_OBJECT, ANY);
+
         // String
         TYPE_MAP.put(DotName.createSimple(String.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(StringBuffer.class.getName()), STRING_FORMAT);
@@ -963,7 +966,6 @@ public class TypeUtil {
             private boolean opaque;
 
             Builder(SchemaType schemaType) {
-                Objects.requireNonNull(schemaType);
                 properties.put(SchemaConstant.PROP_TYPE, schemaType);
             }
 
@@ -1005,7 +1007,12 @@ public class TypeUtil {
         }
 
         static Builder of(SchemaType schemaType) {
+            Objects.requireNonNull(schemaType);
             return new Builder(schemaType);
+        }
+
+        static Builder anyType() {
+            return new Builder(null);
         }
 
         private final Map<String, Object> properties;
@@ -1017,8 +1024,8 @@ public class TypeUtil {
         }
 
         boolean isSchemaType(SchemaType... schemaTypes) {
-            return Arrays.stream(schemaTypes)
-                    .anyMatch(properties.get(SchemaConstant.PROP_TYPE)::equals);
+            SchemaType type = (SchemaType) properties.get(SchemaConstant.PROP_TYPE);
+            return type != null && Arrays.stream(schemaTypes).anyMatch(type::equals);
         }
 
         Map<String, Object> getProperties() {

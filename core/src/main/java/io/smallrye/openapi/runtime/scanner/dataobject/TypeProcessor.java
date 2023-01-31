@@ -5,7 +5,6 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.COLLE
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ENUM_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.ITERABLE_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.MAP_TYPE;
-import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.OBJECT_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
@@ -128,7 +127,7 @@ public class TypeProcessor {
 
         // Raw Map
         if (isA(type, MAP_TYPE)) {
-            return OBJECT_TYPE;
+            return MAP_TYPE;
         }
 
         // Simple case: bare class or primitive type.
@@ -225,7 +224,7 @@ public class TypeProcessor {
                 schema.additionalPropertiesSchema(readGenericValueType(valueType, schema));
             }
 
-            typeRead = OBJECT_TYPE;
+            typeRead = MAP_TYPE;
 
             if (TypeUtil.allowRegistration(context, pType)) {
                 // This type will be inspected later, if necessary.

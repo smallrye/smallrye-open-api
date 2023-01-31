@@ -21,13 +21,11 @@
         "type": "object",
         "properties": {
           "theQ": {
-            "type": "object"
           },
           "theT": {
             "$ref": "#/components/schemas/Baz"
           },
           "ultimateTShouldBeQ": {
-            "type": "object"
           }
         }
       },
@@ -186,14 +184,11 @@
         "type": "object",
         "properties": {
           "qAgain": {
-            "type": "object"
           },
           "qAgain3": {
-            "type": "object"
           },
           "qValue": {
-            "description": "Ah, Q, my favourite variable!",
-            "type": "object"
+            "description": "Ah, Q, my favourite variable!"
           },
           "tAgain2": {
             "type": "string"
@@ -306,7 +301,6 @@
         "type": "object",
         "properties": {
           "bar": {
-            "type": "object"
           },
           "foo": {
             "maxLength": 123456,
@@ -418,7 +412,6 @@
           "barSuper": {
             "type": "array",
             "items": {
-              "type": "object"
             }
           },
           "bareCollection": {
@@ -433,7 +426,6 @@
           "blahMap": {
             "type": "object",
             "additionalProperties": {
-              "type": "object"
             }
           },
           "booking": {
