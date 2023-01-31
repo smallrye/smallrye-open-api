@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.jandex.DotName;
 
@@ -92,6 +94,14 @@ public class JaxRsConstants {
     static final Set<DotName> PATCH = new TreeSet<>(Arrays.asList(
             DotName.createSimple("javax.ws.rs.PATCH"),
             DotName.createSimple("jakarta.ws.rs.PATCH")));
+    static final Set<DotName> CONTEXTS = Stream.of("javax", "jakarta")
+            .map(prefix -> DotName.createComponentized(null, prefix))
+            .map(prefix -> DotName.createComponentized(prefix, "ws"))
+            .map(prefix -> DotName.createComponentized(prefix, "rs"))
+            .map(prefix -> DotName.createComponentized(prefix, "core"))
+            .flatMap(prefix -> Stream.of("Application", "UriInfo", "Request", "HttpHeaders", "SecurityContext")
+                    .map(simpleName -> DotName.createComponentized(prefix, simpleName)))
+            .collect(Collectors.toSet());
 
     static final String TO_RESPONSE_METHOD_NAME = "toResponse";
 

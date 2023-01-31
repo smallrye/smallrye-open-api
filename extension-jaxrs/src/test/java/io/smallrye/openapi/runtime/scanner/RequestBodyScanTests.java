@@ -48,12 +48,14 @@ class RequestBodyScanTests extends IndexScannerTestBase {
     @Test
     void testJavaxResteasyMultipartFormDataInput() throws IOException, JSONException {
         test("params.resteasy-multipart-form-data-input.json",
+                javax.ws.rs.core.HttpHeaders.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.ResteasyMultipartFormDataInputTestResource.class);
     }
 
     @Test
     void testJakartaResteasyMultipartFormDataInput() throws IOException, JSONException {
         test("params.resteasy-multipart-form-data-input.json",
+                jakarta.ws.rs.core.HttpHeaders.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResteasyMultipartFormDataInputTestResource.class);
     }
 

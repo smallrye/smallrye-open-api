@@ -109,6 +109,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
+    public boolean isFrameworkContextType(Type type) {
+        return JaxRsConstants.CONTEXTS.contains(type.name());
+    }
+
+    @Override
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
 

@@ -1020,6 +1020,7 @@ public interface AnnotationScanner {
 
         return IntStream.range(0, methodParams.size())
                 .filter(position -> !isKotlinContinuation(methodParams.get(position)))
+                .filter(position -> !isFrameworkContextType(methodParams.get(position)))
                 .filter(position -> !isPathParameter(context, method.parameterName(position), params))
                 .filter(position -> {
                     List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(method, (short) position);
@@ -1063,6 +1064,20 @@ public interface AnnotationScanner {
                     .filter(p -> Objects.equals(p.getName(), name))
                     .anyMatch(p -> Objects.equals(p.getIn(), Parameter.In.PATH));
         }
+        return false;
+    }
+
+    /**
+     * Determines whether the given type is a special "context" type of the current
+     * web/REST framework and should not be considered as a request body type.
+     * 
+     * This method should be overridden by framework-specific annotation scanners.
+     * 
+     * @param type the type to consider
+     * 
+     * @return true if the type is a framework-specific special/context type, otherwise false.
+     */
+    default boolean isFrameworkContextType(Type type) {
         return false;
     }
 
