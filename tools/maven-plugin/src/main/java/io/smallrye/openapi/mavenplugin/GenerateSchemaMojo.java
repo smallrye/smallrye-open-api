@@ -239,6 +239,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter
     private Map<String, String> systemPropertyVariables;
 
+    /**
+     * Configuration property to specify path for resource classes not annotated with javax.ws.rs.Path (or jakarta.ws.rs.Path)
+     */
+    @Parameter(property = "scanResourceClasses")
+    private Map<String, String> scanResourceClasses;
+
     @Component
     private MavenDependencyIndexCreator mavenDependencyIndexCreator;
 
@@ -403,6 +409,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, OpenApiConstants.OPERATION_ID_STRAGEGY, operationIdStrategy);
         addToPropertyMap(cp, OpenApiConstants.SCAN_PROFILES, scanProfiles);
         addToPropertyMap(cp, OpenApiConstants.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
+        addToPropertyMap(cp, OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
 
         return cp;
     }
@@ -422,6 +429,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
     private void addToPropertyMap(Map<String, String> map, String key, List<String> values) {
         if (values != null && !values.isEmpty()) {
             map.put(key, String.join(",", values));
+        }
+    }
+
+    private void addToPropertyMap(Map<String, String> map, String keyPrefix, Map<String, String> values) {
+        if (values != null) {
+            values.forEach((key, value) -> map.put(keyPrefix + key, value));
         }
     }
 

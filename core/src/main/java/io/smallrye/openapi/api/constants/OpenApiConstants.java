@@ -46,6 +46,7 @@ public final class OpenApiConstants {
     public static final String SMALLRYE_REMOVE_UNUSED_SCHEMAS = SMALLRYE_PREFIX + SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE;
     public static final String SCAN_PROFILES = SMALLRYE_PREFIX + "scan.profiles";
     public static final String SCAN_EXCLUDE_PROFILES = SMALLRYE_PREFIX + "scan.exclude.profiles";
+    public static final String SCAN_RESOURCE_CLASS_PREFIX = SMALLRYE_PREFIX + "scan.resource-class.";
 
     public static final String VERSION = SMALLRYE_PREFIX + "openapi";
     public static final String INFO_TITLE = SMALLRYE_PREFIX + "info.title";

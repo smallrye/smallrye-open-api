@@ -2,7 +2,9 @@ package io.smallrye.openapi.mavenplugin;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.OASConfig;
 
@@ -165,6 +167,14 @@ public class MavenConfig implements OpenApiConfig {
     @Override
     public Set<String> getScanExcludeProfiles() {
         return asCsvSet(properties.getOrDefault(OpenApiConstants.SCAN_EXCLUDE_PROFILES, null));
+    }
+
+    @Override
+    public Map<String, String> getScanResourceClasses() {
+        return properties.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().startsWith(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     @Override
