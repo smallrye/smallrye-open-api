@@ -305,6 +305,7 @@ public class IndexHtmlCreator {
         DEFAULT_OPTIONS.put(Option.tagsSorter, null);
         DEFAULT_OPTIONS.put(Option.onComplete, null);
         DEFAULT_OPTIONS.put(Option.syntaxHighlight, null);
+        DEFAULT_OPTIONS.put(Option.queryConfigEnabled, null);
 
         // Network section 
         DEFAULT_OPTIONS.put(Option.oauth2RedirectUrl, null);
@@ -332,6 +333,7 @@ public class IndexHtmlCreator {
         DEFAULT_OPTIONS.put(Option.layout, "StandaloneLayout");
         DEFAULT_OPTIONS.put(Option.plugins, "[SwaggerUIBundle.plugins.DownloadUrl]");
         DEFAULT_OPTIONS.put(Option.presets, "[SwaggerUIBundle.presets.apis,SwaggerUIStandalonePreset]");
+
     }
 
 }
