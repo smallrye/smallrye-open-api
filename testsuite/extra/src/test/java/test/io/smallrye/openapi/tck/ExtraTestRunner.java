@@ -17,10 +17,11 @@
 package test.io.smallrye.openapi.tck;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -95,9 +95,7 @@ public class ExtraTestRunner {
         }
         File file = new File(parent, testClass.getName() + ".json");
         String content = OpenApiSerializer.serialize(openAPI, Format.JSON);
-        try (FileWriter writer = new FileWriter(file)) {
-            IOUtils.write(content, writer);
-        }
+        Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

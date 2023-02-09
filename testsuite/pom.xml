@@ -34,6 +34,29 @@
     <module>data</module>
   </modules>
 
+  <properties>
+    <version.org.jboss.arquillian>1.6.0.Final</version.org.jboss.arquillian>
+    <version.testng>7.6.0</version.testng>
+  </properties>
+
+  <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <version>${version.testng}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.arquillian</groupId>
+          <artifactId>arquillian-bom</artifactId>
+          <version>${version.org.jboss.arquillian}</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+      </dependencies>
+  </dependencyManagement>
+
   <build>
     <plugins>
       <plugin>
