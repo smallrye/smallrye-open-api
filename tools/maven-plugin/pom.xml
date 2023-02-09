@@ -8,31 +8,36 @@
     </parent>
     <artifactId>smallrye-open-api-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    
+
     <name>SmallRye: OpenAPI Tools :: Maven</name>
     <description>a Maven plugin that can generate the schema on build</description>
-    
+
     <properties>
         <sonar.skip>true</sonar.skip>
 
         <itf-maven.version>0.11.0</itf-maven.version>
+        <maven-plugin-api.version>3.9.0</maven-plugin-api.version>
+        <maven-plugin-annotations.version>3.7.1</maven-plugin-annotations.version>
+        <maven-core.version>3.9.0</maven-core.version>
     </properties>
-    
+
     <dependencies>
         <!-- Maven plugin stuff -->
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
+            <version>${maven-plugin-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
+            <version>${maven-plugin-annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
+            <version>${maven-core.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-core</artifactId>
@@ -49,7 +54,7 @@
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-vertx</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>
@@ -115,7 +120,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M8</version>
                 <executions>
                     <execution>
                         <goals>
