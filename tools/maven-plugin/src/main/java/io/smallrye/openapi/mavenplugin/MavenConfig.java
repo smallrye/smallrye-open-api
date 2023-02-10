@@ -174,7 +174,8 @@ public class MavenConfig implements OpenApiConfig {
         return properties.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().startsWith(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                .collect(Collectors.toMap(e -> e.getKey().substring(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX.length()),
+                        Entry::getValue));
     }
 
     @Override

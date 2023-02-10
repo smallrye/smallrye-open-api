@@ -630,7 +630,6 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return context.getConfig().getScanResourceClasses()
                 .keySet()
                 .stream()
-                .map(key -> key.substring(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX.length()))
                 .map(className -> context.getIndex().getClassByName(className))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
