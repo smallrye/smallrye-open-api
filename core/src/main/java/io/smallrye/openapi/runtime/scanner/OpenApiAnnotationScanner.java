@@ -205,7 +205,7 @@ public class OpenApiAnnotationScanner {
                 .stream()
                 .filter(this::annotatedClasses)
                 .map(annotation -> Type.create(annotation.target().asClass().name(), Type.Kind.CLASS))
-                .forEach(type -> SchemaFactory.typeToSchema(context, type, context.getExtensions()));
+                .forEach(type -> SchemaFactory.typeToSchema(context, type, null, context.getExtensions()));
     }
 
     private boolean annotatedClasses(AnnotationInstance annotation) {

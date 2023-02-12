@@ -60,6 +60,7 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.operation.OperationReader;
 import io.smallrye.openapi.runtime.io.requestbody.RequestBodyReader;
 import io.smallrye.openapi.runtime.io.response.ResponseReader;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeReader;
@@ -488,7 +489,7 @@ public interface AnnotationScanner {
                 } else if (hasKotlinContinuation(method)) {
                     schema = kotlinContinuationToSchema(context, method);
                 } else {
-                    schema = SchemaFactory.typeToSchema(context, returnType, context.getExtensions());
+                    schema = SchemaFactory.typeToSchema(context, returnType, null, context.getExtensions());
                 }
 
                 Content content = new ContentImpl();
@@ -607,7 +608,9 @@ public interface AnnotationScanner {
 
     default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
         Type type = getKotlinContinuationArgument(context, method);
-        return SchemaFactory.typeToSchema(context, type, context.getExtensions());
+        AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, type,
+                SchemaConstant.DOTNAME_SCHEMA);
+        return SchemaFactory.typeToSchema(context, type, schemaAnnotation, context.getExtensions());
     }
 
     /**
@@ -927,7 +930,10 @@ public interface AnnotationScanner {
                 setJsonViewContext(context, views);
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
                     requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
-                    Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
+                    AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, requestBodyType,
+                            SchemaConstant.DOTNAME_SCHEMA);
+                    Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
+                            context.getExtensions());
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
@@ -970,7 +976,10 @@ public interface AnnotationScanner {
                         schema = new SchemaImpl();
                         schema.setType(Schema.SchemaType.OBJECT);
                     } else {
-                        schema = SchemaFactory.typeToSchema(context, requestBodyType, context.getExtensions());
+                        AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, requestBodyType,
+                                SchemaConstant.DOTNAME_SCHEMA);
+                        schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
+                                context.getExtensions());
                     }
 
                     if (requestBody == null) {

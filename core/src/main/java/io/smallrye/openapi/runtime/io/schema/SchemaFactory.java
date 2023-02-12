@@ -463,15 +463,27 @@ public class SchemaFactory {
      * @return Schema model
      */
     public static Schema typeToSchema(final AnnotationScannerContext context, Type type,
+            AnnotationInstance schemaAnnotation,
             List<AnnotationScannerExtension> extensions) {
         Schema schema = null;
+        Schema fromAnnotation = null;
+
+        if (schemaAnnotation != null) {
+            fromAnnotation = SchemaFactory.readSchema(context, schemaAnnotation);
+
+            if (fromAnnotation == null) {
+                // hidden
+                return null;
+            }
+        }
 
         if (TypeUtil.isWrappedType(type)) {
             // Recurse using the optional's type
-            schema = typeToSchema(context, TypeUtil.unwrapType(type), extensions);
+            schema = typeToSchema(context, TypeUtil.unwrapType(type), null, extensions);
         } else if (CurrentScannerInfo.isWrapperType(type)) {
             // Recurse using the wrapped type
-            schema = typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), extensions);
+            schema = typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), null,
+                    extensions);
         } else if (TypeUtil.isTerminalType(type)) {
             schema = new SchemaImpl();
             TypeUtil.applyTypeAttributes(type, schema);
@@ -484,10 +496,11 @@ public class SchemaFactory {
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.setItems(typeToSchema(context, ArrayType.create(componentType, dimensions - 1), extensions));
+                schema.setItems(
+                        typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null, extensions));
             } else {
                 // Recurse using the type of the array elements
-                schema.setItems(typeToSchema(context, componentType, extensions));
+                schema.setItems(typeToSchema(context, componentType, null, extensions));
             }
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(context, type.asClassType(), true);
@@ -495,6 +508,11 @@ public class SchemaFactory {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
             schema = otherTypeToSchema(context, type, extensions);
+        }
+
+        if (fromAnnotation != null) {
+            // Generate `allOf` ?
+            schema = MergeUtil.mergeObjects(schema, fromAnnotation);
         }
 
         return schema;
@@ -693,7 +711,7 @@ public class SchemaFactory {
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements
-            schema.setItems(typeToSchema(context, componentType, extensions));
+            schema.setItems(typeToSchema(context, componentType, null, extensions));
             return schema;
         } else {
             Type asyncType = resolveAsyncType(context, type, extensions);

@@ -150,6 +150,7 @@ public class RequestBodyReader {
             MediaType type = new MediaTypeImpl();
             type.setSchema(SchemaFactory.typeToSchema(context,
                     JandexUtil.value(annotation, RequestBodyConstant.PROP_VALUE),
+                    null,
                     context.getExtensions()));
             content.addMediaType(mediaType, type);
         }

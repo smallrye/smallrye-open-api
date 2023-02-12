@@ -36,6 +36,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <failIfNoTests>true</failIfNoTests>
           <properties>
             <property>
               <name>suitename</name>
@@ -54,6 +55,8 @@
             <test.url>http://localhost:8080</test.url>
             <microprofile.version>${version.eclipse.microprofile.openapi}</microprofile.version>
             <smallrye.version>${project.version}</smallrye.version>
+            <!-- Help catch downstream issues where the default consumes is configured for JSON -->
+            <mp.openapi.extensions.smallrye.defaultConsumes>application/json</mp.openapi.extensions.smallrye.defaultConsumes>
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -76,10 +79,22 @@
     </dependency>
 
     <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.arquillian.container</groupId>
       <artifactId>${artifactId.arquillian.jetty}</artifactId>
       <version>${version.arquillian.jetty}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+            <!-- Surefire 3.0.0-M8 will not run TestNG suite with Junit on the build path -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.shrinkwrap</groupId>
