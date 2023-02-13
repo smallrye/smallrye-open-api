@@ -218,6 +218,7 @@ public class ResponseReader {
             Content content = new ContentImpl();
             Schema responseSchema = SchemaFactory.typeToSchema(context,
                     responseType,
+                    null,
                     context.getExtensions());
 
             for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {

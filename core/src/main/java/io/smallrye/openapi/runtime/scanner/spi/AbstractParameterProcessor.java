@@ -569,7 +569,7 @@ public abstract class AbstractParameterProcessor {
             // readSchema *may* replace the existing schema, so we must assign.
             schema = SchemaFactory.readSchema(scannerContext, new SchemaImpl(), schemaAnnotation, defaults);
         } else {
-            schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, extensions);
+            schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, schemaAnnotation, extensions);
         }
 
         ModelUtil.setParameterSchema(param, schema);
@@ -675,22 +675,11 @@ public abstract class AbstractParameterProcessor {
             String paramName = param.getKey();
             AnnotationTarget paramTarget = param.getValue().target();
             Type paramType = getType(paramTarget);
-            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, extensions);
-
+            AnnotationInstance schemaAnnotation = null;
             if (schemaAnnotationSupported) {
-                AnnotationInstance schemaAnnotation = TypeUtil.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
-                if (schemaAnnotation != null) {
-                    Schema fromAnnotation = SchemaFactory.readSchema(scannerContext, schemaAnnotation);
-
-                    if (fromAnnotation == null) {
-                        // hidden
-                        continue;
-                    } else {
-                        // Generate `allOf` ?
-                        paramSchema = MergeUtil.mergeObjects(paramSchema, fromAnnotation);
-                    }
-                }
+                schemaAnnotation = TypeUtil.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
             }
+            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, schemaAnnotation, extensions);
 
             if (paramSchema == null) {
                 // hidden

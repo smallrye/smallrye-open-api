@@ -35,8 +35,7 @@
   </modules>
 
   <properties>
-    <version.org.jboss.arquillian>1.6.0.Final</version.org.jboss.arquillian>
-    <version.testng>7.6.0</version.testng>
+    <version.org.jboss.arquillian>1.7.0.Alpha10</version.org.jboss.arquillian>
   </properties>
 
   <dependencyManagement>
