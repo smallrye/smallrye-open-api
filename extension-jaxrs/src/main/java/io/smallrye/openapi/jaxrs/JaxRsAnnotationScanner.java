@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -612,8 +613,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .filter(target -> target.kind() == AnnotationTarget.Kind.CLASS)
                 .map(AnnotationTarget::asClass)
                 .filter(classInfo -> this.hasImplementationOrIsIncluded(context, classInfo))
-                .distinct() // CompositeIndex instances may return duplicates
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(() -> new TreeSet<ClassInfo>((one, two) -> one.name().compareTo(two.name())))); // CompositeIndex instances may return duplicates
+
     }
 
     private boolean hasImplementationOrIsIncluded(AnnotationScannerContext context, ClassInfo clazz) {
