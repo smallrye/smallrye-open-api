@@ -23,9 +23,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Operation from annotation or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject">operationObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -36,7 +36,7 @@ public class OperationReader {
 
     /**
      * Reads a single Operation annotation.
-     * 
+     *
      * @param context the scanning context
      * @param methodInfo the method
      * @return Operation model
@@ -80,7 +80,7 @@ public class OperationReader {
 
     /**
      * Reads a {@link Operation} OpenAPI node.
-     * 
+     *
      * @param node json object
      * @return Operation model
      */

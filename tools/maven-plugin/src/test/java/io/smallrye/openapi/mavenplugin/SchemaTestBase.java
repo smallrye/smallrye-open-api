@@ -12,7 +12,7 @@ public class SchemaTestBase {
 
     /**
      * Helper method to check that yaml and json schemas match against given test conditions, which are given as consumer.
-     * 
+     *
      * @param result
      * @param schemaConsumer
      */

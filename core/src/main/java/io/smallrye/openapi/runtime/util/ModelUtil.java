@@ -32,7 +32,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
 
 /**
  * Class with some convenience methods useful for working with the OAI data model.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class ModelUtil {
@@ -48,7 +48,7 @@ public class ModelUtil {
      * name already exists in the model, the tags' attributes are merged, with the
      * new tag's attributes overriding the value of any attributes specified on
      * both.
-     * 
+     *
      * @param openApi the OpenAPI model
      * @param tag a new {@link Tag} to add
      */
@@ -75,7 +75,7 @@ public class ModelUtil {
 
     /**
      * Gets the {@link Components} from the OAI model. If it doesn't exist, creates it.
-     * 
+     *
      * @param openApi OpenAPI
      * @return Components
      */
@@ -96,7 +96,7 @@ public class ModelUtil {
 
     /**
      * Gets the component type specified by the given `ref` from the OpenAPI model.
-     * 
+     *
      * @param <T> the type of the component map's entry values
      * @param openApi containing OpenAPI model
      * @param ref reference path to retrieve
@@ -158,7 +158,7 @@ public class ModelUtil {
 
     /**
      * Gets the {@link Paths} from the OAI model. If it doesn't exist, creates it.
-     * 
+     *
      * @param openApi OpenAPI
      * @return Paths
      */
@@ -172,7 +172,7 @@ public class ModelUtil {
     /**
      * Gets the {@link APIResponses} child model from the given operation. If it's null
      * then it will be created and returned.
-     * 
+     *
      * @param operation Operation
      * @return APIResponses
      */
@@ -187,7 +187,7 @@ public class ModelUtil {
      * Gets the {@link Schema} associated with the named property of the given schema.
      * When the property is not found or when no properties exist on the schema, returns
      * null.
-     * 
+     *
      * @param schema the schema from which to retrieve the property
      * @param name name of the property
      * @return schema for the named property if set, otherwise null
@@ -204,7 +204,7 @@ public class ModelUtil {
      * Returns true only if the given {@link Parameter} has a schema defined
      * for it. A schema can be defined either via the parameter's "schema"
      * property, or any "content.*.schema" property.
-     * 
+     *
      * @param parameter Parameter
      * @return Whether the parameter has a schema
      */
@@ -256,7 +256,7 @@ public class ModelUtil {
      *
      * The OpenAPI specification requires that a parameter have *either* a schema
      * or a content, but not both.
-     * 
+     *
      * @param parameter Parameter
      * @param schema Schema
      */
@@ -289,7 +289,7 @@ public class ModelUtil {
      * Returns true only if the given {@link RequestBody} has a schema defined
      * for it. A schema would be found within the request body's Content/MediaType
      * children.
-     * 
+     *
      * @param requestBody RequestBody
      * @return Whether RequestBody has a schema
      */
@@ -307,7 +307,7 @@ public class ModelUtil {
 
     /**
      * Sets the given {@link Schema} on the given {@link RequestBody}.
-     * 
+     *
      * @param requestBody RequestBody
      * @param schema Schema
      * @param mediaTypes String array
@@ -348,7 +348,7 @@ public class ModelUtil {
 
     /**
      * Returns the name component of the ref.
-     * 
+     *
      * @param ref String
      * @return Name
      */

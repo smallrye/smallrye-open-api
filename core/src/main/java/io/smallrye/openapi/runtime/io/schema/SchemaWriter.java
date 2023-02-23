@@ -20,9 +20,9 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Schema to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject">schemaObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -33,7 +33,7 @@ public class SchemaWriter {
 
     /**
      * Writes a map of {@link Schema} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param schemas map of Schema models
      */
@@ -43,7 +43,7 @@ public class SchemaWriter {
 
     /**
      * Writes a map of {@link Schema} to the JSON tree.
-     * 
+     *
      * @param parent
      * @param schemas
      */
@@ -59,7 +59,7 @@ public class SchemaWriter {
 
     /**
      * Writes a {@link Schema} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model Schema model
      * @param name name of the node
@@ -74,7 +74,7 @@ public class SchemaWriter {
 
     /**
      * Writes the {@link Schema} model to the given node.
-     * 
+     *
      * @param node
      * @param model
      */
@@ -129,7 +129,7 @@ public class SchemaWriter {
 
     /**
      * Writes a list of {@link Schema} to the JSON tree.
-     * 
+     *
      * @param parent
      * @param models
      * @param propertyName

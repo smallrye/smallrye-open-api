@@ -272,7 +272,7 @@ public abstract class AbstractParameterProcessor {
 
         /*
          * Phase II - Read method arguments: @Parameter and framework's annotations
-         * 
+         *
          * Read the resource method and any method super classes/interfaces that it may override
          */
         candidateMethods.stream()
@@ -281,7 +281,7 @@ public abstract class AbstractParameterProcessor {
 
         /*
          * Phase III - Read @Parameter(s) annotations directly on the record method
-         * 
+         *
          * Read the resource method and any method super classes/interfaces that it may override
          */
         candidateMethods.stream()
@@ -398,7 +398,7 @@ public abstract class AbstractParameterProcessor {
     /**
      * Determines if the parameter is eligible to have a pattern constraint
      * applied to its schema.
-     * 
+     *
      * @param param the parameter
      * @return true if the parameter may have the patter applied, otherwise false
      */
@@ -413,7 +413,7 @@ public abstract class AbstractParameterProcessor {
     /**
      * Performs the final merging of framework parameters with MP-OAI parameters to produce the list
      * of {@link Parameter}s found while scanning the current level (class or method).
-     * 
+     *
      * @param resourceMethod the method to which the returned parameters are applicable
      * @return list of {@link Parameter}s
      */
@@ -483,7 +483,7 @@ public abstract class AbstractParameterProcessor {
     protected abstract FrameworkParameter getMatrixParameter();
 
     /**
-     * 
+     *
      * @param resourceMethod method potentially containing an un-annotated path parameter argument
      * @param name name of the path parameter without any associated annotations
      * @return a new ParameterContext if the parameter is found, otherwise null
@@ -586,7 +586,7 @@ public abstract class AbstractParameterProcessor {
     /**
      * Attempt to resolve the type of targetType, using the full stack of resolvers
      * from the scanning context.
-     * 
+     *
      * @param targetType the type to resolve
      * @return the resolved type or targetType unchanged if resolution is not possible
      */
@@ -605,7 +605,7 @@ public abstract class AbstractParameterProcessor {
      * default value or Bean Validation annotations that may alter the schema. When
      * found, update param's schema either directly or, when a <code>ref</code> is present, by
      * creating a union of the local and reference schemas using <code>allOf</code>.
-     * 
+     *
      * @param param the Parameter containing a schema for update
      * @param context ParameterContext associated with param
      */
@@ -712,7 +712,7 @@ public abstract class AbstractParameterProcessor {
     /**
      * Called by the BeanValidationScanner when a member is found to have a BV annotation
      * indicating the parameter is required.
-     * 
+     *
      * @param name name of the schema property
      * @param schema schema holding the property
      */
@@ -895,7 +895,7 @@ public abstract class AbstractParameterProcessor {
 
     /**
      * Check if the given parameter name is present as a path segment in the resourcePath.
-     * 
+     *
      * @param paramName name of parameter
      * @param paramStyle style of parameter, e.g. simple or matrix
      * @param resourcePath resource path/URL
@@ -982,7 +982,7 @@ public abstract class AbstractParameterProcessor {
     /**
      * Retrieves either the provided parameter {@link Parameter.Style}, the default
      * style of the parameter based on the <code>in</code> attribute, or null if <code>in</code> is not defined.
-     * 
+     *
      * @param param the {@link Parameter}
      * @return the param's style, the default style defined based on <code>in</code>, or null if <code>in</code> is not defined.
      */
@@ -1151,7 +1151,7 @@ public abstract class AbstractParameterProcessor {
     /**
      * Retrieves the last path segment of the full path associated with the target. If
      * the last path segment contains a path variable name, returns the variable name.
-     * 
+     *
      * @param target
      * @return the last path segment of the target, or null if no path is defined
      */
@@ -1298,9 +1298,9 @@ public abstract class AbstractParameterProcessor {
      * Merges MP-OAI {@link Parameter}s and framework-specific parameters for the same {@link In} and name,
      * and {@link Style}. When overriddenParametersOnly is true, new parameters not already known
      * in {@link #params} will be ignored.
-     * 
+     *
      * The given {@link ParameterContextKey key} contains:
-     * 
+     *
      * <ul>
      * <li>the name of the parameter specified by application
      * <li>location, given by {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter#in @Parameter.in}
@@ -1458,7 +1458,7 @@ public abstract class AbstractParameterProcessor {
 
     /**
      * Obtain the MethodInfo associated with the annotation target.
-     * 
+     *
      * @param target annotated item. Only method and method parameter targets.
      * @return the MethodInfo associated with the target, or null if target is not a method or parameter.
      */

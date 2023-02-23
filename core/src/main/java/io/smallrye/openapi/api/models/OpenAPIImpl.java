@@ -185,7 +185,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
 
     /**
      * Returns true if the tag already exists in the OpenAPI document.
-     * 
+     *
      * @param name
      */
     private boolean hasTag(String name) {

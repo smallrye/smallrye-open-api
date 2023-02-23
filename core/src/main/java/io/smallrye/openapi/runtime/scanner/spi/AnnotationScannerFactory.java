@@ -9,7 +9,7 @@ import java.util.ServiceLoader;
 
 /**
  * Factory that allows plugging in more scanners.
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class AnnotationScannerFactory {

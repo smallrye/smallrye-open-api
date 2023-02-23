@@ -27,9 +27,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Header from annotations or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject">headerObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -40,7 +40,7 @@ public class HeaderReader {
 
     /**
      * Reads a map of Header annotations.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue map of {@literal @}Header annotations
      * @return Map of Header models
@@ -67,7 +67,7 @@ public class HeaderReader {
 
     /**
      * Reads the {@link Header} OpenAPI nodes.
-     * 
+     *
      * @param node the json node
      * @return Map of Header models
      */
@@ -88,7 +88,7 @@ public class HeaderReader {
 
     /**
      * Reads a Header annotation into a model.
-     * 
+     *
      * @param annotationInstance the {@literal @}Header annotations
      * @return Header model
      */
@@ -111,7 +111,7 @@ public class HeaderReader {
 
     /**
      * Reads a {@link Header} OpenAPI node.
-     * 
+     *
      * @param node
      */
     private static Header readHeader(final JsonNode node) {
@@ -137,7 +137,7 @@ public class HeaderReader {
 
     /**
      * Reads a header style.
-     * 
+     *
      * @param node the json node
      * @return Header style enum
      */

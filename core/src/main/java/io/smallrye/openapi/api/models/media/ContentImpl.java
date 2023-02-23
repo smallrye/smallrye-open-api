@@ -88,5 +88,5 @@ public class ContentImpl implements Content, ModelImpl, MapModel<MediaType> {
         return MapModel.super.remove(key);
     }
 
-    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1 
+    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1
 }

@@ -17,9 +17,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * This reads the Info from annotations or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#infoObject">infoObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -30,7 +30,7 @@ public class InfoReader {
 
     /**
      * Annotation to Info
-     * 
+     *
      * @param annotationValue the {@literal @}Info annotation
      * @return Info model
      */
@@ -54,7 +54,7 @@ public class InfoReader {
 
     /**
      * Reads an {@link Info} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Info model
      */

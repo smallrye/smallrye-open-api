@@ -19,7 +19,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.SalutationSpan
 
 /**
  * Basic tests to check the operation Id autogeneration
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 class OperationIdTest extends JaxRsDataObjectScannerTestBase {

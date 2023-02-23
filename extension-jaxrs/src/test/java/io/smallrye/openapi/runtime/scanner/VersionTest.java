@@ -19,7 +19,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
 /**
  * Basic tests to check the version configuration
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 class VersionTest extends JaxRsDataObjectScannerTestBase {
@@ -28,7 +28,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * This test a basic that set the version by providing a schema document
-     * 
+     *
      * @throws java.io.IOException
      * @throws org.json.JSONException
      */

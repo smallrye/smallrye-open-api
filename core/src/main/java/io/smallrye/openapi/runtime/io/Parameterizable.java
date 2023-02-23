@@ -2,7 +2,7 @@ package io.smallrye.openapi.runtime.io;
 
 /**
  * Constants related to Parameterizable contrants
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */

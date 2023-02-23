@@ -18,7 +18,7 @@ import io.smallrye.openapi.runtime.io.server.ServerConstant;
  *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableObject">serverVariableObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -29,7 +29,7 @@ public class ServerVariableWriter {
 
     /**
      * Writes the {@link ServerVariable} model to the JSON tree.
-     * 
+     *
      * @param serverNode the json node
      * @param variables map of ServerVariable models
      */
@@ -47,7 +47,7 @@ public class ServerVariableWriter {
 
     /**
      * Writes a {@link ServerVariable} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model the ServerVariable model
      * @param variableName the node name

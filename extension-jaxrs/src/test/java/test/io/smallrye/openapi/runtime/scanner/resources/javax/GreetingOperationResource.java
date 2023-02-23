@@ -16,7 +16,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
 /**
  * Test the auto generation of Operation Id in the case that there is an operation annotation
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @Path("/greeting")

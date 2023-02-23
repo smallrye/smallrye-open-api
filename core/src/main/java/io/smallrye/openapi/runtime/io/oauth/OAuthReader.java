@@ -23,10 +23,10 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Oauth flow annotation
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oauthFlowsObject">oauthFlowsObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -37,7 +37,7 @@ public class OAuthReader {
 
     /**
      * Reads an OAuthFlows annotation into a model.
-     * 
+     *
      * @param annotationValue the annotation value
      * @return OAuthFlows model
      */
@@ -58,7 +58,7 @@ public class OAuthReader {
 
     /**
      * Reads a {@link OAuthFlows} OpenAPI node.
-     * 
+     *
      * @param node the json object
      * @return OAuthFlows model
      */
@@ -78,7 +78,7 @@ public class OAuthReader {
 
     /**
      * Reads a single OAuthFlow annotation into a model.
-     * 
+     *
      * @param annotationValue {@literal @}OAuthFlow annotation
      * @return OAuthFlow model
      */
@@ -99,7 +99,7 @@ public class OAuthReader {
 
     /**
      * Reads a {@link OAuthFlow} OpenAPI node.
-     * 
+     *
      * @param node json object
      * @return OAuthFlow model
      */
@@ -119,7 +119,7 @@ public class OAuthReader {
 
     /**
      * Reads an array of OAuthScope annotations into a Scopes model.
-     * 
+     *
      * @param annotationValue {@literal @}OAuthScope annotation
      * @return Map of name and description of the scope
      */
@@ -142,7 +142,7 @@ public class OAuthReader {
 
     /**
      * Reads a map of OAuth scopes.
-     * 
+     *
      * @param node json map
      * @return Map of name and description of the scope
      */

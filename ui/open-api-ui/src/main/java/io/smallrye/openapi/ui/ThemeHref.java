@@ -2,7 +2,7 @@ package io.smallrye.openapi.ui;
 
 /**
  * Available themes
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public enum ThemeHref {

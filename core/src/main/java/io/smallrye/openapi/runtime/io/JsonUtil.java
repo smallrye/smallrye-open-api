@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Utilities methods for reading information from a Json Tree.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public final class JsonUtil {
@@ -43,7 +43,7 @@ public final class JsonUtil {
     /**
      * Extract a string property from the given json tree. Returns null if no
      * property exists or is not a text node.
-     * 
+     *
      * @param node JsonNode
      * @param propertyName Property to extract
      * @return String holding the value found for the property
@@ -59,7 +59,7 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node. If the value is null,
      * then the property is not written.
-     * 
+     *
      * @param node ObjectNode
      * @param propertyName Property to be set
      * @param propertyValue Value to be set
@@ -74,7 +74,7 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node. If the value is null,
      * then the property is not written.
-     * 
+     *
      * @param node ObjectNode
      * @param propertyName Property to be set
      * @param propertyValue Value to be set
@@ -90,7 +90,7 @@ public final class JsonUtil {
     /**
      * Extract a boolean property from the given json tree. Returns null if no
      * property exists or is not a boolean node.
-     * 
+     *
      * @param node JsonNode
      * @param propertyName Property to extract
      * @return Boolean containing the value extracted
@@ -106,7 +106,7 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node. If the value is null,
      * then the property is not written.
-     * 
+     *
      * @param node ObjectNode
      * @param propertyName Property to be set
      * @param propertyValue Boolean value to be set
@@ -121,7 +121,7 @@ public final class JsonUtil {
     /**
      * Extract a integer property from the given json tree. Returns null if no
      * property exists or is not a boolean node.
-     * 
+     *
      * @param node JsonNode
      * @param propertyName Property to extract
      * @return Integer containing the extracted value
@@ -137,7 +137,7 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node. If the value is null,
      * then the property is not written.
-     * 
+     *
      * @param node ObjectNode
      * @param propertyName Property to be set
      * @param propertyValue Integer value to be set
@@ -152,7 +152,7 @@ public final class JsonUtil {
     /**
      * Extract a BigDecimal property from the given json tree. Returns null if no
      * property exists or is not a boolean node.
-     * 
+     *
      * @param node JsonNode
      * @param propertyName Property to extract
      * @return BigDecimal containing the extracted value
@@ -168,7 +168,7 @@ public final class JsonUtil {
     /**
      * Sets the value of a property for a given json node. If the value is null,
      * then the property is not written.
-     * 
+     *
      * @param node ObjectNode
      * @param propertyName Property to be set
      * @param propertyValue BigDecimal value to be set
@@ -192,7 +192,7 @@ public final class JsonUtil {
      * Reads the node as a Java object.This is typically expected to be a literal of
      * some sort, as in the case of default values and examples. The node may be anything
      * from a string to a javascript object.
-     * 
+     *
      * @param node the json node
      * @return a java object
      */
@@ -299,7 +299,7 @@ public final class JsonUtil {
 
     /**
      * Reads a string array.
-     * 
+     *
      * @param node the json node
      * @return List of strings
      */
@@ -320,7 +320,7 @@ public final class JsonUtil {
 
     /**
      * Reads an object array.
-     * 
+     *
      * @param node the json node
      * @return list of objects
      */
@@ -341,7 +341,7 @@ public final class JsonUtil {
 
     /**
      * Reads a map of strings.
-     * 
+     *
      * @param node json map
      * @return a String-String map
      */

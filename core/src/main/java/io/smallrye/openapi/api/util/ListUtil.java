@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 /**
  * Util that helps with List operations
- * 
+ *
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
@@ -21,7 +21,7 @@ public class ListUtil {
      * If the resulting list is empty, return null. This method is marked with
      * {@code @SafeVarargs} because the elements of the lists handled generically
      * and the input/output types match.
-     * 
+     *
      * @param <T> element type of the list
      * @param lists one or more lists to combine
      * @return the combined/merged lists or null if the resulting merged list is empty

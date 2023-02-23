@@ -16,9 +16,9 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
  * Spring.
  * Some basic test, comparing with what we get in the JAX-RS version.
  * See the GreetingPostResource in the JAX-RS test
- * 
+ *
  * This is an alternative that use the RequestMapping rather than PostMapping
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @RestController

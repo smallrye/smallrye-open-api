@@ -20,7 +20,7 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Content object annotation and json
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -32,7 +32,7 @@ public class ContentReader {
     /**
      * Reads a single Content annotation into a model. The value in this case is an array of
      * Content annotations.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue the {@literal @}Content annotation
      * @param direction the content direction
@@ -64,7 +64,7 @@ public class ContentReader {
 
     /**
      * Reads a {@link Content} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Content model
      */
@@ -83,7 +83,7 @@ public class ContentReader {
     /**
      * If the content type is not provided in the @Content annotation, then
      * we assume it applies to all the scanner method's @Consumes or @Produces
-     * 
+     *
      * @param direction the flow of traffic
      * @return default mimetypes
      */

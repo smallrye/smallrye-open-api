@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
- * 
+ *
  */
 class ExtensionParsingTests extends IndexScannerTestBase {
 

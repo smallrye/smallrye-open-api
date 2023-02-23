@@ -18,10 +18,10 @@ import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeWriter;
 
 /**
  * Writing the Components to json node
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject">componentsObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -32,7 +32,7 @@ public class ComponentsWriter {
 
     /**
      * Writes a {@link Components} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param components the components model
      */

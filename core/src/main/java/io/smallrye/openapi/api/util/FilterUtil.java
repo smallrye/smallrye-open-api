@@ -40,7 +40,7 @@ public class FilterUtil {
 
     /**
      * Apply the given filter to the given model.
-     * 
+     *
      * @param filter
      *        OASFilter
      * @param model
@@ -72,7 +72,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -105,7 +105,7 @@ public class FilterUtil {
 
     /**
      * Filters the given models.
-     * 
+     *
      * @param filter OASFilter
      * @param models map of models to be filtered
      * @param contentFilter a filter method to be applied over the properties of each model
@@ -143,7 +143,7 @@ public class FilterUtil {
 
     /**
      * Filters the given models.
-     * 
+     *
      * @param filter OASFilter
      * @param models list of models to be filtered
      * @param contentFilter a filter method to be applied over the properties of each model
@@ -179,7 +179,7 @@ public class FilterUtil {
 
     /**
      * Filters a given model
-     * 
+     *
      * @param filter OASFilter
      * @param models model to be filtered
      * @param contentFilter a filter method to be applied over the properties the model
@@ -209,7 +209,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -229,7 +229,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -252,7 +252,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -277,7 +277,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -290,7 +290,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -306,7 +306,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -319,7 +319,7 @@ public class FilterUtil {
 
     /**
      * Filters the given models.
-     * 
+     *
      * @param filter
      * @param models
      */
@@ -335,7 +335,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -347,7 +347,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -359,7 +359,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -372,7 +372,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -384,7 +384,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */
@@ -398,7 +398,7 @@ public class FilterUtil {
 
     /**
      * Filters the given model.
-     * 
+     *
      * @param filter
      * @param model
      */

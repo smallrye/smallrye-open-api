@@ -19,7 +19,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
  * Special tests using a custom {@link AnnotationScannerExtension#parseExtension(String, String)}
  * implementation. The tests in this class will only run when system property `classpath.jackson.excluded`
  * is set to `true`. In that case, the Jackson dependencies should not be present on the class path.
- * 
+ *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 @EnabledIfSystemProperty(named = "classpath.jackson.excluded", matches = "true")

@@ -183,7 +183,7 @@ public class SchemaRegistry {
     /**
      * Convenience method to check if the current thread's <code>SchemaRegistry</code>
      * contains a schema for the given type (which may require type resolution using resolver).
-     * 
+     *
      * @param type type to check for existence of schema
      * @param resolver resolver for type parameter
      * @return true when schema references are enabled and the type is present in the registry, otherwise false
@@ -268,7 +268,7 @@ public class SchemaRegistry {
      * @param entityType
      *        the type the {@link Schema} applies to
      * @param views
-     * 
+     *
      * @param schema
      *        {@link Schema} to add to the registry
      * @return a reference to the newly registered {@link Schema}

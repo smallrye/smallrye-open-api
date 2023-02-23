@@ -17,9 +17,9 @@ import io.smallrye.openapi.runtime.io.server.ServerWriter;
 
 /**
  * Writing the OperationWriter to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject">operationObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -30,7 +30,7 @@ public class OperationWriter {
 
     /**
      * Writes a {@link Operation} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model the Operation model
      * @param method the name of the node (operation method)

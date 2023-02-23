@@ -48,7 +48,7 @@ public class MergeUtil {
 
     /**
      * Merges documents and returns the result.
-     * 
+     *
      * @param document1 OpenAPIImpl instance
      * @param document2 OpenAPIImpl instance
      * @return Merged OpenAPIImpl instance
@@ -59,7 +59,7 @@ public class MergeUtil {
 
     /**
      * Generic merge of two objects of the same type.
-     * 
+     *
      * @param object1 First object
      * @param object2 Second object
      * @param <T> Type parameter
@@ -144,7 +144,7 @@ public class MergeUtil {
     /**
      * Merges two Maps. Any values missing from Map1 but present in Map2 will be added. If a value
      * is present in both maps, it will be overridden or merged.
-     * 
+     *
      * @param values1
      * @param values2
      */
@@ -212,7 +212,7 @@ public class MergeUtil {
     /**
      * Merges two Lists. Any values missing from List1 but present in List2 will be added. Depending on
      * the type of list, further processing and de-duping may be required.
-     * 
+     *
      * @param values1
      * @param values2
      */
@@ -261,7 +261,7 @@ public class MergeUtil {
     /**
      * Merge a list of strings. In all cases, string lists are really sets. So this is just
      * combining the two lists and then culling duplicates.
-     * 
+     *
      * @param values1
      * @param values2
      */
@@ -277,7 +277,7 @@ public class MergeUtil {
      * have two Tags with the same name. This will append any tags from values2 that don't
      * exist in values1. It will *merge* any tags found in values2 that already exist in
      * values1.
-     * 
+     *
      * @param values1
      * @param values2
      */
@@ -304,7 +304,7 @@ public class MergeUtil {
     /**
      * Merge two lists of Servers. Servers are a special case because they must be unique
      * by the 'url' property each must have.
-     * 
+     *
      * @param values1
      * @param values2
      */
@@ -332,7 +332,7 @@ public class MergeUtil {
      * Merge two lists of Security Requirements. Security Requirement lists are are a
      * special case because
      * values1.
-     * 
+     *
      * @param values1
      * @param values2
      */
@@ -353,7 +353,7 @@ public class MergeUtil {
     /**
      * Merge two lists of Parameters. Parameters are a special case because they must be unique
      * by the name in 'in' each have
-     * 
+     *
      * @param values1
      * @param values2
      */

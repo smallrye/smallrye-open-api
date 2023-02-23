@@ -22,9 +22,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Server annotation and json node
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject">serverObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -35,7 +35,7 @@ public class ServerReader {
 
     /**
      * Reads any Server annotations.The annotation value is an array of Server annotations.
-     * 
+     *
      * @param annotationValue an Array of {@literal @}Server annotations
      * @return a List of Server models
      */
@@ -55,7 +55,7 @@ public class ServerReader {
 
     /**
      * Reads a list of {@link Server} OpenAPI nodes.
-     * 
+     *
      * @param node the json array
      * @return a List of Server models
      */
@@ -74,7 +74,7 @@ public class ServerReader {
 
     /**
      * Reads a single Server annotation.
-     * 
+     *
      * @param annotationValue the {@literal @}Server annotation
      * @return a Server model
      */
@@ -87,7 +87,7 @@ public class ServerReader {
 
     /**
      * Reads a single Server annotation.
-     * 
+     *
      * @param annotationInstance the {@literal @}Server annotations instance
      * @return Server model
      */
@@ -107,7 +107,7 @@ public class ServerReader {
 
     /**
      * Reads a list of {@link Server} OpenAPI nodes.
-     * 
+     *
      * @param node the json array
      * @return a List of Server models
      */

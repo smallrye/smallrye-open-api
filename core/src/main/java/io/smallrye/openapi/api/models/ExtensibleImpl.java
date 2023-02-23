@@ -10,7 +10,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 /**
  * Implementation of the {@link Extensible} OpenAPI model interface. Base class for many of the
  * OpenAPI models.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensible<T>, ModelImpl {

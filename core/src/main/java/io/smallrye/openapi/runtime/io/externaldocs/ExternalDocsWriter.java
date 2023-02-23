@@ -9,10 +9,10 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionWriter;
 
 /**
  * This writes External Documentation json
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#externalDocumentationObject">externalDocumentationObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -23,7 +23,7 @@ public class ExternalDocsWriter {
 
     /**
      * Writes the {@link ExternalDocumentation} model to the JSON tree.
-     * 
+     *
      * @param parent the parent json model
      * @param model the ExternalDocumentation model
      */

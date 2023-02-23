@@ -33,7 +33,7 @@ class FilterUtilTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
-     * 
+     *
      * @param testResource
      * @throws IOException
      */
@@ -43,7 +43,7 @@ class FilterUtilTest {
 
     /**
      * Compares two JSON strings.
-     * 
+     *
      * @param expected
      * @param actual
      * @throws JSONException
@@ -55,7 +55,7 @@ class FilterUtilTest {
     /**
      * Test method for
      * {@link FilterUtil#applyFilter(org.eclipse.microprofile.openapi.OASFilter, org.eclipse.microprofile.openapi.models.OpenAPI)}.
-     * 
+     *
      * @throws Exception
      */
     @Test

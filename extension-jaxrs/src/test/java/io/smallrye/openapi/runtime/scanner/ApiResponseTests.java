@@ -361,7 +361,7 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     /*
      * Test case for Smallrye OpenAPI issue #1026.
-     * 
+     *
      * https://github.com/smallrye/smallrye-open-api/issues/1026
      */
     void testAPIResponseSchema() throws IOException, JSONException {
@@ -400,7 +400,7 @@ class ApiResponseTests extends IndexScannerTestBase {
     @Test
     /*
      * Test case for Smallrye OpenAPI issue #1234.
-     * 
+     *
      * https://github.com/smallrye/smallrye-open-api/issues/1234
      */
     void testNonJaxRsMethodsSkipped() throws IOException, JSONException {

@@ -10,9 +10,9 @@ import io.smallrye.openapi.runtime.io.info.InfoConstant;
 
 /**
  * This write the Contact to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#contactObject">contactObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -23,7 +23,7 @@ public class ContactWriter {
 
     /**
      * Writes the {@link Contact} model to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model the Contact model
      */

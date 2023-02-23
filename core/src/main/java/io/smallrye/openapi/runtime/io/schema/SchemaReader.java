@@ -32,9 +32,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Schema annotation
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject">schemaObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -45,7 +45,7 @@ public class SchemaReader {
 
     /**
      * Reads a map of Schema annotations.
-     * 
+     *
      * @param context the scanner context
      * @param annotationValue map of {@literal @}Schema annotations
      * @return Map of Schema models
@@ -78,7 +78,7 @@ public class SchemaReader {
 
     /**
      * Reads a {@link Schema} OpenAPI node.
-     * 
+     *
      * @param node json node
      * @return Schema model
      */
@@ -139,7 +139,7 @@ public class SchemaReader {
 
     /**
      * Reads a schema type.
-     * 
+     *
      * @param node the json node
      * @return SchemaType enum
      */
@@ -153,7 +153,7 @@ public class SchemaReader {
 
     /**
      * Reads a list of schemas.
-     * 
+     *
      * @param node the json array
      * @return List of Schema models
      */
@@ -171,7 +171,7 @@ public class SchemaReader {
 
     /**
      * Reads the {@link Schema} OpenAPI nodes.
-     * 
+     *
      * @param node map of schema json nodes
      * @return Map of Schema model
      */

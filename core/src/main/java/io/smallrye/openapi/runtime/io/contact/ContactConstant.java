@@ -2,9 +2,9 @@ package io.smallrye.openapi.runtime.io.contact;
 
 /**
  * Constants related to Contact
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#contactObject">contactObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */

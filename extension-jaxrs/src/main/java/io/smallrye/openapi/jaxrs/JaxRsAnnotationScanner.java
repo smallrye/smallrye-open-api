@@ -55,7 +55,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 /**
  * Scanner that scan Jax-Rs entry points.
  * This is also the default, as it's part of the spec.
- * 
+ *
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
@@ -165,7 +165,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     /**
      * Find and process all JAX-RS applications
-     * 
+     *
      * @param context the scanning context
      * @param openApi the openAPI model
      */
@@ -188,7 +188,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * Processes a JAX-RS {@link Application} and creates an {@link OpenAPI} model. Performs
      * annotation scanning and other processing. Returns a model unique to that single JAX-RS
      * app.
-     * 
+     *
      * @param applicationClass
      */
     private OpenAPI processApplicationClass(final AnnotationScannerContext context, ClassInfo applicationClass) {
@@ -233,7 +233,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     /**
      * Processing a single JAX-RS resource class (annotated with @Path).
-     * 
+     *
      * @param openApi
      * @param resourceClass
      * @param locatorPathParameters
@@ -256,7 +256,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     /**
      * Process the JAX-RS Operation methods
-     * 
+     *
      * @param context the scanning context
      * @param resourceClass the class containing the methods
      * @param openApi the OpenApi model being processed
@@ -297,7 +297,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     /**
      * Build a map between exception class name and its corresponding @ApiResponse annotation in the jax-rs exception mapper
-     * 
+     *
      */
     private Map<DotName, List<AnnotationInstance>> processExceptionMappers(final AnnotationScannerContext context) {
         Collection<ClassInfo> exceptionMappers = new ArrayList<>();
@@ -356,7 +356,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * Scans a sub-resource locator method's return type as a resource class. The list of locator path parameters
      * will be expanded with any parameters that apply to the resource sub-locator method (both path and operation
      * parameters).
-     * 
+     *
      * @param openApi current OAI result
      * @param locatorPathParameters the parent resource's list of path parameters, may be null
      * @param resourceClass the JAX-RS resource class being processed. May be a sub-class of the class which declares method
@@ -418,7 +418,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     /**
      * Process a single JAX-RS method to produce an OpenAPI Operation.
-     * 
+     *
      * @param openApi
      * @param resourceClass
      * @param method
@@ -522,7 +522,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     /**
      * Remove from the list of locator parameters and parameter present in the list of operation parameters.
      * Parameters are considered the same if they have the same value for name and {@code in}.
-     * 
+     *
      * @param locatorParams list of locator parameters
      * @param operationParams list of operation parameters
      * @return
@@ -580,7 +580,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * Flattens and trims the list of media types from a {@code @Consumes} or {@code @Produces} annotation.
      * <p>
      * E.g. Converts {@code ["foo, bar"," baz ","qux"]} to {@code ["foo","bar","baz","qux"]}
-     * 
+     *
      * @param mediaTypes array of media types which may contain comma separated values
      * @return elements of {@code mediaTypes} trimmed and with any comma separated values converted into separate elements
      */
@@ -595,7 +595,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     /**
      * Use the Jandex index to find all jax-rs resource classes. This is done by searching for
      * all Class-level @Path annotations.
-     * 
+     *
      * @param context current scanning context
      * @return Collection of ClassInfo's
      */
@@ -634,7 +634,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     /**
      * Determine whether the provided ClassInfo is an interface or a synthetic implementation
      * of an interface annotated with {@code org.eclipse.microprofile.rest.client.inject.RegisterRestClient}.
-     * 
+     *
      * @return {@code true} if the class is neither an interface nor a synthetic (generated) class annotated with
      *         {@code org.eclipse.microprofile.rest.client.inject.RegisterRestClient}, otherwise {@code false}.
      */

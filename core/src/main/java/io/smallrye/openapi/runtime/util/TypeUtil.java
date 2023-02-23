@@ -309,7 +309,7 @@ public class TypeUtil {
      * array or object, the type must be in the provided index. Otherwise, only
      * those types with defined properties beyond 'type' and 'format' are
      * eligible.
-     * 
+     *
      * @param context scanning context
      * @param classType the type to check
      * @return true if the type may be registered in the SchemaRegistry, false otherwise.
@@ -332,7 +332,7 @@ public class TypeUtil {
 
     /**
      * Retrieves the read-only Map of schema attributes for the given type.
-     * 
+     *
      * @param classType the type
      * @return Map of default schema attributes
      */
@@ -343,7 +343,7 @@ public class TypeUtil {
     /**
      * Check if the default schema type that applies to the provided classType
      * differs from any value specified by the user via schemaAnnotation.
-     * 
+     *
      * @param classType class type to find a default schema type
      * @param schemaAnnotation schema annotation (possibly null) which may have an overridden type value
      * @return true if the annotation has a type specified that is different from the default type for classType, otherwise
@@ -358,7 +358,7 @@ public class TypeUtil {
     /**
      * Sets the default schema attributes for the given type on the provided schema
      * instance.
-     * 
+     *
      * @param classType the type
      * @param schema a writable schema to be updated with the type's default schema attributes
      */
@@ -376,7 +376,7 @@ public class TypeUtil {
      * Removes the known default schema attributes from the fieldSchema if they are also
      * present and have the same value in the typeSchema. This method reduces any duplicate
      * attributes between the two schemas when they are in an 'allOf' composition.
-     * 
+     *
      * @param fieldSchema the schema for a field of the type described by typeSchema
      * @param typeSchema the schema for a class type
      */
@@ -554,14 +554,14 @@ public class TypeUtil {
 
     /**
      * Determine if a given type is one of the following types:
-     * 
+     *
      * <ul>
      * <li><code>java.util.Optional</code>
      * <li><code>java.util.OptionalDouble</code>
      * <li><code>java.util.OptionalInt</code>
      * <li><code>java.util.OptionalLong</code>
      * </ul>
-     * 
+     *
      * @param type the type to check
      * @return true if the type is one of the four optional types, otherwise false
      */
@@ -572,7 +572,7 @@ public class TypeUtil {
     /**
      * Unwraps the type parameter (generic or primitive) from the given optional
      * type.
-     * 
+     *
      * @param type the type to unwrap
      * @return the generic type argument for <code>java.util.Optional</code>, otherwise the optional primitive double, int, or
      *         long

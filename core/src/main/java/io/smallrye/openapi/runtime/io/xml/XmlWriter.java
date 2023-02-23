@@ -10,9 +10,9 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 
 /**
  * Writing the Xml to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xmlObject">xmlObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -23,7 +23,7 @@ public class XmlWriter {
 
     /**
      * Writes a {@link XML} object to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model the XML model
      */

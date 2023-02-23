@@ -21,10 +21,10 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the Security from annotations or json
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object">security-requirement-object</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -35,7 +35,7 @@ public class SecurityRequirementReader {
 
     /**
      * Reads any SecurityRequirement and SecurityRequirementsSet annotations.
-     * 
+     *
      * @param securityRequirements Array of {@literal @}SecurityRequirement annotations
      * @param securityRequirementsSets Array of {@literal @}SecurityRequirementsSet annotation
      * @return List of SecurityRequirement models
@@ -75,7 +75,7 @@ public class SecurityRequirementReader {
 
     /**
      * Reads a list of {@link SecurityRequirement} OpenAPI nodes.
-     * 
+     *
      * @param node the json array
      * @return List of SecurityRequirement models
      */
@@ -94,7 +94,7 @@ public class SecurityRequirementReader {
 
     /**
      * Reads a single SecurityRequirement annotation.
-     * 
+     *
      * @param annotationInstance the {@literal @}SecurityRequirement annotation
      * @return SecurityRequirement model
      */
@@ -111,7 +111,7 @@ public class SecurityRequirementReader {
 
     /**
      * Reads a single SecurityRequirementsSet annotation
-     * 
+     *
      * @param annotationInstance the {@literal @}SecurityRequirementsSet annotation
      * @return SecurityRequirement model
      */
@@ -141,7 +141,7 @@ public class SecurityRequirementReader {
 
     /**
      * Reads a {@link APIResponses} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return SecurityRequirement model
      */

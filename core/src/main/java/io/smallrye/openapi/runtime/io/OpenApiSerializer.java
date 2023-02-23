@@ -14,7 +14,7 @@ import io.smallrye.openapi.runtime.io.definition.DefinitionWriter;
 
 /**
  * Class used to serialize an OpenAPI
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiSerializer {
@@ -24,7 +24,7 @@ public class OpenApiSerializer {
 
     /**
      * Serializes the given OpenAPI object into either JSON or YAML and returns it as a string.
-     * 
+     *
      * @param openApi the OpenAPI object
      * @param format the serialization format
      * @return OpenAPI object as a String

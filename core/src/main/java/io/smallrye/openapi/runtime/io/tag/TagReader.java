@@ -25,9 +25,9 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the Tag from annotation or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tagObject">tagObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -39,7 +39,7 @@ public class TagReader {
     /**
      * Reads any Tag annotations.The annotation
      * value is an array of Tag annotations.
-     * 
+     *
      * @param context scanning context
      * @param annotationValue an array of {@literal @}Tag annotations
      * @return List of Tag models
@@ -61,7 +61,7 @@ public class TagReader {
 
     /**
      * Reads a list of {@link Tag} OpenAPI nodes.
-     * 
+     *
      * @param node the json array node
      * @return List of Tag models
      */
@@ -80,7 +80,7 @@ public class TagReader {
 
     /**
      * Reads a single Tag annotation.
-     * 
+     *
      * @param context scanning context
      * @param annotationInstance {@literal @}Tag annotation, must not be null
      * @return Tag model
@@ -100,7 +100,7 @@ public class TagReader {
 
     /**
      * Reads a {@link Tag} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Tag model
      */

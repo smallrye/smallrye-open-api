@@ -21,7 +21,7 @@ class MergeUtilTest {
 
     /**
      * Loads a resource as a string (reads the content at the URL).
-     * 
+     *
      * @param testResource
      * @throws IOException
      */
@@ -31,7 +31,7 @@ class MergeUtilTest {
 
     /**
      * Compares two JSON strings.
-     * 
+     *
      * @param expected
      * @param actual
      * @throws JSONException
@@ -43,7 +43,7 @@ class MergeUtilTest {
     /**
      * Performs a single full merge test. Two documents are loaded (as resources) and then
      * merged. The expected merge result is then loaded and compared with the actual result.
-     * 
+     *
      * @param resource1
      * @param resource2
      * @param expected

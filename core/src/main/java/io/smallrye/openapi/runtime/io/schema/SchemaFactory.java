@@ -87,7 +87,7 @@ public class SchemaFactory {
      * Populates the schema using the {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * on the provided class. If the schema has already been registered (in components), the existing
      * registration will be replaced.
-     * 
+     *
      * @param context scanning context
      * @param schema schema model to populate
      * @param annotation schema annotation to read
@@ -105,7 +105,7 @@ public class SchemaFactory {
      * Populates the schema using the {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * on the provided class. If the schema has already been registered (in components), the existing
      * registration will be replaced.
-     * 
+     *
      * @param context scanning context
      * @param schema schema model to populate
      * @param annotation schema annotation to read
@@ -130,7 +130,7 @@ public class SchemaFactory {
          * The registry may already contain the type from earlier in the scan if the
          * type has been referenced as a field, etc. The schema here is "fuller" as it
          * now contains information gathered from the @Schema annotation on the class.
-         * 
+         *
          * Ignore the reference returned by register, the caller expects the full schema.
          */
         schemaRegistration(context, clazzType, schema);
@@ -295,7 +295,7 @@ public class SchemaFactory {
      * Reads the attribute named by propertyName from annotation. If no value was specified,
      * an optional default value is retrieved from the defaults map using the propertyName as
      * they key. Array-typed annotation values will be converted to List.
-     * 
+     *
      * @param <T> the type of the annotation attribute value
      * @param annotation the annotation to read
      * @param propertyName the name of the attribute to read
@@ -311,7 +311,7 @@ public class SchemaFactory {
      * Reads the attribute named by propertyName from annotation. If no value was specified,
      * an optional default value is retrieved from the defaults map using the propertyName as
      * they key. Array-typed annotation values will be converted to List.
-     * 
+     *
      * @param <T> the type of the annotation attribute value
      * @param annotation the annotation to read
      * @param propertyName the name of the attribute to read
@@ -371,7 +371,7 @@ public class SchemaFactory {
      * Reads the attribute named by propertyName from annotation and converts a non-null value using the
      * provided converter function. If no value was specified, an optional default value is retrieved
      * from the defaults map using the propertyName as they key.
-     * 
+     *
      * @param <R> the type of the annotation attribute value
      * @param <T> the type into which the annotation is to be converted
      * @param annotation the annotation to read
@@ -398,7 +398,7 @@ public class SchemaFactory {
     /**
      * Read the <code>type</code> property from the provided <code>@Schema<code> annotation.
      * When null, the value previously set on the given schema object (if any) will be returned.
-     * 
+     *
      * @param annotation schema annotation being processed
      * @param schema schema model being populated
      * @param defaults default schema property values or empty
@@ -411,7 +411,7 @@ public class SchemaFactory {
 
     /**
      * Convert the string value to the enum equivalent <code>SchemaType</code>
-     * 
+     *
      * @param value string value from the <code>@Schema<code> annotation.
      * @return the equivalent SchemaType value, or null if not set or no match
      */
@@ -456,7 +456,7 @@ public class SchemaFactory {
 
     /**
      * Converts a Jandex type to a {@link Schema} model.
-     * 
+     *
      * @param context scanning context
      * @param type the implementation type of the item to scan
      * @param extensions list of AnnotationScannerExtensions
@@ -521,15 +521,15 @@ public class SchemaFactory {
     /**
      * Convert a Jandex enum class type to a {@link Schema} model. Adds each enum constant
      * name to the list of the given schema's enumeration list.
-     * 
+     *
      * Enumeration values are obtained preferring values from any method annotated with
      * Jackson's `@JsonValue`, if present. The enum class must be loaded in the context's
      * ClassLoader to perform the value extraction.
-     * 
+     *
      * If the annotation is not present, is not located on a supplier method, or
      * any reflection error occurs, the enumeration values will default to the enum
      * constant names listed in the ClassInfo.
-     * 
+     *
      * The given type must be found in the index.
      *
      * @param context scanning context
@@ -644,7 +644,7 @@ public class SchemaFactory {
 
     /**
      * Register the provided schema in the SchemaRegistry if allowed.
-     * 
+     *
      * @param context scanning context
      * @param type the type of the schema to register
      * @param schema a schema
@@ -667,7 +667,7 @@ public class SchemaFactory {
      * if non-null; the type is allowed for registration; and a schema for the given type
      * is not already in the registry or the schema being registered is not already a
      * reference that has been registered.
-     * 
+     *
      * @param context scanning context
      * @param registry
      * @param type
@@ -688,7 +688,7 @@ public class SchemaFactory {
 
     /**
      * Reads an array of Class annotations to produce a list of {@link Schema} models.
-     * 
+     *
      * @param context scanning context
      * @param types the implementation types of the items to scan, never null
      */

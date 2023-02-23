@@ -30,7 +30,7 @@ public interface AnnotationScannerExtension {
 
     /**
      * Gives a chance to extensions to process the set of scanner application classes.
-     * 
+     *
      * @param scanner the scanner used for application scanning
      * @param applications the set of rest application classes
      */
@@ -40,8 +40,8 @@ public interface AnnotationScannerExtension {
     /**
      * Returns true if the given annotation is a scanner annotation extension,
      * such as would be in the scanner's package.
-     * 
-     * 
+     *
+     *
      * @param instance the annotation to check
      * @return true if the given annotation is a jax-rs annotation extension
      */

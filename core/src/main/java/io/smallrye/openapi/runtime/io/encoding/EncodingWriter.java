@@ -12,9 +12,9 @@ import io.smallrye.openapi.runtime.io.header.HeaderWriter;
 
 /**
  * Write the Encoding object to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject">encodingObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -25,7 +25,7 @@ public class EncodingWriter {
 
     /**
      * Writes a map of {@link Encoding} objects to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param models map of Encoding models
      */
@@ -41,7 +41,7 @@ public class EncodingWriter {
 
     /**
      * Writes a {@link Encoding} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name

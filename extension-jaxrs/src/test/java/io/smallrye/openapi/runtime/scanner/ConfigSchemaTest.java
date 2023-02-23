@@ -19,7 +19,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResou
 
 /**
  * Basic tests to check the setting of schemas via the mp.openapi.schema.* config property
- * 
+ *
  * @author Scott Curtis (@literal <Scott.Curtis@ibm.com>)
  */
 class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {

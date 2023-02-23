@@ -15,7 +15,7 @@ import java.util.Set;
 
 /**
  * Creates an index html based on some options
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class IndexHtmlCreator {
@@ -307,7 +307,7 @@ public class IndexHtmlCreator {
         DEFAULT_OPTIONS.put(Option.syntaxHighlight, null);
         DEFAULT_OPTIONS.put(Option.queryConfigEnabled, null);
 
-        // Network section 
+        // Network section
         DEFAULT_OPTIONS.put(Option.oauth2RedirectUrl, null);
         DEFAULT_OPTIONS.put(Option.requestInterceptor, null);
         DEFAULT_OPTIONS.put(Option.requestCurlOptions, null);

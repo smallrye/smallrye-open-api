@@ -53,7 +53,7 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
  * A test runner used to quickly run the OpenAPI extra tests directly against the
  * {@link OpenApiDocument} without spinning up an MP compliant server. This is used
  * as a helper for generating and running Junit DynamicTests from ExtraSuiteTestBase.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 @SuppressWarnings("rawtypes")
@@ -66,7 +66,7 @@ public class ExtraTestRunner {
 
     /**
      * Constructor.
-     * 
+     *
      * @param testClass
      * @throws InitializationError
      */
@@ -114,7 +114,7 @@ public class ExtraTestRunner {
 
     /**
      * Figures out what test class is being run.
-     * 
+     *
      * @throws InitializationError
      */
     @SuppressWarnings("unchecked")

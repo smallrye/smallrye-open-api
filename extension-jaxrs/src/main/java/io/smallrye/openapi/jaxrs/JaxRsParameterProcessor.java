@@ -43,10 +43,10 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     /**
      * Pattern to describe a path template parameter with a regular expression pattern restriction.
-     * 
+     *
      * Sonar validation is disabled on this expression because there is no danger of denial of
      * service attacks input derived from the developer of the host application.
-     * 
+     *
      * See JAX-RS {@link javax.ws.rs.Path Path} JavaDoc for explanation.
      */
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern

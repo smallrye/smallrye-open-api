@@ -52,7 +52,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
-     * 
+     *
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      */
@@ -64,7 +64,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
-     * 
+     *
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      * @param extensions A set of extensions to scanning
@@ -75,7 +75,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
-     * 
+     *
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      */
@@ -86,7 +86,7 @@ public class OpenApiAnnotationScanner {
 
     /**
      * Constructor.
-     * 
+     *
      * @param config OpenApiConfig instance
      * @param index IndexView of deployment
      * @param extensions A set of extensions to scanning
@@ -109,7 +109,7 @@ public class OpenApiAnnotationScanner {
     /**
      * Scan the deployment for relevant annotations. Returns an OpenAPI data model that was
      * built from those found annotations.
-     * 
+     *
      * @param filter Filter to only include certain scanners. Based on the scanner name. (JAX-RS, Spring, Vert.x)
      * @return OpenAPI generated from scanning annotations
      */
@@ -158,7 +158,7 @@ public class OpenApiAnnotationScanner {
     /**
      * Scans all <code>@OpenAPIDefinition</code> annotations present on <code>package-info</code>
      * classes known to the scanner's index.
-     * 
+     *
      * @param context scanning context
      * @param oai the current OpenAPI result
      * @return the created OpenAPI

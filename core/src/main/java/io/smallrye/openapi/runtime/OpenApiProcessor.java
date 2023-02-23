@@ -23,7 +23,7 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**
  * Provides some core archive processing functionality.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiProcessor {
@@ -89,7 +89,7 @@ public class OpenApiProcessor {
      * Parse the static file content and return the resulting model. Note that this
      * method does NOT close the resources in the static file. The caller is
      * responsible for that.
-     * 
+     *
      * @param staticFile OpenApiStaticFile to be parsed
      * @return OpenApiImpl
      */
@@ -108,7 +108,7 @@ public class OpenApiProcessor {
      * Create an {@link OpenAPI} model by scanning the deployment for relevant JAX-RS and
      * OpenAPI annotations. If scanning is disabled, this method returns null. If scanning
      * is enabled but no relevant annotations are found, an empty OpenAPI model is returned.
-     * 
+     *
      * @param config OpenApiConfig
      * @param index IndexView of Archive
      * @return OpenAPIImpl generated from annotations
@@ -121,7 +121,7 @@ public class OpenApiProcessor {
      * Create an {@link OpenAPI} model by scanning the deployment for relevant JAX-RS and
      * OpenAPI annotations. If scanning is disabled, this method returns null. If scanning
      * is enabled but no relevant annotations are found, an empty OpenAPI model is returned.
-     * 
+     *
      * @param config OpenApiConfig
      * @param loader ClassLoader
      * @param index IndexView of Archive
@@ -140,7 +140,7 @@ public class OpenApiProcessor {
      * Instantiate the configured {@link OASModelReader} and invoke it. If no reader is configured,
      * then return null. If a class is configured but there is an error either instantiating or invoking
      * it, a {@link OpenApiRuntimeException} is thrown.
-     * 
+     *
      * @param config OpenApiConfig
      * @param loader ClassLoader
      * @return OpenApiImpl created from OASModelReader
@@ -162,7 +162,7 @@ public class OpenApiProcessor {
 
     /**
      * Instantiate the {@link OASFilter} configured by the app.
-     * 
+     *
      * @param config OpenApiConfig
      * @param loader ClassLoader
      * @return OASFilter instance retrieved from loader

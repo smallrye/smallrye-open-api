@@ -9,10 +9,10 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 
 /**
  * Reading the Discriminator from an annotation or json
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminatorObject">discriminatorObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -23,7 +23,7 @@ public class DiscriminatorReader {
 
     /**
      * Reads a {@link Discriminator} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Discriminator model
      */

@@ -10,9 +10,9 @@ import io.smallrye.openapi.runtime.io.info.InfoConstant;
 
 /**
  * This writes the License to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#licenseObject">licenseObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -23,7 +23,7 @@ public class LicenseWriter {
 
     /**
      * Writes the {@link License} model to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model the License model
      */

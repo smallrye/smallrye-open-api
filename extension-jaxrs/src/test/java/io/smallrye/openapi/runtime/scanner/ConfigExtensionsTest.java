@@ -18,7 +18,7 @@ import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResou
 /**
  * Basic tests to check the setting of certain Info elements via config, using
  * extensions config properties
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {

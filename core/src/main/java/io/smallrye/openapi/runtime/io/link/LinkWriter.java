@@ -17,9 +17,9 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Link to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#linkObject">linkObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -30,7 +30,7 @@ public class LinkWriter {
 
     /**
      * Writes a map of {@link Link} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param links map of Link models
      */
@@ -46,7 +46,7 @@ public class LinkWriter {
 
     /**
      * Writes a {@link Link} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name
@@ -72,7 +72,7 @@ public class LinkWriter {
 
     /**
      * Writes the link parameters to the given node.
-     * 
+     *
      * @param parent
      * @param parameters
      */

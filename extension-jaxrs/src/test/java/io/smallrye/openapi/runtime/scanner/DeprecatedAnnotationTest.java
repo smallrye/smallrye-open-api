@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test the various positions of the {@link java.lang.Deprecated Deprecated} annotation.
- * 
+ *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 class DeprecatedAnnotationTest extends IndexScannerTestBase {

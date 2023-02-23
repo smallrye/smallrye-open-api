@@ -12,7 +12,7 @@ import org.jboss.jandex.DotName;
 
 /**
  * Constants related to JAX-RS
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */

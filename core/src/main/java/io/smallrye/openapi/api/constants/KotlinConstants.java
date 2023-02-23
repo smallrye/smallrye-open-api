@@ -4,7 +4,7 @@ import org.jboss.jandex.DotName;
 
 /**
  * Constants related to the Kotlin language
- * 
+ *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 public class KotlinConstants {

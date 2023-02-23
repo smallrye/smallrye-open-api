@@ -10,7 +10,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
 /**
  * Endpoint with no produces or consumes
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @Path("/greeting")

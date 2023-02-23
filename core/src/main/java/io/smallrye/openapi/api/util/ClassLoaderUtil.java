@@ -5,7 +5,7 @@ import java.security.PrivilegedAction;
 
 /**
  * Help to get a default classLoader
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class ClassLoaderUtil {

@@ -23,9 +23,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Link annotation and json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#linkObject">linkObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -36,7 +36,7 @@ public class LinkReader {
 
     /**
      * Reads Link annotations
-     * 
+     *
      * @param annotationValue map of {@literal @}Link annotations
      * @return Map of Link model
      */
@@ -61,7 +61,7 @@ public class LinkReader {
 
     /**
      * Reads the {@link Link} OpenAPI nodes.
-     * 
+     *
      * @param node the json node
      * @return Map of Link model
      */
@@ -82,7 +82,7 @@ public class LinkReader {
 
     /**
      * Reads a Link annotation into a model.
-     * 
+     *
      * @param annotationInstance {@literal @}Link annotation
      * @return Link model
      */
@@ -105,7 +105,7 @@ public class LinkReader {
 
     /**
      * Reads a {@link Link} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Link model
      */
@@ -129,7 +129,7 @@ public class LinkReader {
 
     /**
      * Reads an array of LinkParameter annotations into a map.
-     * 
+     *
      * @param annotationValue the annotation value
      * @return map of parameters
      */
@@ -151,7 +151,7 @@ public class LinkReader {
 
     /**
      * Reads the map of {@link Link} parameters.
-     * 
+     *
      * @param node the json node
      * @return map of parameters
      */

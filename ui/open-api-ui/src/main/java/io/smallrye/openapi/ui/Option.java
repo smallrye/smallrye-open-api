@@ -2,7 +2,7 @@ package io.smallrye.openapi.ui;
 
 /**
  * All the available options
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public enum Option {
