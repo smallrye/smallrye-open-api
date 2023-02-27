@@ -29,7 +29,7 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**
  * Some useful methods for creating stuff from ShrinkWrap {@link Archive}s.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class ArchiveUtil {
@@ -38,7 +38,7 @@ public class ArchiveUtil {
 
     /**
      * Creates an {@link OpenApiConfig} instance from the given ShrinkWrap archive.
-     * 
+     *
      * @param archive Shrinkwrap Archive instance
      * @return OpenApiConfig
      */
@@ -55,7 +55,7 @@ public class ArchiveUtil {
      * it as an {@link OpenApiStaticFile}. If not found, returns null. The static file
      * (when not null) contains an {@link InputStream} to the contents of the static file.
      * The caller is responsible for closing this stream.
-     * 
+     *
      * @param archive Shrinkwrap Archive instance
      * @return OpenApiStaticFile
      */
@@ -96,7 +96,7 @@ public class ArchiveUtil {
 
     /**
      * Index the ShrinkWrap archive to produce a jandex index.
-     * 
+     *
      * @param config OpenApiConfig
      * @param archive Shrinkwrap Archive
      * @return indexed classes in Archive
@@ -125,7 +125,7 @@ public class ArchiveUtil {
 
     /**
      * Indexes the given archive.
-     * 
+     *
      * @param config
      * @param indexer
      * @param archive
@@ -162,7 +162,7 @@ public class ArchiveUtil {
     /**
      * Returns true if the given JAR archive (dependency) should be cracked open and indexed
      * along with the rest of the deployment's classes.
-     * 
+     *
      * @param config
      * @param jarName
      */
@@ -181,7 +181,7 @@ public class ArchiveUtil {
     /**
      * Returns true if the class represented by the given archive path should be included in
      * the annotation index.
-     * 
+     *
      * @param config
      * @param archivePath
      */

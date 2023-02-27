@@ -25,10 +25,10 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Security Scheme annotation
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject">securitySchemeObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -39,7 +39,7 @@ public class SecuritySchemeReader {
 
     /**
      * Reads a map of SecurityScheme annotations.
-     * 
+     *
      * @param context scanning context
      * @param annotationValue Map of {@literal @}SecurityScheme annotations
      * @return Map of SecurityScheme models
@@ -66,7 +66,7 @@ public class SecuritySchemeReader {
 
     /**
      * Reads the {@link SecurityScheme} OpenAPI nodes.
-     * 
+     *
      * @param node map of json objects
      * @return Map of SecurityScheme models
      */
@@ -86,7 +86,7 @@ public class SecuritySchemeReader {
 
     /**
      * Reads a SecurityScheme annotation into a model.
-     * 
+     *
      * @param context scanning context
      * @param annotationInstance the {@literal @}SecurityScheme annotation
      * @return SecurityScheme model
@@ -119,7 +119,7 @@ public class SecuritySchemeReader {
 
     /**
      * Reads a {@link SecurityScheme} OpenAPI node.
-     * 
+     *
      * @param node json node
      * @return SecurityScheme model
      */
@@ -143,7 +143,7 @@ public class SecuritySchemeReader {
 
     /**
      * Reads a security scheme type.
-     * 
+     *
      * @param node json node
      * @return Type enum
      */
@@ -156,7 +156,7 @@ public class SecuritySchemeReader {
 
     /**
      * Reads a security scheme 'in' property.
-     * 
+     *
      * @param node json node
      * @return In enum
      */

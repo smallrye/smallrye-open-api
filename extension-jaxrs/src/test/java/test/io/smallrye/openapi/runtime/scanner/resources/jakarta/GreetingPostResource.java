@@ -16,7 +16,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 /**
  * JAX-RS.
  * Some basic tests, mostly to compare with the Spring implementation
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @Path("/greeting")

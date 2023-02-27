@@ -11,7 +11,7 @@ import io.quarkus.vertx.web.RouteBase;
  * Vert.x
  * Some basic test, comparing with what we get in the JAX-RS version.
  * See the GreetingDeleteResource in the JAX-RS test
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @ApplicationScoped

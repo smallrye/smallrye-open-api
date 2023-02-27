@@ -17,9 +17,9 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Callback to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject">callbackObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -30,7 +30,7 @@ public class CallbackWriter {
 
     /**
      * Writes a map of {@link Callback} to the JSON tree.
-     * 
+     *
      * @param parent the parent node
      * @param callbacks map of callbacks
      */
@@ -47,7 +47,7 @@ public class CallbackWriter {
 
     /**
      * Writes a {@link Callback} object to the JSON tree.
-     * 
+     *
      * @param parent the parent node
      * @param model the callback model
      * @param name the name of the node

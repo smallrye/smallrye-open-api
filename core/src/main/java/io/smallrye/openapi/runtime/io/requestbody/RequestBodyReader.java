@@ -31,10 +31,10 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the RequestBody annotation
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject">requestBodyObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -45,7 +45,7 @@ public class RequestBodyReader {
 
     /**
      * Reads a map of RequestBody annotations.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue map of {@literal @}RequestBody annotations
      * @return Map of RequestBody model
@@ -72,7 +72,7 @@ public class RequestBodyReader {
 
     /**
      * Reads the {@link RequestBody} OpenAPI nodes.
-     * 
+     *
      * @param node json map of Request Bodies
      * @return Map of RequestBody model
      */
@@ -92,7 +92,7 @@ public class RequestBodyReader {
 
     /**
      * Reads a RequestBody annotation into a model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue {@literal @}RequestBody annotation
      * @return RequestBody model
@@ -107,7 +107,7 @@ public class RequestBodyReader {
 
     /**
      * Reads a RequestBody annotation into a model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationInstance {@literal @}RequestBody annotation
      * @return RequestBody model
@@ -132,7 +132,7 @@ public class RequestBodyReader {
 
     /**
      * Reads a RequestBodySchema annotation into a model.
-     * 
+     *
      * @param context the scanning context
      * @param annotation {@literal @}RequestBodySchema annotation
      * @return RequestBody model
@@ -163,7 +163,7 @@ public class RequestBodyReader {
 
     /**
      * Reads a {@link RequestBody} OpenAPI node.
-     * 
+     *
      * @param node the json object
      * @return RequestBody model
      */

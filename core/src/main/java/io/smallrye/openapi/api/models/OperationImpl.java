@@ -324,7 +324,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
 
     /**
      * Implementation specific, set a reference to the Java Method, so that we can bind back to it later if needed
-     * 
+     *
      * @return reference to the method that we scanned this on
      */
     public String getMethodRef() {

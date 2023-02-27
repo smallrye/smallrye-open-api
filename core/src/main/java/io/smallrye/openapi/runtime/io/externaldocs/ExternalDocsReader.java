@@ -15,10 +15,10 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * This reads annotations and json for External Documentation
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#externalDocumentationObject">externalDocumentationObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -29,7 +29,7 @@ public class ExternalDocsReader {
 
     /**
      * Reads an ExternalDocumentation annotation.
-     * 
+     *
      * @param context scanning context
      * @param annotationValue the {@literal @}ExternalDocumentation annotation
      * @return ExternalDocumentation model
@@ -44,7 +44,7 @@ public class ExternalDocsReader {
 
     /**
      * Reads an ExternalDocumentation annotation.
-     * 
+     *
      * @param context scanning context
      * @param annotationInstance the {@literal @}ExternalDocumentation annotation
      * @return ExternalDocumentation model
@@ -65,7 +65,7 @@ public class ExternalDocsReader {
 
     /**
      * Reads an {@link ExternalDocumentation} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return ExternalDocumentation model
      */

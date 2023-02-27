@@ -78,7 +78,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * This represent a scanner
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public interface AnnotationScanner {
@@ -131,7 +131,7 @@ public interface AnnotationScanner {
 
     /**
      * Process a certain class for OpenApiDefinition annotations.
-     * 
+     *
      * @param context the scanning context
      * @param targetClass the class that contain the server annotation
      * @param openApi the current OpenApi model being created
@@ -146,7 +146,7 @@ public interface AnnotationScanner {
 
     /**
      * Process a certain class for security annotations.
-     * 
+     *
      * @param targetClass the class that contain the security annotation
      * @param openApi the current OpenApi model being created
      */
@@ -169,7 +169,7 @@ public interface AnnotationScanner {
 
     /**
      * Process a certain class for server annotations.
-     * 
+     *
      * @param targetClass the class that contain the server annotation
      * @param openApi the current OpenApi model being created
      */
@@ -183,7 +183,7 @@ public interface AnnotationScanner {
 
     /**
      * Process Java security (roles allowed and declared roles)
-     * 
+     *
      * @param openApi the OpenAPI Model
      * @param resourceClass the Class being scanned
      */
@@ -198,7 +198,7 @@ public interface AnnotationScanner {
     /**
      * Process tags.
      * Tag and Tags annotations combines with the resource tags we've already found (passed in)
-     * 
+     *
      * @param method the REST method
      * @param openApi the OpenApi model
      * @param resourceTags tags passed in
@@ -207,7 +207,7 @@ public interface AnnotationScanner {
     default void processOperationTags(final AnnotationScannerContext context, final MethodInfo method, OpenAPI openApi,
             Set<String> resourceTags,
             final Operation operation) {
-        // 
+        //
         Set<String> tags = processTags(context, method, openApi, true);
         if (tags == null) {
             if (!resourceTags.isEmpty()) {
@@ -223,7 +223,7 @@ public interface AnnotationScanner {
      * {@link org.eclipse.microprofile.openapi.annotations.tags.Tags} annotations present on
      * the annotation target and adds them to the OpenAPI model. The set of tag names found
      * (with iteration order preserved) is returned.
-     * 
+     *
      * @param openApi OpenAPI model
      * @param target a MethodInfo or ClassInfo to read for tag annotations
      * @param nullWhenMissing determines if an empty set or a null value is returned when no annotations are found.
@@ -263,7 +263,7 @@ public interface AnnotationScanner {
 
     /**
      * Extracts all methods from the provided class and its ancestors that are known to the instance's index
-     * 
+     *
      * @param context the scanning context
      * @param resource the resource class
      * @return all methods from the provided class and its ancestors
@@ -293,7 +293,7 @@ public interface AnnotationScanner {
 
     /**
      * While scanning JAX-RS/Spring method, find the operations
-     * 
+     *
      * @param context the scanning context
      * @param resourceClass the JAX-RS/Spring concrete resource class
      * @param method the JAX-RS/Spring method
@@ -444,13 +444,13 @@ public interface AnnotationScanner {
      * no response was actually created for the operation.This method will create a response
      * from the method information and add it to the given operation. It will try to do this
      * by examining the method's return value and the type of operation (GET, PUT, POST, DELETE).
-     * 
+     *
      * If there is a return value of some kind (a non-void return type) then the response code
      * is assumed to be 200.
-     * 
+     *
      * If there not a return value (void return type) then either a 201 or 204 is returned,
      * depending on the type of request.
-     * 
+     *
      * TODO: generate responses for each checked exception?
      *
      * @param context the scanning context
@@ -647,7 +647,7 @@ public interface AnnotationScanner {
 
     /**
      * Add api response to api responses using the annotation information
-     * 
+     *
      * @param context the scanning context
      * @param annotation The APIResponseSchema annotation
      * @param method the current method
@@ -705,7 +705,7 @@ public interface AnnotationScanner {
 
     /**
      * Get the security requirements on method and class and add them to the openapi model
-     * 
+     *
      * @param resourceClass the class
      * @param method the method
      * @param operation the operation to add them to
@@ -745,7 +745,7 @@ public interface AnnotationScanner {
     /**
      * Determines whether the target is annotated with an empty <code>@SecurityRequirements</code>
      * or <code>@SecurityRequirementsSets</code> annotation.
-     * 
+     *
      * @param target
      * @return true if an empty annotation is present, otherwise false
      */
@@ -777,7 +777,7 @@ public interface AnnotationScanner {
 
     /**
      * Process a callback annotation
-     * 
+     *
      * @param context the scanning context
      * @param method the method
      * @param operation the operation to add this to
@@ -803,7 +803,7 @@ public interface AnnotationScanner {
 
     /**
      * Process a certain method for server annotations.
-     * 
+     *
      * @param method the method that contain the server annotation
      * @param operation the current Operation model being created
      */
@@ -820,7 +820,7 @@ public interface AnnotationScanner {
 
     /**
      * Process the Extensions annotations
-     * 
+     *
      * @param context the scanning context
      * @param method the current REST method
      * @param operation the current operation
@@ -841,7 +841,7 @@ public interface AnnotationScanner {
 
     /**
      * Set the created operation to the pathItem
-     * 
+     *
      * @param methodType the HTTP method type
      * @param pathItem the pathItem to set
      * @param operation the operation
@@ -879,7 +879,7 @@ public interface AnnotationScanner {
 
     /**
      * Scan for scanner extensions
-     * 
+     *
      * @param context the scanning context
      * @param applications the scanner applications
      */
@@ -892,7 +892,7 @@ public interface AnnotationScanner {
 
     /**
      * Process the request body
-     * 
+     *
      * @param context the current scanning context
      * @param method the resource method
      * @param params the params
@@ -1016,7 +1016,7 @@ public interface AnnotationScanner {
      * Go through the method parameters looking for one that is not a Kotlin Continuation,
      * is not annotated with a jax-rs/spring annotation, and is not a known path parameter.
      * That will be the one that is the request body.
-     * 
+     *
      * @param context the scanning context
      * @param method MethodInfo
      * @param params the current parameters
@@ -1079,11 +1079,11 @@ public interface AnnotationScanner {
     /**
      * Determines whether the given type is a special "context" type of the current
      * web/REST framework and should not be considered as a request body type.
-     * 
+     *
      * This method should be overridden by framework-specific annotation scanners.
-     * 
+     *
      * @param type the type to consider
-     * 
+     *
      * @return true if the type is a framework-specific special/context type, otherwise false.
      */
     default boolean isFrameworkContextType(Type type) {
@@ -1092,7 +1092,7 @@ public interface AnnotationScanner {
 
     /**
      * Get the default description for a HTTP Status code
-     * 
+     *
      * @param statusCode
      * @return the reason
      */

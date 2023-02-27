@@ -18,12 +18,12 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * <code><pre>
  * &commat;RegisterExtension
  * LogCapture c = new LogCapture(ClassUnderTest.class.getName());
- * 
+ *
  * &commat;Test
  * public void test() {
  *     // do something to provoke a log message
  *     new ClassUnderTest().logMyMessage();
- *     
+ *
  *     LogRecord r = c.assertLogContaining("My Special Message");
  *     assertEquals(Level.INFO, r.getLevel());
  * }

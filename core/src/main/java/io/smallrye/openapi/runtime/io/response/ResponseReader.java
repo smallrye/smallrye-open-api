@@ -38,9 +38,9 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the APIResponse annotation
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject">responseObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -51,7 +51,7 @@ public class ResponseReader {
 
     /**
      * Reads an array of APIResponse annotations into an {@link APIResponses} model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue {@literal @}APIResponse annotation
      * @return APIResponses model
@@ -96,7 +96,7 @@ public class ResponseReader {
 
     /**
      * Reads a {@link APIResponses} OpenAPI node.
-     * 
+     *
      * @param node json object
      * @return APIResponses model
      */
@@ -120,7 +120,7 @@ public class ResponseReader {
 
     /**
      * Reads a map of APIResponse annotations.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue map of {@literal @}APIResponse annotations
      * @return Map of APIResponse models
@@ -147,7 +147,7 @@ public class ResponseReader {
 
     /**
      * Reads the {@link APIResponse} OpenAPI nodes.
-     * 
+     *
      * @param node map of json objects
      * @return Map of APIResponse models
      */
@@ -168,7 +168,7 @@ public class ResponseReader {
 
     /**
      * Reads a APIResponse annotation into a model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationInstance {@literal @}APIResponse annotation
      * @return APIResponse model
@@ -233,7 +233,7 @@ public class ResponseReader {
 
     /**
      * Reads a {@link APIResponse} OpenAPI node.
-     * 
+     *
      * @param node the json object
      * @return APIResponse model
      */

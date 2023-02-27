@@ -341,7 +341,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
 
     /**
      * Adds the given operation to the given map only if the operation is not null.
-     * 
+     *
      * @param method
      * @param operation
      * @param operationMap

@@ -18,9 +18,9 @@ import io.smallrye.openapi.runtime.io.server.ServerWriter;
 
 /**
  * Writing the Paths to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathsObject">pathsObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -31,7 +31,7 @@ public class PathsWriter {
 
     /**
      * Writes a {@link Paths} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param paths Paths model
      */
@@ -51,7 +51,7 @@ public class PathsWriter {
 
     /**
      * Writes a {@link PathItem} to the JSON tree.
-     * 
+     *
      * @param parent parent json node
      * @param model PathItem model
      * @param pathName the node name (path)

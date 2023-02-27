@@ -17,7 +17,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 /**
  * Implementation of the {@link OpenApiConfig} interface that gets config information from a
  * standard MP Config object.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiConfigImpl implements OpenApiConfig {
@@ -69,7 +69,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
 
     /**
      * Constructor.
-     * 
+     *
      * @param config MicroProfile Config instance
      */
     public OpenApiConfigImpl(Config config) {

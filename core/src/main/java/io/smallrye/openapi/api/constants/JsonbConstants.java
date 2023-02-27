@@ -7,7 +7,7 @@ import org.jboss.jandex.DotName;
 
 /**
  * Constants related to the JSON-B Specification
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */

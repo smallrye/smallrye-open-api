@@ -33,10 +33,10 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Parameter annotation
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object">parameter-object</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -47,7 +47,7 @@ public class ParameterReader {
 
     /**
      * Reads a map of Parameter annotations.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue Map of {@literal @}Parameter annotations
      * @return List of Parameter model
@@ -71,7 +71,7 @@ public class ParameterReader {
 
     /**
      * Reads a {@link Parameter} OpenAPI node.
-     * 
+     *
      * @param node json list
      * @return List of Parameter model
      */
@@ -90,7 +90,7 @@ public class ParameterReader {
 
     /**
      * Reads a map of Parameter annotations.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue Map of {@literal @}Parameter annotations
      * @return Map of Parameter model
@@ -120,7 +120,7 @@ public class ParameterReader {
 
     /**
      * Reads the {@link Parameter} OpenAPI nodes.
-     * 
+     *
      * @param node json map of Parameters
      * @return Map of Parameter model
      */
@@ -141,7 +141,7 @@ public class ParameterReader {
 
     /**
      * Reads a Parameter annotation into a model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationInstance {@literal @}Parameter model
      * @return Parameter model
@@ -208,7 +208,7 @@ public class ParameterReader {
 
     /**
      * Reads a {@link Parameter} OpenAPI node.
-     * 
+     *
      * @param node the json object
      * @return Parameter model
      */
@@ -240,7 +240,7 @@ public class ParameterReader {
 
     /**
      * Converts from an Explode enum to a true/false/null.
-     * 
+     *
      * @param enumValue
      */
     private static Optional<Boolean> readExplode(Explode enumValue) {
@@ -255,7 +255,7 @@ public class ParameterReader {
 
     /**
      * Reads a parameter 'in' property.
-     * 
+     *
      * @param node json node
      * @return In enum
      */
@@ -268,7 +268,7 @@ public class ParameterReader {
 
     /**
      * Reads a parameter style.
-     * 
+     *
      * @param node the json node
      * @return style enum
      */

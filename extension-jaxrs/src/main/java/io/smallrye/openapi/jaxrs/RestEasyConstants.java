@@ -9,7 +9,7 @@ import org.jboss.jandex.DotName;
 
 /**
  * Constants related to the RestEasy Project
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */

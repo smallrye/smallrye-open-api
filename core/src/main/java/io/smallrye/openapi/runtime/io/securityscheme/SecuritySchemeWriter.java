@@ -15,10 +15,10 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Security Scheme to json
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject">securitySchemeObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -29,7 +29,7 @@ public class SecuritySchemeWriter {
 
     /**
      * Writes a map of {@link SecurityScheme} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param securitySchemes map of SecurityScheme models
      */
@@ -45,7 +45,7 @@ public class SecuritySchemeWriter {
 
     /**
      * Writes a {@link SecurityScheme} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name

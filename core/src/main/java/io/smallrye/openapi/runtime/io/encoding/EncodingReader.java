@@ -21,9 +21,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Encoding object annotation and json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject">encodingObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -34,7 +34,7 @@ public class EncodingReader {
 
     /**
      * Reads an array of Encoding annotations as a Map.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue Map of {@literal @}Encoding annotations
      * @return Map of Encoding models
@@ -58,7 +58,7 @@ public class EncodingReader {
 
     /**
      * Reads a map of {@link Encoding} OpenAPI nodes.
-     * 
+     *
      * @param node the json node
      * @return Map of Encoding models
      */
@@ -77,7 +77,7 @@ public class EncodingReader {
 
     /**
      * Reads a single Encoding annotation into a model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationInstance the {@literal @}Encoding annotation
      * @return Encoding model
@@ -101,7 +101,7 @@ public class EncodingReader {
 
     /**
      * Reads a {@link Encoding} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Encoding model
      */
@@ -122,7 +122,7 @@ public class EncodingReader {
 
     /**
      * Reads an encoding style.
-     * 
+     *
      * @param node the json node
      * @return Style enum
      */

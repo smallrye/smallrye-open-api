@@ -13,7 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 /**
  * JAX-RS.
  * Some basic tests, mostly to compare with the Spring implementation
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @Path("/greeting")

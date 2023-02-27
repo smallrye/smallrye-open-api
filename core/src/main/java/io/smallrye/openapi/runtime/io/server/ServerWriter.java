@@ -14,9 +14,9 @@ import io.smallrye.openapi.runtime.io.servervariable.ServerVariableWriter;
 
 /**
  * Writing the Server to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject">serverObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -27,7 +27,7 @@ public class ServerWriter {
 
     /**
      * Writes the {@link Server} model array to the JSON tree.
-     * 
+     *
      * @param node the json node
      * @param servers list of Server models
      */
@@ -44,7 +44,7 @@ public class ServerWriter {
 
     /**
      * Writes a {@link Server} model to the given JSON node.
-     * 
+     *
      * @param parent parent json node
      * @param model Server model
      */

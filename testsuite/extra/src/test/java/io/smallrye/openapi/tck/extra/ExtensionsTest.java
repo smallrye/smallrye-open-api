@@ -30,7 +30,7 @@ import test.io.smallrye.openapi.tck.ExtraSuiteTestBase;
 
 /**
  * NOTE: It's not a TCK test, it only leverages the TCK test setup
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class ExtensionsTest extends ExtraSuiteTestBase<ExtensionsTest.ExtensionsTestArquillian> {

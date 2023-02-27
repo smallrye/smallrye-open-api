@@ -104,7 +104,7 @@ public class ConfigUtil {
 
     /**
      * Configures the servers for a PathItem.
-     * 
+     *
      * @param config OpenApiConfig
      * @param pathName String representing the pathName
      * @param pathItem String representing the pathItem
@@ -136,7 +136,7 @@ public class ConfigUtil {
 
     /**
      * Configures the servers for an Operation.
-     * 
+     *
      * @param config OpenApiConfig
      * @param operation Operation
      */

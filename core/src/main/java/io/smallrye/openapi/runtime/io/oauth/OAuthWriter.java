@@ -12,10 +12,10 @@ import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
 
 /**
  * Writing the Security Scheme to json
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oauthFlowsObject">oauthFlowsObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -26,7 +26,7 @@ public class OAuthWriter {
 
     /**
      * Writes a {@link OAuthFlows} object to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model the OAuthFlows model
      */
@@ -44,7 +44,7 @@ public class OAuthWriter {
 
     /**
      * Writes a {@link OAuthFlow} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name

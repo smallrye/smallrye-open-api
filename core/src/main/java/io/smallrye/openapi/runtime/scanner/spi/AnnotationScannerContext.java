@@ -28,7 +28,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 
 /**
  * Context for scanners.
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class AnnotationScannerContext {

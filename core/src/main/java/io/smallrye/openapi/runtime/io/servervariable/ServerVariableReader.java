@@ -22,10 +22,10 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the ServerVariable annotation and json node
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableObject">serverVariableObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -37,7 +37,7 @@ public class ServerVariableReader {
     /**
      * Reads an array of ServerVariable annotations, returning a new {@link ServerVariable} model. The
      * annotation value is an array of ServerVariable annotations.
-     * 
+     *
      * @param annotationValue an arrays of {@literal @}ServerVariable annotations
      * @return a Map of Variable name and ServerVariable model
      */
@@ -60,7 +60,7 @@ public class ServerVariableReader {
 
     /**
      * Reads the {@link ServerVariable} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return a Map of Variable name and ServerVariable model
      */
@@ -83,7 +83,7 @@ public class ServerVariableReader {
 
     /**
      * Reads a single ServerVariable annotation.
-     * 
+     *
      * @param annotationInstance the {@literal @}ServerVariable annotation
      * @return the ServerVariable model
      */
@@ -106,7 +106,7 @@ public class ServerVariableReader {
 
     /**
      * Reads a list of {@link ServerVariable} OpenAPI nodes.
-     * 
+     *
      * @param node the json node
      * @return the ServerVariable model
      */

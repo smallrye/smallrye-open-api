@@ -15,10 +15,10 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the RequestBody to json
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject">requestBodyObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -29,7 +29,7 @@ public class RequestBodyWriter {
 
     /**
      * Writes a map of {@link RequestBody} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param requestBodies map of RequestBody models
      */
@@ -45,7 +45,7 @@ public class RequestBodyWriter {
 
     /**
      * Writes a {@link RequestBody} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model RequestBody model
      */
@@ -55,7 +55,7 @@ public class RequestBodyWriter {
 
     /**
      * Writes a {@link RequestBody} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name

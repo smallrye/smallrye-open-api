@@ -15,7 +15,7 @@ import org.jboss.jandex.Type;
 
 /**
  * Constants from the JDK
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */

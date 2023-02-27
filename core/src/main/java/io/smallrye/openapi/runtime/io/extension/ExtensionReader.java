@@ -23,10 +23,10 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Extension annotation
- * 
+ *
  * @see <a href=
  *      "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions">specificationExtensions</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -38,7 +38,7 @@ public class ExtensionReader {
     /**
      * Reads an array of Extension annotations. The AnnotationValue in this case is
      * an array of Extension annotations. These must be read and converted into a Map.
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue map of {@literal @}Extension annotations
      * @return Map of Objects
@@ -101,12 +101,12 @@ public class ExtensionReader {
      * Reads a single Extension annotation. If the value must be parsed (as indicated by the
      * 'parseValue' attribute of the annotation), the parsing is delegated to the extensions
      * currently set in the scanner. The default value will parse the string using Jackson.
-     * 
+     *
      * @param context the scanning context
      * @param name the name of the extension
      * @param annotationInstance {@literal @}Extension annotation
      * @return a Java representation of the 'value' property, either a String or parsed value
-     * 
+     *
      */
     public static Object readExtensionValue(final AnnotationScannerContext context, final String name,
             final AnnotationInstance annotationInstance) {
@@ -128,7 +128,7 @@ public class ExtensionReader {
 
     /**
      * Reads model extensions.
-     * 
+     *
      * @param node the json object
      * @param model the model to read to
      */

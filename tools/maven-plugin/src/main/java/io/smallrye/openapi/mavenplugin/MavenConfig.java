@@ -11,7 +11,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Implementation of the {@link OpenApiConfig} interface that gets config information from maven
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class MavenConfig implements OpenApiConfig {

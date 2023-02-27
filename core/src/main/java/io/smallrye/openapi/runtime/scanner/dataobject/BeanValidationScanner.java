@@ -118,7 +118,7 @@ public class BeanValidationScanner {
      * Scan the annotation target to determine whether any annotations
      * from the Bean Validation package (<code>javax.validation.constraints</code>) are
      * present.
-     * 
+     *
      * @param target the annotation target to scan
      * @return true if annotations from the Bean Validation package are present, otherwise false.
      */

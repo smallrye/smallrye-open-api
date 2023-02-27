@@ -437,7 +437,7 @@ public class TypeResolver {
     /**
      * Create a new TypeResolver for the given ClassInfo clazz and type. If the Type leaf if not
      * available, the type of the clazz will be used, without parameters.
-     * 
+     *
      * @param context current scanner context
      * @param clazz class to be resolved
      * @param leaf the type of clazz where referenced
@@ -593,7 +593,7 @@ public class TypeResolver {
      * Determine if the target should be exposed in the API or ignored. Explicitly un-hiding a property
      * via the <code>@Schema</code> annotation overrides configuration to ignore the same property
      * higher up the class/interface hierarchy.
-     * 
+     *
      * @param target the field or method to be checked for ignoring or exposure in the API
      * @param reference an annotated member (field or method) that referenced the type of target's declaring class
      * @param descendants list of classes that descend from the class containing target
@@ -638,7 +638,7 @@ public class TypeResolver {
 
     /**
      * Retrieve any property visibility configured on the target or overridden by descendant classes.
-     * 
+     *
      * @param target the field or method to be checked for ignoring or exposure in the API
      * @param reference an annotated member (field or method) that referenced the type of target's declaring class
      * @param descendants list of classes that descend from the class containing target
@@ -660,7 +660,7 @@ public class TypeResolver {
     /**
      * Determines whether the target is set to hidden = false via the <code>@Schema</code>
      * annotation (explicit or default value).
-     * 
+     *
      * @return true if the field is un-hidden, false otherwise
      */
     boolean isUnhidden(AnnotationTarget target) {
@@ -869,7 +869,7 @@ public class TypeResolver {
      * Derive the name of the property using the name of the given method. The method
      * is assumed to be a "getter" (also supporting accessors for boolean values starting
      * with "is") or a "setter".
-     * 
+     *
      * @param method either an accessor (getter) or mutator (setter) for the property
      * @return the property name
      */

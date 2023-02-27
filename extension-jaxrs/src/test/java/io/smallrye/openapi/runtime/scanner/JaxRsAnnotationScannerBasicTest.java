@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Basic tests mostly to compare with Spring
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * This test a basic, no OpenApi annotations, hello world GET service
-     * 
+     *
      * @throws IOException
      * @throws JSONException
      */
@@ -50,7 +50,7 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * This test a basic, no OpenApi annotations, hello world POST service
-     * 
+     *
      * @throws IOException
      * @throws JSONException
      */
@@ -83,7 +83,7 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * This test a basic, no OpenApi annotations, hello world PUT service
-     * 
+     *
      * @throws IOException
      * @throws JSONException
      */
@@ -116,7 +116,7 @@ class JaxRsAnnotationScannerBasicTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * This test a basic, no OpenApi annotations, hello world DELETE service
-     * 
+     *
      * @throws IOException
      * @throws JSONException
      */

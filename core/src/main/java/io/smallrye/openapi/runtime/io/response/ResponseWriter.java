@@ -19,9 +19,9 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the APIResponse to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject">responseObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -32,7 +32,7 @@ public class ResponseWriter {
 
     /**
      * Writes a map of {@link APIResponse} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param responses map of APIResponse models
      */
@@ -48,7 +48,7 @@ public class ResponseWriter {
 
     /**
      * Writes a {@link APIResponses} map to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param model APIResponse model
      */
@@ -69,7 +69,7 @@ public class ResponseWriter {
 
     /**
      * Writes a {@link APIResponse} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name

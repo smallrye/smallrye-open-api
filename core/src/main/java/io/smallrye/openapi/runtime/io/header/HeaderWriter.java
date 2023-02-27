@@ -19,9 +19,9 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Header to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject">headerObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -32,7 +32,7 @@ public class HeaderWriter {
 
     /**
      * Writes a map of {@link Header} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param headers map of Header models
      */
@@ -48,7 +48,7 @@ public class HeaderWriter {
 
     /**
      * Writes a {@link RequestBody} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name

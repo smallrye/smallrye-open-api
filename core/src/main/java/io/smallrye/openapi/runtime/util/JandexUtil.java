@@ -34,7 +34,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * Some utility methods for working with Jandex objects.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class JandexUtil {
@@ -43,7 +43,7 @@ public class JandexUtil {
 
     /**
      * Simple enum to indicate the type of a $ref being read/written.
-     * 
+     *
      * @author eric.wittmann@gmail.com
      */
     public enum RefType {
@@ -111,7 +111,7 @@ public class JandexUtil {
     /**
      * Reads a string property named "ref" value from the given annotation and converts it
      * to a value appropriate for setting on a model's "$ref" property.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param refType RefType
      * @return String value
@@ -209,7 +209,7 @@ public class JandexUtil {
     /**
      * Reads a String property value from the given annotation instance. If no value is found
      * this will return null.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return String value
@@ -234,7 +234,7 @@ public class JandexUtil {
     /**
      * Reads a Boolean property value from the given annotation instance. If no value is found
      * this will return null.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return Boolean value
@@ -250,7 +250,7 @@ public class JandexUtil {
     /**
      * Reads a Boolean property from the given annotation instance. If no value is found
      * this will return false.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return Boolean value
@@ -263,7 +263,7 @@ public class JandexUtil {
     /**
      * Reads a Integer property value from the given annotation instance. If no value is found
      * this will return null.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return Integer value
@@ -280,7 +280,7 @@ public class JandexUtil {
     /**
      * Reads a String array property value from the given annotation instance. If no value is found
      * this will return null.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @return List of Strings
@@ -296,7 +296,7 @@ public class JandexUtil {
     /**
      * Reads a String property value from the given annotation instance. If no value is found
      * this will return null.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @param propertyName String
      * @param clazz Class type of the Enum
@@ -315,7 +315,7 @@ public class JandexUtil {
      * Converts a string value to the given enum type. If the string does not match
      * one of the the enum's values name (case-insensitive) or toString value, null
      * will be returned.
-     * 
+     *
      * @param strVal String
      * @param clazz Class type of the Enum
      * @param <T> Type parameter
@@ -339,7 +339,7 @@ public class JandexUtil {
     /**
      * Returns true if the given annotation instance is a "ref". An annotation is a ref if it has
      * a non-null value for the "ref" property.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return Whether it's a "ref"
      */
@@ -350,7 +350,7 @@ public class JandexUtil {
     /**
      * Returns true if the given annotation is void of any values (and thus is "empty"). An example
      * of this would be if a jax-rs method were annotated with @Tag()
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return Whether it's empty
      */
@@ -361,7 +361,7 @@ public class JandexUtil {
     /**
      * Gets a single class annotation from the given class. Returns null if no matching annotation
      * is found.
-     * 
+     *
      * @param ct ClassInfo
      * @param name DotName
      * @return AnnotationInstance
@@ -373,7 +373,7 @@ public class JandexUtil {
     /**
      * Gets a single class annotation from the given class. Returns null if no matching annotation
      * is found.
-     * 
+     *
      * @param ct ClassInfo
      * @param names List of DotNames
      * @return AnnotationInstance
@@ -404,7 +404,7 @@ public class JandexUtil {
     /**
      * Gets a single annotation from the given field. Returns null if no matching annotation
      * is found.
-     * 
+     *
      * @param field FieldInfo
      * @param names DotName
      * @return AnnotationInstance
@@ -426,7 +426,7 @@ public class JandexUtil {
     /**
      * Gets a single annotation from the given method. Returns null if no matching annotation
      * is found.
-     * 
+     *
      * @param mi MethodInfo
      * @param names DotName
      * @return AnnotationInstance
@@ -447,7 +447,7 @@ public class JandexUtil {
 
     /**
      * Return if any one of the listed annotations exist
-     * 
+     *
      * @param method
      * @param annotations
      * @return
@@ -458,7 +458,7 @@ public class JandexUtil {
 
     /**
      * Return if any one of the listed annotations exist
-     * 
+     *
      * @param method
      * @param annotations
      * @return
@@ -474,7 +474,7 @@ public class JandexUtil {
 
     /**
      * Returns all annotations configured for a single parameter of a method.
-     * 
+     *
      * @param method MethodInfo
      * @param paramPosition parameter position
      * @return List of AnnotationInstance's
@@ -493,7 +493,7 @@ public class JandexUtil {
     /**
      * Gets the name of an item from its ref. For example, the ref might be "#/components/parameters/departureDate"
      * which would result in a name of "departureDate".
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return Name of item from ref
      */
@@ -506,7 +506,7 @@ public class JandexUtil {
      * Many OAI annotations can either be found singly or as a wrapped array. This method will
      * look for both and return a list of all found. Both the single and wrapper annotation names
      * must be provided.
-     * 
+     *
      * @param target the annotated target (e.g. ClassInfo, MethodInfo)
      * @param singleAnnotationName DotName
      * @param repeatableAnnotationName DotName
@@ -541,7 +541,7 @@ public class JandexUtil {
 
     /**
      * Returns the class type of the method parameter at the given position.
-     * 
+     *
      * @param method MethodInfo
      * @param position parameter position
      * @return Type
@@ -563,7 +563,7 @@ public class JandexUtil {
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
      * method.Returns null if not found.
-     * 
+     *
      * @param method the method
      * @param parameterIndex the parameter index
      * @param annotationName name of annotation we are looking for
@@ -582,7 +582,7 @@ public class JandexUtil {
     /**
      * Finds an annotation (if present) with the given name, on a particular parameter of a
      * method based on the identity of the parameterType. Returns null if not found.
-     * 
+     *
      * @param method the method
      * @param parameterType the parameter type
      * @param annotationName name of annotation we are looking for
@@ -597,7 +597,7 @@ public class JandexUtil {
 
     /**
      * Finds all annotations on a particular parameter of a method based on the identity of the parameterType.
-     * 
+     *
      * @param method the method
      * @param parameterType the parameter type
      * @return the list of annotations, never null
@@ -622,7 +622,7 @@ public class JandexUtil {
     /**
      * Returns true if the given @Schema annotation is a simple class schema. This means that
      * the annotation only has one field defined, and that field is "implementation".
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return Is it a simple class @Schema
      */
@@ -634,7 +634,7 @@ public class JandexUtil {
      * Returns true if the given @Schema annotation is a simple array schema. This is defined
      * as a schema with only a "type" field and "implementation" field defined *and* the type must
      * be array.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return Is it a simple array @Schema
      */
@@ -651,7 +651,7 @@ public class JandexUtil {
      * Returns true if the given {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * annotation is an array schema. This is defined as a schema with a "type" field and "implementation"
      * field defined *and* the type must be array.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return Is it an array {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      */
@@ -669,7 +669,7 @@ public class JandexUtil {
     /**
      * Returns true if the given {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      * annotation has defined an "implementation" field.
-     * 
+     *
      * @param annotation AnnotationInstance
      * @return true if the annotation defines an implementation, otherwise false
      */
@@ -720,11 +720,11 @@ public class JandexUtil {
     /**
      * Retrieve the unique <code>Type</code>s that the given <code>ClassInfo</code>
      * implements.
-     * 
+     *
      * @param index
      * @param klass
      * @return the <code>Set</code> of interfaces
-     * 
+     *
      */
     public static Set<Type> interfaces(AugmentedIndexView index, ClassInfo klass) {
         Set<Type> interfaces = new LinkedHashSet<>();

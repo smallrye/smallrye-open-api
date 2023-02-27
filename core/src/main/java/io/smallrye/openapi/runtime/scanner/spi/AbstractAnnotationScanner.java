@@ -12,7 +12,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Abstract base class for annotation scanners
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public abstract class AbstractAnnotationScanner implements AnnotationScanner {

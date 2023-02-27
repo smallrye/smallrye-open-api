@@ -14,9 +14,9 @@ import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsWriter;
 
 /**
  * Writing the Tag to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tagObject">tagObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -27,7 +27,7 @@ public class TagWriter {
 
     /**
      * Writes the {@link Tag} model array to the JSON tree.
-     * 
+     *
      * @param node the json node
      * @param tags list of Tag models
      */

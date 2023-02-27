@@ -29,8 +29,8 @@ class JandexUtilTests {
                 .annotation(DotName.createSimple(APIResponse.class.getName()))
                 .value("content")
                 .asNestedArray()[0]
-                        .value("encoding")
-                        .asNestedArray()[0];
+                .value("encoding")
+                .asNestedArray()[0];
         Encoding.Style style = JandexUtil.enumValue(annotation, "style", Encoding.Style.class);
         assertEquals(Encoding.Style.PIPE_DELIMITED, style);
     }

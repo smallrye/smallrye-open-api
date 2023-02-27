@@ -20,7 +20,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * This helps to apply java security (@RolesAllowed etc.).
- * 
+ *
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
@@ -82,17 +82,17 @@ public class JavaSecurityProcessor {
     /**
      * Add method-level or resource-level <code>RolesAllowed</code> values as
      * scopes to the current operation.
-     * 
+     *
      * <ul>
      * <li>If a <code>DenyAll</code> annotation is present (and a method-level
      * <code>RolesAllowed</code> is not), the roles allowed will be set to an
      * empty array.
-     * 
+     *
      * <li>If none of a <code>PermitAll</code>, a <code>DenyAll</code>, and a
      * <code>RolesAllowed</code> annotation is present at the method-level, the
      * roles allowed will be set to the resource's <code>RolesAllowed</code>.
      * </ul>
-     * 
+     *
      * @param method the current JAX-RS method
      * @param operation the OpenAPI Operation
      */
@@ -118,16 +118,16 @@ public class JavaSecurityProcessor {
 
     /**
      * Add an array of roles to the operation's security requirements.
-     * 
+     *
      * If no security requirements yet exists, one is created with the name of the
      * single OAUTH/OPENIDCONNECT previously defined in the OpenAPI's Components
      * section.
-     * 
+     *
      * Otherwise, the roles are added to only a single existing requirement
      * where the name of the requirement's scheme matches the name of the
      * single OAUTH/OPENIDCONNECT previously defined in the OpenAPI's Components
      * section.
-     * 
+     *
      * @param operation the OpenAPI Operation
      * @param roles a list of JAX-RS roles to use as scopes
      */
@@ -158,7 +158,7 @@ public class JavaSecurityProcessor {
      * annotations and the scheme is OAuth2 or OpenIdConnect, any of the flows
      * where no scopes have yet been provided are eligible to have scopes
      * filled by <code>@DeclareRoles</code>/<code>@RolesAllowed</code> annotations.
-     * 
+     *
      * @param oai the current OpenAPI result
      */
     private void checkSecurityScheme(OpenAPI openApi) {
@@ -191,7 +191,7 @@ public class JavaSecurityProcessor {
      * defined in <code>@OpenAPIDefinition</code> annotations. The saved
      * flows may have scopes added by values discovered in <code>@RolesAllowed</code>
      * annotations during scanning.
-     * 
+     *
      * @param scheme the scheme to save for further role processing.
      */
     private void saveSecurityScheme(String schemeName, SecurityScheme scheme) {
@@ -211,7 +211,7 @@ public class JavaSecurityProcessor {
     /**
      * Saves an {@link OAuthFlow} object in the list of flows for further processing.
      * Only saved if no scopes were defined by the application using annotations.
-     * 
+     *
      * @param flow
      */
     private void saveFlow(OAuthFlow flow) {

@@ -17,13 +17,13 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
 /**
  * Basic tests to check the configuration of the default content type.
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
     /**
      * This test the normal (no config) case
-     * 
+     *
      * @throws java.io.IOException
      * @throws org.json.JSONException
      */
@@ -51,7 +51,7 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
 
     /**
      * This test the normal (no config) case
-     * 
+     *
      * @throws java.io.IOException
      * @throws org.json.JSONException
      */

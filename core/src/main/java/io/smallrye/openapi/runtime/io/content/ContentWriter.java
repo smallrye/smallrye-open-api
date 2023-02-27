@@ -12,7 +12,7 @@ import io.smallrye.openapi.runtime.io.mediatype.MediaTypeWriter;
 
 /**
  * Writing the Content to json
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -23,7 +23,7 @@ public class ContentWriter {
 
     /**
      * Writes a {@link Content} to the JSON tree.
-     * 
+     *
      * @param parent the json parent node
      * @param model the Content model
      */

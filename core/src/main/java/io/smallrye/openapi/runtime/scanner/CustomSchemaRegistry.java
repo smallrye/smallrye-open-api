@@ -9,7 +9,7 @@ public interface CustomSchemaRegistry {
 
     /**
      * Registers types with a custom schema.
-     * 
+     *
      * @param registry Schema registry to add the custom type/schema combinations to.
      */
     public void registerCustomSchemas(SchemaRegistry registry);

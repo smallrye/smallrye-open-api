@@ -25,9 +25,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Callback annotation and json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject">callbackObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -38,7 +38,7 @@ public class CallbackReader {
 
     /**
      * Reads a map of Callback annotations.
-     * 
+     *
      * @param context the scanner context
      * @param annotationValue Map of {@literal @}Callback annotations
      * @return Map of Callback models
@@ -65,7 +65,7 @@ public class CallbackReader {
 
     /**
      * Reads the {@link Callback} OpenAPI nodes.
-     * 
+     *
      * @param node the json node
      * @return Map of Callback models
      */
@@ -91,7 +91,7 @@ public class CallbackReader {
 
     /**
      * Reads a Callback annotation into a model.
-     * 
+     *
      * @param annotation the {@literal @}Callback annotation
      * @param context the scanner context
      * @param methodInfo the method
@@ -115,7 +115,7 @@ public class CallbackReader {
 
     /**
      * Reads a {@link Callback} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return Callback model
      */

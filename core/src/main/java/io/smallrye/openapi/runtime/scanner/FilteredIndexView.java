@@ -19,7 +19,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 /**
  * Wraps an {@link IndexView} instance and filters the contents based on the
  * settings provided via {@link OpenApiConfig}.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class FilteredIndexView implements IndexView {
@@ -38,7 +38,7 @@ public class FilteredIndexView implements IndexView {
 
     /**
      * Constructor.
-     * 
+     *
      * @param delegate the original (to be wrapped) index
      * @param config the config
      */
@@ -78,7 +78,7 @@ public class FilteredIndexView implements IndexView {
     /**
      * Returns true if the class name should be included in the index (is either included or
      * not excluded).
-     * 
+     *
      * @param className the name of the class
      * @return true if the inclusion/exclusion configuration allows scanning of the class name
      */
@@ -89,7 +89,7 @@ public class FilteredIndexView implements IndexView {
     /**
      * Returns true if the class name should be included in the index, only when explicitly
      * included (and not excluded) via configuration.
-     * 
+     *
      * @param className the name of the class
      * @return true if the inclusion/exclusion configuration allows scanning of the class name
      */
@@ -100,7 +100,7 @@ public class FilteredIndexView implements IndexView {
     /**
      * Returns true if the class name should be included in the index (is either included or
      * not excluded).
-     * 
+     *
      * @param className the name of the class
      * @param allowImpliedInclusion whether the class may be implied for inclusion
      * @return true if the inclusion/exclusion configuration allows scanning of the class name
@@ -175,7 +175,7 @@ public class FilteredIndexView implements IndexView {
 
     /**
      * Find the longest string from {@code prefixes} which is a prefix of {@code name}
-     * 
+     *
      * @param name the name
      * @param prefixes a set of potential prefixes of {@code name}
      * @return the longest element of {@code prefixes} which is a prefix of {@code name}, or the empty string if there are none
@@ -194,7 +194,7 @@ public class FilteredIndexView implements IndexView {
 
     /**
      * Find the longest string from {@code suffixes} which is a suffix of {@code name}
-     * 
+     *
      * @param name the name
      * @param suffixes a set of potential suffixes of {@code name}
      * @return the longest element of {@code suffixes} which is a suffix of {@code name}, or the empty string if there are none
@@ -213,7 +213,7 @@ public class FilteredIndexView implements IndexView {
 
     /**
      * Attempts to find each element of {@code patterns} in {@code name} and returns the longest match
-     * 
+     *
      * @param name the name to match against
      * @param patterns the patterns to try
      * @return the longest result returned by {@link Matcher#group()} after successfully finding a pattern in {@code name}, or
@@ -235,7 +235,7 @@ public class FilteredIndexView implements IndexView {
 
     /**
      * Returns the longest argument
-     * 
+     *
      * @param strings an array of strings
      * @return the longest element of {@code strings}
      */

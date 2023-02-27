@@ -2,7 +2,7 @@ package io.smallrye.openapi.runtime.io;
 
 /**
  * Can be referenced
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class Referenceable {

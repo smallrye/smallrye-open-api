@@ -20,7 +20,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 
 /**
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.
- * 
+ *
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiParser {
@@ -29,7 +29,7 @@ public class OpenApiParser {
      * Parses the resource found at the given URL. This method accepts resources
      * either in JSON or YAML format. It will parse the input and, assuming it is
      * valid, return an instance of {@link OpenAPI}.
-     * 
+     *
      * @param url URL to OpenAPI document
      * @return OpenAPIImpl parsed from URL
      * @throws IOException URL parameter is not found
@@ -62,7 +62,7 @@ public class OpenApiParser {
     /**
      * Parses the resource found at the given stream. The format of the stream must
      * be specified.
-     * 
+     *
      * @param stream InputStream containing an OpenAPI document
      * @param format Format of the stream
      * @param maximumStaticFileSize Integer to change (usually to increase) the maximum static file size
@@ -109,7 +109,7 @@ public class OpenApiParser {
 
     /**
      * Constructor.
-     * 
+     *
      * @param tree JsonNode
      */
     public OpenApiParser(JsonNode tree) {

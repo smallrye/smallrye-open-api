@@ -16,7 +16,7 @@ public class ObjectWriter {
 
     /**
      * Writes an array of strings to the parent node.
-     * 
+     *
      * @param parent the parent json node
      * @param models list of Strings
      * @param propertyName the name of the node
@@ -33,7 +33,7 @@ public class ObjectWriter {
 
     /**
      * Writes an array of objects to the parent node.
-     * 
+     *
      * @param parent the parent json node
      * @param models list of objects
      * @param propertyName the name of the node
@@ -50,7 +50,7 @@ public class ObjectWriter {
 
     /**
      * Writes a map of strings to the parent node.
-     * 
+     *
      * @param parent the parent json node
      * @param models map of strings
      * @param propertyName name of the node
@@ -67,7 +67,7 @@ public class ObjectWriter {
 
     /**
      * Write an object to json
-     * 
+     *
      * @param node the json node
      * @param key key
      * @param value value

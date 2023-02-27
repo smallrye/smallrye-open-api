@@ -135,7 +135,7 @@ public class IgnoreResolver {
 
         /**
          * Declaring class ignore
-         * 
+         *
          * <pre>
          * <code>
          *  &#64;JsonIgnoreProperties("ignoreMe")

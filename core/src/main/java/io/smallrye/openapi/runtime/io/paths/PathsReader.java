@@ -30,9 +30,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Paths from annotation or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathsObject">pathsObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -43,7 +43,7 @@ public class PathsReader {
 
     /**
      * Reads the {@link Paths} OpenAPI nodes.
-     * 
+     *
      * @param node json object
      * @return Paths model
      */
@@ -73,7 +73,7 @@ public class PathsReader {
     /**
      * Reads the PathItem.
      * Also used in CallbackOperation
-     * 
+     *
      * @param context the scanning context
      * @param annotationValue the annotation value
      * @return PathItem model
@@ -106,7 +106,7 @@ public class PathsReader {
 
     /**
      * Reads a {@link PathItem} OpenAPI node.
-     * 
+     *
      * @param node json object
      * @return PathItem model
      */

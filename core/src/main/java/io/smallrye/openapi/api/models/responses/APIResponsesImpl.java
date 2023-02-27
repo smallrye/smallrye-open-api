@@ -103,5 +103,5 @@ public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements AP
         return MapModel.super.remove(key);
     }
 
-    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1 
+    // End Methods to support implementation of Map for MicroProfile OpenAPI 1.1
 }

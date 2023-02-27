@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Spring.
  * Some basic test, comparing with what we get in the JAX-RS version.
  * See the GreetingDeleteResource in the JAX-RS test
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @RestController

@@ -19,9 +19,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Media type object annotation and json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject">mediaTypeObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -32,7 +32,7 @@ public class MediaTypeReader {
 
     /**
      * Reads a single Content annotation into a {@link MediaType} model.
-     * 
+     *
      * @param context the scanning context
      * @param annotationInstance {@literal @}Content annotation
      * @return MediaType model
@@ -55,7 +55,7 @@ public class MediaTypeReader {
 
     /**
      * Reads a {@link MediaType} OpenAPI node.
-     * 
+     *
      * @param node the json node
      * @return MediaType model
      */

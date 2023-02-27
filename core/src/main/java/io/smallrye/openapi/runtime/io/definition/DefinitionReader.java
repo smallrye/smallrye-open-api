@@ -22,9 +22,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the OpenAPIDefinition from an annotation or json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object">openapi-object</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -35,7 +35,7 @@ public class DefinitionReader {
 
     /**
      * Reads a OpenAPIDefinition annotation.
-     * 
+     *
      * @param context the scanning context
      * @param openApi OpenAPIImpl
      * @param annotationInstance {@literal @}OpenAPIDefinition annotation
@@ -63,7 +63,7 @@ public class DefinitionReader {
 
     /**
      * Reads a OpenAPIDefinition Json node.
-     * 
+     *
      * @param openApi the OpenAPI model
      * @param node the Json node
      */

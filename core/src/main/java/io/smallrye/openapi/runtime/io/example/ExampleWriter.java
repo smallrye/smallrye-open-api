@@ -15,9 +15,9 @@ import io.smallrye.openapi.runtime.util.StringUtil;
 
 /**
  * Writing the Example to json
- * 
+ *
  * @see <a href="https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject">exampleObject</a>
- * 
+ *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  * @author Eric Wittmann (eric.wittmann@gmail.com)
  */
@@ -28,7 +28,7 @@ public class ExampleWriter {
 
     /**
      * Writes a map of {@link Example} to the JSON tree.
-     * 
+     *
      * @param parent the parent json node
      * @param examples map of Example models
      */
@@ -44,7 +44,7 @@ public class ExampleWriter {
 
     /**
      * Writes a {@link Example} object to the JSON tree.
-     * 
+     *
      * @param parent
      * @param model
      * @param name
