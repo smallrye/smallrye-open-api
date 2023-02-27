@@ -1,0 +1,25 @@
+{
+  "openapi" : "3.0.3",
+  "paths" : {
+    "/overwritten-resource-path" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "uniqueItems" : true,
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
