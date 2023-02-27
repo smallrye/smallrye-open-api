@@ -38,8 +38,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
-    private AnnotationScannerContext scannerContext;
-
     /**
      * Pattern to describe a path template parameter with a regular expression pattern restriction.
      *
@@ -56,7 +54,6 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             Function<AnnotationInstance, Parameter> reader,
             List<AnnotationScannerExtension> extensions) {
         super(scannerContext, contextPath, reader, extensions);
-        this.scannerContext = scannerContext;
     }
 
     /**
