@@ -6,10 +6,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexReader;
@@ -467,5 +475,78 @@ class ParameterScanTests extends IndexScannerTestBase {
     void testPreferredParameterOrderWithAnnotation() throws IOException, JSONException {
         test("params.annotation-preferred-order.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterOrderResource.CLASSES);
+    }
+
+    static class Issue1256 {
+        static final Class<?>[] CLASSES = {
+                BeanParamBean.class,
+                Filter.class,
+                FilterBean.class,
+                JsonBase.class,
+                DataJson.class,
+                GenericBaseInterface.class,
+                RestInterface.class,
+                RestImpl.class
+        };
+
+        static class BeanParamBean {
+            @jakarta.ws.rs.QueryParam("param")
+            @Parameter(description = "A parameter")
+            private String param;
+        }
+
+        interface Filter {
+        }
+
+        static class FilterBean implements Filter {
+        }
+
+        static class JsonBase {
+        }
+
+        static class DataJson extends JsonBase {
+        }
+
+        interface GenericBaseInterface<T extends JsonBase, F extends Filter> {
+
+            @Operation(summary = "list")
+            @APIResponse(responseCode = "200", description = "OK")
+            @APIResponse(responseCode = "500", description = "internal server error", content = @Content(schema = @Schema(type = SchemaType.OBJECT)))
+            List<T> list(BeanParamBean params, F filter);
+        }
+
+        @jakarta.ws.rs.Path("reproducer/reproducers")
+        @jakarta.ws.rs.Consumes(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+        @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+        @Tag(name = "reproducers", description = "This resource is there for reproducing bug 1256.")
+        interface RestInterface extends GenericBaseInterface<DataJson, FilterBean> {
+
+            @jakarta.ws.rs.POST
+            @Operation(summary = "create")
+            @APIResponse(responseCode = "200", description = "OK")
+            @APIResponse(responseCode = "500", description = "internal server error", content = @Content(schema = @Schema(type = SchemaType.OBJECT)))
+            DataJson create(DataJson json);
+
+            @jakarta.ws.rs.GET
+            @Override
+            List<DataJson> list(@jakarta.ws.rs.BeanParam BeanParamBean params, @jakarta.ws.rs.BeanParam FilterBean filter);
+        }
+
+        static class RestImpl implements RestInterface {
+            @Override
+            public DataJson create(DataJson json) {
+                return null;
+            }
+
+            @Override
+            public List<DataJson> list(BeanParamBean params, FilterBean filter) {
+                return null;
+            }
+        }
+    }
+
+    @Test
+    void testParamsNotDuplicated() throws IOException, JSONException {
+        test("params.synthetic-methods-not-included.json", Issue1256.CLASSES);
     }
 }
