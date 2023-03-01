@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.3",
+  "tags": [
+    {
+      "name": "reproducers",
+      "description": "This resource is there for reproducing bug 1256."
+    }
+  ],
+  "paths": {
+    "/reproducer/reproducers": {
+      "get": {
+        "tags": [
+          "reproducers"
+        ],
+        "parameters": [
+          {
+            "name": "param",
+            "in": "query",
+            "description": "A parameter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataJson"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reproducers"
+        ],
+        "summary": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataJson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataJson"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DataJson": {
+        "type": "object"
+      }
+    }
+  }
+}

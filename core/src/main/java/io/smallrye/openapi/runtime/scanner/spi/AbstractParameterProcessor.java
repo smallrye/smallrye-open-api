@@ -1533,28 +1533,38 @@ public abstract class AbstractParameterProcessor {
         boolean relevant = false;
 
         switch (target.kind()) {
-            case FIELD:
+            case FIELD: {
                 FieldInfo field = target.asField();
                 relevant = hasParameters(field.annotations());
                 break;
-            case METHOD_PARAMETER:
+            }
+
+            case METHOD_PARAMETER: {
                 MethodParameterInfo param = target.asMethodParameter();
-                relevant = !isResourceMethod(param.method()) &&
-                        hasParameters(TypeUtil.getAnnotations(param)) &&
-                        !isSubResourceLocator(param.method());
+                MethodInfo method = param.method();
+                relevant = nonSyntheticParameterMethod(method, TypeUtil.getAnnotations(param));
                 break;
-            case METHOD:
+            }
+
+            case METHOD: {
                 MethodInfo method = target.asMethod();
-                relevant = !isResourceMethod(method) &&
-                        hasParameters(method.annotations()) &&
-                        getType(target) != null &&
-                        !isSubResourceLocator(method);
+                relevant = nonSyntheticParameterMethod(method, method.annotations()) &&
+                        getType(target) != null;
                 break;
+            }
+
             default:
                 break;
         }
 
         return relevant;
+    }
+
+    boolean nonSyntheticParameterMethod(MethodInfo method, Collection<AnnotationInstance> annotations) {
+        return !method.isSynthetic() &&
+                !isResourceMethod(method) &&
+                hasParameters(annotations) &&
+                !isSubResourceLocator(method);
     }
 
     /**
