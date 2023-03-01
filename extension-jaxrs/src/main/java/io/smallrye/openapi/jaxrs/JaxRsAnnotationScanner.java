@@ -222,7 +222,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     private void processResourceClasses(final AnnotationScannerContext context, OpenAPI openApi) {
         // Now find all jax-rs endpoints
-        Collection<ClassInfo> resourceClasses = getJaxRsResourceClasses(context);
+        Collection<ClassInfo> resourceClasses = new ArrayList<>();
+        resourceClasses.addAll(getJaxRsResourceClasses(context));
+        resourceClasses.addAll(getConfigurationResourceClasses(context));
+
         for (ClassInfo resourceClass : resourceClasses) {
             TypeResolver resolver = TypeResolver.forClass(context, resourceClass, null);
             context.getResolverStack().push(resolver);
@@ -615,6 +618,21 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .filter(classInfo -> this.hasImplementationOrIsIncluded(context, classInfo))
                 .collect(Collectors.toCollection(() -> new TreeSet<ClassInfo>((one, two) -> one.name().compareTo(two.name())))); // CompositeIndex instances may return duplicates
 
+    }
+
+    /**
+     * Use the Jandex index to find all resource classes specified in the configuration.
+     *
+     * @param context current scanning context
+     * @return Collection of ClassInfo's
+     */
+    private Collection<ClassInfo> getConfigurationResourceClasses(AnnotationScannerContext context) {
+        return context.getConfig().getScanResourceClasses()
+                .keySet()
+                .stream()
+                .map(className -> context.getIndex().getClassByName(className))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private boolean hasImplementationOrIsIncluded(AnnotationScannerContext context, ClassInfo clazz) {

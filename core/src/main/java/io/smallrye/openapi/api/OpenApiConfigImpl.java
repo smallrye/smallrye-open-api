@@ -57,6 +57,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     private DuplicateOperationIdBehavior duplicateOperationIdBehavior;
     private Set<String> scanProfiles;
     private Set<String> scanExcludeProfiles;
+    private Map<String, String> scanResourceClasses;
     private Boolean removeUnusedSchemas;
     private Optional<String[]> defaultProduces = UNSET;
     private Optional<String[]> defaultConsumes = UNSET;
@@ -475,6 +476,18 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     }
 
     @Override
+    public Map<String, String> getScanResourceClasses() {
+        if (scanResourceClasses == null) {
+            scanResourceClasses = StreamSupport.stream(config.getPropertyNames().spliterator(), false)
+                    .filter(name -> name.startsWith(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX))
+                    .collect(Collectors.toMap(name -> name.substring(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX.length()),
+                            name -> config.getValue(name, String.class)));
+
+        }
+        return scanResourceClasses;
+    }
+
+    @Override
     public boolean removeUnusedSchemas() {
         if (removeUnusedSchemas == null) {
             removeUnusedSchemas = getConfig()
@@ -495,8 +508,8 @@ public class OpenApiConfigImpl implements OpenApiConfig {
     }
 
     /**
-     * getConfig().getOptionalValue(key) can return "" if optional {@link Converter}s are used. Enforce a null value if
-     * we get an empty string back.
+     * getConfig().getOptionalValue(key) can return "" if optional {@link Converter}s are used. Enforce a null value if we get
+     * an empty string back.
      */
     String getStringConfigValue(String key) {
         return getConfig().getOptionalValue(key, String.class).map(v -> "".equals(v.trim()) ? null : v).orElse(null);

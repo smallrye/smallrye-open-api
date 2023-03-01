@@ -32,12 +32,9 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
- *
- * Note, javax.ws.rs.PathParam PathParam targets of
- * javax.ws.rs.core.PathSegment PathSegment are not currently supported.
+ * Note, javax.ws.rs.PathParam PathParam targets of javax.ws.rs.core.PathSegment PathSegment are not currently supported.
  *
  * @author Michael Edgar {@literal <michael@xlate.io>}
- *
  */
 public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
@@ -60,21 +57,20 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     /**
-     * Process parameter annotations for the given class and method.This method operates
-     * in two phases. First, class-level parameters are processed and saved in the
-     * {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters
-     * are only applicable to the method-level in this component.
+     * Process parameter annotations for the given class and method.This method operates in two phases. First, class-level
+     * parameters are processed and saved in
+     * the {@link ResourceParameters}. Second, method-level parameters are processed. Form parameters are only applicable to the
+     * method-level in this
+     * component.
      *
      * @param context the AnnotationScannerContext
      * @param contextPath context path for the resource class and method
      * @param resourceClass the class info
-     * @param resourceMethod the JAX-RS resource method, annotated with one of the
-     *        JAX-RS HTTP annotations
+     * @param resourceMethod the JAX-RS resource method, annotated with one of the JAX-RS HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
      * @param extensions scanner extensions
-     * @return scanned parameters and modified path contained in a {@link ResourceParameters}
-     *         object
+     * @return scanned parameters and modified path contained in a {@link ResourceParameters} object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
             String contextPath,
@@ -231,11 +227,14 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected String pathOf(AnnotationTarget target) {
+
         AnnotationInstance path = null;
+        String pathValue = null;
 
         switch (target.kind()) {
             case CLASS:
                 path = JandexUtil.getClassAnnotation(target.asClass(), JaxRsConstants.PATH);
+                pathValue = scannerContext.getConfig().getScanResourceClasses().get(target.asClass().name().toString());
                 break;
             case METHOD:
                 path = pathOf(target.asMethod());
@@ -244,9 +243,11 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                 break;
         }
 
-        if (path != null) {
-            String pathValue = path.value().asString();
+        if (pathValue == null && path != null) {
+            pathValue = path.value().asString();
+        }
 
+        if (pathValue != null) {
             if (pathValue.startsWith("/")) {
                 pathValue = pathValue.substring(1);
             }

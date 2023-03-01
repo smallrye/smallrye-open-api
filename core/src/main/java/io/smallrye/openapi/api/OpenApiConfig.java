@@ -175,6 +175,10 @@ public interface OpenApiConfig {
         return new HashSet<>();
     }
 
+    default Map<String, String> getScanResourceClasses() {
+        return new HashMap<>();
+    }
+
     default boolean removeUnusedSchemas() {
         return false;
     }
