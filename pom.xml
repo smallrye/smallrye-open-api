@@ -36,7 +36,7 @@
         <!-- RESTEasy REST Client relocated to another GAV, so these props are for jakarta auto migration -->
         <groupId.resteasy.client>org.jboss.resteasy.microprofile</groupId.resteasy.client>
         <artifactId.resteasy.client>microprofile-rest-client</artifactId.resteasy.client>
-        <version.resteasy.client>2.0.0.Final</version.resteasy.client>
+        <version.resteasy.client>2.1.0.Final</version.resteasy.client>
         <version.quarkus>2.13.1.Final</version.quarkus>
         <version.testng>7.4.0</version.testng>
 
