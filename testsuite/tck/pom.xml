@@ -27,7 +27,7 @@
   <name>SmallRye: MicroProfile OpenAPI TCK</name>
 
   <properties>
-    <version.weld.core>4.0.3.Final</version.weld.core>
+    <version.weld.core>5.1.0.Final</version.weld.core>
   </properties>
 
   <build>
