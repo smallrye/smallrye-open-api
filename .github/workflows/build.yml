@@ -101,13 +101,8 @@ jobs:
       matrix:
         include:
         - tck-version: "2.0.1"
-          testng-version: "6.14.3"
-          default-properties: false
         - tck-version: "3.0"
-          testng-version: "6.14.3"
-          default-properties: false
         - tck-version: "3.1"
-          default-properties: true
 
     name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
     steps:
@@ -130,13 +125,8 @@ jobs:
       - name: build with maven
         run: mvn -B -pl '!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
 
-      - name: execute specific tck
-        if: ${{ matrix.default-properties == false }}
-        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }} -Dversion.testng=${{ matrix.testng-version }}
-
-      - name: execute default tck
-        if: ${{ matrix.default-properties == true }}
-        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD)
+      - name: execute tck ${{ matrix.tck-version }}
+        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
       - uses: actions/upload-artifact@v3
         name: tck-report

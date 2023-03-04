@@ -28,30 +28,14 @@
         <version.org.skyscreamer>1.5.1</version.org.skyscreamer>
         <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
         <version.com.github.eirslett.frontend-maven-plugin>1.12.1</version.com.github.eirslett.frontend-maven-plugin>
-
-        <artifactId.arquillian.jetty>arquillian-jetty-embedded-11</artifactId.arquillian.jetty>
-        <version.arquillian.jetty>1.0.0.Final</version.arquillian.jetty>
-        <version.jetty>11.0.7</version.jetty>
-        <version.resteasy>6.0.0.Final</version.resteasy>
-        <!-- RESTEasy REST Client relocated to another GAV, so these props are for jakarta auto migration -->
-        <groupId.resteasy.client>org.jboss.resteasy.microprofile</groupId.resteasy.client>
-        <artifactId.resteasy.client>microprofile-rest-client</artifactId.resteasy.client>
-        <version.resteasy.client>2.1.0.Final</version.resteasy.client>
         <version.quarkus>2.13.1.Final</version.quarkus>
-        <version.testng>7.4.0</version.testng>
+        <version.testng>7.7.1</version.testng>
+        <version.arquillian.jetty>1.0.0.Final</version.arquillian.jetty>
+        <version.jetty>11.0.14</version.jetty>
 
-        <!--
-            xmlReportPaths must contain an entry for each project that reports coverage.
-            Each module reports execution data in its own target/jacoco.exec. The exec
-            data is then aggregated by testsuite/extra. The list of paths here allows
-            Sonar to find the aggregate report while processing each module.
-          -->
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/target/site/jacoco-aggregate/jacoco.xml,
-            ${project.basedir}/../extra/target/site/jacoco-aggregate/jacoco.xml,
-            ${project.basedir}/../testsuite/extra/target/site/jacoco-aggregate/jacoco.xml,
-            ${project.basedir}/testsuite/extra/target/site/jacoco-aggregate/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
+        <!-- Use Jakarta EE 10 versions -->
+        <version.resteasy>6.2.3.Final</version.resteasy>
+        <version.weld.core>5.1.0.Final</version.weld.core>
     </properties>
 
     <licenses>
@@ -142,12 +126,14 @@
             </dependency>
 
             <!-- Jakarta EE -->
-            <!-- CDI -->
             <dependency>
-                <groupId>jakarta.enterprise</groupId>
-                <artifactId>jakarta.enterprise.cdi-api</artifactId>
-                <version>3.0.1</version>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-bom</artifactId>
+                <version>${version.jakarta.api}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
+            <!-- CDI -->
             <dependency>
                 <groupId>javax.enterprise</groupId>
                 <artifactId>cdi-api</artifactId>
@@ -155,21 +141,11 @@
             </dependency>
             <!-- JaxRS -->
             <dependency>
-                <groupId>jakarta.ws.rs</groupId>
-                <artifactId>jakarta.ws.rs-api</artifactId>
-                <version>3.1.0</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>2.1.1</version>
             </dependency>
             <!-- Bean Validation-->
-            <dependency>
-                <groupId>jakarta.validation</groupId>
-                <artifactId>jakarta.validation-api</artifactId>
-                <version>3.0.2</version>
-            </dependency>
             <dependency>
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>
@@ -177,21 +153,11 @@
             </dependency>
             <!-- JsonP -->
             <dependency>
-                <groupId>jakarta.json</groupId>
-                <artifactId>jakarta.json-api</artifactId>
-                <version>2.1.1</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.json</groupId>
                 <artifactId>javax.json-api</artifactId>
                 <version>1.1.4</version>
             </dependency>
             <!-- JsonB -->
-            <dependency>
-                <groupId>jakarta.json.bind</groupId>
-                <artifactId>jakarta.json.bind-api</artifactId>
-                <version>3.0.0</version>
-            </dependency>
             <dependency>
                 <groupId>javax.json.bind</groupId>
                 <artifactId>javax.json.bind-api</artifactId>
@@ -199,21 +165,11 @@
             </dependency>
             <!-- JAXB -->
             <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.0</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
                 <version>2.3.1</version>
             </dependency>
             <!-- Annotation -->
-            <dependency>
-                <groupId>jakarta.annotation</groupId>
-                <artifactId>jakarta.annotation-api</artifactId>
-                <version>2.1.1</version>
-            </dependency>
             <dependency>
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
