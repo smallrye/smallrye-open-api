@@ -15,23 +15,6 @@
       <version.parsson.json>1.1.1</version.parsson.json>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-core-spi</artifactId>
-                <version>${version.resteasy}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-              <groupId>org.jboss.resteasy</groupId>
-              <artifactId>resteasy-multipart-provider</artifactId>
-              <version>${version.resteasy}</version>
-              <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <!-- SmallRye core implementation -->
         <dependency>

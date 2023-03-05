@@ -26,10 +26,6 @@
   <artifactId>smallrye-open-api-testsuite-tck</artifactId>
   <name>SmallRye: MicroProfile OpenAPI TCK</name>
 
-  <properties>
-    <version.weld.core>4.0.3.Final</version.weld.core>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -85,7 +81,7 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.arquillian.container</groupId>
-      <artifactId>${artifactId.arquillian.jetty}</artifactId>
+      <artifactId>arquillian-jetty-embedded-11</artifactId>
       <version>${version.arquillian.jetty}</version>
       <scope>test</scope>
       <exclusions>
@@ -154,15 +150,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${groupId.resteasy.client}</groupId>
-      <artifactId>${artifactId.resteasy.client}</artifactId>
-      <version>${version.resteasy.client}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>io.smallrye.config</groupId>
       <artifactId>smallrye-config</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.slf4j</groupId>
+      <artifactId>slf4j-jboss-logging</artifactId>
+      <version>1.2.1.Final</version>
     </dependency>
   </dependencies>
 

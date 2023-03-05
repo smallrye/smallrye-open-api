@@ -9,6 +9,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -22,6 +23,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import io.smallrye.openapi.runtime.io.Format;
 
 @Path("/openapi")
+@ApplicationScoped
 public class OpenApiEndpoint {
     @Context
     ServletContext servletContext;
