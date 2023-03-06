@@ -11,7 +11,9 @@
                 "schema" : {
                   "uniqueItems" : true,
                   "type" : "array",
-                  "items" : { }
+                  "items" : {
+                    "$ref" : "#/components/schemas/Fruit"
+                  }
                 }
               }
             }
@@ -23,7 +25,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "type" : "object"
+                "$ref" : "#/components/schemas/Fruit"
               }
             }
           }
@@ -36,7 +38,9 @@
                 "schema" : {
                   "uniqueItems" : true,
                   "type" : "array",
-                  "items" : { }
+                  "items" : {
+                    "$ref" : "#/components/schemas/Fruit"
+                  }
                 }
               }
             }
@@ -48,7 +52,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "type" : "object"
+                "$ref" : "#/components/schemas/Fruit"
               }
             }
           }
@@ -61,12 +65,38 @@
                 "schema" : {
                   "uniqueItems" : true,
                   "type" : "array",
-                  "items" : { }
+                  "items" : {
+                    "$ref" : "#/components/schemas/Fruit"
+                  }
                 }
               }
             }
           }
         }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Fruit" : {
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "seeds" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Seed"
+            }
+          }
+        }
+      },
+      "Seed" : {
+        "type" : "object"
       }
     }
   }

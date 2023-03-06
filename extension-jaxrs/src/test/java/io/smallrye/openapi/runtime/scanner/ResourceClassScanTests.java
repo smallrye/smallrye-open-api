@@ -16,7 +16,9 @@ class ResourceClassScanTests extends JaxRsDataObjectScannerTestBase {
     void testOverwriteJavaxPath() throws Exception {
         // given
         Class<?> resourceClass = test.io.smallrye.openapi.runtime.scanner.javax.FruitResource.class;
-        Index index = indexOf(resourceClass);
+        Index index = indexOf(resourceClass,
+                test.io.smallrye.openapi.runtime.scanner.Fruit.class,
+                test.io.smallrye.openapi.runtime.scanner.Seed.class);
         Map<String, String> properties = new HashMap<>();
         properties.put(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX + resourceClass.getName(), "overwritten-resource-path");
         OpenApiConfig config = dynamicConfig(properties);
@@ -34,7 +36,9 @@ class ResourceClassScanTests extends JaxRsDataObjectScannerTestBase {
     void testOverwriteJakartaPath() throws Exception {
         // given
         Class<?> resourceClass = test.io.smallrye.openapi.runtime.scanner.jakarta.FruitResource.class;
-        Index index = indexOf(resourceClass);
+        Index index = indexOf(resourceClass,
+                test.io.smallrye.openapi.runtime.scanner.Fruit.class,
+                test.io.smallrye.openapi.runtime.scanner.Seed.class);
         Map<String, String> properties = new HashMap<>();
         properties.put(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX + resourceClass.getName(), "overwritten-resource-path");
         OpenApiConfig config = dynamicConfig(properties);
