@@ -46,7 +46,13 @@
 		{
 			"url": "urn:server2",
 			"description": "Server 2 description."
-		}
+		},
+		{
+            "url": "urn:server3"
+        },
+        {
+            "url": "urn:server4"
+        }
 	],
 	"security": [
 		{
