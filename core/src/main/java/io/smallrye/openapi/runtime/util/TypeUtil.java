@@ -114,7 +114,7 @@ public class TypeUtil {
             .example("13:45.30.123456789").build();
 
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
-    private static final IndexView jdkIndex;
+    public static final IndexView jdkIndex;
     private static final Set<DotName> wrapperTypes = new HashSet<>();
 
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#dataTypeFormat
@@ -263,6 +263,13 @@ public class TypeUtil {
         index(indexer, java.util.concurrent.LinkedTransferQueue.class);
         index(indexer, java.util.concurrent.PriorityBlockingQueue.class);
         index(indexer, java.util.concurrent.SynchronousQueue.class);
+
+        // Streams
+        index(indexer, java.util.stream.BaseStream.class);
+        index(indexer, java.util.stream.Stream.class);
+        index(indexer, java.util.stream.IntStream.class);
+        index(indexer, java.util.stream.LongStream.class);
+        index(indexer, java.util.stream.DoubleStream.class);
 
         // CompletionStage and implementation
         index(indexer, java.util.concurrent.CompletionStage.class);

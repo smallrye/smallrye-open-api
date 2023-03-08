@@ -1,6 +1,7 @@
 package test.io.smallrye.openapi.runtime.scanner.jakarta;
 
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Stream;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
@@ -68,4 +69,11 @@ public class AllTheParamsTestResource {
         return null;
     }
 
+    @GET
+    @Path("stream")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Stream<Widget> getStream(@QueryParam(value = "q1") @Deprecated long q1,
+            @org.jboss.resteasy.annotations.jaxrs.QueryParam(value = "q2") String notQ2) {
+        return null;
+    }
 }

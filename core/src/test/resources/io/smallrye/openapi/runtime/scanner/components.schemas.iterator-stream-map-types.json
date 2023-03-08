@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "StringArray": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "TestBean": {
+        "type": "object",
+        "properties": {
+          "stringArrayFromStream": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "intArrayFromStream": {
+            "type": "array",
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "anyValueMapFromProperties": {
+            "type": "object",
+            "additionalProperties": {
+              
+            }
+          },
+          "stringArrayFromIterator": {
+            "$ref": "#/components/schemas/StringArray"
+          },
+          "longArrayFromStream": {
+            "type": "array",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "doubleArrayFromStream": {
+            "type": "array",
+            "items": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "anyArrayFromRawCollection": {
+            "type": "array",
+            "items": {
+              
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -3,7 +3,6 @@ package test.io.smallrye.openapi.tck;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +24,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
-import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
 /**
  * Some useful methods for creating stuff from ShrinkWrap {@link Archive}s.
@@ -107,20 +105,8 @@ public class ArchiveUtil {
         }
 
         Indexer indexer = new Indexer();
-        index(indexer, "io/smallrye/openapi/runtime/scanner/CollectionStandin.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/IterableStandin.class");
-        index(indexer, "io/smallrye/openapi/runtime/scanner/MapStandin.class");
         indexArchive(config, indexer, archive);
         return indexer.complete();
-    }
-
-    private static void index(Indexer indexer, String resName) {
-        ClassLoader cl = OpenApiAnnotationScanner.class.getClassLoader();
-        try (InputStream klazzStream = cl.getResourceAsStream(resName)) {
-            indexer.index(klazzStream);
-        } catch (IOException ioe) {
-            throw new UncheckedIOException(ioe);
-        }
     }
 
     /**

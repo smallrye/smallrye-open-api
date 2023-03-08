@@ -6,8 +6,10 @@ import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ROOTELEMENT;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.BaseStream;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -67,13 +69,13 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class OpenApiDataObjectScanner {
 
-    // Collection (list-type things)
-    public static final DotName COLLECTION_INTERFACE_NAME = DotName.createSimple(Collection.class.getName());
-    public static final Type COLLECTION_TYPE = Type.create(COLLECTION_INTERFACE_NAME, Type.Kind.CLASS);
-
     // Iterable (also list-type things)
     public static final DotName ITERABLE_INTERFACE_NAME = DotName.createSimple(Iterable.class.getName());
     public static final Type ITERABLE_TYPE = Type.create(ITERABLE_INTERFACE_NAME, Type.Kind.CLASS);
+
+    // Stream
+    public static final DotName STREAM_INTERFACE_NAME = DotName.createSimple(BaseStream.class.getName());
+    public static final Type STREAM_TYPE = Type.create(STREAM_INTERFACE_NAME, Type.Kind.CLASS);
 
     // Map
     public static final DotName MAP_INTERFACE_NAME = DotName.createSimple(Map.class.getName());
@@ -93,9 +95,10 @@ public class OpenApiDataObjectScanner {
     // Array type
     public static final Type ARRAY_TYPE_OBJECT = Type.create(DotName.createSimple(Map[].class.getName()), Type.Kind.ARRAY);
 
-    private static ClassInfo collectionStandin;
     private static ClassInfo iterableStandin;
     private static ClassInfo mapStandin;
+    private static ClassInfo streamStandin;
+    private static List<ClassInfo> standinClasses;
 
     /*-
      * Index the "standin" collection types for internal use. These are required to wrap
@@ -103,13 +106,14 @@ public class OpenApiDataObjectScanner {
      */
     static {
         Indexer indexer = new Indexer();
-        index(indexer, "CollectionStandin.class");
         index(indexer, "IterableStandin.class");
         index(indexer, "MapStandin.class");
+        index(indexer, "StreamStandin.class");
         Index index = indexer.complete();
-        collectionStandin = index.getClassByName(DotName.createSimple(CollectionStandin.class.getName()));
         iterableStandin = index.getClassByName(DotName.createSimple(IterableStandin.class.getName()));
         mapStandin = index.getClassByName(DotName.createSimple(MapStandin.class.getName()));
+        streamStandin = index.getClassByName(DotName.createSimple(StreamStandin.class.getName()));
+        standinClasses = Arrays.asList(iterableStandin, mapStandin, streamStandin);
     }
 
     private static void index(Indexer indexer, String resourceName) {
@@ -208,8 +212,8 @@ public class OpenApiDataObjectScanner {
         DataObjectDeque.PathEntry root = objectStack.rootNode(rootAnnotationTarget, rootClassInfo, rootClassType, rootSchema);
 
         // For certain special types (map, list, etc) we need to do some pre-processing.
-        if (isSpecialType(rootClassType)) {
-            resolveSpecial(root, rootClassType);
+        if (standinClasses.contains(rootClassInfo)) {
+            resolveSpecial(root, rootClassType, rootClassInfo); // NOSONAR - rootClassInfo is known to be non-null
         } else {
             objectStack.push(root);
         }
@@ -322,8 +326,10 @@ public class OpenApiDataObjectScanner {
         return classSchema;
     }
 
-    private void resolveSpecial(DataObjectDeque.PathEntry root, Type type) {
-        if (typeArgumentMismatch(type, rootClassInfo)) {
+    private void resolveSpecial(DataObjectDeque.PathEntry root, Type type, ClassInfo standin) {
+        ParameterizedType standinType = standin.interfaceTypes().get(0).asParameterizedType();
+
+        if (typeArgumentMismatch(type, standin)) {
             /*
              * The type's generic arguments are not in alignment with the type
              * parameters of the stand-in collection type. For the purposes
@@ -331,20 +337,19 @@ public class OpenApiDataObjectScanner {
              * original type and determine the correct type parameter for the
              * stand-in.
              */
-            ParameterizedType standinInterface = rootClassInfo.interfaceTypes().get(0).asParameterizedType();
-            type = TypeResolver.resolveParameterizedAncestor(context,
-                    type.asParameterizedType(),
-                    standinInterface);
+            type = TypeResolver.resolveParameterizedAncestor(context, type, standinType)
+                    .map(Type.class::cast)
+                    .orElse(type);
         }
 
-        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(context, type, rootClassInfo,
+        Map<String, TypeResolver> fieldResolution = TypeResolver.getAllFields(context, type, standin,
                 root.getAnnotationTarget());
         rootSchema = preProcessSpecial(type, fieldResolution.values().iterator().next(), root);
     }
 
     private boolean typeArgumentMismatch(Type type, ClassInfo standin) {
         if (type.kind() != Kind.PARAMETERIZED_TYPE) {
-            return false;
+            return true;
         }
 
         return standin.typeParameters().size() < type.asParameterizedType().arguments().size();
@@ -358,22 +363,17 @@ public class OpenApiDataObjectScanner {
         return TypeUtil.isA(context, testSubject, test);
     }
 
-    // Is Map, Collection, etc.
-    private boolean isSpecialType(Type type) {
-        return isA(type, COLLECTION_TYPE) || isA(type, ITERABLE_TYPE) || isA(type, MAP_TYPE);
-    }
-
     private ClassInfo initialType(Type type) {
-        if (isA(type, COLLECTION_TYPE)) {
-            return collectionStandin;
-        }
-
         if (isA(type, ITERABLE_TYPE)) {
             return iterableStandin;
         }
 
         if (isA(type, MAP_TYPE)) {
             return mapStandin;
+        }
+
+        if (isA(type, STREAM_TYPE)) {
+            return streamStandin;
         }
 
         return index.getClass(type);
