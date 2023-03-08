@@ -1,6 +1,6 @@
 package io.smallrye.openapi.api;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.OASFilter;
@@ -33,7 +33,7 @@ public class OpenApiDocument {
     private transient OpenAPI annotationsModel;
     private transient OpenAPI readerModel;
     private transient OpenAPI staticFileModel;
-    private transient Map<String, OASFilter> filters = new HashMap<>();
+    private transient Map<String, OASFilter> filters = new LinkedHashMap<>();
     private transient String archiveName;
     private transient String version;
 

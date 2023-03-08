@@ -72,8 +72,25 @@ class FilterUtilTest {
         document.config(openApiConfig);
         document.modelFromReader(model);
 
-        document.filter(filter());
-        document.filter(filter()); // Add it twice to make sure we do not repeat
+        OASFilter f1 = filter();
+        OASFilter f2 = filter();
+        OASFilter f3 = new OASFilter() {
+            @Override
+            public void filterOpenAPI(OpenAPI openAPI) {
+                openAPI.addServer(OASFactory.createServer().url("urn:server3"));
+            }
+        };
+        OASFilter f4 = new OASFilter() {
+            @Override
+            public void filterOpenAPI(OpenAPI openAPI) {
+                openAPI.addServer(OASFactory.createServer().url("urn:server4"));
+            }
+        };
+
+        document.filter(f1);
+        document.filter(f2); // Add it twice to make sure we do not repeat
+        document.filter(f3);
+        document.filter(f4);
         document.initialize();
 
         model = document.get();
