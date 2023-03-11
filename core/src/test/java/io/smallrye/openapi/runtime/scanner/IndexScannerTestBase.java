@@ -175,7 +175,11 @@ public class IndexScannerTestBase {
 
     public static void assertJsonEquals(String expectedResource, OpenAPI actual) throws JSONException, IOException {
         URL resourceUrl = IndexScannerTestBase.class.getResource(expectedResource);
-        JSONAssert.assertEquals(loadResource(resourceUrl), OpenApiSerializer.serialize(actual, Format.JSON),
+        assertJsonEquals(resourceUrl, actual);
+    }
+
+    public static void assertJsonEquals(URL expectedResourceUrl, OpenAPI actual) throws JSONException, IOException {
+        JSONAssert.assertEquals(loadResource(expectedResourceUrl), OpenApiSerializer.serialize(actual, Format.JSON),
                 true);
     }
 

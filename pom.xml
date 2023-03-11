@@ -36,6 +36,9 @@
         <!-- Use Jakarta EE 10 versions -->
         <version.resteasy>6.2.3.Final</version.resteasy>
         <version.weld.core>5.1.0.Final</version.weld.core>
+
+        <!-- Ignore the test data classes in test coverage calculation -->
+        <sonar.coverage.exclusions>testsuite/data/**/*.java</sonar.coverage.exclusions>
     </properties>
 
     <licenses>
@@ -240,7 +243,14 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>smallrye-open-api-testsuite-data</artifactId>
+                <classifier>indexed</classifier>
                 <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
