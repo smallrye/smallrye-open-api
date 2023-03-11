@@ -506,8 +506,10 @@ public class TypeUtil {
                 terminal = true;
                 break;
             case TYPE_VARIABLE:
-            case WILDCARD_TYPE:
                 terminal = false;
+                break;
+            case WILDCARD_TYPE:
+                terminal = isTerminalType(resolveWildcard(type));
                 break;
             case CLASS:
                 if (DOTNAME_OBJECT.equals(type.name())) {
