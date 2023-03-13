@@ -17,7 +17,7 @@ class OpenApiConfigImplTest {
         System.clearProperty(TEST_PROPERTY);
         Config config = ConfigProvider.getConfig();
         OpenApiConfigImpl oaiConfig = new OpenApiConfigImpl(config);
-        assertNull(oaiConfig.getStringConfigValue(TEST_PROPERTY));
+        assertNull(oaiConfig.getConfigValue(TEST_PROPERTY, String.class, () -> null));
     }
 
     @Test
@@ -28,7 +28,7 @@ class OpenApiConfigImplTest {
             Config config = ConfigProvider.getConfig();
             OpenApiConfigImpl oaiConfig = new OpenApiConfigImpl(config);
             // White-space only value is treated as absent value
-            assertNull(oaiConfig.getStringConfigValue(TEST_PROPERTY));
+            assertNull(oaiConfig.getConfigValue(TEST_PROPERTY, String.class, () -> null));
         } finally {
             System.clearProperty(TEST_PROPERTY);
         }
@@ -42,7 +42,7 @@ class OpenApiConfigImplTest {
             Config config = ConfigProvider.getConfig();
             OpenApiConfigImpl oaiConfig = new OpenApiConfigImpl(config);
             // Trim is only used to determine if the value is blank. Full value returned for app use
-            assertEquals("  VALUE  \t", oaiConfig.getStringConfigValue(TEST_PROPERTY));
+            assertEquals("  VALUE  \t", oaiConfig.getConfigValue(TEST_PROPERTY, String.class, () -> null));
         } finally {
             System.clearProperty(TEST_PROPERTY);
         }

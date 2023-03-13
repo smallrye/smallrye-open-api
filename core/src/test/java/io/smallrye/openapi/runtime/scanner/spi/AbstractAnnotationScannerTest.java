@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -61,6 +64,18 @@ class AbstractAnnotationScannerTest {
         }
     }
 
+    static class DummyOpenApiConfig implements OpenApiConfig {
+        @Override
+        public <R, T> T getConfigValue(String propertyName, Class<R> type, Function<R, T> converter, Supplier<T> defaultValue) {
+            return defaultValue.get();
+        }
+
+        @Override
+        public <R, T> Map<String, T> getConfigValueMap(String propertyNamePrefix, Class<R> type, Function<R, T> converter) {
+            return Collections.emptyMap();
+        }
+    }
+
     /**
      * Test method for {@link AbstractAnnotationScanner#makePath(String)}.
      */
@@ -88,8 +103,7 @@ class AbstractAnnotationScannerTest {
 
     @Test
     void testNoConfiguredProfile() {
-        OpenApiConfig config = new OpenApiConfig() {
-        };
+        OpenApiConfig config = new DummyOpenApiConfig();
 
         OperationImpl operation = new OperationImpl();
         operation.setExtensions(Collections.singletonMap("x-smallrye-profile-external", ""));
@@ -102,7 +116,7 @@ class AbstractAnnotationScannerTest {
 
     @Test
     void testConfiguredIncludeProfile() {
-        OpenApiConfig config = new OpenApiConfig() {
+        OpenApiConfig config = new DummyOpenApiConfig() {
             @Override
             public Set<String> getScanProfiles() {
                 return Collections.singleton("external");
@@ -123,7 +137,7 @@ class AbstractAnnotationScannerTest {
 
     @Test
     void testConfiguredExcludeProfile() {
-        OpenApiConfig config = new OpenApiConfig() {
+        OpenApiConfig config = new DummyOpenApiConfig() {
             @Override
             public Set<String> getScanExcludeProfiles() {
                 return Collections.singleton("external");
