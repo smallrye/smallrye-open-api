@@ -5,12 +5,15 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,6 +28,7 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 /**
  * Used to merge OAI data models into a single one. The MP+OAI 1.0 spec
@@ -57,6 +61,14 @@ public class MergeUtil {
         return mergeObjects(document1, document2);
     }
 
+    static <T, P> boolean cycleDetected(String propertyName, T obj1, P prop1, T obj2, P prop2) {
+        if (prop1 == obj2 || prop2 == obj1) {
+            UtilLogging.logger.cylicReferenceAvoided(propertyName, obj1.getClass().getName());
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Generic merge of two objects of the same type.
      *
@@ -65,16 +77,15 @@ public class MergeUtil {
      * @param <T> Type parameter
      * @return Merged object
      */
-    @SuppressWarnings({ "rawtypes" })
     public static <T> T mergeObjects(T object1, T object2) {
-        if (object1 == null && object2 != null) {
-            return object2;
-        }
-        if (object1 != null && object2 == null) {
+        if (object1 == object2) {
             return object1;
         }
-        if (object1 == null && object2 == null) {
-            return null;
+        if (object1 == null) {
+            return object2;
+        }
+        if (object2 == null) {
+            return object1;
         }
 
         // It's uncommon, but in some cases (like Link Parameters or Examples) the values could
@@ -83,62 +94,56 @@ public class MergeUtil {
             return object2;
         }
 
-        PropertyDescriptor[] descriptors = new PropertyDescriptor[0];
         try {
-            descriptors = Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors();
+            Arrays.stream(Introspector.getBeanInfo(object1.getClass()).getPropertyDescriptors())
+                    .filter(descriptor -> !EXCLUDED_PROPERTIES.contains(descriptor.getName()))
+                    .filter(descriptor -> Objects.nonNull(descriptor.getWriteMethod()))
+                    .forEach(descriptor -> {
+                        try {
+                            mergeProperty(object1, object2, descriptor);
+                        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                            throw new OpenApiRuntimeException(e);
+                        }
+                    });
         } catch (IntrospectionException e) {
             UtilLogging.logger.failedToIntrospectBeanInfo(object1.getClass(), e);
         }
 
-        for (PropertyDescriptor descriptor : descriptors) {
-            if (EXCLUDED_PROPERTIES.contains(descriptor.getName())) {
-                continue;
-            }
-            Class ptype = descriptor.getPropertyType();
-            Method writeMethod = descriptor.getWriteMethod();
-            if (writeMethod != null) {
-                if (Constructible.class.isAssignableFrom(ptype)) {
-                    try {
-                        Object val1 = descriptor.getReadMethod().invoke(object1);
-                        Object val2 = descriptor.getReadMethod().invoke(object2);
-                        Object newValue = mergeObjects(val1, val2);
-                        if (newValue != null) {
-                            writeMethod.invoke(object1, newValue);
-                        }
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (Map.class.isAssignableFrom(ptype)) {
-                    try {
-                        Map values1 = (Map) descriptor.getReadMethod().invoke(object1);
-                        Map values2 = (Map) descriptor.getReadMethod().invoke(object2);
-                        Map newValues = mergeMaps(values1, values2);
-                        writeMethod.invoke(object1, newValues);
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (List.class.isAssignableFrom(ptype)) {
-                    try {
-                        List values1 = (List) descriptor.getReadMethod().invoke(object1);
-                        List values2 = (List) descriptor.getReadMethod().invoke(object2);
-                        List newValues = mergeLists(values1, values2).orElse(null);
-                        writeMethod.invoke(object1, newValues);
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    try {
-                        Object newValue = descriptor.getReadMethod().invoke(object2);
-                        if (newValue != null) {
-                            writeMethod.invoke(object1, newValue);
-                        }
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
+        return object1;
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    static <T> void mergeProperty(T object1, T object2, PropertyDescriptor descriptor)
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+        Class<?> ptype = descriptor.getPropertyType();
+        Method writeMethod = descriptor.getWriteMethod();
+
+        if (Constructible.class.isAssignableFrom(ptype)) {
+            Object val1 = descriptor.getReadMethod().invoke(object1);
+            Object val2 = descriptor.getReadMethod().invoke(object2);
+            if (!cycleDetected(descriptor.getName(), object1, val1, object2, val2)) {
+                Object newValue = mergeObjects(val1, val2);
+                if (newValue != null) {
+                    writeMethod.invoke(object1, newValue);
                 }
             }
+        } else if (Map.class.isAssignableFrom(ptype)) {
+            Map values1 = (Map) descriptor.getReadMethod().invoke(object1);
+            Map values2 = (Map) descriptor.getReadMethod().invoke(object2);
+            Map newValues = mergeMaps(values1, values2);
+            writeMethod.invoke(object1, newValues);
+        } else if (List.class.isAssignableFrom(ptype)) {
+            List values1 = (List) descriptor.getReadMethod().invoke(object1);
+            List values2 = (List) descriptor.getReadMethod().invoke(object2);
+            List newValues = mergeLists(values1, values2);
+            writeMethod.invoke(object1, newValues);
+        } else {
+            Object newValue = descriptor.getReadMethod().invoke(object2);
+            if (newValue != null) {
+                writeMethod.invoke(object1, newValue);
+            }
         }
-        return object1;
     }
 
     /**
@@ -150,14 +155,14 @@ public class MergeUtil {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static Map mergeMaps(Map values1, Map values2) {
-        if (values1 == null && values2 == null) {
-            return null;
-        }
-        if (values1 != null && values2 == null) {
+        if (values1 == values2) {
             return values1;
         }
-        if (values1 == null && values2 != null) {
+        if (values1 == null) {
             return values2;
+        }
+        if (values2 == null) {
+            return values1;
         }
 
         if (!(values1 instanceof ModelImpl)) {
@@ -167,46 +172,63 @@ public class MergeUtil {
             values2 = new LinkedHashMap<>(values2);
         }
 
-        for (Object key : values2.keySet()) {
-            if (values1.containsKey(key)) {
-                Object pval1 = values1.get(key);
-                Object pval2 = values2.get(key);
-                if (pval1 instanceof Map) {
-                    values1.put(key, mergeMaps((Map) pval1, (Map) pval2));
-                } else if (pval1 instanceof List) {
-                    values1.put(key, mergeLists((List) pval1, (List) pval2).orElse(null));
-                } else if (pval1 instanceof Constructible) {
-                    values1.put(key, mergeObjects(pval1, pval2));
-                } else {
-                    values1.put(key, pval2);
-                }
-            } else {
-                Object pval2 = values2.get(key);
-                values1.put(key, pval2);
-            }
-        }
+        Map<Object, Object> targetValues = values1;
+        Set<Map.Entry<?, ?>> entrySet = values2.entrySet();
+
+        entrySet.stream()
+                .map(entry -> {
+                    Object key = entry.getKey();
+                    Object pval2 = entry.getValue();
+                    Object value;
+
+                    if (targetValues.containsKey(key)) {
+                        Object pval1 = targetValues.get(key);
+
+                        if (pval1 instanceof Map) {
+                            value = mergeMaps((Map) pval1, (Map) pval2);
+                        } else if (pval1 instanceof List) {
+                            value = mergeLists((List) pval1, (List) pval2);
+                        } else if (pval1 instanceof Constructible) {
+                            value = mergeObjects(pval1, pval2);
+                        } else {
+                            value = pval2;
+                        }
+                    } else {
+                        value = pval2;
+                    }
+
+                    return new AbstractMap.SimpleEntry<>(key, value);
+                })
+                .forEach(modifiedEntry -> targetValues.put(modifiedEntry.getKey(), modifiedEntry.getValue()));
 
         if (values1 instanceof Constructible) {
-            if (values1 instanceof Reference) {
-                Reference ref1 = (Reference) values1;
-                Reference ref2 = (Reference) values2;
-                if (ref2.getRef() != null) {
-                    ref1.setRef(ref2.getRef());
-                }
-            }
-            if (values1 instanceof Extensible) {
-                Extensible extensible1 = (Extensible) values1;
-                Extensible extensible2 = (Extensible) values2;
-                extensible1.setExtensions(mergeMaps(extensible1.getExtensions(), extensible2.getExtensions()));
-            }
-            if (values1 instanceof APIResponses) {
-                APIResponses responses1 = (APIResponses) values1;
-                APIResponses responses2 = (APIResponses) values2;
-                responses1.defaultValue(mergeObjects(responses1.getDefaultValue(), responses2.getDefaultValue()));
-            }
+            mergeConstructible(values1, values2);
         }
 
         return values1;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    static void mergeConstructible(Map values1, Map values2) {
+        if (values1 instanceof Reference) {
+            Reference ref1 = (Reference) values1;
+            Reference ref2 = (Reference) values2;
+            if (ref2.getRef() != null) {
+                ref1.setRef(ref2.getRef());
+            }
+        }
+
+        if (values1 instanceof Extensible) {
+            Extensible extensible1 = (Extensible) values1;
+            Extensible extensible2 = (Extensible) values2;
+            extensible1.setExtensions(mergeMaps(extensible1.getExtensions(), extensible2.getExtensions()));
+        }
+
+        if (values1 instanceof APIResponses) {
+            APIResponses responses1 = (APIResponses) values1;
+            APIResponses responses2 = (APIResponses) values2;
+            responses1.defaultValue(mergeObjects(responses1.getDefaultValue(), responses2.getDefaultValue()));
+        }
     }
 
     /**
@@ -217,45 +239,42 @@ public class MergeUtil {
      * @param values2
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Optional<List> mergeLists(List values1, List values2) {
-        if (values1 == null && values2 == null) {
-            return Optional.empty();
+    private static List mergeLists(List values1, List values2) {
+        if (Objects.equals(values1, values2)) {
+            // Do not merge if lists identical, both null, or both the same reference
+            return values1;
         }
-        if (values1 != null && values2 == null) {
-            return Optional.of(values1);
+        if (values2 == null) {
+            return values1;
         }
-        if ((values1 == null || values1.isEmpty()) && values2 != null) {
-            return Optional.of(values2);
-        }
-        if (values1.equals(values2)) {
-            // Do not merge identical lists
-            return Optional.of(values1);
+        if ((values1 == null || values1.isEmpty())) {
+            return values2;
         }
 
         if (values1.get(0) instanceof String) {
-            return Optional.of(mergeStringLists(values1, values2));
+            return mergeStringLists(values1, values2);
         }
 
         if (values1.get(0) instanceof Tag) {
-            return Optional.of(mergeTagLists(values1, values2));
+            return mergeTagLists(values1, values2);
         }
 
         if (values1.get(0) instanceof Server) {
-            return Optional.of(mergeServerLists(values1, values2));
+            return mergeServerLists(values1, values2);
         }
 
         if (values1.get(0) instanceof SecurityRequirement) {
-            return Optional.of(mergeSecurityRequirementLists(values1, values2));
+            return mergeSecurityRequirementLists(values1, values2);
         }
 
         if (values1.get(0) instanceof Parameter) {
-            return Optional.of(mergeParameterLists(values1, values2));
+            return mergeParameterLists(values1, values2);
         }
 
         List merged = new ArrayList<>(values1.size() + values2.size());
         merged.addAll(values1);
         merged.addAll(values2);
-        return Optional.of(merged);
+        return merged;
     }
 
     /**
@@ -358,27 +377,24 @@ public class MergeUtil {
      * @param values2
      */
     private static List<Parameter> mergeParameterLists(List<Parameter> values1, List<Parameter> values2) {
-        values1 = new ArrayList<>(values1);
+        List<Parameter> mutableValues = new ArrayList<>(values1);
 
-        for (Parameter value2 : values2) {
-            Parameter match = null;
-            for (Parameter value1 : values1) {
-                if (value1.getName() == null || !value1.getName().equals(value2.getName())) {
-                    continue;
-                }
-                if (value1.getIn() == null || !value1.getIn().equals(value2.getIn())) {
-                    continue;
-                }
+        values2.stream()
+                .filter(v -> Objects.nonNull(v.getName()))
+                .filter(v -> Objects.nonNull(v.getIn()))
+                .forEach(value2 -> {
+                    Optional<Parameter> match = mutableValues.stream()
+                            .filter(value1 -> Objects.equals(value1.getName(), value2.getName()))
+                            .filter(value1 -> Objects.equals(value1.getIn(), value2.getIn()))
+                            .findFirst();
 
-                match = value1;
-                break;
-            }
-            if (match == null) {
-                values1.add(value2);
-            } else {
-                mergeObjects(match, value2);
-            }
-        }
-        return values1;
+                    if (match.isPresent()) {
+                        mergeObjects(match.get(), value2);
+                    } else {
+                        mutableValues.add(value2);
+                    }
+                });
+
+        return mutableValues;
     }
 }

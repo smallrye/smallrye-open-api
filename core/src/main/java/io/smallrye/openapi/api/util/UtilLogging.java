@@ -23,4 +23,8 @@ interface UtilLogging extends BasicLogger {
     @Message(id = 1002, value = "Cyclic object reference detected in OpenAPI model, skipping current node")
     void cylicReferenceDetected();
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 1003, value = "Merge of property would result in cyclic object reference in OpenAPI model, skipping property '%s' in type %s")
+    void cylicReferenceAvoided(String propertyName, String typeName);
+
 }
