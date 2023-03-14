@@ -24,7 +24,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAcceptsEmptyConfig() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
         assertTrue(view.accepts(DotName.createSimple("com.example.pkgA.MyBean")));
@@ -32,7 +32,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedClass_ExcludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "com.example.pkgA.MyBean,com.example.pkgA.MyClass");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "com.example.pkgA");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -43,7 +43,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_ExcludedClass_IncludedClassPattern() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "^(?:com.example.pkgA.My.*)$");
         properties.put(OASConfig.SCAN_EXCLUDE_CLASSES, "com.example.pkgA.MyImpl");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -55,7 +55,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedClassPattern_ExcludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "^(?:com.example.pkgA.My.*)$");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "com.example.pkgA");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -67,7 +67,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_ExcludedSimpleClassPattern_NotIncludedClassMatch() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_EXCLUDE_CLASSES, "example.pkgA.MyImpl$");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
@@ -78,7 +78,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_ExcludedSimpleClassPattern_IncludedClassShorterMatch() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "(?:pkgA.My.*)$");
         properties.put(OASConfig.SCAN_EXCLUDE_CLASSES, "example.pkgA.MyImpl$");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -90,7 +90,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_ExcludedSimpleClassPattern_IncludedClassLongerMatch() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "(?:example.pkgA.My.*)$");
         properties.put(OASConfig.SCAN_EXCLUDE_CLASSES, "pkgA.MyImpl$");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -102,7 +102,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedSimpleClassPattern_ExcludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "(?:pkgA.My(Bean|Class))$");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "com.example.pkgA");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -114,7 +114,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedSimpleClassPattern_ExcludedPackagePrefix() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "(?:pkgA.My(Bean|Class))$");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "com.example");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -126,7 +126,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedSimpleClassPattern_ExcludedPackagePattern() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "(?:pkgA.MyBean)$");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "example.pkg[AB]$");
         properties.put(OASConfig.SCAN_PACKAGES, "^(com|org).example");
@@ -139,7 +139,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedSimpleClassPattern_ExcludedSimpleClass() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "Resource$");
         properties.put(OASConfig.SCAN_EXCLUDE_CLASSES, "BarResource");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -151,7 +151,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_ExcludedPackageOverridesIncludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "com.example");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "com.example");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -164,7 +164,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedPackagePatternEndAnchor() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "example.pkgA$");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
@@ -175,7 +175,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedPackageOverridesExcludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "com.example.pkgA");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "com.example");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -188,7 +188,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedPackageExcludesOtherPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "com.example.pkgA");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
@@ -199,7 +199,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedClassesImpliesOtherClassesExcluded() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_CLASSES, "^com.example.pkgA.My(Bean|Class)$");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
@@ -210,7 +210,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_IncludedPackageAroundExcludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "org.example.a, org.example.a.b.c");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "org.example.a.b");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -222,7 +222,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_ExcludedPackageAroundIncludedPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OASConfig.SCAN_PACKAGES, "org.example.a.b");
         properties.put(OASConfig.SCAN_EXCLUDE_PACKAGES, "org.example.a, org.example.a.b.c");
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
@@ -234,7 +234,7 @@ class FilteredIndexViewTest {
 
     @Test
     void testAccepts_EmptyPackage() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         OpenApiConfig config = IndexScannerTestBase.dynamicConfig(properties);
         FilteredIndexView view = new FilteredIndexView(null, config);
         assertTrue(view.accepts(DotName.createSimple("int")));

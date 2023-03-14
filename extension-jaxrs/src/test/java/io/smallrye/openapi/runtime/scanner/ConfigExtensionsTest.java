@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource;
@@ -37,7 +36,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     void testSettingJustTitle() throws IOException, JSONException {
         System.setProperty(TITLE, "My Awesome Service");
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
@@ -54,7 +53,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     void testSettingJustContactEmail() throws IOException, JSONException {
         System.setProperty(CONTACT_EMAIL, "phillip.kruger@redhat.com");
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
@@ -71,7 +70,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     void testSettingJustLicenseName() throws IOException, JSONException {
         System.setProperty(LICENSE_NAME, "Apache License 2.0");
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
@@ -98,7 +97,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
         System.setProperty(LICENSE_URL, "https://choosealicense.com/licenses/apache-2.0/");
 
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);

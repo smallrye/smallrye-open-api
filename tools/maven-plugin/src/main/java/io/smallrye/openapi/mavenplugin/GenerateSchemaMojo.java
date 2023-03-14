@@ -31,10 +31,14 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
 
+import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -274,7 +278,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
             systemPropertyVariables.forEach(System::setProperty);
         }
 
-        OpenApiConfig openApiConfig = new MavenConfig(getProperties());
+        Config config = new SmallRyeConfigBuilder()
+                .withSources(
+                        new ConfigValuePropertiesConfigSource(getProperties(), "maven-plugin", ConfigSource.DEFAULT_ORDINAL))
+                .build();
+
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         ClassLoader classLoader = getClassLoader();
 
         OpenAPI staticModel = generateStaticModel(openApiConfig);

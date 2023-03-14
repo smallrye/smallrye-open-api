@@ -11,7 +11,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
@@ -66,7 +65,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     void testSettingViaConfig(Index i) throws IOException, JSONException {
         System.setProperty(VERSION_PROPERTY, "3.0.0");
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
             printToConsole(result);
@@ -92,7 +91,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     void testSettingViaConfigWhenStaticPresent(Index i) throws IOException, JSONException {
         System.setProperty(VERSION_PROPERTY, "3.0.0");
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i, loadStaticFile());
 

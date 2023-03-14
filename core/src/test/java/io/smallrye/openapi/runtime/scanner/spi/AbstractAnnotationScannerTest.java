@@ -22,7 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -73,6 +72,10 @@ class AbstractAnnotationScannerTest {
         @Override
         public <R, T> Map<String, T> getConfigValueMap(String propertyNamePrefix, Class<R> type, Function<R, T> converter) {
             return Collections.emptyMap();
+        }
+
+        @Override
+        public void setAllowNakedPathParameter(Boolean allowNakedPathParameter) {
         }
     }
 
@@ -168,7 +171,7 @@ class AbstractAnnotationScannerTest {
     })
     void testDefaultIsPathParameter(Boolean allowNaked, String searchParamName, String paramName, Parameter.In paramIn,
             boolean expectedResult) {
-        OpenApiConfigImpl config = (OpenApiConfigImpl) IndexScannerTestBase.emptyConfig();
+        OpenApiConfig config = IndexScannerTestBase.emptyConfig();
         config.setAllowNakedPathParameter(allowNaked);
 
         ResourceParameters params = new ResourceParameters();

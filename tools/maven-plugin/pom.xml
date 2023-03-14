@@ -59,6 +59,11 @@
             <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.smallrye.config</groupId>
+            <artifactId>smallrye-config</artifactId>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.soebes.itf.jupiter.extension</groupId>

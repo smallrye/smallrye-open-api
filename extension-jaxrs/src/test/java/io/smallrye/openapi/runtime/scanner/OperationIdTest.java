@@ -9,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
@@ -36,7 +35,7 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
 
         System.setProperty(OpenApiConstants.OPERATION_ID_STRAGEGY, strategy);
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
 
         try {
             Index i = indexOf(Class.forName(resourceClass), Greeting.class);

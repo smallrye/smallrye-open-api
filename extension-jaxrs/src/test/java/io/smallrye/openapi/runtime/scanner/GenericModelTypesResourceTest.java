@@ -60,7 +60,7 @@ class GenericModelTypesResourceTest extends IndexScannerTestBase {
     }
 
     void testGenericsApplication(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.generic-model-types.json", result);

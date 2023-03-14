@@ -17,7 +17,7 @@ class ResourceClassScanTests extends JaxRsDataObjectScannerTestBase {
         // given
         Class<?> resourceClass = test.io.smallrye.openapi.runtime.scanner.javax.FruitResource.class;
         Index index = indexOf(resourceClass);
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX + resourceClass.getName(), "overwritten-resource-path");
         OpenApiConfig config = dynamicConfig(properties);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
@@ -35,7 +35,7 @@ class ResourceClassScanTests extends JaxRsDataObjectScannerTestBase {
         // given
         Class<?> resourceClass = test.io.smallrye.openapi.runtime.scanner.jakarta.FruitResource.class;
         Index index = indexOf(resourceClass);
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX + resourceClass.getName(), "overwritten-resource-path");
         OpenApiConfig config = dynamicConfig(properties);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
@@ -53,7 +53,7 @@ class ResourceClassScanTests extends JaxRsDataObjectScannerTestBase {
         // given
         Class<?> resourceClass = test.io.smallrye.openapi.runtime.scanner.javax.UnannotatedResource.class;
         Index index = indexOf(resourceClass);
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX + resourceClass.getName(), "overwritten-resource-path");
         OpenApiConfig config = dynamicConfig(properties);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
@@ -71,7 +71,7 @@ class ResourceClassScanTests extends JaxRsDataObjectScannerTestBase {
         // given
         Class<?> resourceClass = test.io.smallrye.openapi.runtime.scanner.jakarta.UnannotatedResource.class;
         Index index = indexOf(resourceClass);
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX + resourceClass.getName(), "overwritten-resource-path");
         OpenApiConfig config = dynamicConfig(properties);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);

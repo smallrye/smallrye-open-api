@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
@@ -61,7 +60,7 @@ class FilterUtilTest {
     @Test
     void testApplyFilter() throws Exception {
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = new OpenApiConfigImpl(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
 
         URL beforeUrl = FilterUtilTest.class.getResource("filter-before.json");
         URL afterUrl = FilterUtilTest.class.getResource("filter-after.json");

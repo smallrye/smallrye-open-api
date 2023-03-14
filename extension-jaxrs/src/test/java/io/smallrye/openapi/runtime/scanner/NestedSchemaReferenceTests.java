@@ -57,7 +57,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
     }
 
     void testNestedSchemaOnParameter(IndexView i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
 
         OpenAPI result = scanner.scan();
 
@@ -96,7 +96,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
     }
 
     void testSimpleNestedSchemaOnParameter(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()),
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()),
                 i);
 
         OpenAPI result = scanner.scan();

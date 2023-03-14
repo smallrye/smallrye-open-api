@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.OASConfig;
 
 import io.smallrye.openapi.api.constants.JsonbConstants;
@@ -36,6 +37,10 @@ public interface OpenApiConfig {
     enum DuplicateOperationIdBehavior {
         FAIL,
         WARN
+    }
+
+    public static OpenApiConfig fromConfig(Config config) {
+        return new OpenApiConfigImpl(config);
     }
 
     DuplicateOperationIdBehavior DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT = DuplicateOperationIdBehavior.WARN;
@@ -98,19 +103,20 @@ public interface OpenApiConfig {
     }
 
     default List<String> operationServers(String operationId) {
-        return getConfigValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String[].class, this::toList, Collections::emptyList);
+        return getConfigValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String[].class, this::toList,
+                Collections::emptyList);
     }
 
     default boolean scanDependenciesDisable() {
         return getConfigValue(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, Boolean.class,
-            () -> getConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class, 
-                () -> Boolean.FALSE));
+                () -> getConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class,
+                        () -> Boolean.FALSE));
     }
 
     default Set<String> scanDependenciesJars() {
         return getConfigValue(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS, String[].class, this::toSet,
-            () -> getConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS, String[].class, this::toSet, 
-                Collections::emptySet));
+                () -> getConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS, String[].class, this::toSet,
+                        Collections::emptySet));
     }
 
     default boolean arrayReferencesEnable() {
@@ -119,14 +125,14 @@ public interface OpenApiConfig {
 
     default String customSchemaRegistryClass() {
         return getConfigValue(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, String.class,
-            () -> getConfigValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class,
-                () -> null));
+                () -> getConfigValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class,
+                        () -> null));
     }
 
     default boolean applicationPathDisable() {
         return getConfigValue(OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, Boolean.class,
-            () -> getConfigValue(OpenApiConstants.APP_PATH_DISABLE, Boolean.class, 
-                () -> Boolean.FALSE));
+                () -> getConfigValue(OpenApiConstants.APP_PATH_DISABLE, Boolean.class,
+                        () -> Boolean.FALSE));
     }
 
     default boolean privatePropertiesEnable() {
@@ -192,9 +198,9 @@ public interface OpenApiConfig {
 
     default DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
         return getConfigValue(OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR,
-            String.class,
-            DuplicateOperationIdBehavior::valueOf,
-            () -> DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT);
+                String.class,
+                DuplicateOperationIdBehavior::valueOf,
+                () -> DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT);
     }
 
     default Optional<String[]> getDefaultProduces() {
@@ -207,6 +213,12 @@ public interface OpenApiConfig {
 
     default Optional<Boolean> allowNakedPathParameter() {
         return Optional.empty();
+    }
+
+    void setAllowNakedPathParameter(Boolean allowNakedPathParameter);
+
+    default void doAllowNakedPathParameter() {
+        setAllowNakedPathParameter(Boolean.TRUE);
     }
 
     default Set<String> getScanProfiles() {
@@ -223,9 +235,6 @@ public interface OpenApiConfig {
 
     default boolean removeUnusedSchemas() {
         return getConfigValue(OpenApiConstants.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.class, () -> Boolean.FALSE);
-    }
-
-    default void doAllowNakedPathParameter() {
     }
 
     default Integer getMaximumStaticFileSize() {

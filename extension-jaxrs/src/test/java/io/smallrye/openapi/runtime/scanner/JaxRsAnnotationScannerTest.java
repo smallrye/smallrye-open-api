@@ -196,7 +196,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testTagScanning(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.tags.multilocation.json", result);
@@ -223,7 +223,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testTagScanning_OrderGivenAnnotations(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.tags.ordergiven.annotation.json", result);
@@ -248,14 +248,14 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testTagScanning_OrderGivenStaticFile(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
         OpenAPI scanResult = scanner.scan();
         OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(
                 "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}"
                         .getBytes()),
                 Format.JSON);
         OpenApiDocument doc = OpenApiDocument.INSTANCE;
-        doc.config(dynamicConfig(new HashMap<String, Object>()));
+        doc.config(dynamicConfig(new HashMap<String, String>()));
         doc.modelFromStaticFile(staticResult);
         doc.modelFromAnnotations(scanResult);
         doc.initialize();
@@ -307,7 +307,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @CsvSource({
             OASConfig.SCAN_CLASSES + ", JaxRsAnnotationScannerTest$MissingImplementation",
             OASConfig.SCAN_CLASSES
-                    + ", ^io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest\\$MissingImplementation$",
+                    + ", ^io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest\\\\$MissingImplementation$",
             OASConfig.SCAN_PACKAGES + ", ^io.smallrye.openapi.runtime.scanner$",
             OASConfig.SCAN_PACKAGES + ", ^io.smallrye.openapi.*$",
     })
