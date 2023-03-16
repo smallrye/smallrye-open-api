@@ -137,6 +137,7 @@ public class TypeUtil {
 
         // Binary (any sequence of octets)
         TYPE_MAP.put(DotName.createSimple(byte[].class.getName()), BINARY_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.io.File.class.getName()), BINARY_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.io.InputStream.class.getName()), BINARY_FORMAT);
 
         // Number
