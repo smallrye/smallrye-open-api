@@ -55,7 +55,11 @@
                     "type": "string",
                     "format": "binary"
                   },
-                  "file": {
+                  "fileFromFile": {
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "fileFromStream": {
                     "format": "binary",
                     "type": "string"
                   },
@@ -87,7 +91,10 @@
                 "binaryData": {
                   "contentType": "application/octet-stream"
                 },
-                "file": {
+                "fileFromFile": {
+                  "contentType": "application/octet-stream"
+                },
+                "fileFromStream": {
                   "contentType": "application/octet-stream"
                 }
               }

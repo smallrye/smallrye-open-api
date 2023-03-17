@@ -1,5 +1,6 @@
 package test.io.smallrye.openapi.runtime.scanner.javax;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -36,27 +37,38 @@ public class MultipartFormTestResource {
         @org.jboss.resteasy.annotations.jaxrs.FormParam
         @DefaultValue(value = "f1-default")
         String formField1;
+
         @FormParam(value = "f2")
         @DefaultValue(value = "default2")
         @org.jboss.resteasy.annotations.providers.multipart.PartType(value = "text/plain")
         String formField2;
+
         @FormParam(value = "data")
         private InputPart data;
+
         @FormParam(value = "binaryData")
         @org.jboss.resteasy.annotations.providers.multipart.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(type = SchemaType.STRING, format = "binary")
         private byte[] binaryData;
-        @FormParam(value = "file")
+
+        @FormParam(value = "fileFromFile")
+        @org.jboss.resteasy.annotations.providers.multipart.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
+        private File fileFromFile;
+
+        @FormParam(value = "fileFromStream")
         @org.jboss.resteasy.reactive.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(type = SchemaType.STRING, format = "binary")
-        private InputStream file;
+        private InputStream fileFromStream;
+
         @FormParam(value = "undocumentedFile")
         @org.jboss.resteasy.annotations.providers.multipart.PartType(value = MediaType.APPLICATION_OCTET_STREAM)
         @Schema(hidden = true)
         private InputStream undocumentedFile;
+
         @FormParam(value = "listOfFileStreams")
         @Schema(description = "List of streams")
         private List<InputStream> files1;
+
         @FormParam(value = "listOfBinaryArrays")
         @Schema(description = "List of byte arrays")
         private List<byte[]> files2;
