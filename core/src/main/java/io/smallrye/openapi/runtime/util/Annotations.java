@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -178,6 +179,29 @@ public final class Annotations {
     public static <T> T value(AnnotationInstance annotation, String name, T defaultValue) {
         T value = value(annotation, name);
         return value != null ? value : defaultValue;
+    }
+
+    /**
+     * Reads a String property value from the given annotation instance. If no value is found
+     * this will return null.
+     *
+     * @param annotation AnnotationInstance
+     * @param propertyName String
+     * @param clazz Class type of the Enum
+     * @param <T> Type parameter
+     * @return Value of property
+     */
+    public static <T extends Enum<T>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
+        String value = annotation != null ? value(annotation, propertyName) : null;
+
+        if (value == null) {
+            return null;
+        }
+
+        return Stream.of(clazz.getEnumConstants())
+                .filter(c -> c.name().equals(value))
+                .findFirst()
+                .orElse(null);
     }
 
     /**

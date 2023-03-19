@@ -417,7 +417,12 @@ public class SchemaFactory {
      * @return the equivalent SchemaType value, or null if not set or no match
      */
     static SchemaType parseSchemaType(String value) {
-        return JandexUtil.enumValue(value, SchemaType.class);
+        try {
+            return SchemaType.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            // This will only occur for `org.eclipse.microprofile.openapi.annotations.enums.SchemaType#DEFAULT`.
+            return null;
+        }
     }
 
     /**

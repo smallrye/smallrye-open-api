@@ -350,7 +350,7 @@ public class TypeUtil {
      *         false
      */
     public static boolean isTypeOverridden(Type classType, AnnotationInstance schemaAnnotation) {
-        SchemaType providedType = JandexUtil.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+        SchemaType providedType = Annotations.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
         TypeWithFormat typeFormat = getTypeFormat(classType);
         return providedType != null && !typeFormat.isSchemaType(providedType);
     }

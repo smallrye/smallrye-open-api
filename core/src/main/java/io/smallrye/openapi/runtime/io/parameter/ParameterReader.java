@@ -156,8 +156,7 @@ public class ParameterReader {
         IoLogging.logger.singleAnnotation("@Parameter");
         ParameterImpl parameter = new ParameterImpl();
         parameter.setName(Annotations.value(annotationInstance, Parameterizable.PROP_NAME));
-        parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
-                org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
+        parameter.setIn(Annotations.enumValue(annotationInstance, ParameterConstant.PROP_IN, Parameter.In.class));
 
         // Params can be hidden. Skip if that's the case.
         Boolean isHidden = Annotations.value(annotationInstance, ParameterConstant.PROP_HIDDEN);
@@ -170,10 +169,8 @@ public class ParameterReader {
         parameter.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
         parameter.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));
         parameter.setAllowEmptyValue(Annotations.value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
-        parameter.setStyle(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_STYLE,
-                org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
-        parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_EXPLODE,
-                org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
+        parameter.setStyle(Annotations.enumValue(annotationInstance, Parameterizable.PROP_STYLE, Parameter.Style.class));
+        parameter.setExplode(readExplode(annotationInstance));
         parameter.setAllowReserved(Annotations.value(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED));
         parameter.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
@@ -242,14 +239,16 @@ public class ParameterReader {
      *
      * @param enumValue
      */
-    private static Optional<Boolean> readExplode(Explode enumValue) {
-        if (enumValue == Explode.TRUE) {
-            return Optional.of(Boolean.TRUE);
+    private static Boolean readExplode(AnnotationInstance parameterAnnoatation) {
+        Explode explode = Annotations.enumValue(parameterAnnoatation, Parameterizable.PROP_EXPLODE, Explode.class);
+
+        if (explode == Explode.TRUE) {
+            return Boolean.TRUE;
         }
-        if (enumValue == Explode.FALSE) {
-            return Optional.of(Boolean.FALSE);
+        if (explode == Explode.FALSE) {
+            return Boolean.FALSE;
         }
-        return Optional.empty();
+        return null; // NOSONAR
     }
 
     /**

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
-import org.eclipse.microprofile.openapi.models.security.SecurityScheme.In;
-import org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
@@ -100,11 +98,13 @@ public class SecuritySchemeReader {
         IoLogging.logger.singleAnnotation("@SecurityScheme");
         SecurityScheme securityScheme = new SecuritySchemeImpl();
         securityScheme
-                .setType(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, Type.class));
+                .setType(
+                        Annotations.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, SecurityScheme.Type.class));
         securityScheme
                 .setDescription(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
         securityScheme.setName(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
-        securityScheme.setIn(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN, In.class));
+        securityScheme
+                .setIn(Annotations.enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN, SecurityScheme.In.class));
         securityScheme.setScheme(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
         securityScheme.setBearerFormat(
                 Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
@@ -148,7 +148,7 @@ public class SecuritySchemeReader {
      * @param node json node
      * @return Type enum
      */
-    private static Type readSecuritySchemeType(final JsonNode node) {
+    private static SecurityScheme.Type readSecuritySchemeType(final JsonNode node) {
         if (node == null || !node.isTextual()) {
             return null;
         }
@@ -161,7 +161,7 @@ public class SecuritySchemeReader {
      * @param node json node
      * @return In enum
      */
-    private static In readSecuritySchemeIn(final JsonNode node) {
+    private static SecurityScheme.In readSecuritySchemeIn(final JsonNode node) {
         if (node == null || !node.isTextual()) {
             return null;
         }
@@ -179,17 +179,17 @@ public class SecuritySchemeReader {
         return Annotations.value(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
     }
 
-    private static final Map<String, Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();
-    private static final Map<String, In> SECURITY_SCHEME_IN_LOOKUP = new LinkedHashMap<>();
+    private static final Map<String, SecurityScheme.Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();
+    private static final Map<String, SecurityScheme.In> SECURITY_SCHEME_IN_LOOKUP = new LinkedHashMap<>();
 
     static {
-        Type[] securitySchemeTypes = Type.values();
-        for (Type type : securitySchemeTypes) {
+        SecurityScheme.Type[] securitySchemeTypes = SecurityScheme.Type.values();
+        for (SecurityScheme.Type type : securitySchemeTypes) {
             SECURITY_SCHEME_TYPE_LOOKUP.put(type.toString(), type);
         }
 
-        In[] securitySchemeIns = In.values();
-        for (In type : securitySchemeIns) {
+        SecurityScheme.In[] securitySchemeIns = SecurityScheme.In.values();
+        for (SecurityScheme.In type : securitySchemeIns) {
             SECURITY_SCHEME_IN_LOOKUP.put(type.toString(), type);
         }
     }

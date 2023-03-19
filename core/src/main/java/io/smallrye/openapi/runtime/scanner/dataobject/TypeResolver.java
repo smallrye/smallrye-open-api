@@ -450,7 +450,7 @@ public class TypeResolver {
     public static TypeResolver forClass(AnnotationScannerContext context, ClassInfo clazz, Type leaf) {
         final AugmentedIndexView index = context.getAugmentedIndex();
         Type clazzType = leaf != null ? leaf : Type.create(clazz.name(), Type.Kind.CLASS);
-        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, clazz, clazzType);
+        Map<ClassInfo, Type> chain = index.inheritanceChain(clazz, clazzType);
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
         boolean allOfMatch = false;
 
@@ -463,7 +463,7 @@ public class TypeResolver {
             }
 
             // Add parameter type information from any interfaces implemented by this class/interface
-            JandexUtil.interfaces(index, currentClass)
+            index.interfaces(currentClass)
                     .stream()
                     .filter(type -> type.kind() == Type.Kind.PARAMETERIZED_TYPE)
                     .filter(index::containsClass)
@@ -481,7 +481,7 @@ public class TypeResolver {
     public static Map<String, TypeResolver> getAllFields(AnnotationScannerContext context, Type leaf,
             ClassInfo leafKlazz, AnnotationTarget reference) {
         final AugmentedIndexView index = context.getAugmentedIndex();
-        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(index, leafKlazz, leaf);
+        Map<ClassInfo, Type> chain = index.inheritanceChain(leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
         boolean skipPropertyScan = false;
@@ -520,7 +520,7 @@ public class TypeResolver {
                     .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
-            JandexUtil.interfaces(index, currentClass)
+            index.interfaces(currentClass)
                     .stream()
                     .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .map(index::getClass)

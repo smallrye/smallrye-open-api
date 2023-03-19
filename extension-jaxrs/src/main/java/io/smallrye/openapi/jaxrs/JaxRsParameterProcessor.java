@@ -29,7 +29,6 @@ import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
 import io.smallrye.openapi.runtime.util.Annotations;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -264,7 +263,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     AnnotationInstance pathOf(MethodInfo method) {
-        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+        return scannerContext.getAugmentedIndex().ancestry(method)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
@@ -292,7 +291,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
-        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+        return scannerContext.getAugmentedIndex().ancestry(method)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)

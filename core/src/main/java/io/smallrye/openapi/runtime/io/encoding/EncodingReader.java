@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io.encoding;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.Encoding.Style;
@@ -18,7 +19,6 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.header.HeaderReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * Reading the Encoding object annotation and json
@@ -90,13 +90,22 @@ public class EncodingReader {
         IoLogging.logger.singleAnnotation("@Encoding");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(Annotations.value(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
-        encoding.setStyle(JandexUtil.enumValue(annotationInstance, EncodingConstant.PROP_STYLE, Style.class));
+        encoding.setStyle(readEncodingStyle(annotationInstance));
         encoding.setExplode(Annotations.value(annotationInstance, EncodingConstant.PROP_EXPLODE));
         encoding.setAllowReserved(Annotations.value(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED));
         encoding.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(EncodingConstant.PROP_HEADERS)));
         encoding.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return encoding;
+    }
+
+    static Style readEncodingStyle(AnnotationInstance encodingAnnotation) {
+        String encodingStyle = Annotations.value(encodingAnnotation, EncodingConstant.PROP_STYLE);
+
+        return Stream.of(Style.class.getEnumConstants())
+                .filter(style -> style.toString().equals(encodingStyle))
+                .findFirst()
+                .orElse(null);
     }
 
     /**

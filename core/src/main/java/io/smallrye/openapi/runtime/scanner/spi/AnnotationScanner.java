@@ -271,7 +271,8 @@ public interface AnnotationScanner {
      */
     default List<MethodInfo> getResourceMethods(final AnnotationScannerContext context, ClassInfo resource) {
         Type resourceType = Type.create(resource.name(), Type.Kind.CLASS);
-        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(context.getIndex(), resource, resourceType);
+        AugmentedIndexView index = context.getAugmentedIndex();
+        Map<ClassInfo, Type> chain = index.inheritanceChain(resource, resourceType);
         List<MethodInfo> methods = new ArrayList<>();
 
         for (ClassInfo classInfo : chain.keySet()) {
@@ -280,7 +281,7 @@ public interface AnnotationScanner {
                     .filter(method -> !method.isSynthetic())
                     .forEach(methods::add);
 
-            JandexUtil.interfaces(context.getAugmentedIndex(), classInfo)
+            index.interfaces(classInfo)
                     .stream()
                     .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .map(context.getAugmentedIndex()::getClass)
@@ -373,7 +374,7 @@ public interface AnnotationScanner {
             Arrays.stream(views)
                     .map(viewType -> {
                         if (index.containsClass(viewType)) {
-                            return JandexUtil.inheritanceChain(index, index.getClass(viewType), viewType).values();
+                            return index.inheritanceChain(index.getClass(viewType), viewType).values();
                         }
                         return Collections.singleton(viewType);
                     })

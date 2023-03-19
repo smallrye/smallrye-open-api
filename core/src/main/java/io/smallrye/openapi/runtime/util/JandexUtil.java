@@ -1,11 +1,6 @@
 package io.smallrye.openapi.runtime.util;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -15,14 +10,12 @@ import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
-import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
@@ -131,49 +124,6 @@ public class JandexUtil {
     }
 
     /**
-     * Reads a String property value from the given annotation instance. If no value is found
-     * this will return null.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @param clazz Class type of the Enum
-     * @param <T> Type parameter
-     * @return Value of property
-     */
-    public static <T extends Enum<?>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
-        AnnotationValue value = annotation != null ? annotation.value(propertyName) : null;
-        if (value == null) {
-            return null;
-        }
-        return enumValue(value.asString(), clazz);
-    }
-
-    /**
-     * Converts a string value to the given enum type. If the string does not match
-     * one of the the enum's values name (case-insensitive) or toString value, null
-     * will be returned.
-     *
-     * @param strVal String
-     * @param clazz Class type of the Enum
-     * @param <T> Type parameter
-     * @return Value of property
-     */
-    public static <T extends Enum<?>> T enumValue(String strVal, Class<T> clazz) {
-        T[] constants = clazz.getEnumConstants();
-        for (T t : constants) {
-            if (t.toString().equals(strVal)) {
-                return t;
-            }
-        }
-        for (T t : constants) {
-            if (t.name().equalsIgnoreCase(strVal)) {
-                return t;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns true if the given annotation instance is a "ref". An annotation is a ref if it has
      * a non-null value for the "ref" property.
      *
@@ -255,7 +205,7 @@ public class JandexUtil {
             return false;
         }
 
-        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = JandexUtil.enumValue(annotation,
+        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = Annotations.enumValue(annotation,
                 SchemaConstant.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
 
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY);
@@ -270,26 +220,6 @@ public class JandexUtil {
      */
     public static boolean hasImplementation(AnnotationInstance annotation) {
         return annotation.value(SchemaConstant.PROP_IMPLEMENTATION) != null;
-    }
-
-    /**
-     * Builds an insertion-order map of a class's inheritance chain, starting
-     * with the klazz argument.
-     *
-     * @param index index for superclass retrieval
-     * @param klazz the class to retrieve inheritance
-     * @param type type of the klazz
-     * @return map of a class's inheritance chain/ancestry
-     */
-    public static Map<ClassInfo, Type> inheritanceChain(IndexView index, ClassInfo klazz, Type type) {
-        Map<ClassInfo, Type> chain = new LinkedHashMap<>();
-
-        do {
-            chain.put(klazz, type);
-        } while ((type = klazz.superClassType()) != null &&
-                (klazz = index.getClassByName(TypeUtil.getName(type))) != null);
-
-        return chain;
     }
 
     public static boolean equals(AnnotationTarget t1, AnnotationTarget t2) {
@@ -310,29 +240,6 @@ public class JandexUtil {
             default:
                 return t1.equals(t2);
         }
-    }
-
-    /**
-     * Retrieve the unique <code>Type</code>s that the given <code>ClassInfo</code>
-     * implements.
-     *
-     * @param index
-     * @param klass
-     * @return the <code>Set</code> of interfaces
-     *
-     */
-    public static Set<Type> interfaces(AugmentedIndexView index, ClassInfo klass) {
-        Set<Type> interfaces = new LinkedHashSet<>();
-
-        for (Type type : klass.interfaceTypes()) {
-            interfaces.add(type);
-
-            if (index.containsClass(type)) {
-                interfaces.addAll(interfaces(index, index.getClass(type)));
-            }
-        }
-
-        return interfaces;
     }
 
     public static boolean equals(ClassInfo c1, ClassInfo c2) {
@@ -364,42 +271,4 @@ public class JandexUtil {
         return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
     }
 
-    public static Map<ClassInfo, MethodInfo> ancestry(MethodInfo method, AugmentedIndexView index) {
-        ClassInfo declaringClass = method.declaringClass();
-        Type resourceType = Type.create(declaringClass.name(), Type.Kind.CLASS);
-        Map<ClassInfo, Type> chain = inheritanceChain(index, declaringClass, resourceType);
-        Map<ClassInfo, MethodInfo> ancestry = new LinkedHashMap<>();
-
-        for (ClassInfo classInfo : chain.keySet()) {
-            ancestry.put(classInfo, null);
-
-            classInfo.methods()
-                    .stream()
-                    .filter(m -> !m.isSynthetic())
-                    .filter(m -> isSameSignature(method, m))
-                    .findFirst()
-                    .ifPresent(m -> ancestry.put(classInfo, m));
-
-            interfaces(index, classInfo)
-                    .stream()
-                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
-                    .map(index::getClass)
-                    .filter(Objects::nonNull)
-                    .map(iface -> {
-                        ancestry.put(iface, null);
-                        return iface;
-                    })
-                    .flatMap(iface -> iface.methods().stream())
-                    .filter(m -> isSameSignature(method, m))
-                    .forEach(m -> ancestry.put(m.declaringClass(), m));
-        }
-
-        return ancestry;
-    }
-
-    public static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
-        return Objects.equals(m1.name(), m2.name())
-                && m1.parametersCount() == m2.parametersCount()
-                && Objects.equals(m1.parameterTypes(), m2.parameterTypes());
-    }
 }

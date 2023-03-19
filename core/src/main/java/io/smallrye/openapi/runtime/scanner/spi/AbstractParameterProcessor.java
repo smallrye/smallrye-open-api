@@ -262,7 +262,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected void processOperationParameters(MethodInfo resourceMethod, ResourceParameters parameters) {
-        List<MethodInfo> candidateMethods = JandexUtil.ancestry(resourceMethod, scannerContext.getAugmentedIndex())
+        List<MethodInfo> candidateMethods = scannerContext.getAugmentedIndex().ancestry(resourceMethod)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
@@ -1481,7 +1481,7 @@ public abstract class AbstractParameterProcessor {
     protected void readParametersInherited(ClassInfo clazz, AnnotationInstance beanParamAnnotation,
             boolean overriddenParametersOnly) {
         AugmentedIndexView augmentedIndex = scannerContext.getAugmentedIndex();
-        List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, clazz, null).keySet());
+        List<ClassInfo> ancestors = new ArrayList<>(augmentedIndex.inheritanceChain(clazz, null).keySet());
         /*
          * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
          */

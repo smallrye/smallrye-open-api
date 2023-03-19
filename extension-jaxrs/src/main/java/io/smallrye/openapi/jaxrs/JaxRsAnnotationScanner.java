@@ -50,7 +50,6 @@ import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -547,7 +546,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     static String[] getMediaTypes(AnnotationScannerContext context, MethodInfo resourceMethod, Set<DotName> annotationName,
             String[] defaultValue) {
 
-        return JandexUtil.ancestry(resourceMethod, context.getAugmentedIndex()).entrySet()
+        return context.getAugmentedIndex().ancestry(resourceMethod).entrySet()
                 .stream()
                 .map(e -> getMediaTypeAnnotation(e.getKey(), e.getValue(), annotationName))
                 .filter(Objects::nonNull)
@@ -669,10 +668,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         final AugmentedIndexView index = context.getAugmentedIndex();
 
-        return JandexUtil.inheritanceChain(index, clazz, Type.create(clazz.name(), Type.Kind.CLASS))
+        return index.inheritanceChain(clazz, Type.create(clazz.name(), Type.Kind.CLASS))
                 .entrySet()
                 .stream()
-                .flatMap(e -> JandexUtil.interfaces(index, e.getKey()).stream())
+                .flatMap(e -> index.interfaces(e.getKey()).stream())
                 .map(index::getClass)
                 .filter(Objects::nonNull)
                 .noneMatch(iface -> Annotations.getAnnotation(iface, JaxRsConstants.REGISTER_REST_CLIENT) != null);
