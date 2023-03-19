@@ -4,10 +4,40 @@
     "title": "Generated API",
     "version": "1.0"
   },
+  "tags": [
+    {
+      "name": "PeopleResource"
+    }
+  ],
   "paths": {
     "/people": {
       "get": {
+        "tags": [
+          "PeopleResource"
+        ],
         "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namedQuery",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "page",
             "in": "query",
@@ -32,18 +62,31 @@
             "schema": {
               "type": "array",
               "items": {
-              
+                
               }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Person"
+                  }
+                }
+              }
+            }
           }
         }
       },
       "post": {
+        "tags": [
+          "PeopleResource"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -54,14 +97,43 @@
           }
         },
         "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/people/count": {
+      "get": {
+        "tags": [
+          "PeopleResource"
+        ],
+        "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              }
+            }
           }
         }
       }
     },
     "/people/{id}": {
       "get": {
+        "tags": [
+          "PeopleResource"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -75,11 +147,21 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
           }
         }
       },
       "put": {
+        "tags": [
+          "PeopleResource"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -101,12 +183,21 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
+        "tags": [
+          "PeopleResource"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -119,8 +210,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            
           }
         }
       }

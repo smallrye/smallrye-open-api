@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.zip.GZIPInputStream;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -467,11 +466,12 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     /* *************************************************************************/
     @Test
     void testSyntheticClassesAndInterfacesIgnoredByDefault() throws IOException, JSONException {
-        String indexPath = "/io/smallrye/openapi/runtime/jandex-panache+reactive-client.idx.gz";
-        try (InputStream source = new GZIPInputStream(getClass().getResourceAsStream(indexPath))) {
+        try (InputStream source = getClass().getResourceAsStream("/smallrye-open-api-testsuite-data.idx")) {
             IndexReader reader = new IndexReader(source);
-            Index i = reader.read();
-            OpenAPI result = OpenApiProcessor.bootstrap(emptyConfig(), i);
+            Index index = reader.read();
+            OpenAPI result = OpenApiProcessor.bootstrap(
+                    dynamicConfig(OASConfig.SCAN_EXCLUDE_PACKAGES, "io.smallrye.openapi.testdata.kotlin"),
+                    index);
             printToConsole(result);
             assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
         }

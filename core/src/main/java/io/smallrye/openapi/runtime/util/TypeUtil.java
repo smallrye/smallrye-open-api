@@ -419,7 +419,7 @@ public class TypeUtil {
             Class<?> subjectKlazz = TypeUtil.getClass(subject, cl);
             Class<?> objectKlazz = TypeUtil.getClass(object, cl);
             return objectKlazz.isAssignableFrom(subjectKlazz);
-        } catch (@SuppressWarnings("unused") ClassNotFoundException nfe) {
+        } catch (@SuppressWarnings("unused") ClassNotFoundException | NoClassDefFoundError nfe) {
             return false;
         }
     }
