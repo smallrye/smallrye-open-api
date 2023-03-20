@@ -12,7 +12,7 @@
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
-        <kotlin.version>1.7.20</kotlin.version>
+        <kotlin.version>1.8.10</kotlin.version>
         <maven.compiler.release>11</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
