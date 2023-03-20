@@ -18,7 +18,7 @@
         <itf-maven.version>0.11.0</itf-maven.version>
         <maven-plugin-api.version>3.9.0</maven-plugin-api.version>
         <maven-plugin-annotations.version>3.8.1</maven-plugin-annotations.version>
-        <maven-core.version>3.9.0</maven-core.version>
+        <maven-core.version>3.9.1</maven-core.version>
     </properties>
 
     <dependencies>
