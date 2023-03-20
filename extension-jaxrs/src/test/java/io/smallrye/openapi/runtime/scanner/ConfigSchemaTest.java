@@ -12,7 +12,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource;
@@ -49,7 +48,7 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
     void testValidSchemaDefinitionViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, VALID_PROPERTY_VALUE);
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
@@ -67,7 +66,7 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
     void testInvalidSchemaKeyDefinitionViaConfig() throws IOException, JSONException {
         System.setProperty(INVALID_SCHEMA_PROPERTY_KEY, VALID_PROPERTY_VALUE);
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
@@ -85,7 +84,7 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
     void testValidSchemaKeyWithInvalidSchemaPropertyValueViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, INVALID_PROPERTY_VALUE_SCHEMA);
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
@@ -103,7 +102,7 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
     void testValidSchemaKeyWithInvalidSchemaJSONValueViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, INVALID_PROPERTY_VALUE_JSON);
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
             Index i = indexOf(GreetingGetResource.class, Greeting.class);
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);

@@ -12,15 +12,12 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.spi.ConfigSource;
-import org.eclipse.microprofile.config.spi.Converter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -35,8 +32,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
@@ -186,7 +184,7 @@ public class IndexScannerTestBase {
     public static void assertJsonEquals(String expectedResource, Class<?>... classes)
             throws IOException, JSONException {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
@@ -207,8 +205,8 @@ public class IndexScannerTestBase {
     //    }
 
     public static OpenApiConfig dynamicConfig(String key, Object value) {
-        Map<String, Object> config = new HashMap<>(1);
-        config.put(key, value);
+        Map<String, String> config = new HashMap<>(1);
+        config.put(key, value.toString());
         return dynamicConfig(config);
     }
 
@@ -216,70 +214,11 @@ public class IndexScannerTestBase {
         return dynamicConfig(DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.name());
     }
 
-    @SuppressWarnings("unchecked")
-    public static OpenApiConfig dynamicConfig(Map<String, Object> properties) {
-        return new OpenApiConfigImpl(new Config() {
-            @Override
-            public <T> T getValue(String propertyName, Class<T> propertyType) {
-                return (T) properties.get(propertyName);
-            }
+    public static OpenApiConfig dynamicConfig(Map<String, String> properties) {
+        Config config = new SmallRyeConfigBuilder()
+                .withSources(new ConfigValuePropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
+                .build();
 
-            @Override
-            public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-                return (Optional<T>) Optional.ofNullable(properties.getOrDefault(propertyName, null));
-            }
-
-            @Override
-            public Iterable<String> getPropertyNames() {
-                return properties.keySet();
-            }
-
-            @Override
-            public Iterable<ConfigSource> getConfigSources() {
-                // Not needed for this test case
-                return Collections.emptyList();
-            }
-
-            @Override
-            public ConfigValue getConfigValue(String propertyName) {
-                return new ConfigValue() {
-                    @Override
-                    public String getName() {
-                        return propertyName;
-                    }
-
-                    @Override
-                    public String getValue() {
-                        return (String) properties.get(propertyName);
-                    }
-
-                    @Override
-                    public String getRawValue() {
-                        return getValue();
-                    }
-
-                    @Override
-                    public String getSourceName() {
-                        // Not needed for this test case
-                        return null;
-                    }
-
-                    @Override
-                    public int getSourceOrdinal() {
-                        return 0;
-                    }
-                };
-            }
-
-            @Override
-            public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
-                return Optional.empty();
-            }
-
-            @Override
-            public <T> T unwrap(Class<T> type) {
-                throw new IllegalArgumentException();
-            }
-        });
+        return OpenApiConfig.fromConfig(config);
     }
 }

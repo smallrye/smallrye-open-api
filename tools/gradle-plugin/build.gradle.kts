@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+    val configVersion: String by project
     val versionJackson: String by project
     val versionJunit5: String by project
 
@@ -24,6 +25,7 @@ dependencies {
     implementation("io.smallrye:smallrye-open-api-jaxrs:$version")
     implementation("io.smallrye:smallrye-open-api-spring:$version")
     implementation("io.smallrye:smallrye-open-api-vertx:$version")
+    implementation("io.smallrye.config:smallrye-config:$configVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit5}")
     testImplementation(gradleTestKit())

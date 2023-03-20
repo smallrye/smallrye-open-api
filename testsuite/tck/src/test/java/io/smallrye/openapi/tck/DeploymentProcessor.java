@@ -41,7 +41,6 @@ import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
@@ -181,7 +180,7 @@ public class DeploymentProcessor {
                 .flatMap(node -> node);
 
         if (!microprofileConfig.isPresent()) {
-            return new OpenApiConfigImpl(ConfigProvider.getConfig());
+            return OpenApiConfig.fromConfig(ConfigProvider.getConfig());
         }
 
         Properties properties = new Properties();
@@ -197,7 +196,7 @@ public class DeploymentProcessor {
                 .withSources(new PropertiesConfigSource(properties, "microprofile-config.properties"))
                 .build();
 
-        return new OpenApiConfigImpl(config);
+        return OpenApiConfig.fromConfig(config);
     }
 
     private static Optional<OpenAPI> modelFromFile(OpenApiConfig openApiConfig, final WebArchive war, final String location,

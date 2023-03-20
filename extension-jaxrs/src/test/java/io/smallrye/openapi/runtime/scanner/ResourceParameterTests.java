@@ -39,7 +39,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     }
 
     void testParameterResource(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.parameters.simpleSchema.json", result);
@@ -168,7 +168,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
     }
 
     void testTimeResource(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, Object>()), i);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("resource.parameters.time.json", result);

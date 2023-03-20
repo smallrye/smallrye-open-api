@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
@@ -43,7 +42,7 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
 
     void testVanilla(Index i) throws IOException, JSONException {
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
         printToConsole(result);
         assertJsonEquals("resource.testDefaultContentTypeVanilla.json", result);
@@ -73,7 +72,7 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
         System.setProperty(OpenApiConstants.DEFAULT_CONSUMES, "application/json");
         System.setProperty(OpenApiConstants.DEFAULT_PRODUCES, "application/json");
         Config config = ConfigProvider.getConfig();
-        OpenApiConfig openApiConfig = OpenApiConfigImpl.fromConfig(config);
+        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
 
         try {
 

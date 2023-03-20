@@ -4,10 +4,8 @@ import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 
-import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
-import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
+import io.smallrye.openapi.api.OpenApiConfig;
 
 public interface SmallryeOpenApiProperties {
 
@@ -121,24 +119,26 @@ public interface SmallryeOpenApiProperties {
      * Configuration property to specify how the operationid is generated. Can be used to minimize
      * risk of collisions between operations.
      */
-    Property<OperationIdStrategy> getOperationIdStrategy();
+    Property<OpenApiConfig.OperationIdStrategy> getOperationIdStrategy();
 
     /**
      * Configuration property to specify what should happen if duplicate operationIds occur.
      */
-    Property<DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior();
+    Property<OpenApiConfig.DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior();
 
     /**
      * Profiles which explicitly include operations. Any operation without a matching profile is
      * excluded.
      */
-    SetProperty<String> getScanProfiles();
+    ListProperty<String> getScanProfiles();
 
     /**
      * Profiles which explicitly exclude operations. Any operation without a matching profile is
      * included.
      */
-    SetProperty<String> getScanExcludeProfiles();
+    ListProperty<String> getScanExcludeProfiles();
+
+    MapProperty<String, String> getScanResourceClasses();
 
     /**
      * Output encoding for openapi document.

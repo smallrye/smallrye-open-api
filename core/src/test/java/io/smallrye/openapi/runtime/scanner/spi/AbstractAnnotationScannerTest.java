@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -19,7 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -61,6 +63,22 @@ class AbstractAnnotationScannerTest {
         }
     }
 
+    static class DummyOpenApiConfig implements OpenApiConfig {
+        @Override
+        public <R, T> T getConfigValue(String propertyName, Class<R> type, Function<R, T> converter, Supplier<T> defaultValue) {
+            return defaultValue.get();
+        }
+
+        @Override
+        public <R, T> Map<String, T> getConfigValueMap(String propertyNamePrefix, Class<R> type, Function<R, T> converter) {
+            return Collections.emptyMap();
+        }
+
+        @Override
+        public void setAllowNakedPathParameter(Boolean allowNakedPathParameter) {
+        }
+    }
+
     /**
      * Test method for {@link AbstractAnnotationScanner#makePath(String)}.
      */
@@ -88,8 +106,7 @@ class AbstractAnnotationScannerTest {
 
     @Test
     void testNoConfiguredProfile() {
-        OpenApiConfig config = new OpenApiConfig() {
-        };
+        OpenApiConfig config = new DummyOpenApiConfig();
 
         OperationImpl operation = new OperationImpl();
         operation.setExtensions(Collections.singletonMap("x-smallrye-profile-external", ""));
@@ -102,7 +119,7 @@ class AbstractAnnotationScannerTest {
 
     @Test
     void testConfiguredIncludeProfile() {
-        OpenApiConfig config = new OpenApiConfig() {
+        OpenApiConfig config = new DummyOpenApiConfig() {
             @Override
             public Set<String> getScanProfiles() {
                 return Collections.singleton("external");
@@ -123,7 +140,7 @@ class AbstractAnnotationScannerTest {
 
     @Test
     void testConfiguredExcludeProfile() {
-        OpenApiConfig config = new OpenApiConfig() {
+        OpenApiConfig config = new DummyOpenApiConfig() {
             @Override
             public Set<String> getScanExcludeProfiles() {
                 return Collections.singleton("external");
@@ -154,7 +171,7 @@ class AbstractAnnotationScannerTest {
     })
     void testDefaultIsPathParameter(Boolean allowNaked, String searchParamName, String paramName, Parameter.In paramIn,
             boolean expectedResult) {
-        OpenApiConfigImpl config = (OpenApiConfigImpl) IndexScannerTestBase.emptyConfig();
+        OpenApiConfig config = IndexScannerTestBase.emptyConfig();
         config.setAllowNakedPathParameter(allowNaked);
 
         ResourceParameters params = new ResourceParameters();

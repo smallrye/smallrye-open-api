@@ -96,7 +96,7 @@ class SmallryeOpenApiPluginTest {
         ext.schemaFilename.set("schema-filename");
         ext.servers.addAll("servers");
 
-        List<Function<SmallryeOpenApiProperties, Provider>> getters = asList(
+        List<Function<SmallryeOpenApiProperties, Provider<?>>> getters = asList(
                 SmallryeOpenApiProperties::getOpenApiVersion,
                 SmallryeOpenApiProperties::getConfigProperties,
                 SmallryeOpenApiProperties::getScanDependenciesDisable,
@@ -128,7 +128,7 @@ class SmallryeOpenApiPluginTest {
                 SmallryeOpenApiProperties::getSchemaFilename,
                 SmallryeOpenApiProperties::getServers);
 
-        for (Function<SmallryeOpenApiProperties, ? extends Provider> getter : getters) {
+        for (Function<SmallryeOpenApiProperties, ? extends Provider<?>> getter : getters) {
             assertThat(getter.apply(task).get()).isEqualTo(getter.apply(ext).get());
         }
     }

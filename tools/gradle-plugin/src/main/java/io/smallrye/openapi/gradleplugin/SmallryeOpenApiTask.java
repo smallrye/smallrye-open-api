@@ -37,7 +37,6 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
@@ -49,8 +48,6 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.jandex.IndexView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
-import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
@@ -526,29 +523,36 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     @Input
     @Optional
     @Override
-    public Property<OperationIdStrategy> getOperationIdStrategy() {
+    public Property<OpenApiConfig.OperationIdStrategy> getOperationIdStrategy() {
         return properties.operationIdStrategy;
     }
 
     @Input
     @Optional
     @Override
-    public Property<DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior() {
+    public Property<OpenApiConfig.DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior() {
         return properties.duplicateOperationIdBehavior;
     }
 
     @Input
     @Optional
     @Override
-    public SetProperty<String> getScanProfiles() {
+    public ListProperty<String> getScanProfiles() {
         return properties.scanProfiles;
     }
 
     @Input
     @Optional
     @Override
-    public SetProperty<String> getScanExcludeProfiles() {
+    public ListProperty<String> getScanExcludeProfiles() {
         return properties.scanExcludeProfiles;
+    }
+
+    @Input
+    @Optional
+    @Override
+    public MapProperty<String, String> getScanResourceClasses() {
+        return properties.scanResourceClasses;
     }
 
     @Input

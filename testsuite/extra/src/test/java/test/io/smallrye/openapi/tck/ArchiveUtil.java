@@ -19,7 +19,6 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
@@ -42,7 +41,7 @@ public class ArchiveUtil {
      */
     public static OpenApiConfig archiveToConfig(Archive<?> archive) {
         try (ShrinkWrapClassLoader cl = new ShrinkWrapClassLoader(archive)) {
-            return new OpenApiConfigImpl(ConfigProvider.getConfig(cl));
+            return OpenApiConfig.fromConfig(ConfigProvider.getConfig(cl));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

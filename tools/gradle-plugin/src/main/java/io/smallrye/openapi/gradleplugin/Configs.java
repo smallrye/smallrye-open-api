@@ -1,30 +1,35 @@
 package io.smallrye.openapi.gradleplugin;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.openapi.OASConfig;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 
+import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
-import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Bag for all properties exposed by {@link SmallryeOpenApiExtension} and {@link SmallryeOpenApiTask}, latter takes its defaults
  * from {@link SmallryeOpenApiExtension}.
  */
-class Configs {
+class Configs implements SmallryeOpenApiProperties {
 
     final RegularFileProperty configProperties;
     final Property<String> schemaFilename;
@@ -51,10 +56,11 @@ class Configs {
     final Property<String> infoContactUrl;
     final Property<String> infoLicenseName;
     final Property<String> infoLicenseUrl;
-    final Property<OperationIdStrategy> operationIdStrategy;
-    final Property<DuplicateOperationIdBehavior> duplicateOperationIdBehavior;
-    final SetProperty<String> scanProfiles;
-    final SetProperty<String> scanExcludeProfiles;
+    final Property<OpenApiConfig.OperationIdStrategy> operationIdStrategy;
+    final Property<OpenApiConfig.DuplicateOperationIdBehavior> duplicateOperationIdBehavior;
+    final ListProperty<String> scanProfiles;
+    final ListProperty<String> scanExcludeProfiles;
+    final MapProperty<String, String> scanResourceClasses;
     final Property<String> encoding;
 
     Configs(ObjectFactory objects) {
@@ -83,10 +89,11 @@ class Configs {
         infoContactUrl = objects.property(String.class);
         infoLicenseName = objects.property(String.class);
         infoLicenseUrl = objects.property(String.class);
-        operationIdStrategy = objects.property(OperationIdStrategy.class);
-        duplicateOperationIdBehavior = objects.property(DuplicateOperationIdBehavior.class);
-        scanProfiles = objects.setProperty(String.class);
-        scanExcludeProfiles = objects.setProperty(String.class);
+        operationIdStrategy = objects.property(OpenApiConfig.OperationIdStrategy.class);
+        duplicateOperationIdBehavior = objects.property(OpenApiConfig.DuplicateOperationIdBehavior.class);
+        scanProfiles = objects.listProperty(String.class);
+        scanExcludeProfiles = objects.listProperty(String.class);
+        scanResourceClasses = objects.mapProperty(String.class, String.class);
         encoding = objects.property(String.class).convention(StandardCharsets.UTF_8.name());
     }
 
@@ -116,184 +123,217 @@ class Configs {
         infoContactUrl = objects.property(String.class).convention(ext.getInfoContactUrl());
         infoLicenseName = objects.property(String.class).convention(ext.getInfoLicenseName());
         infoLicenseUrl = objects.property(String.class).convention(ext.getInfoLicenseUrl());
-        operationIdStrategy = objects.property(OperationIdStrategy.class).convention(ext.getOperationIdStrategy());
-        duplicateOperationIdBehavior = objects.property(DuplicateOperationIdBehavior.class);
-        scanProfiles = objects.setProperty(String.class).convention(ext.getScanProfiles());
-        scanExcludeProfiles = objects.setProperty(String.class).convention(ext.scanExcludeProfiles);
-        encoding = objects.property(String.class).convention(ext.encoding);
+        operationIdStrategy = objects.property(OpenApiConfig.OperationIdStrategy.class)
+                .convention(ext.getOperationIdStrategy());
+        duplicateOperationIdBehavior = objects.property(OpenApiConfig.DuplicateOperationIdBehavior.class)
+                .convention(ext.getDuplicateOperationIdBehavior());
+        scanProfiles = objects.listProperty(String.class).convention(ext.getScanProfiles());
+        scanExcludeProfiles = objects.listProperty(String.class).convention(ext.getScanExcludeProfiles());
+        scanResourceClasses = objects.mapProperty(String.class, String.class).convention(ext.getScanResourceClasses());
+        encoding = objects.property(String.class).convention(ext.getEncoding());
     }
 
     OpenApiConfig asOpenApiConfig() {
-        return new OpenApiConfig() {
-            @Override
-            public String modelReader() {
-                return modelReader.getOrNull();
-            }
+        Config config = new SmallRyeConfigBuilder()
+                .withSources(
+                        new ConfigValuePropertiesConfigSource(getProperties(), "maven-plugin", ConfigSource.DEFAULT_ORDINAL))
+                .build();
 
-            @Override
-            public String filter() {
-                return filter.getOrNull();
-            }
-
-            @Override
-            public boolean scanDisable() {
-                return scanDisabled.get();
-            }
-
-            @Override
-            public Set<String> scanPackages() {
-                return new HashSet<>(scanPackages.getOrElse(emptyList()));
-            }
-
-            @Override
-            public Set<String> scanClasses() {
-                return new HashSet<>(scanClasses.getOrElse(emptyList()));
-            }
-
-            @Override
-            public Set<String> scanExcludePackages() {
-                return new HashSet<>(scanExcludePackages.getOrElse(emptyList()));
-            }
-
-            @Override
-            public Set<String> scanExcludeClasses() {
-                return new HashSet<>(scanExcludeClasses.getOrElse(emptyList()));
-            }
-
-            @Override
-            public List<String> servers() {
-                return servers.getOrElse(emptyList());
-            }
-
-            @Override
-            public List<String> pathServers(String path) {
-                return asCsvList(pathServers.getting(path).getOrNull());
-            }
-
-            @Override
-            public List<String> operationServers(String operationId) {
-                return asCsvList(operationServers.getting(operationId).getOrNull());
-            }
-
-            @Override
-            public boolean scanDependenciesDisable() {
-                return scanDependenciesDisable.get();
-            }
-
-            @Override
-            public String customSchemaRegistryClass() {
-                return customSchemaRegistryClass.getOrNull();
-            }
-
-            @Override
-            public boolean applicationPathDisable() {
-                return applicationPathDisable.get();
-            }
-
-            @Override
-            public String getOpenApiVersion() {
-                return openApiVersion.getOrNull();
-            }
-
-            @Override
-            public String getInfoTitle() {
-                return infoTitle.getOrNull();
-            }
-
-            @Override
-            public String getInfoVersion() {
-                return infoVersion.getOrNull();
-            }
-
-            @Override
-            public String getInfoDescription() {
-                return infoDescription.getOrNull();
-            }
-
-            @Override
-            public String getInfoTermsOfService() {
-                return infoTermsOfService.getOrNull();
-            }
-
-            @Override
-            public String getInfoContactEmail() {
-                return infoContactEmail.getOrNull();
-            }
-
-            @Override
-            public String getInfoContactName() {
-                return infoContactName.getOrNull();
-            }
-
-            @Override
-            public String getInfoContactUrl() {
-                return infoContactUrl.getOrNull();
-            }
-
-            @Override
-            public String getInfoLicenseName() {
-                return infoLicenseName.getOrNull();
-            }
-
-            @Override
-            public String getInfoLicenseUrl() {
-                return infoLicenseUrl.getOrNull();
-            }
-
-            @Override
-            public OperationIdStrategy getOperationIdStrategy() {
-                return operationIdStrategy.getOrNull();
-            }
-
-            @Override
-            public DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
-                return duplicateOperationIdBehavior.getOrElse(OpenApiConfig.DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT);
-            }
-
-            @Override
-            public Set<String> getScanProfiles() {
-                return scanProfiles.getOrElse(emptySet());
-            }
-
-            @Override
-            public Set<String> getScanExcludeProfiles() {
-                return scanExcludeProfiles.getOrElse(emptySet());
-            }
-
-            // following aren't implemented by GenerateSchemaMojo, just documenting those here...
-
-            //      public boolean arrayReferencesEnable() {
-            //      }
-            //
-            //      public boolean privatePropertiesEnable() {
-            //      }
-            //
-            //      public String propertyNamingStrategy() {
-            //      }
-            //
-            //      public boolean sortedPropertiesEnable() {
-            //      }
-            //
-            //      public Map<String, String> getSchemas() {
-            //      }
-            //
-            //      public java.util.Optional<String[]> getDefaultProduces() {
-            //      }
-            //
-            //      public java.util.Optional<String[]> getDefaultConsumes() {
-            //      }
-            //
-            //      public java.util.Optional<Boolean> allowNakedPathParameter() {
-            //      }
-            //
-            //      public boolean removeUnusedSchemas() {
-            //      }
-            //
-            //      public void doAllowNakedPathParameter() {
-            //      }
-            //
-            //      public Set<String> scanDependenciesJars() {
-            //      }
-        };
+        return OpenApiConfig.fromConfig(config);
     }
+
+    private Map<String, String> getProperties() {
+        // First check if the configProperties is set, if so, load that.
+        Map<String, String> cp = new HashMap<>();
+        File propertiesFile = configProperties.getAsFile().getOrElse(null);
+
+        if (propertiesFile != null) {
+            Properties p = new Properties();
+
+            try (InputStream is = Files.newInputStream(propertiesFile.toPath())) {
+                p.load(is);
+                p.stringPropertyNames().forEach(name -> cp.put(name, p.getProperty(name)));
+            } catch (IOException ioe) {
+                throw new UncheckedIOException(ioe);
+            }
+        }
+
+        // Now add properties set in the plugin.
+        addToPropertyMap(cp, OASConfig.MODEL_READER, modelReader);
+        addToPropertyMap(cp, OASConfig.FILTER, filter);
+        addToPropertyMap(cp, OASConfig.SCAN_DISABLE, scanDisabled);
+        addToPropertyMap(cp, OASConfig.SCAN_PACKAGES, scanPackages);
+        addToPropertyMap(cp, OASConfig.SCAN_CLASSES, scanClasses);
+        addToPropertyMap(cp, OASConfig.SCAN_EXCLUDE_PACKAGES, scanExcludePackages);
+        addToPropertyMap(cp, OASConfig.SCAN_EXCLUDE_CLASSES, scanExcludeClasses);
+        addToPropertyMap(cp, OASConfig.SERVERS, servers);
+        addToPropertyMap(cp, OASConfig.SERVERS_PATH_PREFIX, pathServers);
+        addToPropertyMap(cp, OASConfig.SERVERS_OPERATION_PREFIX, operationServers);
+        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
+        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
+        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
+        addToPropertyMap(cp, OpenApiConstants.VERSION, openApiVersion);
+        addToPropertyMap(cp, OpenApiConstants.INFO_TITLE, infoTitle);
+        addToPropertyMap(cp, OpenApiConstants.INFO_VERSION, infoVersion);
+        addToPropertyMap(cp, OpenApiConstants.INFO_DESCRIPTION, infoDescription);
+        addToPropertyMap(cp, OpenApiConstants.INFO_TERMS, infoTermsOfService);
+        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_EMAIL, infoContactEmail);
+        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_NAME, infoContactName);
+        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_URL, infoContactUrl);
+        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_NAME, infoLicenseName);
+        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_URL, infoLicenseUrl);
+        addToPropertyMap(cp, OpenApiConstants.OPERATION_ID_STRAGEGY, operationIdStrategy);
+        addToPropertyMap(cp, OpenApiConstants.SCAN_PROFILES, scanProfiles);
+        addToPropertyMap(cp, OpenApiConstants.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
+        addToPropertyMap(cp, OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
+
+        return cp;
+    }
+
+    private void addToPropertyMap(Map<String, String> map, String key, Property<?> value) {
+        if (value.isPresent()) {
+            map.put(key, value.get().toString());
+        }
+    }
+
+    private void addToPropertyMap(Map<String, String> map, String key, ListProperty<String> values) {
+        if (values.isPresent() && !values.get().isEmpty()) {
+            String value = values.get().stream()
+                    .map(v -> v.replace("\\", "\\\\"))
+                    .map(v -> v.replace(",", "\\,"))
+                    .collect(Collectors.joining(","));
+            map.put(key, value);
+        }
+    }
+
+    private void addToPropertyMap(Map<String, String> map, String keyPrefix, MapProperty<String, String> values) {
+        if (values.isPresent()) {
+            values.get().forEach((key, value) -> map.put(keyPrefix + key, value));
+        }
+    }
+
+    public RegularFileProperty getConfigProperties() {
+        return configProperties;
+    }
+
+    public Property<String> getSchemaFilename() {
+        return schemaFilename;
+    }
+
+    public Property<Boolean> getScanDependenciesDisable() {
+        return scanDependenciesDisable;
+    }
+
+    public Property<String> getModelReader() {
+        return modelReader;
+    }
+
+    public Property<String> getFilter() {
+        return filter;
+    }
+
+    public Property<Boolean> getScanDisabled() {
+        return scanDisabled;
+    }
+
+    public ListProperty<String> getScanPackages() {
+        return scanPackages;
+    }
+
+    public ListProperty<String> getScanClasses() {
+        return scanClasses;
+    }
+
+    public ListProperty<String> getScanExcludePackages() {
+        return scanExcludePackages;
+    }
+
+    public ListProperty<String> getScanExcludeClasses() {
+        return scanExcludeClasses;
+    }
+
+    public ListProperty<String> getServers() {
+        return servers;
+    }
+
+    public MapProperty<String, String> getPathServers() {
+        return pathServers;
+    }
+
+    public MapProperty<String, String> getOperationServers() {
+        return operationServers;
+    }
+
+    public Property<String> getCustomSchemaRegistryClass() {
+        return customSchemaRegistryClass;
+    }
+
+    public Property<Boolean> getApplicationPathDisable() {
+        return applicationPathDisable;
+    }
+
+    public Property<String> getOpenApiVersion() {
+        return openApiVersion;
+    }
+
+    public Property<String> getInfoTitle() {
+        return infoTitle;
+    }
+
+    public Property<String> getInfoVersion() {
+        return infoVersion;
+    }
+
+    public Property<String> getInfoDescription() {
+        return infoDescription;
+    }
+
+    public Property<String> getInfoTermsOfService() {
+        return infoTermsOfService;
+    }
+
+    public Property<String> getInfoContactEmail() {
+        return infoContactEmail;
+    }
+
+    public Property<String> getInfoContactName() {
+        return infoContactName;
+    }
+
+    public Property<String> getInfoContactUrl() {
+        return infoContactUrl;
+    }
+
+    public Property<String> getInfoLicenseName() {
+        return infoLicenseName;
+    }
+
+    public Property<String> getInfoLicenseUrl() {
+        return infoLicenseUrl;
+    }
+
+    public Property<OpenApiConfig.OperationIdStrategy> getOperationIdStrategy() {
+        return operationIdStrategy;
+    }
+
+    public Property<OpenApiConfig.DuplicateOperationIdBehavior> getDuplicateOperationIdBehavior() {
+        return duplicateOperationIdBehavior;
+    }
+
+    public ListProperty<String> getScanProfiles() {
+        return scanProfiles;
+    }
+
+    public ListProperty<String> getScanExcludeProfiles() {
+        return scanExcludeProfiles;
+    }
+
+    public MapProperty<String, String> getScanResourceClasses() {
+        return scanResourceClasses;
+    }
+
+    public Property<String> getEncoding() {
+        return encoding;
+    }
+
 }

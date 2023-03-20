@@ -20,7 +20,6 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiConfigImpl;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
@@ -76,7 +75,7 @@ public class OpenApiRegistration extends HttpServlet {
         final OpenApiDocument document = OpenApiDocument.INSTANCE;
         try (OpenApiStaticFile staticFile = new OpenApiStaticFile(resource.openStream(), format)) {
             Config config = ConfigProvider.getConfig();
-            OpenApiConfig openApiConfig = new OpenApiConfigImpl(config);
+            OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
             document.reset();
             document.config(openApiConfig);
             document.filter(OpenApiProcessor.getFilter(openApiConfig, Thread.currentThread().getContextClassLoader()));

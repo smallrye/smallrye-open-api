@@ -1,14 +1,19 @@
 package io.smallrye.openapi.api;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.openapi.OASConfig;
 
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -23,173 +28,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
  */
 public interface OpenApiConfig {
 
-    DuplicateOperationIdBehavior DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT = DuplicateOperationIdBehavior.WARN;
-    Integer MAXIMUM_STATIC_FILE_SIZE_DEFAULT = 3 * 1024 * 1024;
-
-    default String modelReader() {
-        return null;
-    }
-
-    default String filter() {
-        return null;
-    }
-
-    default boolean scanDisable() {
-        return false;
-    }
-
-    default Set<String> scanPackages() {
-        return null;
-    }
-
-    default Set<String> scanClasses() {
-        return null;
-    }
-
-    default Set<String> scanExcludePackages() {
-        return OpenApiConstants.NEVER_SCAN_PACKAGES;
-    }
-
-    default Set<String> scanExcludeClasses() {
-        return OpenApiConstants.NEVER_SCAN_CLASSES;
-    }
-
-    default boolean scanBeanValidation() {
-        return true;
-    }
-
-    default List<String> servers() {
-        return new ArrayList<>();
-    }
-
-    default List<String> pathServers(String path) {
-        return new ArrayList<>();
-    }
-
-    default List<String> operationServers(String operationId) {
-        return new ArrayList<>();
-    }
-
-    default boolean scanDependenciesDisable() {
-        return false;
-    }
-
-    default Set<String> scanDependenciesJars() {
-        return new HashSet<>();
-    }
-
-    default boolean arrayReferencesEnable() {
-        return true;
-    }
-
-    default String customSchemaRegistryClass() {
-        return null;
-    }
-
-    default boolean applicationPathDisable() {
-        return false;
-    }
-
-    default boolean privatePropertiesEnable() {
-        return true;
-    }
-
-    default String propertyNamingStrategy() {
-        return JsonbConstants.IDENTITY;
-    }
-
-    default boolean sortedPropertiesEnable() {
-        return false;
-    }
-
-    default Map<String, String> getSchemas() {
-        return new HashMap<>();
-    }
-
-    // Here we extend this in SmallRye with some more configure options (mp.openapi.extensions)
-    default String getOpenApiVersion() {
-        return null;
-    }
-
-    default String getInfoTitle() {
-        return null;
-    }
-
-    default String getInfoVersion() {
-        return null;
-    }
-
-    default String getInfoDescription() {
-        return null;
-    }
-
-    default String getInfoTermsOfService() {
-        return null;
-    }
-
-    default String getInfoContactEmail() {
-        return null;
-    }
-
-    default String getInfoContactName() {
-        return null;
-    }
-
-    default String getInfoContactUrl() {
-        return null;
-    }
-
-    default String getInfoLicenseName() {
-        return null;
-    }
-
-    default String getInfoLicenseUrl() {
-        return null;
-    }
-
-    default OperationIdStrategy getOperationIdStrategy() {
-        return null;
-    }
-
-    default DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
-        return DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT;
-    }
-
-    default Optional<String[]> getDefaultProduces() {
-        return Optional.empty();
-    }
-
-    default Optional<String[]> getDefaultConsumes() {
-        return Optional.empty();
-    }
-
-    default Optional<Boolean> allowNakedPathParameter() {
-        return Optional.empty();
-    }
-
-    default Set<String> getScanProfiles() {
-        return new HashSet<>();
-    }
-
-    default Set<String> getScanExcludeProfiles() {
-        return new HashSet<>();
-    }
-
-    default Map<String, String> getScanResourceClasses() {
-        return new HashMap<>();
-    }
-
-    default boolean removeUnusedSchemas() {
-        return false;
-    }
-
-    default void doAllowNakedPathParameter() {
-    }
-
-    default Integer getMaximumStaticFileSize() {
-        return MAXIMUM_STATIC_FILE_SIZE_DEFAULT;
-    }
-
     enum OperationIdStrategy {
         METHOD,
         CLASS_METHOD,
@@ -201,49 +39,218 @@ public interface OpenApiConfig {
         WARN
     }
 
-    default Pattern patternOf(String configValue) {
-        return patternOf(configValue, null);
+    public static OpenApiConfig fromConfig(Config config) {
+        return new OpenApiConfigImpl(config);
     }
 
-    default Pattern patternOf(String configValue, Set<String> buildIn) {
-        Pattern pattern = null;
+    DuplicateOperationIdBehavior DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT = DuplicateOperationIdBehavior.WARN;
+    Integer MAXIMUM_STATIC_FILE_SIZE_DEFAULT = 3 * 1024 * 1024;
 
-        if (configValue != null && (configValue.startsWith("^") || configValue.endsWith("$"))) {
-            pattern = Pattern.compile(configValue);
-        } else {
-            Set<String> literals = asCsvSet(configValue);
-            if (buildIn != null && !buildIn.isEmpty()) {
-                literals.addAll(buildIn);
-            }
-            if (literals.isEmpty()) {
-                return Pattern.compile("", Pattern.LITERAL);
-            } else {
-                pattern = Pattern.compile("(" + literals.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
-            }
-        }
+    <R, T> T getConfigValue(String propertyName, Class<R> type, Function<R, T> converter, Supplier<T> defaultValue);
 
-        return pattern;
+    <R, T> Map<String, T> getConfigValueMap(String propertyNamePrefix, Class<R> type, Function<R, T> converter);
+
+    default <T> T getConfigValue(String propertyName, Class<T> type, Supplier<T> defaultValue) {
+        return getConfigValue(propertyName, type, Function.identity(), defaultValue);
     }
 
-    default Set<String> asCsvSet(String items) {
-        Set<String> rval = new HashSet<>();
-        if (items != null) {
-            String[] split = items.split(",");
-            for (String item : split) {
-                rval.add(item.trim());
-            }
-        }
-        return rval;
+    default String modelReader() {
+        return getConfigValue(OASConfig.MODEL_READER, String.class, () -> null);
     }
 
-    default List<String> asCsvList(String items) {
-        List<String> rval = new ArrayList<>();
-        if (items != null) {
-            String[] split = items.split(",");
-            for (String item : split) {
-                rval.add(item.trim());
-            }
-        }
-        return rval;
+    default String filter() {
+        return getConfigValue(OASConfig.FILTER, String.class, () -> null);
     }
+
+    default boolean scanDisable() {
+        return getConfigValue(OASConfig.SCAN_DISABLE, Boolean.class, () -> Boolean.FALSE);
+    }
+
+    default Set<String> scanPackages() {
+        return getConfigValue(OASConfig.SCAN_PACKAGES, String[].class, this::toSet, Collections::emptySet);
+    }
+
+    default Set<String> scanClasses() {
+        return getConfigValue(OASConfig.SCAN_CLASSES, String[].class, this::toSet, Collections::emptySet);
+    }
+
+    default Set<String> scanExcludePackages() {
+        return getConfigValue(OASConfig.SCAN_EXCLUDE_PACKAGES, String[].class, values -> {
+            Set<String> valueSet = toSet(values);
+            valueSet.addAll(OpenApiConstants.NEVER_SCAN_PACKAGES);
+            return Collections.unmodifiableSet(valueSet);
+        }, () -> OpenApiConstants.NEVER_SCAN_PACKAGES);
+    }
+
+    default Set<String> scanExcludeClasses() {
+        return getConfigValue(OASConfig.SCAN_EXCLUDE_CLASSES, String[].class, values -> {
+            Set<String> valueSet = toSet(values);
+            valueSet.addAll(OpenApiConstants.NEVER_SCAN_CLASSES);
+            return Collections.unmodifiableSet(valueSet);
+        }, () -> OpenApiConstants.NEVER_SCAN_CLASSES);
+    }
+
+    default boolean scanBeanValidation() {
+        return getConfigValue(OASConfig.SCAN_BEANVALIDATION, Boolean.class, () -> Boolean.TRUE);
+    }
+
+    default List<String> servers() {
+        return getConfigValue(OASConfig.SERVERS, String[].class, this::toList, Collections::emptyList);
+    }
+
+    default List<String> pathServers(String path) {
+        return getConfigValue(OASConfig.SERVERS_PATH_PREFIX + path, String[].class, this::toList, Collections::emptyList);
+    }
+
+    default List<String> operationServers(String operationId) {
+        return getConfigValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String[].class, this::toList,
+                Collections::emptyList);
+    }
+
+    default boolean scanDependenciesDisable() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, Boolean.class,
+                () -> getConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_DISABLE, Boolean.class,
+                        () -> Boolean.FALSE));
+    }
+
+    default Set<String> scanDependenciesJars() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_JARS, String[].class, this::toSet,
+                () -> getConfigValue(OpenApiConstants.SCAN_DEPENDENCIES_JARS, String[].class, this::toSet,
+                        Collections::emptySet));
+    }
+
+    default boolean arrayReferencesEnable() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE, Boolean.class, () -> Boolean.TRUE);
+    }
+
+    default String customSchemaRegistryClass() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, String.class,
+                () -> getConfigValue(OpenApiConstants.CUSTOM_SCHEMA_REGISTRY_CLASS, String.class,
+                        () -> null));
+    }
+
+    default boolean applicationPathDisable() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, Boolean.class,
+                () -> getConfigValue(OpenApiConstants.APP_PATH_DISABLE, Boolean.class,
+                        () -> Boolean.FALSE));
+    }
+
+    default boolean privatePropertiesEnable() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, Boolean.class, () -> Boolean.TRUE);
+    }
+
+    default String propertyNamingStrategy() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY, String.class, () -> JsonbConstants.IDENTITY);
+    }
+
+    default boolean sortedPropertiesEnable() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_SORTED_PROPERTIES_ENABLE, Boolean.class, () -> Boolean.FALSE);
+    }
+
+    default Map<String, String> getSchemas() {
+        return getConfigValueMap(OASConfig.SCHEMA_PREFIX, String.class, Function.identity());
+    }
+
+    // Here we extend this in SmallRye with some more configure options (mp.openapi.extensions)
+    default String getOpenApiVersion() {
+        return getConfigValue(OpenApiConstants.VERSION, String.class, () -> null);
+    }
+
+    default String getInfoTitle() {
+        return getConfigValue(OpenApiConstants.INFO_TITLE, String.class, () -> null);
+    }
+
+    default String getInfoVersion() {
+        return getConfigValue(OpenApiConstants.INFO_VERSION, String.class, () -> null);
+    }
+
+    default String getInfoDescription() {
+        return getConfigValue(OpenApiConstants.INFO_DESCRIPTION, String.class, () -> null);
+    }
+
+    default String getInfoTermsOfService() {
+        return getConfigValue(OpenApiConstants.INFO_TERMS, String.class, () -> null);
+    }
+
+    default String getInfoContactEmail() {
+        return getConfigValue(OpenApiConstants.INFO_CONTACT_EMAIL, String.class, () -> null);
+    }
+
+    default String getInfoContactName() {
+        return getConfigValue(OpenApiConstants.INFO_CONTACT_NAME, String.class, () -> null);
+    }
+
+    default String getInfoContactUrl() {
+        return getConfigValue(OpenApiConstants.INFO_CONTACT_URL, String.class, () -> null);
+    }
+
+    default String getInfoLicenseName() {
+        return getConfigValue(OpenApiConstants.INFO_LICENSE_NAME, String.class, () -> null);
+    }
+
+    default String getInfoLicenseUrl() {
+        return getConfigValue(OpenApiConstants.INFO_LICENSE_URL, String.class, () -> null);
+    }
+
+    default OperationIdStrategy getOperationIdStrategy() {
+        return getConfigValue(OpenApiConstants.OPERATION_ID_STRAGEGY, String.class, OperationIdStrategy::valueOf, () -> null);
+    }
+
+    default DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {
+        return getConfigValue(OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR,
+                String.class,
+                DuplicateOperationIdBehavior::valueOf,
+                () -> DUPLICATE_OPERATION_ID_BEHAVIOR_DEFAULT);
+    }
+
+    default Optional<String[]> getDefaultProduces() {
+        return getConfigValue(OpenApiConstants.DEFAULT_PRODUCES, String[].class, Optional::of, Optional::empty);
+    }
+
+    default Optional<String[]> getDefaultConsumes() {
+        return getConfigValue(OpenApiConstants.DEFAULT_CONSUMES, String[].class, Optional::of, Optional::empty);
+    }
+
+    default Optional<Boolean> allowNakedPathParameter() {
+        return Optional.empty();
+    }
+
+    void setAllowNakedPathParameter(Boolean allowNakedPathParameter);
+
+    default void doAllowNakedPathParameter() {
+        setAllowNakedPathParameter(Boolean.TRUE);
+    }
+
+    default Set<String> getScanProfiles() {
+        return getConfigValue(OpenApiConstants.SCAN_PROFILES, String[].class, this::toSet, Collections::emptySet);
+    }
+
+    default Set<String> getScanExcludeProfiles() {
+        return getConfigValue(OpenApiConstants.SCAN_EXCLUDE_PROFILES, String[].class, this::toSet, Collections::emptySet);
+    }
+
+    default Map<String, String> getScanResourceClasses() {
+        return getConfigValueMap(OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX, String.class, Function.identity());
+    }
+
+    default boolean removeUnusedSchemas() {
+        return getConfigValue(OpenApiConstants.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.class, () -> Boolean.FALSE);
+    }
+
+    default Integer getMaximumStaticFileSize() {
+        return getConfigValue(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE, Integer.class, () -> MAXIMUM_STATIC_FILE_SIZE_DEFAULT);
+    }
+
+    default Set<String> toSet(String[] items) {
+        return Arrays.stream(items)
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    default List<String> toList(String[] items) {
+        return Arrays.stream(items)
+                .map(String::trim)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
 }
