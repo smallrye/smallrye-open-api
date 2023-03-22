@@ -1,15 +1,27 @@
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 plugins {
-    `java-gradle-plugin`
+    id 'java-gradle-plugin'
     id("com.gradle.plugin-publish") version "1.1.0"
     id("com.github.vlsi.jandex") version "1.87"
 }
 
+group = "io.smallrye"
+
+if (JavaVersion.current().isJava9Compatible()) {
+    compileJava.options.compilerArgs.addAll(['--release', '8'])
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url = uri("file:./target/dependencies")
@@ -17,15 +29,11 @@ repositories {
 }
 
 dependencies {
-    val configVersion: String by project
-    val versionJackson: String by project
-    val versionJunit5: String by project
-
-    implementation("io.smallrye:smallrye-open-api-core:$version")
-    implementation("io.smallrye:smallrye-open-api-jaxrs:$version")
-    implementation("io.smallrye:smallrye-open-api-spring:$version")
-    implementation("io.smallrye:smallrye-open-api-vertx:$version")
-    implementation("io.smallrye.config:smallrye-config:$configVersion")
+    implementation("io.smallrye:smallrye-open-api-core:${version}")
+    implementation("io.smallrye:smallrye-open-api-jaxrs:${version}")
+    implementation("io.smallrye:smallrye-open-api-spring:${version}")
+    implementation("io.smallrye:smallrye-open-api-vertx:${version}")
+    implementation("io.smallrye.config:smallrye-config:${versionConfig}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit5}")
     testImplementation(gradleTestKit())
@@ -33,26 +41,33 @@ dependencies {
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${versionJackson}")
 }
 
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    useJUnitPlatform()
+    // multiple Gradle invocations executed from the same testing JVM cause problems, so fork
+    // for each test, and make sure we only run one Gradle execution in each test
+    forkEvery 1
+}
+
 gradlePlugin {
-    val smallryePlugin by plugins.creating {
-        id = "io.smallrye.openapi"
-        implementationClass = "io.smallrye.openapi.gradleplugin.SmallryeOpenApiPlugin"
-        description = "Official Smallrye Open API Gradle plugin"
+    website = 'https://github.com/smallrye/smallrye-open-api/'
+    vcsUrl = 'https://github.com/smallrye/smallrye-open-api/'
+    plugins {
+        smallryeOpenAPIPlugin {
+            id = 'io.smallrye.openapi'
+            implementationClass = 'io.smallrye.openapi.gradleplugin.SmallryeOpenApiPlugin'
+            description = 'SmallRye: MicroProfile OpenAPI Gradle Plugin'
+            displayName = 'SmallRye: MicroProfile OpenAPI Gradle Plugin'
+            description = 'SmallRye: MicroProfile GraphQL Gradle Plugin'
+            tags.set([ 'smallrye', 'openapi', 'microprofile' ])
+        }
     }
 }
 
-pluginBundle {
-    website = "https://github.com/smallrye/smallrye-open-api/"
-    vcsUrl = "https://github.com/smallrye/smallrye-open-api/"
-    tags = listOf("openapi", "smallrye")
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
 }
 
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.named("pluginUnderTestMetadata") {
-    dependsOn("processJandexIndex")
-}
-
-group = "io.smallrye"
+tasks.pluginUnderTestMetadata.dependsOn(processJandexIndex)
