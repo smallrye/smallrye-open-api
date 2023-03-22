@@ -54,13 +54,12 @@ jobs:
           git push
           git push --tags
 
-      # TODO requires the GRADLE_PUBLISH_KEY + GRADLE_PUBLISH_SECRET secrets - via https://plugins.gradle.org/user/login (IIRC)
-      #- name: gradle release ${{steps.metadata.outputs.current-version}}
-      #  uses: gradle/gradle-build-action@v2
-      #  with:
-      #    build-root-directory: ./tools/gradle-plugin
-      #    cache-read-only: true
-      #    arguments: publishPlugins -Pgradle.publish.key=${{secrets.GRADLE_PUBLISH_KEY}} -Pgradle.publish.secret=${{secrets.GRADLE_PUBLISH_SECRET}}
+      - name: Gradle plugin release ${{steps.metadata.outputs.current-version}}
+        uses: gradle/gradle-build-action@v2
+        with:
+          build-root-directory: ./tools/gradle-plugin
+          cache-read-only: true
+          arguments: publishPlugins -Pgradle.publish.key=${{secrets.GRADLE_PUBLISH_KEY}} -Pgradle.publish.secret=${{secrets.GRADLE_PUBLISH_SECRET}}
 
       - uses: actions/upload-artifact@v3
         name: tck-report
