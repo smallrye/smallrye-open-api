@@ -2,11 +2,13 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.util.Collection;
 
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.io.JsonUtil;
+import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 
 /**
@@ -82,5 +84,15 @@ public interface AnnotationScannerExtension {
      */
     default Object parseValue(String value) {
         return JsonUtil.parseValue(value);
+    }
+
+    /**
+     * Parse a string value as a Schema
+     *
+     * @param jsonSchema the string value of the schema, in JSON format
+     * @return the parsed value as Schema
+     */
+    default Schema parseSchema(String jsonSchema) {
+        return OpenApiParser.parseSchema(jsonSchema);
     }
 }

@@ -9,12 +9,14 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.yaml.snakeyaml.LoaderOptions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 
@@ -97,11 +99,16 @@ public class OpenApiParser {
      *
      * @param schemaJson String containing a JSON formatted schema
      * @return Schema parsed from the String
-     * @throws IOException Errors in reading the String
+     * @throws OpenApiRuntimeException Errors in reading the String
      */
-    public static final Schema parseSchema(String schemaJson) throws IOException {
+    public static final Schema parseSchema(String schemaJson) {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode tree = mapper.readTree(schemaJson);
+        JsonNode tree;
+        try {
+            tree = mapper.readTree(schemaJson);
+        } catch (JsonProcessingException e) {
+            throw new OpenApiRuntimeException("Exception parsing JSON Schema representation", e);
+        }
         return SchemaReader.readSchema(tree);
     }
 
