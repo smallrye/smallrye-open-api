@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -26,7 +27,6 @@ import org.jboss.jandex.WildcardType;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.runtime.io.OpenApiParser;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -248,7 +248,11 @@ public class SchemaRegistry {
             Schema schema;
 
             try {
-                schema = OpenApiParser.parseSchema(jsonSchema);
+                schema = context.getExtensions()
+                        .stream()
+                        .map(ext -> ext.parseSchema(jsonSchema))
+                        .findFirst()
+                        .orElseThrow(NoSuchElementException::new);
             } catch (Exception e) {
                 ScannerLogging.logger.errorParsingSchema(className);
                 return;
