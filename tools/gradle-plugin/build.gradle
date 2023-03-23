@@ -1,0 +1,73 @@
+plugins {
+    id 'java-gradle-plugin'
+    id("com.gradle.plugin-publish") version "1.1.0"
+    id("com.github.vlsi.jandex") version "1.87"
+}
+
+group = "io.smallrye"
+
+if (JavaVersion.current().isJava9Compatible()) {
+    compileJava.options.compilerArgs.addAll(['--release', '8'])
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url = uri("file:./target/dependencies")
+    }
+}
+
+dependencies {
+    implementation("io.smallrye:smallrye-open-api-core:${version}")
+    implementation("io.smallrye:smallrye-open-api-jaxrs:${version}")
+    implementation("io.smallrye:smallrye-open-api-spring:${version}")
+    implementation("io.smallrye:smallrye-open-api-vertx:${version}")
+    implementation("io.smallrye.config:smallrye-config:${versionConfig}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit5}")
+    testImplementation(gradleTestKit())
+    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:${versionJackson}")
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    useJUnitPlatform()
+    // multiple Gradle invocations executed from the same testing JVM cause problems, so fork
+    // for each test, and make sure we only run one Gradle execution in each test
+    forkEvery 1
+}
+
+gradlePlugin {
+    website = 'https://github.com/smallrye/smallrye-open-api/'
+    vcsUrl = 'https://github.com/smallrye/smallrye-open-api/'
+    plugins {
+        smallryeOpenAPIPlugin {
+            id = 'io.smallrye.openapi'
+            implementationClass = 'io.smallrye.openapi.gradleplugin.SmallryeOpenApiPlugin'
+            description = 'SmallRye: MicroProfile OpenAPI Gradle Plugin'
+            displayName = 'SmallRye: MicroProfile OpenAPI Gradle Plugin'
+            description = 'SmallRye: MicroProfile GraphQL Gradle Plugin'
+            tags.set([ 'smallrye', 'openapi', 'microprofile' ])
+        }
+    }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+tasks.pluginUnderTestMetadata.dependsOn(processJandexIndex)
