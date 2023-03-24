@@ -60,7 +60,6 @@ gradlePlugin {
             implementationClass = 'io.smallrye.openapi.gradleplugin.SmallryeOpenApiPlugin'
             description = 'SmallRye: MicroProfile OpenAPI Gradle Plugin'
             displayName = 'SmallRye: MicroProfile OpenAPI Gradle Plugin'
-            description = 'SmallRye: MicroProfile GraphQL Gradle Plugin'
             tags.set([ 'smallrye', 'openapi', 'microprofile' ])
         }
     }
