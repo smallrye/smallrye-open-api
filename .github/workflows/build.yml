@@ -51,7 +51,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B formatter:validate impsort:check install -Pcoverage
+        run: mvn -B formatter:validate impsort:check install -Pcoverage -Pgradle-smoke-test
 
       ## Store information about the build context for Sonar scan in separate job
       - name: Save Build Context

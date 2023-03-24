@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        // Need the local Maven repo for the smoke test, intentionally no other plugin repos
+        mavenLocal()
+    }
+
+    plugins {
+        id('io.smallrye.openapi') version("${System.getProperty('smallrye-openapi-version')}")
+    }
+}
+
+rootProject.name = "gradle-plugin-smoke-test"
