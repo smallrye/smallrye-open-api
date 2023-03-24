@@ -1,0 +1,20 @@
+import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy
+
+plugins {
+    id('java-library')
+    id('io.smallrye.openapi')
+}
+
+smallryeOpenApi {
+    scanDependenciesDisable.set(false)
+    infoTitle.set("Smoke Test")
+    schemaFilename.set("META-INF/openapi/openapi")
+    operationIdStrategy.set(OperationIdStrategy.METHOD)
+}
+
+// Just pull in the Gradle plugin to check whether all dependencies match between the pom.xml
+// and build.gradle. This is currently enough.
+//
+// Let this Gradle build happen by activating the Maven profile 'gradle-smoke-test' or manually
+// using this command (replace the version if necessary).
+//   ./gradlew -p smoke-test/ assemble -Dsmallrye-openapi-version=3.3.2-SNAPSHOT
