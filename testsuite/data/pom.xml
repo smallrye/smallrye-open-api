@@ -181,7 +181,7 @@
             <plugin>
                 <groupId>io.smallrye</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
-                <version>3.0.5</version>
+                <version>3.1.0</version>
                 <configuration>
                     <jar>${project.build.directory}/smallrye-open-api-testsuite-data-${project.version}-indexed.jar</jar>
                     <indexName>${project.artifactId}.idx</indexName>
