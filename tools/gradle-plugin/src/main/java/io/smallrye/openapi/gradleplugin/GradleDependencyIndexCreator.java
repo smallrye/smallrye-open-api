@@ -34,32 +34,32 @@ public class GradleDependencyIndexCreator {
         this.logger = logger;
     }
 
-    IndexView createIndex(Set<ResolvedArtifact> dependencies, FileCollection classesDirs)
+    IndexView createIndex(Set<File> dependencies, FileCollection classesDirs)
             throws Exception {
 
-        List<Entry<ResolvedArtifact, Duration>> indexDurations = new ArrayList<>();
+        List<Entry<File, Duration>> indexDurations = new ArrayList<>();
         List<IndexView> indexes = new ArrayList<>();
 
         for (File f : classesDirs.getFiles()) {
             indexes.add(indexModuleClasses(f));
         }
 
-        for (ResolvedArtifact artifact : dependencies) {
+        for (File artifact : dependencies) {
             try {
-                if (artifact.getFile().isDirectory()) {
+                if (artifact.isDirectory()) {
                     // Don't cache local workspace artifacts. Incremental compilation in IDE's would
                     // otherwise use the cached index instead of new one.
                     // Right now, support for incremental compilation inside eclipse is blocked by:
                     // https://github.com/eclipse-m2e/m2e-core/issues/364#issuecomment-939987848
                     // target/classes
                     indexes.add(indexModuleClasses(artifact));
-                } else if (artifact.getFile().getName().endsWith(".jar")) {
+                } else if (artifact.getName().endsWith(".jar")) {
                     IndexView artifactIndex = logger.isDebugEnabled() ? timedIndex(indexDurations, artifact) : index(artifact);
                     indexes.add(artifactIndex);
                 }
             } catch (IOException | ExecutionException e) {
                 logger.error(
-                        "Can't compute index of {}, skipping", artifact.getFile().getAbsolutePath(),
+                        "Can't compute index of {}, skipping", artifact.getAbsolutePath(),
                         e);
             }
         }
@@ -67,29 +67,28 @@ public class GradleDependencyIndexCreator {
         return CompositeIndex.create(indexes);
     }
 
-    private Index index(ResolvedArtifact artifact) throws IOException {
-        Result result = JarIndexer.createJarIndex(artifact.getFile(), new Indexer(), false,
+    private Index index(File artifact) throws IOException {
+        Result result = JarIndexer.createJarIndex(artifact, new Indexer(), false,
                 false, false);
         return result.getIndex();
     }
 
-    private void printIndexDurations(List<Map.Entry<ResolvedArtifact, Duration>> indexDurations) {
+    private void printIndexDurations(List<Map.Entry<File, Duration>> indexDurations) {
         if (logger.isDebugEnabled()) {
             indexDurations.sort(Map.Entry.comparingByValue());
 
             indexDurations.forEach(e -> {
                 if (e.getValue().toMillis() > 25) {
-                    ResolvedArtifact artifact = e.getKey();
-                    logger.debug("Indexing took {} for {}, {}, {}, {}, {}", e.getValue(), artifact.getName(),
-                            artifact.getExtension(), artifact.getClassifier(), artifact.getType(), artifact.getFile());
+                    File artifact = e.getKey();
+                    logger.debug("Indexing took {} for {}", e.getValue(), artifact);
                 }
             });
         }
     }
 
     private IndexView timedIndex(
-            List<Map.Entry<ResolvedArtifact, Duration>> indexDurations,
-            ResolvedArtifact artifact) throws Exception {
+            List<Map.Entry<File, Duration>> indexDurations,
+            File artifact) throws Exception {
         LocalDateTime start = LocalDateTime.now();
         IndexView result = index(artifact);
         LocalDateTime end = LocalDateTime.now();
