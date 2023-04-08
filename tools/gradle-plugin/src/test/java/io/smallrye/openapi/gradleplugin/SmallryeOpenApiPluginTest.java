@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.zip.ZipFile;
@@ -218,15 +220,15 @@ class SmallryeOpenApiPluginTest {
                         "    }",
                         "}"));
 
-        runGradleTask(buildDir, taskName);
+        runGradleTask(buildDir, taskName, withQuarkus);
 
         checkGeneratedFiles(buildDir);
 
-        checkJarContents(buildDir);
+        checkJarContents(buildDir, withQuarkus);
     }
 
-    private static void checkJarContents(Path buildDir) throws Exception {
-        runGradleTask(buildDir, "jar");
+    private static void checkJarContents(Path buildDir, boolean withQuarkus) throws Exception {
+        runGradleTask(buildDir, "jar", withQuarkus);
 
         Path jarFile = buildDir.resolve("build/libs/smoke-test-project.jar");
         assertThat(jarFile).isRegularFile();
@@ -267,17 +269,24 @@ class SmallryeOpenApiPluginTest {
         assertThat(paths.get("/mypath").get("get").get("operationId").asText()).isEqualTo("dummyThing");
     }
 
-    private static void runGradleTask(Path buildDir, String taskName) {
+    private static void runGradleTask(Path buildDir, String taskName, boolean withQuarkus) {
+        List<String> args = new ArrayList<>();
+        if (!withQuarkus) {
+            // The Quarkus plugin **might** be ready for Gradle configuration cache starting with
+            // Quarkus 3.0.0.GA.
+            args.add("--configuration-cache");
+        }
+        args.addAll(Arrays.asList("--build-cache",
+                // Quarkus plugin just needs this property to be present
+                "-Dquarkus.native.builder-image=x",
+                "--info",
+                "--stacktrace",
+                taskName));
+
         GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(buildDir.toFile())
-                .withArguments(
-                        "--build-cache",
-                        // Quarkus plugin just needs this property to be present
-                        "-Dquarkus.native.builder-image=x",
-                        "--info",
-                        "--stacktrace",
-                        taskName)
+                .withArguments(args)
                 .withDebug(true)
                 .forwardOutput().build();
     }

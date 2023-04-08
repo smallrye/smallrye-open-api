@@ -5,6 +5,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.jvm.ClassDirectoryBinaryNamingScheme;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.PathSensitivity;
@@ -46,6 +47,9 @@ public class SmallryeOpenApiPlugin implements Plugin<Project> {
         NamedDomainObjectProvider<Configuration> configProvider = project.getConfigurations()
                 .named(sourceSet.getCompileClasspathConfigurationName());
 
+        Configuration configuration = configProvider.get();
+        FileCollection classpath = project.getObjects().fileCollection().from(configuration);
+
         ConfigurableFileCollection resourcesSrcDirs = project.getObjects()
                 .fileCollection();
         resourcesSrcDirs.from(sourceSet.getResources().getSrcDirs());
@@ -55,7 +59,7 @@ public class SmallryeOpenApiPlugin implements Plugin<Project> {
                         genTaskName,
                         SmallryeOpenApiTask.class,
                         ext,
-                        configProvider,
+                        classpath,
                         resourcesSrcDirs,
                         sourceSet.getOutput().getClassesDirs());
         task
@@ -66,7 +70,7 @@ public class SmallryeOpenApiPlugin implements Plugin<Project> {
                     t.getInputs().files(sourceSet.getAllSource().getSourceDirectories());
                     t.getInputs().files(sourceSet.getOutput().getDirs()).withPathSensitivity(
                             PathSensitivity.RELATIVE);
-                    t.getInputs().files(configProvider).withPathSensitivity(PathSensitivity.RELATIVE);
+                    t.getInputs().files(classpath).withPathSensitivity(PathSensitivity.RELATIVE);
                 });
 
         project.getTasks().named(sourceSet.getJarTaskName(), Jar.class)

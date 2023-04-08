@@ -26,9 +26,6 @@ import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
-import org.gradle.api.NamedDomainObjectProvider;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.ProjectLayout;
@@ -64,7 +61,7 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 @CacheableTask
 public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiProperties {
 
-    private final NamedDomainObjectProvider<Configuration> configProvider;
+    private final FileCollection classpath;
     private final FileCollection resourcesSrcDirs;
     private final FileCollection classesDirs;
 
@@ -88,10 +85,10 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
             SmallryeOpenApiExtension ext,
             ObjectFactory objects,
             ProjectLayout layout,
-            NamedDomainObjectProvider<Configuration> configProvider,
+            FileCollection classpath,
             FileCollection resourcesSrcDirs,
             FileCollection classesDirs) {
-        this.configProvider = configProvider;
+        this.classpath = classpath;
         this.resourcesSrcDirs = resourcesSrcDirs;
         this.classesDirs = classesDirs;
 
@@ -107,15 +104,13 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         try {
             clearOutput();
 
-            Configuration config = configProvider.get();
-
-            Set<ResolvedArtifact> dependencies = properties.scanDependenciesDisable.get().booleanValue()
+            Set<File> dependencies = properties.scanDependenciesDisable.get().booleanValue()
                     ? Collections.emptySet()
-                    : config.getResolvedConfiguration().getResolvedArtifacts();
+                    : classpath.getFiles();
 
             IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(dependencies,
                     classesDirs);
-            OpenApiDocument schema = generateSchema(index, resourcesSrcDirs, config);
+            OpenApiDocument schema = generateSchema(index, resourcesSrcDirs);
             write(schema);
         } catch (Exception ex) {
             throw new GradleException(
@@ -126,10 +121,9 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
 
     private OpenApiDocument generateSchema(
             IndexView index,
-            FileCollection resourcesSrcDirs,
-            FileCollection config) throws IOException {
+            FileCollection resourcesSrcDirs) throws IOException {
         OpenApiConfig openApiConfig = properties.asOpenApiConfig();
-        ClassLoader classLoader = getClassLoader(config);
+        ClassLoader classLoader = getClassLoader(classpath);
 
         OpenAPI staticModel = generateStaticModel(openApiConfig, resourcesSrcDirs);
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, SmallryeOpenApiTask.class.getClassLoader());
