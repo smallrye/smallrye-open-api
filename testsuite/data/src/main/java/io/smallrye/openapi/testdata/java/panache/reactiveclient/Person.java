@@ -1,6 +1,6 @@
 package io.smallrye.openapi.testdata.java.panache.reactiveclient;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 

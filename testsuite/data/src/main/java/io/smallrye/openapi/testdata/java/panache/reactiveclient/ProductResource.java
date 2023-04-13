@@ -1,8 +1,8 @@
 package io.smallrye.openapi.testdata.java.panache.reactiveclient;
 
-import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 
 @Path("/product")
 @RequestScoped
