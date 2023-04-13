@@ -31,7 +31,7 @@
         <version.quarkus>2.13.1.Final</version.quarkus>
         <version.testng>7.7.1</version.testng>
         <version.arquillian.jetty>1.0.0.Final</version.arquillian.jetty>
-        <version.jetty>11.0.14</version.jetty>
+        <version.jetty>11.0.15</version.jetty>
 
         <!-- Use Jakarta EE 10 versions -->
         <version.resteasy>6.2.3.Final</version.resteasy>
