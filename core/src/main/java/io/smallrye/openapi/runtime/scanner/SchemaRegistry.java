@@ -385,7 +385,7 @@ public class SchemaRegistry {
             throw ScannerMessages.msg.notRegistered(key.type.name());
         }
 
-        return info.schemaRef;
+        return new SchemaImpl().ref(info.schemaRef.getRef());
     }
 
     private Schema lookupSchema(TypeKey key) {
