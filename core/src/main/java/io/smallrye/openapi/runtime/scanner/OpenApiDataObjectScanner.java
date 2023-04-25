@@ -228,9 +228,15 @@ public class OpenApiDataObjectScanner {
             DataObjectDeque.PathEntry currentPathEntry = objectStack.pop();
 
             Type currentType = currentPathEntry.getClazzType();
+            /*
+             * Keep the original schema for this entry in case it needs to be modified to
+             * reference a registered schema.
+             */
+            Schema entrySchema = currentPathEntry.getSchema();
 
             if (SchemaRegistry.hasSchema(currentType, context.getJsonViews(), null)) {
                 // This type has already been scanned and registered, don't do it again!
+                entrySchema.setRef(SchemaRegistry.currentInstance().lookupRef(currentType, context.getJsonViews()).getRef());
                 continue;
             }
 
@@ -247,7 +253,10 @@ public class OpenApiDataObjectScanner {
                 currentSchema.setType(Schema.SchemaType.OBJECT);
             } else {
                 // Ignore the returned ref, the currentSchema will be further modified with added properties
-                SchemaFactory.schemaRegistration(context, currentType, currentSchema);
+                Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
+                if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
+                    entrySchema.setRef(ref.getRef());
+                }
             }
 
             if (currentSchema.getType() == Schema.SchemaType.OBJECT) {

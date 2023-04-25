@@ -212,7 +212,7 @@ public class TypeProcessor {
             if (isOptional) {
                 valueType = TypeUtil.unwrapType(valueType);
             }
-            Schema valueSchema = readGenericValueType(valueType, schema);
+            Schema valueSchema = readGenericValueType(valueType);
 
             if (isOptional) {
                 valueSchema = wrapOptionalItemSchema(valueSchema);
@@ -230,7 +230,7 @@ public class TypeProcessor {
             if (ancestorType.arguments().size() == 2) {
                 Type valueType = ancestorType.arguments().get(1);
                 // Add properties schema to field schema.
-                schema.additionalPropertiesSchema(readGenericValueType(valueType, schema));
+                schema.additionalPropertiesSchema(readGenericValueType(valueType));
             }
 
             typeRead = MAP_TYPE;
@@ -266,7 +266,7 @@ public class TypeProcessor {
                 .addAllOf(itemSchema);
     }
 
-    private Schema readGenericValueType(Type valueType, Schema schema) {
+    private Schema readGenericValueType(Type valueType) {
         Schema valueSchema = new SchemaImpl();
 
         if (isTerminalType(valueType)) {
@@ -274,13 +274,13 @@ public class TypeProcessor {
         } else if (valueType.kind() == Kind.PARAMETERIZED_TYPE) {
             readParameterizedType(valueType.asParameterizedType(), valueSchema);
         } else {
-            valueSchema = resolveParameterizedType(valueType, schema, valueSchema);
+            valueSchema = resolveParameterizedType(valueType, valueSchema);
         }
 
         return valueSchema;
     }
 
-    private Schema resolveParameterizedType(Type valueType, Schema schema, Schema propsSchema) {
+    private Schema resolveParameterizedType(Type valueType, Schema propsSchema) {
         if (valueType.kind() == Type.Kind.TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE ||
                 valueType.kind() == Type.Kind.WILDCARD_TYPE) {
@@ -293,7 +293,7 @@ public class TypeProcessor {
             if (isA(valueType, ENUM_TYPE)) {
                 DataObjectLogging.logger.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(context, valueType);
-                pushToStack(valueType, schema);
+                pushToStack(valueType, propsSchema);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
                 pushToStack(valueType, propsSchema);

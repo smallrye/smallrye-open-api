@@ -142,7 +142,7 @@ public class SchemaRegistry {
      *         to the schema registered for the given Type
      */
     public static Schema registerReference(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
-        return register(type, views, resolver, schema, (registry, key) -> registry.registerReference(key));
+        return register(type, views, resolver, schema, SchemaRegistry::registerReference);
     }
 
     public static Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,

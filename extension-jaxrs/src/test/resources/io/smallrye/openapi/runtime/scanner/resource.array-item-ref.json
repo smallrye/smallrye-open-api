@@ -1,0 +1,103 @@
+{
+    "openapi": "3.0.3",
+    "paths": {
+        "/v1/generics": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/1Generics"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Result1Generics"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "1Generics": {
+                "type": "object",
+                "properties": {
+                    "fooSet": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/1ID1Foo"
+                        }
+                    },
+                    "fooList": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/1ID1Foo"
+                        }
+                    },
+                    "barSet": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/1ID1Bar"
+                        }
+                    },
+                    "barList": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/1ID1Bar"
+                        }
+                    }
+                }
+            },
+            "1ID": {
+                "format": "entity-id",
+                "type": "string"
+            },
+            "1ID1Bar": {
+                "format": "entity-id",
+                "type": "string"
+            },
+            "1ID1Foo": {
+                "format": "entity-id",
+                "type": "string"
+            },
+            "Message": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Result1Generics": {
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "$ref": "#/components/schemas/1Generics"
+                    },
+                    "error": {
+                        "$ref": "#/components/schemas/Message"
+                    },
+                    "status": {
+                        "format": "int32",
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}
