@@ -25,8 +25,10 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
+import io.smallrye.openapi.api.OpenApiConfig.AutoInheritance;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.media.XMLImpl;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
@@ -253,8 +255,8 @@ public class OpenApiDataObjectScanner {
                 // If not schema has yet been set, consider this an "object"
                 currentSchema.setType(Schema.SchemaType.OBJECT);
             } else {
-                // Ignore the returned ref, the currentSchema will be further modified with added properties
                 Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
+
                 if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
                     entrySchema.setRef(ref.getRef());
                 }
@@ -298,22 +300,42 @@ public class OpenApiDataObjectScanner {
         ClassInfo currentClass = currentPathEntry.getClazz();
         Schema currentSchema = currentPathEntry.getSchema();
         Type currentType = currentPathEntry.getClazzType();
+        Type superClassType = currentClass.superClassType();
 
         if (TypeUtil.isIncludedAllOf(currentClass, currentType)) {
-            Schema enclosingSchema = new SchemaImpl().allOf(currentSchema.getAllOf()).addAllOf(currentSchema);
-            currentSchema.setAllOf(null);
+            encloseCurrentSchema(currentSchema, currentType, currentPathEntry);
+        } else if (superClassType != null
+                && context.getConfig().getAutoInheritance() != AutoInheritance.NONE
+                && !TypeUtil.knownJavaType(superClassType.name())
+                && Annotations.getAnnotationValue(currentClass, SchemaConstant.DOTNAME_SCHEMA,
+                        SchemaConstant.PROP_ALL_OF) == null) {
 
-            currentSchema = enclosingSchema;
-            currentPathEntry.setSchema(currentSchema);
+            Schema parentSchema = new SchemaImpl();
+            objectStack.push(currentClass, currentPathEntry, superClassType, parentSchema);
+            parentSchema = context.getSchemaRegistry().registerReference(superClassType, context.getJsonViews(), null,
+                    parentSchema);
+            currentSchema.addAllOf(parentSchema);
 
-            if (rootClassType.equals(currentType)) {
-                this.rootSchema = enclosingSchema;
+            if (context.getConfig().getAutoInheritance() == AutoInheritance.BOTH) {
+                encloseCurrentSchema(currentSchema, currentType, currentPathEntry);
             }
+        }
+    }
 
-            if (context.getSchemaRegistry().hasSchema(currentType, context.getJsonViews(), null)) {
-                // Replace the registered schema if one is present
-                context.getSchemaRegistry().register(currentType, context.getJsonViews(), enclosingSchema);
-            }
+    private void encloseCurrentSchema(Schema currentSchema, Type currentType, DataObjectDeque.PathEntry currentPathEntry) {
+        Schema enclosingSchema = new SchemaImpl().allOf(currentSchema.getAllOf()).addAllOf(currentSchema);
+        currentSchema.setAllOf(null);
+
+        currentSchema = enclosingSchema;
+        currentPathEntry.setSchema(currentSchema);
+
+        if (rootClassType.equals(currentType)) {
+            this.rootSchema = enclosingSchema;
+        }
+
+        if (context.getSchemaRegistry().hasSchema(currentType, context.getJsonViews(), null)) {
+            // Replace the registered schema if one is present
+            context.getSchemaRegistry().register(currentType, context.getJsonViews(), enclosingSchema);
         }
     }
 

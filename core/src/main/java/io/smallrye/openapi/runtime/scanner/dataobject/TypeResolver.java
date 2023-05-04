@@ -495,7 +495,7 @@ public class TypeResolver {
                 stack.push(buildParamTypeResolutionMap(currentClass, currentType));
             }
 
-            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(leafKlazz, currentType))
+            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(context, leafKlazz, currentType))
                     || TypeUtil.knownJavaType(currentClass.name())) {
                 /*
                  * Do not attempt to introspect fields of Java/JDK types or if the @Schema

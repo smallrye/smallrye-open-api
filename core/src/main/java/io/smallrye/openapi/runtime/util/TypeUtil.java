@@ -685,6 +685,24 @@ public class TypeUtil {
         return allOfTypes != null && Arrays.stream(allOfTypes).map(Type::name).anyMatch(type.name()::equals);
     }
 
+    public static boolean isIncludedAllOf(AnnotationScannerContext context, ClassInfo annotatedClass, Type type) {
+        return isIncludedAllOf(annotatedClass, type) || isAutomaticAllOf(context, annotatedClass, type);
+    }
+
+    static boolean isAutomaticAllOf(AnnotationScannerContext context, ClassInfo annotatedClass, Type type) {
+        if (Annotations.getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA, SchemaConstant.PROP_ALL_OF) == null) {
+            switch (context.getConfig().getAutoInheritance()) {
+                case NONE:
+                    break;
+                case BOTH:
+                    return true;
+                case PARENT_ONLY:
+                    return Objects.equals(annotatedClass.superClassType(), type);
+            }
+        }
+        return false;
+    }
+
     public static ClassInfo getDeclaringClass(AnnotationTarget type) {
         switch (type.kind()) {
             case FIELD:
