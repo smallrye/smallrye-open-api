@@ -1,12 +1,20 @@
 package io.smallrye.openapi.runtime.io;
 
-import java.io.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
@@ -552,5 +560,25 @@ class OpenApiParserAndSerializerTest {
         } finally {
             System.clearProperty(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE);
         }
+    }
+
+    @Test
+    void testSerializeLongKeyPreserved() throws IOException {
+        OpenAPI doc = OASFactory.createOpenAPI();
+        String key = "x-" + new String(new char[1021]).replace('\0', 'x');
+        assertEquals(1023, key.length());
+        doc.addExtension(key, "OK");
+        String yaml = OpenApiSerializer.serialize(doc, Format.YAML);
+        assertTrue(yaml.indexOf('?') < 0);
+    }
+
+    @Test
+    void testSerializeExtraLongKeyConvertsToExplicit() throws IOException {
+        OpenAPI doc = OASFactory.createOpenAPI();
+        String key = "x-" + new String(new char[1022]).replace('\0', 'x');
+        assertEquals(1024, key.length());
+        doc.addExtension(key, "OK");
+        String yaml = OpenApiSerializer.serialize(doc, Format.YAML);
+        assertTrue(yaml.indexOf('?') >= 0);
     }
 }
