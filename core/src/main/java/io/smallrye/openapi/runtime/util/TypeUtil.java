@@ -8,31 +8,24 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.AnnotationTarget.Kind;
-import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
-import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.MethodParameterInfo;
@@ -43,7 +36,6 @@ import org.jboss.jandex.WildcardType;
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -358,7 +350,7 @@ public class TypeUtil {
      *         false
      */
     public static boolean isTypeOverridden(Type classType, AnnotationInstance schemaAnnotation) {
-        SchemaType providedType = JandexUtil.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+        SchemaType providedType = Annotations.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
         TypeWithFormat typeFormat = getTypeFormat(classType);
         return providedType != null && !typeFormat.isSchemaType(providedType);
     }
@@ -684,238 +676,13 @@ public class TypeUtil {
     }
 
     public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
-        return getAnnotation(annotationTarget, SchemaConstant.DOTNAME_SCHEMA);
-    }
-
-    public static AnnotationInstance getSchemaAnnotation(ClassInfo field) {
-        return getAnnotation(field, SchemaConstant.DOTNAME_SCHEMA);
-    }
-
-    public static AnnotationInstance getSchemaAnnotation(FieldInfo field) {
-        return getAnnotation(field, SchemaConstant.DOTNAME_SCHEMA);
-    }
-
-    public static AnnotationInstance getSchemaAnnotation(Type type) {
-        return getAnnotation(type, SchemaConstant.DOTNAME_SCHEMA);
+        return Annotations.getAnnotation(annotationTarget, SchemaConstant.DOTNAME_SCHEMA);
     }
 
     public static boolean isIncludedAllOf(ClassInfo annotatedClass, Type type) {
-        Type[] allOfTypes = getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA, SchemaConstant.PROP_ALL_OF);
+        Type[] allOfTypes = Annotations.getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_ALL_OF);
         return allOfTypes != null && Arrays.stream(allOfTypes).map(Type::name).anyMatch(type.name()::equals);
-    }
-
-    public static boolean hasAnnotation(AnnotationTarget target, List<DotName> annotationNames) {
-        for (DotName dn : annotationNames) {
-            if (hasAnnotation(target, dn)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
-        if (target == null) {
-            return false;
-        }
-        switch (target.kind()) {
-            case CLASS:
-                return target.asClass().classAnnotation(annotationName) != null;
-            case FIELD:
-                return target.asField().hasAnnotation(annotationName);
-            case METHOD:
-                return target.asMethod().hasAnnotation(annotationName);
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = target.asMethodParameter();
-                return parameter.method()
-                        .annotations()
-                        .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
-                        .anyMatch(a -> a.name().equals(annotationName));
-            case TYPE:
-            case RECORD_COMPONENT:
-                break;
-        }
-
-        return false;
-    }
-
-    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
-        if (annotationTarget == null) {
-            return null;
-        }
-        return getAnnotations(annotationTarget).stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, Collection<DotName> annotationNames) {
-        if (annotationTarget == null) {
-            return null;
-        }
-        for (DotName dn : annotationNames) {
-            AnnotationInstance ai = getAnnotation(annotationTarget, dn);
-            if (ai != null)
-                return ai;
-        }
-        return null;
-    }
-
-    /**
-     * Convenience method to retrieve the "value" parameter from an annotation bound to the target.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param target the target object annotated with the annotation named by annotationName
-     * @param annotationName name of the annotation from which to retrieve the value
-     * @return an unwrapped annotation parameter value
-     */
-    public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName) {
-        return getAnnotationValue(target, Arrays.asList(annotationName), OpenApiConstants.VALUE);
-    }
-
-    public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
-        return getAnnotationValue(target, annotationNames, OpenApiConstants.VALUE, null);
-    }
-
-    /**
-     * Convenience method to retrieve the named parameter from an annotation bound to the target.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param target the target object annotated with the annotation named by annotationName
-     * @param annotationName name of the annotation from which to retrieve the value
-     * @param propertyName the name of the parameter/property in the annotation
-     * @return an unwrapped annotation parameter value
-     */
-    public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName, String propertyName) {
-        return getAnnotationValue(target, Arrays.asList(annotationName), propertyName);
-    }
-
-    public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames, String propertyName) {
-        return getAnnotationValue(target, annotationNames, propertyName, null);
-    }
-
-    /**
-     * Convenience method to retrieve the named parameter from an annotation bound to the target.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param target the target object annotated with the annotation named by annotationName
-     * @param annotationNames names of the annotations from which to retrieve the value
-     * @param propertyName the name of the parameter/property in the annotation
-     * @param defaultValue a default value to return if either the annotation or the value are missing
-     * @return an unwrapped annotation parameter value
-     */
-    public static <T> T getAnnotationValue(AnnotationTarget target,
-            List<DotName> annotationNames,
-            String propertyName,
-            T defaultValue) {
-
-        AnnotationInstance annotation = getAnnotation(target, annotationNames);
-        T value = null;
-
-        if (annotation != null) {
-            value = JandexUtil.value(annotation, propertyName);
-        }
-
-        return value != null ? value : defaultValue;
-    }
-
-    /**
-     * Convenience method to retrieve the named parameter from an annotation bound to the target.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param target the target object annotated with the annotation named by annotationName
-     * @param annotationName name of the annotation from which to retrieve the value
-     * @param propertyName the name of the parameter/property in the annotation
-     * @param defaultValue a default value to return if either the annotation or the value are missing
-     * @return an unwrapped annotation parameter value
-     */
-    public static <T> T getAnnotationValue(AnnotationTarget target,
-            DotName annotationName,
-            String propertyName,
-            T defaultValue) {
-
-        return getAnnotationValue(target, Arrays.asList(annotationName), propertyName, defaultValue);
-    }
-
-    public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget type) {
-        switch (type.kind()) {
-            case CLASS:
-                return type.asClass().classAnnotations();
-            case FIELD:
-                return type.asField().annotations();
-            case METHOD:
-                return type.asMethod().annotations();
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = type.asMethodParameter();
-                return parameter
-                        .method()
-                        .annotations()
-                        .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
-                        .collect(Collectors.toList());
-            case TYPE:
-            case RECORD_COMPONENT:
-                break;
-        }
-        return Collections.emptyList();
-    }
-
-    public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName, String propertyName) {
-        AnnotationInstance annotation = getDeclaredAnnotation(type, annotationName);
-        T value = null;
-
-        if (annotation != null) {
-            value = JandexUtil.value(annotation, propertyName);
-        }
-
-        return value;
-    }
-
-    public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName) {
-        return getDeclaredAnnotationValue(type, annotationName, OpenApiConstants.VALUE);
-    }
-
-    public static AnnotationInstance getDeclaredAnnotation(AnnotationTarget type, DotName annotationName) {
-        Function<DotName, AnnotationInstance> lookup;
-
-        switch (type.kind()) {
-            case CLASS:
-                lookup = type.asClass()::classAnnotation;
-                break;
-            case FIELD:
-                lookup = type.asField()::annotation;
-                break;
-            case METHOD:
-                lookup = name -> type.asMethod().annotations(name).stream().filter(a -> type.equals(a.target())).findFirst()
-                        .orElse(null);
-                break;
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = type.asMethodParameter();
-                lookup = name -> parameter
-                        .method()
-                        .annotations(name)
-                        .stream()
-                        .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                        .filter(a -> a.target().asMethodParameter().position() == parameter.position())
-                        .findFirst()
-                        .orElse(null);
-                break;
-            case RECORD_COMPONENT:
-                lookup = type.asRecordComponent()::annotation;
-                break;
-            case TYPE:
-            default:
-                lookup = name -> null;
-                break;
-        }
-
-        return lookup.apply(annotationName);
     }
 
     public static ClassInfo getDeclaringClass(AnnotationTarget type) {
@@ -936,34 +703,13 @@ public class TypeUtil {
         return null;
     }
 
-    public static AnnotationInstance getAnnotation(Type type, DotName annotationName) {
-        return type.annotations().stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static AnnotationInstance getAnnotation(ClassInfo field, DotName annotationName) {
-        return field.classAnnotations().stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static AnnotationInstance getAnnotation(FieldInfo field, DotName annotationName) {
-        return field.annotations().stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
-    }
-
     public static void mapDeprecated(AnnotationTarget target, Supplier<Boolean> getDeprecated,
             Consumer<Boolean> setDeprecated) {
         if (getDeprecated.get() != null) {
             return;
         }
 
-        AnnotationInstance deprecated = getAnnotation(target, DOTNAME_DEPRECATED);
+        AnnotationInstance deprecated = Annotations.getAnnotation(target, DOTNAME_DEPRECATED);
 
         if (deprecated != null && JandexUtil.equals(deprecated.target(), target)) {
             setDeprecated.accept(Boolean.TRUE);

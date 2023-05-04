@@ -49,7 +49,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -86,12 +86,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isPostMethod(final MethodInfo method) {
-        return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.POST);
+        return Annotations.hasAnnotation(method, JaxRsConstants.POST);
     }
 
     @Override
     public boolean isDeleteMethod(final MethodInfo method) {
-        return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.DELETE);
+        return Annotations.hasAnnotation(method, JaxRsConstants.DELETE);
     }
 
     @Override
@@ -196,10 +196,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @ApplicationPath info and save it for later (also support @Path which seems nonstandard but common).
-        AnnotationInstance applicationPathAnnotation = JandexUtil.getClassAnnotation(applicationClass,
+        AnnotationInstance applicationPathAnnotation = Annotations.getAnnotation(applicationClass,
                 JaxRsConstants.APPLICATION_PATH);
         if (applicationPathAnnotation == null || context.getConfig().applicationPathDisable()) {
-            applicationPathAnnotation = JandexUtil.getClassAnnotation(applicationClass, JaxRsConstants.PATH);
+            applicationPathAnnotation = Annotations.getAnnotation(applicationClass, JaxRsConstants.PATH);
         }
         // TODO: Add support for Application selection when there are more than one
         if (applicationPathAnnotation != null) {
@@ -292,7 +292,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                                 locatorPathParameters, exceptionAnnotationMap);
                     });
 
-            if (resourceCount.get() == 0 && JandexUtil.hasAnyOneOfAnnotation(methodInfo, JaxRsConstants.PATH)) {
+            if (resourceCount.get() == 0 && Annotations.hasAnnotation(methodInfo, JaxRsConstants.PATH)) {
                 processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters);
             }
         }
@@ -546,7 +546,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     static String[] getMediaTypes(AnnotationScannerContext context, MethodInfo resourceMethod, Set<DotName> annotationName,
             String[] defaultValue) {
 
-        return JandexUtil.ancestry(resourceMethod, context.getAugmentedIndex()).entrySet()
+        return context.getAugmentedIndex().ancestry(resourceMethod).entrySet()
                 .stream()
                 .map(e -> getMediaTypeAnnotation(e.getKey(), e.getValue(), annotationName))
                 .filter(Objects::nonNull)
@@ -559,11 +559,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         AnnotationInstance annotation = null;
 
         if (method != null) {
-            annotation = JandexUtil.getAnnotation(method, annotationName);
+            annotation = Annotations.getAnnotation(method, annotationName);
         }
 
         if (annotation == null) {
-            annotation = JandexUtil.getClassAnnotation(clazz, annotationName);
+            annotation = Annotations.getAnnotation(clazz, annotationName);
         }
 
         return annotation;
@@ -630,6 +630,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return context.getConfig().getScanResourceClasses()
                 .keySet()
                 .stream()
+                .map(DotName::createSimple)
                 .map(className -> context.getIndex().getClassByName(className))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -667,13 +668,13 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         final AugmentedIndexView index = context.getAugmentedIndex();
 
-        return JandexUtil.inheritanceChain(index, clazz, Type.create(clazz.name(), Type.Kind.CLASS))
+        return index.inheritanceChain(clazz, Type.create(clazz.name(), Type.Kind.CLASS))
                 .entrySet()
                 .stream()
-                .flatMap(e -> JandexUtil.interfaces(index, e.getKey()).stream())
+                .flatMap(e -> index.interfaces(e.getKey()).stream())
                 .map(index::getClass)
                 .filter(Objects::nonNull)
-                .noneMatch(iface -> iface.classAnnotation(JaxRsConstants.REGISTER_REST_CLIENT) != null);
+                .noneMatch(iface -> Annotations.getAnnotation(iface, JaxRsConstants.REGISTER_REST_CLIENT) != null);
     }
 
     private boolean neitherAbstractNorSynthetic(ClassInfo clazz) {

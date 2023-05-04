@@ -26,7 +26,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -346,7 +346,7 @@ public class TypeProcessor {
         final AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(annotationTarget);
 
         if (annotation != null) {
-            Schema.SchemaType schemaType = JandexUtil.enumValue(annotation, SchemaConstant.PROP_TYPE, Schema.SchemaType.class);
+            Schema.SchemaType schemaType = Annotations.enumValue(annotation, SchemaConstant.PROP_TYPE, Schema.SchemaType.class);
 
             if (schemaType != null) {
                 return schemaType == Schema.SchemaType.ARRAY;

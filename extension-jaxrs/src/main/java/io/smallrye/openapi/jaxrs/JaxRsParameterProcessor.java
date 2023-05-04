@@ -28,7 +28,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -122,7 +122,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
         for (int i = 0, m = methodParameters.size(); i < m; i++) {
             if (name.equals(resourceMethod.parameterName(i))) {
-                List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(resourceMethod, (short) i);
+                List<AnnotationInstance> annotations = Annotations.getParameterAnnotations(resourceMethod, (short) i);
 
                 if (!JaxRsAnnotationScanner.containsJavaxAnnotations(annotations) &&
                         !JaxRsAnnotationScanner.containsJakartaAnnotations(annotations)) {
@@ -150,7 +150,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             return;
         }
 
-        AnnotationInstance type = TypeUtil.getAnnotation(paramTarget, RestEasyConstants.PART_TYPES);
+        AnnotationInstance type = Annotations.getAnnotation(paramTarget, RestEasyConstants.PART_TYPES);
 
         if (type != null) {
             Encoding encoding = new EncodingImpl();
@@ -197,7 +197,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                     .put(paramName(annotation), annotation);
         } else if (frameworkParam.location == In.PATH && targetType != null
                 && JaxRsConstants.PATH_SEGMENT.contains(targetType.name())) {
-            String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
+            String pathSegment = Annotations.value(annotation, ParameterConstant.PROP_VALUE);
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
         } else if (frameworkParam.location != null) {
             readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
@@ -233,7 +233,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
         switch (target.kind()) {
             case CLASS:
-                path = JandexUtil.getClassAnnotation(target.asClass(), JaxRsConstants.PATH);
+                path = Annotations.getAnnotation(target, JaxRsConstants.PATH);
                 pathValue = scannerContext.getConfig().getScanResourceClasses().get(target.asClass().name().toString());
                 break;
             case METHOD:
@@ -263,12 +263,12 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     AnnotationInstance pathOf(MethodInfo method) {
-        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+        return scannerContext.getAugmentedIndex().ancestry(method)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
                 .filter(Objects::nonNull)
-                .map(m -> JandexUtil.getAnnotation(m, JaxRsConstants.PATH))
+                .map(m -> Annotations.getAnnotation(m, JaxRsConstants.PATH))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
@@ -279,7 +279,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         switch (method.returnType().kind()) {
             case CLASS:
             case PARAMETERIZED_TYPE:
-                return JandexUtil.hasAnyOneOfAnnotation(method, JaxRsConstants.PATH) &&
+                return Annotations.hasAnnotation(method, JaxRsConstants.PATH) &&
                         method.annotations()
                                 .stream()
                                 .map(AnnotationInstance::name)
@@ -291,7 +291,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
-        return JandexUtil.ancestry(method, scannerContext.getAugmentedIndex())
+        return scannerContext.getAugmentedIndex().ancestry(method)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)

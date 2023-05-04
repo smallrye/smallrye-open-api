@@ -16,7 +16,7 @@ import org.jboss.jandex.MethodInfo;
 
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
-import io.smallrye.openapi.runtime.util.TypeUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * This helps to apply java security (@RolesAllowed etc.).
@@ -98,14 +98,14 @@ public class JavaSecurityProcessor {
      */
     private void processSecurityRolesForMethodOperation(MethodInfo method, Operation operation) {
         if (this.currentSecurityScheme != null) {
-            String[] rolesAllowed = TypeUtil.getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
+            String[] rolesAllowed = Annotations.getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
 
             if (rolesAllowed != null) {
                 addScopes(rolesAllowed);
                 addRolesAllowed(operation, rolesAllowed);
             } else if (this.resourceRolesAllowed != null) {
-                boolean denyAll = TypeUtil.getAnnotation(method, SecurityConstants.DENY_ALL) != null;
-                boolean permitAll = TypeUtil.getAnnotation(method, SecurityConstants.PERMIT_ALL) != null;
+                boolean denyAll = Annotations.getAnnotation(method, SecurityConstants.DENY_ALL) != null;
+                boolean permitAll = Annotations.getAnnotation(method, SecurityConstants.PERMIT_ALL) != null;
 
                 if (denyAll) {
                     addRolesAllowed(operation, new String[0]);

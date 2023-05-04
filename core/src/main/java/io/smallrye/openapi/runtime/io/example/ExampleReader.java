@@ -19,6 +19,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -50,7 +51,7 @@ public class ExampleReader {
         Map<String, Example> examples = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, ExampleConstant.PROP_NAME);
+            String name = Annotations.value(nested, ExampleConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -96,10 +97,10 @@ public class ExampleReader {
         IoLogging.logger.singleAnnotation("@ExampleObject");
         Example example = new ExampleImpl();
         example.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.EXAMPLE));
-        example.setSummary(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_SUMMARY));
-        example.setDescription(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
-        example.setValue(parseValue(context, JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_VALUE)));
-        example.setExternalValue(JandexUtil.stringValue(annotationInstance, ExampleConstant.PROP_EXTERNAL_VALUE));
+        example.setSummary(Annotations.value(annotationInstance, ExampleConstant.PROP_SUMMARY));
+        example.setDescription(Annotations.value(annotationInstance, ExampleConstant.PROP_DESCRIPTION));
+        example.setValue(parseValue(context, Annotations.value(annotationInstance, ExampleConstant.PROP_VALUE)));
+        example.setExternalValue(Annotations.value(annotationInstance, ExampleConstant.PROP_EXTERNAL_VALUE));
         example.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
 
         return example;

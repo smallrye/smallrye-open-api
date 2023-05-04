@@ -72,6 +72,7 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -190,9 +191,9 @@ public interface AnnotationScanner {
     default void processJavaSecurity(ClassInfo resourceClass, OpenAPI openApi) {
         JavaSecurityProcessor.register(openApi);
         JavaSecurityProcessor
-                .addDeclaredRolesToScopes(TypeUtil.getAnnotationValue(resourceClass, SecurityConstants.DECLARE_ROLES));
+                .addDeclaredRolesToScopes(Annotations.getAnnotationValue(resourceClass, SecurityConstants.DECLARE_ROLES));
         JavaSecurityProcessor
-                .addRolesAllowedToScopes(TypeUtil.getAnnotationValue(resourceClass, SecurityConstants.ROLES_ALLOWED));
+                .addRolesAllowedToScopes(Annotations.getAnnotationValue(resourceClass, SecurityConstants.ROLES_ALLOWED));
     }
 
     /**
@@ -240,7 +241,7 @@ public interface AnnotationScanner {
 
         for (AnnotationInstance ta : tagAnnos) {
             if (JandexUtil.isRef(ta)) {
-                tags.add(JandexUtil.value(ta, OpenApiConstants.REF));
+                tags.add(Annotations.value(ta, OpenApiConstants.REF));
             } else {
                 Tag tag = TagReader.readTag(context, ta);
 
@@ -251,7 +252,7 @@ public interface AnnotationScanner {
             }
         }
 
-        String[] refs = TypeUtil.getAnnotationValue(target, TagConstant.DOTNAME_TAGS,
+        String[] refs = Annotations.getAnnotationValue(target, TagConstant.DOTNAME_TAGS,
                 OpenApiConstants.REFS);
 
         if (refs != null) {
@@ -270,7 +271,8 @@ public interface AnnotationScanner {
      */
     default List<MethodInfo> getResourceMethods(final AnnotationScannerContext context, ClassInfo resource) {
         Type resourceType = Type.create(resource.name(), Type.Kind.CLASS);
-        Map<ClassInfo, Type> chain = JandexUtil.inheritanceChain(context.getIndex(), resource, resourceType);
+        AugmentedIndexView index = context.getAugmentedIndex();
+        Map<ClassInfo, Type> chain = index.inheritanceChain(resource, resourceType);
         List<MethodInfo> methods = new ArrayList<>();
 
         for (ClassInfo classInfo : chain.keySet()) {
@@ -279,7 +281,7 @@ public interface AnnotationScanner {
                     .filter(method -> !method.isSynthetic())
                     .forEach(methods::add);
 
-            JandexUtil.interfaces(context.getAugmentedIndex(), classInfo)
+            index.interfaces(classInfo)
                     .stream()
                     .filter(type -> !TypeUtil.knownJavaType(type.name()))
                     .map(context.getAugmentedIndex()::getClass)
@@ -372,7 +374,7 @@ public interface AnnotationScanner {
             Arrays.stream(views)
                     .map(viewType -> {
                         if (index.containsClass(viewType)) {
-                            return JandexUtil.inheritanceChain(index, index.getClass(viewType), viewType).values();
+                            return index.inheritanceChain(index.getClass(viewType), viewType).values();
                         }
                         return Collections.singleton(viewType);
                     })
@@ -389,7 +391,7 @@ public interface AnnotationScanner {
             Operation operation,
             Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap) {
 
-        setJsonViewContext(context, TypeUtil.getDeclaredAnnotationValue(method, JacksonConstants.JSON_VIEW));
+        setJsonViewContext(context, Annotations.getDeclaredAnnotationValue(method, JacksonConstants.JSON_VIEW));
 
         List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(resourceClass);
         for (AnnotationInstance annotation : classApiResponseAnnotations) {
@@ -450,8 +452,6 @@ public interface AnnotationScanner {
      *
      * If there not a return value (void return type) then either a 201 or 204 is returned,
      * depending on the type of request.
-     *
-     * TODO: generate responses for each checked exception?
      *
      * @param context the scanning context
      * @param method the current method
@@ -608,7 +608,7 @@ public interface AnnotationScanner {
 
     default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
         Type type = getKotlinContinuationArgument(context, method);
-        AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, type,
+        AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, type,
                 SchemaConstant.DOTNAME_SCHEMA);
         return SchemaFactory.typeToSchema(context, type, schemaAnnotation, context.getExtensions());
     }
@@ -754,7 +754,7 @@ public interface AnnotationScanner {
 
         AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(target);
         if (securityRequirements != null) {
-            AnnotationInstance[] values = JandexUtil.value(securityRequirements, "value");
+            AnnotationInstance[] values = Annotations.value(securityRequirements, "value");
             if (values == null || values.length == 0) {
                 foundEmptyAnnotation = true;
             } else {
@@ -764,7 +764,7 @@ public interface AnnotationScanner {
 
         AnnotationInstance securityRequirementsSets = SecurityRequirementReader.getSecurityRequirementsSetsAnnotation(target);
         if (securityRequirementsSets != null) {
-            AnnotationInstance[] values = JandexUtil.value(securityRequirementsSets, "value");
+            AnnotationInstance[] values = Annotations.value(securityRequirementsSets, "value");
             if (values == null || values.length == 0) {
                 foundEmptyAnnotation = true;
             } else {
@@ -917,20 +917,19 @@ public interface AnnotationScanner {
 
             Type requestBodyType = null;
             if (annotation.target().kind() == METHOD_PARAMETER) {
-                requestBodyType = JandexUtil.getMethodParameterType(method,
-                        annotation.target().asMethodParameter().position());
+                requestBodyType = method.parameterType(annotation.target().asMethodParameter().position());
             } else if (annotation.target().kind() == AnnotationTarget.Kind.METHOD) {
                 requestBodyType = getRequestBodyParameterClassType(context, method, params);
             }
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
             if (requestBodyType != null && requestBody.getRef() == null) {
-                Type[] views = JandexUtil
-                        .value(JandexUtil.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
+                Type[] views = Annotations
+                        .value(Annotations.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
                 setJsonViewContext(context, views);
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
                     requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
-                    AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, requestBodyType,
+                    AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, requestBodyType,
                             SchemaConstant.DOTNAME_SCHEMA);
                     Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
                             context.getExtensions());
@@ -967,8 +966,8 @@ public interface AnnotationScanner {
                 requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
 
                 if (requestBodyType != null && !isScannerInternalParameter(requestBodyType)) {
-                    Type[] views = JandexUtil.value(
-                            JandexUtil.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
+                    Type[] views = Annotations.value(
+                            Annotations.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
                     setJsonViewContext(context, views);
                     Schema schema = null;
 
@@ -976,7 +975,7 @@ public interface AnnotationScanner {
                         schema = new SchemaImpl();
                         schema.setType(Schema.SchemaType.OBJECT);
                     } else {
-                        AnnotationInstance schemaAnnotation = JandexUtil.getMethodParameterAnnotation(method, requestBodyType,
+                        AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, requestBodyType,
                                 SchemaConstant.DOTNAME_SCHEMA);
                         schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
                                 context.getExtensions());
@@ -1032,7 +1031,7 @@ public interface AnnotationScanner {
                 .filter(position -> !isFrameworkContextType(methodParams.get(position)))
                 .filter(position -> !isPathParameter(context, method.parameterName(position), params))
                 .filter(position -> {
-                    List<AnnotationInstance> annotations = JandexUtil.getParameterAnnotations(method, (short) position);
+                    List<AnnotationInstance> annotations = Annotations.getParameterAnnotations(method, (short) position);
                     return annotations.isEmpty() || !containsScannerAnnotations(annotations, context.getExtensions());
                 })
                 .mapToObj(methodParams::get)
@@ -1042,7 +1041,7 @@ public interface AnnotationScanner {
 
     default void setRequestBodyConstraints(AnnotationScannerContext context, RequestBody requestBody, MethodInfo method,
             Type requestBodyType) {
-        List<AnnotationInstance> paramAnnotations = JandexUtil.getMethodParameterAnnotations(method, requestBodyType);
+        List<AnnotationInstance> paramAnnotations = Annotations.getMethodParameterAnnotations(method, requestBodyType);
         Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
 
         if (!paramAnnotations.isEmpty() && constraintScanner.isPresent()) {

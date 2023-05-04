@@ -11,7 +11,7 @@ import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * This reads annotations and json for External Documentation
@@ -57,8 +57,8 @@ public class ExternalDocsReader {
         IoLogging.logger.annotation("@ExternalDocumentation");
         ExternalDocumentation externalDoc = new ExternalDocumentationImpl();
         externalDoc.setDescription(
-                JandexUtil.stringValue(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));
-        externalDoc.setUrl(JandexUtil.stringValue(annotationInstance, ExternalDocsConstant.PROP_URL));
+                Annotations.value(annotationInstance, ExternalDocsConstant.PROP_DESCRIPTION));
+        externalDoc.setUrl(Annotations.value(annotationInstance, ExternalDocsConstant.PROP_URL));
         externalDoc.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return externalDoc;
     }

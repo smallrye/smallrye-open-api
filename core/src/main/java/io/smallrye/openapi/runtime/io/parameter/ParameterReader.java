@@ -29,6 +29,7 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -104,7 +105,7 @@ public class ParameterReader {
         Map<String, Parameter> parameters = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, Parameterizable.PROP_NAME);
+            String name = Annotations.value(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -154,35 +155,30 @@ public class ParameterReader {
         }
         IoLogging.logger.singleAnnotation("@Parameter");
         ParameterImpl parameter = new ParameterImpl();
-        parameter.setName(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_NAME));
-        parameter.setIn(JandexUtil.enumValue(annotationInstance, ParameterConstant.PROP_IN,
-                org.eclipse.microprofile.openapi.models.parameters.Parameter.In.class));
+        parameter.setName(Annotations.value(annotationInstance, Parameterizable.PROP_NAME));
+        parameter.setIn(Annotations.enumValue(annotationInstance, ParameterConstant.PROP_IN, Parameter.In.class));
 
         // Params can be hidden. Skip if that's the case.
-        Optional<Boolean> isHidden = JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_HIDDEN);
-        if (isHidden.isPresent() && isHidden.get()) {
+        Boolean isHidden = Annotations.value(annotationInstance, ParameterConstant.PROP_HIDDEN);
+        if (Boolean.TRUE.equals(isHidden)) {
             ParameterImpl.setHidden(parameter, true);
             return parameter;
         }
 
-        parameter.setDescription(JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_DESCRIPTION));
-        parameter.setRequired(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_REQUIRED).orElse(null));
-        parameter.setDeprecated(JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_DEPRECATED).orElse(null));
-        parameter.setAllowEmptyValue(
-                JandexUtil.booleanValue(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE).orElse(null));
-        parameter.setStyle(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_STYLE,
-                org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.class));
-        parameter.setExplode(readExplode(JandexUtil.enumValue(annotationInstance, Parameterizable.PROP_EXPLODE,
-                org.eclipse.microprofile.openapi.annotations.enums.Explode.class)).orElse(null));
-        parameter.setAllowReserved(
-                JandexUtil.booleanValue(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED).orElse(null));
+        parameter.setDescription(Annotations.value(annotationInstance, Parameterizable.PROP_DESCRIPTION));
+        parameter.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
+        parameter.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));
+        parameter.setAllowEmptyValue(Annotations.value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+        parameter.setStyle(Annotations.enumValue(annotationInstance, Parameterizable.PROP_STYLE, Parameter.Style.class));
+        parameter.setExplode(readExplode(annotationInstance));
+        parameter.setAllowReserved(Annotations.value(annotationInstance, ParameterConstant.PROP_ALLOW_RESERVED));
         parameter.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
         parameter.setContent(
                 ContentReader.readContent(context, annotationInstance.value(Parameterizable.PROP_CONTENT),
                         ContentDirection.PARAMETER));
         parameter.setExamples(ExampleReader.readExamples(context, annotationInstance.value(Parameterizable.PROP_EXAMPLES)));
         parameter.setExample(
-                ExampleReader.parseValue(context, JandexUtil.stringValue(annotationInstance, Parameterizable.PROP_EXAMPLE)));
+                ExampleReader.parseValue(context, Annotations.value(annotationInstance, Parameterizable.PROP_EXAMPLE)));
         parameter.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.PARAMETER));
 
         if (annotationInstance.target() != null) {
@@ -243,14 +239,16 @@ public class ParameterReader {
      *
      * @param enumValue
      */
-    private static Optional<Boolean> readExplode(Explode enumValue) {
-        if (enumValue == Explode.TRUE) {
-            return Optional.of(Boolean.TRUE);
+    private static Boolean readExplode(AnnotationInstance parameterAnnoatation) {
+        Explode explode = Annotations.enumValue(parameterAnnoatation, Parameterizable.PROP_EXPLODE, Explode.class);
+
+        if (explode == Explode.TRUE) {
+            return Boolean.TRUE;
         }
-        if (enumValue == Explode.FALSE) {
-            return Optional.of(Boolean.FALSE);
+        if (explode == Explode.FALSE) {
+            return Boolean.FALSE;
         }
-        return Optional.empty();
+        return null; // NOSONAR
     }
 
     /**

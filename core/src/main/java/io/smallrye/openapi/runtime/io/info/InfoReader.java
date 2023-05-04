@@ -13,7 +13,7 @@ import io.smallrye.openapi.runtime.io.contact.ContactReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.license.LicenseReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * This reads the Info from annotations or json
@@ -42,12 +42,12 @@ public class InfoReader {
         AnnotationInstance nested = annotationValue.asNested();
 
         Info info = new InfoImpl();
-        info.setTitle(JandexUtil.stringValue(nested, InfoConstant.PROP_TITLE));
-        info.setDescription(JandexUtil.stringValue(nested, InfoConstant.PROP_DESCRIPTION));
-        info.setTermsOfService(JandexUtil.stringValue(nested, InfoConstant.PROP_TERMS_OF_SERVICE));
+        info.setTitle(Annotations.value(nested, InfoConstant.PROP_TITLE));
+        info.setDescription(Annotations.value(nested, InfoConstant.PROP_DESCRIPTION));
+        info.setTermsOfService(Annotations.value(nested, InfoConstant.PROP_TERMS_OF_SERVICE));
         info.setContact(ContactReader.readContact(context, nested.value(InfoConstant.PROP_CONTACT)));
         info.setLicense(LicenseReader.readLicense(context, nested.value(InfoConstant.PROP_LICENSE)));
-        info.setVersion(JandexUtil.stringValue(nested, InfoConstant.PROP_VERSION));
+        info.setVersion(Annotations.value(nested, InfoConstant.PROP_VERSION));
         info.setExtensions(ExtensionReader.readExtensions(context, nested));
         return info;
     }

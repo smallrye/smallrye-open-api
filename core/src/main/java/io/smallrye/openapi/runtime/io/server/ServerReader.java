@@ -18,7 +18,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.servervariable.ServerVariableReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Server annotation and json node
@@ -95,8 +95,8 @@ public class ServerReader {
         if (annotationInstance != null) {
             IoLogging.logger.singleAnnotation("@Server");
             Server server = new ServerImpl();
-            server.setUrl(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_URL));
-            server.setDescription(JandexUtil.stringValue(annotationInstance, ServerConstant.PROP_DESCRIPTION));
+            server.setUrl(Annotations.value(annotationInstance, ServerConstant.PROP_URL));
+            server.setDescription(Annotations.value(annotationInstance, ServerConstant.PROP_DESCRIPTION));
             server.setVariables(
                     ServerVariableReader.readServerVariables(context, annotationInstance.value(ServerConstant.PROP_VARIABLES)));
             server.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
@@ -126,7 +126,7 @@ public class ServerReader {
 
     // helper methods for scanners
     public static List<AnnotationInstance> getServerAnnotations(final AnnotationTarget target) {
-        return JandexUtil.getRepeatableAnnotation(target,
+        return Annotations.getRepeatableAnnotation(target,
                 ServerConstant.DOTNAME_SERVER,
                 ServerConstant.DOTNAME_SERVERS);
     }

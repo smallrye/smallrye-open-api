@@ -33,6 +33,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -286,7 +287,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private void processClassAnnotations(Schema schema, ClassInfo classInfo) {
-        String xmlElementName = TypeUtil.getAnnotationValue(classInfo, XML_ROOTELEMENT, PROP_NAME);
+        String xmlElementName = Annotations.getAnnotationValue(classInfo, XML_ROOTELEMENT, PROP_NAME);
 
         if (xmlElementName != null && !classInfo.simpleName().equals(xmlElementName)) {
             schema.setXml(new XMLImpl().name(xmlElementName));

@@ -27,6 +27,7 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -179,7 +180,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
         String defaultPathValue = null;
         if (target.kind().equals(CLASS)) {
             DotName possiblePath = VertxConstants.ROUTE_BASE;
-            AnnotationInstance classAnnotation = target.asClass().classAnnotation(possiblePath);
+            AnnotationInstance classAnnotation = Annotations.getAnnotation(target, possiblePath);
             if (classAnnotation != null && classAnnotation.value("path") != null) {
                 path = classAnnotation;
             }

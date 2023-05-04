@@ -35,9 +35,8 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
-import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Scanner that scan Vertx routes.
@@ -157,7 +156,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RouteBase info and save it for later
-        AnnotationInstance routeBaseAnnotation = JandexUtil.getClassAnnotation(routeClass,
+        AnnotationInstance routeBaseAnnotation = Annotations.getAnnotation(routeClass,
                 VertxConstants.ROUTE_BASE);
 
         if (routeBaseAnnotation != null) {
@@ -206,14 +205,13 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                 .stream()
                 .filter(m -> m.hasAnnotation(VertxConstants.ROUTE))
                 .filter(this::shouldScan)
-                .forEach(methodInfo -> {
-                    Optional.ofNullable(TypeUtil.<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE, "methods"))
-                            .map(methods -> Arrays.stream(methods).map(PathItem.HttpMethod::valueOf))
-                            .orElseGet(() -> Arrays.stream(PathItem.HttpMethod.values()))
-                            .forEach(httpMethod -> processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi,
-                                    tagRefs,
-                                    locatorPathParameters));
-                });
+                .forEach(methodInfo -> Optional
+                        .ofNullable(Annotations.<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE, "methods"))
+                        .map(methods -> Arrays.stream(methods).map(PathItem.HttpMethod::valueOf))
+                        .orElseGet(() -> Arrays.stream(PathItem.HttpMethod.values()))
+                        .forEach(httpMethod -> processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi,
+                                tagRefs,
+                                locatorPathParameters)));
     }
 
     /**
@@ -324,11 +322,11 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
     boolean shouldScan(MethodInfo resourceMethod) {
         AnnotationInstance route = resourceMethod.annotation(VertxConstants.ROUTE);
 
-        if ("FAILURE".equals(JandexUtil.value(route, "type"))) {
+        if ("FAILURE".equals(Annotations.value(route, "type"))) {
             return false;
         }
 
-        if (JandexUtil.value(route, "regex") != null) {
+        if (Annotations.value(route, "regex") != null) {
             return resourceMethod.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
         }
 
@@ -341,7 +339,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
         if (annotation == null || annotation.value(property) == null) {
-            annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
+            annotation = Annotations.getAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
         }
 
         if (annotation != null) {

@@ -18,7 +18,7 @@ import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementRea
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the OpenAPIDefinition from an annotation or json
@@ -87,7 +87,6 @@ public class DefinitionReader {
 
     // helper methods for scanners
     public static AnnotationInstance getDefinitionAnnotation(final ClassInfo targetClass) {
-        return JandexUtil.getClassAnnotation(targetClass,
-                DefinitionConstant.DOTNAME_OPEN_API_DEFINITION);
+        return Annotations.getAnnotation(targetClass, DefinitionConstant.DOTNAME_OPEN_API_DEFINITION);
     }
 }

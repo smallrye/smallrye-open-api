@@ -1,12 +1,17 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ModuleInfo;
 import org.jboss.jandex.Type;
 
@@ -30,23 +35,99 @@ public class AugmentedIndexView implements IndexView {
     }
 
     private AugmentedIndexView(IndexView index) {
-        validateInput(index);
-        this.index = index;
+        this.index = Objects.requireNonNull(index);
     }
 
     public ClassInfo getClass(Type type) {
-        validateInput(type);
-        return index.getClassByName(TypeUtil.getName(type));
+        return index.getClassByName(TypeUtil.getName(Objects.requireNonNull(type)));
     }
 
     public boolean containsClass(Type type) {
-        validateInput(type);
-        return getClass(type) != null;
+        return getClass(Objects.requireNonNull(type)) != null;
     }
 
     public ClassInfo getClass(Class<?> klazz) {
-        validateInput(klazz);
-        return index.getClassByName(DotName.createSimple(klazz.getName()));
+        return index.getClassByName(DotName.createSimple(Objects.requireNonNull(klazz).getName()));
+    }
+
+    /**
+     * Retrieve the unique <code>Type</code>s that the given <code>ClassInfo</code>
+     * implements.
+     *
+     * @param klass
+     * @return the <code>Set</code> of interfaces
+     *
+     */
+    public Set<Type> interfaces(ClassInfo klass) {
+        Set<Type> interfaces = new LinkedHashSet<>();
+
+        for (Type type : klass.interfaceTypes()) {
+            interfaces.add(type);
+
+            if (containsClass(type)) {
+                interfaces.addAll(interfaces(getClass(type)));
+            }
+        }
+
+        return interfaces;
+    }
+
+    /**
+     * Builds an insertion-order map of a class's inheritance chain, starting
+     * with the klazz argument.
+     *
+     * @param klazz the class to retrieve inheritance
+     * @param type type of the klazz
+     * @return map of a class's inheritance chain/ancestry
+     */
+    public Map<ClassInfo, Type> inheritanceChain(ClassInfo klazz, Type type) {
+        Map<ClassInfo, Type> chain = new LinkedHashMap<>();
+
+        do {
+            chain.put(klazz, type);
+        } while ((type = klazz.superClassType()) != null &&
+                (klazz = index.getClassByName(TypeUtil.getName(type))) != null);
+
+        return chain;
+    }
+
+    public Map<ClassInfo, MethodInfo> ancestry(MethodInfo method) {
+        ClassInfo declaringClass = method.declaringClass();
+        Type resourceType = Type.create(declaringClass.name(), Type.Kind.CLASS);
+        Map<ClassInfo, Type> chain = inheritanceChain(declaringClass, resourceType);
+        Map<ClassInfo, MethodInfo> ancestry = new LinkedHashMap<>();
+
+        for (ClassInfo classInfo : chain.keySet()) {
+            ancestry.put(classInfo, null);
+
+            classInfo.methods()
+                    .stream()
+                    .filter(m -> !m.isSynthetic())
+                    .filter(m -> isSameSignature(method, m))
+                    .findFirst()
+                    .ifPresent(m -> ancestry.put(classInfo, m));
+
+            interfaces(classInfo)
+                    .stream()
+                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
+                    .map(this::getClass)
+                    .filter(Objects::nonNull)
+                    .map(iface -> {
+                        ancestry.put(iface, null);
+                        return iface;
+                    })
+                    .flatMap(iface -> iface.methods().stream())
+                    .filter(m -> isSameSignature(method, m))
+                    .forEach(m -> ancestry.put(m.declaringClass(), m));
+        }
+
+        return ancestry;
+    }
+
+    private static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
+        return Objects.equals(m1.name(), m2.name())
+                && m1.parametersCount() == m2.parametersCount()
+                && Objects.equals(m1.parameterTypes(), m2.parameterTypes());
     }
 
     @Override
@@ -56,55 +137,48 @@ public class AugmentedIndexView implements IndexView {
 
     @Override
     public ClassInfo getClassByName(DotName className) {
-        validateInput(className);
-        return index.getClassByName(className);
+        return index.getClassByName(Objects.requireNonNull(className));
     }
 
     @Override
     public Collection<ClassInfo> getKnownDirectSubclasses(DotName className) {
-        validateInput(className);
-        return index.getKnownDirectSubclasses(className);
+        return index.getKnownDirectSubclasses(Objects.requireNonNull(className));
     }
 
     @Override
     public Collection<ClassInfo> getAllKnownSubclasses(DotName className) {
-        validateInput(className);
-        return index.getAllKnownSubclasses(className);
+        return index.getAllKnownSubclasses(Objects.requireNonNull(className));
     }
 
     @Override
     public Collection<ClassInfo> getKnownDirectSubinterfaces(DotName interfaceName) {
-        validateInput(interfaceName);
-        return index.getKnownDirectSubinterfaces(interfaceName);
+        return index.getKnownDirectSubinterfaces(Objects.requireNonNull(interfaceName));
     }
 
     @Override
     public Collection<ClassInfo> getAllKnownSubinterfaces(DotName interfaceName) {
-        validateInput(interfaceName);
-        return index.getAllKnownSubinterfaces(interfaceName);
+        return index.getAllKnownSubinterfaces(Objects.requireNonNull(interfaceName));
     }
 
     @Override
     public Collection<ClassInfo> getKnownDirectImplementors(DotName className) {
-        validateInput(className);
-        return index.getKnownDirectImplementors(className);
+        return index.getKnownDirectImplementors(Objects.requireNonNull(className));
     }
 
     @Override
     public Collection<ClassInfo> getAllKnownImplementors(DotName interfaceName) {
-        validateInput(interfaceName);
-        return index.getAllKnownImplementors(interfaceName);
+        return index.getAllKnownImplementors(Objects.requireNonNull(interfaceName));
     }
 
     @Override
     public Collection<AnnotationInstance> getAnnotations(DotName annotationName) {
-        validateInput(annotationName);
-        return index.getAnnotations(annotationName);
+        return index.getAnnotations(Objects.requireNonNull(annotationName));
     }
 
     @Override
     public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName, IndexView annotationIndex) {
-        validateInput(annotationName, annotationIndex);
+        Objects.requireNonNull(annotationName);
+        Objects.requireNonNull(annotationIndex);
         return index.getAnnotationsWithRepeatable(annotationName, annotationIndex);
     }
 
@@ -115,32 +189,21 @@ public class AugmentedIndexView implements IndexView {
 
     @Override
     public ModuleInfo getModuleByName(DotName moduleName) {
-        validateInput(moduleName);
-        return index.getModuleByName(moduleName);
+        return index.getModuleByName(Objects.requireNonNull(moduleName));
     }
 
     @Override
     public Collection<ClassInfo> getKnownUsers(DotName className) {
-        validateInput(className);
-        return index.getKnownUsers(className);
+        return index.getKnownUsers(Objects.requireNonNull(className));
     }
 
     @Override
     public Collection<ClassInfo> getClassesInPackage(DotName packageName) {
-        validateInput(packageName);
-        return index.getClassesInPackage(packageName);
+        return index.getClassesInPackage(Objects.requireNonNull(packageName));
     }
 
     @Override
     public Set<DotName> getSubpackages(DotName packageName) {
-        validateInput(packageName);
-        return index.getSubpackages(packageName);
-    }
-
-    private void validateInput(Object... inputs) {
-        for (Object input : inputs) {
-            if (input == null)
-                throw DataObjectMessages.msg.notNull();
-        }
+        return index.getSubpackages(Objects.requireNonNull(packageName));
     }
 }

@@ -11,7 +11,7 @@ import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * This reads the License from annotations or json
@@ -39,8 +39,8 @@ public class LicenseReader {
         IoLogging.logger.singleAnnotation("@License");
         AnnotationInstance nested = annotationValue.asNested();
         License license = new LicenseImpl();
-        license.setName(JandexUtil.stringValue(nested, LicenseConstant.PROP_NAME));
-        license.setUrl(JandexUtil.stringValue(nested, LicenseConstant.PROP_URL));
+        license.setName(Annotations.value(nested, LicenseConstant.PROP_NAME));
+        license.setUrl(Annotations.value(nested, LicenseConstant.PROP_URL));
         license.setExtensions(ExtensionReader.readExtensions(context, nested));
         return license;
     }

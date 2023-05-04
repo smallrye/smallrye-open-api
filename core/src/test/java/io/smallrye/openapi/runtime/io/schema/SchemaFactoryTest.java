@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
@@ -41,5 +42,16 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         Type type = WildcardType.create(null, false);
         Schema result = SchemaFactory.typeToSchema(context, type, null, Collections.emptyList());
         assertNull(result.getType());
+    }
+
+    @Test
+    void testParseSchemaType() {
+        for (SchemaType type : SchemaType.values()) {
+            if (type == SchemaType.DEFAULT) {
+                assertNull(SchemaFactory.parseSchemaType(type.name()));
+            } else {
+                assertEquals(Schema.SchemaType.valueOf(type.name()), SchemaFactory.parseSchemaType(type.name()));
+            }
+        }
     }
 }

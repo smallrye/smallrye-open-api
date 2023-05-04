@@ -30,7 +30,7 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -338,7 +338,7 @@ public class SchemaRegistry {
             AnnotationInstance schemaAnnotation = targetSchema != null ? getSchemaAnnotation(targetSchema) : null;
 
             if (schemaAnnotation != null) {
-                schemaName = JandexUtil.stringValue(schemaAnnotation, SchemaConstant.PROP_NAME);
+                schemaName = Annotations.value(schemaAnnotation, SchemaConstant.PROP_NAME);
             }
         }
 

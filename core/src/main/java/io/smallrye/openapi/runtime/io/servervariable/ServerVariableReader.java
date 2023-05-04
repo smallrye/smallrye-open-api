@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.io.servervariable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the ServerVariable annotation and json node
@@ -50,7 +51,7 @@ public class ServerVariableReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, ServerVariable> variables = new LinkedHashMap<>();
         for (AnnotationInstance serverVariableAnno : nestedArray) {
-            String name = JandexUtil.stringValue(serverVariableAnno, ServerVariableConstant.PROP_NAME);
+            String name = Annotations.value(serverVariableAnno, ServerVariableConstant.PROP_NAME);
             if (name != null) {
                 variables.put(name, readServerVariable(context, serverVariableAnno));
             }
@@ -95,11 +96,13 @@ public class ServerVariableReader {
         IoLogging.logger.singleAnnotation("@ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
         variable.setDescription(
-                JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
-        variable.setEnumeration(
-                JandexUtil.stringListValue(annotationInstance, ServerVariableConstant.PROP_ENUMERATION).orElse(null));
+                Annotations.value(annotationInstance, ServerVariableConstant.PROP_DESCRIPTION));
+        String[] enumeration = Annotations.value(annotationInstance, ServerVariableConstant.PROP_ENUMERATION);
+        if (enumeration != null) {
+            variable.setEnumeration(new ArrayList<>(Arrays.asList(enumeration)));
+        }
         variable.setDefaultValue(
-                JandexUtil.stringValue(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
+                Annotations.value(annotationInstance, ServerVariableConstant.PROP_DEFAULT_VALUE));
         variable.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return variable;
     }

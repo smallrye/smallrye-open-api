@@ -35,7 +35,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -184,7 +184,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RequestMapping info and save it for later
-        AnnotationInstance requestMappingAnnotation = JandexUtil.getClassAnnotation(controllerClass,
+        AnnotationInstance requestMappingAnnotation = Annotations.getAnnotation(controllerClass,
                 SpringConstants.REQUEST_MAPPING);
 
         if (requestMappingAnnotation != null) {
@@ -378,7 +378,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Check class
-        AnnotationInstance annotation = JandexUtil.getClassAnnotation(resourceMethod.declaringClass(),
+        AnnotationInstance annotation = Annotations.getAnnotation(resourceMethod.declaringClass(),
                 SpringConstants.REQUEST_MAPPING);
         if (annotation != null) {
             AnnotationValue annotationValue = annotation.value(property);

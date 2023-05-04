@@ -19,7 +19,7 @@ import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Operation from annotation or json
@@ -48,8 +48,8 @@ public class OperationReader {
         if (annotationInstance != null) {
             IoLogging.logger.singleAnnotation("@Operation");
             Operation operation = new OperationImpl();
-            operation.setSummary(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_SUMMARY));
-            operation.setDescription(JandexUtil.stringValue(annotationInstance, OperationConstant.PROP_DESCRIPTION));
+            operation.setSummary(Annotations.value(annotationInstance, OperationConstant.PROP_SUMMARY));
+            operation.setDescription(Annotations.value(annotationInstance, OperationConstant.PROP_DESCRIPTION));
             operation.setExternalDocs(
                     ExternalDocsReader.readExternalDocs(context,
                             annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
@@ -67,9 +67,8 @@ public class OperationReader {
                     ExtensionReader.readExtensions(context,
                             annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
 
-            operation.setOperationId(JandexUtil.value(annotationInstance, OperationConstant.PROP_OPERATION_ID));
-            operation
-                    .setDeprecated(JandexUtil.booleanValue(annotationInstance, OperationConstant.PROP_DEPRECATED).orElse(null));
+            operation.setOperationId(Annotations.value(annotationInstance, OperationConstant.PROP_OPERATION_ID));
+            operation.setDeprecated(Annotations.value(annotationInstance, OperationConstant.PROP_DEPRECATED));
             // TODO: for non-callbacks: operation.setExtensions(ExtensionReader.readExtendsions(context, annotationInstance));
 
             return operation;

@@ -54,7 +54,6 @@
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-vertx</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>

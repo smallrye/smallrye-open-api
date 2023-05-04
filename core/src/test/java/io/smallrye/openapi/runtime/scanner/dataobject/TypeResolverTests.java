@@ -30,6 +30,7 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -275,7 +276,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         TypeResolver property = iter.next().getValue();
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getReadMethod(), property.getAnnotationTarget());
-        assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
+        assertEquals("Name of the property", Annotations.getAnnotationValue(property.getAnnotationTarget(),
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_TITLE));
     }
@@ -290,7 +291,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         TypeResolver property = iter.next().getValue();
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getWriteMethod(), property.getAnnotationTarget());
-        assertEquals("Name of the property", TypeUtil.getAnnotationValue(property.getAnnotationTarget(),
+        assertEquals("Name of the property", Annotations.getAnnotationValue(property.getAnnotationTarget(),
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_TITLE));
     }

@@ -1,8 +1,6 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
 import static io.smallrye.openapi.api.util.MergeUtil.mergeObjects;
-import static io.smallrye.openapi.runtime.util.JandexUtil.getMethodParameterType;
-import static io.smallrye.openapi.runtime.util.JandexUtil.stringValue;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -61,6 +59,7 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -263,7 +262,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected void processOperationParameters(MethodInfo resourceMethod, ResourceParameters parameters) {
-        List<MethodInfo> candidateMethods = JandexUtil.ancestry(resourceMethod, scannerContext.getAugmentedIndex())
+        List<MethodInfo> candidateMethods = scannerContext.getAugmentedIndex().ancestry(resourceMethod)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
@@ -551,13 +550,13 @@ public abstract class AbstractParameterProcessor {
             return;
         }
 
-        AnnotationInstance schemaAnnotation = TypeUtil.getAnnotation(context.target, SchemaConstant.DOTNAME_SCHEMA);
+        AnnotationInstance schemaAnnotation = Annotations.getAnnotation(context.target, SchemaConstant.DOTNAME_SCHEMA);
         Schema schema;
 
-        if (schemaAnnotation != null && Boolean.TRUE.equals(JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
+        if (schemaAnnotation != null && Boolean.TRUE.equals(Annotations.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
             schema = null;
         } else if (schemaAnnotation != null) {
-            Type paramType = JandexUtil.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
+            Type paramType = Annotations.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
             Map<String, Object> defaults;
 
             if (JandexUtil.isArraySchema(schemaAnnotation) || TypeUtil.isTypeOverridden(context.targetType, schemaAnnotation)) {
@@ -677,7 +676,7 @@ public abstract class AbstractParameterProcessor {
             Type paramType = getType(paramTarget);
             AnnotationInstance schemaAnnotation = null;
             if (schemaAnnotationSupported) {
-                schemaAnnotation = TypeUtil.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
+                schemaAnnotation = Annotations.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
             }
             Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, schemaAnnotation, extensions);
 
@@ -1092,11 +1091,11 @@ public abstract class AbstractParameterProcessor {
             return null;
         }
 
-        AnnotationInstance defaultValueAnno = TypeUtil.getAnnotation(target, defaultAnnotationNames);
+        AnnotationInstance defaultValueAnno = Annotations.getAnnotation(target, defaultAnnotationNames);
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
-            String defaultValueString = stringValue(defaultValueAnno, annotationProperty);
+            String defaultValueString = Annotations.value(defaultValueAnno, annotationProperty);
             defaultValue = defaultValueString;
             Type targetType = getType(target);
 
@@ -1250,7 +1249,7 @@ public abstract class AbstractParameterProcessor {
                 }
                 break;
             case METHOD_PARAMETER:
-                type = getMethodParameterType(target.asMethodParameter());
+                type = target.asMethodParameter().method().parameterType(target.asMethodParameter().position());
                 break;
             default:
                 break;
@@ -1482,7 +1481,7 @@ public abstract class AbstractParameterProcessor {
     protected void readParametersInherited(ClassInfo clazz, AnnotationInstance beanParamAnnotation,
             boolean overriddenParametersOnly) {
         AugmentedIndexView augmentedIndex = scannerContext.getAugmentedIndex();
-        List<ClassInfo> ancestors = new ArrayList<>(JandexUtil.inheritanceChain(index, clazz, null).keySet());
+        List<ClassInfo> ancestors = new ArrayList<>(augmentedIndex.inheritanceChain(clazz, null).keySet());
         /*
          * Process parent class(es) before the resource method class to allow for overridden parameter attributes.
          */
@@ -1542,7 +1541,7 @@ public abstract class AbstractParameterProcessor {
             case METHOD_PARAMETER: {
                 MethodParameterInfo param = target.asMethodParameter();
                 MethodInfo method = param.method();
-                relevant = nonSyntheticParameterMethod(method, TypeUtil.getAnnotations(param));
+                relevant = nonSyntheticParameterMethod(method, Annotations.getAnnotations(param));
                 break;
             }
 

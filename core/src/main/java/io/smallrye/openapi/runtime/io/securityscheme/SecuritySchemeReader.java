@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
-import org.eclipse.microprofile.openapi.models.security.SecurityScheme.In;
-import org.eclipse.microprofile.openapi.models.security.SecurityScheme.Type;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
@@ -21,6 +19,7 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.oauth.OAuthReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -53,7 +52,7 @@ public class SecuritySchemeReader {
         Map<String, SecurityScheme> securitySchemes = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
+            String name = Annotations.value(nested, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -99,19 +98,21 @@ public class SecuritySchemeReader {
         IoLogging.logger.singleAnnotation("@SecurityScheme");
         SecurityScheme securityScheme = new SecuritySchemeImpl();
         securityScheme
-                .setType(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, Type.class));
+                .setType(
+                        Annotations.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, SecurityScheme.Type.class));
         securityScheme
-                .setDescription(JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
-        securityScheme.setName(JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
-        securityScheme.setIn(JandexUtil.enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN, In.class));
-        securityScheme.setScheme(JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
+                .setDescription(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
+        securityScheme.setName(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
+        securityScheme
+                .setIn(Annotations.enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN, SecurityScheme.In.class));
+        securityScheme.setScheme(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
         securityScheme.setBearerFormat(
-                JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
+                Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
         securityScheme
                 .setFlows(OAuthReader.readOAuthFlows(context, annotationInstance.value(SecuritySchemeConstant.PROP_FLOWS)));
         securityScheme
                 .setOpenIdConnectUrl(
-                        JandexUtil.stringValue(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
+                        Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
         securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SECURITY_SCHEME));
         securityScheme.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return securityScheme;
@@ -147,7 +148,7 @@ public class SecuritySchemeReader {
      * @param node json node
      * @return Type enum
      */
-    private static Type readSecuritySchemeType(final JsonNode node) {
+    private static SecurityScheme.Type readSecuritySchemeType(final JsonNode node) {
         if (node == null || !node.isTextual()) {
             return null;
         }
@@ -160,7 +161,7 @@ public class SecuritySchemeReader {
      * @param node json node
      * @return In enum
      */
-    private static In readSecuritySchemeIn(final JsonNode node) {
+    private static SecurityScheme.In readSecuritySchemeIn(final JsonNode node) {
         if (node == null || !node.isTextual()) {
             return null;
         }
@@ -169,26 +170,26 @@ public class SecuritySchemeReader {
 
     // helper methods for scanner
     public static List<AnnotationInstance> getSecuritySchemeAnnotations(final AnnotationTarget target) {
-        return JandexUtil.getRepeatableAnnotation(target,
+        return Annotations.getRepeatableAnnotation(target,
                 SecuritySchemeConstant.DOTNAME_SECURITY_SCHEME,
                 SecuritySchemeConstant.TYPE_SECURITY_SCHEMES);
     }
 
     public static String getSecuritySchemeName(AnnotationInstance annotation) {
-        return JandexUtil.stringValue(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
+        return Annotations.value(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
     }
 
-    private static final Map<String, Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();
-    private static final Map<String, In> SECURITY_SCHEME_IN_LOOKUP = new LinkedHashMap<>();
+    private static final Map<String, SecurityScheme.Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();
+    private static final Map<String, SecurityScheme.In> SECURITY_SCHEME_IN_LOOKUP = new LinkedHashMap<>();
 
     static {
-        Type[] securitySchemeTypes = Type.values();
-        for (Type type : securitySchemeTypes) {
+        SecurityScheme.Type[] securitySchemeTypes = SecurityScheme.Type.values();
+        for (SecurityScheme.Type type : securitySchemeTypes) {
             SECURITY_SCHEME_TYPE_LOOKUP.put(type.toString(), type);
         }
 
-        In[] securitySchemeIns = In.values();
-        for (In type : securitySchemeIns) {
+        SecurityScheme.In[] securitySchemeIns = SecurityScheme.In.values();
+        for (SecurityScheme.In type : securitySchemeIns) {
             SECURITY_SCHEME_IN_LOOKUP.put(type.toString(), type);
         }
     }

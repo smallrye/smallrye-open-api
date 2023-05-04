@@ -1,17 +1,6 @@
 package io.smallrye.openapi.runtime.util;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -20,16 +9,13 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
-import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
-import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
@@ -137,205 +123,6 @@ public class JandexUtil {
         return ref;
     }
 
-    public static <T> T value(AnnotationInstance annotation) {
-        return annotation != null ? value(annotation, OpenApiConstants.VALUE) : null;
-    }
-
-    /**
-     * Convenience method to retrieve the named parameter from an annotation.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param annotation the annotation from which to fetch the parameter
-     * @param name the name of the parameter
-     * @return an unwrapped annotation parameter value
-     */
-    @SuppressWarnings({ "unchecked", "squid:S3776" })
-    public static <T> T value(AnnotationInstance annotation, String name) {
-        final AnnotationValue value = annotation.value(name);
-
-        if (value == null) {
-            return null;
-        }
-
-        final boolean isArray = (AnnotationValue.Kind.ARRAY == value.kind());
-
-        switch (isArray ? value.componentKind() : value.kind()) {
-            case BOOLEAN:
-                return (T) (isArray ? value.asBooleanArray() : value.asBoolean());
-            case BYTE:
-                return (T) (isArray ? value.asByteArray() : value.asByte());
-            case CHARACTER:
-                return (T) (isArray ? value.asCharArray() : value.asChar());
-            case CLASS:
-                return (T) (isArray ? value.asClassArray() : value.asClass());
-            case DOUBLE:
-                return (T) (isArray ? value.asDoubleArray() : value.asDouble());
-            case ENUM:
-                return (T) (isArray ? value.asEnumArray() : value.asEnum());
-            case FLOAT:
-                return (T) (isArray ? value.asFloatArray() : value.asFloat());
-            case INTEGER:
-                return (T) (isArray ? value.asIntArray() : value.asInt());
-            case LONG:
-                return (T) (isArray ? value.asLongArray() : value.asLong());
-            case NESTED:
-                return (T) (isArray ? value.asNestedArray() : value.asNested());
-            case SHORT:
-                return (T) (isArray ? value.asShortArray() : value.asShort());
-            case STRING:
-                return (T) (isArray ? value.asStringArray() : value.asString());
-            case UNKNOWN:
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * Convenience method to retrieve the named parameter from an annotation.
-     * The value will be unwrapped from its containing {@link AnnotationValue}.
-     *
-     * @param <T> the type of the parameter being retrieved
-     * @param annotation the annotation from which to fetch the parameter
-     * @param name the name of the parameter
-     * @param defaultValue a default value to return if the parameter is not defined
-     * @return an unwrapped annotation parameter value
-     */
-    public static <T> T value(AnnotationInstance annotation, String name, T defaultValue) {
-        T value = JandexUtil.value(annotation, name);
-        return value != null ? value : defaultValue;
-    }
-
-    /**
-     * Reads a String property value from the given annotation instance. If no value is found
-     * this will return null.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return String value
-     */
-    public static String stringValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        } else {
-            return value.asString();
-        }
-    }
-
-    public static Optional<String> optionalStringValue(AnnotationInstance annotation, String propertyName) {
-        String value = stringValue(annotation, propertyName);
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(value);
-    }
-
-    /**
-     * Reads a Boolean property value from the given annotation instance. If no value is found
-     * this will return null.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return Boolean value
-     */
-    public static Optional<Boolean> booleanValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value != null) {
-            return Optional.of(value.asBoolean());
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Reads a Boolean property from the given annotation instance. If no value is found
-     * this will return false.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return Boolean value
-     */
-    public static boolean booleanValueWithDefault(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        return value != null && value.asBoolean();
-    }
-
-    /**
-     * Reads a Integer property value from the given annotation instance. If no value is found
-     * this will return null.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return Integer value
-     */
-    public static Integer intValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value == null) {
-            return null;
-        } else {
-            return value.asInt();
-        }
-    }
-
-    /**
-     * Reads a String array property value from the given annotation instance. If no value is found
-     * this will return null.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @return List of Strings
-     */
-    public static Optional<List<String>> stringListValue(AnnotationInstance annotation, String propertyName) {
-        AnnotationValue value = annotation.value(propertyName);
-        if (value != null) {
-            return Optional.of(new ArrayList<>(Arrays.asList(value.asStringArray())));
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Reads a String property value from the given annotation instance. If no value is found
-     * this will return null.
-     *
-     * @param annotation AnnotationInstance
-     * @param propertyName String
-     * @param clazz Class type of the Enum
-     * @param <T> Type parameter
-     * @return Value of property
-     */
-    public static <T extends Enum<?>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
-        AnnotationValue value = annotation != null ? annotation.value(propertyName) : null;
-        if (value == null) {
-            return null;
-        }
-        return enumValue(value.asString(), clazz);
-    }
-
-    /**
-     * Converts a string value to the given enum type. If the string does not match
-     * one of the the enum's values name (case-insensitive) or toString value, null
-     * will be returned.
-     *
-     * @param strVal String
-     * @param clazz Class type of the Enum
-     * @param <T> Type parameter
-     * @return Value of property
-     */
-    public static <T extends Enum<?>> T enumValue(String strVal, Class<T> clazz) {
-        T[] constants = clazz.getEnumConstants();
-        for (T t : constants) {
-            if (t.toString().equals(strVal)) {
-                return t;
-            }
-        }
-        for (T t : constants) {
-            if (t.name().equalsIgnoreCase(strVal)) {
-                return t;
-            }
-        }
-        return null;
-    }
-
     /**
      * Returns true if the given annotation instance is a "ref". An annotation is a ref if it has
      * a non-null value for the "ref" property.
@@ -359,138 +146,6 @@ public class JandexUtil {
     }
 
     /**
-     * Gets a single class annotation from the given class. Returns null if no matching annotation
-     * is found.
-     *
-     * @param ct ClassInfo
-     * @param name DotName
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getClassAnnotation(ClassInfo ct, DotName name) {
-        return getClassAnnotation(ct, Arrays.asList(name));
-    }
-
-    /**
-     * Gets a single class annotation from the given class. Returns null if no matching annotation
-     * is found.
-     *
-     * @param ct ClassInfo
-     * @param names List of DotNames
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getClassAnnotation(ClassInfo ct, Collection<DotName> names) {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-
-        for (DotName dn : names) {
-            AnnotationInstance classAnnotation = ct.classAnnotation(dn);
-            if (classAnnotation != null) {
-                return classAnnotation;
-            }
-        }
-
-        return null;
-    }
-
-    public static AnnotationInstance getAnnotation(MethodInfo mi, DotName... names) {
-        return getAnnotation(mi, Arrays.asList(names));
-    }
-
-    public static AnnotationInstance getAnnotation(FieldInfo field, DotName name) {
-        return getAnnotation(field, Arrays.asList(name));
-    }
-
-    /**
-     * Gets a single annotation from the given field. Returns null if no matching annotation
-     * is found.
-     *
-     * @param field FieldInfo
-     * @param names DotName
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getAnnotation(FieldInfo field, Collection<DotName> names) {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-
-        for (DotName dn : names) {
-            AnnotationInstance annotation = field.annotation(dn);
-            if (annotation != null)
-                return annotation;
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets a single annotation from the given method. Returns null if no matching annotation
-     * is found.
-     *
-     * @param mi MethodInfo
-     * @param names DotName
-     * @return AnnotationInstance
-     */
-    public static AnnotationInstance getAnnotation(MethodInfo mi, Collection<DotName> names) {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-
-        for (DotName dn : names) {
-            AnnotationInstance annotation = mi.annotation(dn);
-            if (annotation != null)
-                return annotation;
-        }
-
-        return null;
-    }
-
-    /**
-     * Return if any one of the listed annotations exist
-     *
-     * @param method
-     * @param annotations
-     * @return
-     */
-    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, DotName... annotations) {
-        return hasAnyOneOfAnnotation(method, Arrays.asList(annotations));
-    }
-
-    /**
-     * Return if any one of the listed annotations exist
-     *
-     * @param method
-     * @param annotations
-     * @return
-     */
-    public static boolean hasAnyOneOfAnnotation(final MethodInfo method, Collection<DotName> annotations) {
-        for (DotName dotName : annotations) {
-            if (method.hasAnnotation(dotName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns all annotations configured for a single parameter of a method.
-     *
-     * @param method MethodInfo
-     * @param paramPosition parameter position
-     * @return List of AnnotationInstance's
-     */
-    public static List<AnnotationInstance> getParameterAnnotations(MethodInfo method, short paramPosition) {
-        return method.annotations()
-                .stream()
-                .filter(annotation -> {
-                    AnnotationTarget target = annotation.target();
-                    return target != null && target.kind() == Kind.METHOD_PARAMETER
-                            && target.asMethodParameter().position() == paramPosition;
-                })
-                .collect(toList());
-    }
-
-    /**
      * Gets the name of an item from its ref. For example, the ref might be "#/components/parameters/departureDate"
      * which would result in a name of "departureDate".
      *
@@ -500,116 +155,6 @@ public class JandexUtil {
     public static String nameFromRef(AnnotationInstance annotation) {
         String ref = annotation.value(OpenApiConstants.REF).asString();
         return ModelUtil.nameFromRef(ref);
-    }
-
-    /**
-     * Many OAI annotations can either be found singly or as a wrapped array. This method will
-     * look for both and return a list of all found. Both the single and wrapper annotation names
-     * must be provided.
-     *
-     * @param target the annotated target (e.g. ClassInfo, MethodInfo)
-     * @param singleAnnotationName DotName
-     * @param repeatableAnnotationName DotName
-     * @return List of AnnotationInstance's
-     */
-    public static List<AnnotationInstance> getRepeatableAnnotation(AnnotationTarget target,
-            DotName singleAnnotationName,
-            DotName repeatableAnnotationName) {
-
-        List<AnnotationInstance> annotations = new ArrayList<>();
-
-        AnnotationInstance annotation = TypeUtil.getAnnotation(target, singleAnnotationName);
-
-        if (annotation != null) {
-            annotations.add(annotation);
-        }
-
-        if (repeatableAnnotationName != null) {
-            AnnotationInstance[] nestedArray = TypeUtil.getAnnotationValue(target,
-                    repeatableAnnotationName,
-                    OpenApiConstants.VALUE);
-
-            if (nestedArray != null) {
-                Arrays.stream(nestedArray)
-                        .map(a -> AnnotationInstance.create(a.name(), target, a.values()))
-                        .forEach(annotations::add);
-            }
-        }
-
-        return annotations;
-    }
-
-    /**
-     * Returns the class type of the method parameter at the given position.
-     *
-     * @param method MethodInfo
-     * @param position parameter position
-     * @return Type
-     */
-    public static Type getMethodParameterType(MethodInfo method, short position) {
-        return method.parameterType(position);
-    }
-
-    /**
-     * Returns the class type of the method parameter.
-     *
-     * @param parameter the {@link MethodParameterInfo parameter}
-     * @return Type
-     */
-    public static Type getMethodParameterType(MethodParameterInfo parameter) {
-        return parameter.method().parameterType(parameter.position());
-    }
-
-    /**
-     * Finds an annotation (if present) with the given name, on a particular parameter of a
-     * method.Returns null if not found.
-     *
-     * @param method the method
-     * @param parameterIndex the parameter index
-     * @param annotationName name of annotation we are looking for
-     * @return the Annotation instance
-     */
-    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
-            DotName annotationName) {
-        return method.annotations(annotationName)
-                .stream()
-                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
-                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
-     * Finds an annotation (if present) with the given name, on a particular parameter of a
-     * method based on the identity of the parameterType. Returns null if not found.
-     *
-     * @param method the method
-     * @param parameterType the parameter type
-     * @param annotationName name of annotation we are looking for
-     * @return the Annotation instance
-     */
-    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, Type parameterType,
-            DotName annotationName) {
-        // parameterType must be the same object as in the method's parameter type array
-        int parameterIndex = method.parameterTypes().indexOf(parameterType);
-        return getMethodParameterAnnotation(method, parameterIndex, annotationName);
-    }
-
-    /**
-     * Finds all annotations on a particular parameter of a method based on the identity of the parameterType.
-     *
-     * @param method the method
-     * @param parameterType the parameter type
-     * @return the list of annotations, never null
-     */
-    public static List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, Type parameterType) {
-        // parameterType must be the same object as in the method's parameter type array
-        int parameterIndex = method.parameterTypes().indexOf(parameterType);
-        return method.annotations()
-                .stream()
-                .filter(annotation -> annotation.target().kind() == Kind.METHOD_PARAMETER)
-                .filter(annotation -> annotation.target().asMethodParameter().position() == parameterIndex)
-                .collect(Collectors.toList());
     }
 
     public static List<AnnotationValue> schemaDisplayValues(AnnotationInstance annotation) {
@@ -660,7 +205,7 @@ public class JandexUtil {
             return false;
         }
 
-        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = JandexUtil.enumValue(annotation,
+        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = Annotations.enumValue(annotation,
                 SchemaConstant.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
 
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY);
@@ -675,26 +220,6 @@ public class JandexUtil {
      */
     public static boolean hasImplementation(AnnotationInstance annotation) {
         return annotation.value(SchemaConstant.PROP_IMPLEMENTATION) != null;
-    }
-
-    /**
-     * Builds an insertion-order map of a class's inheritance chain, starting
-     * with the klazz argument.
-     *
-     * @param index index for superclass retrieval
-     * @param klazz the class to retrieve inheritance
-     * @param type type of the klazz
-     * @return map of a class's inheritance chain/ancestry
-     */
-    public static Map<ClassInfo, Type> inheritanceChain(IndexView index, ClassInfo klazz, Type type) {
-        Map<ClassInfo, Type> chain = new LinkedHashMap<>();
-
-        do {
-            chain.put(klazz, type);
-        } while ((type = klazz.superClassType()) != null &&
-                (klazz = index.getClassByName(TypeUtil.getName(type))) != null);
-
-        return chain;
     }
 
     public static boolean equals(AnnotationTarget t1, AnnotationTarget t2) {
@@ -715,29 +240,6 @@ public class JandexUtil {
             default:
                 return t1.equals(t2);
         }
-    }
-
-    /**
-     * Retrieve the unique <code>Type</code>s that the given <code>ClassInfo</code>
-     * implements.
-     *
-     * @param index
-     * @param klass
-     * @return the <code>Set</code> of interfaces
-     *
-     */
-    public static Set<Type> interfaces(AugmentedIndexView index, ClassInfo klass) {
-        Set<Type> interfaces = new LinkedHashSet<>();
-
-        for (Type type : klass.interfaceTypes()) {
-            interfaces.add(type);
-
-            if (index.containsClass(type)) {
-                interfaces.addAll(interfaces(index, index.getClass(type)));
-            }
-        }
-
-        return interfaces;
     }
 
     public static boolean equals(ClassInfo c1, ClassInfo c2) {
@@ -769,42 +271,4 @@ public class JandexUtil {
         return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
     }
 
-    public static Map<ClassInfo, MethodInfo> ancestry(MethodInfo method, AugmentedIndexView index) {
-        ClassInfo declaringClass = method.declaringClass();
-        Type resourceType = Type.create(declaringClass.name(), Type.Kind.CLASS);
-        Map<ClassInfo, Type> chain = inheritanceChain(index, declaringClass, resourceType);
-        Map<ClassInfo, MethodInfo> ancestry = new LinkedHashMap<>();
-
-        for (ClassInfo classInfo : chain.keySet()) {
-            ancestry.put(classInfo, null);
-
-            classInfo.methods()
-                    .stream()
-                    .filter(m -> !m.isSynthetic())
-                    .filter(m -> isSameSignature(method, m))
-                    .findFirst()
-                    .ifPresent(m -> ancestry.put(classInfo, m));
-
-            interfaces(index, classInfo)
-                    .stream()
-                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
-                    .map(index::getClass)
-                    .filter(Objects::nonNull)
-                    .map(iface -> {
-                        ancestry.put(iface, null);
-                        return iface;
-                    })
-                    .flatMap(iface -> iface.methods().stream())
-                    .filter(m -> isSameSignature(method, m))
-                    .forEach(m -> ancestry.put(m.declaringClass(), m));
-        }
-
-        return ancestry;
-    }
-
-    public static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
-        return Objects.equals(m1.name(), m2.name())
-                && m1.parametersCount() == m2.parametersCount()
-                && Objects.equals(m1.parameterTypes(), m2.parameterTypes());
-    }
 }

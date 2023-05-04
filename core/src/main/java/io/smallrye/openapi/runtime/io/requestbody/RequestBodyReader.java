@@ -26,8 +26,8 @@ import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Reading the RequestBody annotation
@@ -59,7 +59,7 @@ public class RequestBodyReader {
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = JandexUtil.stringValue(nested, RequestBodyConstant.PROP_NAME);
+            String name = Annotations.value(nested, RequestBodyConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -119,12 +119,12 @@ public class RequestBodyReader {
         }
         IoLogging.logger.singleAnnotation("@RequestBody");
         RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(JandexUtil.stringValue(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
+        requestBody.setDescription(Annotations.value(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody
                 .setContent(ContentReader.readContent(context,
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),
                         ContentDirection.INPUT));
-        requestBody.setRequired(JandexUtil.booleanValue(annotationInstance, RequestBodyConstant.PROP_REQUIRED).orElse(null));
+        requestBody.setRequired(Annotations.value(annotationInstance, RequestBodyConstant.PROP_REQUIRED));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.REQUEST_BODY));
         requestBody.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return requestBody;
@@ -149,7 +149,7 @@ public class RequestBodyReader {
         for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {
             MediaType type = new MediaTypeImpl();
             type.setSchema(SchemaFactory.typeToSchema(context,
-                    JandexUtil.value(annotation, RequestBodyConstant.PROP_VALUE),
+                    Annotations.value(annotation, RequestBodyConstant.PROP_VALUE),
                     null,
                     context.getExtensions()));
             content.addMediaType(mediaType, type);
@@ -182,11 +182,11 @@ public class RequestBodyReader {
 
     // helper methods for scanners
     public static List<AnnotationInstance> getRequestBodyAnnotations(final AnnotationTarget target) {
-        return JandexUtil.getRepeatableAnnotation(target,
+        return Annotations.getRepeatableAnnotation(target,
                 RequestBodyConstant.DOTNAME_REQUESTBODY, null);
     }
 
     public static AnnotationInstance getRequestBodySchemaAnnotation(final AnnotationTarget target) {
-        return TypeUtil.getAnnotation(target, RequestBodyConstant.DOTNAME_REQUEST_BODY_SCHEMA);
+        return Annotations.getAnnotation(target, RequestBodyConstant.DOTNAME_REQUEST_BODY_SCHEMA);
     }
 }
