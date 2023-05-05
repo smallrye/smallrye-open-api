@@ -44,6 +44,7 @@ public class OpenApiSerializer {
                 YAMLFactory factory = new YAMLFactory();
                 factory.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
                 factory.enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
+                factory.enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS);
                 mapper = new ObjectMapper(factory);
                 return mapper.writer().writeValueAsString(tree);
             }
