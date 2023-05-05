@@ -17,6 +17,8 @@ import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
  * @author eric.wittmann@gmail.com
  */
@@ -552,5 +554,17 @@ class OpenApiParserAndSerializerTest {
         } finally {
             System.clearProperty(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE);
         }
+    }
+
+    /**
+     *
+     * Support long paths (until 1024)
+     */
+    @Test
+    void testAllowLongKeys() throws Exception {
+        URL resource = OpenApiParserAndSerializerTest.class.getResource("long-path.yaml");
+        assertNotNull(resource, "resource not found: long-path.yaml");
+        OpenAPI model = OpenApiParser.parse(resource.openStream(), Format.YAML);
+        doTest(resource, Format.YAML, model);
     }
 }

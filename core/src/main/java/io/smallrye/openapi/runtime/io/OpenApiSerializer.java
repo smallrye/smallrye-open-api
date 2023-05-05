@@ -30,7 +30,7 @@ public class OpenApiSerializer {
      * @return OpenAPI object as a String
      * @throws IOException Errors in processing the JSON
      */
-    public static final String serialize(OpenAPI openApi, Format format) throws IOException {
+    public static String serialize(OpenAPI openApi, Format format) throws IOException {
 
         try {
             ObjectNode tree = JsonUtil.objectNode();
@@ -42,6 +42,7 @@ public class OpenApiSerializer {
                 return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tree);
             } else {
                 YAMLFactory factory = new YAMLFactory();
+                factory.enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS);
                 factory.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
                 factory.enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
                 mapper = new ObjectMapper(factory);
