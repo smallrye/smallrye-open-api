@@ -17,9 +17,11 @@
         <script src="swagger-ui-bundle.js" charset="UTF-8"></script>
         <script src="swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
         <script>
-
+            
             window.onload = function() {
-                
+                const urlParams = new URLSearchParams(window.location.search);
+                const embed = urlParams.get('embed');
+        
                 // If Url is relative, append the host and port
                 var oar = "${oauth2RedirectUrl}";
                 if(oar.startsWith("/")){
@@ -66,7 +68,15 @@
                 
                 window.ui = ui;
 
-                document.getElementsByClassName("link")[0].innerHTML = "<a id='swaggerUiLogoLink' href='${backHref}'><img src='${logoHref}' alt='${title}' height='44' align='middle'></a><a id='swaggerUiTitleLink' href='${selfHref}'></a>";
+                console.log(embed);
+                if(!embed){
+                    document.getElementsByClassName("link")[0].innerHTML = "<a id='swaggerUiLogoLink' href='${backHref}'><img src='${logoHref}' alt='${title}' height='44' align='middle'></a><a id='swaggerUiTitleLink' href='${selfHref}'></a>";
+                }else{
+                    const l = document.querySelector(".link");
+                    l.style.display = 'none';
+                    const u = document.querySelector(".download-url-input");
+                    u.style.width = "100%";
+                }
             }
         </script>
     </body>
