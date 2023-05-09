@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -14,6 +15,11 @@ import test.io.smallrye.openapi.runtime.scanner.entities.SpecialCaseTestContaine
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 class SpecialCaseTests extends JaxRsDataObjectScannerTestBase {
+
+    @BeforeEach
+    void setup() {
+        context.getSchemaRegistry().setDisabled(true);
+    }
 
     @ParameterizedTest
     @CsvSource({

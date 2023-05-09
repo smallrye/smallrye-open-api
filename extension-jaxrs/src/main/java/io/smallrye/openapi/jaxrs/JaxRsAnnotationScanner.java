@@ -38,7 +38,6 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -46,7 +45,6 @@ import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
-import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
@@ -251,7 +249,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processSecuritySchemeAnnotation(context, resourceClass, openApi);
 
         // Process Java security
-        processJavaSecurity(resourceClass, openApi);
+        processJavaSecurity(context, resourceClass, openApi);
 
         // Now find and process the operation methods
         processResourceMethods(context, resourceClass, openApi, locatorPathParameters);
@@ -441,10 +439,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         // Figure out the current @Produces and @Consumes (if any)
         String[] defaultConsumes = context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(context, method, JaxRsConstants.CONSUMES, defaultConsumes));
+        context.setCurrentConsumes(getMediaTypes(context, method, JaxRsConstants.CONSUMES, defaultConsumes));
 
         String[] defaultProduces = context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(context, method, JaxRsConstants.PRODUCES, defaultProduces));
+        context.setCurrentProduces(getMediaTypes(context, method, JaxRsConstants.PRODUCES, defaultProduces));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -492,7 +490,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processExtensions(context, method, operation);
 
         // Process Security Roles
-        JavaSecurityProcessor.processSecurityRoles(method, operation);
+        context.getJavaSecurityProcessor().processSecurityRoles(method, operation);
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
         setOperationOnPathItem(methodType, pathItem, operation);

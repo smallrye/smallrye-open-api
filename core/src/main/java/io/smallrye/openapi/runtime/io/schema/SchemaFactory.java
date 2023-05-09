@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
@@ -40,6 +40,7 @@ import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -483,12 +484,14 @@ public class SchemaFactory {
             }
         }
 
+        Optional<AnnotationScanner> currentScanner = context.getCurrentScanner();
+
         if (TypeUtil.isWrappedType(type)) {
             // Recurse using the optional's type
             schema = typeToSchema(context, TypeUtil.unwrapType(type), null, extensions);
-        } else if (CurrentScannerInfo.isWrapperType(type)) {
+        } else if (currentScanner.isPresent() && currentScanner.get().isWrapperType(type)) {
             // Recurse using the wrapped type
-            schema = typeToSchema(context, CurrentScannerInfo.getCurrentAnnotationScanner().unwrapType(type), null,
+            schema = typeToSchema(context, currentScanner.get().unwrapType(type), null,
                     extensions);
         } else if (TypeUtil.isTerminalType(type)) {
             schema = new SchemaImpl();
@@ -613,7 +616,9 @@ public class SchemaFactory {
     private static Schema introspectClassToSchema(final AnnotationScannerContext context, ClassType ctype,
             boolean schemaReferenceSupported) {
 
-        if (CurrentScannerInfo.isScannerInternalResponse(ctype)) {
+        Optional<AnnotationScanner> currentScanner = context.getCurrentScanner();
+
+        if (currentScanner.isPresent() && currentScanner.get().isScannerInternalResponse(ctype)) {
             return null;
         }
 
@@ -625,9 +630,9 @@ public class SchemaFactory {
                 return null;
             }
         }
-        SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
+        SchemaRegistry schemaRegistry = context.getSchemaRegistry();
 
-        if (schemaRegistry != null && schemaRegistry.hasSchema(ctype, context.getJsonViews())) {
+        if (schemaRegistry.hasSchema(ctype, context.getJsonViews())) {
             if (schemaReferenceSupported) {
                 return schemaRegistry.lookupRef(ctype, context.getJsonViews());
             } else {
@@ -636,7 +641,7 @@ public class SchemaFactory {
             }
         } else if (context.getScanStack().contains(ctype)) {
             // Protect against stack overflow when the type is in the process of being scanned.
-            return SchemaRegistry.registerReference(ctype, context.getJsonViews(), null, new SchemaImpl());
+            return schemaRegistry.registerReference(ctype, context.getJsonViews(), null, new SchemaImpl());
         } else {
             Schema schema = OpenApiDataObjectScanner.process(context, ctype);
 
@@ -657,7 +662,7 @@ public class SchemaFactory {
      * @return a reference to the registered schema or the input schema when registration is not allowed/possible
      */
     public static Schema schemaRegistration(final AnnotationScannerContext context, Type type, Schema schema) {
-        SchemaRegistry schemaRegistry = SchemaRegistry.currentInstance();
+        SchemaRegistry schemaRegistry = context.getSchemaRegistry();
 
         if (allowRegistration(context, schemaRegistry, type, schema)) {
             schema = schemaRegistry.register(type, context.getJsonViews(), schema);
@@ -682,7 +687,7 @@ public class SchemaFactory {
      */
     static boolean allowRegistration(final AnnotationScannerContext context, SchemaRegistry registry, Type type,
             Schema schema) {
-        if (schema == null || registry == null || !registry.isTypeRegistrationSupported(type, schema)) {
+        if (schema == null || registry.isDisabled() || !registry.isTypeRegistrationSupported(type, schema)) {
             return false;
         }
 

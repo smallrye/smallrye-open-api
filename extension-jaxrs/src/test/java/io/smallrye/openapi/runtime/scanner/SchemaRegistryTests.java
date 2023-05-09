@@ -34,7 +34,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         Index index = indexOf(Container.class, Nestable.class);
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -61,7 +61,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
 
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -80,7 +80,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
 
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -100,7 +100,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
 
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);
@@ -120,7 +120,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
 
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         DotName cName = componentize(Container.class.getName());
         ClassInfo cInfo = index.getClassByName(cName);

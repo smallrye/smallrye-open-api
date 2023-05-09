@@ -29,7 +29,7 @@ class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
     @BeforeEach
     void setupRegistry() {
         oai = (OpenAPIImpl) context.getOpenApi();
-        registry = SchemaRegistry.newInstance(context);
+        registry = context.getSchemaRegistry();
     }
 
     private void testAssertion(Class<?> target, String expectedResourceName) throws IOException, JSONException {

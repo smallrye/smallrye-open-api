@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -26,7 +27,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -118,14 +118,10 @@ public class OpenApiAnnotationScanner {
         OpenAPI openApi = scanMicroProfileOpenApiAnnotations();
 
         // Now load all entry points with SPI and scan those
-        List<AnnotationScanner> annotationScanners = annotationScannerFactory.getAnnotationScanners();
-
-        for (AnnotationScanner annotationScanner : annotationScanners) {
-            if (filter == null || filter.length == 0 || Arrays.asList(filter).contains(annotationScanner.getName())) {
-                ScannerLogging.logger.scanning(annotationScanner.getName());
-                CurrentScannerInfo.register(annotationScanner);
-                openApi = annotationScanner.scan(annotationScannerContext, openApi);
-            }
+        for (AnnotationScanner annotationScanner : getScanners(filter)) {
+            ScannerLogging.logger.scanning(annotationScanner.getName());
+            annotationScannerContext.setCurrentScanner(annotationScanner);
+            openApi = annotationScanner.scan(annotationScannerContext, openApi);
         }
 
         sortTags(annotationScannerContext, openApi);
@@ -134,17 +130,26 @@ public class OpenApiAnnotationScanner {
         return openApi;
     }
 
+    private List<AnnotationScanner> getScanners(String[] filters) {
+        List<AnnotationScanner> knownScanners = annotationScannerFactory.getAnnotationScanners();
+        List<String> enabledScanners = Optional.ofNullable(filters).map(Arrays::asList).orElseGet(Collections::emptyList);
+
+        if (enabledScanners.isEmpty()) {
+            return knownScanners;
+        }
+
+        return knownScanners.stream().filter(s -> enabledScanners.contains(s.getName())).collect(Collectors.toList());
+    }
+
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
         OpenAPI openApi = this.annotationScannerContext.getOpenApi();
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
-        // Creating a new instance of a registry which will be set on the thread context.
-        SchemaRegistry schemaRegistry = SchemaRegistry.newInstance(annotationScannerContext);
-
         // Register custom schemas if available
-        getCustomSchemaRegistry(annotationScannerContext.getConfig()).registerCustomSchemas(schemaRegistry);
+        getCustomSchemaRegistry(annotationScannerContext.getConfig())
+                .registerCustomSchemas(annotationScannerContext.getSchemaRegistry());
 
         // Find all OpenAPIDefinition annotations at the package level
         ScannerLogging.logger.scanning("OpenAPI");
@@ -198,7 +203,7 @@ public class OpenApiAnnotationScanner {
     }
 
     private void processClassSchemas(final AnnotationScannerContext context) {
-        CurrentScannerInfo.register(null);
+        context.setCurrentScanner(null);
 
         context.getIndex()
                 .getAnnotations(SchemaConstant.DOTNAME_SCHEMA)

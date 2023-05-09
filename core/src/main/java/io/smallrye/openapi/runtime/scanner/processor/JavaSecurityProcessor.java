@@ -25,35 +25,28 @@ import io.smallrye.openapi.runtime.util.Annotations;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class JavaSecurityProcessor {
-    private static final ThreadLocal<JavaSecurityProcessor> current = new ThreadLocal<>();
 
-    public static void register(OpenAPI openApi) {
-        JavaSecurityProcessor registry = new JavaSecurityProcessor(openApi);
-        current.set(registry);
+    public void addRolesAllowedToScopes(String[] roles) {
+        resourceRolesAllowed = roles;
+        addScopes(roles);
     }
 
-    public static void addRolesAllowedToScopes(String[] roles) {
-        current.get().resourceRolesAllowed = roles;
-        current.get().addScopes(roles);
+    public void addDeclaredRolesToScopes(String[] roles) {
+        addScopes(roles);
     }
 
-    public static void addDeclaredRolesToScopes(String[] roles) {
-        current.get().addScopes(roles);
-    }
-
-    public static void processSecurityRoles(MethodInfo method, Operation operation) {
-        current.get().processSecurityRolesForMethodOperation(method, operation);
-    }
-
-    public static void remove() {
-        current.remove();
+    public void processSecurityRoles(MethodInfo method, Operation operation) {
+        processSecurityRolesForMethodOperation(method, operation);
     }
 
     private String currentSecurityScheme;
     private List<OAuthFlow> currentFlows;
     private String[] resourceRolesAllowed;
 
-    private JavaSecurityProcessor(OpenAPI openApi) {
+    public void initialize(OpenAPI openApi) {
+        currentSecurityScheme = null;
+        currentFlows = null;
+        resourceRolesAllowed = null;
         checkSecurityScheme(openApi);
     }
 

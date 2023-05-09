@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.mediatype.MediaTypeReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -52,7 +51,7 @@ public class ContentReader {
             String contentType = Annotations.value(nested, OpenApiConstants.PROP_MEDIA_TYPE);
             MediaType mediaTypeModel = MediaTypeReader.readMediaType(context, nested);
             if (contentType == null) {
-                for (String mimeType : getDefaultMimeTypes(direction)) {
+                for (String mimeType : getDefaultMimeTypes(context, direction)) {
                     content.addMediaType(mimeType, mediaTypeModel);
                 }
             } else {
@@ -87,12 +86,12 @@ public class ContentReader {
      * @param direction the flow of traffic
      * @return default mimetypes
      */
-    private static String[] getDefaultMimeTypes(final ContentDirection direction) {
+    private static String[] getDefaultMimeTypes(AnnotationScannerContext context, final ContentDirection direction) {
 
-        if (direction == ContentDirection.INPUT && CurrentScannerInfo.getCurrentConsumes() != null) {
-            return CurrentScannerInfo.getCurrentConsumes();
-        } else if (direction == ContentDirection.OUTPUT && CurrentScannerInfo.getCurrentProduces() != null) {
-            return CurrentScannerInfo.getCurrentProduces();
+        if (direction == ContentDirection.INPUT && context.getCurrentConsumes() != null) {
+            return context.getCurrentConsumes();
+        } else if (direction == ContentDirection.OUTPUT && context.getCurrentProduces() != null) {
+            return context.getCurrentProduces();
         } else if (direction == ContentDirection.PARAMETER) {
             return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
         } else {

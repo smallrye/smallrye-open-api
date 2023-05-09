@@ -42,41 +42,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class SchemaRegistry {
 
-    // Initial value is null
-    private static final ThreadLocal<SchemaRegistry> current = new ThreadLocal<>();
-
-    /**
-     * Create a new instance of a {@link SchemaRegistry} on this thread. The
-     * registry returned by this method may also be obtained by subsequent calls
-     * to {@link #currentInstance()}. Additional calls of this method will
-     * replace the registry in the current thread context with a new instance.
-     *
-     * @param context
-     *        current scanner context
-     * @return the registry
-     */
-    public static SchemaRegistry newInstance(AnnotationScannerContext context) {
-        SchemaRegistry registry = new SchemaRegistry(context);
-        current.set(registry);
-        return registry;
-    }
-
-    /**
-     * Retrieve the {@link SchemaRegistry} previously created by
-     * {@link SchemaRegistry#newInstance(AnnotationScannerContext)
-     * newInstance} for the current thread, or <code>null</code> if none has yet
-     * been created.
-     *
-     * @return a {@link SchemaRegistry} instance or null
-     */
-    public static SchemaRegistry currentInstance() {
-        return current.get();
-    }
-
-    public static void remove() {
-        current.remove();
-    }
-
     /**
      * Check if the entityType is eligible for registration using the
      * typeResolver. The eligible kinds of types are
@@ -107,8 +72,8 @@ public class SchemaRegistry {
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the given Type
      */
-    public static Schema checkRegistration(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
-        return register(type, views, resolver, schema, (registry, key) -> registry.register(key, schema, null));
+    public Schema checkRegistration(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
+        return register(type, views, resolver, schema, (reg, key) -> reg.register(key, schema, null));
     }
 
     /**
@@ -141,11 +106,11 @@ public class SchemaRegistry {
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the given Type
      */
-    public static Schema registerReference(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
+    public Schema registerReference(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
         return register(type, views, resolver, schema, SchemaRegistry::registerReference);
     }
 
-    public static Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,
+    public Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,
             BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
 
         final Type resolvedType = TypeResolver.resolve(type, resolver);
@@ -160,21 +125,19 @@ public class SchemaRegistry {
                 return schema;
         }
 
-        SchemaRegistry registry = currentInstance();
-
-        if (registry == null) {
+        if (disabled) {
             return schema;
         }
 
         TypeKey key = new TypeKey(resolvedType, views);
 
-        if (registry.hasRef(key)) {
-            schema = registry.lookupRef(key);
-        } else if (!registry.isTypeRegistrationSupported(resolvedType, schema)
-                || registry.index.getClassByName(resolvedType.name()) == null) {
+        if (hasRef(key)) {
+            schema = lookupRef(key);
+        } else if (!isTypeRegistrationSupported(resolvedType, schema)
+                || index.getClassByName(resolvedType.name()) == null) {
             return schema;
         } else {
-            schema = registrationAction.apply(registry, key);
+            schema = registrationAction.apply(this, key);
         }
 
         return schema;
@@ -185,17 +148,16 @@ public class SchemaRegistry {
      * contains a schema for the given type (which may require type resolution using resolver).
      *
      * @param type type to check for existence of schema
+     * @param views types applied to the currently-active JsonView (Jackson annotation)
      * @param resolver resolver for type parameter
      * @return true when schema references are enabled and the type is present in the registry, otherwise false
      */
-    public static boolean hasSchema(Type type, Set<Type> views, TypeResolver resolver) {
-        SchemaRegistry registry = currentInstance();
-
-        if (registry == null) {
+    public boolean hasSchema(Type type, Set<Type> views, TypeResolver resolver) {
+        if (disabled) {
             return false;
         }
 
-        return registry.hasSchema(TypeResolver.resolve(type, resolver), views);
+        return hasSchema(TypeResolver.resolve(type, resolver), views);
     }
 
     /**
@@ -219,11 +181,16 @@ public class SchemaRegistry {
     private final OpenApiConfig config;
     private final OpenAPI oai;
     private final IndexView index;
+    /**
+     * Testing only! Disables use of the registry for backward-compatibility of several tests that
+     * directly use {@link OpenApiDataObjectScanner}.
+     */
+    private boolean disabled;
 
     private final Map<TypeKey, GeneratedSchemaInfo> registry = new LinkedHashMap<>();
     private final Set<String> names = new LinkedHashSet<>();
 
-    private SchemaRegistry(AnnotationScannerContext context) {
+    public SchemaRegistry(AnnotationScannerContext context) {
         this.context = context;
         this.config = context.getConfig();
         this.oai = context.getOpenApi();
@@ -609,5 +576,13 @@ public class SchemaRegistry {
             this.hashCode = hash;
             return hash;
         }
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }

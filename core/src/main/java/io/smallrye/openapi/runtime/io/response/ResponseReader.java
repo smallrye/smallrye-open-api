@@ -23,7 +23,6 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
@@ -214,7 +213,7 @@ public class ResponseReader {
 
         Type responseType = Annotations.value(annotation, ResponseConstant.PROP_VALUE);
 
-        if (CurrentScannerInfo.getCurrentProduces() != null && !TypeUtil.isVoid(responseType)) {
+        if (context.getCurrentProduces() != null && !TypeUtil.isVoid(responseType)) {
             // Only generate the content if the endpoint declares an @Produces media type
             Content content = new ContentImpl();
             Schema responseSchema = SchemaFactory.typeToSchema(context,
@@ -222,7 +221,7 @@ public class ResponseReader {
                     null,
                     context.getExtensions());
 
-            for (String mediaType : CurrentScannerInfo.getCurrentProduces()) {
+            for (String mediaType : context.getCurrentProduces()) {
                 content.addMediaType(mediaType, new MediaTypeImpl().schema(responseSchema));
             }
 

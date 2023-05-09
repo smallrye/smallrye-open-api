@@ -130,6 +130,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     Schema processField() {
         final AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
         final String propertyKey = typeResolver.getPropertyName();
+        final SchemaRegistry schemaRegistry = context.getSchemaRegistry();
 
         final TypeProcessor typeProcessor;
         final Schema typeSchema;
@@ -161,12 +162,12 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
             registrationType = TypeUtil.isWrappedType(entityType) ? fieldType : entityType;
             registrationCandidate = !JandexUtil.isRef(schemaAnnotation) &&
-                    SchemaRegistry.register(registrationType, context.getJsonViews(), typeResolver,
+                    schemaRegistry.register(registrationType, context.getJsonViews(), typeResolver,
                             initTypeSchema,
                             (reg, key) -> null) != initTypeSchema;
 
-            if (registrationCandidate && SchemaRegistry.hasSchema(registrationType, context.getJsonViews(), typeResolver)) {
-                typeSchema = SchemaRegistry.currentInstance()
+            if (registrationCandidate && schemaRegistry.hasSchema(registrationType, context.getJsonViews(), typeResolver)) {
+                typeSchema = schemaRegistry
                         .lookupSchema(TypeResolver.resolve(registrationType, typeResolver), context.getJsonViews());
             } else {
                 typeSchema = initTypeSchema;
@@ -229,11 +230,11 @@ public class AnnotationTargetProcessor implements RequirementHandler {
                 if (typeSchema.getType() != SchemaType.ARRAY) {
                     // Only register a reference to the type schema. The full schema will be added by subsequent
                     // items on the stack (if not already present in the registry).
-                    registeredTypeSchema = SchemaRegistry.registerReference(registrationType, context.getJsonViews(),
+                    registeredTypeSchema = schemaRegistry.registerReference(registrationType, context.getJsonViews(),
                             typeResolver, typeSchema);
                 } else {
                     // Allow registration of arrays since we may not encounter a List<CurrentType> again.
-                    registeredTypeSchema = SchemaRegistry.checkRegistration(registrationType, context.getJsonViews(),
+                    registeredTypeSchema = schemaRegistry.checkRegistration(registrationType, context.getJsonViews(),
                             typeResolver, typeSchema);
                 }
 
