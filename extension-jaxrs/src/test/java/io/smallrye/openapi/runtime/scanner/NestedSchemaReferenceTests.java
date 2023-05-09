@@ -25,7 +25,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         DotName parentName = componentize(test.io.smallrye.openapi.runtime.scanner.entities.NestedSchemaParent.class.getName());
         Type parentType = ClassType.create(parentName, Type.Kind.CLASS);
         OpenAPI oai = context.getOpenApi();
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 

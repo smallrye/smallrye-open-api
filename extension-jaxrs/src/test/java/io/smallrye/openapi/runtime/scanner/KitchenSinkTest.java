@@ -64,7 +64,7 @@ class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
         Type type = ClassType.create(name, Type.Kind.CLASS);
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
         OpenAPI oai = context.getOpenApi();
-        SchemaRegistry registry = SchemaRegistry.newInstance(context);
+        SchemaRegistry registry = context.getSchemaRegistry();
 
         Schema result = scanner.process();
         registry.register(type, Collections.emptySet(), result);

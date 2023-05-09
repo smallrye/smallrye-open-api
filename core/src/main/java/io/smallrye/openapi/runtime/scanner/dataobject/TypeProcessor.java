@@ -24,7 +24,6 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
-import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -81,7 +80,7 @@ public class TypeProcessor {
     public Type processType() {
         // If it's a terminal type.
         if (isTerminalType(type)) {
-            SchemaRegistry.checkRegistration(type, context.getJsonViews(), typeResolver, schema);
+            context.getSchemaRegistry().checkRegistration(type, context.getJsonViews(), typeResolver, schema);
             return type;
         }
 
@@ -170,7 +169,8 @@ public class TypeProcessor {
             pushToStack(componentType, itemSchema);
         }
 
-        itemSchema = SchemaRegistry.registerReference(componentType, context.getJsonViews(), typeResolver, itemSchema);
+        itemSchema = context.getSchemaRegistry().registerReference(componentType, context.getJsonViews(), typeResolver,
+                itemSchema);
 
         while (arrayType.dimensions() > 1) {
             Schema parentArrSchema = new SchemaImpl();
@@ -287,7 +287,8 @@ public class TypeProcessor {
             Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
                 propsSchema.type(Schema.SchemaType.OBJECT);
-                propsSchema = SchemaRegistry.registerReference(valueType, context.getJsonViews(), typeResolver, propsSchema);
+                propsSchema = context.getSchemaRegistry().registerReference(valueType, context.getJsonViews(), typeResolver,
+                        propsSchema);
             }
         } else if (index.containsClass(valueType)) {
             if (isA(valueType, ENUM_TYPE)) {
@@ -299,7 +300,8 @@ public class TypeProcessor {
                 pushToStack(valueType, propsSchema);
             }
 
-            propsSchema = SchemaRegistry.registerReference(valueType, context.getJsonViews(), typeResolver, propsSchema);
+            propsSchema = context.getSchemaRegistry().registerReference(valueType, context.getJsonViews(), typeResolver,
+                    propsSchema);
         }
 
         return propsSchema;

@@ -20,11 +20,13 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
+import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.PropertyNamingStrategyFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 
 /**
  * Context for scanners.
@@ -44,6 +46,11 @@ public class AnnotationScannerContext {
     private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
     private final Optional<BeanValidationScanner> beanValidationScanner;
     private final Set<Type> jsonViews = new LinkedHashSet<>();
+    private String[] currentConsumes;
+    private String[] currentProduces;
+    private Optional<AnnotationScanner> currentScanner = Optional.empty();
+    private final SchemaRegistry schemaRegistry;
+    private final JavaSecurityProcessor javaSecurityProcessor;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
@@ -61,6 +68,8 @@ public class AnnotationScannerContext {
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
         this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(BeanValidationScanner.INSTANCE)
                 : Optional.empty();
+        this.schemaRegistry = new SchemaRegistry(this);
+        this.javaSecurityProcessor = new JavaSecurityProcessor();
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
@@ -122,5 +131,37 @@ public class AnnotationScannerContext {
 
     public Map<String, MethodInfo> getOperationIdMap() {
         return operationIdMap;
+    }
+
+    public String[] getCurrentConsumes() {
+        return currentConsumes;
+    }
+
+    public void setCurrentConsumes(String[] currentConsumes) {
+        this.currentConsumes = currentConsumes;
+    }
+
+    public String[] getCurrentProduces() {
+        return currentProduces;
+    }
+
+    public void setCurrentProduces(String[] currentProduces) {
+        this.currentProduces = currentProduces;
+    }
+
+    public Optional<AnnotationScanner> getCurrentScanner() {
+        return currentScanner;
+    }
+
+    public void setCurrentScanner(AnnotationScanner currentScanner) {
+        this.currentScanner = Optional.ofNullable(currentScanner);
+    }
+
+    public SchemaRegistry getSchemaRegistry() {
+        return schemaRegistry;
+    }
+
+    public JavaSecurityProcessor getJavaSecurityProcessor() {
+        return javaSecurityProcessor;
     }
 }

@@ -28,7 +28,6 @@ import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.logging.Logger;
 import org.json.JSONException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -39,7 +38,6 @@ import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
@@ -47,12 +45,6 @@ public class IndexScannerTestBase {
 
     private static final Logger LOG = Logger.getLogger(IndexScannerTestBase.class);
     static final Pattern PATTERN_CLASS_DOTNAME_COMPONENTIZE = Pattern.compile("([\\.$]|$)");
-
-    @AfterEach
-    public void removeSchemaRegistry() {
-        SchemaRegistry.remove();
-        CurrentScannerInfo.remove();
-    }
 
     protected static String pathOf(Class<?> clazz) {
         return clazz.getName().replace('.', '/').concat(".class");

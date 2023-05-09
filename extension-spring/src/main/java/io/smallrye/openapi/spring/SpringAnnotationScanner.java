@@ -27,12 +27,10 @@ import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
-import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
@@ -203,7 +201,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processServerAnnotation(context, controllerClass, openApi);
 
         // Process Java security
-        processJavaSecurity(controllerClass, openApi);
+        processJavaSecurity(context, controllerClass, openApi);
 
         // Now find and process the operation methods
         processControllerMethods(context, controllerClass, openApi, null);
@@ -291,10 +289,10 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        CurrentScannerInfo.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES,
+        context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES,
                 context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
-        CurrentScannerInfo.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES,
+        context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES,
                 context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
 
         // Process any @Operation annotation
@@ -339,7 +337,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processExtensions(context, method, operation);
 
         // Process Security Roles
-        JavaSecurityProcessor.processSecurityRoles(method, operation);
+        context.getJavaSecurityProcessor().processSecurityRoles(method, operation);
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
         setOperationOnPathItem(methodType, pathItem, operation);

@@ -18,7 +18,6 @@ import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.runtime.io.ContentDirection;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.Referenceable;
@@ -139,14 +138,14 @@ public class RequestBodyReader {
      */
     public static RequestBody readRequestBodySchema(final AnnotationScannerContext context,
             AnnotationInstance annotation) {
-        if (annotation == null || CurrentScannerInfo.getCurrentConsumes() == null) {
+        if (annotation == null || context.getCurrentConsumes() == null) {
             // Only generate the RequestBody if the endpoint declares an @Consumes media type
             return null;
         }
         IoLogging.logger.singleAnnotation("@RequestBodySchema");
         Content content = new ContentImpl();
 
-        for (String mediaType : CurrentScannerInfo.getCurrentConsumes()) {
+        for (String mediaType : context.getCurrentConsumes()) {
             MediaType type = new MediaTypeImpl();
             type.setSchema(SchemaFactory.typeToSchema(context,
                     Annotations.value(annotation, RequestBodyConstant.PROP_VALUE),

@@ -53,7 +53,6 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.callback.CallbackReader;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
@@ -188,11 +187,12 @@ public interface AnnotationScanner {
      * @param openApi the OpenAPI Model
      * @param resourceClass the Class being scanned
      */
-    default void processJavaSecurity(ClassInfo resourceClass, OpenAPI openApi) {
-        JavaSecurityProcessor.register(openApi);
-        JavaSecurityProcessor
+    default void processJavaSecurity(AnnotationScannerContext context, ClassInfo resourceClass, OpenAPI openApi) {
+        JavaSecurityProcessor securityProcessor = context.getJavaSecurityProcessor();
+        securityProcessor.initialize(openApi);
+        securityProcessor
                 .addDeclaredRolesToScopes(Annotations.getAnnotationValue(resourceClass, SecurityConstants.DECLARE_ROLES));
-        JavaSecurityProcessor
+        securityProcessor
                 .addRolesAllowedToScopes(Annotations.getAnnotationValue(resourceClass, SecurityConstants.ROLES_ALLOWED));
     }
 
@@ -493,7 +493,7 @@ public interface AnnotationScanner {
                 }
 
                 Content content = new ContentImpl();
-                String[] produces = CurrentScannerInfo.getCurrentProduces();
+                String[] produces = context.getCurrentProduces();
 
                 if (produces == null || produces.length == 0) {
                     produces = context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
@@ -1004,7 +1004,7 @@ public interface AnnotationScanner {
     }
 
     default String[] getConsumes(final AnnotationScannerContext context) {
-        String[] currentConsumes = CurrentScannerInfo.getCurrentConsumes();
+        String[] currentConsumes = context.getCurrentConsumes();
         if (currentConsumes == null || currentConsumes.length == 0) {
             currentConsumes = context.getConfig().getDefaultConsumes().orElse(null);
         }

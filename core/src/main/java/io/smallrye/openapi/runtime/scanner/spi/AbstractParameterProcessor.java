@@ -49,7 +49,6 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.CurrentScannerInfo;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -495,9 +494,12 @@ public abstract class AbstractParameterProcessor {
         ParameterImpl param = context.oaiParam != null ? (ParameterImpl) context.oaiParam : new ParameterImpl();
 
         if (context.frameworkParam == null) {
-            String paramIn = String.valueOf(context.oaiParam.getIn());
-            ScannerSPILogging.log.missingFrameworkParam(CurrentScannerInfo.getCurrentAnnotationScanner().getName(),
-                    resourceMethod.declaringClass().toString(), resourceMethod.toString(), context.oaiParam.getName(), paramIn);
+            scannerContext.getCurrentScanner().ifPresent(scanner -> {
+                String paramIn = String.valueOf(context.oaiParam.getIn());
+                ScannerSPILogging.log.missingFrameworkParam(scanner.getName(),
+                        resourceMethod.declaringClass().toString(), resourceMethod.toString(), context.oaiParam.getName(),
+                        paramIn);
+            });
         }
 
         param.setName(context.name);
@@ -748,7 +750,7 @@ public abstract class AbstractParameterProcessor {
 
         Content content = new ContentImpl();
 
-        Arrays.stream(getFormMediaTypes(CurrentScannerInfo::getCurrentConsumes, this::getFormMediaType))
+        Arrays.stream(getFormMediaTypes(scannerContext::getCurrentConsumes, this::getFormMediaType))
                 .forEach(mediaTypeName -> {
                     MediaType mediaType = new MediaTypeImpl();
                     Schema schema = new SchemaImpl();

@@ -9,6 +9,7 @@ import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.json.JSONException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -23,6 +24,11 @@ import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContaine
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 class ExpectationTests extends JaxRsDataObjectScannerTestBase {
+
+    @BeforeEach
+    void setup() {
+        context.getSchemaRegistry().setDisabled(true);
+    }
 
     /**
      * Unresolvable type parameter.
