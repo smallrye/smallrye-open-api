@@ -36,11 +36,49 @@ mvn clean install
 * {microprofile-open-api}[Eclipse MicroProfile OpenAPI]
 
 === Configuration Extensions
-* `mp.openapi.extensions.smallrye.property-naming-strategy` - define a naming strategy to be used globally for all schema properties. Set to one of the following:
+
+* Property Naming Strategy
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.property-naming-strategy
+----
+Define a naming strategy to be used globally for all schema properties. Set to one of the following:
 ** A standard JSON-B naming strategy (listed in `jakarta.json.bind.config.PropertyNamingStrategy`/`javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
-* `mp.openapi.extensions.smallrye.remove-unused-schemas.enable` - Set to `true` enable automatic removal of unused schemas from `components/schemas` in the OpenAPI model. Unused schemas will be removed following annotation scanning but prior to running any `OASFilter` that may be configured. Default value is `false`.
-* `mp.openapi.extensions.smallrye.duplicateOperationIdBehavior` - Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log warnings when the build encounters duplicate operationIds. Default value is `WARN`.
-* `mp.openapi.extensions.smallrye.maximumStaticFileSize` - Set this value in order to change the maximum threshold for
-processed static files, when generating model from them. If not set, it will default to 3 MB.
+
+* Removal of unused schemas
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.remove-unused-schemas.enable
+----
+Set to `true` enable automatic removal of unused schemas from `components/schemas` in the OpenAPI model. Unused schemas will be removed following annotation scanning but prior to running any `OASFilter` that may be configured. Default value is `false`.
+
+* Automatic Schema Inheritance
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.auto-inheritance
+----
+Configures handling of schema inheritance. Allowed values include `NONE` (default), `BOTH`, and `PARENT_ONLY`.
+** `NONE` disables automatic schema inheritance. Parent class properties will be includes in the properties map of each child class unless `@Schema(allOf = { ... })` has been specified on the child class.
+** `BOTH` enables automatic schema inheritance by placing both the child and parent class within the child schema's `allOf` property _unless_ `@Schema(allOf = { ... })`  has already been specified on the child class. `BOTH` processing can be selectively disabled on individual classes by setting `@Schema(allOf = void.class)` on the child class and no `allOf` will be set on the resulting schema - parent and child properties will be present in the child schema as if `NONE` were used.
+** `PARENT_ONLY` enables automatic schema inheritance by placing only the parent class within the child schema's `allOf` property _unless_ `@Schema(allOf = { ... })`  has already been specified on the child class. `PARENT_ONLY` processing can be selectively disabled on individual classes by setting `@Schema(allOf = void.class)` on the child class and no `allOf` will be set on the resulting schema - parent and child properties will be present in the child schema as if `NONE` were used.
+
+* Duplicate Operation ID Behavior
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.duplicateOperationIdBehavior
+----
+Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log warnings when the build encounters duplicate operationIds. Default value is `WARN`.
+
+* Maximum Static File Size
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.maximumStaticFileSize
+----
+Set this value in order to change the maximum threshold for processed static files, when generating model from them. If not set, it will default to 3 MB.

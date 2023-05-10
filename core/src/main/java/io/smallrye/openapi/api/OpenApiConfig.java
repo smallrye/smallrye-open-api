@@ -39,6 +39,12 @@ public interface OpenApiConfig {
         WARN
     }
 
+    enum AutoInheritance {
+        NONE,
+        BOTH,
+        PARENT_ONLY
+    }
+
     public static OpenApiConfig fromConfig(Config config) {
         return new OpenApiConfigImpl(config);
     }
@@ -239,6 +245,11 @@ public interface OpenApiConfig {
 
     default Integer getMaximumStaticFileSize() {
         return getConfigValue(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE, Integer.class, () -> MAXIMUM_STATIC_FILE_SIZE_DEFAULT);
+    }
+
+    default AutoInheritance getAutoInheritance() {
+        return getConfigValue(OpenApiConstants.AUTO_INHERITANCE, String.class, AutoInheritance::valueOf,
+                () -> AutoInheritance.NONE);
     }
 
     default Set<String> toSet(String[] items) {

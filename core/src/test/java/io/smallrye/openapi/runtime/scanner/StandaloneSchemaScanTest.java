@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import io.smallrye.openapi.api.constants.OpenApiConstants;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
 
 class StandaloneSchemaScanTest extends IndexScannerTestBase {
@@ -57,6 +58,32 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.inheritance.json", result);
+
+    }
+
+    @Test
+    void testInheritanceAutomaticAnyOf() throws Exception {
+        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
+                dynamicConfig(OpenApiConstants.AUTO_INHERITANCE, "BOTH"), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.inheritance.json", result);
+
+    }
+
+    @Test
+    void testInheritanceAutomaticAnyOfParentOnly() throws Exception {
+        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
+                dynamicConfig(OpenApiConstants.AUTO_INHERITANCE, "PARENT_ONLY"), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.inheritance-parent-only.json", result);
 
     }
 
@@ -101,6 +128,32 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Schema(allOf = { Reptile.class, Turtle.class })
     static class Turtle extends Reptile {
+        String shellPattern;
+    }
+
+    @Schema(name = "Reptile", discriminatorProperty = "type", discriminatorMapping = {
+            @DiscriminatorMapping(value = "lizard", schema = LizardNoAllOf.class),
+            @DiscriminatorMapping(value = "snake", schema = SnakeNoAllOf.class),
+            @DiscriminatorMapping(value = "turtle", schema = TurtleNoAllOf.class)
+    })
+    static abstract class ReptileNoAllOf {
+        @Schema(required = true)
+        private String type;
+    }
+
+    @Schema(name = "Lizard")
+    static class LizardNoAllOf extends ReptileNoAllOf {
+        String color;
+    }
+
+    @Schema(name = "Snake")
+    static class SnakeNoAllOf extends ReptileNoAllOf {
+        int length;
+        String lengthUnits;
+    }
+
+    @Schema(name = "Turtle")
+    static class TurtleNoAllOf extends ReptileNoAllOf {
         String shellPattern;
     }
 

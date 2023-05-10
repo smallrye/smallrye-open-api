@@ -63,6 +63,7 @@ public final class OpenApiConstants {
     public static final String DEFAULT_PRODUCES = SMALLRYE_PREFIX + "defaultProduces";
     public static final String DEFAULT_CONSUMES = SMALLRYE_PREFIX + "defaultConsumes";
     public static final String MAXIMUM_STATIC_FILE_SIZE = SMALLRYE_PREFIX + "maximumStaticFileSize";
+    public static final String AUTO_INHERITANCE = SMALLRYE_PREFIX + "auto-inheritance";
 
     /**
      * Set of classes which should never be scanned, regardless of user configuration.

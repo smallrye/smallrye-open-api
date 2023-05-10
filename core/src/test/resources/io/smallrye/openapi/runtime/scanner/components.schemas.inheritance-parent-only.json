@@ -3,16 +3,15 @@
   "components" : {
     "schemas" : {
       "Lizard" : {
+        "type" : "object",
         "allOf" : [ {
           "$ref" : "#/components/schemas/Reptile"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "color" : {
-              "type" : "string"
-            }
+        } ],
+        "properties" : {
+          "color" : {
+            "type" : "string"
           }
-        } ]
+        }
       },
       "Reptile" : {
         "required" : [ "type" ],
@@ -32,32 +31,30 @@
         }
       },
       "Snake" : {
+        "type" : "object",
         "allOf" : [ {
           "$ref" : "#/components/schemas/Reptile"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "length" : {
-              "format" : "int32",
-              "type" : "integer"
-            },
-            "lengthUnits" : {
-              "type" : "string"
-            }
+        } ],
+        "properties" : {
+          "length" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lengthUnits" : {
+            "type" : "string"
           }
-        } ]
+        }
       },
       "Turtle" : {
+        "type" : "object",
         "allOf" : [ {
           "$ref" : "#/components/schemas/Reptile"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "shellPattern" : {
-              "type" : "string"
-            }
+        } ],
+        "properties" : {
+          "shellPattern" : {
+            "type" : "string"
           }
-        } ]
+        }
       }
     }
   }
