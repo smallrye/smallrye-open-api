@@ -257,7 +257,14 @@ public class OpenApiDataObjectScanner {
             } else {
                 Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
 
-                if (currentSchema.getType() != Schema.SchemaType.OBJECT) {
+                /*
+                 * Ignore the returned ref when:
+                 *
+                 * - the currentSchema is an object type and will be further modified with added properties
+                 * - this is the root object entry that should never be set to a ref here. That may be done
+                 * by the process that is invoking this instance of OpenApiDataObjectScanner.
+                 */
+                if (currentSchema.getType() != Schema.SchemaType.OBJECT && entrySchema != rootSchema) {
                     entrySchema.setRef(ref.getRef());
                 }
             }

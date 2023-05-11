@@ -549,4 +549,52 @@ class ParameterScanTests extends IndexScannerTestBase {
     void testParamsNotDuplicated() throws IOException, JSONException {
         test("params.synthetic-methods-not-included.json", Issue1256.CLASSES);
     }
+
+    static class Issue1466 {
+        static final Class<?>[] CLASSES = {
+                Fruit.class,
+                FruitId.class,
+                FruitResource.class
+        };
+
+        static class Fruit {
+            public String name;
+            public String description;
+
+            public Fruit() {
+            }
+
+            public Fruit(String name, String description) {
+                this.name = name;
+                this.description = description;
+            }
+        }
+
+        @Schema(type = SchemaType.STRING)
+        static class FruitId {
+            private final String id;
+
+            public FruitId(String id) {
+                this.id = id;
+            }
+
+            public String getId() {
+                return this.id;
+            }
+        }
+
+        @jakarta.ws.rs.Path("/fruits")
+        static class FruitResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("{fruitId}")
+            public Fruit get(@jakarta.ws.rs.PathParam("fruitId") FruitId fruitId) {
+                return null;
+            }
+        }
+    }
+
+    @Test
+    void testPathParamValueType() throws IOException, JSONException {
+        test("params.value-class-pathparam.json", Issue1466.CLASSES);
+    }
 }
