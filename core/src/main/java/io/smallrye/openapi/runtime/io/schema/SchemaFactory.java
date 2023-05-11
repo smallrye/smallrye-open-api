@@ -25,7 +25,7 @@ import org.jboss.jandex.ClassType;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.jandex.VoidType;
+import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.JacksonConstants;
@@ -52,8 +52,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  * @author Marc Savy {@literal <marc@rhymewithgravy.com>}
  */
 public class SchemaFactory {
-
-    static final Type[] IGNORED = { VoidType.VOID };
 
     private SchemaFactory() {
     }
@@ -707,7 +705,7 @@ public class SchemaFactory {
      * @param types the implementation types of the items to scan, never null
      */
     private static List<Schema> readClassSchemas(final AnnotationScannerContext context, Type[] types, boolean removeCurrent) {
-        if (Arrays.equals(types, IGNORED)) {
+        if (Arrays.stream(types).allMatch(type -> type.kind() == Kind.VOID)) {
             return null; // NOSONAR - intentionally return null
         }
 
