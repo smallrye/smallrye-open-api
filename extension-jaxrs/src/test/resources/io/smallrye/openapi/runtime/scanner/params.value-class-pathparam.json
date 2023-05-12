@@ -1,0 +1,47 @@
+{
+  "openapi" : "3.0.3",
+  "paths" : {
+    "/fruits/{fruitId}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "fruitId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/FruitId"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Fruit"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Fruit" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          }
+        }
+      },
+      "FruitId" : {
+        "type" : "string"
+      }
+    }
+  }
+}

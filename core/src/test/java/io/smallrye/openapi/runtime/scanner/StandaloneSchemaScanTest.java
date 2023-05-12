@@ -51,7 +51,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testInheritanceAnyOf() throws Exception {
-        Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class);
+        Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class, Alligator.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -63,7 +63,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testInheritanceAutomaticAnyOf() throws Exception {
-        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class);
+        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class,
+                AlligatorNoAllOf.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
                 dynamicConfig(OpenApiConstants.AUTO_INHERITANCE, "BOTH"), index);
 
@@ -76,7 +77,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testInheritanceAutomaticAnyOfParentOnly() throws Exception {
-        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class);
+        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class,
+                AlligatorNoAllOf.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
                 dynamicConfig(OpenApiConstants.AUTO_INHERITANCE, "PARENT_ONLY"), index);
 
@@ -131,6 +133,11 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         String shellPattern;
     }
 
+    @Schema(description = "An alligator is a reptile without allOf inheritance")
+    static class Alligator extends Reptile {
+        float jawLength;
+    }
+
     @Schema(name = "Reptile", discriminatorProperty = "type", discriminatorMapping = {
             @DiscriminatorMapping(value = "lizard", schema = LizardNoAllOf.class),
             @DiscriminatorMapping(value = "snake", schema = SnakeNoAllOf.class),
@@ -155,6 +162,11 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Schema(name = "Turtle")
     static class TurtleNoAllOf extends ReptileNoAllOf {
         String shellPattern;
+    }
+
+    @Schema(name = "Alligator", allOf = void.class, description = "An alligator is a reptile without allOf inheritance")
+    static class AlligatorNoAllOf extends ReptileNoAllOf {
+        float jawLength;
     }
 
     /****************************************************************/

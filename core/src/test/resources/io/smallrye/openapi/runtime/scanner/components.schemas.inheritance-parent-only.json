@@ -2,6 +2,20 @@
   "openapi" : "3.0.3",
   "components" : {
     "schemas" : {
+      "Alligator" : {
+        "description" : "An alligator is a reptile without allOf inheritance",
+        "required" : [ "type" ],
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "jawLength" : {
+            "format" : "float",
+            "type" : "number"
+          }
+        }
+      },
       "Lizard" : {
         "type" : "object",
         "allOf" : [ {
