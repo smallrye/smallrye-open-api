@@ -127,7 +127,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
 
         OpenAPI staticModel = generateStaticModel(openApiConfig, resourcesSrcDirs);
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, SmallryeOpenApiTask.class.getClassLoader());
-        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
+        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader, index);
 
         OpenApiDocument document = OpenApiDocument.INSTANCE;
 
@@ -146,7 +146,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
             addingModelDebug("static", staticModel);
             document.modelFromStaticFile(staticModel);
         }
-        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader));
+        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader, index));
         document.initialize();
 
         return document;

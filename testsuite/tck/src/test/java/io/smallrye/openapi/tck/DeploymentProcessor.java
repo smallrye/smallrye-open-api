@@ -13,6 +13,7 @@ import static java.util.Optional.ofNullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Properties;
@@ -20,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.arquillian.container.spi.client.deployment.DeploymentDescription;
@@ -27,6 +29,7 @@ import org.jboss.arquillian.container.spi.event.container.BeforeDeploy;
 import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
+import org.jboss.jandex.IndexWriter;
 import org.jboss.jandex.Indexer;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ArchivePaths;
@@ -114,7 +117,7 @@ public class DeploymentProcessor {
         ClassLoader contextClassLoader = currentThread().getContextClassLoader();
 
         Optional<OpenAPI> annotationModel = ofNullable(modelFromAnnotations(openApiConfig, contextClassLoader, index));
-        Optional<OpenAPI> readerModel = ofNullable(modelFromReader(openApiConfig, contextClassLoader));
+        Optional<OpenAPI> readerModel = ofNullable(modelFromReader(openApiConfig, contextClassLoader, index));
         Optional<OpenAPI> staticFileModel = Stream.of(modelFromFile(openApiConfig, war, "/META-INF/openapi.json", JSON),
                 modelFromFile(openApiConfig, war, "/META-INF/openapi.yaml", YAML),
                 modelFromFile(openApiConfig, war, "/META-INF/openapi.yml", YAML))
@@ -128,7 +131,7 @@ public class DeploymentProcessor {
         annotationModel.ifPresent(document::modelFromAnnotations);
         readerModel.ifPresent(document::modelFromReader);
         staticFileModel.ifPresent(document::modelFromStaticFile);
-        document.filter(getFilter(openApiConfig, contextClassLoader));
+        document.filter(getFilter(openApiConfig, contextClassLoader, index));
         document.initialize();
         OpenAPI openAPI = document.get();
 
@@ -137,6 +140,13 @@ public class DeploymentProcessor {
             war.addAsManifestResource(new ByteArrayAsset(serialize(openAPI, YAML).getBytes(UTF_8)), "openapi.yaml");
         } catch (IOException e) {
             // Ignore
+        }
+
+        try (ByteArrayOutputStream indexOut = new ByteArrayOutputStream()) {
+            new IndexWriter(indexOut).write(index);
+            war.addAsManifestResource(new ByteArrayAsset(indexOut.toByteArray()), "jandex.idx");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
 
         document.reset();
