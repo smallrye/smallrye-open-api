@@ -86,14 +86,14 @@ jobs:
           java-version: 11
 
       - name: maven cache
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
       - name: generate javadocs
-        run: mvn -B package javadoc:javadoc -DskipTests
+        run: mvn -B install javadoc:javadoc -DskipTests
 
   tck-reporting:
     runs-on: ubuntu-latest
