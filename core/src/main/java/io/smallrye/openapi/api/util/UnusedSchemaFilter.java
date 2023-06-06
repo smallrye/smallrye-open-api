@@ -1,11 +1,6 @@
 package io.smallrye.openapi.api.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.OASFilter;
@@ -97,13 +92,22 @@ public class UnusedSchemaFilter implements OASFilter {
 
     void removeReferences(Map<String, Schema> schemas) {
         if (schemas != null) {
-            schemas.values().forEach(this::removeReference);
+            removeReferences(schemas.values());
         }
     }
 
-    void removeReferences(List<Schema> schemas) {
+    void removeReferences(Collection<Schema> schemas) {
         if (schemas != null) {
-            schemas.forEach(this::removeReference);
+            schemas.forEach(schema -> {
+                removeReference(schema);
+                removeReference(schema.getAdditionalPropertiesSchema());
+                removeReferences(schema.getAllOf());
+                removeReferences(schema.getAnyOf());
+                removeReferences(schema.getOneOf());
+                removeReference(schema.getItems());
+                removeReference(schema.getNot());
+                removeReferences(schema.getProperties());
+            });
         }
     }
 }
