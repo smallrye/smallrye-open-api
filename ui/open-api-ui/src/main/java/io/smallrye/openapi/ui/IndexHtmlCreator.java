@@ -82,6 +82,13 @@ public class IndexHtmlCreator {
                             replacement = "'" + replacement + "'";
                         }
                     }
+                    // Some properties can be boolean or Object, if not, we treat it as String and add '
+                    if (BOOLEAN_OR_OBJECT_KEYS.contains(variableOption)) {
+                        if (!replacement.equals("true") && !replacement.equals("false") &&
+                        !(replacement.startsWith("{") && replacement.endsWith("}"))) {
+                            replacement = "'" + replacement + "'";
+                        }
+                    }
                     // Some properties can be a String or a function, if String we need to add '
                     replacement = replacement.trim();
                     if (STRING_OR_FUNCTION_KEYS.contains(variableOption)) {
@@ -259,7 +266,11 @@ public class IndexHtmlCreator {
 
     // Some properties can be a boolean or a String. To render correct we need to handle those specially
     private static final List<Option> BOOLEAN_OR_STRING_KEYS = Arrays
-            .asList(new Option[] { Option.filter, Option.syntaxHighlight });
+            .asList(new Option[] { Option.filter });
+
+    // Some properties can be a boolean or an Object. To render correct we need to handle those specially
+    private static final List<Option> BOOLEAN_OR_OBJECT_KEYS = Arrays
+      .asList(new Option[] { Option.syntaxHighlight });
 
     // Some properties can be a String or a function. To render correct we need to handle those specially
     private static final List<Option> STRING_OR_FUNCTION_KEYS = Arrays

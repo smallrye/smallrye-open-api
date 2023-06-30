@@ -214,4 +214,30 @@ class IndexCreatorTest {
 
         assertTrue(html.contains("var oar"), "Missing declaration of 'oar'");
     }
+
+    @Test
+    void testCreateWithSyntaxHighlightBoolean() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.syntaxHighlight, "false");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("syntaxHighlight: false,"));
+    }
+
+    @Test
+    void testCreateWithSyntaxHighlightObject() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.syntaxHighlight, "{ activated: true, theme: \"monokai\" }");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("syntaxHighlight: { activated: true, theme: \"monokai\" },"));
+    }
 }
