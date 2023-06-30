@@ -75,10 +75,6 @@ public class IgnoreResolver {
         return Visibility.UNSET;
     }
 
-    public ClassInfo getClassInfoFromIndex(Type type) {
-        return this.index.getClass(type);
-    }
-
     /**
      * Handler for OAS hidden @{@link Schema}
      */
@@ -367,6 +363,8 @@ public class IgnoreResolver {
 
             if (hasXmlTransient(declaringClass)) {
                 result = Visibility.IGNORED;
+            } else if (isXmlExposed(target)) {
+                result = Visibility.EXPOSED;
             } else {
                 result = getXmlVisibility(declaringClass, accessTypeRequired, flags);
             }
@@ -376,6 +374,10 @@ public class IgnoreResolver {
 
         boolean hasXmlTransient(AnnotationTarget target) {
             return Annotations.hasAnnotation(target, JaxbConstants.XML_TRANSIENT);
+        }
+
+        boolean isXmlExposed(AnnotationTarget target) {
+            return Annotations.hasAnnotation(target, JaxbConstants.XML_ALL_BINDINGS);
         }
 
         Visibility getXmlVisibility(ClassInfo declaringClass, String accessTypeRequired, int flags) {
