@@ -1,7 +1,11 @@
 package io.smallrye.openapi.api.constants;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.jandex.DotName;
 
@@ -37,6 +41,12 @@ public class JaxbConstants {
     public static final List<DotName> XML_WRAPPERELEMENT = Arrays.asList(
             DotName.createSimple("javax.xml.bind.annotation.XmlElementWrapper"),
             DotName.createSimple("jakarta.xml.bind.annotation.XmlElementWrapper"));
+    public static final List<DotName> XML_ALL_BINDINGS = Collections.unmodifiableList(Stream.of(
+            JaxbConstants.XML_ATTRIBUTE,
+            JaxbConstants.XML_ELEMENT,
+            JaxbConstants.XML_WRAPPERELEMENT)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList()));
 
     public static final String PROP_NAME = "name";
 
