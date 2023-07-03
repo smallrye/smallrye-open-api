@@ -19,7 +19,6 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.FieldInfo;
-import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
@@ -266,44 +265,20 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
         String name = typeResolver.getBeanPropertyName();
-        FieldInfo field = typeResolver.getField();
-        if (field != null) {
-            if (processXmlAttr(name,
-                    fieldSchema,
-                    Annotations.getAnnotation(field, XML_ATTRIBUTE),
-                    Annotations.getAnnotation(field, XML_ELEMENT),
-                    Annotations.getAnnotation(field, XML_WRAPPERELEMENT))) {
-                return;
-            }
-        }
-        MethodInfo readMethod = typeResolver.getReadMethod();
-        if (readMethod != null) {
-            if (processXmlAttr(name,
-                    fieldSchema,
-                    Annotations.getAnnotation(readMethod, XML_ATTRIBUTE),
-                    Annotations.getAnnotation(readMethod, XML_ELEMENT),
-                    Annotations.getAnnotation(readMethod, XML_WRAPPERELEMENT))) {
-                return;
-            }
-        }
-        MethodInfo writeMethod = typeResolver.getWriteMethod();
-        if (writeMethod != null) {
-            if (processXmlAttr(name,
-                    fieldSchema,
-                    Annotations.getAnnotation(writeMethod, XML_ATTRIBUTE),
-                    Annotations.getAnnotation(writeMethod, XML_ELEMENT),
-                    Annotations.getAnnotation(writeMethod, XML_WRAPPERELEMENT))) {
-                return;
+
+        for (AnnotationTarget target : Arrays.asList(typeResolver.getField(), typeResolver.getReadMethod(),
+                typeResolver.getWriteMethod())) {
+            if (target != null && processXmlAttr(name, fieldSchema, target)) {
+                break;
             }
         }
     }
 
-    private boolean processXmlAttr(
-            String name,
-            Schema fieldSchema,
-            AnnotationInstance xmlAttr,
-            AnnotationInstance xmlElement,
-            AnnotationInstance xmlWrapper) {
+    private boolean processXmlAttr(String name, Schema fieldSchema, AnnotationTarget target) {
+        AnnotationInstance xmlAttr = Annotations.getAnnotation(target, XML_ATTRIBUTE);
+        AnnotationInstance xmlElement = Annotations.getAnnotation(target, XML_ELEMENT);
+        AnnotationInstance xmlWrapper = Annotations.getAnnotation(target, XML_WRAPPERELEMENT);
+
         if (xmlAttr == null && xmlWrapper == null && xmlElement == null) {
             return false;
         }
@@ -313,6 +288,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema.getXml().attribute(true);
             setXmlName(fieldSchema, name, xmlAttr);
         }
+
         if (xmlWrapper != null) {
             setXmlIfEmpty(fieldSchema);
             fieldSchema.getXml().wrapped(true);
@@ -322,9 +298,11 @@ public class AnnotationTargetProcessor implements RequirementHandler {
                 return true;
             }
         }
+
         if (xmlElement != null) {
             setXmlName(fieldSchema, name, xmlElement);
         }
+
         return true;
     }
 
@@ -332,6 +310,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (schema.getXml() != null) {
             return;
         }
+
         schema.setXml(new XMLImpl());
     }
 
