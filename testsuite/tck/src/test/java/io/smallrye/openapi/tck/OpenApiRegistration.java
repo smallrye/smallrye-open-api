@@ -3,6 +3,7 @@ package io.smallrye.openapi.tck;
 import static io.smallrye.openapi.runtime.io.Format.JSON;
 import static io.smallrye.openapi.runtime.io.Format.YAML;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,8 @@ import jakarta.servlet.http.HttpServlet;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.jandex.IndexReader;
+import org.jboss.jandex.IndexView;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -72,15 +75,21 @@ public class OpenApiRegistration extends HttpServlet {
             return Optional.empty();
         }
 
+        final IndexView index;
+
+        try (InputStream indexStream = servletContext.getResourceAsStream("/META-INF/jandex.idx")) {
+            index = new IndexReader(indexStream).read();
+        }
+
         final OpenApiDocument document = OpenApiDocument.INSTANCE;
+
         try (OpenApiStaticFile staticFile = new OpenApiStaticFile(resource.openStream(), format)) {
             Config config = ConfigProvider.getConfig();
             OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
             document.reset();
             document.config(openApiConfig);
-            document.filter(OpenApiProcessor.getFilter(openApiConfig, Thread.currentThread().getContextClassLoader()));
-            document.modelFromStaticFile(
-                    io.smallrye.openapi.runtime.OpenApiProcessor.modelFromStaticFile(openApiConfig, staticFile));
+            document.filter(OpenApiProcessor.getFilter(openApiConfig, Thread.currentThread().getContextClassLoader(), index));
+            document.modelFromStaticFile(OpenApiProcessor.modelFromStaticFile(openApiConfig, staticFile));
             document.initialize();
             return Optional.of(document.get());
         } finally {

@@ -288,7 +288,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
         OpenAPI staticModel = generateStaticModel(openApiConfig);
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, classLoader);
-        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader);
+        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader, index);
 
         OpenApiDocument document = OpenApiDocument.newInstance();
 
@@ -304,7 +304,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         if (staticModel != null) {
             document.modelFromStaticFile(staticModel);
         }
-        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader));
+        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader, index));
         document.initialize();
 
         return document;

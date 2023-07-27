@@ -2,9 +2,11 @@ package io.smallrye.openapi.runtime;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -12,6 +14,7 @@ import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.OASModelReader;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.Indexer;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
@@ -26,6 +29,8 @@ import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiProcessor {
+
+    static final IndexView EMPTY_INDEX = new Indexer().complete();
 
     private OpenApiProcessor() {
     }
@@ -71,8 +76,8 @@ public class OpenApiProcessor {
         }
         // Filter and model
         if (config != null && classLoader != null) {
-            OpenApiDocument.INSTANCE.modelFromReader(modelFromReader(config, classLoader));
-            OpenApiDocument.INSTANCE.filter(getFilter(config, classLoader));
+            OpenApiDocument.INSTANCE.modelFromReader(modelFromReader(config, classLoader, index));
+            OpenApiDocument.INSTANCE.filter(getFilter(config, classLoader, index));
         }
 
         OpenApiDocument.INSTANCE.initialize();
@@ -169,20 +174,27 @@ public class OpenApiProcessor {
      * @param config OpenApiConfig
      * @param loader ClassLoader
      * @return OpenApiImpl created from OASModelReader
+     *
+     * @deprecated use {@linkplain #modelFromReader(OpenApiConfig, ClassLoader, IndexView)} instead
      */
+    @Deprecated
     public static OpenAPI modelFromReader(OpenApiConfig config, ClassLoader loader) {
-        String readerClassName = config.modelReader();
-        if (readerClassName == null) {
-            return null;
-        }
-        try {
-            Class<?> c = loader.loadClass(readerClassName);
-            OASModelReader reader = (OASModelReader) c.getDeclaredConstructor().newInstance();
-            return reader.buildModel();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            throw new OpenApiRuntimeException(e);
-        }
+        return modelFromReader(config, loader, EMPTY_INDEX);
+    }
+
+    /**
+     * Instantiate the configured {@link OASModelReader} and invoke it. If no reader is configured,
+     * then return null. If a class is configured but there is an error either instantiating or invoking
+     * it, a {@link OpenApiRuntimeException} is thrown.
+     *
+     * @param config OpenApiConfig
+     * @param loader ClassLoader
+     * @param index an IndexView to be provided to the filter when accepted via its constructor
+     * @return OpenApiImpl created from OASModelReader
+     */
+    public static OpenAPI modelFromReader(OpenApiConfig config, ClassLoader loader, IndexView index) {
+        OASModelReader reader = newInstance(config.modelReader(), loader, index);
+        return reader != null ? reader.buildModel() : null;
     }
 
     /**
@@ -191,17 +203,49 @@ public class OpenApiProcessor {
      * @param config OpenApiConfig
      * @param loader ClassLoader
      * @return OASFilter instance retrieved from loader
+     *
+     * @deprecated use {@linkplain #getFilter(OpenApiConfig, ClassLoader, IndexView)} instead
      */
+    @Deprecated
     public static OASFilter getFilter(OpenApiConfig config, ClassLoader loader) {
-        String filterClassName = config.filter();
-        if (filterClassName == null) {
+        return getFilter(config, loader, EMPTY_INDEX);
+    }
+
+    /**
+     * Instantiate the {@link OASFilter} configured by the application.
+     *
+     * @param config OpenApiConfig
+     * @param loader ClassLoader
+     * @param index an IndexView to be provided to the filter when accepted via its constructor
+     * @return OASFilter instance retrieved from loader
+     */
+    public static OASFilter getFilter(OpenApiConfig config, ClassLoader loader, IndexView index) {
+        return newInstance(config.filter(), loader, index);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T newInstance(String className, ClassLoader loader, IndexView index) {
+        if (className == null) {
             return null;
         }
+
+        Class<T> klazz = uncheckedCall(() -> (Class<T>) loader.loadClass(className));
+
+        return Arrays.stream(klazz.getDeclaredConstructors())
+                .filter(OpenApiProcessor::acceptsIndexView)
+                .findFirst()
+                .map(ctor -> uncheckedCall(() -> (T) ctor.newInstance(index)))
+                .orElseGet(() -> uncheckedCall(() -> klazz.getDeclaredConstructor().newInstance()));
+    }
+
+    private static boolean acceptsIndexView(Constructor<?> ctor) {
+        return ctor.getParameterCount() == 1 && IndexView.class.isAssignableFrom(ctor.getParameterTypes()[0]);
+    }
+
+    private static <T> T uncheckedCall(Callable<T> callable) {
         try {
-            Class<?> c = loader.loadClass(filterClassName);
-            return (OASFilter) c.getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            return callable.call();
+        } catch (Exception e) {
             throw new OpenApiRuntimeException(e);
         }
     }
