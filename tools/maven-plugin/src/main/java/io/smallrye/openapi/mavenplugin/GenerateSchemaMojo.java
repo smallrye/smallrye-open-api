@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -249,6 +250,18 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "scanResourceClasses")
     private Map<String, String> scanResourceClasses;
 
+    enum OutputFileFilter {
+        ALL,
+        YAML,
+        JSON
+    }
+
+    /**
+     * Filter the type of files that will be generated, allowed values are {@code ALL}, {@code YAML} and {@code JSON}.
+     */
+    @Parameter(property = "outputFileTypeFilter", defaultValue = "ALL")
+    private String outputFileTypeFilter;
+
     @Component
     private MavenDependencyIndexCreator mavenDependencyIndexCreator;
 
@@ -472,9 +485,15 @@ public class GenerateSchemaMojo extends AbstractMojo {
                     }
                 }
 
-                writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
+                if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.YAML)
+                        .anyMatch(f -> f.equals(OutputFileFilter.valueOf(this.outputFileTypeFilter)))) {
+                    writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
+                }
 
-                writeSchemaFile(directory, "json", json.getBytes(charset));
+                if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.JSON)
+                        .anyMatch(f -> f.equals(OutputFileFilter.valueOf(this.outputFileTypeFilter)))) {
+                    writeSchemaFile(directory, "json", json.getBytes(charset));
+                }
 
                 getLog().info("Wrote the schema files to " + outputDirectory.getAbsolutePath());
             }

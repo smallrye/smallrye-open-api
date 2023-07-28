@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -79,6 +80,12 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     private final DirectoryProperty outputDirectory;
 
     private final Configs properties;
+
+    enum OutputFileFilter {
+        ALL,
+        YAML,
+        JSON
+    }
 
     @Inject
     public SmallryeOpenApiTask(
@@ -306,9 +313,17 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
                 throw new GradleException("encoding parameter does not define a supported charset", e);
             }
 
-            writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
+            if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.YAML)
+                    .anyMatch(f -> f
+                            .equals(OutputFileFilter.valueOf(OutputFileFilter.class, properties.outputFileTypeFilter.get())))) {
+                writeSchemaFile(directory, "yaml", json.getBytes(charset));
+            }
 
-            writeSchemaFile(directory, "json", json.getBytes(charset));
+            if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.JSON)
+                    .anyMatch(f -> f
+                            .equals(OutputFileFilter.valueOf(OutputFileFilter.class, properties.outputFileTypeFilter.get())))) {
+                writeSchemaFile(directory, "json", json.getBytes(charset));
+            }
 
             getLogger().info("Wrote the schema files to {}",
                     outputDirectory.get().getAsFile().getAbsolutePath());
@@ -547,6 +562,13 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     @Override
     public MapProperty<String, String> getScanResourceClasses() {
         return properties.scanResourceClasses;
+    }
+
+    @Input
+    @Optional
+    @Override
+    public Property<String> getOutputFileTypeFilter() {
+        return properties.outputFileTypeFilter;
     }
 
     @Input

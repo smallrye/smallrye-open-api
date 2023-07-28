@@ -61,6 +61,7 @@ class Configs implements SmallryeOpenApiProperties {
     final ListProperty<String> scanProfiles;
     final ListProperty<String> scanExcludeProfiles;
     final MapProperty<String, String> scanResourceClasses;
+    final Property<String> outputFileTypeFilter;
     final Property<String> encoding;
 
     Configs(ObjectFactory objects) {
@@ -94,6 +95,7 @@ class Configs implements SmallryeOpenApiProperties {
         scanProfiles = objects.listProperty(String.class);
         scanExcludeProfiles = objects.listProperty(String.class);
         scanResourceClasses = objects.mapProperty(String.class, String.class);
+        outputFileTypeFilter = objects.property(String.class).convention("ALL");
         encoding = objects.property(String.class).convention(StandardCharsets.UTF_8.name());
     }
 
@@ -130,6 +132,7 @@ class Configs implements SmallryeOpenApiProperties {
         scanProfiles = objects.listProperty(String.class).convention(ext.getScanProfiles());
         scanExcludeProfiles = objects.listProperty(String.class).convention(ext.getScanExcludeProfiles());
         scanResourceClasses = objects.mapProperty(String.class, String.class).convention(ext.getScanResourceClasses());
+        outputFileTypeFilter = objects.property(String.class).convention(ext.getOutputFileTypeFilter());
         encoding = objects.property(String.class).convention(ext.getEncoding());
     }
 
@@ -330,6 +333,10 @@ class Configs implements SmallryeOpenApiProperties {
 
     public MapProperty<String, String> getScanResourceClasses() {
         return scanResourceClasses;
+    }
+
+    public Property<String> getOutputFileTypeFilter() {
+        return outputFileTypeFilter;
     }
 
     public Property<String> getEncoding() {

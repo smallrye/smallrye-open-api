@@ -50,6 +50,7 @@ E.g. for includeDependenciesScopes could be configured as:
 - `attachArtifacts` (boolean, default: false) - Attach the built OpenAPI schema as build artifact.
 - `skip` (boolean, default: false) - Skip execution of the plugin.
 - `encoding` (String) - Encoding of output OpenAPI files.
+- `outputFileTypeFilter` (String) - Set this to "YAML" in order to let the generation process produce just *.yaml output, "JSON" to obtain *.json files only. The default is "ALL", which will generate both file types.
 
 == MicroProfile OpenAPI Properties
 

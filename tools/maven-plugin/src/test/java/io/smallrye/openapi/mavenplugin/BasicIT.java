@@ -4,13 +4,19 @@ import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.servers.Server;
+import org.junit.jupiter.api.Assertions;
 
 import com.soebes.itf.jupiter.extension.MavenGoal;
 import com.soebes.itf.jupiter.extension.MavenJupiterExtension;
@@ -47,5 +53,60 @@ public class BasicIT extends SchemaTestBase {
         };
 
         testSchema(result, schemaConsumer);
+    }
+
+    @MavenTest
+    void outputFileTypeFilter_All(MavenExecutionResult result) throws IOException {
+
+        assertThat(result).isSuccessful();
+
+        // Test which checks that the output file type is as expected
+        Assertions.assertEquals(1, filterGeneratedFileTypes(".yaml").size());
+        Assertions.assertEquals(1, filterGeneratedFileTypes(".json").size());
+        // clean the outputFileTypeFilter generation path for other tests to come
+        FileUtils.deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH.toFile());
+    }
+
+    @MavenTest
+    void outputFileTypeFilter_Yaml(MavenExecutionResult result) throws IOException {
+
+        assertThat(result).isSuccessful();
+
+        // Test which checks that the output file type is as expected
+        Assertions.assertEquals(1, filterGeneratedFileTypes(".yaml").size());
+        Assertions.assertEquals(0, filterGeneratedFileTypes(".json").size());
+        // clean the outputFileTypeFilter generation path for other tests to come
+        FileUtils.deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH.toFile());
+    }
+
+    @MavenTest
+    void outputFileTypeFilter_Json(MavenExecutionResult result) throws IOException {
+
+        assertThat(result).isSuccessful();
+
+        // Test which checks that the output file type is as expected
+        Assertions.assertEquals(0, filterGeneratedFileTypes(".yaml").size());
+        Assertions.assertEquals(1, filterGeneratedFileTypes(".json").size());
+        // clean the outputFileTypeFilter generation path for other tests to come
+        FileUtils.deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH.toFile());
+    }
+
+    private static final Path OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH = Paths.get(System.getProperty("java.io.tmpdir"),
+            "smallrye-openapi", "maven-plugin", "it");
+
+    private static List<String> filterGeneratedFileTypes(final String fileExtension)
+            throws IOException {
+
+        if (!Files.isDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH)) {
+            throw new IllegalArgumentException("The generated file path does not exist, or is not a directory");
+        }
+
+        try (Stream<Path> walk = Files.walk(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH)) {
+            return walk
+                    .filter(p -> !Files.isDirectory(p))
+                    .map(p -> p.toString().toLowerCase())
+                    .filter(f -> f.endsWith(fileExtension.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
     }
 }

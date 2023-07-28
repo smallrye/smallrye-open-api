@@ -1,0 +1,53 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.smallrye.openapi.mavenplugin</groupId>
+    <artifactId>outputFileTypeFilter_All</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <openApiVersion>custom-openapi-version</openApiVersion>
+        <infoTitle>Smallrye OpenAPI</infoTitle>
+        <infoVersion>2.1.15</infoVersion>
+        <infoDescription>Description of this schema</infoDescription>
+        <infoTermsOfService>custom-tos</infoTermsOfService>
+        <infoContactEmail>custom-info-email</infoContactEmail>
+        <infoContactName>Max Mustermann</infoContactName>
+        <infoContactUrl>https://example.com/contact</infoContactUrl>
+        <infoLicenseName>Apache License V2.0</infoLicenseName>
+        <infoLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</infoLicenseUrl>
+        <outputDirectory>${java.io.tmpdir}/smallrye-openapi/maven-plugin/it</outputDirectory>
+        <outputFileTypeFilter>ALL</outputFileTypeFilter>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>@project.groupId@</groupId>
+                <artifactId>@project.artifactId@</artifactId>
+                <version>@project.version@</version>
+                <goals>
+                    <goal>generate-schema</goal>
+                </goals>
+                <configuration>
+                    <openApiVersion>${openApiVersion}</openApiVersion>
+                    <infoTitle>${infoTitle}</infoTitle>
+                    <infoVersion>${infoVersion}</infoVersion>
+                    <infoDescription>${infoDescription}</infoDescription>
+                    <infoTermsOfService>${infoTermsOfService}</infoTermsOfService>
+                    <infoContactEmail>${infoContactEmail}</infoContactEmail>
+                    <infoContactName>${infoContactName}</infoContactName>
+                    <infoContactUrl>${infoContactUrl}</infoContactUrl>
+                    <infoLicenseName>${infoLicenseName}</infoLicenseName>
+                    <infoLicenseUrl>${infoLicenseUrl}</infoLicenseUrl>
+                    <outputDirectory>${outputDirectory}</outputDirectory>
+                    <outputFileTypeFilter>${outputFileTypeFilter}</outputFileTypeFilter>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
