@@ -141,6 +141,11 @@ public interface SmallryeOpenApiProperties {
     MapProperty<String, String> getScanResourceClasses();
 
     /**
+     * Filter the type of files that will be generated, allowed values are {@code ALL}, {@code YAML} and {@code JSON}.
+     */
+    Property<String> getOutputFileTypeFilter();
+
+    /**
      * Output encoding for openapi document.
      */
     Property<String> getEncoding();
