@@ -316,7 +316,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
             if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.YAML)
                     .anyMatch(f -> f
                             .equals(OutputFileFilter.valueOf(OutputFileFilter.class, properties.outputFileTypeFilter.get())))) {
-                writeSchemaFile(directory, "yaml", json.getBytes(charset));
+                writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
             }
 
             if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.JSON)
