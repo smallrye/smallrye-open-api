@@ -1,5 +1,6 @@
 package io.smallrye.openapi.mavenplugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,13 +8,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
@@ -71,40 +73,50 @@ public class MavenDependencyIndexCreator {
     }
 
     public IndexView createIndex(MavenProject mavenProject, boolean scanDependenciesDisable,
-            List<String> includeDependenciesScopes, List<String> includeDependenciesTypes) throws Exception {
+            List<String> includeDependenciesScopes, List<String> includeDependenciesTypes) {
 
-        List<Map.Entry<Artifact, Duration>> indexDurations = new ArrayList<>();
+        List<Map.Entry<File, Duration>> indexDurations = new ArrayList<>();
 
-        List<Artifact> artifacts = new ArrayList<>();
-        artifacts.add(mavenProject.getArtifact());
+        List<File> artifacts = new ArrayList<>();
+        String buildOutput = mavenProject.getBuild().getOutputDirectory();
+        if (buildOutput != null) {
+            logger.debug("Build output: " + buildOutput);
+            artifacts.add(new File(buildOutput));
+        } else {
+            logger.warn("Build output is null!");
+        }
+
         if (!scanDependenciesDisable) {
-            artifacts.addAll(mavenProject.getArtifacts());
+            mavenProject.getArtifacts()
+                    .stream()
+                    .filter(artifact -> !isIgnored(artifact, includeDependenciesScopes, includeDependenciesTypes))
+                    .map(Artifact::getFile)
+                    .filter(Objects::nonNull)
+                    .forEach(artifacts::add);
         }
 
         List<IndexView> indexes = new ArrayList<>();
-        for (Artifact artifact : artifacts) {
-            if (isIgnored(artifact, includeDependenciesScopes, includeDependenciesTypes)) {
-                continue;
-            }
-
+        for (File artifact : artifacts) {
             try {
-                if (artifact.getFile().isDirectory()) {
-                    // Don't' cache local worskpace artifacts. Incremental compilation in IDE's would otherwise use the cached index instead of new one.
+                if (artifact.isDirectory()) {
+                    // Don't cache local workspace artifacts. Incremental compilation in IDEs would otherwise use the cached index instead of new one.
                     // Right now, support for incremental compilation inside eclipse is blocked by: https://github.com/eclipse-m2e/m2e-core/issues/364#issuecomment-939987848
                     // target/classes
+                    LocalDateTime start = LocalDateTime.now();
                     indexes.add(indexModuleClasses(artifact));
-                } else if (artifact.getFile().getName().endsWith(".jar")) {
+                    Duration duration = Duration.between(start, LocalDateTime.now());
+                    indexDurations.add(new AbstractMap.SimpleEntry<>(artifact, duration));
+                } else if (artifact.getName().endsWith(".jar")) {
                     IndexView artifactIndex = timeAndCache(indexDurations, artifact, () -> {
-                        Result result = JarIndexer.createJarIndex(artifact.getFile(), new Indexer(),
+                        Result result = JarIndexer.createJarIndex(artifact, new Indexer(),
                                 false, false, false);
                         return result.getIndex();
                     });
                     indexes.add(artifactIndex);
                 }
-            } catch (IOException | ExecutionException e) {
-                logger.error("Can't compute index of " + artifact.getFile().getAbsolutePath() + ", skipping", e);
+            } catch (Exception e) {
+                logger.error("Can't compute index of " + artifact.getAbsolutePath() + ", skipping", e);
             }
-
         }
 
         printIndexDurations(indexDurations);
@@ -112,15 +124,10 @@ public class MavenDependencyIndexCreator {
         return CompositeIndex.create(indexes);
     }
 
-    private void printIndexDurations(List<Map.Entry<Artifact, Duration>> indexDurations) {
+    private void printIndexDurations(List<Map.Entry<File, Duration>> indexDurations) {
         if (logger.isDebugEnabled()) {
-            indexDurations.sort(Map.Entry.comparingByValue());
-
-            indexDurations.forEach(e -> {
-                if (e.getValue().toMillis() > 25) {
-                    logger.debug(buildGAVCTString(e.getKey()) + " " + e.getValue());
-                }
-            });
+            logger.debug("Indexed directories/artifacts for annotation scanning:");
+            indexDurations.forEach(e -> logger.debug("  " + e.getKey() + " (index time " + e.getValue() + ")"));
         }
     }
 
@@ -137,10 +144,10 @@ public class MavenDependencyIndexCreator {
                 || ignoredArtifacts.contains(artifact.getGroupId() + ":" + artifact.getArtifactId());
     }
 
-    private IndexView timeAndCache(List<Map.Entry<Artifact, Duration>> indexDurations, Artifact artifact,
-            Callable<IndexView> callable) throws Exception {
+    private IndexView timeAndCache(List<Map.Entry<File, Duration>> indexDurations, File artifact,
+            Callable<IndexView> callable) throws ExecutionException {
         LocalDateTime start = LocalDateTime.now();
-        IndexView result = indexCache.get(buildGAVCTString(artifact), callable);
+        IndexView result = indexCache.get(artifact.getAbsolutePath(), callable);
         LocalDateTime end = LocalDateTime.now();
 
         Duration duration = Duration.between(start, end);
@@ -150,33 +157,20 @@ public class MavenDependencyIndexCreator {
     }
 
     // index the classes of this Maven module
-    private Index indexModuleClasses(Artifact artifact) throws IOException {
-
-        Indexer indexer = new Indexer();
-
+    private Index indexModuleClasses(File artifact) throws IOException {
         // Check first if the classes directory exists, before attempting to create an index for the classes
-        if (artifact.getFile().exists()) {
-            try (Stream<Path> stream = Files.walk(artifact.getFile().toPath())) {
-                List<Path> classFiles = stream
+        if (artifact.exists()) {
+            try (Stream<Path> stream = Files.walk(artifact.toPath())) {
+                File[] classFiles = stream
                         .filter(path -> path.toString().endsWith(".class"))
-                        .collect(Collectors.toList());
-                for (Path path : classFiles) {
-                    indexer.index(Files.newInputStream(path));
-                }
+                        .map(Path::toFile)
+                        .toArray(File[]::new);
+                return Index.of(classFiles);
             }
+        } else {
+            logger.warn("Module directory does not exist: " + artifact);
+            return Index.of(Collections.emptyList());
         }
-        return indexer.complete();
     }
 
-    private String buildGAVCTString(Artifact artifact) {
-        return artifact.getGroupId() +
-                ":" +
-                artifact.getArtifactId() +
-                ":" +
-                artifact.getVersion() +
-                ":" +
-                artifact.getClassifier() +
-                ":" +
-                artifact.getType();
-    }
 }

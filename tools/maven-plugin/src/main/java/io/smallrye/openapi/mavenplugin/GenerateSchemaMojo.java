@@ -3,7 +3,9 @@ package io.smallrye.openapi.mavenplugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -323,18 +325,32 @@ public class GenerateSchemaMojo extends AbstractMojo {
         return document;
     }
 
-    private ClassLoader getClassLoader() throws MalformedURLException, DependencyResolutionRequiredException {
-        Set<URL> urls = new HashSet<>();
+    private ClassLoader getClassLoader() throws DependencyResolutionRequiredException {
+        Set<URI> elements = new HashSet<>();
 
-        for (String element : mavenProject.getCompileClasspathElements()) {
-            getLog().debug("Adding " + element + " to annotation scanner class loader");
-            urls.add(new File(element).toURI().toURL());
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("Adding directories/artifacts to annotation scanner class loader:");
         }
 
-        return URLClassLoader.newInstance(
-                urls.toArray(new URL[0]),
-                Thread.currentThread().getContextClassLoader());
+        for (String element : mavenProject.getCompileClasspathElements()) {
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("  " + element);
+            }
 
+            elements.add(new File(element).toURI());
+        }
+
+        URL[] locators = elements.stream()
+                .map(uri -> {
+                    try {
+                        return uri.toURL();
+                    } catch (MalformedURLException mue) {
+                        throw new UncheckedIOException(mue);
+                    }
+                })
+                .toArray(URL[]::new);
+
+        return URLClassLoader.newInstance(locators, Thread.currentThread().getContextClassLoader());
     }
 
     private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig, ClassLoader classLoader) {
@@ -399,7 +415,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
             Properties p = new Properties();
             try (InputStream is = Files.newInputStream(configProperties.toPath())) {
                 p.load(is);
-                cp.putAll((Map) p);
+                p.stringPropertyNames().forEach(k -> cp.put(k, p.getProperty(k)));
             }
         }
 
@@ -473,17 +489,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
                     Files.createDirectories(directory);
                 }
 
-                Charset charset = Charset.defaultCharset();
-
-                if (!StringUtils.isBlank(encoding)) {
-                    try {
-                        charset = Charset.forName(encoding.trim());
-                    } catch (IllegalCharsetNameException e) {
-                        throw new MojoExecutionException("encoding parameter does not define a legal charset name", e);
-                    } catch (UnsupportedCharsetException e) {
-                        throw new MojoExecutionException("encoding parameter does not define a supported charset", e);
-                    }
-                }
+                Charset charset = getCharset(encoding);
 
                 if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.YAML)
                         .anyMatch(f -> f.equals(OutputFileFilter.valueOf(this.outputFileTypeFilter)))) {
@@ -500,6 +506,24 @@ public class GenerateSchemaMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Can't write the result", e);
         }
+    }
+
+    static Charset getCharset(String encoding) throws MojoExecutionException {
+        if (StringUtils.isBlank(encoding)) {
+            return Charset.defaultCharset();
+        }
+
+        Charset charset;
+
+        try {
+            charset = Charset.forName(encoding.trim());
+        } catch (IllegalCharsetNameException e) {
+            throw new MojoExecutionException("encoding parameter does not define a legal charset name", e);
+        } catch (UnsupportedCharsetException e) {
+            throw new MojoExecutionException("encoding parameter does not define a supported charset", e);
+        }
+
+        return charset;
     }
 
     private void writeSchemaFile(Path directory, String type, byte[] contents) throws IOException {
