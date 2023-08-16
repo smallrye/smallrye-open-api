@@ -8,6 +8,8 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 
 import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 
+import io.smallrye.openapi.runtime.io.OpenApiParser;
+
 public class SchemaTestBase {
 
     /**
@@ -25,13 +27,13 @@ public class SchemaTestBase {
         File openapiFile = new File(result.getMavenProjectResult().getTargetProjectDirectory(),
                 "target/generated/openapi.json");
 
-        return TestObjectMapperHolder.json().readValue(openapiFile, OpenAPI.class);
+        return OpenApiParser.parse(openapiFile.toURI().toURL());
     }
 
     private OpenAPI readYaml(MavenExecutionResult result) throws IOException {
         File openapiFile = new File(result.getMavenProjectResult().getTargetProjectDirectory(),
                 "target/generated/openapi.yaml");
 
-        return TestObjectMapperHolder.yaml().readValue(openapiFile, OpenAPI.class);
+        return OpenApiParser.parse(openapiFile.toURI().toURL());
     }
 }
