@@ -24,6 +24,7 @@ import com.soebes.itf.jupiter.extension.MavenTest;
 import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 
 @MavenJupiterExtension
+@MavenGoal("compile")
 @MavenGoal("${project.groupId}:${project.artifactId}:${project.version}:generate-schema")
 public class BasicIT extends SchemaTestBase {
     @MavenTest
@@ -50,6 +51,8 @@ public class BasicIT extends SchemaTestBase {
 
             assertTrue(servers.contains(properties.get("server1").toString()));
             assertTrue(servers.contains(properties.get("server2").toString()));
+
+            assertTrue(schema.getPaths().hasPathItem("/hello"));
         };
 
         testSchema(result, schemaConsumer);
