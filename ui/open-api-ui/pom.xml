@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI UI</name>
 
     <properties>
-        <swagger-ui.version>5.4.2</swagger-ui.version>
+        <swagger-ui.version>5.5.0</swagger-ui.version>
         <swagger-ui-theme.version>3.0.1</swagger-ui-theme.version>
         <path.swagger-ui>openapi-ui</path.swagger-ui>
         <sonar.skip>true</sonar.skip>
@@ -22,13 +22,13 @@
     <dependencies>
         <!-- Keep it here so that dependabot can help us with the update -->
         <dependency>
-            <groupId>org.webjars.npm</groupId>
+            <groupId>org.mvnpm</groupId>
             <artifactId>swagger-ui-dist</artifactId>
             <version>${swagger-ui.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.webjars.npm</groupId>
+            <groupId>org.mvnpm</groupId>
             <artifactId>swagger-ui-themes</artifactId>
             <version>${swagger-ui-theme.version}</version>
             <scope>provided</scope>
@@ -91,7 +91,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.webjars.npm</groupId>
+                                    <groupId>org.mvnpm</groupId>
                                     <artifactId>swagger-ui-dist</artifactId>
                                     <version>${swagger-ui.version}</version>
                                     <type>jar</type>
@@ -109,7 +109,7 @@
                                     </fileMappers>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.webjars.npm</groupId>
+                                    <groupId>org.mvnpm</groupId>
                                     <artifactId>swagger-ui-themes</artifactId>
                                     <version>${swagger-ui-theme.version}</version>
                                     <type>jar</type>
