@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>smallrye-open-api-testsuite-data</artifactId>
-    <version>3.5.2</version>
+    <version>3.5.3-SNAPSHOT</version>
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
@@ -220,8 +220,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <tag>3.5.2</tag>
-  </scm>
 </project>
