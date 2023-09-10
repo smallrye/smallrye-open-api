@@ -67,7 +67,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     void testHiddenOperationNotPresent(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.testHiddenOperationNotPresent.json", result);
@@ -96,7 +96,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     void testHiddenOperationPathNotPresent(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.testHiddenOperationPathNotPresent.json", result);
@@ -138,7 +138,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 MyCustomSchemaRegistry.class.getName());
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, i);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.testRequestBodyComponentGeneration.json", result);
@@ -169,7 +169,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     void testPackageInfoDefinitionScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.testPackageInfoDefinitionScanning.json", result);
@@ -197,7 +197,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     void testTagScanning(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
         printToConsole(result);
         assertJsonEquals("resource.tags.multilocation.json", result);
     }
@@ -224,7 +224,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     void testTagScanning_OrderGivenAnnotations(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
         printToConsole(result);
         assertJsonEquals("resource.tags.ordergiven.annotation.json", result);
     }
@@ -249,7 +249,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     void testTagScanning_OrderGivenStaticFile(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
-        OpenAPI scanResult = scanner.scan();
+        OpenAPI scanResult = scanner.scan("JAX-RS");
         OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(
                 "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}"
                         .getBytes()),
@@ -284,7 +284,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     void testEmptySecurityRequirements(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.testEmptySecurityRequirements.json", result);
@@ -297,7 +297,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Index index = indexOf(MissingImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("default.json", result);
@@ -315,7 +315,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Index index = indexOf(MissingImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(configKey, configValue), index);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.interface-only.json", result);
@@ -335,7 +335,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Index index = indexOf(HasConcreteImplementation.class, ImplementsHasConcreteImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("resource.concrete-implementation.json", result);
@@ -362,7 +362,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         Index index = indexOf(HasAbstractImplementation.class, ImplementsHasAbstractImplementation.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         printToConsole(result);
         assertJsonEquals("default.json", result);
@@ -412,7 +412,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         Assertions.assertEquals(1, result.getPaths().getPathItems().size());
         Assertions.assertTrue(result.getPaths().getPathItems().containsKey("/profile/{id}"));
@@ -426,7 +426,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
 
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scanner.scan("JAX-RS");
 
         Assertions.assertEquals(1, result.getPaths().getPathItems().size());
         Assertions.assertTrue(result.getPaths().getPathItems().containsKey("/profile"));

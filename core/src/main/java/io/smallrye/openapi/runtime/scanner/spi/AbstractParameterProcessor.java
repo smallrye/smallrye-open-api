@@ -81,7 +81,6 @@ public abstract class AbstractParameterProcessor {
     protected final AnnotationScannerContext scannerContext;
     protected final String contextPath;
     protected final IndexView index;
-    protected final ClassLoader cl;
     protected final Function<AnnotationInstance, Parameter> readerFunction;
     protected final List<AnnotationScannerExtension> extensions;
     protected final Optional<BeanValidationScanner> beanValidationScanner;
@@ -228,7 +227,6 @@ public abstract class AbstractParameterProcessor {
         this.scannerContext = scannerContext;
         this.contextPath = contextPath;
         this.index = scannerContext.getIndex();
-        this.cl = scannerContext.getClassLoader();
         this.readerFunction = reader;
         this.extensions = extensions;
         this.beanValidationScanner = scannerContext.getBeanValidationScanner();

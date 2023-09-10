@@ -1,30 +1,42 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Factory that allows plugging in more scanners.
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-public class AnnotationScannerFactory {
-    private final Map<String, AnnotationScanner> loadedScanners = new HashMap<>();
+public class AnnotationScannerFactory implements Supplier<Iterable<AnnotationScanner>> {
 
-    public AnnotationScannerFactory(ClassLoader cl) {
-        ServiceLoader<AnnotationScanner> loader = ServiceLoader.load(AnnotationScanner.class, cl);
-        Iterator<AnnotationScanner> scannerIterator = loader.iterator();
-        while (scannerIterator.hasNext()) {
-            AnnotationScanner scanner = scannerIterator.next();
-            loadedScanners.put(scanner.getName(), scanner);
-        }
+    /**
+     * List of AnnotationScanners discovered via the ServiceLoader, ordered by
+     * {@linkplain AnnotationScanner#getName() name}
+     */
+    private final List<AnnotationScanner> loadedScanners;
+
+    public AnnotationScannerFactory(ClassLoader loader) {
+        Iterable<AnnotationScanner> scanners = ServiceLoader.load(AnnotationScanner.class, loader);
+        loadedScanners = StreamSupport.stream(scanners.spliterator(), false)
+                .sorted(comparing(AnnotationScanner::getName, nullsLast(String::compareTo)))
+                .collect(Collectors.toList());
     }
 
     public List<AnnotationScanner> getAnnotationScanners() {
-        return new ArrayList<>(loadedScanners.values());
+        return new ArrayList<>(loadedScanners);
     }
+
+    @Override
+    public Iterable<AnnotationScanner> get() {
+        return getAnnotationScanners();
+    }
+
 }

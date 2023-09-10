@@ -11,7 +11,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -48,7 +50,7 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
 public class OpenApiAnnotationScanner {
 
     private final AnnotationScannerContext annotationScannerContext;
-    private final AnnotationScannerFactory annotationScannerFactory;
+    private final Supplier<Iterable<AnnotationScanner>> scannerSupplier;
 
     /**
      * Constructor.
@@ -57,9 +59,7 @@ public class OpenApiAnnotationScanner {
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
-        this(config, ClassLoaderUtil.getDefaultClassLoader(), index,
-                Collections.singletonList(new AnnotationScannerExtension() {
-                }));
+        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, AnnotationScannerExtension.DEFAULT);
     }
 
     /**
@@ -76,22 +76,53 @@ public class OpenApiAnnotationScanner {
     /**
      * Constructor.
      *
-     * @param config OpenApiConfig instance
-     * @param index IndexView of deployment
+     * @param config
+     *        OpenApiConfig instance
+     * @param loader
+     *        ClassLoader to discover AnnotationScanner services (via
+     *        ServiceLoader) as well as loading application classes
+     * @param index
+     *        IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index) {
-        this(config, loader, index, Collections.singletonList(new AnnotationScannerExtension() {
-        }));
+        this(config, loader, index, AnnotationScannerExtension.DEFAULT);
     }
 
     /**
      * Constructor.
      *
-     * @param config OpenApiConfig instance
-     * @param index IndexView of deployment
-     * @param extensions A set of extensions to scanning
+     * @param config
+     *        OpenApiConfig instance
+     * @param loader
+     *        ClassLoader to discover AnnotationScanner services (via
+     *        ServiceLoader) as well as loading application classes
+     * @param index
+     *        IndexView of deployment
+     * @param extensions
+     *        A set of extensions to scanning
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
+            List<AnnotationScannerExtension> extensions) {
+        this(config, loader, index, new AnnotationScannerFactory(loader), extensions);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param config
+     *        OpenApiConfig instance
+     * @param loader
+     *        ClassLoader to load application classes
+     * @param index
+     *        IndexView of deployment
+     * @param scannerSupplier
+     *        supplier of AnnotationScanner instances to use to generate the
+     *        OpenAPI model for the application
+     * @param extensions
+     *        A set of extensions to scanning
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
+            Supplier<Iterable<AnnotationScanner>> scannerSupplier,
             List<AnnotationScannerExtension> extensions) {
         FilteredIndexView filteredIndexView;
 
@@ -103,7 +134,7 @@ public class OpenApiAnnotationScanner {
 
         this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, config,
                 new OpenAPIImpl());
-        this.annotationScannerFactory = new AnnotationScannerFactory(loader);
+        this.scannerSupplier = scannerSupplier;
     }
 
     /**
@@ -130,15 +161,16 @@ public class OpenApiAnnotationScanner {
         return openApi;
     }
 
-    private List<AnnotationScanner> getScanners(String[] filters) {
-        List<AnnotationScanner> knownScanners = annotationScannerFactory.getAnnotationScanners();
+    private Iterable<AnnotationScanner> getScanners(String[] filters) {
         List<String> enabledScanners = Optional.ofNullable(filters).map(Arrays::asList).orElseGet(Collections::emptyList);
 
         if (enabledScanners.isEmpty()) {
-            return knownScanners;
+            return scannerSupplier.get();
         }
 
-        return knownScanners.stream().filter(s -> enabledScanners.contains(s.getName())).collect(Collectors.toList());
+        return StreamSupport.stream(scannerSupplier.get().spliterator(), false)
+                .filter(s -> enabledScanners.contains(s.getName()))
+                .collect(Collectors.toList());
     }
 
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
