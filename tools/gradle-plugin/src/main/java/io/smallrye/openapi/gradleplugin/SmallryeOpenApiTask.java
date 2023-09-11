@@ -136,7 +136,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, SmallryeOpenApiTask.class.getClassLoader());
         OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader, index);
 
-        OpenApiDocument document = OpenApiDocument.INSTANCE;
+        OpenApiDocument document = OpenApiDocument.newInstance();
 
         document.reset();
         document.config(openApiConfig);
