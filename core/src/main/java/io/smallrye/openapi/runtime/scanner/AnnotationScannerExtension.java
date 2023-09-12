@@ -1,6 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
@@ -16,6 +18,12 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
  * Implement this directly
  */
 public interface AnnotationScannerExtension {
+
+    static final List<AnnotationScannerExtension> DEFAULT = Collections.singletonList(new Default());
+
+    static class Default implements AnnotationScannerExtension {
+        // All default methods
+    }
 
     /**
      * Unwraps an asynchronous type such as

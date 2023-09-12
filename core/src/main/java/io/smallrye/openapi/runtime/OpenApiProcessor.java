@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -21,7 +22,10 @@ import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
+import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
 
 /**
  * Provides some core archive processing functionality.
@@ -148,21 +152,49 @@ public class OpenApiProcessor {
     }
 
     /**
-     * Create an {@link OpenAPI} model by scanning the deployment for relevant JAX-RS and
-     * OpenAPI annotations. If scanning is disabled, this method returns null. If scanning
-     * is enabled but no relevant annotations are found, an empty OpenAPI model is returned.
+     * Create an {@link OpenAPI} model by scanning the deployment for relevant
+     * JAX-RS and OpenAPI annotations. If scanning is disabled, this method
+     * returns null. If scanning is enabled but no relevant annotations are
+     * found, an empty OpenAPI model is returned.
      *
-     * @param config OpenApiConfig
-     * @param loader ClassLoader
-     * @param index IndexView of Archive
+     * @param config
+     *        OpenApiConfig
+     * @param loader
+     *        ClassLoader to discover AnnotationScanner services (via
+     *        ServiceLoader) as well as loading application classes
+     * @param index
+     *        IndexView of Archive
      * @return OpenAPIImpl generated from annotations
      */
     public static OpenAPI modelFromAnnotations(OpenApiConfig config, ClassLoader loader, IndexView index) {
+        return modelFromAnnotations(config, loader, index, new AnnotationScannerFactory(loader));
+    }
+
+    /**
+     * Create an {@link OpenAPI} model by scanning the deployment for relevant
+     * JAX-RS and OpenAPI annotations. If scanning is disabled, this method
+     * returns null. If scanning is enabled but no relevant annotations are
+     * found, an empty OpenAPI model is returned.
+     *
+     * @param config
+     *        OpenApiConfig
+     * @param loader
+     *        ClassLoader to load application classes
+     * @param index
+     *        IndexView of Archive
+     * @param scannerSupplier
+     *        supplier of AnnotationScanner instances to use to generate the
+     *        OpenAPI model for the application
+     * @return OpenAPI generated from annotations
+     */
+    public static OpenAPI modelFromAnnotations(OpenApiConfig config, ClassLoader loader, IndexView index,
+            Supplier<Iterable<AnnotationScanner>> scannerSupplier) {
         if (config.scanDisable()) {
             return null;
         }
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, loader, index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, loader, index, scannerSupplier,
+                AnnotationScannerExtension.DEFAULT);
         return scanner.scan();
     }
 
