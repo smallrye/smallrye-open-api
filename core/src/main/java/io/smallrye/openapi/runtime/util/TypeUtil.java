@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.util;
 import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -16,8 +15,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -185,10 +186,18 @@ public class TypeUtil {
         index(indexer, java.lang.Enum.class);
         index(indexer, java.lang.Object.class);
 
+        // Interfaces commonly implemented by core JDK classes
+        index(indexer, java.lang.AutoCloseable.class);
+        index(indexer, java.lang.Cloneable.class);
+        index(indexer, java.lang.Comparable.class);
+        index(indexer, java.io.Serializable.class);
+        index(indexer, java.util.RandomAccess.class);
+
         // Common, expected classes
         index(indexer, java.lang.Boolean.class);
         index(indexer, java.lang.Byte.class);
         index(indexer, java.lang.Character.class);
+        index(indexer, java.lang.CharSequence.class);
         index(indexer, java.lang.Double.class);
         index(indexer, java.lang.Float.class);
         index(indexer, java.lang.Integer.class);
@@ -197,9 +206,30 @@ public class TypeUtil {
         index(indexer, java.lang.Short.class);
         index(indexer, java.lang.String.class);
         index(indexer, java.lang.Void.class);
+        index(indexer, java.util.Date.class);
         index(indexer, java.util.UUID.class);
 
+        // Java Time APIs
+        index(indexer, java.time.Duration.class);
+        index(indexer, java.time.Instant.class);
+        index(indexer, java.time.LocalDate.class);
+        index(indexer, java.time.LocalDateTime.class);
+        index(indexer, java.time.LocalTime.class);
+        index(indexer, java.time.OffsetDateTime.class);
+        index(indexer, java.time.OffsetTime.class);
+        index(indexer, java.time.Period.class);
+        index(indexer, java.time.ZonedDateTime.class);
+        index(indexer, java.time.chrono.ChronoLocalDate.class);
+        index(indexer, java.time.chrono.ChronoLocalDateTime.class);
+        index(indexer, java.time.chrono.ChronoPeriod.class);
+        index(indexer, java.time.chrono.ChronoZonedDateTime.class);
+        index(indexer, java.time.temporal.Temporal.class);
+        index(indexer, java.time.temporal.TemporalAccessor.class);
+        index(indexer, java.time.temporal.TemporalAdjuster.class);
+        index(indexer, java.time.temporal.TemporalAmount.class);
+
         // Collection Interfaces
+        index(indexer, java.lang.Iterable.class);
         index(indexer, java.util.Collection.class);
         index(indexer, java.util.Deque.class);
         index(indexer, java.util.List.class);
@@ -228,6 +258,7 @@ public class TypeUtil {
         // Collections
         index(indexer, java.util.ArrayDeque.class);
         index(indexer, java.util.ArrayList.class);
+        index(indexer, java.util.Dictionary.class);
         index(indexer, java.util.EnumMap.class);
         index(indexer, java.util.HashMap.class);
         index(indexer, java.util.HashSet.class);
@@ -267,6 +298,12 @@ public class TypeUtil {
         // CompletionStage and implementation
         index(indexer, java.util.concurrent.CompletionStage.class);
         index(indexer, java.util.concurrent.CompletableFuture.class);
+        index(indexer, java.util.concurrent.Future.class);
+
+        // Index classes that may not be present in older Java versions
+        ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+        Stream.of("java.lang.constant.Constable", "java.lang.constant.ConstantDesc")
+                .forEach(className -> indexOptional(indexer, className, contextLoader));
 
         jdkIndex = indexer.complete();
 
@@ -274,9 +311,17 @@ public class TypeUtil {
         wrapperTypes.add(MutinyConstants.UNI_TYPE.name());
     }
 
+    private static void indexOptional(Indexer indexer, String className, ClassLoader contextLoader) {
+        try {
+            index(indexer, Class.forName(className, false, contextLoader));
+        } catch (Exception e) {
+            // Ignore anything
+        }
+    }
+
     private static void index(Indexer indexer, Class<?> klazz) {
-        try (InputStream stream = klazz.getResourceAsStream(klazz.getSimpleName() + ".class")) {
-            indexer.index(stream);
+        try {
+            indexer.indexClass(klazz);
         } catch (IOException ioe) {
             throw new UncheckedIOException(ioe);
         }
@@ -410,14 +455,11 @@ public class TypeUtil {
         try {
             Class<?> subjectKlazz = TypeUtil.getClass(subject, cl);
             Class<?> objectKlazz = TypeUtil.getClass(object, cl);
+            UtilLogging.logger.reflectionInstanceOf(subjectKlazz, objectKlazz);
             return objectKlazz.isAssignableFrom(subjectKlazz);
         } catch (@SuppressWarnings("unused") ClassNotFoundException | NoClassDefFoundError nfe) {
             return false;
         }
-    }
-
-    static ClassInfo getClassInfo(IndexView appIndex, Type type) {
-        return getClassInfo(appIndex, getName(type));
     }
 
     static ClassInfo getClassInfo(IndexView appIndex, DotName className) {
@@ -442,52 +484,66 @@ public class TypeUtil {
      */
     public static boolean isA(final AnnotationScannerContext context, Type testSubject, Type testObject) {
         IndexView index = context.getIndex();
-        ClassLoader cl = context.getClassLoader();
+        DotName testSubjectName = getName(testSubject);
+        DotName testObjectName = getName(testObject);
 
         // The types may be the same -- short circuit looking in the index
-        if (getName(testSubject).equals(getName(testObject))) {
+        if (testSubjectName.equals(testObjectName)) {
             return true;
         }
+
         if (testSubject.kind() == Type.Kind.PRIMITIVE && testObject.kind() != Type.Kind.PRIMITIVE) {
             return false;
         }
 
         // First, look in Jandex, as target might not be in our classloader
-        ClassInfo subJandexKlazz = getClassInfo(index, testSubject);
+        ClassInfo subJandexKlazz = getClassInfo(index, testSubjectName);
 
-        if (subJandexKlazz != null && superTypes(index, subJandexKlazz).contains(getName(testObject))) {
-            return true;
+        if (subJandexKlazz != null) {
+            Set<DotName> superTypes = new HashSet<>();
+            AtomicBoolean indexComplete = new AtomicBoolean(true);
+            loadSuperTypes(index, subJandexKlazz, superTypes, indexComplete);
+
+            if (superTypes.contains(testObjectName)) {
+                return true;
+            }
+
+            if (indexComplete.get()) {
+                /*
+                 * When indexComplete remains `true` during the search for super types of the
+                 * `testSubject`, we can be sure that the testSubject is not an instance of the
+                 * `testObject`. Otherwise, we must default to class-loading/reflection, below.
+                 */
+                return false;
+            }
         }
 
-        return isAssignableFrom(testSubject.name(), testObject.name(), cl);
+        return isAssignableFrom(testSubject.name(), testObject.name(), context.getClassLoader());
     }
 
-    private static Set<DotName> superTypes(IndexView index, ClassInfo testSubject) {
-        Set<DotName> superTypes = new HashSet<>();
+    private static void loadSuperTypes(IndexView index, ClassInfo testSubject, Set<DotName> superTypes,
+            AtomicBoolean indexComplete) {
+        testSubject.interfaceNames()
+                .forEach(iface -> loadSuperType(index, iface, superTypes, indexComplete));
 
-        testSubject.interfaceNames().forEach(iface -> {
-            superTypes.add(iface);
+        DotName superName = testSubject.superName();
 
-            ClassInfo superIFace = getClassInfo(index, iface);
-
-            if (superIFace != null) {
-                superTypes.addAll(superTypes(index, superIFace));
-            }
-        });
-
-        Type superType = testSubject.superClassType();
-
-        if (superType != null) {
-            superTypes.add(getName(superType));
-
-            ClassInfo superKlazz = getClassInfo(index, superType);
-
-            if (superKlazz != null) {
-                superTypes.addAll(superTypes(index, superKlazz));
-            }
+        if (superName != null) {
+            loadSuperType(index, superName, superTypes, indexComplete);
         }
+    }
 
-        return superTypes;
+    private static void loadSuperType(IndexView index, DotName superName, Set<DotName> superTypes,
+            AtomicBoolean indexComplete) {
+        superTypes.add(superName);
+
+        ClassInfo superKlazz = getClassInfo(index, superName);
+
+        if (superKlazz != null) {
+            loadSuperTypes(index, superKlazz, superTypes, indexComplete);
+        } else {
+            indexComplete.set(false);
+        }
     }
 
     public static boolean isTerminalType(Type type) {

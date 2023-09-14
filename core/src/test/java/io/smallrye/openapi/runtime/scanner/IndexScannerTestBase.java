@@ -105,13 +105,11 @@ public class IndexScannerTestBase {
     public static void printToConsole(String entityName, Schema schema) throws IOException {
         // Remember to set debug level logging.
         LOG.debug(schemaToString(entityName, schema));
-        System.out.println(schemaToString(entityName, schema));
     }
 
     public static void printToConsole(OpenAPI oai) throws IOException {
         // Remember to set debug level logging.
         LOG.debug(OpenApiSerializer.serialize(oai, Format.JSON));
-        System.out.println(OpenApiSerializer.serialize(oai, Format.JSON));
     }
 
     public static void verifyMethodAndParamRefsPresent(OpenAPI oai) {
