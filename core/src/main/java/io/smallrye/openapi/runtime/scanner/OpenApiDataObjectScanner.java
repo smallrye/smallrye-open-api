@@ -236,10 +236,11 @@ public class OpenApiDataObjectScanner {
              * reference a registered schema.
              */
             Schema entrySchema = currentPathEntry.getSchema();
+            SchemaRegistry registry = context.getSchemaRegistry();
 
-            if (context.getSchemaRegistry().hasSchema(currentType, context.getJsonViews(), null)) {
+            if (registry.hasSchema(currentType, context.getJsonViews(), null)) {
                 // This type has already been scanned and registered, don't do it again!
-                entrySchema.setRef(context.getSchemaRegistry().lookupRef(currentType, context.getJsonViews()).getRef());
+                entrySchema.setRef(registry.lookupRef(currentType, context.getJsonViews()).getRef());
                 continue;
             }
 
@@ -255,18 +256,7 @@ public class OpenApiDataObjectScanner {
                 // If not schema has yet been set, consider this an "object"
                 currentSchema.setType(Schema.SchemaType.OBJECT);
             } else {
-                Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
-
-                /*
-                 * Ignore the returned ref when:
-                 *
-                 * - the currentSchema is an object type and will be further modified with added properties
-                 * - this is the root object entry that should never be set to a ref here. That may be done
-                 * by the process that is invoking this instance of OpenApiDataObjectScanner.
-                 */
-                if (currentSchema.getType() != Schema.SchemaType.OBJECT && entrySchema != rootSchema) {
-                    entrySchema.setRef(ref.getRef());
-                }
+                maybeRegisterSchema(currentType, currentSchema, entrySchema);
             }
 
             if (currentSchema.getType() == Schema.SchemaType.OBJECT) {
@@ -291,6 +281,26 @@ public class OpenApiDataObjectScanner {
                                 currentPathEntry));
 
                 processInheritance(currentPathEntry);
+            }
+        }
+    }
+
+    private void maybeRegisterSchema(Type currentType, Schema currentSchema, Schema entrySchema) {
+        Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
+
+        /*
+         * Ignore the returned ref when:
+         *
+         * - the ref is the currentSchema, i.e. registration did not occur
+         * - the currentSchema is an object type and will be further modified with added properties
+         * - the target of the ref is the schema currently being processed and using the ref would
+         * result in a self-referencing schema.
+         */
+        if (ref != currentSchema && currentSchema.getType() != Schema.SchemaType.OBJECT) {
+            Schema refTarget = context.getSchemaRegistry().lookupSchema(currentType, context.getJsonViews());
+
+            if (refTarget != entrySchema) {
+                entrySchema.setRef(ref.getRef());
             }
         }
     }

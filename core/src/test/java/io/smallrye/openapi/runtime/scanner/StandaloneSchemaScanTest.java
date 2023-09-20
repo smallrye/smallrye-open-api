@@ -762,4 +762,33 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         printToConsole(result);
         assertJsonEquals("components.schemas.terminal-array-item-registration.json", result);
     }
+
+    /*
+     * https://github.com/smallrye/smallrye-open-api/issues/1565
+     *
+     * Verify that registered schemas are not set to a self reference.
+     * Previously, a schema of an object property may have been set
+     * in components as a ref to itself when the property schema was
+     * discovered as one of the parent object's fields. Here, Class2
+     * would have been a self-ref if Class1 were scanned first. If Class2
+     * were scanned first, the issue would not occur.
+     */
+    @Test
+    void testNoSelfRefToSchemaOfAnnotatedObjectProperty() throws IOException, JSONException {
+        @Schema(type = SchemaType.STRING, name = "MyValueClass")
+        class Class2 {
+        }
+
+        @Schema(description = "some description", name = "MyClass")
+        class Class1 {
+            @SuppressWarnings("unused")
+            Class2 value;
+        }
+
+        Index index = indexOf(Class1.class, Class2.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("components.schemas.no-self-ref-for-property-schema.json", result);
+    }
 }
