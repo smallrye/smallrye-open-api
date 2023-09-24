@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -737,5 +738,28 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.iterator-stream-map-types.json", result);
+    }
+
+    /**
+     * Check that an array item that is considered "terminal" because it is a known type
+     * is registered in the schema registry and `#/components/schemas`.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/1573
+     */
+    @Test
+    void testZonedDateTimeArrayWrapper() throws IOException, JSONException {
+        @Schema(name = "ZonedDateTimeArrayWrapper")
+        class ZonedDateTimeArrayWrapper {
+            @SuppressWarnings("unused")
+            ZonedDateTime[] now;
+        }
+
+        Index index = indexOf(ZonedDateTimeArrayWrapper.class, ZonedDateTime.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.terminal-array-item-registration.json", result);
     }
 }

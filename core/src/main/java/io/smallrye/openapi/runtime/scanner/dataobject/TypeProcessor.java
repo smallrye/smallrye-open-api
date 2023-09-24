@@ -164,13 +164,16 @@ public class TypeProcessor {
         // Only use component (excludes the special name formatting for arrays).
         TypeUtil.applyTypeAttributes(componentType, itemSchema);
 
-        // If it's not a terminal type, then push for later inspection.
         if (!isTerminalType(componentType) && index.containsClass(componentType)) {
+            // If it's not a terminal type, then push for later inspection.
             pushToStack(componentType, itemSchema);
+            itemSchema = context.getSchemaRegistry().registerReference(componentType, context.getJsonViews(), typeResolver,
+                    itemSchema);
+        } else {
+            // Otherwise, allow registration since we may not encounter the array's element type again.
+            itemSchema = context.getSchemaRegistry().checkRegistration(componentType, context.getJsonViews(), typeResolver,
+                    itemSchema);
         }
-
-        itemSchema = context.getSchemaRegistry().registerReference(componentType, context.getJsonViews(), typeResolver,
-                itemSchema);
 
         while (arrayType.dimensions() > 1) {
             Schema parentArrSchema = new SchemaImpl();

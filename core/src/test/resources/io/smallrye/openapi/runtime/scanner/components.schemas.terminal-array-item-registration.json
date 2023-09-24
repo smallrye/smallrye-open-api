@@ -1,0 +1,23 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "ZonedDateTimeArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "now": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZonedDateTime"
+            }
+          }
+        }
+      },
+      "ZonedDateTime": {
+        "format": "date-time",
+        "type": "string",
+        "example": "2022-03-10T12:15:50-04:00"
+      }
+    }
+  }
+}
