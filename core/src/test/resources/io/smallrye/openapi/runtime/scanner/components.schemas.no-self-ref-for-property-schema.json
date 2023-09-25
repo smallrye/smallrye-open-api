@@ -1,0 +1,19 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "MyClass" : {
+        "description" : "some description",
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "$ref" : "#/components/schemas/MyValueClass"
+          }
+        }
+      },
+      "MyValueClass" : {
+        "type" : "string"
+      }
+    }
+  }
+}
