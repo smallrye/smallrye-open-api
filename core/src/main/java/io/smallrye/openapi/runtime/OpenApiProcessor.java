@@ -252,7 +252,19 @@ public class OpenApiProcessor {
      * @return OASFilter instance retrieved from loader
      */
     public static OASFilter getFilter(OpenApiConfig config, ClassLoader loader, IndexView index) {
-        return newInstance(config.filter(), loader, index);
+        return getFilter(config.filter(), loader, index);
+    }
+
+    /**
+     * Instantiate the {@link OASFilter} from a class name.
+     *
+     * @param className the filter impl class name
+     * @param loader ClassLoader
+     * @param index an IndexView to be provided to the filter when accepted via its constructor
+     * @return OASFilter instance retrieved from loader
+     */
+    public static OASFilter getFilter(String className, ClassLoader loader, IndexView index) {
+        return newInstance(className, loader, index);
     }
 
     @SuppressWarnings("unchecked")
