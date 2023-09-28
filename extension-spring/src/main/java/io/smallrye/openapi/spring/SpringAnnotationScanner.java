@@ -289,11 +289,11 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES,
-                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+        String[] defaultConsumes = getDefaultConsumes(context, method);
+        context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES, defaultConsumes).orElse(null));
 
-        context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES,
-                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+        String[] defaultProduces = getDefaultProduces(context, method);
+        context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES, defaultProduces).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);

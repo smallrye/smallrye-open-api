@@ -101,6 +101,10 @@ public interface AnnotationScanner {
     // Allow runtimes to set the context root path
     public void setContextRoot(String path);
 
+    public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo);
+
+    public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo);
+
     default boolean isMultipartOutput(Type returnType) {
         return false;
     }
@@ -496,7 +500,7 @@ public interface AnnotationScanner {
                 String[] produces = context.getCurrentProduces();
 
                 if (produces == null || produces.length == 0) {
-                    produces = context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get());
+                    produces = getDefaultProduces(context, method);
                 }
 
                 if (schema != null && schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
