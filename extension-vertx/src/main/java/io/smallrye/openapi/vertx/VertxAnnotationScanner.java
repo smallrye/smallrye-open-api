@@ -233,10 +233,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         VertxLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
+        String[] defaultConsumes = getDefaultConsumes(context, method);
         context.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
-                context.getConfig().getDefaultConsumes().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+                defaultConsumes).orElse(null));
+        String[] defaultProduces = getDefaultProduces(context, method);
         context.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
-                context.getConfig().getDefaultProduces().orElse(OpenApiConstants.DEFAULT_MEDIA_TYPES.get())).orElse(null));
+                defaultProduces).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
