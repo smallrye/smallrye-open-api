@@ -217,6 +217,14 @@ public interface OpenApiConfig {
         return getConfigValue(OpenApiConstants.DEFAULT_CONSUMES, String[].class, Optional::of, Optional::empty);
     }
 
+    default Optional<String[]> getDefaultPrimitivesProduces() {
+        return getConfigValue(OpenApiConstants.DEFAULT_PRODUCES_PRIMITIVES, String[].class, Optional::of, Optional::empty);
+    }
+
+    default Optional<String[]> getDefaultPrimitivesConsumes() {
+        return getConfigValue(OpenApiConstants.DEFAULT_CONSUMES_PRIMITIVES, String[].class, Optional::of, Optional::empty);
+    }
+
     default Optional<Boolean> allowNakedPathParameter() {
         return Optional.empty();
     }

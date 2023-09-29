@@ -438,10 +438,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        String[] defaultConsumes = getDefaultConsumes(context, method);
         context.setCurrentConsumes(getMediaTypes(context, method, JaxRsConstants.CONSUMES, defaultConsumes));
 
-        String[] defaultProduces = context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        String[] defaultProduces = getDefaultProduces(context, method);
         context.setCurrentProduces(getMediaTypes(context, method, JaxRsConstants.PRODUCES, defaultProduces));
 
         // Process any @Operation annotation

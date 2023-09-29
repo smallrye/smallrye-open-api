@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
+import org.jboss.jandex.DotName;
+import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -98,5 +101,21 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
         }
 
         return config.getScanProfiles().stream().anyMatch(profiles::contains);
+    }
+
+    public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo) {
+        if (methodInfo.returnType().kind().equals(Type.Kind.PRIMITIVE)
+                || methodInfo.returnType().name().equals(DotName.createSimple(String.class))) {
+            return context.getConfig().getDefaultPrimitivesConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        }
+        return context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+    }
+
+    public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo) {
+        if (methodInfo.returnType().kind().equals(Type.Kind.PRIMITIVE)
+                || methodInfo.returnType().name().equals(DotName.createSimple(String.class))) {
+            return context.getConfig().getDefaultPrimitivesProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        }
+        return context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
     }
 }

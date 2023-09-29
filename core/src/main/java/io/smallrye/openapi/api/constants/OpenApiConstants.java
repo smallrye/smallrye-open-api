@@ -62,6 +62,9 @@ public final class OpenApiConstants {
     public static final String DUPLICATE_OPERATION_ID_BEHAVIOR = SMALLRYE_PREFIX + "duplicateOperationIdBehavior";
     public static final String DEFAULT_PRODUCES = SMALLRYE_PREFIX + "defaultProduces";
     public static final String DEFAULT_CONSUMES = SMALLRYE_PREFIX + "defaultConsumes";
+    public static final String DEFAULT_PRODUCES_PRIMITIVES = SMALLRYE_PREFIX + "defaultPrimitivesProduces";
+    public static final String DEFAULT_CONSUMES_PRIMITIVES = SMALLRYE_PREFIX + "defaultPrimitivesConsumes";
+
     public static final String MAXIMUM_STATIC_FILE_SIZE = SMALLRYE_PREFIX + "maximumStaticFileSize";
     public static final String AUTO_INHERITANCE = SMALLRYE_PREFIX + "auto-inheritance";
 
