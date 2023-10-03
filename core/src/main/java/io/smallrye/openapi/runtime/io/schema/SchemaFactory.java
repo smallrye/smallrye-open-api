@@ -1,6 +1,5 @@
 package io.smallrye.openapi.runtime.io.schema;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,13 +20,11 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
-import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
-import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
@@ -41,6 +37,7 @@ import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.dataobject.EnumProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
@@ -550,47 +547,10 @@ public class SchemaFactory {
      */
     public static Schema enumToSchema(final AnnotationScannerContext context, Type enumType) {
         IoLogging.logger.enumProcessing(enumType);
-        final int ENUM = 0x00004000; // see java.lang.reflect.Modifier#ENUM
+        List<Object> enumeration = EnumProcessor.enumConstants(context, enumType);
         ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = Annotations.getAnnotation(enumKlazz, SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
-
-        List<Object> enumeration = enumKlazz.annotationsMap()
-                .getOrDefault(JacksonConstants.JSON_VALUE, Collections.emptyList())
-                .stream()
-                // @JsonValue#value (default = true) allows for the functionality to be disabled
-                .filter(atJsonValue -> Annotations.value(atJsonValue, JacksonConstants.PROP_VALUE, true))
-                .map(AnnotationInstance::target)
-                .filter(JandexUtil::isSupplier)
-                .map(valueTarget -> {
-                    String className = enumKlazz.name().toString();
-                    String methodName = valueTarget.asMethod().name();
-
-                    try {
-                        Class<?> loadedEnum = Class.forName(className, false, context.getClassLoader());
-                        Method valueMethod = loadedEnum.getDeclaredMethod(methodName);
-                        Object[] constants = loadedEnum.getEnumConstants();
-
-                        List<Object> reflectedEnumeration = new ArrayList<>(constants.length);
-
-                        for (Object constant : constants) {
-                            reflectedEnumeration.add(valueMethod.invoke(constant));
-                        }
-
-                        return reflectedEnumeration;
-                    } catch (Exception e) {
-                        IoLogging.logger.exceptionReadingEnumJsonValue(className, methodName, e);
-                    }
-
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseGet(() -> JandexUtil.fields(context, enumKlazz)
-                        .stream()
-                        .filter(field -> (field.flags() & ENUM) != 0)
-                        .map(FieldInfo::name)
-                        .collect(Collectors.toList()));
 
         if (schemaAnnotation != null) {
             Map<String, Object> defaults = new HashMap<>(2);
