@@ -1,0 +1,19 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "days" : {
+            "$ref" : "#/components/schemas/DaysOfWeek"
+          }
+        }
+      },
+      "DaysOfWeek" : {
+        "enum" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "type" : "string"
+      }
+    }
+  }
+}

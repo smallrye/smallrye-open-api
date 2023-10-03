@@ -86,4 +86,9 @@ interface DataObjectLogging extends BasicLogger {
     @Message(id = 31016, value = "Unanticipated mismatch between type arguments and type variables \n" +
             "Args: %s\n Vars:%s")
     void classNotAvailable(List<TypeVariable> typeVariables, List<Type> arguments);
+
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 31017, value = "Failed to read enumeration values from enum %s method %s with `@JsonValue`: %s")
+    void exceptionReadingEnumJsonValue(String enumName, String methodName, Exception exception);
+
 }

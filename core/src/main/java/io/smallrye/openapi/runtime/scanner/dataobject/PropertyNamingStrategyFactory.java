@@ -14,7 +14,9 @@ public class PropertyNamingStrategyFactory {
 
     private static final String JSONB_TRANSLATE_NAME = "translateName";
     private static final String JACKSON_TRANSLATE = "translate";
-    private static final List<String> knownMethods = Arrays.asList(JSONB_TRANSLATE_NAME, JACKSON_TRANSLATE);
+    private static final String JACKSON_TRANSLATE_ENUM = "convertEnumToExternalName";
+    private static final List<String> knownMethods = Arrays.asList(JSONB_TRANSLATE_NAME, JACKSON_TRANSLATE,
+            JACKSON_TRANSLATE_ENUM);
     private static final Map<String, UnaryOperator<String>> STRATEGY_CACHE = new ConcurrentHashMap<>();
 
     private PropertyNamingStrategyFactory() {
