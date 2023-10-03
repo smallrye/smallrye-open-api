@@ -71,6 +71,8 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
     void testConfigured(Index i) throws IOException, JSONException {
         System.setProperty(OpenApiConstants.DEFAULT_CONSUMES, "application/json");
         System.setProperty(OpenApiConstants.DEFAULT_PRODUCES, "application/json");
+        System.setProperty(OpenApiConstants.DEFAULT_CONSUMES_PRIMITIVES, "text/plain");
+        System.setProperty(OpenApiConstants.DEFAULT_PRODUCES_PRIMITIVES, "text/plain");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
 
@@ -83,6 +85,8 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
         } finally {
             System.clearProperty(OpenApiConstants.DEFAULT_CONSUMES);
             System.clearProperty(OpenApiConstants.DEFAULT_PRODUCES);
+            System.clearProperty(OpenApiConstants.DEFAULT_CONSUMES_PRIMITIVES);
+            System.clearProperty(OpenApiConstants.DEFAULT_PRODUCES_PRIMITIVES);
         }
     }
 
