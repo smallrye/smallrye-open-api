@@ -12,6 +12,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
  * Abstract base class for annotation scanners
@@ -104,18 +105,19 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
     }
 
     public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo) {
-        if (methodInfo.returnType().kind().equals(Type.Kind.PRIMITIVE)
-                || methodInfo.returnType().name().equals(DotName.createSimple(String.class))) {
-            return context.getConfig().getDefaultPrimitivesConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
-        }
         return context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
     }
 
     public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo) {
-        if (methodInfo.returnType().kind().equals(Type.Kind.PRIMITIVE)
-                || methodInfo.returnType().name().equals(DotName.createSimple(String.class))) {
+        if (isPrimimive(methodInfo.returnType())) {
             return context.getConfig().getDefaultPrimitivesProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
         }
         return context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+    }
+
+    private boolean isPrimimive(Type type) {
+        return type.kind().equals(Type.Kind.PRIMITIVE)
+                || type.name().equals(DotName.createSimple(String.class))
+                || (TypeUtil.isWrappedType(type) && isPrimimive(TypeUtil.unwrapType(type)));
     }
 }
