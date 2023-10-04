@@ -91,7 +91,7 @@ public class TypeUtil {
     /*
      * This is used both for Java Period and Duration according to
      * https://docs.oracle.com/javase/8/docs/api/java/time/Period.html
-     * As they're both basically https://tools.ietf.org/html/rfc3339#appendix-A
+     * As they're both basically https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6
      * Examples is parsed from both classes
      */
     private static final TypeWithFormat DURATION_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.DURATION)
@@ -99,12 +99,12 @@ public class TypeUtil {
             .build();
     private static final TypeWithFormat TIME_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.TIME)
             .externalDocumentation("As defined by 'full-time' in RFC3339",
-                    "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14")
-            .example("13:45.30.123456789+02:00").build();
+                    "https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6")
+            .example("13:45:30.123456789+02:00").build();
     private static final TypeWithFormat TIME_LOCAL_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.TIME_LOCAL)
             .externalDocumentation("As defined by 'partial-time' in RFC3339",
-                    "https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14")
-            .example("13:45.30.123456789").build();
+                    "https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6")
+            .example("13:45:30.123456789").build();
 
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
     public static final IndexView jdkIndex;
