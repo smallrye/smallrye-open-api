@@ -21,7 +21,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 
@@ -580,5 +584,29 @@ class OpenApiParserAndSerializerTest {
         doc.addExtension(key, "OK");
         String yaml = OpenApiSerializer.serialize(doc, Format.YAML);
         assertTrue(yaml.indexOf('?') >= 0);
+    }
+
+    @Test
+    void testJsonObjectWriter() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectWriter writer = objectMapper.writer();
+        OpenAPI doc = OASFactory.createOpenAPI();
+        doc.addExtension("x-foo", "bar");
+        String json = OpenApiSerializer.serialize(doc, writer);
+        assertJsonEquals("{\"x-foo\":\"bar\"}", json);
+    }
+
+    @Test
+    void testYamlObjectWriter() throws Exception {
+        YAMLFactory factory = new YAMLFactory();
+        factory.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+        factory.enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
+        factory.enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS);
+        ObjectMapper mapper = new ObjectMapper(factory);
+        ObjectWriter writer = mapper.writer();
+        OpenAPI doc = OASFactory.createOpenAPI();
+        doc.addExtension("x-foo", "bar");
+        String yaml = OpenApiSerializer.serialize(doc, writer);
+        assertYamlEquals("x-foo: bar", yaml);
     }
 }
