@@ -317,6 +317,7 @@ public class IndexHtmlCreator {
         DEFAULT_OPTIONS.put(Option.onComplete, null);
         DEFAULT_OPTIONS.put(Option.syntaxHighlight, null);
         DEFAULT_OPTIONS.put(Option.queryConfigEnabled, null);
+        DEFAULT_OPTIONS.put(Option.tryItOutEnabled, null);
 
         // Network section
         DEFAULT_OPTIONS.put(Option.oauth2RedirectUrl, null);

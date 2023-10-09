@@ -45,6 +45,7 @@ public enum Option {
     layout,
     plugins,
     presets,
+    tryItOutEnabled,
     // OAuth related
     initOAuthSection,
     oauthClientId,
