@@ -18,6 +18,21 @@ Add this to your pom.xml:
             </goals>
         </execution>
     </executions>
+    <!-- Uncomment the dependency overrides for JDK 1.8 compatibility: -->
+    <!--
+    <dependencies>
+        <dependency>
+            <groupId>io.smallrye.config</groupId>
+            <artifactId>smallrye-config</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.4.3.Final</version>
+        </dependency>
+    </dependencies>
+    -->
 </plugin>
 ----
 
