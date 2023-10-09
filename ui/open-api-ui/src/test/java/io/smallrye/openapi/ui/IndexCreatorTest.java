@@ -32,7 +32,7 @@ class IndexCreatorTest {
         assertTrue(s.contains("dom_id: '#swagger-ui',"));
         assertTrue(s.contains("deepLinking: true,"));
         assertFalse(s.contains("queryConfigEnabled"));
-
+        assertFalse(s.contains("tryItOutEnabled"));
     }
 
     @Test
@@ -239,5 +239,18 @@ class IndexCreatorTest {
         String s = new String(indexHtml);
 
         assertTrue(s.contains("syntaxHighlight: { activated: true, theme: \"monokai\" },"));
+    }
+
+    @Test
+    void testCreateWithTryItOutEnabledBoolean() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.tryItOutEnabled, "true");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("tryItOutEnabled: true,"));
     }
 }
