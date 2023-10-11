@@ -32,6 +32,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.runtime.util.TypeParser;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -210,9 +211,17 @@ public class SchemaRegistry {
         }
 
         config.getSchemas().entrySet().forEach(entry -> {
-            String className = entry.getKey();
+            String typeSignature = entry.getKey();
             String jsonSchema = entry.getValue();
+            Type type;
             Schema schema;
+
+            try {
+                type = TypeParser.parse(typeSignature);
+            } catch (Exception e) {
+                ScannerLogging.logger.configSchemaTypeInvalid(typeSignature, e);
+                return;
+            }
 
             try {
                 schema = context.getExtensions()
@@ -221,13 +230,12 @@ public class SchemaRegistry {
                         .findFirst()
                         .orElseThrow(NoSuchElementException::new);
             } catch (Exception e) {
-                ScannerLogging.logger.errorParsingSchema(className);
+                ScannerLogging.logger.errorParsingSchema(typeSignature);
                 return;
             }
 
-            Type type = Type.create(DotName.createSimple(className), Type.Kind.CLASS);
             this.register(new TypeKey(type, Collections.emptySet()), schema, ((SchemaImpl) schema).getName());
-            ScannerLogging.logger.configSchemaRegistered(className);
+            ScannerLogging.logger.configSchemaRegistered(typeSignature);
         });
     }
 
