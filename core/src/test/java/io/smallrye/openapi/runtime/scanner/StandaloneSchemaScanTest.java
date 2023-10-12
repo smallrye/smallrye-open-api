@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -790,5 +791,35 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("components.schemas.no-self-ref-for-property-schema.json", result);
+    }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testParameterizedTypeSchemaConfig() throws IOException, JSONException {
+        class Nullable<T> {
+            T value;
+            boolean isPresent;
+
+            boolean isPresent() {
+                return isPresent;
+            }
+        }
+
+        @Schema(name = "Bean")
+        class Bean {
+            Nullable<String[]> nullableString;
+        }
+
+        Index index = indexOf(Nullable.class, Bean.class);
+        String nullableStringArySig = Nullable.class.getName() + "<java.lang.String[]>";
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(
+                OASConfig.SCHEMA_PREFIX + nullableStringArySig,
+                "{ \"name\": \"NullableStringArray\", \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"nullable\": true }"),
+                index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.parameterized-type-schema-config.json", result);
     }
 }

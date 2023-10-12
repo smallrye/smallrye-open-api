@@ -5,6 +5,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
+import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
@@ -36,5 +37,9 @@ interface ScannerLogging extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     @Message(id = 4005, value = "Could not find schema class in index: %s")
     void schemaTypeNotFound(DotName className);
+
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 4006, value = "Configured schema type %s is not a valid type signature")
+    void configSchemaTypeInvalid(String typeSignature, @Cause Throwable cause);
 
 }
