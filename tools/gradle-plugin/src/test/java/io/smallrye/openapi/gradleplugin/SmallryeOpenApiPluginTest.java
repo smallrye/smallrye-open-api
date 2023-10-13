@@ -205,11 +205,13 @@ class SmallryeOpenApiPluginTest {
                         "  infoLicenseName.set(\"Apache 2.0\")",
                         "  infoLicenseUrl.set(\"http://www.apache.org/licenses/LICENSE-2.0.html\")",
                         "  operationIdStrategy.set(OperationIdStrategy.METHOD)",
+                        "  filter.set(\"testcases.CustomOASFilter\")",
                         "  outputFileTypeFilter.set(\"" + outputFileTypeFilter + "\")",
                         "}"));
 
         Path javaDir = Paths.get("src/main/java/testcases");
         Files.createDirectories(buildDir.resolve(javaDir));
+
         Files.write(buildDir.resolve(javaDir.resolve("DummyJaxRs.java")),
                 asList("package testcases;",
                         "",
@@ -234,6 +236,18 @@ class SmallryeOpenApiPluginTest {
                         "      )})",
                         "    public String dummyThing() {",
                         "        return \"foo\";",
+                        "    }",
+                        "}"));
+
+        Files.write(buildDir.resolve(javaDir.resolve("CustomOASFilter.java")),
+                asList("package testcases;",
+                        "",
+                        "import org.eclipse.microprofile.openapi.OASFilter;",
+                        "import org.eclipse.microprofile.openapi.models.OpenAPI;",
+                        "",
+                        "public class CustomOASFilter implements OASFilter {",
+                        "    public void filterOpenAPI(OpenAPI openAPI) {",
+                        "        openAPI.addExtension(\"x-smallrye-gradle-generated\", Boolean.TRUE);",
                         "    }",
                         "}"));
 
@@ -274,6 +288,7 @@ class SmallryeOpenApiPluginTest {
                     targetOpenapiDir.resolve("my-openapi-schema-file.json").toUri().toURL(),
                     JsonNode.class);
             assertThat(root.get("openapi").asText()).isEqualTo("3.0.2");
+            assertThat(root.get("x-smallrye-gradle-generated").booleanValue()).isTrue();
 
             JsonNode info = root.get("info");
             assertThat(info).isNotNull();
