@@ -3,6 +3,7 @@ package io.smallrye.openapi.gradleplugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -15,7 +16,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -130,7 +130,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
             IndexView index,
             FileCollection resourcesSrcDirs) throws IOException {
         OpenApiConfig openApiConfig = properties.asOpenApiConfig();
-        ClassLoader classLoader = getClassLoader(classpath);
+        ClassLoader classLoader = getClassLoader();
 
         OpenAPI staticModel = generateStaticModel(openApiConfig, resourcesSrcDirs);
         OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, SmallryeOpenApiTask.class.getClassLoader());
@@ -192,17 +192,22 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         getLogger().debug("Adding {} {} from {}", collection.map(Object::toString).orElse("<no>"), what, from);
     }
 
-    private ClassLoader getClassLoader(FileCollection config) throws MalformedURLException {
-        Set<URL> urls = new HashSet<>();
+    private ClassLoader getClassLoader() {
+        URL[] locators = Stream.of(classesDirs, classpath)
+                .map(FileCollection::getFiles)
+                .flatMap(Collection::stream)
+                .map(pathEntry -> {
+                    getLogger().debug("Adding {} to annotation scanner class loader", pathEntry);
 
-        for (File dependency : config.getFiles()) {
-            getLogger().debug("Adding {} to annotation scanner class loader", dependency);
-            urls.add(dependency.toURI().toURL());
-        }
+                    try {
+                        return pathEntry.toURI().toURL();
+                    } catch (MalformedURLException mue) {
+                        throw new UncheckedIOException(mue);
+                    }
+                })
+                .toArray(URL[]::new);
 
-        return URLClassLoader.newInstance(
-                urls.toArray(new URL[0]),
-                Thread.currentThread().getContextClassLoader());
+        return URLClassLoader.newInstance(locators, Thread.currentThread().getContextClassLoader());
     }
 
     private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig,
@@ -226,13 +231,12 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     }
 
     private Path getStaticFile(FileCollection resourcesSrcDirs) {
-        Path staticFile = resourcesSrcDirs.getFiles()
+        return resourcesSrcDirs.getFiles()
                 .stream()
                 .map(this::getStaticFile)
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
-        return staticFile;
     }
 
     private Path getStaticFile(File dir) {
