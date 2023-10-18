@@ -69,9 +69,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-kotlin</artifactId>
-            <version>${version.quarkus}</version>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>1.9.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.config</groupId>
+            <artifactId>smallrye-config</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
