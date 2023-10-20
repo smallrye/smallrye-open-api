@@ -227,7 +227,9 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         for (ClassInfo resourceClass : resourceClasses) {
             TypeResolver resolver = TypeResolver.forClass(context, resourceClass, null);
             context.getResolverStack().push(resolver);
-            processResourceClass(context, openApi, resourceClass, null);
+            // Process tags (both declarations and references).
+            Set<String> tags = processTags(context, resourceClass, openApi, false);
+            processResourceClass(context, openApi, resourceClass, null, tags);
             context.getResolverStack().pop();
         }
     }
@@ -242,7 +244,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private void processResourceClass(final AnnotationScannerContext context,
             OpenAPI openApi,
             ClassInfo resourceClass,
-            List<Parameter> locatorPathParameters) {
+            List<Parameter> locatorPathParameters,
+            Set<String> tagRefs) {
         JaxRsLogging.log.processingClass(resourceClass.simpleName());
 
         // Process @SecurityScheme annotations.
@@ -252,7 +255,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processJavaSecurity(context, resourceClass, openApi);
 
         // Now find and process the operation methods
-        processResourceMethods(context, resourceClass, openApi, locatorPathParameters);
+        processResourceMethods(context, resourceClass, openApi, locatorPathParameters, tagRefs);
     }
 
     /**
@@ -266,10 +269,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private void processResourceMethods(final AnnotationScannerContext context,
             final ClassInfo resourceClass,
             OpenAPI openApi,
-            List<Parameter> locatorPathParameters) {
-
-        // Process tags (both declarations and references).
-        Set<String> tagRefs = processTags(context, resourceClass, openApi, false);
+            List<Parameter> locatorPathParameters,
+            Set<String> tagRefs) {
 
         // Process exception mapper to auto generate api response based on method exceptions
         Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap = processExceptionMappers(context);
@@ -291,7 +292,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                     });
 
             if (resourceCount.get() == 0 && Annotations.hasAnnotation(methodInfo, JaxRsConstants.PATH)) {
-                processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters);
+                processSubResource(context, resourceClass, methodInfo, openApi, locatorPathParameters, tagRefs);
             }
         }
     }
@@ -367,7 +368,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             final ClassInfo resourceClass,
             final MethodInfo method,
             OpenAPI openApi,
-            List<Parameter> locatorPathParameters) {
+            List<Parameter> locatorPathParameters,
+            Set<String> tagRefs) {
         final Type methodReturnType = context.getResourceTypeResolver().resolve(method.returnType());
 
         if (Type.Kind.VOID.equals(methodReturnType.kind())) {
@@ -401,6 +403,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             TypeResolver resolver = TypeResolver.forClass(context, subResourceClass, methodReturnType);
             context.getResolverStack().push(resolver);
 
+            // Check for @Tags from the method or the subresource class, default to the parent's tags
+            Set<String> subresourceTags = Optional.ofNullable(processTags(context, method, openApi, true))
+                    .orElseGet(() -> Optional.ofNullable(processTags(context, subResourceClass, openApi, true))
+                            .orElse(tagRefs));
+
             /*
              * Combine parameters passed previously with all of those from the current resource class and
              * method that apply to this Path. The full list will be used as PATH-LEVEL parameters for
@@ -409,7 +416,8 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             processResourceClass(context, openApi, subResourceClass,
                     ListUtil.mergeNullableLists(locatorPathParameters,
                             params.getPathItemParameters(),
-                            params.getOperationParameters()));
+                            params.getOperationParameters()),
+                    subresourceTags);
 
             context.getResolverStack().pop();
             this.subResourceStack.pop();
