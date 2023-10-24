@@ -1,0 +1,115 @@
+{
+  "openapi" : "3.0.3",
+  "tags" : [ {
+    "name" : "root-a2-tag"
+  }, {
+    "name" : "root-tag"
+  }, {
+    "name" : "subresource-a-op1-tag"
+  }, {
+    "name" : "subresource-a-tag"
+  } ],
+  "paths" : {
+    "/root/a1/op1" : {
+      "get" : {
+        "tags" : [ "subresource-a-op1-tag" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/root/a1/op2" : {
+      "get" : {
+        "tags" : [ "subresource-a-tag" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/root/a2/op1" : {
+      "get" : {
+        "tags" : [ "subresource-a-op1-tag" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/root/a2/op2" : {
+      "get" : {
+        "tags" : [ "root-a2-tag" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/root/b1/op1" : {
+      "get" : {
+        "tags" : [ "root-tag" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/root/b1/op2" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
