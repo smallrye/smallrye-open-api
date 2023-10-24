@@ -48,6 +48,8 @@ public class AnnotationScannerContext {
     private final Set<Type> jsonViews = new LinkedHashSet<>();
     private String[] currentConsumes;
     private String[] currentProduces;
+    private String[] defaultConsumes;
+    private String[] defaultProduces;
     private Optional<AnnotationScanner> currentScanner = Optional.empty();
     private final SchemaRegistry schemaRegistry;
     private final JavaSecurityProcessor javaSecurityProcessor;
@@ -147,6 +149,22 @@ public class AnnotationScannerContext {
 
     public void setCurrentProduces(String[] currentProduces) {
         this.currentProduces = currentProduces;
+    }
+
+    public String[] getDefaultConsumes() {
+        return defaultConsumes;
+    }
+
+    public void setDefaultConsumes(String[] defaultConsumes) {
+        this.defaultConsumes = defaultConsumes;
+    }
+
+    public String[] getDefaultProduces() {
+        return defaultProduces;
+    }
+
+    public void setDefaultProduces(String[] defaultProduces) {
+        this.defaultProduces = defaultProduces;
     }
 
     public Optional<AnnotationScanner> getCurrentScanner() {

@@ -8,6 +8,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import org.jboss.jandex.DotName;
@@ -27,6 +28,7 @@ public class JDKConstants {
     public static final DotName DOTNAME_OPTIONAL_INT = DotName.createSimple(OptionalInt.class.getName());
     public static final DotName DOTNAME_OPTIONAL_LONG = DotName.createSimple(OptionalLong.class.getName());
     public static final DotName COMPLETION_STAGE_NAME = DotName.createSimple(CompletionStage.class.getName());
+    public static final DotName COMPLETABLE_FUTURE_NAME = DotName.createSimple(CompletableFuture.class.getName());
 
     public static final Set<DotName> DOTNAME_OPTIONALS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(DOTNAME_OPTIONAL,

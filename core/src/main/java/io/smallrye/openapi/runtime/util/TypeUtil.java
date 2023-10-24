@@ -309,6 +309,8 @@ public class TypeUtil {
 
         wrapperTypes.addAll(JaxbConstants.JAXB_ELEMENT);
         wrapperTypes.add(MutinyConstants.UNI_TYPE.name());
+        wrapperTypes.add(JDKConstants.COMPLETION_STAGE_NAME);
+        wrapperTypes.add(JDKConstants.COMPLETABLE_FUTURE_NAME);
     }
 
     private static void indexOptional(Indexer indexer, String className, ClassLoader contextLoader) {

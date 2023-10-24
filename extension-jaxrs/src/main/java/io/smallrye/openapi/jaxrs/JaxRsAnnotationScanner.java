@@ -446,11 +446,13 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         JaxRsLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method);
-        context.setCurrentConsumes(getMediaTypes(context, method, JaxRsConstants.CONSUMES, defaultConsumes));
+        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(context, resourceClass, method));
+        context.setDefaultConsumes(defaultConsumes);
+        context.setCurrentConsumes(getMediaTypes(context, method, JaxRsConstants.CONSUMES, defaultConsumes).orElse(null));
 
         String[] defaultProduces = getDefaultProduces(context, method);
-        context.setCurrentProduces(getMediaTypes(context, method, JaxRsConstants.PRODUCES, defaultProduces));
+        context.setDefaultProduces(defaultProduces);
+        context.setCurrentProduces(getMediaTypes(context, method, JaxRsConstants.PRODUCES, defaultProduces).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -463,10 +465,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processOperationTags(context, method, context.getOpenApi(), resourceTags, operation);
 
         // Process @Parameter annotations.
-        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-
-        ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
-                reader, context.getExtensions());
+        ResourceParameters params = getResourceParameters(context, resourceClass, method);
         List<Parameter> operationParams = params.getOperationParameters();
         operation.setParameters(operationParams);
         if (locatorPathParameters != null && operationParams != null) {
@@ -528,6 +527,13 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
+    private ResourceParameters getResourceParameters(final AnnotationScannerContext context,
+            final ClassInfo resourceClass, final MethodInfo method) {
+        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+        return JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
+                reader, context.getExtensions());
+    }
+
     /**
      * Remove from the list of locator parameters and parameter present in the list of operation parameters.
      * Parameters are considered the same if they have the same value for name and {@code in}.
@@ -549,16 +555,15 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      * not found, search for {@code annotationName} on {@code resourceMethod}'s containing class or any
      * of its super-classes or interfaces.
      */
-    static String[] getMediaTypes(AnnotationScannerContext context, MethodInfo resourceMethod, Set<DotName> annotationName,
-            String[] defaultValue) {
+    static Optional<String[]> getMediaTypes(AnnotationScannerContext context, MethodInfo resourceMethod,
+            Set<DotName> annotationName, String[] defaultValue) {
 
         return context.getAugmentedIndex().ancestry(resourceMethod).entrySet()
                 .stream()
                 .map(e -> getMediaTypeAnnotation(e.getKey(), e.getValue(), annotationName))
                 .filter(Objects::nonNull)
                 .map(annotation -> mediaTypeValue(annotation, defaultValue))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
     static AnnotationInstance getMediaTypeAnnotation(ClassInfo clazz, MethodInfo method, Set<DotName> annotationName) {

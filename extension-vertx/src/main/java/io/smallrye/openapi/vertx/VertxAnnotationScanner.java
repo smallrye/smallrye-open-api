@@ -212,6 +212,16 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                                 locatorPathParameters)));
     }
 
+    @Override
+    public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo, ResourceParameters params) {
+        return context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+    }
+
+    @Override
+    public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo) {
+        return context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+    }
+
     /**
      * Process a single Vert.x method to produce an OpenAPI Operation.
      *
@@ -233,10 +243,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         VertxLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method);
+        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(context, resourceClass, method));
+        context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
                 defaultConsumes).orElse(null));
         String[] defaultProduces = getDefaultProduces(context, method);
+        context.setDefaultProduces(defaultProduces);
         context.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
                 defaultProduces).orElse(null));
 
@@ -252,11 +264,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
-        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-
-        ResourceParameters params = VertxParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader,
-                context.getExtensions());
+        ResourceParameters params = getResourceParameters(context, resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -304,6 +312,15 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
+    }
+
+    private ResourceParameters getResourceParameters(final AnnotationScannerContext context,
+            final ClassInfo resourceClass,
+            final MethodInfo method) {
+        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+        return VertxParameterProcessor.process(context, currentAppPath, resourceClass,
+                method, reader,
+                context.getExtensions());
     }
 
     /**
