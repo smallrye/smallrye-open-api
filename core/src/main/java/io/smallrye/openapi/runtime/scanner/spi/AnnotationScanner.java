@@ -101,7 +101,7 @@ public interface AnnotationScanner {
     // Allow runtimes to set the context root path
     public void setContextRoot(String path);
 
-    public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo);
+    public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo, ResourceParameters params);
 
     public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo);
 
@@ -990,7 +990,7 @@ public interface AnnotationScanner {
                     }
 
                     if (schema != null) {
-                        ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
+                        ModelUtil.setRequestBodySchema(requestBody, schema, getConsumesForRequestBody(context));
                     }
 
                     if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
@@ -1011,6 +1011,14 @@ public interface AnnotationScanner {
         String[] currentConsumes = context.getCurrentConsumes();
         if (currentConsumes == null || currentConsumes.length == 0) {
             currentConsumes = context.getConfig().getDefaultConsumes().orElse(null);
+        }
+        return currentConsumes;
+    }
+
+    default String[] getConsumesForRequestBody(final AnnotationScannerContext context) {
+        String[] currentConsumes = context.getCurrentConsumes();
+        if (currentConsumes == null || currentConsumes.length == 0) {
+            currentConsumes = context.getDefaultConsumes();
         }
         return currentConsumes;
     }

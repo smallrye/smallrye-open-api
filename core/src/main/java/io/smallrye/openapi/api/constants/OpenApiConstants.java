@@ -64,6 +64,8 @@ public final class OpenApiConstants {
     public static final String DEFAULT_CONSUMES = SMALLRYE_PREFIX + "defaultConsumes";
     public static final String DEFAULT_PRODUCES_PRIMITIVES = SMALLRYE_PREFIX + "defaultPrimitivesProduces";
     public static final String DEFAULT_CONSUMES_PRIMITIVES = SMALLRYE_PREFIX + "defaultPrimitivesConsumes";
+    public static final String DEFAULT_PRODUCES_STREAMING = SMALLRYE_PREFIX + "defaultStreamingProduces";
+    public static final String DEFAULT_CONSUMES_STREAMING = SMALLRYE_PREFIX + "defaultStreamingConsumes";
 
     public static final String MAXIMUM_STATIC_FILE_SIZE = SMALLRYE_PREFIX + "maximumStaticFileSize";
     public static final String AUTO_INHERITANCE = SMALLRYE_PREFIX + "auto-inheritance";

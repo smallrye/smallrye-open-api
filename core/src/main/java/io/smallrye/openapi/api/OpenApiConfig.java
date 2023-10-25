@@ -225,6 +225,14 @@ public interface OpenApiConfig {
         return getConfigValue(OpenApiConstants.DEFAULT_CONSUMES_PRIMITIVES, String[].class, Optional::of, Optional::empty);
     }
 
+    default Optional<String[]> getDefaultStreamingProduces() {
+        return getConfigValue(OpenApiConstants.DEFAULT_PRODUCES_STREAMING, String[].class, Optional::of, Optional::empty);
+    }
+
+    default Optional<String[]> getDefaultStreamingConsumes() {
+        return getConfigValue(OpenApiConstants.DEFAULT_CONSUMES_STREAMING, String[].class, Optional::of, Optional::empty);
+    }
+
     default Optional<Boolean> allowNakedPathParameter() {
         return Optional.empty();
     }

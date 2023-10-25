@@ -20,6 +20,7 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -289,10 +290,12 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method);
+        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(context, resourceClass, method));
+        context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES, defaultConsumes).orElse(null));
 
         String[] defaultProduces = getDefaultProduces(context, method);
+        context.setDefaultProduces(defaultProduces);
         context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES, defaultProduces).orElse(null));
 
         // Process any @Operation annotation
@@ -307,10 +310,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
-        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
-        ResourceParameters params = SpringParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader,
-                context.getExtensions());
+        ResourceParameters params = getResourceParameters(context, resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -360,6 +360,15 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
+    private ResourceParameters getResourceParameters(final AnnotationScannerContext context,
+            final ClassInfo resourceClass,
+            final MethodInfo method) {
+        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+        return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
+                method, reader,
+                context.getExtensions());
+    }
+
     static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
         Set<DotName> annotationNames = new HashSet<>(SpringConstants.HTTP_METHODS);
         annotationNames.add(SpringConstants.REQUEST_MAPPING);
@@ -383,10 +392,12 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             if (annotationValue != null) {
                 return Optional.of(annotationValue.asStringArray());
             }
-
-            return Optional.of(defaultValue);
         }
 
         return Optional.empty();
+    }
+
+    public boolean isRequestBody(MethodParameterInfo mip) {
+        return mip.annotations().isEmpty() || Annotations.hasAnnotation(mip, SpringConstants.REQUEST_BODY);
     }
 }
