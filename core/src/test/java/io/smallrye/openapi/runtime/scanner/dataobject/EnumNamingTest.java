@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import java.util.Set;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
@@ -24,7 +26,7 @@ class EnumNamingTest extends IndexScannerTestBase {
         @Schema(name = "Bean")
         class Bean {
             @SuppressWarnings("unused")
-            DaysOfWeekDefault days;
+            Set<DaysOfWeekDefault> days;
         }
 
         test(Bean.class, DaysOfWeekDefault.class);
@@ -35,7 +37,7 @@ class EnumNamingTest extends IndexScannerTestBase {
         @Schema(name = "Bean")
         class Bean {
             @SuppressWarnings("unused")
-            DaysOfWeekValue days;
+            Set<DaysOfWeekValue> days;
         }
 
         test(Bean.class, DaysOfWeekValue.class);
@@ -46,7 +48,7 @@ class EnumNamingTest extends IndexScannerTestBase {
         @Schema(name = "Bean")
         class Bean {
             @SuppressWarnings("unused")
-            DaysOfWeekStrategy days;
+            Set<DaysOfWeekStrategy> days;
         }
 
         test(Bean.class, DaysOfWeekStrategy.class);
@@ -57,7 +59,7 @@ class EnumNamingTest extends IndexScannerTestBase {
         @Schema(name = "Bean")
         class Bean {
             @SuppressWarnings("unused")
-            DaysOfWeekProperty days;
+            Set<DaysOfWeekProperty> days;
         }
 
         test(Bean.class, DaysOfWeekProperty.class);
