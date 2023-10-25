@@ -6,7 +6,11 @@
         "type" : "object",
         "properties" : {
           "days" : {
-            "$ref" : "#/components/schemas/DaysOfWeek"
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DaysOfWeek"
+            }
           }
         }
       },

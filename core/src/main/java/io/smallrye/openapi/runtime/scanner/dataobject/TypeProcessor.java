@@ -24,6 +24,7 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
+import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -297,14 +298,19 @@ public class TypeProcessor {
             if (isA(valueType, ENUM_TYPE)) {
                 DataObjectLogging.logger.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(context, valueType);
-                pushToStack(valueType, propsSchema);
             } else {
                 propsSchema.type(Schema.SchemaType.OBJECT);
-                pushToStack(valueType, propsSchema);
             }
 
-            propsSchema = context.getSchemaRegistry().registerReference(valueType, context.getJsonViews(), typeResolver,
-                    propsSchema);
+            SchemaRegistry registry = context.getSchemaRegistry();
+
+            if (registry.hasSchema(valueType, context.getJsonViews(), typeResolver)) {
+                propsSchema = registry.lookupRef(valueType, context.getJsonViews());
+            } else {
+                pushToStack(valueType, propsSchema);
+                propsSchema = registry.registerReference(valueType, context.getJsonViews(), typeResolver,
+                        propsSchema);
+            }
         }
 
         return propsSchema;
