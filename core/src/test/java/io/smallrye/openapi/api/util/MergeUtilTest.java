@@ -1,10 +1,11 @@
 package io.smallrye.openapi.api.util;
 
+import static io.smallrye.openapi.runtime.scanner.IndexScannerTestBase.loadResource;
+
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -18,16 +19,6 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
  * @author eric.wittmann@gmail.com
  */
 class MergeUtilTest {
-
-    /**
-     * Loads a resource as a string (reads the content at the URL).
-     *
-     * @param testResource
-     * @throws IOException
-     */
-    private static String loadResource(URL testResource) throws IOException {
-        return IOUtils.toString(testResource, "UTF-8");
-    }
 
     /**
      * Compares two JSON strings.
