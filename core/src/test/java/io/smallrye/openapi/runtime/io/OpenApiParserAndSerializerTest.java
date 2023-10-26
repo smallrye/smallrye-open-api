@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.io;
 
+import static io.smallrye.openapi.runtime.scanner.IndexScannerTestBase.loadResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.json.JSONException;
@@ -35,16 +35,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 class OpenApiParserAndSerializerTest {
 
     static final int REPEAT_BODY_CONTENTS_ITERATIONS = 1536; // ~8MB?
-
-    /**
-     * Loads a resource as a string (reads the content at the URL).
-     *
-     * @param testResource
-     * @throws IOException
-     */
-    private static String loadResource(URL testResource) throws IOException {
-        return IOUtils.toString(testResource, "UTF-8");
-    }
 
     /**
      * Compares two JSON strings.

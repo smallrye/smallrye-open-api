@@ -1,11 +1,10 @@
 package io.smallrye.openapi.api.util;
 
+import static io.smallrye.openapi.runtime.scanner.IndexScannerTestBase.loadResource;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.io.IOException;
 import java.net.URL;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFactory;
@@ -29,16 +28,6 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
  * @author eric.wittmann@gmail.com
  */
 class FilterUtilTest {
-
-    /**
-     * Loads a resource as a string (reads the content at the URL).
-     *
-     * @param testResource
-     * @throws IOException
-     */
-    private static String loadResource(URL testResource) throws IOException {
-        return IOUtils.toString(testResource, "UTF-8");
-    }
 
     /**
      * Compares two JSON strings.

@@ -6,8 +6,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +17,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -181,18 +182,22 @@ public class IndexScannerTestBase {
     }
 
     public static String loadResource(URL testResource) throws IOException {
-        return IOUtils.toString(testResource, "UTF-8");
+        final char[] buffer = new char[8192];
+        final StringBuilder result = new StringBuilder();
+
+        try (Reader reader = new InputStreamReader(testResource.openStream(), StandardCharsets.UTF_8)) {
+            int count;
+            while ((count = reader.read(buffer, 0, buffer.length)) > 0) {
+                result.append(buffer, 0, count);
+            }
+        }
+
+        return result.toString();
     }
 
     public static OpenApiConfig emptyConfig() {
         return dynamicConfig(Collections.emptyMap());
     }
-
-    //    public static OpenApiConfig nestingSupportConfig() {
-    //        Map<String, Object> config = new HashMap<>();
-    //        config.put(OpenApiConstants.SMALLRYE_SCHEMA_REFERENCES_ENABLE, Boolean.TRUE);
-    //        return dynamicConfig(config);
-    //    }
 
     public static OpenApiConfig dynamicConfig(String key, Object value) {
         Map<String, String> config = new HashMap<>(1);
