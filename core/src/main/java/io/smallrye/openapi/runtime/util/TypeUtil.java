@@ -311,6 +311,7 @@ public class TypeUtil {
         wrapperTypes.add(MutinyConstants.UNI_TYPE.name());
         wrapperTypes.add(JDKConstants.COMPLETION_STAGE_NAME);
         wrapperTypes.add(JDKConstants.COMPLETABLE_FUTURE_NAME);
+        wrapperTypes.add(DotName.createSimple("io.reactivex.Single"));
     }
 
     private static void indexOptional(Indexer indexer, String className, ClassLoader contextLoader) {
