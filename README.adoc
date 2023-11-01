@@ -39,3 +39,5 @@ mvn clean install
 ** A standard JSON-B naming strategy (listed in `jakarta.json.bind.config.PropertyNamingStrategy`/`javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
+* `mp.openapi.extensions.smallrye.maximumStaticFileSize` - Set this value in order to change the maximum threshold for
+processed static files, when generating model from them. If not set, it will default to 3 MB.

@@ -80,7 +80,8 @@ public class OpenApiRegistration extends HttpServlet {
             document.reset();
             document.config(openApiConfig);
             document.filter(OpenApiProcessor.getFilter(openApiConfig, Thread.currentThread().getContextClassLoader()));
-            document.modelFromStaticFile(io.smallrye.openapi.runtime.OpenApiProcessor.modelFromStaticFile(staticFile));
+            document.modelFromStaticFile(
+                    io.smallrye.openapi.runtime.OpenApiProcessor.modelFromStaticFile(openApiConfig, staticFile));
             document.initialize();
             return Optional.of(document.get());
         } finally {

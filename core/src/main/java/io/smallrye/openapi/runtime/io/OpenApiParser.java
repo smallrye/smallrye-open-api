@@ -7,10 +7,12 @@ import java.net.URL;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.yaml.snakeyaml.LoaderOptions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
@@ -63,20 +65,30 @@ public class OpenApiParser {
      * 
      * @param stream InputStream containing an OpenAPI document
      * @param format Format of the stream
+     * @param maximumStaticFileSize Integer to change (usually to increase) the maximum static file size
      * @return OpenAPIImpl parsed from the stream
      * @throws IOException Errors in reading the stream
      */
-    public static final OpenAPI parse(InputStream stream, Format format) throws IOException {
+    public static final OpenAPI parse(InputStream stream, Format format, final Integer maximumStaticFileSize)
+            throws IOException {
         ObjectMapper mapper;
         if (format == Format.JSON) {
             mapper = new ObjectMapper();
         } else {
-            mapper = new ObjectMapper(new YAMLFactory());
+            LoaderOptions loaderOptions = new LoaderOptions();
+            if (maximumStaticFileSize != null) {
+                loaderOptions.setCodePointLimit(maximumStaticFileSize);
+            }
+            mapper = new ObjectMapper(new YAMLFactoryBuilder(new YAMLFactory()).loaderOptions(loaderOptions).build());
         }
         JsonNode tree = mapper.readTree(stream);
 
         OpenApiParser parser = new OpenApiParser(tree);
         return parser.parse();
+    }
+
+    public static final OpenAPI parse(InputStream stream, Format format) throws IOException {
+        return parse(stream, format, null);
     }
 
     /**

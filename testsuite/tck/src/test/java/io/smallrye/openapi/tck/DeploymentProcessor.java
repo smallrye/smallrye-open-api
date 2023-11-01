@@ -106,9 +106,9 @@ public class DeploymentProcessor implements ApplicationArchiveProcessor {
 
         Optional<OpenAPI> annotationModel = ofNullable(modelFromAnnotations(openApiConfig, contextClassLoader, index));
         Optional<OpenAPI> readerModel = ofNullable(modelFromReader(openApiConfig, contextClassLoader));
-        Optional<OpenAPI> staticFileModel = Stream.of(modelFromFile(war, "/META-INF/openapi.json", JSON),
-                modelFromFile(war, "/META-INF/openapi.yaml", YAML),
-                modelFromFile(war, "/META-INF/openapi.yml", YAML))
+        Optional<OpenAPI> staticFileModel = Stream.of(modelFromFile(openApiConfig, war, "/META-INF/openapi.json", JSON),
+                modelFromFile(openApiConfig, war, "/META-INF/openapi.yaml", YAML),
+                modelFromFile(openApiConfig, war, "/META-INF/openapi.yml", YAML))
                 .filter(Optional::isPresent)
                 .findFirst()
                 .flatMap(openAPI -> openAPI);
@@ -190,11 +190,11 @@ public class DeploymentProcessor implements ApplicationArchiveProcessor {
         return new OpenApiConfigImpl(config);
     }
 
-    private static Optional<OpenAPI> modelFromFile(final WebArchive war, final String location,
+    private static Optional<OpenAPI> modelFromFile(OpenApiConfig openApiConfig, final WebArchive war, final String location,
             final Format format) {
         return ofNullable(war.get(location))
                 .map(Node::getAsset)
                 .map(asset -> new OpenApiStaticFile(asset.openStream(), format))
-                .map(OpenApiProcessor::modelFromStaticFile);
+                .map(f -> OpenApiProcessor.modelFromStaticFile(openApiConfig, f));
     }
 }

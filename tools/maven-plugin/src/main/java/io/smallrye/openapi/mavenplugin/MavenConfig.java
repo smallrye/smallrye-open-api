@@ -155,4 +155,11 @@ public class MavenConfig implements OpenApiConfig {
     public Set<String> getScanExcludeProfiles() {
         return asCsvSet(properties.getOrDefault(OpenApiConstants.SCAN_EXCLUDE_PROFILES, null));
     }
+
+    @Override
+    public Integer getMaximumStaticFileSize() {
+        return Integer.parseInt(
+                properties.getOrDefault(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE,
+                        String.valueOf(OpenApiConfig.MAXIMUM_STATIC_FILE_SIZE_DEFAULT)));
+    }
 }
