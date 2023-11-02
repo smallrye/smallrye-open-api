@@ -1,6 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 
@@ -44,7 +46,9 @@ class OpenApiDataObjectScannerTest {
     }
 
     @Test
-    void testClassWithSchemaTypeString() throws IOException {
+    void testNoSelfReferencingRegardlessOfScanOrder() throws IOException {
+        // one way to trigger issue 1565 (self-referencing) was to have a
+        // non-SchemaType.OBJECT type as a field in another type
         @org.eclipse.microprofile.openapi.annotations.media.Schema(
                 description = "Nested class",
                 type = SchemaType.STRING)
@@ -75,8 +79,10 @@ class OpenApiDataObjectScannerTest {
         OpenApiDataObjectScanner.process(contextNFirst, nType);
         OpenApiDataObjectScanner.process(contextNFirst, cType);
 
-        assertEquals(
-                contextCFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(),
-                contextNFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef());
+        assertAll("no self referencing"
+                // the contextCFirst case had "#/components/schemas/1N" from getRef() in smallrye-open-api 3.5.2
+                , () -> assertNull(contextCFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(), "C first")
+                , () -> assertNull(contextNFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(), "N first")
+        );
     }
 }
