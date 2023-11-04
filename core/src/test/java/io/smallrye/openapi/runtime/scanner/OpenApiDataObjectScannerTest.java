@@ -49,22 +49,21 @@ class OpenApiDataObjectScannerTest {
     void testNoSelfReferencingRegardlessOfScanOrder() throws IOException {
         // one way to trigger issue 1565 (self-referencing) was to have a
         // non-SchemaType.OBJECT type as a field in another type
-        @org.eclipse.microprofile.openapi.annotations.media.Schema(
-                description = "Nested class",
-                type = SchemaType.STRING)
+        @org.eclipse.microprofile.openapi.annotations.media.Schema(description = "Nested class", type = SchemaType.STRING)
         class N {
         }
 
-        @org.eclipse.microprofile.openapi.annotations.media.Schema(
-                description = "Containing class")
+        @org.eclipse.microprofile.openapi.annotations.media.Schema(description = "Containing class")
         class C {
             N n;
         }
 
         IndexView index = Index.of(C.class, N.class);
-        AnnotationScannerContext contextCFirst = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
+        AnnotationScannerContext contextCFirst = new AnnotationScannerContext(index,
+                Thread.currentThread().getContextClassLoader(),
                 IndexScannerTestBase.emptyConfig());
-        AnnotationScannerContext contextNFirst = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
+        AnnotationScannerContext contextNFirst = new AnnotationScannerContext(index,
+                Thread.currentThread().getContextClassLoader(),
                 IndexScannerTestBase.emptyConfig());
         Type cType = Type.create(DotName.createSimple(C.class), Kind.CLASS);
         Type nType = Type.create(DotName.createSimple(N.class), Kind.CLASS);
@@ -79,10 +78,9 @@ class OpenApiDataObjectScannerTest {
         OpenApiDataObjectScanner.process(contextNFirst, nType);
         OpenApiDataObjectScanner.process(contextNFirst, cType);
 
-        assertAll("no self referencing"
-                // the contextCFirst case had "#/components/schemas/1N" from getRef() in smallrye-open-api 3.5.2
-                , () -> assertNull(contextCFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(), "C first")
-                , () -> assertNull(contextNFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(), "N first")
-        );
+        // the contextCFirst case had "#/components/schemas/1N" from getRef() in smallrye-open-api 3.5.2
+        assertAll(
+                () -> assertNull(contextCFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(), "C first"),
+                () -> assertNull(contextNFirst.getOpenApi().getComponents().getSchemas().get("1N").getRef(), "N first"));
     }
 }
