@@ -71,6 +71,9 @@ jobs:
             !**/target/node/**/*
             !**/target/**/*.jar
             !**/target/**/*.war
+            !**/target/failsafe-reports/**/*
+            !**/target/surefire-reports/**/*
+            !**/target/maven-it/**/*
 
   javadoc:
     name: verify javadocs
