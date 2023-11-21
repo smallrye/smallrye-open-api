@@ -1,0 +1,30 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "record" : {
+            "$ref" : "#/components/schemas/NonBean"
+          }
+        }
+      },
+      "NonBean" : {
+        "type" : "object",
+        "properties" : {
+          "isBoolean" : {
+            "type" : "boolean"
+          },
+          "getString" : {
+            "type" : "string"
+          },
+          "setInteger" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      }
+    }
+  }
+}

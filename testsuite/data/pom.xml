@@ -14,7 +14,10 @@
 
     <properties>
         <kotlin.version>1.9.21</kotlin.version>
-        <maven.compiler.release>11</maven.compiler.release>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.version>3.6.0</quarkus.platform.version>
@@ -220,4 +223,61 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>build-with-downloaded-jdk17</id>
+            <activation>
+                <jdk>(,17)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.igormaznitsa</groupId>
+                        <artifactId>mvn-jlink-wrapper</artifactId>
+                        <version>${version.mvn-jlink-wrapper}</version>
+                        <executions>
+                            <execution>
+                                <id>download-jdk</id>
+                                <goals>
+                                    <goal>cache-jdk</goal>
+                                </goals>
+                                <configuration>
+                                    <jdkCachePath>${project.basedir}/jdk-cache</jdkCachePath>
+                                    <jdkPathProperty>custom-jdk-path</jdkPathProperty>
+                                    <provider>ADOPT</provider>
+                                    <providerConfig>
+                                        <release>${java.version}</release>
+                                        <arch>x64</arch> <!-- TODO select automatically, but how? -->
+                                    </providerConfig>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-compile</id>
+                                <configuration>
+                                    <executable>${custom-jdk-path}/bin/javac</executable>
+                                    <fork>true</fork>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <javadocExecutable>${custom-jdk-path}/bin/javadoc</javadocExecutable>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -876,6 +876,14 @@ public class TypeResolver {
      */
     static String propertyName(MethodInfo method) {
         final String methodName = method.name();
+        final ClassInfo declaringClass = method.declaringClass();
+
+        if (declaringClass.isRecord() && declaringClass.recordComponent(methodName) != null) {
+            // This is a record and the method name is generated (or overridden) and
+            // matches the record component name. Do not modify further.
+            return methodName;
+        }
+
         final int nameStart = methodNamePrefix(method).length();
         final String propertyName;
 

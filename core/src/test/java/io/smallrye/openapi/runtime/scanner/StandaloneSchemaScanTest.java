@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.testdata.java.NonBean;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
 
 class StandaloneSchemaScanTest extends IndexScannerTestBase {
@@ -838,5 +839,22 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.parameterized-type-schema-config.json", result);
+    }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testRecordWithPojoPrefixedRecordComponents() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+            NonBean record;
+        }
+
+        Index index = indexOf(NonBean.class, Bean.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.prefixed-record-component-names.json", result);
     }
 }
