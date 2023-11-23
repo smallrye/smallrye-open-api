@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: 17
 
       - name: maven cache
         uses: actions/cache@v3
@@ -60,12 +60,6 @@ jobs:
           build-root-directory: ./tools/gradle-plugin
           cache-read-only: true
           arguments: publishPlugins -Pgradle.publish.key=${{secrets.GRADLE_PUBLISH_KEY}} -Pgradle.publish.secret=${{secrets.GRADLE_PUBLISH_SECRET}}
-
-      - uses: actions/upload-artifact@v3
-        name: tck-report
-        with:
-          name: tck-report
-          path: testsuite/tck/target/surefire-reports
 
       - uses: radcortez/milestone-release-action@main
         name: milestone release
@@ -112,7 +106,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B -pl '!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
+        run: mvn -B -pl '!testsuite/data,!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
 
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}

@@ -26,11 +26,35 @@ on:
       - 'README*'
 
 jobs:
+  build-test-data:
+    runs-on: ubuntu-latest
+    name: build test data app
+    steps:
+      - uses: actions/checkout@v4
+        name: checkout
+
+      - uses: actions/setup-java@v3
+        name: set up jdk 17
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: build with maven
+        run: mvn -B formatter:validate impsort:check install -pl 'testsuite/data'
+
   build:
     runs-on: ubuntu-latest
+    needs: build-test-data
     strategy:
       matrix:
-        java: [ 11, 17 ]
+        java: [ 11, 17, 21 ]
     name: build with jdk ${{matrix.java}}
 
     steps:
@@ -51,7 +75,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B formatter:validate impsort:check install -Pcoverage -Pgradle-smoke-test
+        run: mvn -B formatter:validate impsort:check install -pl '!testsuite/data' -Pcoverage -Pgradle-smoke-test
 
       ## Store information about the build context for Sonar scan in separate job
       - name: Save Build Context
@@ -78,6 +102,7 @@ jobs:
   javadoc:
     name: verify javadocs
     runs-on: ubuntu-latest
+    needs: build-test-data
     steps:
       - uses: actions/checkout@v4
         name: checkout
@@ -96,10 +121,11 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: generate javadocs
-        run: mvn -B install javadoc:javadoc -DskipTests
+        run: mvn -B install javadoc:javadoc -pl '!testsuite/data' -DskipTests
 
   tck-reporting:
     runs-on: ubuntu-latest
+    needs: build-test-data
     strategy:
       matrix:
         include:
@@ -126,7 +152,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: build with maven
-        run: mvn -B -pl '!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
+        run: mvn -B install -pl '!testsuite/data,!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' -DskipTests
 
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
