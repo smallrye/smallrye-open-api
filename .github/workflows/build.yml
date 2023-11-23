@@ -54,7 +54,7 @@ jobs:
     needs: build-test-data
     strategy:
       matrix:
-        java: [ 11, 17, 21 ]
+        java: [ 11, 17 ]
     name: build with jdk ${{matrix.java}}
 
     steps:

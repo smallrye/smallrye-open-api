@@ -1,6 +1,6 @@
-package io.smallrye.openapi.testdata.java;
+package io.smallrye.openapi.testdata.java.records;
 
-public record NonBean(
+public record NonBeanRecord(
         boolean isBoolean,
         String getString,
         int setInteger) {

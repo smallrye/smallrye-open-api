@@ -2,15 +2,15 @@
   "openapi" : "3.0.3",
   "components" : {
     "schemas" : {
-      "Bean" : {
+      "RecordReferencingBean" : {
         "type" : "object",
         "properties" : {
-          "record" : {
-            "$ref" : "#/components/schemas/NonBean"
+          "theRecord" : {
+            "$ref" : "#/components/schemas/NonBeanRecord"
           }
         }
       },
-      "NonBean" : {
+      "NonBeanRecord" : {
         "type" : "object",
         "properties" : {
           "isBoolean" : {

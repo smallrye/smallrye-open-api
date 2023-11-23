@@ -38,7 +38,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.testdata.java.NonBean;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
 
 class StandaloneSchemaScanTest extends IndexScannerTestBase {
@@ -703,8 +702,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testKotlinPropertyName() throws IOException, JSONException {
-        Index index = indexOf(io.smallrye.openapi.testdata.kotlin.KotlinBean.class,
-                io.smallrye.openapi.testdata.kotlin.KotlinLongValue.class);
+        Index index = indexOf("io.smallrye.openapi.testdata.kotlin.KotlinBean",
+                "io.smallrye.openapi.testdata.kotlin.KotlinLongValue");
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -842,14 +841,10 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     }
 
     @Test
-    @SuppressWarnings("unused")
     void testRecordWithPojoPrefixedRecordComponents() throws IOException, JSONException {
-        @Schema(name = "Bean")
-        class Bean {
-            NonBean record;
-        }
-
-        Index index = indexOf(NonBean.class, Bean.class);
+        Index index = indexOf(
+                "io.smallrye.openapi.testdata.java.records.NonBeanRecord",
+                "io.smallrye.openapi.testdata.java.records.RecordReferencingBean");
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();

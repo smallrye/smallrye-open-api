@@ -66,6 +66,16 @@ public class IndexScannerTestBase {
                 .getResourceAsStream(path);
     }
 
+    public static Index indexOf(String... classNames) {
+        Indexer indexer = new Indexer();
+
+        for (String name : classNames) {
+            index(indexer, name.replace('.', '/').concat(".class"));
+        }
+
+        return indexer.complete();
+    }
+
     public static Index indexOf(Class<?>... classes) {
         Indexer indexer = new Indexer();
 

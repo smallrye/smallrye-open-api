@@ -81,6 +81,12 @@
             <artifactId>smallrye-open-api-testsuite-data</artifactId>
             <classifier>indexed</classifier>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
