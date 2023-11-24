@@ -451,7 +451,7 @@ public class TypeUtil {
             Class<?> objectKlazz = TypeUtil.getClass(object, cl);
             UtilLogging.logger.reflectionInstanceOf(subjectKlazz, objectKlazz);
             return objectKlazz.isAssignableFrom(subjectKlazz);
-        } catch (@SuppressWarnings("unused") ClassNotFoundException | NoClassDefFoundError nfe) {
+        } catch (@SuppressWarnings("unused") ClassNotFoundException | LinkageError nfe) {
             return false;
         }
     }
