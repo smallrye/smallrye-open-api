@@ -12,6 +12,9 @@ public class KotlinConstants {
     public static final DotName CONTINUATION = DotName
             .createSimple("kotlin.coroutines.Continuation");
 
+    public static final DotName DEPRECATED = DotName
+            .createSimple("kotlin.Deprecated");
+
     public static final DotName JETBRAINS_NULLABLE = DotName
             .createSimple("org.jetbrains.annotations.Nullable");
 

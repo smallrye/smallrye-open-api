@@ -32,6 +32,8 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
@@ -708,6 +710,21 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.kotlin-value-class-propname.json", result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {
+            io.smallrye.openapi.testdata.kotlin.JavaDeprecatedKotlinBean.class,
+            io.smallrye.openapi.testdata.kotlin.DeprecatedKotlinBean.class
+    })
+    void testDeprecatedAnnotation(Class clazz) throws IOException, JSONException {
+        Index index = indexOf(clazz);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.kotlin-deprecated-annotation.json", result);
     }
 
     /*
