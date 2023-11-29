@@ -1,20 +1,10 @@
 package io.smallrye.openapi.runtime.util;
 
-import static io.smallrye.openapi.api.constants.JDKConstants.DOTNAME_DEPRECATED;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -36,6 +26,7 @@ import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
+import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
@@ -786,7 +777,9 @@ public class TypeUtil {
             return;
         }
 
-        AnnotationInstance deprecated = Annotations.getAnnotation(target, DOTNAME_DEPRECATED);
+        AnnotationInstance deprecated = Annotations.getAnnotation(
+                target,
+                Arrays.asList(JDKConstants.DOTNAME_DEPRECATED, KotlinConstants.DEPRECATED));
 
         if (deprecated != null && JandexUtil.equals(deprecated.target(), target)) {
             setDeprecated.accept(Boolean.TRUE);
