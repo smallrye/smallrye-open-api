@@ -1,7 +1,8 @@
 package io.smallrye.openapi.mavenplugin;
 
 import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +14,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.junit.jupiter.api.Assertions;
@@ -67,7 +67,7 @@ public class BasicIT extends SchemaTestBase {
         Assertions.assertEquals(1, filterGeneratedFileTypes(".yaml").size());
         Assertions.assertEquals(1, filterGeneratedFileTypes(".json").size());
         // clean the outputFileTypeFilter generation path for other tests to come
-        FileUtils.deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH.toFile());
+        deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH);
     }
 
     @MavenTest
@@ -79,7 +79,7 @@ public class BasicIT extends SchemaTestBase {
         Assertions.assertEquals(1, filterGeneratedFileTypes(".yaml").size());
         Assertions.assertEquals(0, filterGeneratedFileTypes(".json").size());
         // clean the outputFileTypeFilter generation path for other tests to come
-        FileUtils.deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH.toFile());
+        deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH);
     }
 
     @MavenTest
@@ -91,7 +91,7 @@ public class BasicIT extends SchemaTestBase {
         Assertions.assertEquals(0, filterGeneratedFileTypes(".yaml").size());
         Assertions.assertEquals(1, filterGeneratedFileTypes(".json").size());
         // clean the outputFileTypeFilter generation path for other tests to come
-        FileUtils.deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH.toFile());
+        deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH);
     }
 
     private static final Path OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH = Paths.get(System.getProperty("java.io.tmpdir"),
