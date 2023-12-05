@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
         name: checkout
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         name: set up jdk ${{matrix.java}}
         with:
           distribution: 'temurin'
@@ -82,7 +82,7 @@ jobs:
       - uses: actions/checkout@v4
         name: checkout
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         name: set up jdk
         with:
           distribution: 'temurin'
@@ -112,7 +112,7 @@ jobs:
       - uses: actions/checkout@v4
         name: checkout
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         name: set up jdk
         with:
           distribution: 'temurin'
