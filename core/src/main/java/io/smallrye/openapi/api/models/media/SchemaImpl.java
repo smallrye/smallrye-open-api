@@ -96,15 +96,11 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
                 .map(SchemaImpl::copyOf)
                 .collect(Collectors.toList()));
 
-        clone.properties = copy(clone.properties, () -> clone.properties.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> copyOf(e.getValue()),
-                        (u, v) -> {
-                            throw new IllegalStateException(String.format("Duplicate key %s", u));
-                        },
-                        LinkedHashMap::new)));
+        clone.properties = copy(clone.properties, () -> {
+            Map<String, Schema> copiedProperties = new LinkedHashMap<>(clone.properties.size());
+            clone.properties.forEach((k, v) -> copiedProperties.put(k, copyOf(v)));
+            return copiedProperties;
+        });
 
         clone.additionalPropertiesSchema = copy(clone.additionalPropertiesSchema,
                 () -> copyOf(clone.additionalPropertiesSchema));
