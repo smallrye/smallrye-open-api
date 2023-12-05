@@ -1,0 +1,30 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "RecordReferencingBean" : {
+        "type" : "object",
+        "properties" : {
+          "theRecord" : {
+            "$ref" : "#/components/schemas/NonBeanRecord"
+          }
+        }
+      },
+      "NonBeanRecord" : {
+        "type" : "object",
+        "properties" : {
+          "isBoolean" : {
+            "type" : "boolean"
+          },
+          "getString" : {
+            "type" : "string"
+          },
+          "setInteger" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      }
+    }
+  }
+}

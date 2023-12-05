@@ -90,7 +90,7 @@ class TypeUtilTest extends IndexScannerTestBase {
     @Test
     void testIsA_UnindexedPrimitiveSubjectUnrelatedToObject() {
         final Class<?> subjectClass = int.class;
-        Index index = indexOf();
+        Index index = indexOf(new Class[0]);
         Type testSubject = Type.create(DotName.createSimple(subjectClass.getName()), Type.Kind.PRIMITIVE);
         boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);
@@ -100,7 +100,7 @@ class TypeUtilTest extends IndexScannerTestBase {
     void testIsA_UnindexedPrimitiveWrapperSubjectUnrelatedToObject() {
         final Class<?> subjectClass = Integer.class;
         final DotName subjectName = DotName.createSimple(subjectClass.getName());
-        Index index = indexOf();
+        Index index = indexOf(new Class[0]);
         Type testSubject = Type.create(subjectName, Type.Kind.CLASS);
         boolean result = isA(index, testSubject, ITERABLE_TYPE);
         assertFalse(result);

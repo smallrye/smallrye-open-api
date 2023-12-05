@@ -702,8 +702,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testKotlinPropertyName() throws IOException, JSONException {
-        Index index = indexOf(io.smallrye.openapi.testdata.kotlin.KotlinBean.class,
-                io.smallrye.openapi.testdata.kotlin.KotlinLongValue.class);
+        Index index = indexOf("io.smallrye.openapi.testdata.kotlin.KotlinBean",
+                "io.smallrye.openapi.testdata.kotlin.KotlinLongValue");
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -838,5 +838,18 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.parameterized-type-schema-config.json", result);
+    }
+
+    @Test
+    void testRecordWithPojoPrefixedRecordComponents() throws IOException, JSONException {
+        Index index = indexOf(
+                "io.smallrye.openapi.testdata.java.records.NonBeanRecord",
+                "io.smallrye.openapi.testdata.java.records.RecordReferencingBean");
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.prefixed-record-component-names.json", result);
     }
 }

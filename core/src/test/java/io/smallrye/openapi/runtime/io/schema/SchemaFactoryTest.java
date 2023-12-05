@@ -23,7 +23,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
 
     @Test
     void testResolveAsyncType() {
-        Index index = indexOf();
+        Index index = indexOf(new Class[0]);
         Type STRING_TYPE = Type.create(DotName.createSimple(String.class.getName()), Type.Kind.CLASS);
         Type target = ParameterizedType.create(DotName.createSimple(CompletableFuture.class.getName()),
                 new Type[] { STRING_TYPE },
@@ -36,7 +36,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
 
     @Test
     void testWildcardSchemaIsEmpty() {
-        Index index = indexOf();
+        Index index = indexOf(new Class[0]);
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
         Type type = WildcardType.create(null, false);

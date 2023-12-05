@@ -470,7 +470,8 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             IndexReader reader = new IndexReader(source);
             Index index = reader.read();
             OpenAPI result = OpenApiProcessor.bootstrap(
-                    dynamicConfig(OASConfig.SCAN_EXCLUDE_PACKAGES, "io.smallrye.openapi.testdata.kotlin"),
+                    dynamicConfig(OASConfig.SCAN_EXCLUDE_PACKAGES,
+                            "io.smallrye.openapi.testdata.java.records,io.smallrye.openapi.testdata.kotlin"),
                     index);
             printToConsole(result);
             assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
