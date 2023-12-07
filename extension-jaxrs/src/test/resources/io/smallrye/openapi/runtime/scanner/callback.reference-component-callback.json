@@ -1,0 +1,48 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Greetings",
+    "version" : "0.0.1"
+  },
+  "paths" : {
+    "/" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "callbacks" : {
+          "myEvent" : {
+            "$ref" : "#/components/callbacks/myEvent"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "callbacks" : {
+      "myEvent" : {
+        "{$request.body#/callbackUrl}" : {
+          "post" : {
+            "responses" : {
+              "2XX" : {
+                "description" : "Ok"
+              },
+              "5XX" : {
+                "description" : "Failed"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
