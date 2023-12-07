@@ -6,9 +6,11 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.Components;
@@ -214,17 +216,20 @@ public class FilterUtil {
      * @param model
      */
     private void filterCallback(OASFilter filter, Callback model) {
-        if (model != null) {
-            Collection<String> keys = new ArrayList<>(model.getPathItems().keySet());
-            for (String key : keys) {
-                PathItem childModel = model.getPathItem(key);
-                filterPathItem(filter, childModel);
+        Optional.ofNullable(model)
+                .map(Callback::getPathItems)
+                .map(Map::keySet)
+                .map(ArrayList::new)
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .forEach(key -> {
+                    PathItem childModel = model.getPathItem(key);
+                    filterPathItem(filter, childModel);
 
-                if (filter.filterPathItem(childModel) == null) {
-                    model.removePathItem(key);
-                }
-            }
-        }
+                    if (filter.filterPathItem(childModel) == null) {
+                        model.removePathItem(key);
+                    }
+                });
     }
 
     /**
