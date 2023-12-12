@@ -18,8 +18,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
-import test.io.smallrye.openapi.runtime.scanner.javax.Result.ResultBuilder;
-
 @Path(value = "/v1/kingcrimson")
 @Produces(value = MediaType.APPLICATION_JSON)
 @Consumes(value = MediaType.APPLICATION_JSON)

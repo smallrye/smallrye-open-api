@@ -388,8 +388,9 @@ public class TypeUtil {
      * @return true if the annotation has a type specified that is different from the default type for classType, otherwise
      *         false
      */
-    public static boolean isTypeOverridden(Type classType, AnnotationInstance schemaAnnotation) {
-        SchemaType providedType = Annotations.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+    public static boolean isTypeOverridden(AnnotationScannerContext context, Type classType,
+            AnnotationInstance schemaAnnotation) {
+        SchemaType providedType = context.annotations().enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
         TypeWithFormat typeFormat = getTypeFormat(classType);
         return providedType != null && !typeFormat.isSchemaType(providedType);
     }
@@ -420,7 +421,6 @@ public class TypeUtil {
      * @param typeSchema the schema for a class type
      */
     public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
-        //clearIfEqual(fieldSchema.getType(), typeSchema.getType(), fieldSchema::setType);
         clearIfEqual(fieldSchema.getFormat(), typeSchema.getFormat(), fieldSchema::setFormat);
         clearIfEqual(fieldSchema.getPattern(), typeSchema.getPattern(), fieldSchema::setPattern);
         clearIfEqual(fieldSchema.getExample(), typeSchema.getExample(), fieldSchema::setExample);
@@ -725,22 +725,23 @@ public class TypeUtil {
         return DotName.createSimple(wrapperType.getName()).equals(wrapped.name());
     }
 
-    public static AnnotationInstance getSchemaAnnotation(AnnotationTarget annotationTarget) {
-        return Annotations.getAnnotation(annotationTarget, SchemaConstant.DOTNAME_SCHEMA);
+    public static AnnotationInstance getSchemaAnnotation(AnnotationScannerContext context, AnnotationTarget annotationTarget) {
+        return context.annotations().getAnnotation(annotationTarget, SchemaConstant.DOTNAME_SCHEMA);
     }
 
-    public static boolean isIncludedAllOf(ClassInfo annotatedClass, Type type) {
-        Type[] allOfTypes = Annotations.getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA,
+    public static boolean isIncludedAllOf(AnnotationScannerContext context, ClassInfo annotatedClass, Type type) {
+        Type[] allOfTypes = context.annotations().getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_ALL_OF);
         return allOfTypes != null && Arrays.stream(allOfTypes).map(Type::name).anyMatch(type.name()::equals);
     }
 
-    public static boolean isIncludedAllOf(AnnotationScannerContext context, ClassInfo annotatedClass, Type type) {
-        return isIncludedAllOf(annotatedClass, type) || isAutomaticAllOf(context, annotatedClass, type);
+    public static boolean isAllOf(AnnotationScannerContext context, ClassInfo annotatedClass, Type type) {
+        return isIncludedAllOf(context, annotatedClass, type) || isAutomaticAllOf(context, annotatedClass, type);
     }
 
     static boolean isAutomaticAllOf(AnnotationScannerContext context, ClassInfo annotatedClass, Type type) {
-        if (Annotations.getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA, SchemaConstant.PROP_ALL_OF) == null) {
+        if (context.annotations().getAnnotationValue(annotatedClass, SchemaConstant.DOTNAME_SCHEMA,
+                SchemaConstant.PROP_ALL_OF) == null) {
             switch (context.getConfig().getAutoInheritance()) {
                 case NONE:
                     break;
@@ -771,13 +772,13 @@ public class TypeUtil {
         return null;
     }
 
-    public static void mapDeprecated(AnnotationTarget target, Supplier<Boolean> getDeprecated,
+    public static void mapDeprecated(AnnotationScannerContext context, AnnotationTarget target, Supplier<Boolean> getDeprecated,
             Consumer<Boolean> setDeprecated) {
         if (getDeprecated.get() != null) {
             return;
         }
 
-        AnnotationInstance deprecated = Annotations.getAnnotation(
+        AnnotationInstance deprecated = context.annotations().getAnnotation(
                 target,
                 Arrays.asList(JDKConstants.DOTNAME_DEPRECATED, KotlinConstants.DEPRECATED));
 

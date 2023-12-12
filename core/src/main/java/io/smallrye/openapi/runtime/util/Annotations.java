@@ -1,12 +1,14 @@
 package io.smallrye.openapi.runtime.util;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,103 +19,145 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
+import org.jboss.jandex.PrimitiveType;
+import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
+
+import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 public final class Annotations {
 
     private static final String VALUE = "value";
+    private static final Map<PrimitiveType.Primitive, AnnotationValue.Kind> PRIMITIVES;
+    private static final DotName CLASS_NAME = DotName.createSimple("java.lang.Class");
+    private static final Type ENUM_TYPE = Type.create(DotName.ENUM_NAME, Type.Kind.CLASS);
+    private static final Type ANNOTATION_TYPE = Type.create(DotName.createSimple("java.lang.annotation.Annotation"),
+            Type.Kind.CLASS);
 
-    private Annotations() {
+    static {
+        PRIMITIVES = new EnumMap<>(PrimitiveType.Primitive.class);
+        PRIMITIVES.put(Primitive.BOOLEAN, AnnotationValue.Kind.BOOLEAN);
+        PRIMITIVES.put(Primitive.BYTE, AnnotationValue.Kind.BYTE);
+        PRIMITIVES.put(Primitive.CHAR, AnnotationValue.Kind.CHARACTER);
+        PRIMITIVES.put(Primitive.DOUBLE, AnnotationValue.Kind.DOUBLE);
+        PRIMITIVES.put(Primitive.FLOAT, AnnotationValue.Kind.FLOAT);
+        PRIMITIVES.put(Primitive.INT, AnnotationValue.Kind.INTEGER);
+        PRIMITIVES.put(Primitive.LONG, AnnotationValue.Kind.LONG);
+        PRIMITIVES.put(Primitive.SHORT, AnnotationValue.Kind.SHORT);
+    }
+
+    private final AnnotationScannerContext context;
+
+    public Annotations(AnnotationScannerContext context) {
+        this.context = context;
     }
 
     @SuppressWarnings("deprecation")
-    static Collection<AnnotationInstance> declaredAnnotation(ClassInfo target) {
-        return target.classAnnotations();
+    private static List<AnnotationInstance> declaredAnnotations(ClassInfo target) {
+        return new ArrayList<>(target.classAnnotations());
     }
 
-    @SuppressWarnings("deprecation")
-    static AnnotationInstance declaredAnnotation(ClassInfo target, DotName name) {
-        return target.classAnnotation(name);
+    private static List<AnnotationInstance> filter(AnnotationTarget target, List<AnnotationInstance> annotations) {
+        return annotations.stream()
+                .filter(a -> target.equals(a.target()))
+                .collect(Collectors.toList());
     }
 
-    public static Collection<AnnotationInstance> getAnnotations(AnnotationTarget target) {
-        if (target == null) {
-            return Collections.emptyList();
-        }
-
+    private static List<AnnotationInstance> getDeclaredAnnotations(AnnotationTarget target) {
         switch (target.kind()) {
             case CLASS:
-                return declaredAnnotation(target.asClass());
+                return declaredAnnotations(target.asClass());
+
             case FIELD:
-                return target.asField().annotations();
+                return filter(target, target.asField().annotations());
+
             case METHOD:
-                return target.asMethod().annotations();
+                return filter(target, target.asMethod().annotations());
+
             case METHOD_PARAMETER:
-                MethodParameterInfo parameter = target.asMethodParameter();
-                return parameter
-                        .method()
-                        .annotations()
-                        .stream()
-                        .filter(a -> targetsMethodParameter(a, parameter.position()))
-                        .collect(Collectors.toList());
-            case TYPE:
+                return filter(target, target.asMethodParameter().method().annotations());
+
             case RECORD_COMPONENT:
-                break;
-        }
+                return filter(target, target.asRecordComponent().annotations());
 
-        return Collections.emptyList();
-    }
-
-    public static AnnotationInstance getDeclaredAnnotation(AnnotationTarget target, DotName name) {
-        if (target == null) {
-            return null;
-        }
-
-        AnnotationInstance annotation;
-
-        switch (target.kind()) {
-            case CLASS:
-                annotation = declaredAnnotation(target.asClass(), name);
-                break;
-            case FIELD:
-                annotation = target.asField()
-                        .annotations()
-                        .stream()
-                        .filter(a -> name.equals(a.name()))
-                        .filter(a -> target.equals(a.target())).findFirst()
-                        .orElse(null);
-                break;
-            case METHOD:
-                annotation = target.asMethod()
-                        .annotations(name)
-                        .stream()
-                        .filter(a -> target.equals(a.target())).findFirst()
-                        .orElse(null);
-                break;
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = target.asMethodParameter();
-                annotation = parameter
-                        .method()
-                        .annotations(name)
-                        .stream()
-                        .filter(a -> targetsMethodParameter(a, parameter.position()))
-                        .findFirst()
-                        .orElse(null);
-                break;
-            case RECORD_COMPONENT:
-                annotation = target.asRecordComponent().annotation(name);
-                break;
             case TYPE:
+                return filter(target, Optional.ofNullable(target.asType().target())
+                        .map(Type::annotations)
+                        .orElseGet(Collections::emptyList));
+
             default:
-                annotation = null;
-                break;
+                return Collections.emptyList();
         }
-
-        return annotation;
     }
 
-    public static <T> T value(AnnotationInstance annotation) {
+    private Stream<AnnotationInstance> getComposedAnnotation(Collection<AnnotationInstance> declaredAnnotations,
+            DotName name) {
+        AugmentedIndexView index = context.getAugmentedIndex();
+
+        return declaredAnnotations
+                .stream()
+                .map(AnnotationInstance::name)
+                .map(index::getClassByName)
+                .filter(Objects::nonNull)
+                .flatMap(annotationClass -> getDeclaredAnnotation(annotationClass, name))
+                .filter(Objects::nonNull);
+    }
+
+    private Stream<AnnotationInstance> getDeclaredAnnotation(AnnotationTarget target, DotName name) {
+        if (target == null) {
+            return Stream.empty();
+        }
+
+        List<AnnotationInstance> declaredAnnotations = getDeclaredAnnotations(target);
+
+        if (declaredAnnotations.isEmpty()) {
+            return Stream.empty();
+        }
+
+        Stream<AnnotationInstance> direct = declaredAnnotations.stream().filter(a -> name.equals(a.name()));
+        Stream<AnnotationInstance> composed = getComposedAnnotation(declaredAnnotations, name);
+
+        return Stream.concat(direct, composed);
+    }
+
+    public <T> T value(AnnotationInstance annotation) {
         return annotation != null ? value(annotation, VALUE) : null;
+    }
+
+    private AnnotationValue.Kind valueKind(AnnotationInstance annotation, AnnotationValue value) {
+        final boolean isArray = (AnnotationValue.Kind.ARRAY == value.kind());
+        AnnotationValue.Kind kind = (isArray ? value.componentKind() : value.kind());
+        AugmentedIndexView index = context.getAugmentedIndex();
+        ClassInfo annoClass = index.getClassByName(annotation.name());
+
+        if (kind == AnnotationValue.Kind.UNKNOWN && annoClass != null) {
+            MethodInfo valueMethod = annoClass.method(value.name());
+            @SuppressWarnings("deprecation")
+            Type valueType = valueMethod.returnType().asArrayType().component();
+
+            switch (valueType.kind()) {
+                case PRIMITIVE:
+                    return PRIMITIVES.get(valueType.asPrimitiveType().primitive());
+
+                case CLASS:
+                case PARAMETERIZED_TYPE:
+                    if (valueType.name().equals(DotName.STRING_NAME)) {
+                        return AnnotationValue.Kind.STRING;
+                    } else if (valueType.name().equals(CLASS_NAME)) {
+                        return AnnotationValue.Kind.CLASS;
+                    } else if (TypeUtil.isA(context, valueType, ENUM_TYPE)) {
+                        return AnnotationValue.Kind.ENUM;
+                    } else if (TypeUtil.isA(context, valueType, ANNOTATION_TYPE)) {
+                        return AnnotationValue.Kind.NESTED;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return kind;
     }
 
     /**
@@ -125,8 +169,8 @@ public final class Annotations {
      * @param name the name of the parameter
      * @return an unwrapped annotation parameter value
      */
-    @SuppressWarnings({ "unchecked", "squid:S3776" })
-    public static <T> T value(AnnotationInstance annotation, String name) {
+    @SuppressWarnings({ "unchecked" })
+    public <T> T value(AnnotationInstance annotation, String name) {
         final AnnotationValue value = annotation.value(name);
 
         if (value == null) {
@@ -135,7 +179,7 @@ public final class Annotations {
 
         final boolean isArray = (AnnotationValue.Kind.ARRAY == value.kind());
 
-        switch (isArray ? value.componentKind() : value.kind()) {
+        switch (valueKind(annotation, value)) {
             case BOOLEAN:
                 return (T) (isArray ? value.asBooleanArray() : value.asBoolean());
             case BYTE:
@@ -176,7 +220,7 @@ public final class Annotations {
      * @param defaultValue a default value to return if the parameter is not defined
      * @return an unwrapped annotation parameter value
      */
-    public static <T> T value(AnnotationInstance annotation, String name, T defaultValue) {
+    public <T> T value(AnnotationInstance annotation, String name, T defaultValue) {
         T value = value(annotation, name);
         return value != null ? value : defaultValue;
     }
@@ -191,7 +235,7 @@ public final class Annotations {
      * @param <T> Type parameter
      * @return Value of property
      */
-    public static <T extends Enum<T>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
+    public <T extends Enum<T>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
         String value = annotation != null ? value(annotation, propertyName) : null;
 
         if (value == null) {
@@ -205,20 +249,6 @@ public final class Annotations {
     }
 
     /**
-     * Returns all annotations configured for a single parameter of a method.
-     *
-     * @param method MethodInfo
-     * @param paramPosition parameter position
-     * @return List of AnnotationInstance's
-     */
-    public static List<AnnotationInstance> getParameterAnnotations(MethodInfo method, short paramPosition) {
-        return method.annotations()
-                .stream()
-                .filter(a -> targetsMethodParameter(a, paramPosition))
-                .collect(toList());
-    }
-
-    /**
      * Many OAI annotations can either be found singly or as a wrapped array. This method will
      * look for both and return a list of all found. Both the single and wrapper annotation names
      * must be provided.
@@ -228,31 +258,18 @@ public final class Annotations {
      * @param repeatableAnnotationName DotName
      * @return List of AnnotationInstance's
      */
-    public static List<AnnotationInstance> getRepeatableAnnotation(AnnotationTarget target,
+    public List<AnnotationInstance> getRepeatableAnnotation(AnnotationTarget target,
             DotName singleAnnotationName,
             DotName repeatableAnnotationName) {
 
-        List<AnnotationInstance> annotations = new ArrayList<>();
+        Stream<AnnotationInstance> single = getDeclaredAnnotation(target, singleAnnotationName);
+        Stream<AnnotationInstance> wrapped = getDeclaredAnnotation(target, repeatableAnnotationName)
+                .map(a -> this.<AnnotationInstance[]> value(a, VALUE))
+                .filter(Objects::nonNull)
+                .flatMap(Arrays::stream)
+                .map(a -> AnnotationInstance.create(a.name(), target, a.values()));
 
-        AnnotationInstance annotation = getAnnotation(target, singleAnnotationName);
-
-        if (annotation != null) {
-            annotations.add(annotation);
-        }
-
-        if (repeatableAnnotationName != null) {
-            AnnotationInstance[] nestedArray = getAnnotationValue(target,
-                    repeatableAnnotationName,
-                    VALUE);
-
-            if (nestedArray != null) {
-                Arrays.stream(nestedArray)
-                        .map(a -> AnnotationInstance.create(a.name(), target, a.values()))
-                        .forEach(annotations::add);
-            }
-        }
-
-        return annotations;
+        return Stream.concat(single, wrapped).collect(Collectors.toList());
     }
 
     /**
@@ -264,11 +281,9 @@ public final class Annotations {
      * @param annotationName name of annotation we are looking for
      * @return the Annotation instance
      */
-    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
+    public AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {
-        return method.annotations(annotationName)
-                .stream()
-                .filter(a -> targetsMethodParameter(a, parameterIndex))
+        return getDeclaredAnnotation(MethodParameterInfo.create(method, (short) parameterIndex), annotationName)
                 .findFirst()
                 .orElse(null);
     }
@@ -282,11 +297,22 @@ public final class Annotations {
      * @param annotationName name of annotation we are looking for
      * @return the Annotation instance
      */
-    public static AnnotationInstance getMethodParameterAnnotation(MethodInfo method, Type parameterType,
+    public AnnotationInstance getMethodParameterAnnotation(MethodInfo method, Type parameterType,
             DotName annotationName) {
         // parameterType must be the same object as in the method's parameter type array
         int parameterIndex = method.parameterTypes().indexOf(parameterType);
         return getMethodParameterAnnotation(method, parameterIndex, annotationName);
+    }
+
+    /**
+     * Returns all annotations configured for a single parameter of a method.
+     *
+     * @param method MethodInfo
+     * @param parameterIndex parameter position
+     * @return List of AnnotationInstance's
+     */
+    public List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, int parameterIndex) {
+        return getDeclaredAnnotations(MethodParameterInfo.create(method, (short) parameterIndex));
     }
 
     /**
@@ -296,62 +322,27 @@ public final class Annotations {
      * @param parameterType the parameter type
      * @return the list of annotations, never null
      */
-    public static List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, Type parameterType) {
+    public List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, Type parameterType) {
         // parameterType must be the same object as in the method's parameter type array
         int parameterIndex = method.parameterTypes().indexOf(parameterType);
-        return method.annotations()
-                .stream()
-                .filter(a -> targetsMethodParameter(a, parameterIndex))
-                .collect(Collectors.toList());
+        return getMethodParameterAnnotations(method, parameterIndex);
     }
 
-    public static boolean hasAnnotation(AnnotationTarget target, Collection<DotName> annotationNames) {
-        for (DotName dn : annotationNames) {
-            if (hasAnnotation(target, dn)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean hasAnnotation(AnnotationTarget target, Collection<DotName> annotationNames) {
+        return Objects.nonNull(getAnnotation(target, annotationNames));
     }
 
-    public static boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
-        if (target == null) {
-            return false;
-        }
-        switch (target.kind()) {
-            case CLASS:
-                return declaredAnnotation(target.asClass(), annotationName) != null;
-            case FIELD:
-                return target.asField().hasAnnotation(annotationName);
-            case METHOD:
-                return target.asMethod().hasAnnotation(annotationName);
-            case METHOD_PARAMETER:
-                MethodParameterInfo parameter = target.asMethodParameter();
-                return parameter.method()
-                        .annotations()
-                        .stream()
-                        .filter(a -> targetsMethodParameter(a, parameter.position()))
-                        .anyMatch(a -> a.name().equals(annotationName));
-            case TYPE:
-            case RECORD_COMPONENT:
-                break;
-        }
-
-        return false;
+    public boolean hasAnnotation(AnnotationTarget target, DotName... annotationNames) {
+        return Objects.nonNull(getAnnotation(target, annotationNames));
     }
 
-    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
-        return getAnnotations(annotationTarget)
-                .stream()
-                .filter(annotation -> annotation.name().equals(annotationName))
-                .findFirst()
-                .orElse(null);
+    public AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName... annotationName) {
+        return getAnnotation(annotationTarget, Arrays.asList(annotationName));
     }
 
-    public static AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, Collection<DotName> annotationNames) {
-        return getAnnotations(annotationTarget)
-                .stream()
-                .filter(annotation -> annotationNames.contains(annotation.name()))
+    public AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, Collection<DotName> annotationNames) {
+        return annotationNames.stream()
+                .flatMap(annotationName -> getDeclaredAnnotation(annotationTarget, annotationName))
                 .findFirst()
                 .orElse(null);
     }
@@ -365,7 +356,11 @@ public final class Annotations {
      * @param annotationNames names of annotations from which to retrieve the value
      * @return an unwrapped annotation parameter value
      */
-    public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
+    public <T> T getAnnotationValue(AnnotationTarget target, DotName... annotationNames) {
+        return getAnnotationValue(target, Arrays.asList(annotationNames), VALUE, null);
+    }
+
+    public <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
         return getAnnotationValue(target, annotationNames, VALUE, null);
     }
 
@@ -379,11 +374,11 @@ public final class Annotations {
      * @param propertyName the name of the parameter/property in the annotation
      * @return an unwrapped annotation parameter value
      */
-    public static <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName, String propertyName) {
+    public <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName, String propertyName) {
         return getAnnotationValue(target, Arrays.asList(annotationName), propertyName);
     }
 
-    public static <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames, String propertyName) {
+    public <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames, String propertyName) {
         return getAnnotationValue(target, annotationNames, propertyName, null);
     }
 
@@ -398,7 +393,7 @@ public final class Annotations {
      * @param defaultValue a default value to return if either the annotation or the value are missing
      * @return an unwrapped annotation parameter value
      */
-    public static <T> T getAnnotationValue(AnnotationTarget target,
+    public <T> T getAnnotationValue(AnnotationTarget target,
             List<DotName> annotationNames,
             String propertyName,
             T defaultValue) {
@@ -413,25 +408,4 @@ public final class Annotations {
         return value != null ? value : defaultValue;
     }
 
-    public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName, String propertyName) {
-        AnnotationInstance annotation = getDeclaredAnnotation(type, annotationName);
-        T value = null;
-
-        if (annotation != null) {
-            value = value(annotation, propertyName);
-        }
-
-        return value;
-    }
-
-    public static <T> T getDeclaredAnnotationValue(AnnotationTarget type, DotName annotationName) {
-        return getDeclaredAnnotationValue(type, annotationName, VALUE);
-    }
-
-    static boolean targetsMethodParameter(AnnotationInstance annotation, int position) {
-        AnnotationTarget target = annotation.target();
-
-        return target.kind() == AnnotationTarget.Kind.METHOD_PARAMETER
-                && target.asMethodParameter().position() == position;
-    }
 }

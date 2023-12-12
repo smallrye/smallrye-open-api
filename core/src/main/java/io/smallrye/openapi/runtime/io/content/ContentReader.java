@@ -15,7 +15,6 @@ import io.smallrye.openapi.runtime.io.ContentDirection;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.mediatype.MediaTypeReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Content object annotation and json
@@ -48,7 +47,7 @@ public class ContentReader {
         Content content = new ContentImpl();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String contentType = Annotations.value(nested, OpenApiConstants.PROP_MEDIA_TYPE);
+            String contentType = context.annotations().value(nested, OpenApiConstants.PROP_MEDIA_TYPE);
             MediaType mediaTypeModel = MediaTypeReader.readMediaType(context, nested);
             if (contentType == null) {
                 for (String mimeType : getDefaultMimeTypes(context, direction)) {

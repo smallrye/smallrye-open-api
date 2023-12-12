@@ -34,7 +34,6 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -118,8 +117,9 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public OpenAPI scan(final AnnotationScannerContext context, OpenAPI openApi) {
+        this.context = context;
         // Get all Spring controllers and convert them to OpenAPI models (and merge them into a single one)
-        processControllerClasses(context, openApi);
+        processControllerClasses(openApi);
 
         return openApi;
     }
@@ -141,7 +141,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
      * @param context the scanning context
      * @param openApi the openAPI model
      */
-    private void processControllerClasses(final AnnotationScannerContext context, OpenAPI openApi) {
+    private void processControllerClasses(OpenAPI openApi) {
         // Get all Spring controllers and convert them to OpenAPI models (and merge them into a single one)
         Collection<AnnotationInstance> controllerAnnotations = context.getIndex()
                 .getAnnotations(SpringConstants.REST_CONTROLLER);
@@ -159,7 +159,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processScannerExtensions(context, applications);
 
         for (ClassInfo controller : applications) {
-            OpenAPI applicationOpenApi = processControllerClass(context, controller);
+            OpenAPI applicationOpenApi = processControllerClass(controller);
             openApi = MergeUtil.merge(openApi, applicationOpenApi);
         }
     }
@@ -172,7 +172,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
      * @param context the scanning context
      * @param controllerClass the Spring REST controller
      */
-    private OpenAPI processControllerClass(final AnnotationScannerContext context, ClassInfo controllerClass) {
+    private OpenAPI processControllerClass(ClassInfo controllerClass) {
 
         SpringLogging.log.processingController(controllerClass.simpleName());
 
@@ -183,7 +183,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RequestMapping info and save it for later
-        AnnotationInstance requestMappingAnnotation = Annotations.getAnnotation(controllerClass,
+        AnnotationInstance requestMappingAnnotation = context.annotations().getAnnotation(controllerClass,
                 SpringConstants.REQUEST_MAPPING);
 
         if (requestMappingAnnotation != null) {
@@ -205,7 +205,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processJavaSecurity(context, controllerClass, openApi);
 
         // Now find and process the operation methods
-        processControllerMethods(context, controllerClass, openApi, null);
+        processControllerMethods(controllerClass, openApi, null);
 
         context.getResolverStack().pop();
 
@@ -220,8 +220,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
      * @param openApi the OpenApi model being processed
      * @param locatorPathParameters path parameters
      */
-    private void processControllerMethods(final AnnotationScannerContext context,
-            final ClassInfo resourceClass,
+    private void processControllerMethods(final ClassInfo resourceClass,
             OpenAPI openApi,
             List<Parameter> locatorPathParameters) {
 
@@ -235,7 +234,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                     if (methodInfo.hasAnnotation(validMethodAnnotations)) {
                         String toHttpMethod = toHttpMethod(validMethodAnnotations);
                         PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(toHttpMethod);
-                        processControllerMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
+                        processControllerMethod(resourceClass, methodInfo, httpMethod, openApi, tagRefs,
                                 locatorPathParameters);
 
                     }
@@ -250,7 +249,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                         for (String enumValue : enumArray) {
                             if (enumValue != null) {
                                 PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(enumValue.toUpperCase());
-                                processControllerMethod(context, resourceClass, methodInfo, httpMethod, openApi, tagRefs,
+                                processControllerMethod(resourceClass, methodInfo, httpMethod, openApi, tagRefs,
                                         locatorPathParameters);
                             }
                         }
@@ -279,8 +278,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
      * @param resourceTags
      * @param locatorPathParameters
      */
-    private void processControllerMethod(final AnnotationScannerContext context,
-            final ClassInfo resourceClass,
+    private void processControllerMethod(final ClassInfo resourceClass,
             final MethodInfo method,
             final PathItem.HttpMethod methodType,
             OpenAPI openApi,
@@ -290,7 +288,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         SpringLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(context, resourceClass, method));
+        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(resourceClass, method));
         context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES, defaultConsumes).orElse(null));
 
@@ -310,7 +308,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
-        ResourceParameters params = getResourceParameters(context, resourceClass, method);
+        ResourceParameters params = getResourceParameters(resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -325,7 +323,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processResponse(context, resourceClass, method, operation, null);
 
         // Process @SecurityRequirement annotations
-        processSecurityRequirementAnnotation(resourceClass, method, operation);
+        processSecurityRequirementAnnotation(context, resourceClass, method, operation);
 
         // Process @Callback annotations
         processCallback(context, method, operation);
@@ -360,8 +358,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    private ResourceParameters getResourceParameters(final AnnotationScannerContext context,
-            final ClassInfo resourceClass,
+    private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
             final MethodInfo method) {
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
         return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
@@ -369,7 +366,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                 context.getExtensions());
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
+    Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
         Set<DotName> annotationNames = new HashSet<>(SpringConstants.HTTP_METHODS);
         annotationNames.add(SpringConstants.REQUEST_MAPPING);
 
@@ -385,7 +382,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Check class
-        AnnotationInstance annotation = Annotations.getAnnotation(resourceMethod.declaringClass(),
+        AnnotationInstance annotation = context.annotations().getAnnotation(resourceMethod.declaringClass(),
                 SpringConstants.REQUEST_MAPPING);
         if (annotation != null) {
             AnnotationValue annotationValue = annotation.value(property);
@@ -398,6 +395,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     public boolean isRequestBody(MethodParameterInfo mip) {
-        return mip.annotations().isEmpty() || Annotations.hasAnnotation(mip, SpringConstants.REQUEST_BODY);
+        return mip.annotations().isEmpty() || context.annotations().hasAnnotation(mip, SpringConstants.REQUEST_BODY);
     }
 }

@@ -32,7 +32,6 @@ import io.smallrye.openapi.runtime.io.header.HeaderReader;
 import io.smallrye.openapi.runtime.io.link.LinkReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -65,7 +64,7 @@ public class ResponseReader {
         APIResponses responses = new APIResponsesImpl();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String responseCode = Annotations.value(nested, ResponseConstant.PROP_RESPONSE_CODE);
+            String responseCode = context.annotations().value(nested, ResponseConstant.PROP_RESPONSE_CODE);
             if (responseCode != null) {
                 responses.addAPIResponse(responseCode,
                         ResponseReader.readResponse(context, nested));
@@ -134,7 +133,7 @@ public class ResponseReader {
         Map<String, APIResponse> responses = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, ResponseConstant.PROP_NAME);
+            String name = context.annotations().value(nested, ResponseConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -180,7 +179,7 @@ public class ResponseReader {
         }
         IoLogging.logger.singleAnnotation("@APIResponse");
         APIResponseImpl response = new APIResponseImpl();
-        response.setDescription(Annotations.value(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
+        response.setDescription(context.annotations().value(annotationInstance, ResponseConstant.PROP_DESCRIPTION));
         response.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(ResponseConstant.PROP_HEADERS)));
         response.setLinks(LinkReader.readLinks(context, annotationInstance.value(ResponseConstant.PROP_LINKS)));
@@ -189,7 +188,7 @@ public class ResponseReader {
                         ContentDirection.OUTPUT));
         response.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.RESPONSE));
         response.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
-        response.setResponseCode(Annotations.value(annotationInstance, ResponseConstant.PROP_RESPONSE_CODE));
+        response.setResponseCode(context.annotations().value(annotationInstance, ResponseConstant.PROP_RESPONSE_CODE));
         return response;
     }
 
@@ -208,10 +207,10 @@ public class ResponseReader {
         IoLogging.logger.singleAnnotation("@APIResponseSchema");
 
         APIResponseImpl response = new APIResponseImpl();
-        response.setDescription(Annotations.value(annotation, ResponseConstant.PROP_RESPONSE_DESCRIPTION));
-        response.setResponseCode(Annotations.value(annotation, ResponseConstant.PROP_RESPONSE_CODE));
+        response.setDescription(context.annotations().value(annotation, ResponseConstant.PROP_RESPONSE_DESCRIPTION));
+        response.setResponseCode(context.annotations().value(annotation, ResponseConstant.PROP_RESPONSE_CODE));
 
-        Type responseType = Annotations.value(annotation, ResponseConstant.PROP_VALUE);
+        Type responseType = context.annotations().value(annotation, ResponseConstant.PROP_VALUE);
 
         if (context.getCurrentProduces() != null && !TypeUtil.isVoid(responseType)) {
             // Only generate the content if the endpoint declares an @Produces media type
@@ -253,8 +252,8 @@ public class ResponseReader {
     }
 
     // helper methods for scanners
-    public static List<AnnotationInstance> getResponseAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getResponseAnnotations(AnnotationScannerContext context, AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 ResponseConstant.DOTNAME_API_RESPONSE,
                 ResponseConstant.DOTNAME_API_RESPONSES);
     }
@@ -280,7 +279,7 @@ public class ResponseReader {
     }
 
     public static String getResponseName(AnnotationScannerContext context, AnnotationInstance annotation) {
-        String responseCode = Annotations.value(annotation, ResponseConstant.PROP_RESPONSE_CODE);
+        String responseCode = context.annotations().value(annotation, ResponseConstant.PROP_RESPONSE_CODE);
 
         if (responseCode != null) {
             return responseCode;

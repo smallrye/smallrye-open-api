@@ -27,6 +27,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.PropertyNamingStrategyFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
+import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Context for scanners.
@@ -34,6 +35,7 @@ import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public class AnnotationScannerContext {
+
     private final FilteredIndexView index;
     private final AugmentedIndexView augmentedIndex;
     private final IgnoreResolver ignoreResolver;
@@ -53,6 +55,7 @@ public class AnnotationScannerContext {
     private Optional<AnnotationScanner> currentScanner = Optional.empty();
     private final SchemaRegistry schemaRegistry;
     private final JavaSecurityProcessor javaSecurityProcessor;
+    private final Annotations annotations;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
@@ -62,16 +65,17 @@ public class AnnotationScannerContext {
             OpenAPI openApi) {
         this.index = index;
         this.augmentedIndex = AugmentedIndexView.augment(index);
-        this.ignoreResolver = new IgnoreResolver(this.augmentedIndex);
+        this.ignoreResolver = new IgnoreResolver(this);
         this.classLoader = classLoader;
         this.extensions = extensions;
         this.config = config;
         this.openApi = openApi;
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
-        this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(BeanValidationScanner.INSTANCE)
+        this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(new BeanValidationScanner(this))
                 : Optional.empty();
         this.schemaRegistry = new SchemaRegistry(this);
-        this.javaSecurityProcessor = new JavaSecurityProcessor();
+        this.javaSecurityProcessor = new JavaSecurityProcessor(this);
+        this.annotations = new Annotations(this);
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
@@ -181,5 +185,9 @@ public class AnnotationScannerContext {
 
     public JavaSecurityProcessor getJavaSecurityProcessor() {
         return javaSecurityProcessor;
+    }
+
+    public Annotations annotations() {
+        return annotations;
     }
 }

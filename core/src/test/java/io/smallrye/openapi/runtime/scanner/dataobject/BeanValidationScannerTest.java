@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,14 +18,18 @@ import java.util.Set;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.CompositeIndex;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -39,7 +44,6 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
     @BeforeEach
     void beforeEach() {
-        testTarget = BeanValidationScanner.INSTANCE;
         Index javaxIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.javax.BVTestContainer.class);
         Index jakartaIndex = indexOf(test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.BVTestContainer.class);
         methodsInvoked.clear();
@@ -49,6 +53,12 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
         jakartaTargetClass = jakartaIndex.getClassByName(
                 componentize(test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.BVTestContainer.class.getName()));
+
+        FilteredIndexView index = new FilteredIndexView(CompositeIndex.create(javaxIndex, jakartaIndex), emptyConfig());
+        AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
+                Collections.emptyList(),
+                emptyConfig(), new OpenAPIImpl());
+        testTarget = new BeanValidationScanner(context);
     }
 
     Schema proxySchema(Schema schema, Set<String> methodsInvoked) {

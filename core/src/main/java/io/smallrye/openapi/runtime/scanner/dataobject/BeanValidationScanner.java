@@ -18,7 +18,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
-import io.smallrye.openapi.runtime.util.Annotations;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -30,7 +30,6 @@ public class BeanValidationScanner {
         void setRequired(AnnotationTarget target, String propertyKey);
     }
 
-    public static final BeanValidationScanner INSTANCE = new BeanValidationScanner();
     static final Set<DotName> CONSTRAINTS = new HashSet<>();
     private static final String VALUE = "value";
     private static final String INCLUSIVE = "inclusive";
@@ -112,6 +111,12 @@ public class BeanValidationScanner {
         return constraintName;
     }
 
+    private final AnnotationScannerContext context;
+
+    public BeanValidationScanner(AnnotationScannerContext context) {
+        this.context = context;
+    }
+
     /**
      * Scan the annotation target to determine whether any annotations
      * from the Bean Validation package (<code>javax.validation.constraints</code>) are
@@ -121,10 +126,7 @@ public class BeanValidationScanner {
      * @return true if annotations from the Bean Validation package are present, otherwise false.
      */
     public boolean hasConstraints(AnnotationTarget target) {
-        return Annotations.getAnnotations(target)
-                .stream()
-                .map(AnnotationInstance::name)
-                .anyMatch(CONSTRAINTS::contains);
+        return context.annotations().hasAnnotation(target, CONSTRAINTS);
     }
 
     /**
@@ -269,12 +271,12 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_DECIMAL_MAX);
 
         if (constraint != null && schema.getMaximum() == null) {
-            String decimalValue = Annotations.value(constraint, VALUE);
+            String decimalValue = context.annotations().value(constraint, VALUE);
             try {
                 BigDecimal decimal = new BigDecimal(decimalValue);
                 schema.setMaximum(decimal);
 
-                Boolean inclusive = Annotations.value(constraint, INCLUSIVE);
+                Boolean inclusive = context.annotations().value(constraint, INCLUSIVE);
 
                 if (schema.getExclusiveMaximum() == null && Boolean.FALSE.equals(inclusive)) {
                     schema.setExclusiveMaximum(Boolean.TRUE);
@@ -289,11 +291,11 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_DECIMAL_MIN);
 
         if (constraint != null && schema.getMinimum() == null) {
-            String decimalValue = Annotations.value(constraint, VALUE);
+            String decimalValue = context.annotations().value(constraint, VALUE);
             try {
                 BigDecimal decimal = new BigDecimal(decimalValue);
                 schema.setMinimum(decimal);
-                Boolean inclusive = Annotations.value(constraint, INCLUSIVE);
+                Boolean inclusive = context.annotations().value(constraint, INCLUSIVE);
 
                 if (schema.getExclusiveMinimum() == null && Boolean.FALSE.equals(inclusive)) {
                     schema.setExclusiveMinimum(Boolean.TRUE);
@@ -310,8 +312,8 @@ public class BeanValidationScanner {
 
         if (constraint != null && schema.getPattern() == null) {
             // Both attributes are required - safe to use primitives.
-            final int integerPart = Annotations.value(constraint, "integer");
-            final int fractionPart = Annotations.value(constraint, "fraction");
+            final int integerPart = context.annotations().value(constraint, "integer");
+            final int fractionPart = context.annotations().value(constraint, "fraction");
             final StringBuilder pattern = new StringBuilder(50);
 
             pattern.append('^');
@@ -447,13 +449,13 @@ public class BeanValidationScanner {
     }
 
     void notNullKotlin(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
-        if (Annotations.hasAnnotation(target, KOTLIN_NOT_NULL)) {
+        if (context.annotations().hasAnnotation(target, KOTLIN_NOT_NULL)) {
             handler.setRequired(target, propertyKey);
         }
     }
 
     void nullableKotlin(AnnotationTarget target, Schema schema) {
-        if (Annotations.hasAnnotation(target, KOTLIN_NULLABLE) && schema.getNullable() == null) {
+        if (context.annotations().hasAnnotation(target, KOTLIN_NULLABLE) && schema.getNullable() == null) {
             schema.setNullable(Boolean.TRUE);
         }
     }
@@ -462,7 +464,7 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_PATTERN);
 
         if (constraint != null && schema.getPattern() == null) {
-            schema.setPattern(Annotations.value(constraint, "regexp"));
+            schema.setPattern(context.annotations().value(constraint, "regexp"));
         }
     }
 
@@ -496,7 +498,7 @@ public class BeanValidationScanner {
     }
 
     void requiredJackson(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
-        Boolean required = Annotations.getAnnotationValue(target, JACKSON_JSONPROPERTY, "required");
+        Boolean required = context.annotations().getAnnotationValue(target, JACKSON_JSONPROPERTY, "required");
 
         if (Boolean.TRUE.equals(required)) {
             handler.setRequired(target, propertyKey);
@@ -507,8 +509,8 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_SIZE);
 
         if (constraint != null) {
-            Integer min = Annotations.value(constraint, "min");
-            Integer max = Annotations.value(constraint, "max");
+            Integer min = context.annotations().value(constraint, "min");
+            Integer max = context.annotations().value(constraint, "max");
 
             if (min != null && schema.getMinItems() == null) {
                 schema.setMinItems(min);
@@ -528,8 +530,8 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_SIZE);
 
         if (constraint != null) {
-            Integer min = Annotations.value(constraint, "min");
-            Integer max = Annotations.value(constraint, "max");
+            Integer min = context.annotations().value(constraint, "min");
+            Integer max = context.annotations().value(constraint, "max");
 
             if (min != null && schema.getMinProperties() == null) {
                 schema.setMinProperties(min);
@@ -545,8 +547,8 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_SIZE);
 
         if (constraint != null) {
-            Integer min = Annotations.value(constraint, "min");
-            Integer max = Annotations.value(constraint, "max");
+            Integer min = context.annotations().value(constraint, "min");
+            Integer max = context.annotations().value(constraint, "max");
 
             if (min != null && schema.getMinLength() == null) {
                 schema.setMinLength(min);
@@ -581,7 +583,7 @@ public class BeanValidationScanner {
      *         {@link Default} group, otherwise null
      */
     AnnotationInstance getConstraint(AnnotationTarget target, List<DotName> annotationName) {
-        AnnotationInstance constraint = Annotations.getAnnotation(target, annotationName);
+        AnnotationInstance constraint = context.annotations().getAnnotation(target, annotationName);
 
         if (constraint != null && JandexUtil.equals(constraint.target(), target)) {
             AnnotationValue groupValue = constraint.value("groups");

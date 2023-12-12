@@ -20,7 +20,6 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -89,8 +88,8 @@ public class TagReader {
         Objects.requireNonNull(annotationInstance, "Tag annotation must not be null");
         IoLogging.logger.singleAnnotation("@Tag");
         Tag tag = new TagImpl();
-        tag.setName(Annotations.value(annotationInstance, TagConstant.PROP_NAME));
-        tag.setDescription(Annotations.value(annotationInstance, TagConstant.PROP_DESCRIPTION));
+        tag.setName(context.annotations().value(annotationInstance, TagConstant.PROP_NAME));
+        tag.setDescription(context.annotations().value(annotationInstance, TagConstant.PROP_DESCRIPTION));
         tag.setExternalDocs(
                 ExternalDocsReader.readExternalDocs(context,
                         annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
@@ -115,13 +114,12 @@ public class TagReader {
     }
 
     // Helpers for scanner classes
-    public static boolean hasTagAnnotation(final AnnotationTarget target) {
-        return Annotations.hasAnnotation(target, TagConstant.DOTNAME_TAG) ||
-                Annotations.hasAnnotation(target, TagConstant.DOTNAME_TAGS);
+    public static boolean hasTagAnnotation(AnnotationScannerContext context, AnnotationTarget target) {
+        return context.annotations().hasAnnotation(target, TagConstant.DOTNAME_TAG, TagConstant.DOTNAME_TAGS);
     }
 
-    public static List<AnnotationInstance> getTagAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getTagAnnotations(AnnotationScannerContext context, AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 TagConstant.DOTNAME_TAG,
                 TagConstant.DOTNAME_TAGS);
     }

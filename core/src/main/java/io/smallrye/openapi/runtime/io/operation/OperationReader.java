@@ -19,7 +19,6 @@ import io.smallrye.openapi.runtime.io.response.ResponseReader;
 import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Operation from annotation or json
@@ -48,8 +47,8 @@ public class OperationReader {
         if (annotationInstance != null) {
             IoLogging.logger.singleAnnotation("@Operation");
             Operation operation = new OperationImpl();
-            operation.setSummary(Annotations.value(annotationInstance, OperationConstant.PROP_SUMMARY));
-            operation.setDescription(Annotations.value(annotationInstance, OperationConstant.PROP_DESCRIPTION));
+            operation.setSummary(context.annotations().value(annotationInstance, OperationConstant.PROP_SUMMARY));
+            operation.setDescription(context.annotations().value(annotationInstance, OperationConstant.PROP_DESCRIPTION));
             operation.setExternalDocs(
                     ExternalDocsReader.readExternalDocs(context,
                             annotationInstance.value(ExternalDocsConstant.PROP_EXTERNAL_DOCS)));
@@ -60,15 +59,15 @@ public class OperationReader {
             operation.setResponses(ResponseReader.readResponses(context,
                     annotationInstance.value(OperationConstant.PROP_RESPONSES)));
             operation.setSecurity(SecurityRequirementReader
-                    .readSecurityRequirements(annotationInstance.value(OperationConstant.PROP_SECURITY),
+                    .readSecurityRequirements(context, annotationInstance.value(OperationConstant.PROP_SECURITY),
                             annotationInstance.value(OperationConstant.PROP_SECURITY_SETS))
                     .orElse(null));
             operation.setExtensions(
                     ExtensionReader.readExtensions(context,
                             annotationInstance.value(OperationConstant.PROP_EXTENSIONS)));
 
-            operation.setOperationId(Annotations.value(annotationInstance, OperationConstant.PROP_OPERATION_ID));
-            operation.setDeprecated(Annotations.value(annotationInstance, OperationConstant.PROP_DEPRECATED));
+            operation.setOperationId(context.annotations().value(annotationInstance, OperationConstant.PROP_OPERATION_ID));
+            operation.setDeprecated(context.annotations().value(annotationInstance, OperationConstant.PROP_DEPRECATED));
             // TODO: for non-callbacks: operation.setExtensions(ExtensionReader.readExtendsions(context, annotationInstance));
 
             return operation;

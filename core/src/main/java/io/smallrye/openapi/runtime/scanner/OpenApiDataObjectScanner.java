@@ -35,7 +35,6 @@ import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -249,7 +248,7 @@ public class OpenApiDataObjectScanner {
 
             // First, handle class annotations (re-assign since readKlass may return new schema)
             currentSchema = readKlass(currentClass, currentType, currentSchema);
-            TypeUtil.mapDeprecated(currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
+            TypeUtil.mapDeprecated(context, currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
 
             if (currentSchema.getType() == null) {
@@ -306,7 +305,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private void processClassAnnotations(Schema schema, ClassInfo classInfo) {
-        String xmlElementName = Annotations.getAnnotationValue(classInfo, XML_ROOTELEMENT, PROP_NAME);
+        String xmlElementName = context.annotations().getAnnotationValue(classInfo, XML_ROOTELEMENT, PROP_NAME);
 
         if (xmlElementName != null && !classInfo.simpleName().equals(xmlElementName)) {
             schema.setXml(new XMLImpl().name(xmlElementName));
@@ -319,12 +318,12 @@ public class OpenApiDataObjectScanner {
         Type currentType = currentPathEntry.getClazzType();
         Type superClassType = currentClass.superClassType();
 
-        if (TypeUtil.isIncludedAllOf(currentClass, currentType)) {
+        if (TypeUtil.isIncludedAllOf(context, currentClass, currentType)) {
             encloseCurrentSchema(currentSchema, currentType, currentPathEntry);
         } else if (superClassType != null
                 && context.getConfig().getAutoInheritance() != AutoInheritance.NONE
                 && !TypeUtil.knownJavaType(superClassType.name())
-                && Annotations.getAnnotationValue(currentClass, SchemaConstant.DOTNAME_SCHEMA,
+                && context.annotations().getAnnotationValue(currentClass, SchemaConstant.DOTNAME_SCHEMA,
                         SchemaConstant.PROP_ALL_OF) == null) {
 
             Schema parentSchema = new SchemaImpl();
@@ -360,7 +359,7 @@ public class OpenApiDataObjectScanner {
             Type currentType,
             Schema currentSchema) {
 
-        AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(currentClass);
+        AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(context, currentClass);
         Schema classSchema;
 
         if (annotation != null) {

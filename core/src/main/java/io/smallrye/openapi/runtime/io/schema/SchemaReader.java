@@ -28,7 +28,6 @@ import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.io.xml.XmlReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -60,7 +59,7 @@ public class SchemaReader {
         Map<String, Schema> map = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, SchemaConstant.PROP_NAME);
+            String name = context.annotations().value(nested, SchemaConstant.PROP_NAME);
 
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);

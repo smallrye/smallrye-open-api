@@ -4,13 +4,17 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.jboss.jandex.AnnotationInstance;
-import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.DotName;
+import org.jboss.jandex.MethodInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -25,7 +29,6 @@ import io.smallrye.openapi.runtime.io.content.ContentReader;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -58,7 +61,7 @@ public class RequestBodyReader {
         Map<String, RequestBody> requestBodies = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, RequestBodyConstant.PROP_NAME);
+            String name = context.annotations().value(nested, RequestBodyConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -118,12 +121,12 @@ public class RequestBodyReader {
         }
         IoLogging.logger.singleAnnotation("@RequestBody");
         RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(Annotations.value(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
+        requestBody.setDescription(context.annotations().value(annotationInstance, RequestBodyConstant.PROP_DESCRIPTION));
         requestBody
                 .setContent(ContentReader.readContent(context,
                         annotationInstance.value(RequestBodyConstant.PROP_CONTENT),
                         ContentDirection.INPUT));
-        requestBody.setRequired(Annotations.value(annotationInstance, RequestBodyConstant.PROP_REQUIRED));
+        requestBody.setRequired(context.annotations().value(annotationInstance, RequestBodyConstant.PROP_REQUIRED));
         requestBody.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.REQUEST_BODY));
         requestBody.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return requestBody;
@@ -148,7 +151,7 @@ public class RequestBodyReader {
         for (String mediaType : context.getCurrentConsumes()) {
             MediaType type = new MediaTypeImpl();
             type.setSchema(SchemaFactory.typeToSchema(context,
-                    Annotations.value(annotation, RequestBodyConstant.PROP_VALUE),
+                    context.annotations().value(annotation, RequestBodyConstant.PROP_VALUE),
                     null,
                     context.getExtensions()));
             content.addMediaType(mediaType, type);
@@ -180,12 +183,23 @@ public class RequestBodyReader {
     }
 
     // helper methods for scanners
-    public static List<AnnotationInstance> getRequestBodyAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
-                RequestBodyConstant.DOTNAME_REQUESTBODY, null);
+    public static List<AnnotationInstance> getRequestBodyAnnotations(AnnotationScannerContext context, MethodInfo method) {
+        return getAnnotations(context, method, RequestBodyConstant.DOTNAME_REQUESTBODY).collect(Collectors.toList());
     }
 
-    public static AnnotationInstance getRequestBodySchemaAnnotation(final AnnotationTarget target) {
-        return Annotations.getAnnotation(target, RequestBodyConstant.DOTNAME_REQUEST_BODY_SCHEMA);
+    public static AnnotationInstance getRequestBodySchemaAnnotation(AnnotationScannerContext context, MethodInfo method) {
+        return getAnnotations(context, method, RequestBodyConstant.DOTNAME_REQUEST_BODY_SCHEMA)
+                .findFirst()
+                .orElse(null);
+    }
+
+    static Stream<AnnotationInstance> getAnnotations(AnnotationScannerContext context, MethodInfo method, DotName annotation) {
+        Stream<AnnotationInstance> methodAnnos = Stream.of(context.annotations().getAnnotation(method, annotation));
+        Stream<AnnotationInstance> paramAnnos = method.parameterTypes()
+                .stream()
+                .map(p -> context.annotations().getMethodParameterAnnotation(method, p, annotation));
+
+        return Stream.concat(methodAnnos, paramAnnos)
+                .filter(Objects::nonNull);
     }
 }

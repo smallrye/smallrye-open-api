@@ -33,7 +33,6 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -91,8 +90,9 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public OpenAPI scan(final AnnotationScannerContext context, OpenAPI openApi) {
+        this.context = context;
         // Get all Vert.x routes and convert them to OpenAPI models (and merge them into a single one)
-        processRoutes(context, openApi);
+        processRoutes(openApi);
 
         return openApi;
     }
@@ -113,7 +113,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
      * @param context the scanning context
      * @param openApi the openAPI model
      */
-    private void processRoutes(final AnnotationScannerContext context, OpenAPI openApi) {
+    private void processRoutes(OpenAPI openApi) {
         // Get all Vert.x routes and convert them to OpenAPI models (and merge them into a single one)
         Collection<AnnotationInstance> routeAnnotations = context.getIndex()
                 .getAnnotations(VertxConstants.ROUTE);
@@ -131,7 +131,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processScannerExtensions(context, applications);
 
         for (ClassInfo controller : applications) {
-            OpenAPI applicationOpenApi = processRouteClass(context, controller);
+            OpenAPI applicationOpenApi = processRouteClass(controller);
             openApi = MergeUtil.merge(openApi, applicationOpenApi);
         }
     }
@@ -143,7 +143,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
      * @param context the scanning context
      * @param routeClass the class containing the Vert.x route
      */
-    private OpenAPI processRouteClass(final AnnotationScannerContext context, ClassInfo routeClass) {
+    private OpenAPI processRouteClass(ClassInfo routeClass) {
 
         VertxLogging.log.processingRouteClass(routeClass.simpleName());
 
@@ -154,7 +154,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
 
         // Get the @RouteBase info and save it for later
-        AnnotationInstance routeBaseAnnotation = Annotations.getAnnotation(routeClass,
+        AnnotationInstance routeBaseAnnotation = context.annotations().getAnnotation(routeClass,
                 VertxConstants.ROUTE_BASE);
 
         if (routeBaseAnnotation != null) {
@@ -176,7 +176,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processJavaSecurity(context, routeClass, openApi);
 
         // Now find and process the operation methods
-        processRouteMethods(context, routeClass, openApi, null);
+        processRouteMethods(routeClass, openApi, null);
 
         context.getResolverStack().pop();
 
@@ -191,8 +191,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
      * @param openApi the OpenApi model being processed
      * @param locatorPathParameters path parameters
      */
-    private void processRouteMethods(final AnnotationScannerContext context,
-            final ClassInfo resourceClass,
+    private void processRouteMethods(final ClassInfo resourceClass,
             OpenAPI openApi,
             List<Parameter> locatorPathParameters) {
 
@@ -204,10 +203,11 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
                 .filter(m -> m.hasAnnotation(VertxConstants.ROUTE))
                 .filter(this::shouldScan)
                 .forEach(methodInfo -> Optional
-                        .ofNullable(Annotations.<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE, "methods"))
+                        .ofNullable(context.annotations().<String[]> getAnnotationValue(methodInfo, VertxConstants.ROUTE,
+                                "methods"))
                         .map(methods -> Arrays.stream(methods).map(PathItem.HttpMethod::valueOf))
                         .orElseGet(() -> Arrays.stream(PathItem.HttpMethod.values()))
-                        .forEach(httpMethod -> processRouteMethod(context, resourceClass, methodInfo, httpMethod, openApi,
+                        .forEach(httpMethod -> processRouteMethod(resourceClass, methodInfo, httpMethod, openApi,
                                 tagRefs,
                                 locatorPathParameters)));
     }
@@ -232,8 +232,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
      * @param resourceTags
      * @param locatorPathParameters
      */
-    private void processRouteMethod(final AnnotationScannerContext context,
-            final ClassInfo resourceClass,
+    private void processRouteMethod(final ClassInfo resourceClass,
             final MethodInfo method,
             final PathItem.HttpMethod methodType,
             OpenAPI openApi,
@@ -243,7 +242,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         VertxLogging.log.processingMethod(method.toString());
 
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(context, resourceClass, method));
+        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(resourceClass, method));
         context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
                 defaultConsumes).orElse(null));
@@ -264,7 +263,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process @Parameter annotations.
         PathItem pathItem = new PathItemImpl();
-        ResourceParameters params = getResourceParameters(context, resourceClass, method);
+        ResourceParameters params = getResourceParameters(resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -279,7 +278,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processResponse(context, resourceClass, method, operation, null);
 
         // Process @SecurityRequirement annotations
-        processSecurityRequirementAnnotation(resourceClass, method, operation);
+        processSecurityRequirementAnnotation(context, resourceClass, method, operation);
 
         // Process @Callback annotations
         processCallback(context, method, operation);
@@ -314,8 +313,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         }
     }
 
-    private ResourceParameters getResourceParameters(final AnnotationScannerContext context,
-            final ClassInfo resourceClass,
+    private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
             final MethodInfo method) {
         Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
         return VertxParameterProcessor.process(context, currentAppPath, resourceClass,
@@ -339,24 +337,24 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
     boolean shouldScan(MethodInfo resourceMethod) {
         AnnotationInstance route = resourceMethod.annotation(VertxConstants.ROUTE);
 
-        if ("FAILURE".equals(Annotations.value(route, "type"))) {
+        if ("FAILURE".equals(context.annotations().value(route, "type"))) {
             return false;
         }
 
-        if (Annotations.value(route, "regex") != null) {
+        if (context.annotations().value(route, "regex") != null) {
             return resourceMethod.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
         }
 
         return true;
     }
 
-    static Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
+    Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
         DotName annotationName = VertxConstants.ROUTE;
 
         AnnotationInstance annotation = resourceMethod.annotation(annotationName);
 
         if (annotation == null || annotation.value(property) == null) {
-            annotation = Annotations.getAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
+            annotation = context.annotations().getAnnotation(resourceMethod.declaringClass(), VertxConstants.ROUTE_BASE);
         }
 
         if (annotation != null) {

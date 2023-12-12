@@ -183,13 +183,13 @@ public class JandexUtil {
      * @param annotation AnnotationInstance
      * @return Is it a simple array @Schema
      */
-    public static boolean isSimpleArraySchema(AnnotationInstance annotation) {
+    public static boolean isSimpleArraySchema(AnnotationScannerContext context, AnnotationInstance annotation) {
         // May only have 'type' display property
         if (schemaDisplayValues(annotation).size() != 1) {
             return false;
         }
 
-        return isArraySchema(annotation);
+        return isArraySchema(context, annotation);
     }
 
     /**
@@ -200,12 +200,12 @@ public class JandexUtil {
      * @param annotation AnnotationInstance
      * @return Is it an array {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
      */
-    public static boolean isArraySchema(AnnotationInstance annotation) {
+    public static boolean isArraySchema(AnnotationScannerContext context, AnnotationInstance annotation) {
         if (!hasImplementation(annotation)) {
             return false;
         }
 
-        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = Annotations.enumValue(annotation,
+        org.eclipse.microprofile.openapi.models.media.Schema.SchemaType type = context.annotations().enumValue(annotation,
                 SchemaConstant.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
 
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY);

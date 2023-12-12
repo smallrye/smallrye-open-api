@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.util.Annotations;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * Reading the Security from annotations or json
@@ -40,7 +40,8 @@ public class SecurityRequirementReader {
      * @param securityRequirementsSets Array of {@literal @}SecurityRequirementsSet annotation
      * @return List of SecurityRequirement models
      */
-    public static Optional<List<SecurityRequirement>> readSecurityRequirements(final AnnotationValue securityRequirements,
+    public static Optional<List<SecurityRequirement>> readSecurityRequirements(AnnotationScannerContext context,
+            final AnnotationValue securityRequirements,
             final AnnotationValue securityRequirementsSets) {
         if (securityRequirements == null && securityRequirementsSets == null) {
             return Optional.empty();
@@ -52,7 +53,7 @@ public class SecurityRequirementReader {
             IoLogging.logger.annotationsArray("@SecurityRequirement");
             AnnotationInstance[] nestedArray = securityRequirements.asNestedArray();
             for (AnnotationInstance requirementAnno : nestedArray) {
-                SecurityRequirement requirement = readSecurityRequirement(requirementAnno);
+                SecurityRequirement requirement = readSecurityRequirement(context, requirementAnno);
                 if (requirement != null) {
                     requirements.add(requirement);
                 }
@@ -63,7 +64,7 @@ public class SecurityRequirementReader {
             IoLogging.logger.annotationsArray("@SecurityRequirementsSet");
             AnnotationInstance[] nestedArray = securityRequirementsSets.asNestedArray();
             for (AnnotationInstance requirementSetAnno : nestedArray) {
-                SecurityRequirement requirement = readSecurityRequirementsSet(requirementSetAnno);
+                SecurityRequirement requirement = readSecurityRequirementsSet(context, requirementSetAnno);
                 if (requirement != null) {
                     requirements.add(requirement);
                 }
@@ -98,9 +99,10 @@ public class SecurityRequirementReader {
      * @param annotationInstance the {@literal @}SecurityRequirement annotation
      * @return SecurityRequirement model
      */
-    public static SecurityRequirement readSecurityRequirement(AnnotationInstance annotationInstance) {
+    public static SecurityRequirement readSecurityRequirement(AnnotationScannerContext context,
+            AnnotationInstance annotationInstance) {
         SecurityRequirement requirement = new SecurityRequirementImpl();
-        addSecurityRequirement(requirement, annotationInstance);
+        addSecurityRequirement(context, requirement, annotationInstance);
         if (requirement.getSchemes().isEmpty()) {
             // Should only happen if the annotation was missing the required "name" property
             return null;
@@ -115,21 +117,23 @@ public class SecurityRequirementReader {
      * @param annotationInstance the {@literal @}SecurityRequirementsSet annotation
      * @return SecurityRequirement model
      */
-    public static SecurityRequirement readSecurityRequirementsSet(AnnotationInstance annotationInstance) {
+    public static SecurityRequirement readSecurityRequirementsSet(AnnotationScannerContext context,
+            AnnotationInstance annotationInstance) {
         AnnotationValue value = annotationInstance.value();
         SecurityRequirement requirement = new SecurityRequirementImpl();
         if (value != null) {
             for (AnnotationInstance securityRequirementInstance : value.asNestedArray()) {
-                addSecurityRequirement(requirement, securityRequirementInstance);
+                addSecurityRequirement(context, requirement, securityRequirementInstance);
             }
         }
         return requirement;
     }
 
-    private static void addSecurityRequirement(SecurityRequirement requirement, AnnotationInstance annotationInstance) {
-        String name = Annotations.value(annotationInstance, SecurityRequirementConstant.PROP_NAME);
+    private static void addSecurityRequirement(AnnotationScannerContext context, SecurityRequirement requirement,
+            AnnotationInstance annotationInstance) {
+        String name = context.annotations().value(annotationInstance, SecurityRequirementConstant.PROP_NAME);
         if (name != null) {
-            String[] scopes = Annotations.value(annotationInstance, SecurityRequirementConstant.PROP_SCOPES);
+            String[] scopes = context.annotations().value(annotationInstance, SecurityRequirementConstant.PROP_SCOPES);
 
             if (scopes != null) {
                 requirement.addScheme(name, new ArrayList<>(Arrays.asList(scopes)));
@@ -140,7 +144,7 @@ public class SecurityRequirementReader {
     }
 
     /**
-     * Reads a {@link APIResponses} OpenAPI node.
+     * Reads a {@link SecurityRequirement} OpenAPI node.
      *
      * @param node the json node
      * @return SecurityRequirement model
@@ -165,25 +169,29 @@ public class SecurityRequirementReader {
     }
 
     // helper methods for scanners
-    public static AnnotationInstance getSecurityRequirementsAnnotation(final AnnotationTarget target) {
-        return Annotations.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
+    public static AnnotationInstance getSecurityRequirementsAnnotation(AnnotationScannerContext context,
+            AnnotationTarget target) {
+        return context.annotations().getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
     }
 
     // helper methods for scanners
-    public static List<AnnotationInstance> getSecurityRequirementAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getSecurityRequirementAnnotations(AnnotationScannerContext context,
+            AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENT,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS);
     }
 
     // helper methods for scanners
-    public static AnnotationInstance getSecurityRequirementsSetsAnnotation(final AnnotationTarget target) {
-        return Annotations.getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
+    public static AnnotationInstance getSecurityRequirementsSetsAnnotation(AnnotationScannerContext context,
+            AnnotationTarget target) {
+        return context.annotations().getAnnotation(target, SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
     }
 
     // helper methods for scanners
-    public static List<AnnotationInstance> getSecurityRequirementsSetAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getSecurityRequirementsSetAnnotations(AnnotationScannerContext context,
+            AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SET,
                 SecurityRequirementConstant.DOTNAME_SECURITY_REQUIREMENTS_SETS);
     }

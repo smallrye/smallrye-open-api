@@ -1,8 +1,5 @@
 package io.smallrye.openapi.spring;
 
-import static org.jboss.jandex.AnnotationTarget.Kind.CLASS;
-import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +23,6 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -155,25 +151,21 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
         AnnotationInstance path = null;
         Set<DotName> paths = SpringConstants.HTTP_METHODS;
 
-        if (target.kind().equals(CLASS)) {
-            for (DotName possiblePath : paths) {
-                AnnotationInstance classAnnotation = Annotations.getAnnotation(target, possiblePath);
-                if (classAnnotation != null && (classAnnotation.value() != null || classAnnotation.value("path") != null)) {
-                    path = classAnnotation;
-                }
+        for (DotName possiblePath : paths) {
+            AnnotationInstance annotation = scannerContext.annotations()
+                    .getAnnotation(target, possiblePath);
+
+            if (mappingHasPath(annotation)) {
+                path = annotation;
             }
-        } else if (target.kind().equals(METHOD)) {
-            for (DotName possiblePath : paths) {
-                AnnotationInstance methodAnnotation = target.asMethod().annotation(possiblePath);
-                if (methodAnnotation != null && (methodAnnotation.value() != null || methodAnnotation.value("path") != null)) {
-                    path = methodAnnotation;
-                }
-            }
-            // Also support @RequestMapping
-            AnnotationInstance methodAnnotation = target.asMethod().annotation(SpringConstants.REQUEST_MAPPING);
-            if (methodAnnotation != null && (methodAnnotation.value() != null || methodAnnotation.value("path") != null)) {
-                path = methodAnnotation;
-            }
+        }
+
+        // Also support @RequestMapping
+        AnnotationInstance annotation = scannerContext.annotations()
+                .getAnnotation(target, SpringConstants.REQUEST_MAPPING);
+
+        if (mappingHasPath(annotation)) {
+            path = annotation;
         }
 
         if (path != null) {
@@ -190,6 +182,10 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
         }
 
         return "";
+    }
+
+    static boolean mappingHasPath(AnnotationInstance mappingAnnotation) {
+        return mappingAnnotation != null && (mappingAnnotation.value() != null || mappingAnnotation.value("path") != null);
     }
 
     /**

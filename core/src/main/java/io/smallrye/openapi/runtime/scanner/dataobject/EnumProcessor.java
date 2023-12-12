@@ -21,7 +21,6 @@ import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -40,7 +39,7 @@ public class EnumProcessor {
                 .getOrDefault(JSON_VALUE, Collections.emptyList())
                 .stream()
                 // @JsonValue#value (default = true) allows for the functionality to be disabled
-                .filter(atJsonValue -> Annotations.value(atJsonValue, PROP_VALUE, true))
+                .filter(atJsonValue -> context.annotations().value(atJsonValue, PROP_VALUE, true))
                 .map(AnnotationInstance::target)
                 .filter(JandexUtil::isSupplier)
                 .map(valueTarget -> jacksonJsonValues(context, enumKlazz, valueTarget))
@@ -78,12 +77,12 @@ public class EnumProcessor {
     }
 
     private static Function<FieldInfo, String> nameTranslator(AnnotationScannerContext context, ClassInfo enumKlazz) {
-        return Optional.<Type> ofNullable(Annotations.getAnnotationValue(enumKlazz, ENUM_NAMING, PROP_VALUE))
+        return Optional.<Type> ofNullable(context.annotations().getAnnotationValue(enumKlazz, ENUM_NAMING, PROP_VALUE))
                 .map(namingClass -> namingClass.name().toString())
                 .map(namingClass -> PropertyNamingStrategyFactory.getStrategy(namingClass, context.getClassLoader()))
                 .<Function<FieldInfo, String>> map(nameStrategy -> fieldInfo -> nameStrategy.apply(fieldInfo.name()))
                 .orElse(fieldInfo -> Optional
-                        .<String> ofNullable(Annotations.getAnnotationValue(fieldInfo, JSON_PROPERTY, PROP_VALUE))
+                        .<String> ofNullable(context.annotations().getAnnotationValue(fieldInfo, JSON_PROPERTY, PROP_VALUE))
                         .orElseGet(fieldInfo::name));
     }
 }

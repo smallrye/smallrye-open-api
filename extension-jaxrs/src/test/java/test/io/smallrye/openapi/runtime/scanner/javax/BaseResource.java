@@ -2,8 +2,6 @@ package test.io.smallrye.openapi.runtime.scanner.javax;
 
 import javax.ws.rs.core.Response;
 
-import test.io.smallrye.openapi.runtime.scanner.javax.ResultList.ResultBuilder;
-
 public abstract class BaseResource<T extends BaseModel> {
 
     protected ResultList<T> getAll1() {

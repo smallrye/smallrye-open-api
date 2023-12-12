@@ -71,7 +71,6 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -142,7 +141,7 @@ public interface AnnotationScanner {
      */
     default void processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
             OpenAPI openApi) {
-        AnnotationInstance openApiDefAnno = DefinitionReader.getDefinitionAnnotation(targetClass);
+        AnnotationInstance openApiDefAnno = DefinitionReader.getDefinitionAnnotation(context, targetClass);
         if (openApiDefAnno != null) {
             DefinitionReader.processDefinition(context, openApi, openApiDefAnno);
         }
@@ -156,10 +155,11 @@ public interface AnnotationScanner {
      */
     default void processSecuritySchemeAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
             OpenAPI openApi) {
-        List<AnnotationInstance> securitySchemeAnnotations = SecuritySchemeReader.getSecuritySchemeAnnotations(targetClass);
+        List<AnnotationInstance> securitySchemeAnnotations = SecuritySchemeReader.getSecuritySchemeAnnotations(context,
+                targetClass);
 
         for (AnnotationInstance annotation : securitySchemeAnnotations) {
-            String name = SecuritySchemeReader.getSecuritySchemeName(annotation);
+            String name = SecuritySchemeReader.getSecuritySchemeName(context, annotation);
             if (name == null && JandexUtil.isRef(annotation)) {
                 name = JandexUtil.nameFromRef(annotation);
             }
@@ -178,7 +178,7 @@ public interface AnnotationScanner {
      * @param openApi the current OpenApi model being created
      */
     default void processServerAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass, OpenAPI openApi) {
-        List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(targetClass);
+        List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(context, targetClass);
         for (AnnotationInstance annotation : serverAnnotations) {
             Server server = ServerReader.readServer(context, annotation);
             openApi.addServer(server);
@@ -195,9 +195,11 @@ public interface AnnotationScanner {
         JavaSecurityProcessor securityProcessor = context.getJavaSecurityProcessor();
         securityProcessor.initialize(openApi);
         securityProcessor
-                .addDeclaredRolesToScopes(Annotations.getAnnotationValue(resourceClass, SecurityConstants.DECLARE_ROLES));
+                .addDeclaredRolesToScopes(
+                        context.annotations().getAnnotationValue(resourceClass, SecurityConstants.DECLARE_ROLES));
         securityProcessor
-                .addRolesAllowedToScopes(Annotations.getAnnotationValue(resourceClass, SecurityConstants.ROLES_ALLOWED));
+                .addRolesAllowedToScopes(
+                        context.annotations().getAnnotationValue(resourceClass, SecurityConstants.ROLES_ALLOWED));
     }
 
     /**
@@ -236,16 +238,16 @@ public interface AnnotationScanner {
      */
     default Set<String> processTags(final AnnotationScannerContext context, final AnnotationTarget target, OpenAPI openApi,
             final boolean nullWhenMissing) {
-        if (!TagReader.hasTagAnnotation(target)) {
+        if (!TagReader.hasTagAnnotation(context, target)) {
             return nullWhenMissing ? null : Collections.emptySet();
         }
 
         Set<String> tags = new LinkedHashSet<>();
-        List<AnnotationInstance> tagAnnos = TagReader.getTagAnnotations(target);
+        List<AnnotationInstance> tagAnnos = TagReader.getTagAnnotations(context, target);
 
         for (AnnotationInstance ta : tagAnnos) {
             if (JandexUtil.isRef(ta)) {
-                tags.add(Annotations.value(ta, OpenApiConstants.REF));
+                tags.add(context.annotations().value(ta, OpenApiConstants.REF));
             } else {
                 Tag tag = TagReader.readTag(context, ta);
 
@@ -256,7 +258,7 @@ public interface AnnotationScanner {
             }
         }
 
-        String[] refs = Annotations.getAnnotationValue(target, TagConstant.DOTNAME_TAGS,
+        String[] refs = context.annotations().getAnnotationValue(target, TagConstant.DOTNAME_TAGS,
                 OpenApiConstants.REFS);
 
         if (refs != null) {
@@ -321,8 +323,8 @@ public interface AnnotationScanner {
         operation.setMethodRef(JandexUtil.createUniqueMethodReference(resourceClass, method));
 
         // @Deprecrated may be on either the method or the class
-        TypeUtil.mapDeprecated(method, operation::getDeprecated, operation::setDeprecated);
-        TypeUtil.mapDeprecated(resourceClass, operation::getDeprecated, operation::setDeprecated);
+        TypeUtil.mapDeprecated(context, method, operation::getDeprecated, operation::setDeprecated);
+        TypeUtil.mapDeprecated(context, resourceClass, operation::getDeprecated, operation::setDeprecated);
 
         OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
 
@@ -395,15 +397,15 @@ public interface AnnotationScanner {
             Operation operation,
             Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap) {
 
-        setJsonViewContext(context, Annotations.getDeclaredAnnotationValue(method, JacksonConstants.JSON_VIEW));
+        setJsonViewContext(context, context.annotations().getAnnotationValue(method, JacksonConstants.JSON_VIEW));
 
-        List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(resourceClass);
+        List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(context, resourceClass);
         for (AnnotationInstance annotation : classApiResponseAnnotations) {
             addApiReponseFromAnnotation(context, annotation, operation);
         }
 
         // Method annotations override class annotations
-        List<AnnotationInstance> methodApiResponseAnnotations = ResponseReader.getResponseAnnotations(method);
+        List<AnnotationInstance> methodApiResponseAnnotations = ResponseReader.getResponseAnnotations(context, method);
         for (AnnotationInstance annotation : methodApiResponseAnnotations) {
             addApiReponseFromAnnotation(context, annotation, operation);
         }
@@ -612,7 +614,7 @@ public interface AnnotationScanner {
 
     default Schema kotlinContinuationToSchema(AnnotationScannerContext context, MethodInfo method) {
         Type type = getKotlinContinuationArgument(context, method);
-        AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, type,
+        AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method, type,
                 SchemaConstant.DOTNAME_SCHEMA);
         return SchemaFactory.typeToSchema(context, type, schemaAnnotation, context.getExtensions());
     }
@@ -714,28 +716,30 @@ public interface AnnotationScanner {
      * @param method the method
      * @param operation the operation to add them to
      */
-    default void processSecurityRequirementAnnotation(final ClassInfo resourceClass, final MethodInfo method,
+    default void processSecurityRequirementAnnotation(AnnotationScannerContext context, final ClassInfo resourceClass,
+            final MethodInfo method,
             Operation operation) {
 
-        List<AnnotationInstance> requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(method);
-        List<AnnotationInstance> requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(method);
-        boolean emptyContainerPresent = isEmptySecurityRequirements(method);
+        List<AnnotationInstance> requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(context, method);
+        List<AnnotationInstance> requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(context,
+                method);
+        boolean emptyContainerPresent = isEmptySecurityRequirements(context, method);
 
         if (requirements.isEmpty() && requirementSets.isEmpty() && !emptyContainerPresent) {
-            requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(resourceClass);
-            requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(resourceClass);
-            emptyContainerPresent = isEmptySecurityRequirements(resourceClass);
+            requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(context, resourceClass);
+            requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(context, resourceClass);
+            emptyContainerPresent = isEmptySecurityRequirements(context, resourceClass);
         }
 
         for (AnnotationInstance annotation : requirements) {
-            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(annotation);
+            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(context, annotation);
             if (requirement != null) {
                 operation.addSecurityRequirement(requirement);
             }
         }
 
         for (AnnotationInstance annotation : requirementSets) {
-            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirementsSet(annotation);
+            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirementsSet(context, annotation);
             if (requirement != null) {
                 operation.addSecurityRequirement(requirement);
             }
@@ -753,12 +757,12 @@ public interface AnnotationScanner {
      * @param target
      * @return true if an empty annotation is present, otherwise false
      */
-    default boolean isEmptySecurityRequirements(AnnotationTarget target) {
+    default boolean isEmptySecurityRequirements(AnnotationScannerContext context, AnnotationTarget target) {
         boolean foundEmptyAnnotation = false;
 
-        AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(target);
+        AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(context, target);
         if (securityRequirements != null) {
-            AnnotationInstance[] values = Annotations.value(securityRequirements, "value");
+            AnnotationInstance[] values = context.annotations().value(securityRequirements, "value");
             if (values == null || values.length == 0) {
                 foundEmptyAnnotation = true;
             } else {
@@ -766,9 +770,10 @@ public interface AnnotationScanner {
             }
         }
 
-        AnnotationInstance securityRequirementsSets = SecurityRequirementReader.getSecurityRequirementsSetsAnnotation(target);
+        AnnotationInstance securityRequirementsSets = SecurityRequirementReader.getSecurityRequirementsSetsAnnotation(context,
+                target);
         if (securityRequirementsSets != null) {
-            AnnotationInstance[] values = Annotations.value(securityRequirementsSets, "value");
+            AnnotationInstance[] values = context.annotations().value(securityRequirementsSets, "value");
             if (values == null || values.length == 0) {
                 foundEmptyAnnotation = true;
             } else {
@@ -787,11 +792,11 @@ public interface AnnotationScanner {
      * @param operation the operation to add this to
      */
     default void processCallback(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<AnnotationInstance> callbackAnnotations = CallbackReader.getCallbackAnnotations(method);
+        List<AnnotationInstance> callbackAnnotations = CallbackReader.getCallbackAnnotations(context, method);
 
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         for (AnnotationInstance annotation : callbackAnnotations) {
-            String name = CallbackReader.getCallbackName(annotation);
+            String name = CallbackReader.getCallbackName(context, annotation);
             if (name == null && JandexUtil.isRef(annotation)) {
                 name = JandexUtil.nameFromRef(annotation);
             }
@@ -812,9 +817,9 @@ public interface AnnotationScanner {
      * @param operation the current Operation model being created
      */
     default void processServerAnnotation(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(method);
+        List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(context, method);
         if (serverAnnotations.isEmpty()) {
-            serverAnnotations.addAll(ServerReader.getServerAnnotations(method.declaringClass()));
+            serverAnnotations.addAll(ServerReader.getServerAnnotations(context, method.declaringClass()));
         }
         for (AnnotationInstance annotation : serverAnnotations) {
             Server server = ServerReader.readServer(context, annotation);
@@ -830,14 +835,14 @@ public interface AnnotationScanner {
      * @param operation the current operation
      */
     default void processExtensions(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(method);
+        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context, method);
 
         if (extensionAnnotations.isEmpty()) {
-            extensionAnnotations.addAll(ExtensionReader.getExtensionsAnnotations(method.declaringClass()));
+            extensionAnnotations.addAll(ExtensionReader.getExtensionsAnnotations(context, method.declaringClass()));
         }
         for (AnnotationInstance annotation : extensionAnnotations) {
             if (annotation.target() == null || !METHOD_PARAMETER.equals(annotation.target().kind())) {
-                String name = ExtensionReader.getExtensionName(annotation);
+                String name = ExtensionReader.getExtensionName(context, annotation);
                 operation.addExtension(name, ExtensionReader.readExtensionValue(context, name, annotation));
             }
         }
@@ -907,7 +912,7 @@ public interface AnnotationScanner {
             final ResourceParameters params) {
         RequestBody requestBody = null;
 
-        List<AnnotationInstance> requestBodyAnnotations = RequestBodyReader.getRequestBodyAnnotations(method);
+        List<AnnotationInstance> requestBodyAnnotations = RequestBodyReader.getRequestBodyAnnotations(context, method);
         for (AnnotationInstance annotation : requestBodyAnnotations) {
             requestBody = RequestBodyReader.readRequestBody(context, annotation);
             Content formBodyContent = params.getFormBodyContent();
@@ -928,12 +933,14 @@ public interface AnnotationScanner {
 
             // Only generate the request body schema if the @RequestBody is not a reference and no schema is yet specified
             if (requestBodyType != null && requestBody.getRef() == null) {
-                Type[] views = Annotations
-                        .value(Annotations.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
+                Type[] views = context.annotations()
+                        .value(context.annotations().getMethodParameterAnnotation(method, requestBodyType,
+                                JacksonConstants.JSON_VIEW));
                 setJsonViewContext(context, views);
                 if (!ModelUtil.requestBodyHasSchema(requestBody)) {
                     requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
-                    AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, requestBodyType,
+                    AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method,
+                            requestBodyType,
                             SchemaConstant.DOTNAME_SCHEMA);
                     Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
                             context.getExtensions());
@@ -953,7 +960,7 @@ public interface AnnotationScanner {
 
         if (requestBody == null) {
             requestBody = RequestBodyReader.readRequestBodySchema(context,
-                    RequestBodyReader.getRequestBodySchemaAnnotation(method));
+                    RequestBodyReader.getRequestBodySchemaAnnotation(context, method));
         }
 
         // If the request body is null, figure it out from the parameters.  Only if the
@@ -970,8 +977,9 @@ public interface AnnotationScanner {
                 requestBodyType = context.getResourceTypeResolver().resolve(requestBodyType);
 
                 if (requestBodyType != null && !isScannerInternalParameter(requestBodyType)) {
-                    Type[] views = Annotations.value(
-                            Annotations.getMethodParameterAnnotation(method, requestBodyType, JacksonConstants.JSON_VIEW));
+                    Type[] views = context.annotations().value(
+                            context.annotations().getMethodParameterAnnotation(method, requestBodyType,
+                                    JacksonConstants.JSON_VIEW));
                     setJsonViewContext(context, views);
                     Schema schema = null;
 
@@ -979,7 +987,8 @@ public interface AnnotationScanner {
                         schema = new SchemaImpl();
                         schema.setType(Schema.SchemaType.OBJECT);
                     } else {
-                        AnnotationInstance schemaAnnotation = Annotations.getMethodParameterAnnotation(method, requestBodyType,
+                        AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method,
+                                requestBodyType,
                                 SchemaConstant.DOTNAME_SCHEMA);
                         schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
                                 context.getExtensions());
@@ -1043,7 +1052,8 @@ public interface AnnotationScanner {
                 .filter(position -> !isFrameworkContextType(methodParams.get(position)))
                 .filter(position -> !isPathParameter(context, method.parameterName(position), params))
                 .filter(position -> {
-                    List<AnnotationInstance> annotations = Annotations.getParameterAnnotations(method, (short) position);
+                    List<AnnotationInstance> annotations = context.annotations().getMethodParameterAnnotations(method,
+                            position);
                     return annotations.isEmpty() || !containsScannerAnnotations(annotations, context.getExtensions());
                 })
                 .mapToObj(methodParams::get)
@@ -1053,7 +1063,8 @@ public interface AnnotationScanner {
 
     default void setRequestBodyConstraints(AnnotationScannerContext context, RequestBody requestBody, MethodInfo method,
             Type requestBodyType) {
-        List<AnnotationInstance> paramAnnotations = Annotations.getMethodParameterAnnotations(method, requestBodyType);
+        List<AnnotationInstance> paramAnnotations = context.annotations().getMethodParameterAnnotations(method,
+                requestBodyType);
         Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
 
         if (!paramAnnotations.isEmpty() && constraintScanner.isPresent()) {
