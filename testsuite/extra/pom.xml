@@ -15,28 +15,12 @@
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-core</artifactId>
-            <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-jaxrs</artifactId>
-            <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-open-api-spring</artifactId>
-            <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-open-api-vertx</artifactId>
-            <!--<scope>test</scope> This breaks the sonar coverage ?!? -->
-        </dependency>
-        <dependency>
-            <!-- Required to aggregate coverage -->
-            <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-open-api-testsuite-tck</artifactId>
-            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>
@@ -161,24 +145,11 @@
             <properties>
                 <argLine>@{jacocoArgLine}</argLine>
             </properties>
-
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>report-aggregate</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>report-aggregate</goal>
-                                </goals>
-                                <configuration>
-                                    <formats>XML</formats>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>

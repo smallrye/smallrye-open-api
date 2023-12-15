@@ -169,7 +169,7 @@ class AnnotationsTest extends IndexScannerTestBase {
         }
 
         FilteredIndexView index = new FilteredIndexView(Index.of(Bean.class, AllKinds.class, AllKinds.List.class, Nested.class,
-                AnnotationEnum.class, AllKindsComposed.class), emptyConfig());
+                AnnotationEnum.class, AllKindsComposed.class, Retention.class, Repeatable.class), emptyConfig());
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
                 emptyConfig(), new OpenAPIImpl());

@@ -5,10 +5,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,9 +50,15 @@ public final class Annotations {
     }
 
     private final AnnotationScannerContext context;
+    private final Set<String> excludedPackages;
 
     public Annotations(AnnotationScannerContext context) {
         this.context = context;
+        this.excludedPackages = context.getConfig()
+                .getScanCompositionExcludePackages()
+                .stream()
+                .map(pkg -> pkg.concat("."))
+                .collect(Collectors.toSet());
     }
 
     @SuppressWarnings("deprecation")
@@ -91,20 +99,41 @@ public final class Annotations {
         }
     }
 
+    private boolean composable(DotName annotation) {
+        String name = annotation.toString();
+
+        for (String pkg : this.excludedPackages) {
+            if (name.startsWith(pkg)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private Stream<AnnotationInstance> getComposedAnnotation(Collection<AnnotationInstance> declaredAnnotations,
-            DotName name) {
-        AugmentedIndexView index = context.getAugmentedIndex();
+            DotName name,
+            Set<DotName> scanned) {
 
         return declaredAnnotations
                 .stream()
                 .map(AnnotationInstance::name)
-                .map(index::getClassByName)
+                .filter(this::composable)
+                .map(context.getAugmentedIndex()::getClassByName)
                 .filter(Objects::nonNull)
-                .flatMap(annotationClass -> getDeclaredAnnotation(annotationClass, name))
+                .flatMap(annotationClass -> {
+                    if (scanned.contains(annotationClass.name())) {
+                        return null;
+                    }
+
+                    scanned.add(annotationClass.name());
+                    UtilLogging.logger.composedAnnotationSearch(name, annotationClass.name());
+                    return getDeclaredAnnotation(annotationClass, name, scanned);
+                })
                 .filter(Objects::nonNull);
     }
 
-    private Stream<AnnotationInstance> getDeclaredAnnotation(AnnotationTarget target, DotName name) {
+    private Stream<AnnotationInstance> getDeclaredAnnotation(AnnotationTarget target, DotName name, Set<DotName> scanned) {
         if (target == null) {
             return Stream.empty();
         }
@@ -116,9 +145,13 @@ public final class Annotations {
         }
 
         Stream<AnnotationInstance> direct = declaredAnnotations.stream().filter(a -> name.equals(a.name()));
-        Stream<AnnotationInstance> composed = getComposedAnnotation(declaredAnnotations, name);
+        Stream<AnnotationInstance> composed = getComposedAnnotation(declaredAnnotations, name, scanned);
 
         return Stream.concat(direct, composed);
+    }
+
+    private Stream<AnnotationInstance> getDeclaredAnnotation(AnnotationTarget target, DotName name) {
+        return getDeclaredAnnotation(target, name, new HashSet<>());
     }
 
     public <T> T value(AnnotationInstance annotation) {

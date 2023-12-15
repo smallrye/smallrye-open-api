@@ -47,6 +47,7 @@ public final class OpenApiConstants {
     public static final String SCAN_PROFILES = SMALLRYE_PREFIX + "scan.profiles";
     public static final String SCAN_EXCLUDE_PROFILES = SMALLRYE_PREFIX + "scan.exclude.profiles";
     public static final String SCAN_RESOURCE_CLASS_PREFIX = SMALLRYE_PREFIX + "scan.resource-class.";
+    public static final String SCAN_COMPOSITION_EXCLUDE_PACKAGES = SMALLRYE_PREFIX + "scan.composition.exclude.packages";
 
     public static final String VERSION = SMALLRYE_PREFIX + "openapi";
     public static final String INFO_TITLE = SMALLRYE_PREFIX + "info.title";
@@ -122,6 +123,25 @@ public final class OpenApiConstants {
     public static final String REF = "ref";
 
     public static final String EXTENSION_PROFILE_PREFIX = "x-smallrye-profile-";
+
+    /**
+     * Default set of packages with annotations that should not be checked for
+     * nested/composed annotations. For example, the annotations
+     * <code>org.jetbrains.annotations.NotNull</code> will not be checked for
+     * additional annotations. Generally, only application-provided custom
+     * annotations would be used to compose multiple OpenAPI annotations. This
+     * list allows the scanner to short-circuit the scanning of an excessive
+     * number of annotations.
+     */
+    public static final Set<String> DEFAULT_COMPOSITION_EXCLUDE_PACKAGES = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(
+                    "java",
+                    "jakarta",
+                    "kotlin",
+                    "com.fasterxml.jackson",
+                    "io.quarkus",
+                    "org.eclipse.microprofile.openapi",
+                    "org.jetbrains.annotations")));
 
     /**
      * Constructor.
