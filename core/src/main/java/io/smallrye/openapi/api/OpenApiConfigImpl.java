@@ -1,14 +1,17 @@
 package io.smallrye.openapi.api;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * Implementation of the {@link OpenApiConfig} interface that gets config information from a
@@ -47,8 +50,20 @@ public class OpenApiConfigImpl implements OpenApiConfig {
         return config;
     }
 
-    protected Iterable<String> getPropertyNames() {
-        return getConfig().getPropertyNames();
+    /**
+     * Fetch the stream of all available configuration property names.
+     */
+    protected Stream<String> getPropertyNames() {
+        /*
+         * Obtain the names directly from the underlying ConfigSources.
+         * This bypasses name caching known to occur in smallrye-config
+         * that breaks several unit tests.
+         */
+        Iterable<ConfigSource> sources = getConfig().getConfigSources();
+
+        return StreamSupport.stream(sources.spliterator(), false)
+                .map(ConfigSource::getPropertyNames)
+                .flatMap(Collection::stream);
     }
 
     protected <T> T getValue(String propertyName, Class<T> type) {
@@ -103,7 +118,7 @@ public class OpenApiConfigImpl implements OpenApiConfig {
             return (Map<String, T>) cache.get(propertyNamePrefix);
         }
 
-        Map<String, T> valueMap = StreamSupport.stream(getPropertyNames().spliterator(), false)
+        Map<String, T> valueMap = getPropertyNames()
                 .filter(propertyName -> propertyName.startsWith(propertyNamePrefix))
                 .collect(Collectors.toMap(
                         name -> name.substring(propertyNamePrefix.length()),
