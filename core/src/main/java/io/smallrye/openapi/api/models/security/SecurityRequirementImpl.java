@@ -1,5 +1,6 @@
 package io.smallrye.openapi.api.models.security;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,9 +23,9 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
     @Override
     public SecurityRequirement addScheme(String securitySchemeName, String scope) {
         if (scope == null) {
-            this.put(securitySchemeName, Collections.emptyList());
+            addScheme(securitySchemeName);
         } else {
-            this.put(securitySchemeName, Collections.singletonList(scope));
+            addScheme(securitySchemeName, new ArrayList<>(Collections.singletonList(scope)));
         }
         return this;
     }
@@ -35,7 +36,7 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
     @Override
     public SecurityRequirement addScheme(String securitySchemeName, List<String> scopes) {
         if (scopes == null) {
-            scopes = Collections.emptyList();
+            scopes = new ArrayList<>(0);
         }
         this.put(securitySchemeName, scopes);
         return this;
@@ -46,7 +47,7 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
      */
     @Override
     public SecurityRequirement addScheme(String securitySchemeName) {
-        this.put(securitySchemeName, Collections.emptyList());
+        addScheme(securitySchemeName, (List<String>) null);
         return this;
     }
 
@@ -72,7 +73,7 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
     @Override
     public void setSchemes(Map<String, List<String>> items) {
         this.clear();
-        this.putAll(items);
+        items.forEach(this::addScheme);
     }
 
 }

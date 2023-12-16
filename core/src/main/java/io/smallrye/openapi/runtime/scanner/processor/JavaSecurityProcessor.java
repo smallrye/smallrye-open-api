@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
@@ -141,12 +143,12 @@ public class JavaSecurityProcessor {
 
             if (requirement.hasScheme(currentSecurityScheme)) {
                 // The name of the declared requirement must match the scheme's name
-                List<String> scopes = requirement.getScheme(currentSecurityScheme);
-                for (String role : roles) {
-                    if (!scopes.contains(role)) {
-                        scopes.add(role);
-                    }
-                }
+                List<String> scopes = Stream.concat(
+                        requirement.getScheme(currentSecurityScheme).stream(),
+                        Arrays.stream(roles))
+                        .distinct()
+                        .collect(Collectors.toList());
+                requirement.addScheme(currentSecurityScheme, scopes);
             }
         }
     }
