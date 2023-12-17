@@ -33,6 +33,9 @@ import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -809,5 +812,45 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("components.schemas.parameterized-type-schema-config.json", result);
+    }
+
+    @Test
+    void testJacksonPropertyAccess() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+            @JsonProperty
+            String dflt;
+
+            @JsonProperty(access = Access.READ_ONLY)
+            String ro;
+
+            @JsonProperty(access = Access.WRITE_ONLY)
+            String wo;
+
+            @JsonProperty(access = Access.READ_WRITE)
+            String rw;
+
+            @JsonProperty(access = Access.AUTO)
+            @JsonIgnore
+            String ignored;
+
+            @SuppressWarnings("unused")
+            public void setRo(String ro) {
+                this.ro = ro;
+            }
+
+            @SuppressWarnings("unused")
+            public String getWo() {
+                return wo;
+            }
+        }
+
+        Index index = indexOf(Bean.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.jackson-property-access.json", result);
     }
 }

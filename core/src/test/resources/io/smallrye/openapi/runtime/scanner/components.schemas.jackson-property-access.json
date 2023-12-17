@@ -1,0 +1,26 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "dflt" : {
+            "type" : "string"
+          },
+          "ro" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "wo" : {
+            "type" : "string",
+            "writeOnly" : true
+          },
+          "rw" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

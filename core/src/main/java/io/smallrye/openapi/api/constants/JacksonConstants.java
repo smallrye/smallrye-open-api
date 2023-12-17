@@ -32,6 +32,12 @@ public class JacksonConstants {
             .createSimple("com.fasterxml.jackson.databind.annotation.EnumNaming");
 
     public static final String PROP_VALUE = "value";
+    public static final String PROP_ACCESS = "access";
+
+    public static final String PROP_ACCESS_AUTO = "AUTO";
+    public static final String PROP_ACCESS_READ_ONLY = "READ_ONLY";
+    public static final String PROP_ACCESS_WRITE_ONLY = "WRITE_ONLY";
+    public static final String PROP_ACCESS_READ_WRITE = "READ_WRITE";
 
     private JacksonConstants() {
     }
