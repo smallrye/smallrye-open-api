@@ -351,7 +351,8 @@ public class TypeResolver {
     }
 
     public boolean isIgnored() {
-        return ignored || (readOnly && readMethod == null) || (writeOnly && writeMethod == null);
+        return ignored || (readOnly && readMethod == null && field == null)
+                || (writeOnly && writeMethod == null && field == null);
     }
 
     public boolean isReadOnly() {
@@ -645,6 +646,31 @@ public class TypeResolver {
         }
     }
 
+    private void processAccess(AnnotationTarget target) {
+        if (ignored) {
+            return;
+        }
+
+        switch (context.annotations().getAnnotationValue(target,
+                Collections.singletonList(JacksonConstants.JSON_PROPERTY),
+                JacksonConstants.PROP_ACCESS,
+                JacksonConstants.PROP_ACCESS_AUTO)) {
+            case JacksonConstants.PROP_ACCESS_READ_ONLY:
+                readOnly = true;
+                break;
+            case JacksonConstants.PROP_ACCESS_WRITE_ONLY:
+                writeOnly = true;
+                break;
+            case JacksonConstants.PROP_ACCESS_READ_WRITE:
+                readOnly = false;
+                writeOnly = false;
+                break;
+            case JacksonConstants.PROP_ACCESS_AUTO:
+            default:
+                break;
+        }
+    }
+
     /**
      * Retrieve any property visibility configured on the target or overridden by descendant classes.
      *
@@ -745,6 +771,7 @@ public class TypeResolver {
             resolver.ignored = true;
         } else {
             resolver.processVisibility(context, field, reference, descendants, context.getIgnoreResolver());
+            resolver.processAccess(field);
         }
     }
 
@@ -812,6 +839,7 @@ public class TypeResolver {
             TypeResolver resolver = updateTypeResolvers(context, properties, stack, method, propertyType);
             if (resolver != null) {
                 resolver.processVisibility(context, method, reference, descendants, context.getIgnoreResolver());
+                resolver.processAccess(method);
             }
         }
     }
