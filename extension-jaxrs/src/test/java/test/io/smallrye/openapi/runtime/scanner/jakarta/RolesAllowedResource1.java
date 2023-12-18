@@ -8,6 +8,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
+
 @Path(value = "/v1")
 @RolesAllowed(value = "admin")
 @SuppressWarnings(value = "unused")
@@ -16,6 +18,7 @@ public class RolesAllowedResource1 {
     @GET
     @Path(value = "secured")
     @Produces(value = "application/json")
+    @SecurityRequirement(name = "rolesScheme")
     public Response getSecuredData(int id) {
         return null;
     }
