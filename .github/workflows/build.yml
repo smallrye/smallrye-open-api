@@ -67,7 +67,7 @@ jobs:
       ## Attach target directories for safe Sonar scan in separate job
       - name: Attach Build Output
         if: matrix.java == '17'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: target
           path: |
@@ -119,7 +119,7 @@ jobs:
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: tck-report
         with:
           name: "tck-report-${{ matrix.tck-version }}"
