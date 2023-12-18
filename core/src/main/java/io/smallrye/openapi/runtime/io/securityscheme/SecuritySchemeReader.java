@@ -19,7 +19,6 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.oauth.OAuthReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -52,7 +51,7 @@ public class SecuritySchemeReader {
         Map<String, SecurityScheme> securitySchemes = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
+            String name = context.annotations().value(nested, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -99,20 +98,22 @@ public class SecuritySchemeReader {
         SecurityScheme securityScheme = new SecuritySchemeImpl();
         securityScheme
                 .setType(
-                        Annotations.enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE, SecurityScheme.Type.class));
+                        context.annotations().enumValue(annotationInstance, SecuritySchemeConstant.PROP_TYPE,
+                                SecurityScheme.Type.class));
         securityScheme
-                .setDescription(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
-        securityScheme.setName(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
+                .setDescription(context.annotations().value(annotationInstance, SecuritySchemeConstant.PROP_DESCRIPTION));
+        securityScheme.setName(context.annotations().value(annotationInstance, SecuritySchemeConstant.PROP_API_KEY_NAME));
         securityScheme
-                .setIn(Annotations.enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN, SecurityScheme.In.class));
-        securityScheme.setScheme(Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
+                .setIn(context.annotations().enumValue(annotationInstance, SecuritySchemeConstant.PROP_IN,
+                        SecurityScheme.In.class));
+        securityScheme.setScheme(context.annotations().value(annotationInstance, SecuritySchemeConstant.PROP_SCHEME));
         securityScheme.setBearerFormat(
-                Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
+                context.annotations().value(annotationInstance, SecuritySchemeConstant.PROP_BEARER_FORMAT));
         securityScheme
                 .setFlows(OAuthReader.readOAuthFlows(context, annotationInstance.value(SecuritySchemeConstant.PROP_FLOWS)));
         securityScheme
                 .setOpenIdConnectUrl(
-                        Annotations.value(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
+                        context.annotations().value(annotationInstance, SecuritySchemeConstant.PROP_OPEN_ID_CONNECT_URL));
         securityScheme.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.SECURITY_SCHEME));
         securityScheme.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return securityScheme;
@@ -169,14 +170,15 @@ public class SecuritySchemeReader {
     }
 
     // helper methods for scanner
-    public static List<AnnotationInstance> getSecuritySchemeAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getSecuritySchemeAnnotations(AnnotationScannerContext context,
+            AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 SecuritySchemeConstant.DOTNAME_SECURITY_SCHEME,
                 SecuritySchemeConstant.TYPE_SECURITY_SCHEMES);
     }
 
-    public static String getSecuritySchemeName(AnnotationInstance annotation) {
-        return Annotations.value(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
+    public static String getSecuritySchemeName(AnnotationScannerContext context, AnnotationInstance annotation) {
+        return context.annotations().value(annotation, SecuritySchemeConstant.PROP_SECURITY_SCHEME_NAME);
     }
 
     private static final Map<String, SecurityScheme.Type> SECURITY_SCHEME_TYPE_LOOKUP = new LinkedHashMap<>();

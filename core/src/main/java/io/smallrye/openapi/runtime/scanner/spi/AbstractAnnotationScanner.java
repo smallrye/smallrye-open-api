@@ -55,6 +55,7 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
 
     }
 
+    protected AnnotationScannerContext context;
     protected String currentAppPath = EMPTY;
     private String contextRoot = EMPTY;
 

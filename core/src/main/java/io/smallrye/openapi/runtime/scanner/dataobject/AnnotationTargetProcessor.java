@@ -29,7 +29,6 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -90,7 +89,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         List<String> requiredProperties = parentPathEntry.getSchema().getRequired();
 
         if (requiredProperties == null || !requiredProperties.contains(propertyKey)) {
-            AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
+            AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(context, target);
 
             if (schemaAnnotation == null ||
                     schemaAnnotation.value(SchemaConstant.PROP_REQUIRED) == null) {
@@ -127,7 +126,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
      * @return the individual or composite schema for the annotationTarget used to create this {@link AnnotationTargetProcessor}
      */
     Schema processField() {
-        final AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(annotationTarget);
+        final AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(context, annotationTarget);
         final String propertyKey = typeResolver.getPropertyName();
         final SchemaRegistry schemaRegistry = context.getSchemaRegistry();
 
@@ -140,7 +139,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         if (schemaAnnotation != null && JandexUtil.hasImplementation(schemaAnnotation)) {
             typeProcessor = null;
             typeSchema = null;
-            fieldType = Annotations.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
+            fieldType = context.annotations().value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION);
             registrationType = null;
             registrationCandidate = false;
         } else {
@@ -154,7 +153,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             Schema initTypeSchema = typeProcessor.getSchema();
 
             // Set any default values that apply to the type schema as a result of the TypeProcessor
-            if (!TypeUtil.isTypeOverridden(fieldType, schemaAnnotation)) {
+            if (!TypeUtil.isTypeOverridden(context, fieldType, schemaAnnotation)) {
                 TypeUtil.applyTypeAttributes(fieldType, initTypeSchema);
             }
 
@@ -207,7 +206,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema.setWriteOnly(Boolean.TRUE);
         }
 
-        TypeUtil.mapDeprecated(annotationTarget, fieldSchema::getDeprecated, fieldSchema::setDeprecated);
+        TypeUtil.mapDeprecated(context, annotationTarget, fieldSchema::getDeprecated, fieldSchema::setDeprecated);
 
         processFieldAnnotations(fieldSchema, typeResolver);
 
@@ -275,9 +274,9 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private boolean processXmlAttr(String name, Schema fieldSchema, AnnotationTarget target) {
-        AnnotationInstance xmlAttr = Annotations.getAnnotation(target, XML_ATTRIBUTE);
-        AnnotationInstance xmlElement = Annotations.getAnnotation(target, XML_ELEMENT);
-        AnnotationInstance xmlWrapper = Annotations.getAnnotation(target, XML_WRAPPERELEMENT);
+        AnnotationInstance xmlAttr = context.annotations().getAnnotation(target, XML_ATTRIBUTE);
+        AnnotationInstance xmlElement = context.annotations().getAnnotation(target, XML_ELEMENT);
+        AnnotationInstance xmlWrapper = context.annotations().getAnnotation(target, XML_WRAPPERELEMENT);
 
         if (xmlAttr == null && xmlWrapper == null && xmlElement == null) {
             return false;
@@ -330,7 +329,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         // If "required" attribute is on field. It should be applied to the *parent* schema.
         // Required is false by default.
-        if (Annotations.value(annotation, SchemaConstant.PROP_REQUIRED, Boolean.FALSE).booleanValue()) {
+        if (context.annotations().value(annotation, SchemaConstant.PROP_REQUIRED, Boolean.FALSE).booleanValue()) {
             parentPathEntry.getSchema().addRequired(propertyKey);
         }
 
@@ -338,7 +337,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         // Provide inferred type and format if relevant.
         Map<String, Object> defaults;
 
-        if (JandexUtil.isArraySchema(annotation) || TypeUtil.isTypeOverridden(postProcessedField, annotation)) {
+        if (JandexUtil.isArraySchema(context, annotation)
+                || TypeUtil.isTypeOverridden(context, postProcessedField, annotation)) {
             defaults = Collections.emptyMap();
         } else {
             defaults = TypeUtil.getTypeAttributes(postProcessedField);

@@ -4,8 +4,6 @@ import java.time.LocalDate;
 
 import javax.ws.rs.Path;
 
-import test.io.smallrye.openapi.runtime.scanner.javax.Greetable.GreetingBean;
-
 @Path(value = "/hi")
 public class ExampleResource1 extends GenericResource implements Greetable {
 

@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Extension annotation
@@ -52,7 +51,7 @@ public class ExtensionReader {
         Map<String, Object> e = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
-            String extName = Annotations.value(annotation, ExtensionConstant.PROP_NAME);
+            String extName = context.annotations().value(annotation, ExtensionConstant.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
         return e;
@@ -70,7 +69,7 @@ public class ExtensionReader {
         IoLogging.logger.annotationsMap("@Extension");
         Map<String, Object> e = new LinkedHashMap<>();
         for (AnnotationInstance annotation : extensions) {
-            String extName = Annotations.value(annotation, ExtensionConstant.PROP_NAME);
+            String extName = context.annotations().value(annotation, ExtensionConstant.PROP_NAME);
             e.put(extName, readExtensionValue(context, extName, annotation));
         }
         return e;
@@ -78,7 +77,7 @@ public class ExtensionReader {
 
     public static Map<String, Object> readExtensions(final AnnotationScannerContext context,
             final AnnotationInstance extensible) {
-        AnnotationInstance[] nestedExtensions = Annotations.value(extensible, "extensions");
+        AnnotationInstance[] nestedExtensions = context.annotations().value(extensible, "extensions");
         List<AnnotationInstance> extensions;
 
         if (nestedExtensions != null) {
@@ -89,7 +88,7 @@ public class ExtensionReader {
         } else {
             AnnotationTarget target = extensible.target();
             // target may be null - checked by JandexUtil methods
-            extensions = Annotations.getRepeatableAnnotation(target,
+            extensions = context.annotations().getRepeatableAnnotation(target,
                     ExtensionConstant.DOTNAME_EXTENSION,
                     ExtensionConstant.DOTNAME_EXTENSIONS);
         }
@@ -111,8 +110,8 @@ public class ExtensionReader {
     public static Object readExtensionValue(final AnnotationScannerContext context, final String name,
             final AnnotationInstance annotationInstance) {
         IoLogging.logger.annotation("@Extension");
-        String extValue = Annotations.value(annotationInstance, ExtensionConstant.PROP_VALUE);
-        boolean parseValue = Annotations.value(annotationInstance, ExtensionConstant.PROP_PARSE_VALUE, Boolean.FALSE);
+        String extValue = context.annotations().value(annotationInstance, ExtensionConstant.PROP_VALUE);
+        boolean parseValue = context.annotations().value(annotationInstance, ExtensionConstant.PROP_PARSE_VALUE, Boolean.FALSE);
         Object parsedValue = extValue;
         if (parseValue) {
             for (AnnotationScannerExtension e : context.getExtensions()) {
@@ -143,13 +142,13 @@ public class ExtensionReader {
 
     // helper methods for scanners
 
-    public static List<AnnotationInstance> getExtensionsAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getExtensionsAnnotations(AnnotationScannerContext context, AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 ExtensionConstant.DOTNAME_EXTENSION,
                 ExtensionConstant.DOTNAME_EXTENSIONS);
     }
 
-    public static String getExtensionName(final AnnotationInstance annotation) {
-        return Annotations.value(annotation, ExtensionConstant.PROP_NAME);
+    public static String getExtensionName(AnnotationScannerContext context, AnnotationInstance annotation) {
+        return context.annotations().value(annotation, ExtensionConstant.PROP_NAME);
     }
 }

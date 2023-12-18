@@ -2,7 +2,6 @@ package io.smallrye.openapi.runtime.scanner;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
@@ -19,7 +18,6 @@ import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Index;
-import org.jboss.jandex.IndexReader;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
@@ -33,7 +31,6 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 
@@ -463,18 +460,4 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.MultiProduceConsumeResource.class);
     }
 
-    /* *************************************************************************/
-    @Test
-    void testSyntheticClassesAndInterfacesIgnoredByDefault() throws IOException, JSONException {
-        try (InputStream source = getClass().getResourceAsStream("/smallrye-open-api-testsuite-data.idx")) {
-            IndexReader reader = new IndexReader(source);
-            Index index = reader.read();
-            OpenAPI result = OpenApiProcessor.bootstrap(
-                    dynamicConfig(OASConfig.SCAN_EXCLUDE_PACKAGES,
-                            "io.smallrye.openapi.testdata.java.records,io.smallrye.openapi.testdata.kotlin"),
-                    index);
-            printToConsole(result);
-            assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
-        }
-    }
 }

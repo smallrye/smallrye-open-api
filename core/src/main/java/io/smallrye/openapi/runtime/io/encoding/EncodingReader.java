@@ -18,7 +18,6 @@ import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.header.HeaderReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Encoding object annotation and json
@@ -49,7 +48,7 @@ public class EncodingReader {
         Map<String, Encoding> encodings = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance annotation : nestedArray) {
-            String name = Annotations.value(annotation, EncodingConstant.PROP_NAME);
+            String name = context.annotations().value(annotation, EncodingConstant.PROP_NAME);
             if (name != null) {
                 encodings.put(name, readEncoding(context, annotation));
             }
@@ -89,18 +88,18 @@ public class EncodingReader {
         }
         IoLogging.logger.singleAnnotation("@Encoding");
         Encoding encoding = new EncodingImpl();
-        encoding.setContentType(Annotations.value(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
-        encoding.setStyle(readEncodingStyle(annotationInstance));
-        encoding.setExplode(Annotations.value(annotationInstance, EncodingConstant.PROP_EXPLODE));
-        encoding.setAllowReserved(Annotations.value(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED));
+        encoding.setContentType(context.annotations().value(annotationInstance, EncodingConstant.PROP_CONTENT_TYPE));
+        encoding.setStyle(readEncodingStyle(context, annotationInstance));
+        encoding.setExplode(context.annotations().value(annotationInstance, EncodingConstant.PROP_EXPLODE));
+        encoding.setAllowReserved(context.annotations().value(annotationInstance, EncodingConstant.PROP_ALLOW_RESERVED));
         encoding.setHeaders(
                 HeaderReader.readHeaders(context, annotationInstance.value(EncodingConstant.PROP_HEADERS)));
         encoding.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return encoding;
     }
 
-    static Style readEncodingStyle(AnnotationInstance encodingAnnotation) {
-        String encodingStyle = Annotations.value(encodingAnnotation, EncodingConstant.PROP_STYLE);
+    static Style readEncodingStyle(AnnotationScannerContext context, AnnotationInstance encodingAnnotation) {
+        String encodingStyle = context.annotations().value(encodingAnnotation, EncodingConstant.PROP_STYLE);
 
         return Stream.of(Style.class.getEnumConstants())
                 .filter(style -> style.toString().equals(encodingStyle))

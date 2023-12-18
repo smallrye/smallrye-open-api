@@ -59,6 +59,11 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
 
+      ## ! Remove this step in a follow-up PR
+      ## Copy aggregrate coverage report to the testsuite/extra project where it is expected by sonar.yml
+      - name: copy coverage report (temporary)
+        run: cp -R testsuite/coverage/target/site testsuite/extra/target
+
       ## Attach target directories for safe Sonar scan in separate job
       - name: Attach Build Output
         if: matrix.java == '17'
@@ -103,7 +108,7 @@ jobs:
           java-version: 17
 
       - name: build with maven
-        run: mvn -B install -pl '!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' -DskipTests
+        run: mvn -B install -pl '!testsuite/coverage,!testsuite/data,!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' -DskipTests
 
       - uses: actions/setup-java@v4
         name: set up jdk

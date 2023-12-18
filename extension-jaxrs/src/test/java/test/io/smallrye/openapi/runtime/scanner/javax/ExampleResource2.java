@@ -11,8 +11,6 @@ import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
-import test.io.smallrye.openapi.runtime.scanner.javax.Greetable.GreetingBean;
-
 @Path(value = "/hello")
 public class ExampleResource2 extends GenericResource implements Greetable {
 

@@ -1,7 +1,8 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -19,7 +20,7 @@ class SubresourceScanTests extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<>()), index);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals(expectedResource, result);
@@ -43,10 +44,20 @@ class SubresourceScanTests extends IndexScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.RecursiveLocatorResource.class);
     }
 
+    @Tag(name = "root-a2-tag")
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface RootA2Tag {
+    }
+
+    @Produces(MediaType.TEXT_PLAIN)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface ProducesText {
+    }
+
     @Test
     void testTagPlacementPriority() throws IOException, JSONException {
         @Tag(name = "subresource-a-tag")
-        @Produces(MediaType.TEXT_PLAIN)
+        @ProducesText
         class SubresourceA {
             @GET
             @Path("/op1")
@@ -62,7 +73,7 @@ class SubresourceScanTests extends IndexScannerTestBase {
             }
         }
 
-        @Produces(MediaType.TEXT_PLAIN)
+        @ProducesText
         class SubresourceB {
             @GET
             @Path("/op1")
@@ -87,7 +98,7 @@ class SubresourceScanTests extends IndexScannerTestBase {
             }
 
             @Path("a2")
-            @Tag(name = "root-a2-tag")
+            @RootA2Tag
             public SubresourceA getA2() {
                 return null;
             }
@@ -98,6 +109,7 @@ class SubresourceScanTests extends IndexScannerTestBase {
             }
         }
 
-        test("resource.subresource-tag-placement-priority.json", RootResource.class, SubresourceA.class, SubresourceB.class);
+        test("resource.subresource-tag-placement-priority.json",
+                RootResource.class, SubresourceA.class, SubresourceB.class, ProducesText.class, RootA2Tag.class);
     }
 }

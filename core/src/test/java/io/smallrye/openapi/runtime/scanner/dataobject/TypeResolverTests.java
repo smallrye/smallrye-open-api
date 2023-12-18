@@ -30,7 +30,6 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -38,46 +37,57 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 class TypeResolverTests extends IndexScannerTestBase {
 
-    private Map<String, TypeResolver> getProperties(Class<?> leafClass, OpenApiConfig config, Class<?>... indexClasses) {
+    private AnnotationScannerContext buildContext(OpenApiConfig config, Class<?>... indexClasses) {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        AnnotationScannerContext context = new AnnotationScannerContext(indexOf(indexClasses), loader, config);
+        return new AnnotationScannerContext(indexOf(indexClasses), loader, config);
+    }
+
+    private Map<String, TypeResolver> getProperties(AnnotationScannerContext context, Class<?> leafClass) {
         ClassInfo leafKlazz = context.getIndex().getClassByName(componentize(leafClass.getName()));
         Type leaf = Type.create(leafKlazz.name(), Type.Kind.CLASS);
         return TypeResolver.getAllFields(context, leaf, leafKlazz, null);
     }
 
+    private Map<String, TypeResolver> getProperties(Class<?> leafClass, OpenApiConfig config, Class<?>... indexClasses) {
+        return getProperties(buildContext(config, indexClasses), leafClass);
+    }
+
     private Map<String, TypeResolver> getProperties(Class<?> leafClass, Class<?>... indexClasses) {
-        return getProperties(leafClass, emptyConfig(), indexClasses);
+        return getProperties(buildContext(emptyConfig(), indexClasses), leafClass);
     }
 
     @Test
     void testJavaxAnnotatedMethodOverridesParentSchema() {
-        Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
 
-        testAnnotatedMethodOverridesParentSchema(properties);
+        testAnnotatedMethodOverridesParentSchema(context, properties);
     }
 
     @Test
     void testJakartaAnnotatedMethodOverridesParentSchema() {
-        Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
 
-        testAnnotatedMethodOverridesParentSchema(properties);
+        testAnnotatedMethodOverridesParentSchema(context, properties);
     }
 
-    void testAnnotatedMethodOverridesParentSchema(Map<String, TypeResolver> properties) {
+    void testAnnotatedMethodOverridesParentSchema(AnnotationScannerContext context, Map<String, TypeResolver> properties) {
         TypeResolver resolver = properties.get("type");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
-        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
+        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(context, resolver.getAnnotationTarget());
         assertEquals("type", schema.value("name").asString());
         assertEquals(false, schema.value("required").asBoolean());
         assertEquals("Cat", schema.value("example").asString());
@@ -87,65 +97,74 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxAnnotatedFieldsOverridesInterfaceSchema() {
-        Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
-        testAnnotatedFieldsOverridesInterfaceSchema(properties);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Cat.class);
+        testAnnotatedFieldsOverridesInterfaceSchema(context, properties);
     }
 
     @Test
     void testJakartaAnnotatedFieldsOverridesInterfaceSchema() {
-        Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Feline.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
-        testAnnotatedFieldsOverridesInterfaceSchema(properties);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Cat.class);
+        testAnnotatedFieldsOverridesInterfaceSchema(context, properties);
     }
 
-    void testAnnotatedFieldsOverridesInterfaceSchema(Map<String, TypeResolver> properties) {
+    void testAnnotatedFieldsOverridesInterfaceSchema(AnnotationScannerContext context, Map<String, TypeResolver> properties) {
         TypeResolver resolver = properties.get("name");
         assertEquals(Kind.FIELD, resolver.getAnnotationTarget().kind());
-        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
+        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(context, resolver.getAnnotationTarget());
         assertEquals(true, schema.value("required").asBoolean());
         assertEquals("Felix", schema.value("example").asString());
     }
 
     @Test
     void testJavaxAnnotatedInterfaceMethodOverridesImplMethod() {
-        Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.Dog.class);
 
-        testAnnotatedInterfaceMethodOverridesImplMethod(properties);
+        testAnnotatedInterfaceMethodOverridesImplMethod(context, properties);
     }
 
     @Test
     void testJakartaAnnotatedInterfaceMethodOverridesImplMethod() {
-        Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Canine.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.Dog.class);
 
-        testAnnotatedInterfaceMethodOverridesImplMethod(properties);
+        testAnnotatedInterfaceMethodOverridesImplMethod(context, properties);
     }
 
-    void testAnnotatedInterfaceMethodOverridesImplMethod(Map<String, TypeResolver> properties) {
+    void testAnnotatedInterfaceMethodOverridesImplMethod(AnnotationScannerContext context,
+            Map<String, TypeResolver> properties) {
         assertEquals(6, properties.size());
         TypeResolver speciesNameResolver = properties.get("speciesName");
         assertEquals(Kind.METHOD, speciesNameResolver.getAnnotationTarget().kind());
         TypeResolver nameResolver = properties.get("name");
         assertEquals(Kind.METHOD, nameResolver.getAnnotationTarget().kind());
-        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(nameResolver.getAnnotationTarget());
+        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(context, nameResolver.getAnnotationTarget());
         assertEquals("c_name", schema.value("name").asString());
         assertEquals(50, schema.value("maxLength").asInt());
         assertEquals("The name of the canine", schema.value("description").asString());
@@ -155,15 +174,18 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testAnnotatedInterfaceMethodOverridesStaticField() {
-        Map<String, TypeResolver> properties = getProperties(test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class,
+        AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Reptile.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class);
+        Map<String, TypeResolver> properties = getProperties(
+                context,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.Lizard.class);
 
         TypeResolver resolver = properties.get("scaleColor");
         assertEquals(Kind.METHOD, resolver.getAnnotationTarget().kind());
-        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(resolver.getAnnotationTarget());
+        AnnotationInstance schema = TypeUtil.getSchemaAnnotation(context, resolver.getAnnotationTarget());
         assertEquals("scaleColor", schema.value("name").asString());
         assertNull(schema.value("deprecated"));
         assertEquals("The color of a reptile's scales", schema.value("description").asString());
@@ -175,23 +197,27 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxBareInterface() {
+        AnnotationScannerContext context = buildContext(emptyConfig(),
+                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.MySchema.class);
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.javax.MySchema.class,
+                context,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.MySchema.class);
 
-        testBareInterface(properties);
+        testBareInterface(context, properties);
     }
 
     @Test
     void testJakartaBareInterface() {
+        AnnotationScannerContext context = buildContext(emptyConfig(),
+                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.MySchema.class);
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.MySchema.class,
+                context,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.jakarta.MySchema.class);
 
-        testBareInterface(properties);
+        testBareInterface(context, properties);
     }
 
-    void testBareInterface(Map<String, TypeResolver> properties) {
+    void testBareInterface(AnnotationScannerContext context, Map<String, TypeResolver> properties) {
         assertEquals(3, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         assertEquals("field1", iter.next().getKey());
@@ -200,19 +226,19 @@ class TypeResolverTests extends IndexScannerTestBase {
 
         TypeResolver field1 = properties.get("field1");
         assertEquals(Kind.METHOD, field1.getAnnotationTarget().kind());
-        AnnotationInstance schema1 = TypeUtil.getSchemaAnnotation(field1.getAnnotationTarget());
+        AnnotationInstance schema1 = TypeUtil.getSchemaAnnotation(context, field1.getAnnotationTarget());
         assertEquals(1, schema1.values().size());
         assertEquals(true, schema1.value("required").asBoolean());
 
         TypeResolver field2 = properties.get("field2");
         assertEquals(Kind.METHOD, field1.getAnnotationTarget().kind());
-        AnnotationInstance schema2 = TypeUtil.getSchemaAnnotation(field2.getAnnotationTarget());
+        AnnotationInstance schema2 = TypeUtil.getSchemaAnnotation(context, field2.getAnnotationTarget());
         assertEquals(1, schema2.values().size());
         assertEquals("anotherField", schema2.value("name").asString());
 
         TypeResolver field3 = properties.get("field3");
         assertEquals(Kind.METHOD, field3.getAnnotationTarget().kind());
-        AnnotationInstance schema3 = TypeUtil.getSchemaAnnotation(field3.getAnnotationTarget());
+        AnnotationInstance schema3 = TypeUtil.getSchemaAnnotation(context, field3.getAnnotationTarget());
         assertNull(schema3);
     }
 
@@ -268,30 +294,34 @@ class TypeResolverTests extends IndexScannerTestBase {
 
     @Test
     void testNonJavaBeansPropertyAccessor() {
+        AnnotationScannerContext context = buildContext(emptyConfig(),
+                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanAccessorProperty.class);
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanAccessorProperty.class,
+                context,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanAccessorProperty.class);
         assertEquals(1, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getReadMethod(), property.getAnnotationTarget());
-        assertEquals("Name of the property", Annotations.getAnnotationValue(property.getAnnotationTarget(),
+        assertEquals("Name of the property", context.annotations().getAnnotationValue(property.getAnnotationTarget(),
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_TITLE));
     }
 
     @Test
     void testNonJavaBeansPropertyMutator() {
+        AnnotationScannerContext context = buildContext(emptyConfig(),
+                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanMutatorProperty.class);
         Map<String, TypeResolver> properties = getProperties(
-                test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanMutatorProperty.class,
+                context,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.NonJavaBeanMutatorProperty.class);
         assertEquals(1, properties.size());
         Iterator<Entry<String, TypeResolver>> iter = properties.entrySet().iterator();
         TypeResolver property = iter.next().getValue();
         assertEquals("name", property.getPropertyName());
         assertEquals(property.getWriteMethod(), property.getAnnotationTarget());
-        assertEquals("Name of the property", Annotations.getAnnotationValue(property.getAnnotationTarget(),
+        assertEquals("Name of the property", context.annotations().getAnnotationValue(property.getAnnotationTarget(),
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_TITLE));
     }

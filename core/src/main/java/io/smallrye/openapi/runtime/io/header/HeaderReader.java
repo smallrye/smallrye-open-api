@@ -23,7 +23,6 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.io.schema.SchemaReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -55,7 +54,7 @@ public class HeaderReader {
         Map<String, Header> headers = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, Parameterizable.PROP_NAME);
+            String name = context.annotations().value(nested, Parameterizable.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -100,11 +99,11 @@ public class HeaderReader {
         IoLogging.logger.singleAnnotation("@Header");
         Header header = new HeaderImpl();
         header.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.HEADER));
-        header.setDescription(Annotations.value(annotationInstance, Parameterizable.PROP_DESCRIPTION));
+        header.setDescription(context.annotations().value(annotationInstance, Parameterizable.PROP_DESCRIPTION));
         header.setSchema(SchemaFactory.readSchema(context, annotationInstance.value(Parameterizable.PROP_SCHEMA)));
-        header.setRequired(Annotations.value(annotationInstance, Parameterizable.PROP_REQUIRED));
-        header.setDeprecated(Annotations.value(annotationInstance, Parameterizable.PROP_DEPRECATED));
-        header.setAllowEmptyValue(Annotations.value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
+        header.setRequired(context.annotations().value(annotationInstance, Parameterizable.PROP_REQUIRED));
+        header.setDeprecated(context.annotations().value(annotationInstance, Parameterizable.PROP_DEPRECATED));
+        header.setAllowEmptyValue(context.annotations().value(annotationInstance, Parameterizable.PROP_ALLOW_EMPTY_VALUE));
         header.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
         return header;
     }

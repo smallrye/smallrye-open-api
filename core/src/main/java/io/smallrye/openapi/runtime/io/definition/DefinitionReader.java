@@ -18,7 +18,6 @@ import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementRea
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the OpenAPIDefinition from an annotation or json
@@ -50,7 +49,7 @@ public class DefinitionReader {
         openApi.setServers(
                 ServerReader.readServers(context, annotationInstance.value(DefinitionConstant.PROP_SERVERS)).orElse(null));
         openApi.setSecurity(SecurityRequirementReader
-                .readSecurityRequirements(annotationInstance.value(DefinitionConstant.PROP_SECURITY),
+                .readSecurityRequirements(context, annotationInstance.value(DefinitionConstant.PROP_SECURITY),
                         annotationInstance.value(DefinitionConstant.PROP_SECURITY_SETS))
                 .orElse(null));
         openApi.setExternalDocs(
@@ -86,7 +85,7 @@ public class DefinitionReader {
     }
 
     // helper methods for scanners
-    public static AnnotationInstance getDefinitionAnnotation(final ClassInfo targetClass) {
-        return Annotations.getAnnotation(targetClass, DefinitionConstant.DOTNAME_OPEN_API_DEFINITION);
+    public static AnnotationInstance getDefinitionAnnotation(AnnotationScannerContext context, ClassInfo targetClass) {
+        return context.annotations().getAnnotation(targetClass, DefinitionConstant.DOTNAME_OPEN_API_DEFINITION);
     }
 }

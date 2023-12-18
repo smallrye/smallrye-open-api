@@ -16,7 +16,7 @@ import org.jboss.jandex.MethodInfo;
 
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
-import io.smallrye.openapi.runtime.util.Annotations;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * This helps to apply java security (@RolesAllowed etc.).
@@ -39,9 +39,14 @@ public class JavaSecurityProcessor {
         processSecurityRolesForMethodOperation(method, operation);
     }
 
+    private final AnnotationScannerContext context;
     private String currentSecurityScheme;
     private List<OAuthFlow> currentFlows;
     private String[] resourceRolesAllowed;
+
+    public JavaSecurityProcessor(AnnotationScannerContext context) {
+        this.context = context;
+    }
 
     public void initialize(OpenAPI openApi) {
         currentSecurityScheme = null;
@@ -91,14 +96,14 @@ public class JavaSecurityProcessor {
      */
     private void processSecurityRolesForMethodOperation(MethodInfo method, Operation operation) {
         if (this.currentSecurityScheme != null) {
-            String[] rolesAllowed = Annotations.getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
+            String[] rolesAllowed = context.annotations().getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
 
             if (rolesAllowed != null) {
                 addScopes(rolesAllowed);
                 addRolesAllowed(operation, rolesAllowed);
             } else if (this.resourceRolesAllowed != null) {
-                boolean denyAll = Annotations.getAnnotation(method, SecurityConstants.DENY_ALL) != null;
-                boolean permitAll = Annotations.getAnnotation(method, SecurityConstants.PERMIT_ALL) != null;
+                boolean denyAll = context.annotations().getAnnotation(method, SecurityConstants.DENY_ALL) != null;
+                boolean permitAll = context.annotations().getAnnotation(method, SecurityConstants.PERMIT_ALL) != null;
 
                 if (denyAll) {
                     addRolesAllowed(operation, new String[0]);

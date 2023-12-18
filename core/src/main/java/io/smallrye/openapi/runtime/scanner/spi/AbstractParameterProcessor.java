@@ -58,7 +58,6 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -510,7 +509,7 @@ public abstract class AbstractParameterProcessor {
 
         mapParameterStyle(param, context);
         mapParameterSchema(param, context);
-        TypeUtil.mapDeprecated(context.target, param::getDeprecated, param::setDeprecated);
+        TypeUtil.mapDeprecated(scannerContext, context.target, param::getDeprecated, param::setDeprecated);
         mapParameterExtensions(param, context);
 
         if (param.getSchema() != null) {
@@ -550,16 +549,20 @@ public abstract class AbstractParameterProcessor {
             return;
         }
 
-        AnnotationInstance schemaAnnotation = Annotations.getAnnotation(context.target, SchemaConstant.DOTNAME_SCHEMA);
+        AnnotationInstance schemaAnnotation = scannerContext.annotations().getAnnotation(context.target,
+                SchemaConstant.DOTNAME_SCHEMA);
         Schema schema;
 
-        if (schemaAnnotation != null && Boolean.TRUE.equals(Annotations.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
+        if (schemaAnnotation != null
+                && Boolean.TRUE.equals(scannerContext.annotations().value(schemaAnnotation, SchemaConstant.PROP_HIDDEN))) {
             schema = null;
         } else if (schemaAnnotation != null) {
-            Type paramType = Annotations.value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION, context.targetType);
+            Type paramType = scannerContext.annotations().value(schemaAnnotation, SchemaConstant.PROP_IMPLEMENTATION,
+                    context.targetType);
             Map<String, Object> defaults;
 
-            if (JandexUtil.isArraySchema(schemaAnnotation) || TypeUtil.isTypeOverridden(context.targetType, schemaAnnotation)) {
+            if (JandexUtil.isArraySchema(scannerContext, schemaAnnotation)
+                    || TypeUtil.isTypeOverridden(scannerContext, context.targetType, schemaAnnotation)) {
                 defaults = Collections.emptyMap();
             } else {
                 defaults = TypeUtil.getTypeAttributes(paramType);
@@ -575,7 +578,8 @@ public abstract class AbstractParameterProcessor {
     }
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
-        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context.target);
+        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(scannerContext,
+                context.target);
 
         if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
             param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
@@ -676,7 +680,7 @@ public abstract class AbstractParameterProcessor {
             Type paramType = getType(paramTarget);
             AnnotationInstance schemaAnnotation = null;
             if (schemaAnnotationSupported) {
-                schemaAnnotation = Annotations.getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
+                schemaAnnotation = scannerContext.annotations().getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
             }
             Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, schemaAnnotation, extensions);
 
@@ -687,7 +691,7 @@ public abstract class AbstractParameterProcessor {
 
             addEncoding(encodings, paramName, paramTarget);
             setDefaultValue(paramSchema, getDefaultValue(paramTarget));
-            TypeUtil.mapDeprecated(paramTarget, paramSchema::getDeprecated, paramSchema::setDeprecated);
+            TypeUtil.mapDeprecated(scannerContext, paramTarget, paramSchema::getDeprecated, paramSchema::setDeprecated);
 
             if (beanValidationScanner.isPresent()) {
                 beanValidationScanner.get().applyConstraints(paramTarget,
@@ -1091,11 +1095,11 @@ public abstract class AbstractParameterProcessor {
             return null;
         }
 
-        AnnotationInstance defaultValueAnno = Annotations.getAnnotation(target, defaultAnnotationNames);
+        AnnotationInstance defaultValueAnno = scannerContext.annotations().getAnnotation(target, defaultAnnotationNames);
         Object defaultValue = null;
 
         if (defaultValueAnno != null) {
-            String defaultValueString = Annotations.value(defaultValueAnno, annotationProperty);
+            String defaultValueString = scannerContext.annotations().value(defaultValueAnno, annotationProperty);
             defaultValue = defaultValueString;
             Type targetType = getType(target);
 
@@ -1541,7 +1545,8 @@ public abstract class AbstractParameterProcessor {
             case METHOD_PARAMETER: {
                 MethodParameterInfo param = target.asMethodParameter();
                 MethodInfo method = param.method();
-                relevant = nonSyntheticParameterMethod(method, Annotations.getAnnotations(param));
+                relevant = nonSyntheticParameterMethod(method,
+                        scannerContext.annotations().getMethodParameterAnnotations(method, param.position()));
                 break;
             }
 

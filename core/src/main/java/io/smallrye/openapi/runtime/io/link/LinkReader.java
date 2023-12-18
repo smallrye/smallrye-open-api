@@ -19,7 +19,6 @@ import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -49,7 +48,7 @@ public class LinkReader {
         Map<String, Link> links = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, LinkConstant.PROP_NAME);
+            String name = context.annotations().value(nested, LinkConstant.PROP_NAME);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -93,11 +92,11 @@ public class LinkReader {
         }
         IoLogging.logger.singleAnnotation("@Link");
         Link link = new LinkImpl();
-        link.setOperationRef(Annotations.value(annotationInstance, LinkConstant.PROP_OPERATION_REF));
-        link.setOperationId(Annotations.value(annotationInstance, LinkConstant.PROP_OPERATION_ID));
-        link.setParameters(readLinkParameters(annotationInstance.value(LinkConstant.PROP_PARAMETERS)));
-        link.setDescription(Annotations.value(annotationInstance, LinkConstant.PROP_DESCRIPTION));
-        link.setRequestBody(Annotations.value(annotationInstance, LinkConstant.PROP_REQUEST_BODY));
+        link.setOperationRef(context.annotations().value(annotationInstance, LinkConstant.PROP_OPERATION_REF));
+        link.setOperationId(context.annotations().value(annotationInstance, LinkConstant.PROP_OPERATION_ID));
+        link.setParameters(readLinkParameters(context, annotationInstance.value(LinkConstant.PROP_PARAMETERS)));
+        link.setDescription(context.annotations().value(annotationInstance, LinkConstant.PROP_DESCRIPTION));
+        link.setRequestBody(context.annotations().value(annotationInstance, LinkConstant.PROP_REQUEST_BODY));
         link.setServer(ServerReader.readServer(context, annotationInstance.value(LinkConstant.PROP_SERVER)));
         link.setRef(JandexUtil.refValue(annotationInstance, JandexUtil.RefType.LINK));
         link.setExtensions(ExtensionReader.readExtensions(context, annotationInstance));
@@ -134,16 +133,16 @@ public class LinkReader {
      * @param annotationValue the annotation value
      * @return map of parameters
      */
-    private static Map<String, Object> readLinkParameters(final AnnotationValue annotationValue) {
+    private static Map<String, Object> readLinkParameters(AnnotationScannerContext context, AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, Object> linkParams = new LinkedHashMap<>();
         for (AnnotationInstance annotation : nestedArray) {
-            String name = Annotations.value(annotation, LinkConstant.PROP_NAME);
+            String name = context.annotations().value(annotation, LinkConstant.PROP_NAME);
             if (name != null) {
-                String expression = Annotations.value(annotation, LinkConstant.PROP_EXPRESSION);
+                String expression = context.annotations().value(annotation, LinkConstant.PROP_EXPRESSION);
                 linkParams.put(name, expression);
             }
         }

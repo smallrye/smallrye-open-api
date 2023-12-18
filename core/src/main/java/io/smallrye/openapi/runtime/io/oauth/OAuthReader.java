@@ -19,7 +19,6 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Oauth flow annotation
@@ -48,10 +47,10 @@ public class OAuthReader {
         IoLogging.logger.singleAnnotation("@OAuthFlows");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlows flows = new OAuthFlowsImpl();
-        flows.setImplicit(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_IMPLICIT)));
-        flows.setPassword(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_PASSWORD)));
-        flows.setClientCredentials(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_CLIENT_CREDENTIALS)));
-        flows.setAuthorizationCode(readOAuthFlow(annotation.value(SecuritySchemeConstant.PROP_AUTHORIZATION_CODE)));
+        flows.setImplicit(readOAuthFlow(context, annotation.value(SecuritySchemeConstant.PROP_IMPLICIT)));
+        flows.setPassword(readOAuthFlow(context, annotation.value(SecuritySchemeConstant.PROP_PASSWORD)));
+        flows.setClientCredentials(readOAuthFlow(context, annotation.value(SecuritySchemeConstant.PROP_CLIENT_CREDENTIALS)));
+        flows.setAuthorizationCode(readOAuthFlow(context, annotation.value(SecuritySchemeConstant.PROP_AUTHORIZATION_CODE)));
         flows.setExtensions(ExtensionReader.readExtensions(context, annotation));
         return flows;
     }
@@ -82,18 +81,18 @@ public class OAuthReader {
      * @param annotationValue {@literal @}OAuthFlow annotation
      * @return OAuthFlow model
      */
-    private static OAuthFlow readOAuthFlow(final AnnotationValue annotationValue) {
+    private static OAuthFlow readOAuthFlow(AnnotationScannerContext context, AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
         IoLogging.logger.singleAnnotation("@OAuthFlow");
         AnnotationInstance annotation = annotationValue.asNested();
         OAuthFlow flow = new OAuthFlowImpl();
-        flow.setAuthorizationUrl(Annotations.value(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
-        flow.setTokenUrl(Annotations.value(annotation, SecuritySchemeConstant.PROP_TOKEN_URL));
-        flow.setRefreshUrl(Annotations.value(annotation, SecuritySchemeConstant.PROP_REFRESH_URL));
-        flow.setScopes(readOAuthScopes(annotation.value(SecuritySchemeConstant.PROP_SCOPES)));
-        flow.setExtensions(ExtensionReader.readExtensions(null, annotation));
+        flow.setAuthorizationUrl(context.annotations().value(annotation, SecuritySchemeConstant.PROP_AUTHORIZATION_URL));
+        flow.setTokenUrl(context.annotations().value(annotation, SecuritySchemeConstant.PROP_TOKEN_URL));
+        flow.setRefreshUrl(context.annotations().value(annotation, SecuritySchemeConstant.PROP_REFRESH_URL));
+        flow.setScopes(readOAuthScopes(context, annotation.value(SecuritySchemeConstant.PROP_SCOPES)));
+        flow.setExtensions(ExtensionReader.readExtensions(context, annotation));
         return flow;
     }
 
@@ -123,7 +122,7 @@ public class OAuthReader {
      * @param annotationValue {@literal @}OAuthScope annotation
      * @return Map of name and description of the scope
      */
-    private static Map<String, String> readOAuthScopes(final AnnotationValue annotationValue) {
+    private static Map<String, String> readOAuthScopes(AnnotationScannerContext context, AnnotationValue annotationValue) {
         if (annotationValue == null) {
             return null;
         }
@@ -131,9 +130,9 @@ public class OAuthReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         Map<String, String> scopes = new LinkedHashMap<>();
         for (AnnotationInstance nested : nestedArray) {
-            String name = Annotations.value(nested, SecuritySchemeConstant.PROP_NAME);
+            String name = context.annotations().value(nested, SecuritySchemeConstant.PROP_NAME);
             if (name != null) {
-                String description = Annotations.value(nested, SecuritySchemeConstant.PROP_DESCRIPTION);
+                String description = context.annotations().value(nested, SecuritySchemeConstant.PROP_DESCRIPTION);
                 scopes.put(name, description);
             }
         }

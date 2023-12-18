@@ -26,7 +26,6 @@ import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -354,10 +353,11 @@ public class TypeProcessor {
             return false;
         }
 
-        final AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(annotationTarget);
+        final AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(context, annotationTarget);
 
         if (annotation != null) {
-            Schema.SchemaType schemaType = Annotations.enumValue(annotation, SchemaConstant.PROP_TYPE, Schema.SchemaType.class);
+            Schema.SchemaType schemaType = context.annotations().enumValue(annotation, SchemaConstant.PROP_TYPE,
+                    Schema.SchemaType.class);
 
             if (schemaType != null) {
                 return schemaType == Schema.SchemaType.ARRAY;

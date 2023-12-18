@@ -268,6 +268,11 @@ public interface OpenApiConfig {
                 () -> AutoInheritance.NONE);
     }
 
+    default Set<String> getScanCompositionExcludePackages() {
+        return getConfigValue(OpenApiConstants.SCAN_COMPOSITION_EXCLUDE_PACKAGES, String[].class, this::toSet,
+                () -> OpenApiConstants.DEFAULT_COMPOSITION_EXCLUDE_PACKAGES);
+    }
+
     default Set<String> toSet(String[] items) {
         return Arrays.stream(items)
                 .map(String::trim)

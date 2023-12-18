@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,6 @@ import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -62,6 +62,7 @@ public class TypeResolver {
         return value;
     });
 
+    private final AnnotationScannerContext context;
     private final UnaryOperator<String> nameTranslator;
     private final Deque<Map<String, Type>> resolutionStack;
     private final String propertyName;
@@ -76,6 +77,7 @@ public class TypeResolver {
     private final List<AnnotationTarget> constraintTargets = new ArrayList<>();
     private String propertyNamePrefix;
     private String propertyNameSuffix;
+    private Comparator<AnnotationTarget> targetComparator;
 
     /**
      * A comparator to order the field, write method, and read method in the {@link #targets}
@@ -92,28 +94,28 @@ public class TypeResolver {
      * </ol>
      *
      */
-    private static final Comparator<AnnotationTarget> targetComparator = (t1, t2) -> {
+    private static Function<AnnotationScannerContext, Comparator<AnnotationTarget>> comparatorFactory = ctxt -> (t1, t2) -> {
         int result;
 
         // Annotated elements sort to the top of the priority queue
-        if ((result = compareAnnotation(t1, t2, SchemaConstant.DOTNAME_SCHEMA)) != 0) {
+        if ((result = compareAnnotation(ctxt, t1, t2, SchemaConstant.DOTNAME_SCHEMA)) != 0) {
             return result;
         }
         for (DotName jsonbProperty : JsonbConstants.JSONB_PROPERTY) {
-            if ((result = compareAnnotation(t1, t2, jsonbProperty)) != 0) {
+            if ((result = compareAnnotation(ctxt, t1, t2, jsonbProperty)) != 0) {
                 return result;
             }
         }
-        if ((result = compareAnnotation(t1, t2, JacksonConstants.JSON_PROPERTY)) != 0) {
+        if ((result = compareAnnotation(ctxt, t1, t2, JacksonConstants.JSON_PROPERTY)) != 0) {
             return result;
         }
         for (DotName xmlElement : JaxbConstants.XML_ELEMENT) {
-            if ((result = compareAnnotation(t1, t2, xmlElement)) != 0) {
+            if ((result = compareAnnotation(ctxt, t1, t2, xmlElement)) != 0) {
                 return result;
             }
         }
         for (DotName xmlAttribute : JaxbConstants.XML_ATTRIBUTE) {
-            if ((result = compareAnnotation(t1, t2, xmlAttribute)) != 0) {
+            if ((result = compareAnnotation(ctxt, t1, t2, xmlAttribute)) != 0) {
                 return result;
             }
         }
@@ -123,7 +125,7 @@ public class TypeResolver {
         if (t2.kind() == Kind.FIELD) {
             return +1;
         }
-        if (isAccessor(t1.asMethod()) && !isAccessor(t2.asMethod())) {
+        if (isAccessor(ctxt, t1.asMethod()) && !isAccessor(ctxt, t2.asMethod())) {
             return -1;
         }
 
@@ -135,11 +137,12 @@ public class TypeResolver {
      * target is in the first position, using the order determined by
      * {@link TypeResolver#targetComparator targetComparator}.
      */
-    private Queue<AnnotationTarget> targets = new PriorityQueue<>(targetComparator);
+    private final Queue<AnnotationTarget> targets;
 
-    private static int compareAnnotation(AnnotationTarget t1, AnnotationTarget t2, DotName annotationName) {
-        boolean hasAnno1 = Annotations.hasAnnotation(t1, annotationName);
-        boolean hasAnno2 = Annotations.hasAnnotation(t2, annotationName);
+    private static int compareAnnotation(AnnotationScannerContext context, AnnotationTarget t1, AnnotationTarget t2,
+            DotName annotationName) {
+        boolean hasAnno1 = context.annotations().hasAnnotation(t1, annotationName);
+        boolean hasAnno2 = context.annotations().hasAnnotation(t2, annotationName);
 
         // Element with @Schema is top priority
         if (hasAnno1) {
@@ -162,12 +165,16 @@ public class TypeResolver {
         return type;
     }
 
-    private TypeResolver(UnaryOperator<String> nameTranslator, String propertyName, FieldInfo field,
+    private TypeResolver(AnnotationScannerContext context, UnaryOperator<String> nameTranslator, String propertyName,
+            FieldInfo field,
             Deque<Map<String, Type>> resolutionStack) {
+        this.context = context;
         this.nameTranslator = nameTranslator;
         this.propertyName = propertyName;
         this.field = field;
         this.resolutionStack = resolutionStack;
+        this.targetComparator = comparatorFactory.apply(context);
+        targets = new PriorityQueue<>(targetComparator);
 
         if (field != null) {
             this.leaf = field.type();
@@ -221,19 +228,19 @@ public class TypeResolver {
         AnnotationTarget target = getAnnotationTarget();
         String name;
 
-        if ((name = Annotations.getAnnotationValue(target,
+        if ((name = context.annotations().getAnnotationValue(target,
                 SchemaConstant.DOTNAME_SCHEMA,
                 SchemaConstant.PROP_NAME)) != null) {
             return wrap(name);
         }
 
-        if ((name = Annotations.getAnnotationValue(target,
+        if ((name = context.annotations().getAnnotationValue(target,
                 JsonbConstants.JSONB_PROPERTY,
                 JsonbConstants.PROP_VALUE)) != null) {
             return wrap(name);
         }
 
-        if ((name = Annotations.getAnnotationValue(target,
+        if ((name = context.annotations().getAnnotationValue(target,
                 JacksonConstants.JSON_PROPERTY,
                 JacksonConstants.PROP_VALUE)) != null) {
             return wrap(name);
@@ -470,12 +477,12 @@ public class TypeResolver {
                     .map(type -> buildParamTypeResolutionMap(index.getClass(type), type))
                     .forEach(stack::push);
 
-            if (allOfMatch || (!currentType.equals(clazzType) && TypeUtil.isIncludedAllOf(clazz, currentType))) {
+            if (allOfMatch || (!currentType.equals(clazzType) && TypeUtil.isIncludedAllOf(context, clazz, currentType))) {
                 allOfMatch = true;
             }
         }
 
-        return new TypeResolver(getPropertyNameTranslator(context, clazz), null, null, stack);
+        return new TypeResolver(context, getPropertyNameTranslator(context, clazz), null, null, stack);
     }
 
     public static Map<String, TypeResolver> getAllFields(AnnotationScannerContext context, Type leaf,
@@ -495,7 +502,7 @@ public class TypeResolver {
                 stack.push(buildParamTypeResolutionMap(currentClass, currentType));
             }
 
-            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isIncludedAllOf(context, leafKlazz, currentType))
+            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isAllOf(context, leafKlazz, currentType))
                     || TypeUtil.knownJavaType(currentClass.name())) {
                 /*
                  * Do not attempt to introspect fields of Java/JDK types or if the @Schema
@@ -543,7 +550,7 @@ public class TypeResolver {
                     .forEach(property -> property.ignored = true);
         }
 
-        return sorted(properties, chain.keySet());
+        return sorted(context, properties, chain.keySet());
     }
 
     private static List<MethodInfo> methods(AnnotationScannerContext context, ClassInfo currentClass) {
@@ -581,7 +588,7 @@ public class TypeResolver {
             return true;
         }
 
-        Type[] applicableViews = Annotations.getDeclaredAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
+        Type[] applicableViews = context.annotations().getAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
 
         if (applicableViews != null && applicableViews.length > 0) {
             return Arrays.stream(applicableViews).anyMatch(activeViews::contains);
@@ -600,7 +607,8 @@ public class TypeResolver {
      * @param descendants list of classes that descend from the class containing target
      * @param ignoreResolver resolver to determine if the field is ignored
      */
-    private void processVisibility(AnnotationTarget target, AnnotationTarget reference, List<ClassInfo> descendants,
+    private void processVisibility(AnnotationScannerContext context, AnnotationTarget target, AnnotationTarget reference,
+            List<ClassInfo> descendants,
             IgnoreResolver ignoreResolver) {
         if (this.exposed || this.ignored) {
             // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
@@ -619,7 +627,7 @@ public class TypeResolver {
                 break;
             case IGNORED:
                 if (target.kind() == Kind.METHOD) {
-                    if (isAccessor(target.asMethod())) {
+                    if (isAccessor(context, target.asMethod())) {
                         this.writeOnly = true;
                     } else {
                         this.readOnly = true;
@@ -666,10 +674,10 @@ public class TypeResolver {
      */
     boolean isUnhidden(AnnotationTarget target) {
         if (target != null) {
-            AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(target);
+            AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(context, target);
 
             if (schemaAnnotation != null) {
-                Boolean hidden = Annotations.value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
+                Boolean hidden = context.annotations().value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
 
                 if (hidden == null || !hidden.booleanValue()) {
                     return true;
@@ -723,7 +731,7 @@ public class TypeResolver {
                 resolver.setField(field);
             }
         } else {
-            resolver = new TypeResolver(getPropertyNameTranslator(context, field), propertyName, field,
+            resolver = new TypeResolver(context, getPropertyNameTranslator(context, field), propertyName, field,
                     new ArrayDeque<>(stack));
             properties.put(propertyName, resolver);
         }
@@ -736,7 +744,7 @@ public class TypeResolver {
             // Ignored for getters/setters
             resolver.ignored = true;
         } else {
-            resolver.processVisibility(field, reference, descendants, context.getIgnoreResolver());
+            resolver.processVisibility(context, field, reference, descendants, context.getIgnoreResolver());
         }
     }
 
@@ -746,9 +754,9 @@ public class TypeResolver {
             ClassInfo memberClass) {
 
         Map<String, TypeResolver> unwrappedProperties = getAllFields(context, memberType, memberClass, member);
-        AnnotationInstance jsonUnwrapped = Annotations.getAnnotation(member, JacksonConstants.JSON_UNWRAPPED);
-        String unwrapPrefix = Annotations.value(jsonUnwrapped, "prefix");
-        String unwrapSuffix = Annotations.value(jsonUnwrapped, "suffix");
+        AnnotationInstance jsonUnwrapped = context.annotations().getAnnotation(member, JacksonConstants.JSON_UNWRAPPED);
+        String unwrapPrefix = context.annotations().value(jsonUnwrapped, "prefix");
+        String unwrapSuffix = context.annotations().value(jsonUnwrapped, "suffix");
 
         return unwrappedProperties.entrySet()
                 .stream()
@@ -794,16 +802,16 @@ public class TypeResolver {
         Type returnType = method.returnType();
         Type propertyType = null;
 
-        if (isAccessor(method)) {
+        if (isAccessor(context, method)) {
             propertyType = returnType;
-        } else if (isMutator(method)) {
+        } else if (isMutator(context, method)) {
             propertyType = method.parameterType(0);
         }
 
         if (propertyType != null) {
             TypeResolver resolver = updateTypeResolvers(context, properties, stack, method, propertyType);
             if (resolver != null) {
-                resolver.processVisibility(method, reference, descendants, context.getIgnoreResolver());
+                resolver.processVisibility(context, method, reference, descendants, context.getIgnoreResolver());
             }
         }
     }
@@ -842,19 +850,19 @@ public class TypeResolver {
                 return resolver;
             }
         } else {
-            resolver = new TypeResolver(getPropertyNameTranslator(context, method), propertyName, null,
+            resolver = new TypeResolver(context, getPropertyNameTranslator(context, method), propertyName, null,
                     new ArrayDeque<>(stack));
             properties.put(propertyName, resolver);
         }
 
-        final boolean isWriteMethod = isMutator(method);
+        final boolean isWriteMethod = isMutator(context, method);
 
         if (isWriteMethod) {
-            if (isHigherPriority(method, resolver.getWriteMethod())) {
+            if (isHigherPriority(resolver.targetComparator, method, resolver.getWriteMethod())) {
                 resolver.setWriteMethod(method);
             }
         } else {
-            if (isHigherPriority(method, resolver.getReadMethod())) {
+            if (isHigherPriority(resolver.targetComparator, method, resolver.getReadMethod())) {
                 resolver.setReadMethod(method);
             }
         }
@@ -913,7 +921,7 @@ public class TypeResolver {
      * @param method the method to check
      * @return true if the method is a Java bean getter, otherwise false
      */
-    private static boolean isAccessor(MethodInfo method) {
+    private static boolean isAccessor(AnnotationScannerContext context, MethodInfo method) {
         if (!JandexUtil.isSupplier(method)) {
             return false;
         }
@@ -928,7 +936,7 @@ public class TypeResolver {
             return true;
         }
 
-        return isAnnotatedProperty(method);
+        return isAnnotatedProperty(context, method);
     }
 
     /**
@@ -938,19 +946,18 @@ public class TypeResolver {
      * @param method the method to check
      * @return true if the method is a Java bean setter, otherwise false
      */
-    private static boolean isMutator(MethodInfo method) {
+    private static boolean isMutator(AnnotationScannerContext context, MethodInfo method) {
         Type returnType = method.returnType();
 
         if (method.parametersCount() != 1 || !Type.Kind.VOID.equals(returnType.kind())) {
             return false;
         }
 
-        return METHOD_PREFIX_SET.equals(methodNamePrefix(method)) || isAnnotatedProperty(method);
+        return METHOD_PREFIX_SET.equals(methodNamePrefix(method)) || isAnnotatedProperty(context, method);
     }
 
-    static boolean isAnnotatedProperty(MethodInfo method) {
-        return PROPERTY_METHOD_ANNOTATIONS.stream()
-                .anyMatch(annotation -> Annotations.hasAnnotation(method, annotation));
+    static boolean isAnnotatedProperty(AnnotationScannerContext context, MethodInfo method) {
+        return context.annotations().hasAnnotation(method, PROPERTY_METHOD_ANNOTATIONS);
     }
 
     private static String methodNamePrefix(MethodInfo method) {
@@ -971,7 +978,8 @@ public class TypeResolver {
         return "";
     }
 
-    private static boolean isHigherPriority(MethodInfo newMethod, MethodInfo oldMethod) {
+    private static boolean isHigherPriority(Comparator<AnnotationTarget> targetComparator, MethodInfo newMethod,
+            MethodInfo oldMethod) {
         if (oldMethod == null) {
             return true;
         }
@@ -985,11 +993,11 @@ public class TypeResolver {
 
     private static UnaryOperator<String> getPropertyNameTranslator(AnnotationScannerContext context, AnnotationTarget target) {
         ClassInfo clazz = target.kind() == Kind.CLASS ? target.asClass() : TypeUtil.getDeclaringClass(target);
-        AnnotationInstance jacksonNaming = Annotations.getAnnotation(clazz, JacksonConstants.JSON_NAMING);
+        AnnotationInstance jacksonNaming = context.annotations().getAnnotation(clazz, JacksonConstants.JSON_NAMING);
         UnaryOperator<String> translator;
 
         if (jacksonNaming != null) {
-            Type namingClass = Annotations.value(jacksonNaming, JacksonConstants.PROP_VALUE);
+            Type namingClass = context.annotations().value(jacksonNaming, JacksonConstants.PROP_VALUE);
 
             if (namingClass != null) {
                 translator = PropertyNamingStrategyFactory.getStrategy(namingClass.name().toString(), context.getClassLoader());
@@ -1020,11 +1028,12 @@ public class TypeResolver {
      * @param chainKeys inheritance chain, child classes first
      * @return ordered map of properties
      */
-    private static Map<String, TypeResolver> sorted(Map<String, TypeResolver> properties, Set<ClassInfo> chainKeys) {
+    private static Map<String, TypeResolver> sorted(AnnotationScannerContext context, Map<String, TypeResolver> properties,
+            Set<ClassInfo> chainKeys) {
         List<ClassInfo> chain = new ArrayList<>(chainKeys);
         Collections.reverse(chain);
         List<String> order = chain.stream()
-                .map(TypeResolver::propertyOrder)
+                .map(clazz -> TypeResolver.propertyOrder(context, clazz))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
         List<DotName> chainClassNames = chain.stream().map(ClassInfo::name).collect(Collectors.toList());
@@ -1077,15 +1086,15 @@ public class TypeResolver {
      * @param clazz the class to check for property ordering
      * @return a list of property names, in the order declared, or an empty list if none
      */
-    private static List<String> propertyOrder(ClassInfo clazz) {
+    private static List<String> propertyOrder(AnnotationScannerContext context, ClassInfo clazz) {
         AnnotationInstance propertyOrder;
         AnnotationValue orderArray = null;
 
-        if ((propertyOrder = Annotations.getAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
+        if ((propertyOrder = context.annotations().getAnnotation(clazz, JsonbConstants.JSONB_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
-        } else if ((propertyOrder = Annotations.getAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
+        } else if ((propertyOrder = context.annotations().getAnnotation(clazz, JaxbConstants.XML_TYPE)) != null) {
             orderArray = propertyOrder.value("propOrder");
-        } else if ((propertyOrder = Annotations.getAnnotation(clazz, JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
+        } else if ((propertyOrder = context.annotations().getAnnotation(clazz, JacksonConstants.JSON_PROPERTY_ORDER)) != null) {
             orderArray = propertyOrder.value();
         }
 

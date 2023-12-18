@@ -40,7 +40,6 @@ import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.EnumProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -76,7 +75,7 @@ public class SchemaFactory {
      * @return Schema model
      */
     public static Schema readSchema(final AnnotationScannerContext context, AnnotationInstance schemaAnnotation) {
-        if (isAnnotationMissingOrHidden(schemaAnnotation, Collections.emptyMap())) {
+        if (isAnnotationMissingOrHidden(context, schemaAnnotation, Collections.emptyMap())) {
             return null;
         }
 
@@ -119,7 +118,7 @@ public class SchemaFactory {
             ClassInfo clazz,
             Map<String, Object> defaults) {
 
-        if (isAnnotationMissingOrHidden(annotation, defaults)) {
+        if (isAnnotationMissingOrHidden(context, annotation, defaults)) {
             return schema;
         }
 
@@ -143,63 +142,64 @@ public class SchemaFactory {
             AnnotationInstance annotation,
             Map<String, Object> defaults) {
 
-        if (isAnnotationMissingOrHidden(annotation, defaults)) {
+        if (isAnnotationMissingOrHidden(context, annotation, defaults)) {
             return schema;
         }
 
-        schema.setNot(SchemaFactory.<Type, Schema> readAttr(annotation, SchemaConstant.PROP_NOT,
+        schema.setNot(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_NOT,
                 types -> readClassSchema(context, types, true), defaults));
-        schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ONE_OF,
+        schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(context, annotation, SchemaConstant.PROP_ONE_OF,
                 types -> readClassSchemas(context, types, false), defaults));
-        schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ANY_OF,
+        schema.setAnyOf(SchemaFactory.<Type[], List<Schema>> readAttr(context, annotation, SchemaConstant.PROP_ANY_OF,
                 types -> readClassSchemas(context, types, false), defaults));
-        schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(annotation, SchemaConstant.PROP_ALL_OF,
+        schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(context, annotation, SchemaConstant.PROP_ALL_OF,
                 types -> readClassSchemas(context, types, true), defaults));
-        schema.setTitle(readAttr(annotation, SchemaConstant.PROP_TITLE, defaults));
-        schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(annotation, SchemaConstant.PROP_MULTIPLE_OF,
+        schema.setTitle(readAttr(context, annotation, SchemaConstant.PROP_TITLE, defaults));
+        schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(context, annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
-        schema.setMaximum(SchemaFactory.readAttr(annotation, SchemaConstant.PROP_MAXIMUM,
+        schema.setMaximum(SchemaFactory.readAttr(context, annotation, SchemaConstant.PROP_MAXIMUM,
                 SchemaFactory::tolerantParseBigDecimal, defaults));
-        schema.setMinimum(SchemaFactory.readAttr(annotation, SchemaConstant.PROP_MINIMUM,
+        schema.setMinimum(SchemaFactory.readAttr(context, annotation, SchemaConstant.PROP_MINIMUM,
                 SchemaFactory::tolerantParseBigDecimal, defaults));
-        schema.setExclusiveMaximum(readAttr(annotation, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, defaults));
-        schema.setExclusiveMinimum(readAttr(annotation, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, defaults));
-        schema.setMaxLength(readAttr(annotation, SchemaConstant.PROP_MAX_LENGTH, defaults));
-        schema.setMinLength(readAttr(annotation, SchemaConstant.PROP_MIN_LENGTH, defaults));
-        schema.setPattern(readAttr(annotation, SchemaConstant.PROP_PATTERN, defaults));
-        schema.setMaxProperties(readAttr(annotation, SchemaConstant.PROP_MAX_PROPERTIES, defaults));
-        schema.setMinProperties(readAttr(annotation, SchemaConstant.PROP_MIN_PROPERTIES, defaults));
-        schema.setRequired(readAttr(annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
-        schema.setDescription(readAttr(annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
-        schema.setFormat(readAttr(annotation, SchemaConstant.PROP_FORMAT, defaults));
-        schema.setRef(readAttr(annotation, OpenApiConstants.REF, defaults));
-        schema.setNullable(readAttr(annotation, SchemaConstant.PROP_NULLABLE, defaults));
-        schema.setReadOnly(readAttr(annotation, SchemaConstant.PROP_READ_ONLY, defaults));
-        schema.setWriteOnly(readAttr(annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        AnnotationInstance externalDocsAnnotation = Annotations.value(annotation, ExternalDocsConstant.PROP_EXTERNAL_DOCS);
+        schema.setExclusiveMaximum(readAttr(context, annotation, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, defaults));
+        schema.setExclusiveMinimum(readAttr(context, annotation, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, defaults));
+        schema.setMaxLength(readAttr(context, annotation, SchemaConstant.PROP_MAX_LENGTH, defaults));
+        schema.setMinLength(readAttr(context, annotation, SchemaConstant.PROP_MIN_LENGTH, defaults));
+        schema.setPattern(readAttr(context, annotation, SchemaConstant.PROP_PATTERN, defaults));
+        schema.setMaxProperties(readAttr(context, annotation, SchemaConstant.PROP_MAX_PROPERTIES, defaults));
+        schema.setMinProperties(readAttr(context, annotation, SchemaConstant.PROP_MIN_PROPERTIES, defaults));
+        schema.setRequired(readAttr(context, annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
+        schema.setDescription(readAttr(context, annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
+        schema.setFormat(readAttr(context, annotation, SchemaConstant.PROP_FORMAT, defaults));
+        schema.setRef(readAttr(context, annotation, OpenApiConstants.REF, defaults));
+        schema.setNullable(readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
+        schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
+        schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
+        AnnotationInstance externalDocsAnnotation = context.annotations().value(annotation,
+                ExternalDocsConstant.PROP_EXTERNAL_DOCS);
         schema.setExternalDocs(ExternalDocsReader.readExternalDocs(context, externalDocsAnnotation));
-        schema.setDeprecated(readAttr(annotation, SchemaConstant.PROP_DEPRECATED, defaults));
-        schema.setType(readSchemaType(annotation, schema, defaults));
+        schema.setDeprecated(readAttr(context, annotation, SchemaConstant.PROP_DEPRECATED, defaults));
+        schema.setType(readSchemaType(context, annotation, schema, defaults));
         schema.setExample(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
         schema.setDefaultValue(
                 parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, schema.getType()));
         schema.setDiscriminator(
                 readDiscriminator(context,
-                        Annotations.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
-                        Annotations.value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
-        schema.setMaxItems(readAttr(annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
-        schema.setMinItems(readAttr(annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
-        schema.setUniqueItems(readAttr(annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
+                        context.annotations().value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
+                        context.annotations().value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
+        schema.setMaxItems(readAttr(context, annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
+        schema.setMinItems(readAttr(context, annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
+        schema.setUniqueItems(readAttr(context, annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
         schema.setExtensions(ExtensionReader.readExtensions(context, annotation));
 
-        schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(annotation,
+        schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(context, annotation,
                 SchemaConstant.PROP_PROPERTIES, properties -> {
                     if (properties == null || properties.length == 0) {
                         return null;
                     }
                     Map<String, Schema> propertySchemas = new LinkedHashMap<>(properties.length);
                     for (AnnotationInstance propAnnotation : properties) {
-                        String key = Annotations.value(propAnnotation, SchemaConstant.PROP_NAME);
+                        String key = context.annotations().value(propAnnotation, SchemaConstant.PROP_NAME);
                         Schema value = readSchema(context, new SchemaImpl(), propAnnotation, Collections.emptyMap());
                         propertySchemas.put(key, value);
                     }
@@ -207,7 +207,7 @@ public class SchemaFactory {
                     return propertySchemas;
                 }, defaults));
 
-        Type additionalProperties = readAttr(annotation, "additionalProperties", defaults);
+        Type additionalProperties = readAttr(context, annotation, "additionalProperties", defaults);
 
         if (additionalProperties != null) {
             if (additionalProperties.name().equals(SchemaConstant.DOTNAME_TRUE_SCHEMA)) {
@@ -221,7 +221,7 @@ public class SchemaFactory {
 
         final Schema.SchemaType type = schema.getType();
 
-        List<Object> enumeration = readAttr(annotation, SchemaConstant.PROP_ENUMERATION, (Object[] values) -> {
+        List<Object> enumeration = readAttr(context, annotation, SchemaConstant.PROP_ENUMERATION, (Object[] values) -> {
             List<Object> parsed = new ArrayList<>(values.length);
 
             if (type == Schema.SchemaType.STRING) {
@@ -244,18 +244,19 @@ public class SchemaFactory {
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
             Schema implSchema = readClassSchema(context,
-                    Annotations.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
+                    context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     !namedComponent);
             schema = MergeUtil.mergeObjects(implSchema, schema);
-        } else if (JandexUtil.isSimpleArraySchema(annotation)) {
+        } else if (JandexUtil.isSimpleArraySchema(context, annotation)) {
             Schema implSchema = readClassSchema(context,
-                    Annotations.value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
+                    context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
                     !namedComponent);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            schema = includeTypeSchema(context, schema, Annotations.value(annotation, SchemaConstant.PROP_IMPLEMENTATION));
+            schema = includeTypeSchema(context, schema,
+                    context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION));
         }
 
         return schema;
@@ -282,13 +283,14 @@ public class SchemaFactory {
         return schema;
     }
 
-    static boolean isAnnotationMissingOrHidden(AnnotationInstance annotation, Map<String, Object> defaults) {
+    static boolean isAnnotationMissingOrHidden(AnnotationScannerContext context, AnnotationInstance annotation,
+            Map<String, Object> defaults) {
         if (annotation == null) {
             return true;
         }
 
         // Schemas can be hidden. Skip if that's the case.
-        return Boolean.TRUE.equals(readAttr(annotation, SchemaConstant.PROP_HIDDEN, defaults));
+        return Boolean.TRUE.equals(readAttr(context, annotation, SchemaConstant.PROP_HIDDEN, defaults));
     }
 
     /**
@@ -303,8 +305,9 @@ public class SchemaFactory {
      * @return the annotation attribute value, a default value, or null
      */
     @SuppressWarnings("unchecked")
-    static <T> T readAttr(AnnotationInstance annotation, String propertyName, Map<String, Object> defaults) {
-        return (T) readAttr(annotation, propertyName, (T) defaults.get(propertyName));
+    static <T> T readAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
+            Map<String, Object> defaults) {
+        return readAttr(context, annotation, propertyName, (T) defaults.get(propertyName));
     }
 
     /**
@@ -319,8 +322,9 @@ public class SchemaFactory {
      * @return the annotation attribute value, a default value, or null
      */
     @SuppressWarnings("unchecked")
-    static <T> T readAttr(AnnotationInstance annotation, String propertyName, T defaultValue) {
-        Object value = Annotations.value(annotation, propertyName);
+    static <T> T readAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
+            T defaultValue) {
+        Object value = context.annotations().value(annotation, propertyName);
 
         if (value == null) {
             value = defaultValue;
@@ -346,7 +350,7 @@ public class SchemaFactory {
      */
     static Object parseSchemaAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
             Map<String, Object> defaults, SchemaType schemaType) {
-        return readAttr(annotation, propertyName, value -> {
+        return readAttr(context, annotation, propertyName, value -> {
             if (value instanceof String) {
                 return parseValue(context, (String) value, schemaType);
             }
@@ -381,9 +385,10 @@ public class SchemaFactory {
      * @return the converted annotation attribute value, a default value, or null
      */
     @SuppressWarnings("unchecked")
-    static <R, T> T readAttr(AnnotationInstance annotation, String propertyName, Function<R, T> converter,
+    static <R, T> T readAttr(AnnotationScannerContext context, AnnotationInstance annotation, String propertyName,
+            Function<R, T> converter,
             Map<String, Object> defaults) {
-        R rawValue = Annotations.value(annotation, propertyName);
+        R rawValue = context.annotations().value(annotation, propertyName);
         T value;
 
         if (rawValue == null) {
@@ -404,8 +409,9 @@ public class SchemaFactory {
      * @param defaults default schema property values or empty
      * @return the value of the type property if not null, otherwise the current schema type
      */
-    static SchemaType readSchemaType(AnnotationInstance annotation, Schema schema, Map<String, Object> defaults) {
-        SchemaType type = readAttr(annotation, SchemaConstant.PROP_TYPE, SchemaFactory::parseSchemaType, defaults);
+    static SchemaType readSchemaType(AnnotationScannerContext context, AnnotationInstance annotation, Schema schema,
+            Map<String, Object> defaults) {
+        SchemaType type = readAttr(context, annotation, SchemaConstant.PROP_TYPE, SchemaFactory::parseSchemaType, defaults);
         return type != null ? type : schema.getType();
     }
 
@@ -549,7 +555,7 @@ public class SchemaFactory {
         IoLogging.logger.enumProcessing(enumType);
         List<Object> enumeration = EnumProcessor.enumConstants(context, enumType);
         ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
-        AnnotationInstance schemaAnnotation = Annotations.getAnnotation(enumKlazz, SchemaConstant.DOTNAME_SCHEMA);
+        AnnotationInstance schemaAnnotation = context.annotations().getAnnotation(enumKlazz, SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
 
         if (schemaAnnotation != null) {
@@ -585,9 +591,9 @@ public class SchemaFactory {
 
         ClassInfo classInfo = context.getAugmentedIndex().getClass(ctype);
         if (classInfo != null) {
-            AnnotationInstance schemaAnnotation = Annotations.getAnnotation(classInfo, SchemaConstant.DOTNAME_SCHEMA);
+            AnnotationInstance schemaAnnotation = context.annotations().getAnnotation(classInfo, SchemaConstant.DOTNAME_SCHEMA);
             if (schemaAnnotation != null
-                    && Boolean.TRUE.equals(readAttr(schemaAnnotation, SchemaConstant.PROP_HIDDEN, false))) {
+                    && Boolean.TRUE.equals(readAttr(context, schemaAnnotation, SchemaConstant.PROP_HIDDEN, false))) {
                 return null;
             }
         }
@@ -755,8 +761,8 @@ public class SchemaFactory {
 
     private static void readDiscriminatorMapping(AnnotationScannerContext context, Discriminator discriminator,
             AnnotationInstance mapping) {
-        String propertyValue = Annotations.value(mapping, SchemaConstant.PROP_VALUE);
-        Type schemaType = Annotations.value(mapping, SchemaConstant.PROP_SCHEMA);
+        String propertyValue = context.annotations().value(mapping, SchemaConstant.PROP_VALUE);
+        Type schemaType = context.annotations().value(mapping, SchemaConstant.PROP_SCHEMA);
 
         String schemaRef;
 

@@ -106,7 +106,7 @@ jobs:
           java-version: 17
 
       - name: build with maven
-        run: mvn -B -pl '!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
+        run: mvn -B -pl '!testsuite/coverage,!testsuite/data,!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' install -DskipTests
 
       - uses: actions/setup-java@v4
         name: set up jdk

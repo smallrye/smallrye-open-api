@@ -26,7 +26,6 @@ import io.smallrye.openapi.runtime.io.operation.OperationReader;
 import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.io.server.ServerReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 
 /**
  * Reading the Paths from annotation or json
@@ -88,7 +87,7 @@ public class PathsReader {
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         PathItem pathItem = new PathItemImpl();
         for (AnnotationInstance operationAnno : nestedArray) {
-            String method = Annotations.value(operationAnno, PathsConstant.PROP_METHOD);
+            String method = context.annotations().value(operationAnno, PathsConstant.PROP_METHOD);
             if (method == null) {
                 continue;
             }

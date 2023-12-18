@@ -27,7 +27,8 @@ mvn clean install
 * link:testsuite[testsuite] - Test Suites and Data
 ** link:testsuite/tck[tck] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
 ** link:testsuite/extra[extra] - Extra integration tests not related to the TCK.
-** link:testsuite/data[data] - Classes for use by unit tests
+** link:testsuite/data[data] - Quarkus application with tests to verify additional annotation scanning scenarios
+** link:testsuite/coverage[coverage] - Test coverage report aggregator for other modules
 * link:tools/maven-plugin[maven-plugin] - Maven plugin that creates the OpenAPI Schema on build.
 
 === Links

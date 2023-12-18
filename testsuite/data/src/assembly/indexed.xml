@@ -19,6 +19,7 @@
             <unpackOptions>
                 <includes>
                     <include>io/smallrye/openapi/testdata/**/*</include>
+                    <include>META-INF/quarkus-generated-openapi-doc.*</include>
                 </includes>
             </unpackOptions>
             <scope>runtime</scope>

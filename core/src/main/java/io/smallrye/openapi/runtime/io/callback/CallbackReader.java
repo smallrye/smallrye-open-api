@@ -21,7 +21,6 @@ import io.smallrye.openapi.runtime.io.extension.ExtensionConstant;
 import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
 import io.smallrye.openapi.runtime.io.paths.PathsReader;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
@@ -53,7 +52,7 @@ public class CallbackReader {
         Map<String, Callback> callbacks = new LinkedHashMap<>();
         AnnotationInstance[] nestedArray = annotationValue.asNestedArray();
         for (AnnotationInstance nested : nestedArray) {
-            String name = getCallbackName(nested);
+            String name = getCallbackName(context, nested);
             if (name == null && JandexUtil.isRef(nested)) {
                 name = JandexUtil.nameFromRef(nested);
             }
@@ -107,7 +106,7 @@ public class CallbackReader {
         IoLogging.logger.singleAnnotation("@Callback");
         Callback callback = new CallbackImpl();
         callback.setRef(JandexUtil.refValue(annotation, JandexUtil.RefType.CALLBACK));
-        String expression = Annotations.value(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
+        String expression = context.annotations().value(annotation, CallbackConstant.PROP_CALLBACK_URL_EXPRESSION);
         callback.addPathItem(expression,
                 PathsReader.readPathItem(context, annotation.value(CallbackConstant.PROP_OPERATIONS), null));
         callback.setExtensions(ExtensionReader.readExtensions(context, annotation));
@@ -140,13 +139,13 @@ public class CallbackReader {
     }
 
     // helper methods for scanners
-    public static List<AnnotationInstance> getCallbackAnnotations(final AnnotationTarget target) {
-        return Annotations.getRepeatableAnnotation(target,
+    public static List<AnnotationInstance> getCallbackAnnotations(AnnotationScannerContext context, AnnotationTarget target) {
+        return context.annotations().getRepeatableAnnotation(target,
                 CallbackConstant.DOTNAME_CALLBACK,
                 CallbackConstant.DOTNAME_CALLBACKS);
     }
 
-    public static String getCallbackName(AnnotationInstance annotation) {
-        return Annotations.value(annotation, CallbackConstant.PROP_NAME);
+    public static String getCallbackName(AnnotationScannerContext context, AnnotationInstance annotation) {
+        return context.annotations().value(annotation, CallbackConstant.PROP_NAME);
     }
 }
