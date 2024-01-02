@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import jakarta.ws.rs.GET;
@@ -59,6 +60,31 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/VisibleOperationResource.class");
 
         testHiddenOperationNotPresent(indexer.complete());
+    }
+
+    /**
+     * Verify that no false positive failures/warnings for duplicate operation-IDs are generated when both
+     * {@code javax} and {@code jakarta} annotations are present.
+     */
+    @Test
+    void testMixedJakartaAndJavaxAnnotations() throws IOException {
+        // Needed a resource implementation class and an interface to trigger the duplicate operation-ID
+        // false positives.
+        Indexer indexer = new Indexer();
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/mixed/RestResourceImpl.class");
+        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/mixed/RestInterface.class");
+        Index index = indexer.complete();
+
+        Map<String, String> cfg = new HashMap<>();
+        // fail hard to trigger the failure in this test
+        cfg.put(OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.toString());
+        // method-strategy needed for this test
+        cfg.put(OpenApiConstants.OPERATION_ID_STRAGEGY, OpenApiConfig.OperationIdStrategy.METHOD.toString());
+        OpenApiConfig config = dynamicConfig(cfg);
+
+        OpenApiAnnotationScanner s = new OpenApiAnnotationScanner(config, index);
+        OpenAPI result = Assertions.assertDoesNotThrow(() -> s.scan("JAX-RS"));
+        printToConsole(result);
     }
 
     void testHiddenOperationNotPresent(Index i) throws IOException, JSONException {
