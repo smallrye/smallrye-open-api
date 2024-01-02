@@ -276,6 +276,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                     .filter(methodInfo::hasAnnotation)
                     .map(DotName::withoutPackagePrefix)
                     .map(PathItem.HttpMethod::valueOf)
+                    .distinct() // needed when both javax+jakarta annotations are present
                     .forEach(httpMethod -> {
                         resourceCount.incrementAndGet();
                         processResourceMethod(resourceClass, methodInfo, httpMethod, tagRefs,
