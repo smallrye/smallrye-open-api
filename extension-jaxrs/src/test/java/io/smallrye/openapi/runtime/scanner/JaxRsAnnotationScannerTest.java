@@ -83,7 +83,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         OpenApiConfig config = dynamicConfig(cfg);
 
         OpenApiAnnotationScanner s = new OpenApiAnnotationScanner(config, index);
-        OpenAPI result = s.scan("JAX-RS");
+        OpenAPI result = Assertions.assertDoesNotThrow(() -> s.scan("JAX-RS"));
         printToConsole(result);
     }
 
