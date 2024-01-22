@@ -44,7 +44,7 @@ jobs:
           java-version: ${{matrix.java}}
 
       - name: maven cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -95,7 +95,7 @@ jobs:
         name: checkout
 
       - name: maven cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-tck-${{ matrix.tck-version }}-${{ hashFiles('**/pom.xml') }}
