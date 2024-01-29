@@ -55,7 +55,7 @@ jobs:
           git push --tags
 
       - name: Gradle plugin release ${{steps.metadata.outputs.current-version}}
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           build-root-directory: ./tools/gradle-plugin
           cache-read-only: true
