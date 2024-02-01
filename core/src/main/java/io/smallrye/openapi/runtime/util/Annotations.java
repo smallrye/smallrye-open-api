@@ -117,6 +117,7 @@ public final class Annotations {
 
         return declaredAnnotations
                 .stream()
+                .filter(AnnotationInstance::runtimeVisible)
                 .map(AnnotationInstance::name)
                 .filter(this::composable)
                 .map(context.getAugmentedIndex()::getClassByName)
