@@ -15,6 +15,7 @@ updates:
       patterns:
       - "version.quarkus"
       - "quarkus.platform.version"
+      - "io.quarkus*"
 
 - package-ecosystem: gradle
   directory: "/tools/gradle-plugin"
