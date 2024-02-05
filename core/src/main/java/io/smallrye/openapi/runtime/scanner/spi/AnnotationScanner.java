@@ -558,17 +558,17 @@ public interface AnnotationScanner {
     }
 
     default boolean isVoidResponse(final MethodInfo method) {
-        final Type returnType = method.returnType();
+        return isVoidType(method.returnType());
+    }
 
-        if (returnType.kind().equals(Type.Kind.VOID)) {
+    default boolean isVoidType(Type type) {
+        if (TypeUtil.isVoid(type)) {
             return true;
-        }
-
-        if (isWrapperType(returnType)) {
-            ParameterizedType parameterizedType = returnType.asParameterizedType();
-            return parameterizedType.arguments().stream().anyMatch(TypeUtil::isVoid);
-        } else if (TypeUtil.isWrappedType(returnType)) {
-            return TypeUtil.isVoid(TypeUtil.unwrapType(returnType));
+        } else if (isWrapperType(type)) {
+            ParameterizedType parameterizedType = type.asParameterizedType();
+            return parameterizedType.arguments().stream().anyMatch(this::isVoidType);
+        } else if (TypeUtil.isWrappedType(type)) {
+            return isVoidType(TypeUtil.unwrapType(type));
         }
 
         return false;
