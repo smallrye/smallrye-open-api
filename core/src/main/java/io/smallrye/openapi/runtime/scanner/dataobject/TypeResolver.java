@@ -517,14 +517,12 @@ public class TypeResolver {
             JandexUtil.fields(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptField)
-                    .filter(field -> isViewable(context, field))
                     .filter(field -> field.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
 
             methods(context, currentClass)
                     .stream()
                     .filter(TypeResolver::acceptMethod)
-                    .filter(method -> isViewable(context, method))
                     .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
@@ -534,7 +532,6 @@ public class TypeResolver {
                     .map(index::getClass)
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> methods(context, clazz).stream())
-                    .filter(method -> isViewable(context, method))
                     .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
                     .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
 
@@ -622,7 +619,7 @@ public class TypeResolver {
             return;
         }
 
-        switch (getVisibility(target, reference, descendants, ignoreResolver)) {
+        switch (getVisibility(context, target, reference, descendants, ignoreResolver)) {
             case EXPOSED:
                 this.exposed = true;
                 break;
@@ -679,9 +676,15 @@ public class TypeResolver {
      * @param descendants list of classes that descend from the class containing target
      * @param ignoreResolver resolver to determine if the field is ignored
      */
-    private IgnoreResolver.Visibility getVisibility(AnnotationTarget target, AnnotationTarget reference,
+    private IgnoreResolver.Visibility getVisibility(AnnotationScannerContext context, AnnotationTarget target,
+            AnnotationTarget reference,
             List<ClassInfo> descendants,
             IgnoreResolver ignoreResolver) {
+
+        if (!isViewable(context, target)) {
+            return IgnoreResolver.Visibility.IGNORED;
+        }
+
         // First check if a descendant class has hidden/exposed the property
         IgnoreResolver.Visibility visibility = ignoreResolver.getDescendantVisibility(propertyName, descendants);
 

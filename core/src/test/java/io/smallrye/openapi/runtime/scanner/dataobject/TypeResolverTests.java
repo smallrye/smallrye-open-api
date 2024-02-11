@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -24,6 +25,8 @@ import org.jboss.jandex.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import com.fasterxml.jackson.annotation.JsonView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -793,5 +796,90 @@ class TypeResolverTests extends IndexScannerTestBase {
                 .getClassByName(componentize(TestForClassWithGenericInterfaceClasses.FruitResource.class.getName()))
                 .method("get").returnType());
         assertEquals(componentize(TestForClassWithGenericInterfaceClasses.Apple.class.getName()), resolved.name());
+    }
+
+    @Test
+    /*
+     * Issue: https://github.com/smallrye/smallrye-open-api/issues/1724
+     */
+    void testJsonViewSetsVisibility() {
+        class Views {
+            class View0 {
+            }
+
+            class View1 extends View0 {
+            }
+
+            class View2 extends View1 {
+            }
+
+            class View3 extends View2 {
+            }
+        }
+
+        @SuppressWarnings("unused")
+        class Bean {
+            private String field0;
+            @JsonView(Views.View1.class)
+            private String field1;
+            @JsonView(Views.View2.class)
+            private String field2;
+            @JsonView(Views.View3.class)
+            private String field3;
+
+            public String getField0() {
+                return field0;
+            }
+
+            public void setField0(String field0) {
+                this.field0 = field0;
+            }
+
+            public String getField1() {
+                return field1;
+            }
+
+            public void setField1(String field1) {
+                this.field1 = field1;
+            }
+
+            public String getField2() {
+                return field2;
+            }
+
+            public void setField2(String field2) {
+                this.field2 = field2;
+            }
+
+            public String getField3() {
+                return field3;
+            }
+
+            public void setField3(String field3) {
+                this.field3 = field3;
+            }
+        }
+
+        AnnotationScannerContext context = buildContext(emptyConfig(), Bean.class, Views.View0.class, Views.View1.class,
+                Views.View2.class, Views.View3.class);
+
+        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View0.class), Type.Kind.CLASS));
+        Map<String, TypeResolver> p0 = getProperties(context, Bean.class);
+        assertFalse(p0.get("field0").isIgnored());
+        Stream.of("field1", "field2", "field3").forEach(f -> assertTrue(p0.get(f).isIgnored()));
+
+        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View1.class), Type.Kind.CLASS));
+        Map<String, TypeResolver> p1 = getProperties(context, Bean.class);
+        Stream.of("field0", "field1").forEach(f -> assertFalse(p1.get(f).isIgnored()));
+        Stream.of("field2", "field3").forEach(f -> assertTrue(p1.get(f).isIgnored()));
+
+        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View2.class), Type.Kind.CLASS));
+        Map<String, TypeResolver> p2 = getProperties(context, Bean.class);
+        Stream.of("field0", "field1", "field2").forEach(f -> assertFalse(p2.get(f).isIgnored()));
+        Stream.of("field3").forEach(f -> assertTrue(p2.get(f).isIgnored()));
+
+        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View3.class), Type.Kind.CLASS));
+        Map<String, TypeResolver> p3 = getProperties(context, Bean.class);
+        Stream.of("field0", "field1", "field2", "field3").forEach(f -> assertFalse(p3.get(f).isIgnored()));
     }
 }
