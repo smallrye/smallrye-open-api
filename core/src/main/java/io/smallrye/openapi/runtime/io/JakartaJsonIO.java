@@ -102,6 +102,27 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
     }
 
     @Override
+    public boolean isBoolean(JsonValue value) {
+        if (value == null) {
+            return false;
+        }
+        ValueType type = value.getValueType();
+        return type == ValueType.TRUE || type == ValueType.FALSE;
+    }
+
+    @Override
+    public Boolean asBoolean(JsonValue value) {
+        ValueType type = value.getValueType();
+        if (type == ValueType.TRUE) {
+            return Boolean.TRUE;
+        } else if (type == ValueType.FALSE) {
+            return Boolean.FALSE;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public boolean hasKey(JsonObject object, String key) {
         return object.containsKey(key);
     }
@@ -249,6 +270,48 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
             default:
                 return null;
         }
+    }
+
+    @Override
+    public <T> T fromJson(JsonValue object, Class<T> desiredType) {
+        ValueType type = object.getValueType();
+        if (desiredType == String.class) {
+            if (type == ValueType.STRING) {
+                return (T) ((JsonString) object).getString();
+            } else if (type == ValueType.NUMBER) {
+                return (T) ((JsonNumber) object).numberValue().toString();
+            } else if (type == ValueType.TRUE) {
+                return (T) "true";
+            } else if (type == ValueType.FALSE) {
+                return (T) "false";
+            }
+        }
+        if (type == ValueType.NUMBER) {
+            JsonNumber number = (JsonNumber) object;
+            try {
+                if (desiredType == Integer.class) {
+                    return (T) Integer.valueOf(number.intValueExact());
+                } else if (desiredType == Long.class) {
+                    return (T) Long.valueOf(number.longValueExact());
+                } else if (desiredType == BigInteger.class) {
+                    return (T) number.bigIntegerValueExact();
+                } else if (desiredType == BigDecimal.class) {
+                    return (T) number.bigDecimalValue();
+                }
+            } catch (ArithmeticException e) {
+                // thrown if conversion cannot be done losslessly
+                // fall through to return null later
+            }
+        }
+        if (desiredType == Boolean.class) {
+            if (type == ValueType.TRUE) {
+                return (T) Boolean.TRUE;
+            } else if (type == ValueType.FALSE) {
+                return (T) Boolean.FALSE;
+            }
+        }
+        // Nothing matched
+        return null;
     }
 
     @Override

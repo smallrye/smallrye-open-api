@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
+import static java.util.Collections.singletonList;
 import static org.jboss.jandex.AnnotationTarget.Kind.METHOD_PARAMETER;
 
 import java.util.ArrayList;
@@ -471,7 +472,21 @@ public interface AnnotationScanner {
                 }
 
                 if (schema != null && schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
-                    schema.setNullable(Boolean.TRUE);
+                    if (schema.getType() != null) {
+                        schema.addType(Schema.SchemaType.NULL);
+                    }
+                    if (schema.getRef() != null) {
+                        Schema nullSchema = new SchemaImpl().type(singletonList(Schema.SchemaType.NULL));
+                        // Move reference to type into its own subschema
+                        Schema refSchema = new SchemaImpl().ref(schema.getRef());
+                        schema.setRef(null);
+                        if (schema.getAnyOf() == null) {
+                            schema.addAnyOf(refSchema).addAnyOf(nullSchema);
+                        } else {
+                            Schema anyOfSchema = new SchemaImpl().addAnyOf(refSchema).addAnyOf(nullSchema);
+                            schema.addAllOf(anyOfSchema);
+                        }
+                    }
                 }
 
                 for (String producesType : produces) {

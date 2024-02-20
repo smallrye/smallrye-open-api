@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -416,8 +418,16 @@ public class TypeUtil {
         schema.setType((SchemaType) properties.get(SchemaConstant.PROP_TYPE));
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
-        schema.setExample(properties.get(SchemaConstant.PROP_EXAMPLE));
+        schema.setExamples(wrapInList(properties.get(SchemaConstant.PROP_EXAMPLE)));
         schema.setExternalDocs((ExternalDocumentation) properties.get(SchemaConstant.PROP_EXTERNAL_DOCS));
+    }
+
+    private static <E> List<E> wrapInList(E item) {
+        if (item == null) {
+            return null;
+        } else {
+            return Collections.singletonList(item);
+        }
     }
 
     /**
@@ -431,6 +441,7 @@ public class TypeUtil {
     public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
         clearIfEqual(fieldSchema.getFormat(), typeSchema.getFormat(), fieldSchema::setFormat);
         clearIfEqual(fieldSchema.getPattern(), typeSchema.getPattern(), fieldSchema::setPattern);
+        clearIfEqual(fieldSchema.getExamples(), typeSchema.getExamples(), fieldSchema::setExamples);
         clearIfEqual(fieldSchema.getExample(), typeSchema.getExample(), fieldSchema::setExample);
         clearIfEqual(fieldSchema.getExternalDocs(), typeSchema.getExternalDocs(), fieldSchema::setExternalDocs);
     }

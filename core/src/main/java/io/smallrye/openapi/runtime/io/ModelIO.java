@@ -151,5 +151,5 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
 
     public abstract T readObject(O node);
 
-    public abstract Optional<O> write(T model);
+    public abstract Optional<? extends V> write(T model);
 }

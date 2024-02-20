@@ -8,11 +8,13 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_T
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STREAM_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
+import static java.util.Collections.singletonList;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
@@ -265,8 +267,8 @@ public class TypeProcessor {
 
     private static Schema wrapOptionalItemSchema(Schema itemSchema) {
         return new SchemaImpl()
-                .nullable(Boolean.TRUE)
-                .addAllOf(itemSchema);
+                .addAnyOf(new SchemaImpl().type(singletonList(Schema.SchemaType.NULL)))
+                .addAnyOf(itemSchema);
     }
 
     private Schema readGenericValueType(Type valueType) {

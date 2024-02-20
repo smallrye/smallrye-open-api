@@ -400,7 +400,8 @@ public abstract class AbstractParameterProcessor {
         return Parameter.In.PATH.equals(param.getIn())
                 && !Style.MATRIX.equals(param.getStyle())
                 && param.getSchema() != null
-                && SchemaType.STRING.equals(param.getSchema().getType())
+                && param.getSchema().getType() != null
+                && param.getSchema().getType().contains(SchemaType.STRING)
                 && param.getSchema().getPattern() == null;
     }
 
@@ -647,7 +648,7 @@ public abstract class AbstractParameterProcessor {
 
         if (localOnlySchemaModified(paramSchema, localSchema, modCount)) {
             // Add new `allOf` schema, erasing `type` derived above from the local schema
-            Schema allOf = new SchemaImpl().addAllOf(paramSchema).addAllOf(localSchema.type(null));
+            Schema allOf = new SchemaImpl().addAllOf(paramSchema).addAllOf(localSchema.type((List<SchemaType>) null));
             param.setSchema(allOf);
         }
     }

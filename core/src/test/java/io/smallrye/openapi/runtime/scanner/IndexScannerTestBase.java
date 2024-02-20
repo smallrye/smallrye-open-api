@@ -164,7 +164,8 @@ public class IndexScannerTestBase {
 
     private static boolean isPathMatrixObject(Parameter parameter) {
         return parameter.getIn() == Parameter.In.PATH && parameter.getStyle() == Parameter.Style.MATRIX
-                && parameter.getSchema() != null && parameter.getSchema().getType() == Schema.SchemaType.OBJECT;
+                && parameter.getSchema() != null && parameter.getSchema().getType() != null
+                && parameter.getSchema().getType().equals(Collections.singletonList(Schema.SchemaType.OBJECT));
     }
 
     public static String schemaToString(String entityName, Schema schema) {

@@ -118,6 +118,16 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     }
 
     @Override
+    public boolean isBoolean(JsonNode value) {
+        return value != null && value.isBoolean();
+    }
+
+    @Override
+    public Boolean asBoolean(JsonNode value) {
+        return value != null && value.isBoolean() ? value.asBoolean() : null;
+    }
+
+    @Override
     public Integer getJsonInt(ObjectNode object, String key) {
         JsonNode value = object.get(key);
         return value != null && value.isInt() ? value.asInt() : null;
@@ -267,6 +277,29 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
             Map<String, Object> items = new LinkedHashMap<>();
             value.properties().forEach(field -> items.put(field.getKey(), fromJson(field.getValue())));
             return items;
+        }
+        return null;
+    }
+
+    @Override
+    public <T> T fromJson(JsonNode object, Class<T> desiredType) {
+        if (desiredType == String.class) {
+            return (T) object.asText();
+        }
+        if (desiredType == Integer.class && object.canConvertToInt()) {
+            return (T) Integer.valueOf(object.asInt());
+        }
+        if (desiredType == BigInteger.class && object.canConvertToExactIntegral()) {
+            return (T) object.bigIntegerValue();
+        }
+        if (desiredType == Long.class && object.canConvertToLong()) {
+            return (T) Long.valueOf(object.asLong());
+        }
+        if (desiredType == BigDecimal.class && object.isNumber()) {
+            return (T) object.decimalValue();
+        }
+        if (desiredType == Boolean.class && object.isBoolean()) {
+            return (T) Boolean.valueOf(object.booleanValue());
         }
         return null;
     }

@@ -470,31 +470,6 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testJavaxIntegerPositiveNotZeroMaxValueExclusive() {
-        FieldInfo targetField = javaxTargetClass.field("integerPositiveNotZeroMaxValue");
-        testIntegerPositiveNotZeroMaxValueExclusive(targetField);
-    }
-
-    @Test
-    void testJakartaIntegerPositiveNotZeroMaxValueExclusive() {
-        FieldInfo targetField = jakartaTargetClass.field("integerPositiveNotZeroMaxValue");
-        testIntegerPositiveNotZeroMaxValueExclusive(targetField);
-    }
-
-    void testIntegerPositiveNotZeroMaxValueExclusive(FieldInfo targetField) {
-        schema.setExclusiveMaximum(Boolean.TRUE);
-        schema.setExclusiveMinimum(Boolean.TRUE);
-
-        testTarget.max(targetField, schema);
-        testTarget.positive(targetField, schema);
-
-        assertEquals(new BigDecimal("0"), schema.getMinimum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
-        assertEquals(new BigDecimal("1000"), schema.getMaximum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
-    }
-
-    @Test
     void testJavaxIntegerPositiveOrZeroMaxValue() {
         FieldInfo targetField = javaxTargetClass.field("integerPositiveOrZeroMaxValue");
         testIntegerPositiveOrZeroMaxValue(targetField);
@@ -514,31 +489,6 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         assertEquals(null, schema.getExclusiveMinimum());
         assertEquals(new BigDecimal("999"), schema.getMaximum());
         assertEquals(null, schema.getExclusiveMaximum());
-    }
-
-    @Test
-    void testJavaxIntegerPositiveOrZeroMaxValueExclusive() {
-        FieldInfo targetField = javaxTargetClass.field("integerPositiveOrZeroMaxValue");
-        testIntegerPositiveOrZeroMaxValueExclusive(targetField);
-    }
-
-    @Test
-    void testJakartaIntegerPositiveOrZeroMaxValueExclusive() {
-        FieldInfo targetField = jakartaTargetClass.field("integerPositiveOrZeroMaxValue");
-        testIntegerPositiveOrZeroMaxValueExclusive(targetField);
-    }
-
-    void testIntegerPositiveOrZeroMaxValueExclusive(FieldInfo targetField) {
-        schema.setExclusiveMaximum(Boolean.TRUE);
-        schema.setExclusiveMinimum(Boolean.TRUE);
-
-        testTarget.max(targetField, schema);
-        testTarget.positiveOrZero(targetField, schema);
-
-        assertEquals(new BigDecimal("-1"), schema.getMinimum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
-        assertEquals(new BigDecimal("999"), schema.getMaximum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
     }
 
     /**********************************************************************/
@@ -566,31 +516,6 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testJavaxIntegerNegativeNotZeroMinValueExclusive() {
-        FieldInfo targetField = javaxTargetClass.field("integerNegativeNotZeroMinValue");
-        testIntegerNegativeNotZeroMinValueExclusive(targetField);
-    }
-
-    @Test
-    void testJakartaIntegerNegativeNotZeroMinValueExclusive() {
-        FieldInfo targetField = jakartaTargetClass.field("integerNegativeNotZeroMinValue");
-        testIntegerNegativeNotZeroMinValueExclusive(targetField);
-    }
-
-    void testIntegerNegativeNotZeroMinValueExclusive(FieldInfo targetField) {
-        schema.setExclusiveMaximum(Boolean.TRUE);
-        schema.setExclusiveMinimum(Boolean.TRUE);
-
-        testTarget.min(targetField, schema);
-        testTarget.negative(targetField, schema);
-
-        assertEquals(new BigDecimal("0"), schema.getMaximum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
-        assertEquals(new BigDecimal("-1000000"), schema.getMinimum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
-    }
-
-    @Test
     void testJavaxIntegerNegativeOrZeroMinValue() {
         FieldInfo targetField = javaxTargetClass.field("integerNegativeOrZeroMinValue");
         testIntegerNegativeOrZeroMinValue(targetField);
@@ -610,31 +535,6 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         assertEquals(null, schema.getExclusiveMaximum());
         assertEquals(new BigDecimal("-999"), schema.getMinimum());
         assertEquals(null, schema.getExclusiveMinimum());
-    }
-
-    @Test
-    void testJavaxIntegerNegativeOrZeroMinValueExclusive() {
-        FieldInfo targetField = javaxTargetClass.field("integerNegativeOrZeroMinValue");
-        testIntegerNegativeOrZeroMinValueExclusive(targetField);
-    }
-
-    @Test
-    void testJakartaIntegerNegativeOrZeroMinValueExclusive() {
-        FieldInfo targetField = jakartaTargetClass.field("integerNegativeOrZeroMinValue");
-        testIntegerNegativeOrZeroMinValueExclusive(targetField);
-    }
-
-    void testIntegerNegativeOrZeroMinValueExclusive(FieldInfo targetField) {
-        schema.setExclusiveMaximum(Boolean.TRUE);
-        schema.setExclusiveMinimum(Boolean.TRUE);
-
-        testTarget.min(targetField, schema);
-        testTarget.negativeOrZero(targetField, schema);
-
-        assertEquals(new BigDecimal("1"), schema.getMaximum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
-        assertEquals(new BigDecimal("-999"), schema.getMinimum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
     }
 
     /**********************************************************************/
