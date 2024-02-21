@@ -23,12 +23,9 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
@@ -179,9 +176,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         TypeResolver resolver = TypeResolver.forClass(context, controllerClass, null);
         context.getResolverStack().push(resolver);
 
-        OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
-
         // Get the @RequestMapping info and save it for later
         AnnotationInstance requestMappingAnnotation = context.annotations().getAnnotation(controllerClass,
                 SpringConstants.REQUEST_MAPPING);
@@ -193,7 +187,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Process @OpenAPIDefinition annotation
-        processDefinitionAnnotation(context, controllerClass, openApi);
+        OpenAPI openApi = processDefinitionAnnotation(context, controllerClass);
 
         // Process @SecurityScheme annotations
         processSecuritySchemeAnnotation(context, controllerClass, openApi);
@@ -338,7 +332,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         context.getJavaSecurityProcessor().processSecurityRoles(method, operation);
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
-        setOperationOnPathItem(methodType, pathItem, operation);
+        pathItem.setOperation(methodType, operation);
 
         if (!processProfiles(context.getConfig(), operation)) {
             return;
@@ -360,7 +354,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
             final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameters().read(t);
         return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
                 method, reader,
                 context.getExtensions());

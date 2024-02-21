@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -12,13 +13,12 @@ import org.yaml.snakeyaml.LoaderOptions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
-import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
-import io.smallrye.openapi.runtime.io.schema.SchemaReader;
+import io.smallrye.openapi.runtime.io.media.SchemaIO;
 
 /**
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.
@@ -109,7 +109,7 @@ public class OpenApiParser {
         } catch (JsonProcessingException e) {
             throw new OpenApiRuntimeException("Exception parsing JSON Schema representation", e);
         }
-        return SchemaReader.readSchema(tree);
+        return new SchemaIO(null).read(tree);
     }
 
     private final JsonNode tree;
@@ -127,8 +127,10 @@ public class OpenApiParser {
      * Parses the json tree into an OpenAPI data model.
      */
     private OpenAPI parse() {
-        OpenAPI oai = new OpenAPIImpl();
-        DefinitionReader.processDefinition(oai, tree);
-        return oai;
+        return Optional.of(tree)
+                .filter(JsonNode::isObject)
+                .map(ObjectNode.class::cast)
+                .map(node -> new OpenAPIDefinitionIO(null).read(node))
+                .orElse(null);
     }
 }

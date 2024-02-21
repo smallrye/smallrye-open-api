@@ -1,17 +1,15 @@
 package io.smallrye.openapi.runtime.io;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-
-import io.smallrye.openapi.runtime.io.definition.DefinitionWriter;
 
 /**
  * Class used to serialize an OpenAPI
@@ -77,12 +75,15 @@ public class OpenApiSerializer {
      * @throws IOException Errors in processing the model
      */
     public static String serialize(OpenAPI openApi, ObjectWriter writer) throws IOException {
-        try {
-            ObjectNode tree = JsonUtil.objectNode();
-            DefinitionWriter.writeOpenAPI(tree, openApi);
-            return writer.writeValueAsString(tree);
-        } catch (JsonProcessingException e) {
-            throw new IOException(e);
-        }
+        return new OpenAPIDefinitionIO(null)
+                .write(openApi)
+                .map(tree -> {
+                    try {
+                        return writer.writeValueAsString(tree);
+                    } catch (JsonProcessingException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+                .orElseThrow(IllegalStateException::new);
     }
 }

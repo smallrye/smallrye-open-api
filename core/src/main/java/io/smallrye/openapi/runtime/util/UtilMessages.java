@@ -9,7 +9,7 @@ import org.jboss.logging.annotations.MessageBundle;
 interface UtilMessages {
     UtilMessages msg = Messages.getBundle(UtilMessages.class);
 
-    @Message(id = 8000, value = "RefType must not be null")
+    @Message(id = 8000, value = "ReferenceType must not be null")
     NullPointerException refTypeNotNull();
 
     @Message(id = 8001, value = "Unknown primitive: %s")

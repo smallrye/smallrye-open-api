@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -22,12 +23,9 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.operation.OperationConstant;
-import io.smallrye.openapi.runtime.io.parameter.ParameterReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
@@ -150,9 +148,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         TypeResolver resolver = TypeResolver.forClass(context, routeClass, null);
         context.getResolverStack().push(resolver);
 
-        OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
-
         // Get the @RouteBase info and save it for later
         AnnotationInstance routeBaseAnnotation = context.annotations().getAnnotation(routeClass,
                 VertxConstants.ROUTE_BASE);
@@ -164,7 +159,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Process @OpenAPIDefinition annotation
-        processDefinitionAnnotation(context, routeClass, openApi);
+        OpenAPI openApi = processDefinitionAnnotation(context, routeClass);
 
         // Process @SecurityScheme annotations
         processSecuritySchemeAnnotation(context, routeClass, openApi);
@@ -293,7 +288,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         context.getJavaSecurityProcessor().processSecurityRoles(method, operation);
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
-        setOperationOnPathItem(methodType, pathItem, operation);
+        pathItem.setOperation(methodType, operation);
 
         if (!processProfiles(context.getConfig(), operation)) {
             return;
@@ -315,7 +310,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
             final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> ParameterReader.readParameter(context, t);
+        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameters().read(t);
         return VertxParameterProcessor.process(context, currentAppPath, resourceClass,
                 method, reader,
                 context.getExtensions());
@@ -342,7 +337,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         if (context.annotations().value(route, "regex") != null) {
-            return resourceMethod.hasAnnotation(OperationConstant.DOTNAME_OPERATION);
+            return Objects.nonNull(context.io().operations().getAnnotation(resourceMethod));
         }
 
         return true;

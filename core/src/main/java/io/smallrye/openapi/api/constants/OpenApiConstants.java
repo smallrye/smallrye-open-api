@@ -115,7 +115,7 @@ public final class OpenApiConstants {
     public static final String REF_PREFIX_SECURITY_SCHEME = "#/components/securitySchemes/";
 
     public static final String VALUE = "value";
-    public static final String REFS = "refs";
+
     // Shared public
     public static final String OPEN_API_VERSION = "3.0.3";
     public static final Supplier<String[]> DEFAULT_MEDIA_TYPES = () -> new String[] { "*/*" };

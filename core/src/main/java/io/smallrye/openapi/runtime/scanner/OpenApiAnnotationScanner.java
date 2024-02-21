@@ -21,6 +21,7 @@ import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Type;
 
@@ -29,8 +30,8 @@ import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.definition.DefinitionConstant;
-import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
+import io.smallrye.openapi.runtime.io.Names;
+import io.smallrye.openapi.runtime.io.OpenAPIDefinitionIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
@@ -202,15 +203,14 @@ public class OpenApiAnnotationScanner {
      */
     private OpenAPI processPackageOpenAPIDefinitions(final AnnotationScannerContext context, OpenAPI oai) {
         List<AnnotationInstance> packageDefs = context.getIndex()
-                .getAnnotations(DefinitionConstant.DOTNAME_OPEN_API_DEFINITION)
+                .getAnnotations(Names.OPENAPI_DEFINITION)
                 .stream()
                 .filter(this::annotatedClasses)
                 .filter(annotation -> annotation.target().asClass().name().withoutPackagePrefix().equals("package-info"))
                 .collect(Collectors.toList());
 
         for (AnnotationInstance packageDef : packageDefs) {
-            OpenAPI packageOai = new OpenAPIImpl();
-            DefinitionReader.processDefinition(context, packageOai, packageDef);
+            OpenAPI packageOai = context.io().read(packageDef);
             oai = MergeUtil.merge(oai, packageOai);
         }
         return oai;
@@ -268,11 +268,11 @@ public class OpenApiAnnotationScanner {
     }
 
     private boolean tagsDefinedByOpenAPIDefinition(final AnnotationScannerContext context) {
-        return context.getIndex()
-                .getAnnotations(DefinitionConstant.DOTNAME_OPEN_API_DEFINITION)
+        return context.getIndex().getAnnotations(Names.OPENAPI_DEFINITION)
                 .stream()
-                .filter(a -> a.value(DefinitionConstant.PROP_TAGS) != null)
-                .map(a -> a.value(DefinitionConstant.PROP_TAGS).asNestedArray())
+                .map(definition -> definition.value(OpenAPIDefinitionIO.PROP_TAGS))
+                .filter(Objects::nonNull)
+                .map(AnnotationValue::asNestedArray)
                 .anyMatch(definitionTags -> definitionTags.length > 0);
     }
 
