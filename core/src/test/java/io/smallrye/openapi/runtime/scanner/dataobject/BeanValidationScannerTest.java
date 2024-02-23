@@ -347,8 +347,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     void testDecimalMaxExclusiveDigits(FieldInfo targetField) {
         testTarget.decimalMax(targetField, schema);
         testTarget.digits(targetField, schema);
-        assertEquals(new BigDecimal("201.0"), schema.getMaximum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
+        assertEquals(new BigDecimal("201.0"), schema.getExclusiveMaximum());
         assertEquals("^\\d{1,3}([.]\\d)?$", schema.getPattern());
     }
 
@@ -426,8 +425,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.decimalMin(targetField, schema);
         testTarget.digits(targetField, schema);
 
-        assertEquals(new BigDecimal("9.00"), schema.getMinimum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
+        assertEquals(new BigDecimal("9.00"), schema.getExclusiveMinimum());
         assertEquals("^\\d([.]\\d{1,2})?$", schema.getPattern());
     }
 
@@ -463,10 +461,8 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.max(targetField, schema);
         testTarget.positive(targetField, schema);
 
-        assertEquals(new BigDecimal("0"), schema.getMinimum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMinimum());
+        assertEquals(new BigDecimal("0"), schema.getExclusiveMinimum());
         assertEquals(new BigDecimal("1000"), schema.getMaximum());
-        assertEquals(null, schema.getExclusiveMaximum());
     }
 
     @Test
@@ -509,10 +505,8 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.min(targetField, schema);
         testTarget.negative(targetField, schema);
 
-        assertEquals(new BigDecimal("0"), schema.getMaximum());
-        assertEquals(Boolean.TRUE, schema.getExclusiveMaximum());
+        assertEquals(new BigDecimal("0"), schema.getExclusiveMaximum());
         assertEquals(new BigDecimal("-1000000"), schema.getMinimum());
-        assertEquals(null, schema.getExclusiveMinimum());
     }
 
     @Test

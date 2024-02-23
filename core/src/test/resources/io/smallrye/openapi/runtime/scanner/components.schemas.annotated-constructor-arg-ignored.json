@@ -9,7 +9,7 @@
           "property1": {
             "description": "The single property",
             "type": "string",
-            "example": "some value"
+            "examples": ["some value"]
           }
         }
       }

@@ -61,7 +61,7 @@
             "$ref" : "#/components/schemas/LocalDate"
           },
           "allowEmptyValue": false,
-          "example": "2019-12-31"
+          "example" : "2019-12-31"
         }
       ],
       "get": {
@@ -115,7 +115,7 @@
             "$ref" : "#/components/schemas/LocalDate"
           },
           "allowEmptyValue": false,
-          "example": "2019-12-31"
+          "example" : "2019-12-31"
         }
       ],
       "post": {
@@ -219,7 +219,7 @@
       "LocalDate" : {
         "format" : "date",
         "type" : "string",
-        "example" : "2022-03-10"
+        "examples" : [ "2022-03-10" ]
       }
     }
   }

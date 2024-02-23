@@ -49,11 +49,7 @@
           "another_child": {
             "type": "object",
             "description": "This schema will be unioned to $ref to 'another_nested', name will be used for the property, and this description will be present on this property",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/another_nested"
-              }
-            ]
+            "$ref": "#/components/schemas/another_nested"
           },
           "childList": {
             "type": "array",

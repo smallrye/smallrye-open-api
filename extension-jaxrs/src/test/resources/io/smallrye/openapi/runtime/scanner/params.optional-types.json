@@ -71,8 +71,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -89,8 +88,7 @@
                 "type": "object",
                 "properties": {
                   "name4": {
-                    "type": "string",
-                    "nullable": true
+                    "type": ["string", "null"]
                   }
                 }
               }
@@ -140,8 +138,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -176,8 +173,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -229,8 +225,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -272,8 +267,7 @@
         "required": [ "title" ],
         "properties": {
           "title": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           }
         }
       },
@@ -282,19 +276,18 @@
         "properties": {
           "age": {
             "format": "double",
-            "type": "number",
-            "nullable": true
+            "type": ["number", "null"]
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           },
           "nested": {
-            "type": "object",
-            "nullable": true,
-            "allOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/NestedBean"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -304,8 +297,7 @@
         "type": "object",
         "properties": {
           "value": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           }
         }
       }
