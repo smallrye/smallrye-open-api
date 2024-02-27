@@ -5,20 +5,16 @@ import java.util.Optional;
 
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class LinkParameterIO extends MapModelIO<Object> {
+public class LinkParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Object, V, A, O, AB, OB> {
 
     private static final String PROP_EXPRESSION = "expression";
 
-    protected LinkParameterIO(AnnotationScannerContext context) {
+    protected LinkParameterIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OAUTH_SCOPE, Names.create(String.class));
     }
 
@@ -28,30 +24,31 @@ public class LinkParameterIO extends MapModelIO<Object> {
     }
 
     @Override
-    public Map<String, Object> readMap(ObjectNode node) {
+    public Map<String, Object> readObjectMap(O node) {
         IoLogging.logger.jsonNodeMap(modelName.local());
-        return node.properties()
+        return jsonIO.properties(node)
                 .stream()
-                .filter(property -> property.getValue().isValueNode())
-                .map(property -> entry(property.getKey(), JsonUtil.readObject(property.getValue())))
+                .filter(not(property -> jsonIO.isArray(property.getValue())))
+                .filter(not(property -> jsonIO.isObject(property.getValue())))
+                .map(property -> entry(property.getKey(), jsonIO.fromJson(property.getValue())))
                 .collect(toLinkedMap());
     }
 
     @Override
-    public Object read(ObjectNode node) {
+    public Object readObject(O node) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Optional<ObjectNode> write(Map<String, Object> models) {
+    public Optional<O> write(Map<String, Object> models) {
         return optionalJsonObject(models).map(node -> {
-            models.forEach((key, value) -> ObjectWriter.writeObject(node, key, value));
+            models.forEach((key, value) -> setIfPresent(node, key, jsonIO.toJson(value)));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 
     @Override
-    public Optional<ObjectNode> write(Object model) {
+    public Optional<O> write(Object model) {
         throw new UnsupportedOperationException();
     }
 

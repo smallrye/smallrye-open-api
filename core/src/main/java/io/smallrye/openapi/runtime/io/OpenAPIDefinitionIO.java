@@ -5,8 +5,6 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
@@ -19,9 +17,8 @@ import io.smallrye.openapi.runtime.io.responses.APIResponsesIO;
 import io.smallrye.openapi.runtime.io.security.SecurityIO;
 import io.smallrye.openapi.runtime.io.servers.ServerIO;
 import io.smallrye.openapi.runtime.io.tags.TagIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class OpenAPIDefinitionIO extends ModelIO<OpenAPI> {
+public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OpenAPI, V, A, O, AB, OB> {
 
     public static final String PROP_COMPONENTS = "components";
     public static final String PROP_EXTERNAL_DOCS = "externalDocs";
@@ -33,79 +30,79 @@ public class OpenAPIDefinitionIO extends ModelIO<OpenAPI> {
     public static final String PROP_SERVERS = "servers";
     public static final String PROP_TAGS = "tags";
 
-    private final InfoIO infoIO;
-    private final TagIO tagIO;
-    private final ServerIO serverIO;
-    private final SecurityIO securityIO;
-    private final PathsIO pathsIO;
-    private final OperationIO operationIO;
-    private final ComponentsIO componentIO;
-    private final APIResponsesIO responsesIO;
-    private final ExternalDocumentationIO externalDocIO;
-    private final ParameterIO parameterIO;
-    private final RequestBodyIO requestBodyIO;
-    private final SchemaIO schemaIO;
-    private final ExtensionIO extensionIO;
+    private final InfoIO<V, A, O, AB, OB> infoIO;
+    private final TagIO<V, A, O, AB, OB> tagIO;
+    private final ServerIO<V, A, O, AB, OB> serverIO;
+    private final SecurityIO<V, A, O, AB, OB> securityIO;
+    private final PathsIO<V, A, O, AB, OB> pathsIO;
+    private final OperationIO<V, A, O, AB, OB> operationIO;
+    private final ComponentsIO<V, A, O, AB, OB> componentIO;
+    private final APIResponsesIO<V, A, O, AB, OB> responsesIO;
+    private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
+    private final ParameterIO<V, A, O, AB, OB> parameterIO;
+    private final RequestBodyIO<V, A, O, AB, OB> requestBodyIO;
+    private final SchemaIO<V, A, O, AB, OB> schemaIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public OpenAPIDefinitionIO(AnnotationScannerContext context) {
+    public OpenAPIDefinitionIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OPENAPI_DEFINITION, Names.create(OpenAPI.class));
-        ContentIO contentIO = new ContentIO(context);
-        infoIO = new InfoIO(context);
-        tagIO = new TagIO(context);
-        serverIO = new ServerIO(context);
-        securityIO = new SecurityIO(context);
-        operationIO = new OperationIO(context, contentIO);
-        pathsIO = new PathsIO(context, operationIO, contentIO);
-        componentIO = new ComponentsIO(context, contentIO);
-        responsesIO = new APIResponsesIO(context, contentIO);
-        externalDocIO = new ExternalDocumentationIO(context);
-        parameterIO = new ParameterIO(context, contentIO);
-        requestBodyIO = new RequestBodyIO(context, contentIO);
-        schemaIO = new SchemaIO(context);
-        extensionIO = new ExtensionIO(context);
+        ContentIO<V, A, O, AB, OB> contentIO = new ContentIO<>(context);
+        infoIO = new InfoIO<>(context);
+        tagIO = new TagIO<>(context);
+        serverIO = new ServerIO<>(context);
+        securityIO = new SecurityIO<>(context);
+        operationIO = new OperationIO<>(context, contentIO);
+        pathsIO = new PathsIO<>(context, operationIO, contentIO);
+        componentIO = new ComponentsIO<>(context, contentIO);
+        responsesIO = new APIResponsesIO<>(context, contentIO);
+        externalDocIO = new ExternalDocumentationIO<>(context);
+        parameterIO = new ParameterIO<>(context, contentIO);
+        requestBodyIO = new RequestBodyIO<>(context, contentIO);
+        schemaIO = new SchemaIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
-    public TagIO tags() {
+    public TagIO<V, A, O, AB, OB> tags() {
         return tagIO;
     }
 
-    public ServerIO servers() {
+    public ServerIO<V, A, O, AB, OB> servers() {
         return serverIO;
     }
 
-    public SecurityIO security() {
+    public SecurityIO<V, A, O, AB, OB> security() {
         return securityIO;
     }
 
-    public OperationIO operations() {
+    public OperationIO<V, A, O, AB, OB> operations() {
         return operationIO;
     }
 
-    public ComponentsIO components() {
+    public ComponentsIO<V, A, O, AB, OB> components() {
         return componentIO;
     }
 
-    public APIResponsesIO responses() {
+    public APIResponsesIO<V, A, O, AB, OB> responses() {
         return responsesIO;
     }
 
-    public ExternalDocumentationIO externalDocumentation() {
+    public ExternalDocumentationIO<V, A, O, AB, OB> externalDocumentation() {
         return externalDocIO;
     }
 
-    public ParameterIO parameters() {
+    public ParameterIO<V, A, O, AB, OB> parameters() {
         return parameterIO;
     }
 
-    public RequestBodyIO requestBodies() {
+    public RequestBodyIO<V, A, O, AB, OB> requestBodies() {
         return requestBodyIO;
     }
 
-    public SchemaIO schemas() {
+    public SchemaIO<V, A, O, AB, OB> schemas() {
         return schemaIO;
     }
 
-    public ExtensionIO extensions() {
+    public ExtensionIO<V, A, O, AB, OB> extensions() {
         return extensionIO;
     }
 
@@ -129,33 +126,29 @@ public class OpenAPIDefinitionIO extends ModelIO<OpenAPI> {
     /**
      * Reads a OpenAPIDefinition Json node.
      *
-     * @param openApi
-     *        the OpenAPI model
      * @param node
      *        the Json node
      */
     @Override
-    public OpenAPI read(ObjectNode node) {
+    public OpenAPI readObject(O node) {
         IoLogging.logger.jsonNode("OpenAPIDefinition");
-
         OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(JsonUtil.stringProperty(node, PROP_OPENAPI));
-        openApi.setInfo(infoIO.read(node.get(PROP_INFO)));
-        openApi.setTags(tagIO.readList(node.get(PROP_TAGS)));
-        openApi.setServers(serverIO.readList(node.get(PROP_SERVERS)));
-        openApi.setSecurity(securityIO.readRequirements(node.get(PROP_SECURITY)));
-        openApi.setExternalDocs(externalDocIO.read(node.get(PROP_EXTERNAL_DOCS)));
-        openApi.setComponents(componentIO.read(node.get(PROP_COMPONENTS)));
-        openApi.setPaths(pathsIO.read(node.get(PROP_PATHS)));
-        extensionIO.readMap(node).forEach(openApi::addExtension);
-
+        openApi.setOpenapi(jsonIO.getString(node, PROP_OPENAPI));
+        openApi.setInfo(infoIO.readValue(jsonIO.getValue(node, PROP_INFO)));
+        openApi.setTags(tagIO.readList(jsonIO.getValue(node, PROP_TAGS)));
+        openApi.setServers(serverIO.readList(jsonIO.getValue(node, PROP_SERVERS)));
+        openApi.setSecurity(securityIO.readRequirements(jsonIO.getValue(node, PROP_SECURITY)));
+        openApi.setExternalDocs(externalDocIO.readValue(jsonIO.getValue(node, PROP_EXTERNAL_DOCS)));
+        openApi.setComponents(componentIO.readValue(jsonIO.getValue(node, PROP_COMPONENTS)));
+        openApi.setPaths(pathsIO.readValue(jsonIO.getValue(node, PROP_PATHS)));
+        openApi.setExtensions(extensionIO.readMap(node));
         return openApi;
     }
 
     @Override
-    public Optional<ObjectNode> write(OpenAPI model) {
+    public Optional<O> write(OpenAPI model) {
         return optionalJsonObject(model).map(node -> {
-            JsonUtil.stringProperty(node, PROP_OPENAPI, model.getOpenapi());
+            setIfPresent(node, PROP_OPENAPI, jsonIO.toJson(model.getOpenapi()));
             setIfPresent(node, PROP_INFO, infoIO.write(model.getInfo()));
             setIfPresent(node, PROP_EXTERNAL_DOCS, externalDocIO.write(model.getExternalDocs()));
             setIfPresent(node, PROP_SERVERS, serverIO.write(model.getServers()));
@@ -165,6 +158,6 @@ public class OpenAPIDefinitionIO extends ModelIO<OpenAPI> {
             setIfPresent(node, PROP_COMPONENTS, componentIO.write(model.getComponents()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

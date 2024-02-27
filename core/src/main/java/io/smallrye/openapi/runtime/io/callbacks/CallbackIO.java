@@ -6,35 +6,32 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.PathItemIO;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class CallbackIO extends MapModelIO<Callback> implements ReferenceIO {
+public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Callback, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_OPERATIONS = "operations";
     private static final String PROP_CALLBACK_URL_EXPRESSION = "callbackUrlExpression";
 
-    private final ExtensionIO extensionIO;
-    private final CallbackOperationIO callbackOperationIO;
-    private final PathItemIO pathItemIO;
+    private final CallbackOperationIO<V, A, O, AB, OB> callbackOperationIO;
+    private final PathItemIO<V, A, O, AB, OB> pathItemIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public CallbackIO(AnnotationScannerContext context, ContentIO contentIO) {
+    public CallbackIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
         super(context, Names.CALLBACK, DotName.createSimple(Callback.class));
-        extensionIO = new ExtensionIO(context);
-        callbackOperationIO = new CallbackOperationIO(context, contentIO, this);
-        pathItemIO = new PathItemIO(context, callbackOperationIO, contentIO);
+        callbackOperationIO = new CallbackOperationIO<>(context, contentIO, this);
+        pathItemIO = new PathItemIO<>(context, callbackOperationIO, contentIO);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     @Override
@@ -55,17 +52,17 @@ public class CallbackIO extends MapModelIO<Callback> implements ReferenceIO {
     }
 
     @Override
-    public Callback read(ObjectNode node) {
+    public Callback readObject(O node) {
         IoLogging.logger.singleJsonNode("Callback");
         Callback callback = new CallbackImpl();
         callback.setRef(readReference(node));
 
-        node.properties()
+        jsonIO.properties(node)
                 .stream()
                 .filter(not(ExtensionIO::isExtension))
                 .filter(not(this::isReference))
-                .filter(property -> property.getValue().isObject())
-                .map(property -> entry(property.getKey(), pathItemIO.read((ObjectNode) property.getValue())))
+                .filter(property -> jsonIO.isObject(property.getValue()))
+                .map(property -> entry(property.getKey(), pathItemIO.readValue(property.getValue())))
                 .forEach(pathItem -> callback.addPathItem(pathItem.getKey(), pathItem.getValue()));
 
         extensionIO.readMap(node).forEach(callback::addExtension);
@@ -74,10 +71,10 @@ public class CallbackIO extends MapModelIO<Callback> implements ReferenceIO {
     }
 
     @Override
-    public Optional<ObjectNode> write(Callback model) {
+    public Optional<O> write(Callback model) {
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
-                JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+                setReference(node, model);
             } else {
                 Optional.ofNullable(model.getPathItems())
                         .ifPresent(items -> items.forEach((key, value) -> setIfPresent(node, key, pathItemIO.write(value))));
@@ -85,6 +82,6 @@ public class CallbackIO extends MapModelIO<Callback> implements ReferenceIO {
                 setAllIfPresent(node, extensionIO.write(model));
             }
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

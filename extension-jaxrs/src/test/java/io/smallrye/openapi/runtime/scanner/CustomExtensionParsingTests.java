@@ -9,11 +9,13 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
 
 /**
  * Special tests using a custom {@link AnnotationScannerExtension#parseExtension(String, String)}
@@ -41,8 +43,7 @@ class CustomExtensionParsingTests {
 
     void testDefaultExtensionParseThrowsJacksonNotFound(Index index) {
         OpenApiConfig config = IndexScannerTestBase.emptyConfig();
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
-        NoClassDefFoundError err = assertThrows(NoClassDefFoundError.class, () -> scanner.scan());
+        NoClassDefFoundError err = assertThrows(NoClassDefFoundError.class, () -> new OpenApiAnnotationScanner(config, index));
         assertTrue(err.getMessage().contains("jackson"));
     }
 
@@ -70,6 +71,16 @@ class CustomExtensionParsingTests {
                          * extension name as the key and the unparsed value as the value
                          */
                         return Collections.singletonMap(name, value);
+                    }
+
+                    @Override
+                    public Object parseValue(String value) {
+                        return value;
+                    }
+
+                    @Override
+                    public Schema parseSchema(String jsonSchema) {
+                        return new SchemaImpl();
                     }
                 }));
 

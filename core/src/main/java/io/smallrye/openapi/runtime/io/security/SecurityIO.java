@@ -13,27 +13,24 @@ import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import io.smallrye.openapi.runtime.io.IOContext;
 
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+public class SecurityIO<V, A extends V, O extends V, AB, OB> {
 
-public class SecurityIO {
+    private final SecurityRequirementIO<V, A, O, AB, OB> securityRequirementIO;
+    private final SecurityRequirementsSetIO<V, A, O, AB, OB> securityRequirementsSetIO;
+    private final SecuritySchemeIO<V, A, O, AB, OB> securitySchemeIO;
 
-    private final SecurityRequirementIO securityRequirementIO;
-    private final SecurityRequirementsSetIO securityRequirementsSetIO;
-    private final SecuritySchemeIO securitySchemeIO;
-
-    public SecurityIO(AnnotationScannerContext context) {
-        securityRequirementIO = new SecurityRequirementIO(context);
-        securityRequirementsSetIO = new SecurityRequirementsSetIO(context);
-        securitySchemeIO = new SecuritySchemeIO(context);
+    public SecurityIO(IOContext<V, A, O, AB, OB> context) {
+        securityRequirementIO = new SecurityRequirementIO<>(context);
+        securityRequirementsSetIO = new SecurityRequirementsSetIO<>(context);
+        securitySchemeIO = new SecuritySchemeIO<>(context);
     }
 
     public List<SecurityRequirement> readRequirements(AnnotationTarget target) {
         return Stream.of(
-                    securityRequirementIO.readList(target),
-                    securityRequirementsSetIO.readList(target))
+                securityRequirementIO.readList(target),
+                securityRequirementsSetIO.readList(target))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
@@ -42,8 +39,8 @@ public class SecurityIO {
         List<List<SecurityRequirement>> requirements = Stream.of(
                 securityRequirementIO.readList(annotations),
                 securityRequirementsSetIO.readList(setAnnotations))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         if (requirements.isEmpty()) {
             return null; // NOSONAR - null is the desired result when both sublists were null
@@ -58,11 +55,11 @@ public class SecurityIO {
         return securitySchemeIO.readMap(target);
     }
 
-    public List<SecurityRequirement> readRequirements(JsonNode node) {
+    public List<SecurityRequirement> readRequirements(V node) {
         return securityRequirementIO.readList(node);
     }
 
-    public Optional<ArrayNode> write(List<SecurityRequirement> models) {
+    public Optional<A> write(List<SecurityRequirement> models) {
         return securityRequirementIO.write(models);
     }
 }

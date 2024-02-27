@@ -5,18 +5,20 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.Reference;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
-public interface ReferenceIO {
+public interface ReferenceIO<V, A extends V, O extends V, AB, OB> {
+
+    static final String REF = "$ref";
+
+    JsonIO<V, A, O, AB, OB> jsonIO();
 
     default boolean isReference(Object model) {
         return model instanceof Reference && isReference((Reference<?>) model);
     }
 
     default boolean isReference(String name) {
-        return Referenceable.PROP_$REF.equals(name);
+        return REF.equals(name);
     }
 
     default boolean isReference(Map.Entry<String, ?> entry) {
@@ -32,7 +34,12 @@ public interface ReferenceIO {
         return ref != null && !ref.trim().isEmpty();
     }
 
-    default String readReference(ObjectNode node) {
-        return JsonUtil.stringProperty(node, Referenceable.PROP_$REF);
+    default String readReference(O node) {
+        return jsonIO().getString(node, REF);
+    }
+
+    default void setReference(OB object, Reference<?> model) {
+        jsonIO().toJson(model.getRef())
+                .ifPresent(value -> jsonIO().set(object, REF, value));
     }
 }

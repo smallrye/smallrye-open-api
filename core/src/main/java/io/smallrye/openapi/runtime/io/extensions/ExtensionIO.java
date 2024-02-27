@@ -8,16 +8,12 @@ import org.eclipse.microprofile.openapi.models.Extensible;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class ExtensionIO extends MapModelIO<Object> {
+public class ExtensionIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Object, V, A, O, AB, OB> {
 
     private static final String PROP_VALUE = "value";
     private static final String EXTENSION_PROPERTY_PREFIX = "x-";
@@ -31,7 +27,7 @@ public class ExtensionIO extends MapModelIO<Object> {
         return isExtension(entry.getKey());
     }
 
-    public ExtensionIO(AnnotationScannerContext context) {
+    public ExtensionIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.EXTENSION, Names.create(Object.class));
     }
 
@@ -72,33 +68,31 @@ public class ExtensionIO extends MapModelIO<Object> {
     }
 
     @Override
-    public Map<String, Object> readMap(ObjectNode node) {
-        return readMap(node, ExtensionIO::isExtension, JsonUtil::readObject);
+    public Map<String, Object> readObjectMap(O node) {
+        return readMap(node, ExtensionIO::isExtension, jsonIO::fromJson);
     }
 
     @Override
-    public Object read(ObjectNode node) {
-        return JsonUtil.readObject(node);
+    public Object readObject(O node) {
+        return jsonIO.fromJson(node);
     }
 
     @Override
-    public Optional<ObjectNode> write(Object model) {
+    public Optional<O> write(Object model) {
         return Optional.ofNullable(model)
                 .filter(Extensible.class::isInstance)
                 .map(Extensible.class::cast)
                 .flatMap(this::write);
     }
 
-    public Optional<ObjectNode> write(Extensible<?> model) {
-        return optionalJsonObject(model.getExtensions())
-                .map(node -> {
-                    model.getExtensions()
-                            .entrySet()
-                            .stream()
-                            .map(e -> isExtension(e) ? e
-                                    : entry(EXTENSION_PROPERTY_PREFIX + e.getKey(), e.getValue()))
-                            .forEach(e -> ObjectWriter.writeObject(node, e.getKey(), e.getValue()));
-                    return node;
-                });
+    public Optional<O> write(Extensible<?> model) {
+        return optionalJsonObject(model.getExtensions()).map(node -> {
+            model.getExtensions()
+                    .entrySet()
+                    .stream()
+                    .map(e -> isExtension(e) ? e : entry(EXTENSION_PROPERTY_PREFIX + e.getKey(), e.getValue()))
+                    .forEach(e -> setIfPresent(node, e.getKey(), jsonIO.toJson(e.getValue())));
+            return node;
+        }).map(jsonIO::buildObject);
     }
 }

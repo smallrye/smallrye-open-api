@@ -16,14 +16,11 @@ import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
-import io.smallrye.openapi.runtime.io.ContentDirection;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
@@ -31,23 +28,22 @@ import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class RequestBodyIO extends MapModelIO<RequestBody> implements ReferenceIO {
+public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<RequestBody, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_REQUIRED = "required";
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_CONTENT = "content";
     private static final String PROP_VALUE = "value";
-    private static final String PROP_REF = "$ref";
 
-    private final ContentIO contentIO;
-    private final ExtensionIO extensionIO;
+    private final ContentIO<V, A, O, AB, OB> contentIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public RequestBodyIO(AnnotationScannerContext context, ContentIO contentIO) {
+    public RequestBodyIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
         super(context, Names.REQUEST_BODY, Names.create(RequestBody.class));
         this.contentIO = contentIO;
-        extensionIO = new ExtensionIO(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     Stream<AnnotationInstance> getAnnotations(MethodInfo method, DotName annotation) {
@@ -73,7 +69,7 @@ public class RequestBodyIO extends MapModelIO<RequestBody> implements ReferenceI
         IoLogging.logger.singleAnnotation("@RequestBody");
         RequestBody requestBody = new RequestBodyImpl();
         requestBody.setDescription(value(annotation, PROP_DESCRIPTION));
-        requestBody.setContent(contentIO.read(annotation.value(PROP_CONTENT), ContentDirection.INPUT));
+        requestBody.setContent(contentIO.read(annotation.value(PROP_CONTENT), ContentIO.Direction.INPUT));
         requestBody.setRequired(value(annotation, PROP_REQUIRED));
         requestBody.setRef(ReferenceType.REQUEST_BODY.refValue(annotation));
         requestBody.setExtensions(extensionIO.readExtensible(annotation));
@@ -109,29 +105,28 @@ public class RequestBodyIO extends MapModelIO<RequestBody> implements ReferenceI
     }
 
     @Override
-    public RequestBody read(ObjectNode node) {
+    public RequestBody readObject(O node) {
         RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
-        requestBody.setContent(contentIO.read(node.get(PROP_CONTENT)));
-        requestBody.setRequired(JsonUtil.booleanProperty(node, PROP_REQUIRED).orElse(null));
-        requestBody.setRef(JsonUtil.stringProperty(node, PROP_REF));
+        requestBody.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        requestBody.setContent(contentIO.readValue(jsonIO.getValue(node, PROP_CONTENT)));
+        requestBody.setRequired(jsonIO.getBoolean(node, PROP_REQUIRED));
+        requestBody.setRef(readReference(node));
         requestBody.setExtensions(extensionIO.readMap(node));
         return requestBody;
     }
 
-
-    public Optional<ObjectNode> write(RequestBody model) {
+    public Optional<O> write(RequestBody model) {
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
-                JsonUtil.stringProperty(node, PROP_REF, model.getRef());
+                setReference(node, model);
             } else {
-                JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
                 setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
-                JsonUtil.booleanProperty(node, PROP_REQUIRED, model.getRequired());
+                setIfPresent(node, PROP_REQUIRED, jsonIO.toJson(model.getRequired()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

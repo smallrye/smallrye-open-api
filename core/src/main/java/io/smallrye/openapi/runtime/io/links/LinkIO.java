@@ -5,23 +5,18 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.links.Link;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.links.LinkImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.servers.ServerIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class LinkIO extends MapModelIO<Link> implements ReferenceIO {
+public class LinkIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Link, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_OPERATION_ID = "operationId";
     private static final String PROP_PARAMETERS = "parameters";
@@ -30,15 +25,15 @@ public class LinkIO extends MapModelIO<Link> implements ReferenceIO {
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_REQUEST_BODY = "requestBody";
 
-    private final ServerIO serverIO;
-    private final LinkParameterIO linkParameterIO;
-    private final ExtensionIO extensionIO;
+    private final ServerIO<V, A, O, AB, OB> serverIO;
+    private final LinkParameterIO<V, A, O, AB, OB> linkParameterIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public LinkIO(AnnotationScannerContext context) {
+    public LinkIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.LINK, Names.create(Link.class));
-        serverIO = new ServerIO(context);
-        linkParameterIO = new LinkParameterIO(context);
-        extensionIO = new ExtensionIO(context);
+        serverIO = new ServerIO<>(context);
+        linkParameterIO = new LinkParameterIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     @Override
@@ -57,36 +52,35 @@ public class LinkIO extends MapModelIO<Link> implements ReferenceIO {
     }
 
     @Override
-    public Link read(ObjectNode node) {
+    public Link readObject(O node) {
         IoLogging.logger.singleJsonNode("Link");
         Link link = new LinkImpl();
-        link.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
-
-        link.setOperationRef(JsonUtil.stringProperty(node, PROP_OPERATION_REF));
-        link.setOperationId(JsonUtil.stringProperty(node, PROP_OPERATION_ID));
-        link.setParameters(linkParameterIO.readMap(node.get(PROP_PARAMETERS)));
-        link.setRequestBody(JsonUtil.readObject(node.get(PROP_REQUEST_BODY)));
-        link.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
-        link.setServer(serverIO.read(node.get(PROP_SERVER)));
+        link.setRef(readReference(node));
+        link.setOperationRef(jsonIO.getString(node, PROP_OPERATION_REF));
+        link.setOperationId(jsonIO.getString(node, PROP_OPERATION_ID));
+        link.setParameters(linkParameterIO.readMap(jsonIO.getValue(node, PROP_PARAMETERS)));
+        link.setRequestBody(jsonIO.fromJson(jsonIO.getValue(node, PROP_REQUEST_BODY)));
+        link.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        link.setServer(serverIO.readValue(jsonIO.getValue(node, PROP_SERVER)));
         extensionIO.readMap(node).forEach(link::addExtension);
         return link;
     }
 
-    public Optional<ObjectNode> write(Link model) {
+    public Optional<O> write(Link model) {
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
-                JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+                setReference(node, model);
             } else {
-                JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_REF, model.getOperationRef());
-                JsonUtil.stringProperty(node, OpenApiConstants.PROP_OPERATION_ID, model.getOperationId());
+                setIfPresent(node, PROP_OPERATION_REF, jsonIO.toJson(model.getOperationRef()));
+                setIfPresent(node, PROP_OPERATION_ID, jsonIO.toJson(model.getOperationId()));
                 setIfPresent(node, PROP_PARAMETERS, linkParameterIO.write(model.getParameters()));
-                ObjectWriter.writeObject(node, PROP_REQUEST_BODY, model.getRequestBody());
-                JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
+                setIfPresent(node, PROP_REQUEST_BODY, jsonIO.toJson(model.getRequestBody()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
                 setIfPresent(node, PROP_SERVER, serverIO.write(model.getServer()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

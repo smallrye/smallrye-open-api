@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.io;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -14,14 +13,18 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+/**
+ *
+ * @param <T> model type
+ * @param <V> JSON value type
+ * @param <A> JSON array type
+ * @param <O> JSON object type
+ * @param <AB> JSON array builder type (writable array)
+ * @param <OB> JSON object builder type (writable object)
+ */
+public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends ModelIO<T, V, A, O, AB, OB> {
 
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-
-public abstract class MapModelIO<T> extends ModelIO<T> {
-
-    protected MapModelIO(AnnotationScannerContext context, DotName annotationName, DotName modelName) {
+    protected MapModelIO(IOContext<V, A, O, AB, OB> context, DotName annotationName, DotName modelName) {
         super(context, annotationName, modelName);
     }
 
@@ -72,47 +75,46 @@ public abstract class MapModelIO<T> extends ModelIO<T> {
 
     // -------------- JSON
 
-    protected Map<String, T> readMap(ObjectNode node, Function<ObjectNode, T> reader) {
-        return node.properties()
+    protected Map<String, T> readMap(O node, Function<O, T> reader) {
+        return jsonIO.properties(node)
                 .stream()
-                .filter(property -> Objects.nonNull(property.getValue()))
-                .filter(property -> property.getValue().isObject())
-                .map(property -> entry(property.getKey(), reader.apply((ObjectNode) property.getValue())))
+                .filter(property -> jsonIO.isObject(property.getValue()))
+                .map(property -> entry(property.getKey(), reader.apply(jsonIO.asObject(property.getValue()))))
                 .collect(toLinkedMap());
     }
 
-    protected Map<String, T> readMap(ObjectNode node, Predicate<String> nameFilter, Function<JsonNode, T> reader) {
-        return node.properties()
+    protected Map<String, T> readMap(O node, Predicate<String> nameFilter, Function<V, T> reader) {
+        return jsonIO.properties(node)
                 .stream()
                 .filter(property -> nameFilter.test(property.getKey()))
                 .map(property -> entry(property.getKey(), reader.apply(property.getValue())))
                 .collect(toLinkedMap());
     }
 
-    public Map<String, T> readMap(JsonNode node) {
+    public Map<String, T> readMap(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isObject)
-                .map(ObjectNode.class::cast)
-                .map(this::readMap)
+                .filter(jsonIO::isObject)
+                .map(jsonIO::asObject)
+                .map(this::readObjectMap)
                 .orElse(null);
     }
 
-    public Map<String, T> readMap(ObjectNode node) {
+    public Map<String, T> readObjectMap(O node) {
         IoLogging.logger.jsonNodeMap(modelName.local());
-        return readMap(node, this::read);
+        return readMap(node, this::readObject);
     }
 
-    public Optional<ObjectNode> write(Map<String, T> models) {
+    public Optional<O> write(Map<String, T> models) {
         return optionalJsonObject(models).map(node -> {
             models.forEach((key, value) -> {
-                Optional<ObjectNode> jsonValue = write(value);
+                Optional<O> jsonValue = write(value);
                 if (jsonValue.isPresent()) {
-                    node.set(key, jsonValue.get());
+                    jsonIO.set(node, key, jsonValue.get());
                 } else {
-                    node.putNull(key);
+                    jsonIO.set(node, key, null);
                 }
             });
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

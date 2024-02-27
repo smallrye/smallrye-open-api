@@ -138,7 +138,7 @@ public class DeploymentProcessor {
         try {
             war.addAsManifestResource(new ByteArrayAsset(serialize(openAPI, JSON).getBytes(UTF_8)), "openapi.json");
             war.addAsManifestResource(new ByteArrayAsset(serialize(openAPI, YAML).getBytes(UTF_8)), "openapi.yaml");
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Ignore
         }
 

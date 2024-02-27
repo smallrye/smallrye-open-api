@@ -8,19 +8,15 @@ import org.eclipse.microprofile.openapi.models.media.Encoding.Style;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.media.EncodingImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.headers.HeaderIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class EncodingIO extends MapModelIO<Encoding> {
+public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Encoding, V, A, O, AB, OB> {
 
     private static final String PROP_ALLOW_RESERVED = "allowReserved";
     private static final String PROP_CONTENT_TYPE = "contentType";
@@ -28,13 +24,13 @@ public class EncodingIO extends MapModelIO<Encoding> {
     private static final String PROP_EXPLODE = "explode";
     private static final String PROP_STYLE = "style";
 
-    private final HeaderIO headerIO;
-    private final ExtensionIO extensionIO;
+    private final HeaderIO<V, A, O, AB, OB> headerIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public EncodingIO(AnnotationScannerContext context, ContentIO contentIO) {
+    public EncodingIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
         super(context, Names.ENCODING, Names.create(Encoding.class));
-        headerIO = new HeaderIO(context, contentIO);
-        extensionIO = new ExtensionIO(context);
+        headerIO = new HeaderIO<>(context, contentIO);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     @Override
@@ -51,28 +47,29 @@ public class EncodingIO extends MapModelIO<Encoding> {
     }
 
     @Override
-    public Encoding read(ObjectNode node) {
+    public Encoding readObject(O node) {
         IoLogging.logger.singleJsonNode("Encoding");
         Encoding encoding = new EncodingImpl();
-        encoding.setContentType(JsonUtil.stringProperty(node, PROP_CONTENT_TYPE));
-        encoding.setHeaders(headerIO.readMap(node.get(PROP_HEADERS)));
-        encoding.setStyle(readStyle(node.get(PROP_STYLE)));
-        encoding.setExplode(JsonUtil.booleanProperty(node, PROP_EXPLODE).orElse(null));
-        encoding.setAllowReserved(JsonUtil.booleanProperty(node, PROP_ALLOW_RESERVED).orElse(null));
+        encoding.setContentType(jsonIO.getString(node, PROP_CONTENT_TYPE));
+        encoding.setHeaders(headerIO.readMap(jsonIO.getValue(node, PROP_HEADERS)));
+        encoding.setStyle(readStyle(jsonIO.getValue(node, PROP_STYLE)));
+        encoding.setExplode(jsonIO.getBoolean(node, PROP_EXPLODE));
+        encoding.setAllowReserved(jsonIO.getBoolean(node, PROP_ALLOW_RESERVED));
         encoding.setExtensions(extensionIO.readMap(node));
         return encoding;
     }
 
-    public Optional<ObjectNode> write(Encoding model) {
+    @Override
+    public Optional<O> write(Encoding model) {
         return optionalJsonObject(model).map(node -> {
-            JsonUtil.stringProperty(node, PROP_CONTENT_TYPE, model.getContentType());
+            setIfPresent(node, PROP_CONTENT_TYPE, jsonIO.toJson(model.getContentType()));
             setIfPresent(node, PROP_HEADERS, headerIO.write(model.getHeaders()));
-            JsonUtil.enumProperty(node, PROP_STYLE, model.getStyle());
-            JsonUtil.booleanProperty(node, PROP_EXPLODE, model.getExplode());
-            JsonUtil.booleanProperty(node, PROP_ALLOW_RESERVED, model.getAllowReserved());
+            setIfPresent(node, PROP_STYLE, jsonIO.toJson(model.getStyle()));
+            setIfPresent(node, PROP_EXPLODE, jsonIO.toJson(model.getExplode()));
+            setIfPresent(node, PROP_ALLOW_RESERVED, jsonIO.toJson(model.getAllowReserved()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 
     Style readStyle(AnnotationInstance annotation) {
@@ -83,10 +80,9 @@ public class EncodingIO extends MapModelIO<Encoding> {
                 .orElse(null);
     }
 
-    private Style readStyle(JsonNode node) {
+    private Style readStyle(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
+                .map(jsonIO::asString)
                 .flatMap(this::readStyle)
                 .orElse(null);
     }

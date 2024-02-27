@@ -1,39 +1,27 @@
 package io.smallrye.openapi.runtime.io.media;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.XML;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.runtime.io.ExternalDocumentationIO;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
-import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class SchemaIO extends MapModelIO<Schema> implements ReferenceIO {
+public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Schema, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_NAME = "name";
     private static final String PROP_PREFIX = "prefix";
@@ -41,18 +29,18 @@ public class SchemaIO extends MapModelIO<Schema> implements ReferenceIO {
     private static final String PROP_WRAPPED = "wrapped";
     private static final String PROP_ATTRIBUTE = "attribute";
 
-    private final DiscriminatorIO discriminatorIO;
-    private final ExternalDocumentationIO externalDocIO;
-    private final ExtensionIO extensionIO;
+    private final DiscriminatorIO<V, A, O, AB, OB> discriminatorIO;
+    private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public SchemaIO(AnnotationScannerContext context) {
+    public SchemaIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SCHEMA, Names.create(Schema.class));
-        discriminatorIO = new DiscriminatorIO(context);
-        externalDocIO = new ExternalDocumentationIO(context);
-        extensionIO = new ExtensionIO(context);
+        discriminatorIO = new DiscriminatorIO<>(context);
+        externalDocIO = new ExternalDocumentationIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
-    public DiscriminatorIO discriminator() {
+    public DiscriminatorIO<V, A, O, AB, OB> discriminator() {
         return discriminatorIO;
     }
 
@@ -67,155 +55,125 @@ public class SchemaIO extends MapModelIO<Schema> implements ReferenceIO {
     }
 
     @Override
-    public Schema read(ObjectNode node) {
+    public Schema readObject(O node) {
         IoLogging.logger.singleJsonObject("Schema");
-        String name = JsonUtil.stringProperty(node, SchemaConstant.PROP_NAME);
+        Schema schema = new SchemaImpl(jsonIO.getString(node, SchemaConstant.PROP_NAME));
+        schema.setRef(readReference(node));
+        schema.setFormat(jsonIO.getString(node, SchemaConstant.PROP_FORMAT));
+        schema.setTitle(jsonIO.getString(node, SchemaConstant.PROP_TITLE));
+        schema.setDescription(jsonIO.getString(node, SchemaConstant.PROP_DESCRIPTION));
+        schema.setDefaultValue(jsonIO.fromJson(jsonIO.getValue(node, SchemaConstant.PROP_DEFAULT)));
+        schema.setMultipleOf(jsonIO.getBigDecimal(node, SchemaConstant.PROP_MULTIPLE_OF));
+        schema.setMaximum(jsonIO.getBigDecimal(node, SchemaConstant.PROP_MAXIMUM));
+        schema.setExclusiveMaximum(jsonIO.getBoolean(node, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM));
+        schema.setMinimum(jsonIO.getBigDecimal(node, SchemaConstant.PROP_MINIMUM));
+        schema.setExclusiveMinimum(jsonIO.getBoolean(node, SchemaConstant.PROP_EXCLUSIVE_MINIMUM));
+        schema.setMaxLength(jsonIO.getInt(node, SchemaConstant.PROP_MAX_LENGTH));
+        schema.setMinLength(jsonIO.getInt(node, SchemaConstant.PROP_MIN_LENGTH));
+        schema.setPattern(jsonIO.getString(node, SchemaConstant.PROP_PATTERN));
+        schema.setMaxItems(jsonIO.getInt(node, SchemaConstant.PROP_MAX_ITEMS));
+        schema.setMinItems(jsonIO.getInt(node, SchemaConstant.PROP_MIN_ITEMS));
+        schema.setUniqueItems(jsonIO.getBoolean(node, SchemaConstant.PROP_UNIQUE_ITEMS));
+        schema.setMaxProperties(jsonIO.getInt(node, SchemaConstant.PROP_MAX_PROPERTIES));
+        schema.setMinProperties(jsonIO.getInt(node, SchemaConstant.PROP_MIN_PROPERTIES));
+        schema.setRequired(jsonIO.getArray(node, SchemaConstant.PROP_REQUIRED, jsonIO::asString).orElse(null));
+        schema.setEnumeration(jsonIO.getArray(node, SchemaConstant.PROP_ENUM, jsonIO::fromJson).orElse(null));
+        schema.setType(enumValue(jsonIO.getValue(node, SchemaConstant.PROP_TYPE), Schema.SchemaType.class));
+        schema.setItems(jsonIO.getObject(node, SchemaConstant.PROP_ITEMS).map(this::readObject).orElse(null));
+        schema.setNot(jsonIO.getObject(node, SchemaConstant.PROP_NOT).map(this::readObject).orElse(null));
+        schema.setAllOf(jsonIO.getArray(node, SchemaConstant.PROP_ALL_OF, this::readValue).orElse(null));
+        schema.setProperties(readMap(jsonIO.getValue(node, SchemaConstant.PROP_PROPERTIES)));
 
-        Schema schema = new SchemaImpl(name);
-        schema.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
-        schema.setFormat(JsonUtil.stringProperty(node, SchemaConstant.PROP_FORMAT));
-        schema.setTitle(JsonUtil.stringProperty(node, SchemaConstant.PROP_TITLE));
-        schema.setDescription(JsonUtil.stringProperty(node, SchemaConstant.PROP_DESCRIPTION));
-        schema.setDefaultValue(JsonUtil.readObject(node.get(SchemaConstant.PROP_DEFAULT)));
-        schema.setMultipleOf(JsonUtil.bigDecimalProperty(node, SchemaConstant.PROP_MULTIPLE_OF));
-        schema.setMaximum(JsonUtil.bigDecimalProperty(node, SchemaConstant.PROP_MAXIMUM));
-        schema.setExclusiveMaximum(JsonUtil.booleanProperty(node, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM).orElse(null));
-        schema.setMinimum(JsonUtil.bigDecimalProperty(node, SchemaConstant.PROP_MINIMUM));
-        schema.setExclusiveMinimum(JsonUtil.booleanProperty(node, SchemaConstant.PROP_EXCLUSIVE_MINIMUM).orElse(null));
-        schema.setMaxLength(JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_LENGTH));
-        schema.setMinLength(JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_LENGTH));
-        schema.setPattern(JsonUtil.stringProperty(node, SchemaConstant.PROP_PATTERN));
-        schema.setMaxItems(JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_ITEMS));
-        schema.setMinItems(JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_ITEMS));
-        schema.setUniqueItems(JsonUtil.booleanProperty(node, SchemaConstant.PROP_UNIQUE_ITEMS).orElse(null));
-        schema.setMaxProperties(JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_PROPERTIES));
-        schema.setMinProperties(JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_PROPERTIES));
-        schema.setRequired(JsonUtil.readStringArray(node.get(SchemaConstant.PROP_REQUIRED)).orElse(null));
-        schema.setEnumeration(JsonUtil.readObjectArray(node.get(SchemaConstant.PROP_ENUM)).orElse(null));
-        schema.setType(readSchemaType(node.get(SchemaConstant.PROP_TYPE)));
-        schema.setItems(read(node.get(SchemaConstant.PROP_ITEMS)));
-        schema.setNot(read(node.get(SchemaConstant.PROP_NOT)));
-        schema.setAllOf(readList(node.get(SchemaConstant.PROP_ALL_OF)));
-        schema.setProperties(readMap(node.get(SchemaConstant.PROP_PROPERTIES)));
+        V addlProperties = jsonIO.getValue(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES);
 
-        if (node.has(SchemaConstant.PROP_ADDITIONAL_PROPERTIES)
-                && node.get(SchemaConstant.PROP_ADDITIONAL_PROPERTIES).isObject()) {
-            schema.setAdditionalPropertiesSchema(read(node.get(SchemaConstant.PROP_ADDITIONAL_PROPERTIES)));
+        if (jsonIO.isObject(addlProperties)) {
+            schema.setAdditionalPropertiesSchema(readObject(jsonIO.asObject(addlProperties)));
         } else {
             schema.setAdditionalPropertiesBoolean(
-                    JsonUtil.booleanProperty(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES).orElse(null));
+                    jsonIO.getBoolean(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES));
         }
 
-        schema.setReadOnly(JsonUtil.booleanProperty(node, SchemaConstant.PROP_READ_ONLY).orElse(null));
-        schema.setXml(readXML(node.get(SchemaConstant.PROP_XML)));
-        schema.setExternalDocs(externalDocIO.read(node.get(SchemaConstant.PROP_EXTERNAL_DOCS)));
-        schema.setExample(JsonUtil.readObject(node.get(SchemaConstant.PROP_EXAMPLE)));
-        schema.setOneOf(readList(node.get(SchemaConstant.PROP_ONE_OF)));
-        schema.setAnyOf(readList(node.get(SchemaConstant.PROP_ANY_OF)));
-        schema.setNot(read(node.get(SchemaConstant.PROP_NOT)));
-        schema.setDiscriminator(discriminatorIO.read(node.get(SchemaConstant.PROP_DISCRIMINATOR)));
-        schema.setNullable(JsonUtil.booleanProperty(node, SchemaConstant.PROP_NULLABLE).orElse(null));
-        schema.setWriteOnly(JsonUtil.booleanProperty(node, SchemaConstant.PROP_WRITE_ONLY).orElse(null));
-        schema.setDeprecated(JsonUtil.booleanProperty(node, SchemaConstant.PROP_DEPRECATED).orElse(null));
+        schema.setReadOnly(jsonIO.getBoolean(node, SchemaConstant.PROP_READ_ONLY));
+        schema.setXml(readXML(jsonIO.getValue(node, SchemaConstant.PROP_XML)));
+        schema.setExternalDocs(externalDocIO.readValue(jsonIO.getValue(node, SchemaConstant.PROP_EXTERNAL_DOCS)));
+        schema.setExample(jsonIO.fromJson(jsonIO.getValue(node, SchemaConstant.PROP_EXAMPLE)));
+        schema.setOneOf(jsonIO.getArray(node, SchemaConstant.PROP_ONE_OF, this::readValue).orElse(null));
+        schema.setAnyOf(jsonIO.getArray(node, SchemaConstant.PROP_ANY_OF, this::readValue).orElse(null));
+        schema.setDiscriminator(discriminatorIO.readValue(jsonIO.getValue(node, SchemaConstant.PROP_DISCRIMINATOR)));
+        schema.setNullable(jsonIO.getBoolean(node, SchemaConstant.PROP_NULLABLE));
+        schema.setWriteOnly(jsonIO.getBoolean(node, SchemaConstant.PROP_WRITE_ONLY));
+        schema.setDeprecated(jsonIO.getBoolean(node, SchemaConstant.PROP_DEPRECATED));
         schema.setExtensions(extensionIO.readMap(node));
         return schema;
     }
 
-    public XML readXML(JsonNode node) {
+    public XML readXML(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isObject)
-                .map(ObjectNode.class::cast)
+                .filter(jsonIO::isObject)
+                .map(jsonIO::asObject)
                 .map(object -> {
                     XML xml = new XMLImpl();
-                    xml.setName(JsonUtil.stringProperty(node, PROP_NAME));
-                    xml.setNamespace(JsonUtil.stringProperty(node, PROP_NAMESPACE));
-                    xml.setPrefix(JsonUtil.stringProperty(node, PROP_PREFIX));
-                    xml.setAttribute(JsonUtil.booleanProperty(node, PROP_ATTRIBUTE).orElse(null));
-                    xml.setWrapped(JsonUtil.booleanProperty(node, PROP_WRAPPED).orElse(null));
+                    xml.setName(jsonIO.getString(node, PROP_NAME));
+                    xml.setNamespace(jsonIO.getString(node, PROP_NAMESPACE));
+                    xml.setPrefix(jsonIO.getString(node, PROP_PREFIX));
+                    xml.setAttribute(jsonIO.getBoolean(node, PROP_ATTRIBUTE));
+                    xml.setWrapped(jsonIO.getBoolean(node, PROP_WRAPPED));
                     xml.setExtensions(extensionIO.readMap(node));
                     return xml;
                 })
                 .orElse(null);
     }
 
-    private static Schema.SchemaType readSchemaType(final JsonNode node) {
-        if (node != null && node.isTextual()) {
-            String strval = node.asText();
-            return Schema.SchemaType.valueOf(strval.toUpperCase(Locale.ROOT));
-        }
-        return null;
-    }
-
-    /**
-     * Reads a list of schemas.
-     *
-     * @param node the json array
-     * @return List of Schema models
-     */
-    private List<Schema> readList(JsonNode node) {
-        return Optional.ofNullable(node)
-                .filter(JsonNode::isArray)
-                .map(ArrayNode.class::cast)
-                .map(ArrayNode::elements)
-                .map(elements -> Spliterators.spliteratorUnknownSize(elements, Spliterator.ORDERED))
-                .map(elements -> StreamSupport.stream(elements, false))
-                .map(elements -> elements.filter(JsonNode::isObject)
-                        .map(ObjectNode.class::cast)
-                        .map(this::read)
-                        .collect(Collectors.toCollection(ArrayList::new)))
-                .orElse(null);
-    }
-
-    public Optional<ObjectNode> write(Schema model) {
+    public Optional<O> write(Schema model) {
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
-                JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+                setReference(node, model);
             } else {
-                JsonUtil.stringProperty(node, SchemaConstant.PROP_FORMAT, model.getFormat());
-                JsonUtil.stringProperty(node, SchemaConstant.PROP_TITLE, model.getTitle());
-                JsonUtil.stringProperty(node, SchemaConstant.PROP_DESCRIPTION, model.getDescription());
-                ObjectWriter.writeObject(node, SchemaConstant.PROP_DEFAULT, model.getDefaultValue());
-                JsonUtil.bigDecimalProperty(node, SchemaConstant.PROP_MULTIPLE_OF, model.getMultipleOf());
-                JsonUtil.bigDecimalProperty(node, SchemaConstant.PROP_MAXIMUM, model.getMaximum());
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, model.getExclusiveMaximum());
-                JsonUtil.bigDecimalProperty(node, SchemaConstant.PROP_MINIMUM, model.getMinimum());
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, model.getExclusiveMinimum());
-                JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_LENGTH, model.getMaxLength());
-                JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_LENGTH, model.getMinLength());
-                JsonUtil.stringProperty(node, SchemaConstant.PROP_PATTERN, model.getPattern());
-                JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_ITEMS, model.getMaxItems());
-                JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_ITEMS, model.getMinItems());
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_UNIQUE_ITEMS, model.getUniqueItems());
-                JsonUtil.intProperty(node, SchemaConstant.PROP_MAX_PROPERTIES, model.getMaxProperties());
-                JsonUtil.intProperty(node, SchemaConstant.PROP_MIN_PROPERTIES, model.getMinProperties());
-                ObjectWriter.writeStringArray(node, model.getRequired(), SchemaConstant.PROP_REQUIRED);
-                ObjectWriter.writeObjectArray(node, model.getEnumeration(), SchemaConstant.PROP_ENUM);
-                JsonUtil.enumProperty(node, SchemaConstant.PROP_TYPE, model.getType());
+                setIfPresent(node, SchemaConstant.PROP_FORMAT, jsonIO.toJson(model.getFormat()));
+                setIfPresent(node, SchemaConstant.PROP_TITLE, jsonIO.toJson(model.getTitle()));
+                setIfPresent(node, SchemaConstant.PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+                setIfPresent(node, SchemaConstant.PROP_DEFAULT, jsonIO.toJson(model.getDefaultValue()));
+                setIfPresent(node, SchemaConstant.PROP_MULTIPLE_OF, jsonIO.toJson(model.getMultipleOf()));
+                setIfPresent(node, SchemaConstant.PROP_MAXIMUM, jsonIO.toJson(model.getMaximum()));
+                setIfPresent(node, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, jsonIO.toJson(model.getExclusiveMaximum()));
+                setIfPresent(node, SchemaConstant.PROP_MINIMUM, jsonIO.toJson(model.getMinimum()));
+                setIfPresent(node, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, jsonIO.toJson(model.getExclusiveMinimum()));
+                setIfPresent(node, SchemaConstant.PROP_MAX_LENGTH, jsonIO.toJson(model.getMaxLength()));
+                setIfPresent(node, SchemaConstant.PROP_MIN_LENGTH, jsonIO.toJson(model.getMinLength()));
+                setIfPresent(node, SchemaConstant.PROP_PATTERN, jsonIO.toJson(model.getPattern()));
+                setIfPresent(node, SchemaConstant.PROP_MAX_ITEMS, jsonIO.toJson(model.getMaxItems()));
+                setIfPresent(node, SchemaConstant.PROP_MIN_ITEMS, jsonIO.toJson(model.getMinItems()));
+                setIfPresent(node, SchemaConstant.PROP_UNIQUE_ITEMS, jsonIO.toJson(model.getUniqueItems()));
+                setIfPresent(node, SchemaConstant.PROP_MAX_PROPERTIES, jsonIO.toJson(model.getMaxProperties()));
+                setIfPresent(node, SchemaConstant.PROP_MIN_PROPERTIES, jsonIO.toJson(model.getMinProperties()));
+                setIfPresent(node, SchemaConstant.PROP_REQUIRED, jsonIO.toJson(model.getRequired()));
+                setIfPresent(node, SchemaConstant.PROP_ENUM, jsonIO.toJson(model.getEnumeration()));
+                setIfPresent(node, SchemaConstant.PROP_TYPE, jsonIO.toJson(model.getType()));
                 setIfPresent(node, SchemaConstant.PROP_ITEMS, write(model.getItems()));
                 setIfPresent(node, SchemaConstant.PROP_ALL_OF, write(model.getAllOf()));
                 setIfPresent(node, SchemaConstant.PROP_PROPERTIES, write(model.getProperties()));
                 if (model.getAdditionalPropertiesBoolean() != null) {
-                    JsonUtil.booleanProperty(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES,
-                            model.getAdditionalPropertiesBoolean());
+                    setIfPresent(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES,
+                            jsonIO.toJson(model.getAdditionalPropertiesBoolean()));
                 } else {
                     setIfPresent(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES, write(model.getAdditionalPropertiesSchema()));
                 }
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_READ_ONLY, model.getReadOnly());
+                setIfPresent(node, SchemaConstant.PROP_READ_ONLY, jsonIO.toJson(model.getReadOnly()));
                 setIfPresent(node, SchemaConstant.PROP_XML, write(model.getXml()));
                 setIfPresent(node, SchemaConstant.PROP_EXTERNAL_DOCS, externalDocIO.write(model.getExternalDocs()));
-                ObjectWriter.writeObject(node, SchemaConstant.PROP_EXAMPLE, model.getExample());
+                setIfPresent(node, SchemaConstant.PROP_EXAMPLE, jsonIO.toJson(model.getExample()));
                 setIfPresent(node, SchemaConstant.PROP_ONE_OF, write(model.getOneOf()));
                 setIfPresent(node, SchemaConstant.PROP_ANY_OF, write(model.getAnyOf()));
                 setIfPresent(node, SchemaConstant.PROP_NOT, write(model.getNot()));
                 setIfPresent(node, SchemaConstant.PROP_DISCRIMINATOR, discriminatorIO.write(model.getDiscriminator()));
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_NULLABLE, model.getNullable());
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_WRITE_ONLY, model.getWriteOnly());
-                JsonUtil.booleanProperty(node, SchemaConstant.PROP_DEPRECATED, model.getDeprecated());
+                setIfPresent(node, SchemaConstant.PROP_NULLABLE, jsonIO.toJson(model.getNullable()));
+                setIfPresent(node, SchemaConstant.PROP_WRITE_ONLY, jsonIO.toJson(model.getWriteOnly()));
+                setIfPresent(node, SchemaConstant.PROP_DEPRECATED, jsonIO.toJson(model.getDeprecated()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 
     /**
@@ -225,23 +183,22 @@ public class SchemaIO extends MapModelIO<Schema> implements ReferenceIO {
      * @param models
      * @param propertyName
      */
-    private Optional<ArrayNode> write(List<Schema> models) {
-        return optionalJsonArray(models)
-                .map(node -> {
-                    models.stream().map(this::write).map(Optional::get).forEach(node::add);
-                    return node;
-                });
+    private Optional<A> write(List<Schema> models) {
+        return optionalJsonArray(models).map(array -> {
+            models.forEach(model -> write(model).ifPresent(v -> jsonIO.add(array, v)));
+            return array;
+        }).map(jsonIO::buildArray);
     }
 
-    public Optional<ObjectNode> write(XML model) {
+    public Optional<O> write(XML model) {
         return optionalJsonObject(model).map(node -> {
-            JsonUtil.stringProperty(node, PROP_NAME, model.getName());
-            JsonUtil.stringProperty(node, PROP_NAMESPACE, model.getNamespace());
-            JsonUtil.stringProperty(node, PROP_PREFIX, model.getPrefix());
-            JsonUtil.booleanProperty(node, PROP_ATTRIBUTE, model.getAttribute());
-            JsonUtil.booleanProperty(node, PROP_WRAPPED, model.getWrapped());
+            setIfPresent(node, PROP_NAME, jsonIO.toJson(model.getName()));
+            setIfPresent(node, PROP_NAMESPACE, jsonIO.toJson(model.getNamespace()));
+            setIfPresent(node, PROP_PREFIX, jsonIO.toJson(model.getPrefix()));
+            setIfPresent(node, PROP_ATTRIBUTE, jsonIO.toJson(model.getAttribute()));
+            setIfPresent(node, PROP_WRAPPED, jsonIO.toJson(model.getWrapped()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

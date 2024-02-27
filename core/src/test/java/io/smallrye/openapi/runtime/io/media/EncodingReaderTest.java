@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -30,6 +31,7 @@ class EncodingIOTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
                 emptyConfig(), new OpenAPIImpl());
+        IOContext<?, ?, ?, ?, ?> ioContext = IOContext.forScanning(context);
 
         ClassInfo clazz = index.getClassByName(DotName.createSimple(endpointClass.getName()));
         AnnotationInstance annotation = clazz.method("getData")
@@ -38,7 +40,10 @@ class EncodingIOTest extends IndexScannerTestBase {
                 .asNestedArray()[0]
                 .value("encoding")
                 .asNestedArray()[0];
-        Encoding.Style style = new EncodingIO(context, new ContentIO(context)).readStyle(annotation);
+        ContentIO<?, ?, ?, ?, ?> contentIO = new ContentIO<>(ioContext);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        EncodingIO<?, ?, ?, ?, ?> encodingIO = new EncodingIO(ioContext, contentIO);
+        Encoding.Style style = encodingIO.readStyle(annotation);
         assertEquals(expectedStyle, style);
     }
 

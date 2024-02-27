@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.io.responses;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -10,27 +11,25 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class APIResponsesIO extends ModelIO<APIResponses> {
+public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO<APIResponses, V, A, O, AB, OB> {
 
     private static final String PROP_DEFAULT = "default";
 
-    private final APIResponseIO responseIO;
-    private final ExtensionIO extensionIO;
+    private final APIResponseIO<V, A, O, AB, OB> responseIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public APIResponsesIO(AnnotationScannerContext context, ContentIO contentIO) {
+    public APIResponsesIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
         super(context, Names.API_RESPONSES, Names.create(APIResponses.class));
-        responseIO = new APIResponseIO(context, contentIO);
-        extensionIO = new ExtensionIO(context);
+        responseIO = new APIResponseIO<>(context, contentIO);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     public Map<String, APIResponse> readSingle(AnnotationTarget target) {
@@ -46,8 +45,20 @@ public class APIResponsesIO extends ModelIO<APIResponses> {
 
     @Override
     public APIResponses read(AnnotationInstance annotation) {
+        AnnotationTarget target = annotation.target();
+
         return Optional.ofNullable(annotation)
                 .map(AnnotationInstance::value)
+                /*
+                 * Begin - copy target to clones of nested annotations to support @Extension on
+                 * method being applied to @APIReponse. Remove when no longer supporting TCK
+                 * 3.1.1 and earlier.
+                 */
+                .map(AnnotationValue::asNestedArray)
+                .map(annotations -> Arrays.stream(annotations)
+                        .map(a -> AnnotationInstance.create(a.name(), target, a.values()))
+                        .toArray(AnnotationInstance[]::new))
+                // End
                 .map(this::read)
                 .map(responses -> responses.extensions(extensionIO.readExtensible(annotation)))
                 .orElse(null);
@@ -69,8 +80,7 @@ public class APIResponsesIO extends ModelIO<APIResponses> {
     /**
      * Reads an array of APIResponse annotations into an {@link APIResponses} model.
      *
-     * @param context the scanning context
-     * @param annotationValue {@literal @}APIResponse annotation
+     * @param annotations {@literal @}APIResponse annotations
      * @return APIResponses model
      */
     public APIResponses read(AnnotationInstance[] annotations) {
@@ -86,28 +96,27 @@ public class APIResponsesIO extends ModelIO<APIResponses> {
     }
 
     @Override
-    public APIResponses read(ObjectNode node) {
+    public APIResponses readObject(O node) {
         IoLogging.logger.jsonList("APIResponse");
 
         APIResponses model = new APIResponsesImpl();
-        model.setDefaultValue(responseIO.read(node.get(PROP_DEFAULT)));
-        extensionIO.readMap(node).forEach(model::addExtension);
+        model.setDefaultValue(responseIO.readValue(jsonIO.getValue(node, PROP_DEFAULT)));
+        model.setExtensions(extensionIO.readMap(node));
 
-        node.properties()
+        jsonIO.properties(node)
                 .stream()
                 .filter(not(property -> PROP_DEFAULT.equals(property.getKey())))
-                .forEach(property -> model.addAPIResponse(property.getKey(), responseIO.read(property.getValue())));
+                .forEach(property -> model.addAPIResponse(property.getKey(), responseIO.readValue(property.getValue())));
 
         return model;
     }
 
-    public Optional<ObjectNode> write(APIResponses model) {
-        return optionalJsonObject(model)
-                .map(node -> {
-                    setAllIfPresent(node, extensionIO.write(model));
-                    setIfPresent(node, PROP_DEFAULT, responseIO.write(model.getDefaultValue()));
-                    setAllIfPresent(node, responseIO.write(model.getAPIResponses()));
-                    return node;
-                });
+    public Optional<O> write(APIResponses model) {
+        return optionalJsonObject(model).map(node -> {
+            setAllIfPresent(node, extensionIO.write(model));
+            setIfPresent(node, PROP_DEFAULT, responseIO.write(model.getDefaultValue()));
+            setAllIfPresent(node, responseIO.write(model.getAPIResponses()));
+            return node;
+        }).map(jsonIO::buildObject);
     }
 }

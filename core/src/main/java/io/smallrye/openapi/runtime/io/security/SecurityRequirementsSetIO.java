@@ -12,20 +12,19 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class SecurityRequirementsSetIO extends ModelIO<SecurityRequirement> {
+public class SecurityRequirementsSetIO<V, A extends V, O extends V, AB, OB>
+        extends ModelIO<SecurityRequirement, V, A, O, AB, OB> {
 
-    private final SecurityRequirementIO securityRequirementIO;
+    private final SecurityRequirementIO<V, A, O, AB, OB> securityRequirementIO;
 
-    public SecurityRequirementsSetIO(AnnotationScannerContext context) {
+    public SecurityRequirementsSetIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SECURITY_REQUIREMENTS_SET, Names.create(SecurityRequirement.class));
-        securityRequirementIO = new SecurityRequirementIO(context);
+        securityRequirementIO = new SecurityRequirementIO<>(context);
     }
 
     public List<SecurityRequirement> readList(AnnotationTarget target) {
@@ -45,22 +44,22 @@ public class SecurityRequirementsSetIO extends ModelIO<SecurityRequirement> {
 
     public List<SecurityRequirement> readList(Collection<AnnotationInstance> annotations) {
         return annotations.stream()
-            .map(set -> Optional.ofNullable(set.value())
-                .map(AnnotationValue::asNestedArray)
-                .map(this::readSet)
-                .orElse(null))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+                .map(set -> Optional.ofNullable(set.value())
+                        .map(AnnotationValue::asNestedArray)
+                        .map(this::readSet)
+                        .orElseGet(SecurityRequirementImpl::new))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     SecurityRequirement readSet(AnnotationInstance[] annotations) {
         SecurityRequirement requirement = new SecurityRequirementImpl();
 
         Arrays.stream(annotations)
-            .map(securityRequirementIO::readEntry)
-            .forEach(scheme -> requirement.addScheme(scheme.getKey(), scheme.getValue()));
+                .map(securityRequirementIO::readEntry)
+                .forEach(scheme -> requirement.addScheme(scheme.getKey(), scheme.getValue()));
 
-            return requirement;
+        return requirement;
     }
 
     @Override
@@ -69,12 +68,12 @@ public class SecurityRequirementsSetIO extends ModelIO<SecurityRequirement> {
     }
 
     @Override
-    public SecurityRequirement read(ObjectNode node) {
+    public SecurityRequirement readObject(O node) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Optional<ObjectNode> write(SecurityRequirement model) {
+    public Optional<O> write(SecurityRequirement model) {
         throw new UnsupportedOperationException();
     }
 

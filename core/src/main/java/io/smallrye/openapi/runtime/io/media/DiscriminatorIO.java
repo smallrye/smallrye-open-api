@@ -9,25 +9,21 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.Type;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
-public class DiscriminatorIO extends ModelIO<Discriminator> {
+public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Discriminator, V, A, O, AB, OB> {
 
     private static final String PROP_MAPPING = "mapping";
     private static final String PROP_PROPERTY_NAME = "propertyName";
 
-    public DiscriminatorIO(AnnotationScannerContext context) {
+    public DiscriminatorIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.DISCRIMINATOR_MAPPING, Names.create(Discriminator.class));
     }
 
@@ -96,18 +92,23 @@ public class DiscriminatorIO extends ModelIO<Discriminator> {
     }
 
     @Override
-    public Discriminator read(ObjectNode node) {
+    public Discriminator readObject(O node) {
         Discriminator discriminator = new DiscriminatorImpl();
-        discriminator.setPropertyName(JsonUtil.stringProperty(node, PROP_PROPERTY_NAME));
-        discriminator.setMapping(JsonUtil.readStringMap(node.get(PROP_MAPPING)).orElse(null));
+        discriminator.setPropertyName(jsonIO.getString(node, PROP_PROPERTY_NAME));
+        discriminator.setMapping(jsonIO.getObject(node, PROP_MAPPING)
+                .map(jsonIO::properties)
+                .map(properties -> properties.stream()
+                        .map(entry -> entry(entry.getKey(), jsonIO.asString(entry.getValue())))
+                        .collect(toLinkedMap()))
+                .orElse(null));
         return discriminator;
     }
 
-    public Optional<ObjectNode> write(Discriminator model) {
+    public Optional<O> write(Discriminator model) {
         return optionalJsonObject(model).map(node -> {
-            JsonUtil.stringProperty(node, PROP_PROPERTY_NAME, model.getPropertyName());
-            ObjectWriter.writeStringMap(node, model.getMapping(), PROP_MAPPING);
+            setIfPresent(node, PROP_PROPERTY_NAME, jsonIO.toJson(model.getPropertyName()));
+            setIfPresent(node, PROP_MAPPING, jsonIO.toJson(model.getMapping()));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

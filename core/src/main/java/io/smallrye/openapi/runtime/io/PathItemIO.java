@@ -12,18 +12,15 @@ import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.PathItem.HttpMethod;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.parameters.ParameterIO;
 import io.smallrye.openapi.runtime.io.servers.ServerIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class PathItemIO extends ModelIO<PathItem> implements ReferenceIO {
+public class PathItemIO<V, A extends V, O extends V, AB, OB> extends ModelIO<PathItem, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
-    private static final String PROP_REF = "$ref";
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_PARAMETERS = "parameters";
     private static final String PROP_SERVERS = "servers";
@@ -34,17 +31,18 @@ public class PathItemIO extends ModelIO<PathItem> implements ReferenceIO {
             .map(String::toLowerCase)
             .collect(Collectors.toSet());
 
-    private final ServerIO serverIO;
-    protected final OperationIO operationIO;
-    private final ParameterIO parameterIO;
-    protected final ExtensionIO extensionIO;
+    private final ServerIO<V, A, O, AB, OB> serverIO;
+    protected final OperationIO<V, A, O, AB, OB> operationIO;
+    private final ParameterIO<V, A, O, AB, OB> parameterIO;
+    protected final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public PathItemIO(AnnotationScannerContext context, OperationIO operationIO, ContentIO contentIO) {
+    public PathItemIO(IOContext<V, A, O, AB, OB> context, OperationIO<V, A, O, AB, OB> operationIO,
+            ContentIO<V, A, O, AB, OB> contentIO) {
         super(context, null, Names.create(PathItem.class));
-        serverIO = new ServerIO(context);
+        serverIO = new ServerIO<>(context);
         this.operationIO = operationIO;
-        parameterIO = new ParameterIO(context, contentIO);
-        extensionIO = new ExtensionIO(context);
+        parameterIO = new ParameterIO<>(context, contentIO);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     @Override
@@ -68,37 +66,38 @@ public class PathItemIO extends ModelIO<PathItem> implements ReferenceIO {
     }
 
     @Override
-    public PathItem read(ObjectNode node) {
+    public PathItem readObject(O node) {
         IoLogging.logger.singleJsonNode("PathItem");
         PathItem pathItem = new PathItemImpl();
         pathItem.setRef(readReference(node));
-        pathItem.setSummary(JsonUtil.stringProperty(node, PROP_SUMMARY));
-        pathItem.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
+        pathItem.setSummary(jsonIO.getString(node, PROP_SUMMARY));
+        pathItem.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
 
-        node.properties().stream()
+        jsonIO.properties(node)
+                .stream()
                 .filter(entry -> OPERATION_PROPS.contains(entry.getKey()))
                 .forEach(entry -> {
                     HttpMethod method = HttpMethod.valueOf(entry.getKey().toUpperCase(Locale.ROOT));
-                    Operation operation = operationIO.read(entry.getValue());
+                    Operation operation = operationIO.readValue(entry.getValue());
                     pathItem.setOperation(method, operation);
                 });
 
-        pathItem.setParameters(parameterIO.readList(node.get(PROP_PARAMETERS)));
-        pathItem.setServers(serverIO.readList(node.get(PROP_SERVERS)));
-
-        extensionIO.readMap(node).forEach(pathItem::addExtension);
+        pathItem.setParameters(parameterIO.readList(jsonIO.getValue(node, PROP_PARAMETERS)));
+        pathItem.setServers(serverIO.readList(jsonIO.getValue(node, PROP_SERVERS)));
+        pathItem.setExtensions(extensionIO.readObjectMap(node));
 
         return pathItem;
     }
 
-    public Optional<ObjectNode> write(PathItem model) {
-        return optionalJsonObject(model).map(node -> write(model, node));
+    @Override
+    public Optional<O> write(PathItem model) {
+        return optionalJsonObject(model).map(node -> write(model, node)).map(jsonIO::buildObject);
     }
 
-    private ObjectNode write(PathItem model, ObjectNode node) {
-        JsonUtil.stringProperty(node, PROP_REF, model.getRef());
-        JsonUtil.stringProperty(node, PROP_SUMMARY, model.getSummary());
-        JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
+    private OB write(PathItem model, OB node) {
+        setReference(node, model);
+        setIfPresent(node, PROP_SUMMARY, jsonIO.toJson(model.getSummary()));
+        setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
 
         model.getOperations()
                 .forEach((method, operation) -> setIfPresent(node, method.name().toLowerCase(), operationIO.write(operation)));

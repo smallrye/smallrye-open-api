@@ -7,33 +7,44 @@ import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.runtime.io.ContentDirection;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class ContentIO extends ModelIO<Content> {
+public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Content, V, A, O, AB, OB> {
 
-    private final MediaTypeIO mediaTypeIO;
+    private static final String[] EMPTY = new String[0];
 
-    public ContentIO(AnnotationScannerContext context) {
-        super(context, Names.CONTENT, Names.create(Content.class));
-        mediaTypeIO = new MediaTypeIO(context, this);
+    /**
+     * Simple enum to indicate whether an {@literal @}Content annotation being processed is
+     * an input or an output.
+     *
+     * @author Eric Wittmann (eric.wittmann@gmail.com)
+     */
+    public enum Direction {
+        INPUT,
+        OUTPUT,
+        PARAMETER
     }
 
-    public Content read(AnnotationValue annotations, ContentDirection direction) {
+    private final MediaTypeIO<V, A, O, AB, OB> mediaTypeIO;
+
+    public ContentIO(IOContext<V, A, O, AB, OB> context) {
+        super(context, Names.CONTENT, Names.create(Content.class));
+        mediaTypeIO = new MediaTypeIO<>(context, this);
+    }
+
+    public Content read(AnnotationValue annotations, Direction direction) {
         return Optional.ofNullable(annotations)
                 .map(AnnotationValue::asNestedArray)
                 .map(annotationArray -> read(annotationArray, direction))
                 .orElse(null);
     }
 
-    private Content read(AnnotationInstance[] annotations, ContentDirection direction) {
+    private Content read(AnnotationInstance[] annotations, Direction direction) {
         IoLogging.logger.singleAnnotation("@Content");
         Content content = new ContentImpl();
 
@@ -53,16 +64,21 @@ public class ContentIO extends ModelIO<Content> {
         return content;
     }
 
-    private String[] getDefaultMimeTypes(ContentDirection direction) {
-        if (direction == ContentDirection.INPUT && context.getCurrentConsumes() != null) {
-            return context.getCurrentConsumes();
-        } else if (direction == ContentDirection.OUTPUT && context.getCurrentProduces() != null) {
-            return context.getCurrentProduces();
-        } else if (direction == ContentDirection.PARAMETER) {
-            return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
-        } else {
-            return new String[] {};
+    private String[] getDefaultMimeTypes(Direction direction) {
+        switch (direction) {
+            case INPUT:
+                return nonNullOrElse(context.getCurrentConsumes(), EMPTY);
+            case OUTPUT:
+                return nonNullOrElse(context.getCurrentProduces(), EMPTY);
+            case PARAMETER:
+                return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+            default:
+                return EMPTY;
         }
+    }
+
+    static <T> T nonNullOrElse(T value, T defaultValue) {
+        return value != null ? value : defaultValue;
     }
 
     @Override
@@ -71,20 +87,22 @@ public class ContentIO extends ModelIO<Content> {
     }
 
     @Override
-    public Content read(ObjectNode node) {
+    public Content readObject(O node) {
         Content content = new ContentImpl();
 
-        node.properties().forEach(property -> content.addMediaType(property.getKey(), mediaTypeIO.read(property.getValue())));
+        jsonIO.properties(node)
+                .forEach(property -> content.addMediaType(property.getKey(), mediaTypeIO.readValue(property.getValue())));
 
         return content;
     }
 
-    public Optional<ObjectNode> write(Content model) {
+    @Override
+    public Optional<O> write(Content model) {
         return optionalJsonObject(model).map(node -> {
             if (model.getMediaTypes() != null) {
                 model.getMediaTypes().forEach((key, mediaType) -> setIfPresent(node, key, mediaTypeIO.write(mediaType)));
             }
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

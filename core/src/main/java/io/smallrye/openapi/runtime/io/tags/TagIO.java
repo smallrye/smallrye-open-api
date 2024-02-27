@@ -6,32 +6,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.runtime.io.ExternalDocumentationIO;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class TagIO extends ModelIO<Tag> implements ReferenceIO {
+public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_NAME = "name";
     private static final String PROP_DESCRIPTION = "description";
@@ -39,13 +32,13 @@ public class TagIO extends ModelIO<Tag> implements ReferenceIO {
     private static final String PROP_REF = "ref";
     private static final String PROP_EXTERNAL_DOCS = "externalDocs";
 
-    private final ExternalDocumentationIO externalDocIO;
-    private final ExtensionIO extensionIO;
+    private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public TagIO(AnnotationScannerContext context) {
+    public TagIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.TAG, Names.create(Tag.class));
-        externalDocIO = new ExternalDocumentationIO(context);
-        extensionIO = new ExtensionIO(context);
+        externalDocIO = new ExternalDocumentationIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     public List<String> readReferences(AnnotationTarget target) {
@@ -96,50 +89,47 @@ public class TagIO extends ModelIO<Tag> implements ReferenceIO {
         return tag;
     }
 
-    public List<Tag> readList(JsonNode node) {
+    public List<Tag> readList(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isArray)
-                .map(ArrayNode.class::cast)
-                .map(ArrayNode::elements)
-                .map(elements -> Spliterators.spliteratorUnknownSize(elements, Spliterator.ORDERED))
-                .map(elements -> StreamSupport.stream(elements, false))
+                .filter(jsonIO::isArray)
+                .map(jsonIO::asArray)
+                .map(jsonIO::entries)
+                .map(Collection::stream)
                 .map(elements -> {
                     IoLogging.logger.jsonArray("Tag");
-                    return elements.filter(JsonNode::isObject)
-                            .map(ObjectNode.class::cast)
-                            .map(this::read)
+                    return elements.filter(jsonIO::isObject)
+                            .map(jsonIO::asObject)
+                            .map(this::readObject)
                             .collect(Collectors.toCollection(ArrayList::new));
                 })
                 .orElse(null);
     }
 
     @Override
-    public Tag read(ObjectNode node) {
+    public Tag readObject(O node) {
         IoLogging.logger.singleJsonNode("Tag");
         Tag tag = new TagImpl();
-        tag.setName(JsonUtil.stringProperty(node, PROP_NAME));
-        tag.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
-        tag.setExternalDocs(externalDocIO.read(node.get(PROP_EXTERNAL_DOCS)));
-        extensionIO.readMap(node).forEach(tag::addExtension);
+        tag.setName(jsonIO.getString(node, PROP_NAME));
+        tag.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        tag.setExternalDocs(externalDocIO.readValue(jsonIO.getValue(node, PROP_EXTERNAL_DOCS)));
+        tag.setExtensions(extensionIO.readMap(node));
         return tag;
     }
 
-    public Optional<ArrayNode> write(List<Tag> models) {
+    public Optional<A> write(List<Tag> models) {
         return optionalJsonArray(models).map(array -> {
-            for (Tag model : models) {
-                write(model).ifPresent(array::add);
-            }
+            models.forEach(model -> write(model).ifPresent(v -> jsonIO.add(array, v)));
             return array;
-        });
+        }).map(jsonIO::buildArray);
     }
 
-    public Optional<ObjectNode> write(Tag model) {
+    public Optional<O> write(Tag model) {
         return optionalJsonObject(model).map(node -> {
-            JsonUtil.stringProperty(node, PROP_NAME, model.getName());
-            JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
+            setIfPresent(node, PROP_NAME, jsonIO.toJson(model.getName()));
+            setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
             setIfPresent(node, PROP_EXTERNAL_DOCS, externalDocIO.write(model.getExternalDocs()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

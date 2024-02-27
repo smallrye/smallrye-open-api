@@ -18,6 +18,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.OpenAPIDefinitionIO;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
@@ -57,7 +58,7 @@ public class AnnotationScannerContext {
     private final SchemaRegistry schemaRegistry;
     private final JavaSecurityProcessor javaSecurityProcessor;
     private final Annotations annotations;
-    private final OpenAPIDefinitionIO modelIO;
+    private final OpenAPIDefinitionIO<?, ?, ?, ?, ?> modelIO;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
@@ -78,7 +79,7 @@ public class AnnotationScannerContext {
         this.schemaRegistry = new SchemaRegistry(this);
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
-        this.modelIO = new OpenAPIDefinitionIO(this);
+        this.modelIO = new OpenAPIDefinitionIO<>(IOContext.forScanning(this));
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
@@ -194,7 +195,8 @@ public class AnnotationScannerContext {
         return annotations;
     }
 
-    public OpenAPIDefinitionIO io() {
-        return modelIO;
+    @SuppressWarnings("unchecked")
+    public <V, A extends V, O extends V, AB, OB> OpenAPIDefinitionIO<V, A, O, AB, OB> io() { // NOSONAR - ignore wildcards in return type
+        return (OpenAPIDefinitionIO<V, A, O, AB, OB>) modelIO;
     }
 }

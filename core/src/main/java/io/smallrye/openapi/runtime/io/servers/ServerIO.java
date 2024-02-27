@@ -5,41 +5,33 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.servers.ServerImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class ServerIO extends ModelIO<Server> {
+public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Server, V, A, O, AB, OB> {
 
     private static final String PROP_VARIABLES = "variables";
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_URL = "url";
 
-    private final ServerVariableIO serverVariableIO;
-    private final ExtensionIO extensionIO;
+    private final ServerVariableIO<V, A, O, AB, OB> serverVariableIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ServerIO(AnnotationScannerContext context) {
+    public ServerIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SERVER, Names.create(Server.class));
-        serverVariableIO = new ServerVariableIO(context);
-        extensionIO = new ExtensionIO(context);
+        serverVariableIO = new ServerVariableIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     public List<Server> readList(AnnotationTarget target) {
@@ -82,53 +74,54 @@ public class ServerIO extends ModelIO<Server> {
      *        the json array
      * @return a List of Server models
      */
-    public List<Server> readList(JsonNode node) {
+    public List<Server> readList(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isArray)
-                .map(ArrayNode.class::cast)
-                .map(ArrayNode::elements)
-                .map(elements -> Spliterators.spliteratorUnknownSize(elements, Spliterator.ORDERED))
-                .map(elements -> StreamSupport.stream(elements, false))
+                .filter(jsonIO::isArray)
+                .map(jsonIO::asArray)
+                .map(jsonIO::entries)
+                .map(Collection::stream)
                 .map(elements -> {
                     IoLogging.logger.jsonArray("Server");
-                    return elements.filter(JsonNode::isObject)
-                            .map(ObjectNode.class::cast)
-                            .map(this::read)
+                    return elements.filter(jsonIO::isObject)
+                            .map(jsonIO::asObject)
+                            .map(this::readObject)
                             .collect(Collectors.toCollection(ArrayList::new));
                 })
                 .orElse(null);
     }
 
     @Override
-    public Server read(ObjectNode node) {
+    public Server readObject(O node) {
         IoLogging.logger.singleJsonNode("Server");
         Server server = new ServerImpl();
-        server.setUrl(JsonUtil.stringProperty(node, PROP_URL));
-        server.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
-        server.setVariables(serverVariableIO.readMap(node.get(PROP_VARIABLES)));
-        extensionIO.readMap(node).forEach(server::addExtension);
+        server.setUrl(jsonIO.getString(node, PROP_URL));
+        server.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        server.setVariables(serverVariableIO.readMap(jsonIO.getValue(node, PROP_VARIABLES)));
+        server.setExtensions(extensionIO.readMap(node));
         return server;
     }
 
-    public Optional<ArrayNode> write(List<Server> models) {
-        return optionalJsonArray(models)
-                .map(array -> {
-                    models.forEach(model -> write(model, array.addObject()));
-                    return array;
-                });
+    public Optional<A> write(List<Server> models) {
+        return optionalJsonArray(models).map(array -> {
+            models.forEach(model -> {
+                OB entry = jsonIO.createObject();
+                write(model, entry);
+                jsonIO.add(array, jsonIO.buildObject(entry));
+            });
+            return array;
+        }).map(jsonIO::buildArray);
     }
 
-    public Optional<ObjectNode> write(Server model) {
-        return optionalJsonObject(model)
-                .map(node -> {
-                    write(model, node);
-                    return node;
-                });
+    public Optional<O> write(Server model) {
+        return optionalJsonObject(model).map(node -> {
+            write(model, node);
+            return node;
+        }).map(jsonIO::buildObject);
     }
 
-    private void write(Server model, ObjectNode node) {
-        JsonUtil.stringProperty(node, PROP_URL, model.getUrl());
-        JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
+    private void write(Server model, OB node) {
+        setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
+        setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
         setIfPresent(node, PROP_VARIABLES, serverVariableIO.write(model.getVariables()));
         setAllIfPresent(node, extensionIO.write(model));
     }

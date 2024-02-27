@@ -29,7 +29,6 @@ import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
@@ -125,7 +124,6 @@ public interface AnnotationScanner {
      *
      * @param context the scanning context
      * @param targetClass the class that contain the server annotation
-     * @param openApi the current OpenApi model being created
      */
     default OpenAPI processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass) {
         return Optional.ofNullable(context.io().read(targetClass))
@@ -141,8 +139,8 @@ public interface AnnotationScanner {
     default void processSecuritySchemeAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
             OpenAPI openApi) {
 
-        context.io().security().readSchemes(targetClass).forEach((name, scheme) ->
-            ModelUtil.components(openApi).addSecurityScheme(name, scheme));
+        context.io().security().readSchemes(targetClass)
+                .forEach((name, scheme) -> ModelUtil.components(openApi).addSecurityScheme(name, scheme));
     }
 
     /**
@@ -602,12 +600,16 @@ public interface AnnotationScanner {
     }
 
     /**
-     * Add api response to api responses using the annotation information
+     * Add API response to API responses using the annotation information
      *
-     * @param context the scanning context
-     * @param annotation The APIResponseSchema annotation
-     * @param method the current method
-     * @param operation the method operation
+     * @param responseSchema
+     *        The APIResponseSchema created from a
+     *        {@link org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema
+     *        APIResponseSchema} annotation
+     * @param method
+     *        the current method
+     * @param operation
+     *        the method operation
      */
     default void addApiReponseSchemaFromAnnotation(Map<String, APIResponse> responseSchema,
             MethodInfo method, Operation operation) {
@@ -667,10 +669,10 @@ public interface AnnotationScanner {
      */
     default boolean isEmptySecurityRequirements(AnnotationScannerContext context, AnnotationTarget target) {
         return Stream.of(Names.SECURITY_REQUIREMENTS, Names.SECURITY_REQUIREMENTS_SETS)
-            .map(name -> context.annotations().getAnnotation(target, name))
-            .filter(Objects::nonNull)
-            .map(annotation -> context.annotations().<AnnotationValue[]>value(annotation))
-            .anyMatch(values -> values == null || values.length == 0);
+                .map(name -> context.annotations().getAnnotation(target, name))
+                .filter(Objects::nonNull)
+                .map(annotation -> context.annotations().<AnnotationInstance[]> value(annotation))
+                .anyMatch(values -> values == null || values.length == 0);
     }
 
     /**

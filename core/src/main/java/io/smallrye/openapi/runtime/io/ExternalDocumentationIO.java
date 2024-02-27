@@ -5,22 +5,20 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class ExternalDocumentationIO extends ModelIO<ExternalDocumentation> {
+public class ExternalDocumentationIO<V, A extends V, O extends V, AB, OB>
+        extends ModelIO<ExternalDocumentation, V, A, O, AB, OB> {
 
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_URL = "url";
 
-    private final ExtensionIO extension;
+    private final ExtensionIO<V, A, O, AB, OB> extension;
 
-    public ExternalDocumentationIO(AnnotationScannerContext context) {
+    public ExternalDocumentationIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.EXTERNAL_DOCUMENTATION, Names.create(ExternalDocumentation.class));
-        extension = new ExtensionIO(context);
+        extension = new ExtensionIO<>(context);
     }
 
     @Override
@@ -34,21 +32,21 @@ public class ExternalDocumentationIO extends ModelIO<ExternalDocumentation> {
     }
 
     @Override
-    public ExternalDocumentation read(ObjectNode node) {
+    public ExternalDocumentation readObject(O node) {
         ExternalDocumentation model = new ExternalDocumentationImpl();
-        model.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
-        model.setUrl(JsonUtil.stringProperty(node, PROP_URL));
+        jsonIO.getString(node, PROP_DESCRIPTION);
+        model.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        model.setUrl(jsonIO.getString(node, PROP_URL));
         extension.readMap(node).forEach(model::addExtension);
         return model;
     }
 
-    public Optional<ObjectNode> write(ExternalDocumentation model) {
-        return optionalJsonObject(model)
-                .map(node -> {
-                    JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
-                    JsonUtil.stringProperty(node, PROP_URL, model.getUrl());
-                    setAllIfPresent(node, extension.write(model));
-                    return node;
-                });
+    public Optional<O> write(ExternalDocumentation model) {
+        return optionalJsonObject(model).map(node -> {
+            setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+            setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
+            setAllIfPresent(node, extension.write(model));
+            return node;
+        }).map(jsonIO::buildObject);
     }
 }

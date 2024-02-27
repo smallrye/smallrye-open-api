@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -14,65 +15,78 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
-public abstract class ModelIO<T> {
+public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
 
     protected final AnnotationScannerContext context;
     protected final DotName annotationName;
     protected final DotName modelName;
+    protected final JsonIO<V, A, O, AB, OB> jsonIO;
 
-    protected ModelIO(AnnotationScannerContext context, DotName annotationName, DotName modelName) {
-        this.context = context;
+    protected ModelIO(IOContext<V, A, O, AB, OB> context, DotName annotationName, DotName modelName) {
+        this.context = context.scannerContext();
         this.annotationName = annotationName;
         this.modelName = modelName;
+        jsonIO = context.jsonIO();
     }
 
-    protected ObjectNode createObject() {
-        return JsonUtil.objectNode();
+    public JsonIO<V, A, O, AB, OB> jsonIO() {
+        return jsonIO;
     }
 
-    protected void setIfPresent(ObjectNode object, String key, Optional<? extends JsonNode> valueSource) {
-        valueSource.ifPresent(node -> object.set(key, node));
+    protected void setIfPresent(OB object, String key, Optional<? extends V> valueSource) {
+        valueSource.ifPresent(value -> jsonIO.set(object, key, value));
     }
 
-    protected void setAllIfPresent(ObjectNode object, Optional<? extends ObjectNode> valueSource) {
-        valueSource.ifPresent(object::setAll);
+    protected void setAllIfPresent(OB object, Optional<? extends O> valueSource) {
+        valueSource.ifPresent(value -> jsonIO.setAll(object, value));
     }
 
-    protected Optional<ObjectNode> optionalJsonObject(Object source) {
+    protected Optional<OB> optionalJsonObject(Object source) {
         if (source == null) {
             return Optional.empty();
         }
-        return Optional.of(JsonUtil.objectNode());
+        return Optional.of(jsonIO.createObject());
     }
 
-    protected Optional<ArrayNode> optionalJsonArray(Object source) {
+    protected Optional<AB> optionalJsonArray(Object source) {
         if (source == null) {
             return Optional.empty();
         }
-        return Optional.of(JsonUtil.arrayNode());
+        return Optional.of(jsonIO.createArray());
     }
 
     protected static <T> Map.Entry<String, T> entry(String key, T value) {
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
-    protected <V> V value(AnnotationInstance annotation, String propertyName) {
+    protected <P> P value(AnnotationInstance annotation, String propertyName) {
         return context.annotations().value(annotation, propertyName);
     }
 
-    protected <V extends Enum<V>> V enumValue(AnnotationInstance annotation, String propertyName, Class<V> type) {
+    protected <P> P value(AnnotationInstance annotation, String propertyName, P defaultValue) {
+        return context.annotations().value(annotation, propertyName, defaultValue);
+    }
+
+    protected <P extends Enum<P>> P enumValue(AnnotationInstance annotation, String propertyName, Class<P> type) {
         return context.annotations().enumValue(annotation, propertyName, type);
     }
 
-    protected <V> V value(AnnotationInstance annotation, String propertyName, V defaultValue) {
-        return context.annotations().value(annotation, propertyName, defaultValue);
+    protected <P extends Enum<P>> P enumValue(V value, Class<P> type) {
+        if (jsonIO.isString(value)) {
+            String strValue = jsonIO.asString(value);
+
+            if (strValue != null) {
+                try {
+                    return Enum.valueOf(type, strValue.toUpperCase(Locale.ROOT));
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        return null;
     }
 
     protected Optional<String> getName(AnnotationInstance annotation, String nameProperty) {
@@ -126,15 +140,15 @@ public abstract class ModelIO<T> {
 
     public abstract T read(AnnotationInstance annotation);
 
-    public T read(JsonNode node) {
+    public T readValue(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isObject)
-                .map(ObjectNode.class::cast)
-                .map(this::read)
+                .filter(jsonIO::isObject)
+                .map(jsonIO::asObject)
+                .map(this::readObject)
                 .orElse(null);
     }
 
-    public abstract T read(ObjectNode node);
+    public abstract T readObject(O node);
 
-    public abstract Optional<ObjectNode> write(T model);
+    public abstract Optional<O> write(T model);
 }

@@ -9,8 +9,10 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.OpenApiParser;
+import io.smallrye.openapi.runtime.io.Format;
+import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.JsonIO;
+import io.smallrye.openapi.runtime.io.media.SchemaIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 
 /**
@@ -19,10 +21,58 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
  */
 public interface AnnotationScannerExtension {
 
-    static final List<AnnotationScannerExtension> DEFAULT = Collections.singletonList(new Default());
+    public static List<AnnotationScannerExtension> defaultExtension() {
+        return Collections.singletonList(new Default<>());
+    }
 
-    static class Default implements AnnotationScannerExtension {
-        // All default methods
+    static class Default<V> implements AnnotationScannerExtension {
+        JsonIO<V, ?, ?, ?, ?> jackson = JsonIO.newInstance(null);
+
+        @Override
+        public Object parseValue(String value) {
+            if (value == null || value.isEmpty()) {
+                return null;
+            }
+
+            value = value.trim();
+
+            if ("true".equals(value) || "false".equals(value)) {
+                return Boolean.valueOf(value);
+            }
+
+            switch (value.charAt(0)) {
+                case '{': /* JSON Object */
+                case '[': /* JSON Array */
+                case '-': /* JSON Negative Number */
+                case '0': /* JSON Numbers */
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    try {
+                        return jackson.fromJson(jackson.fromString(value, Format.JSON));
+                    } catch (Exception e) {
+                        // TODO log the error
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            // JSON String
+            return value;
+        }
+
+        @Override
+        public Schema parseSchema(String jsonSchema) {
+            return new SchemaIO<>(IOContext.forJson(jackson))
+                    .readValue(jackson.fromString(jsonSchema, Format.JSON));
+        }
     }
 
     /**
@@ -90,9 +140,7 @@ public interface AnnotationScannerExtension {
      * @param value the string value
      * @return the parsed value as Object
      */
-    default Object parseValue(String value) {
-        return JsonUtil.parseValue(value);
-    }
+    Object parseValue(String value);
 
     /**
      * Parse a string value as a Schema
@@ -100,7 +148,5 @@ public interface AnnotationScannerExtension {
      * @param jsonSchema the string value of the schema, in JSON format
      * @return the parsed value as Schema
      */
-    default Schema parseSchema(String jsonSchema) {
-        return OpenApiParser.parseSchema(jsonSchema);
-    }
+    Schema parseSchema(String jsonSchema);
 }

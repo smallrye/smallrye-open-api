@@ -1,39 +1,33 @@
 package io.smallrye.openapi.runtime.io.media;
 
-import static io.smallrye.openapi.runtime.io.JsonUtil.readObject;
-
 import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.examples.ExampleImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.Referenceable;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class ExampleObjectIO extends MapModelIO<Example> implements ReferenceIO {
+public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Example, V, A, O, AB, OB>
+        implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_VALUE = "value";
     private static final String PROP_SUMMARY = "summary";
     private static final String PROP_EXTERNAL_VALUE = "externalValue";
     private static final String PROP_DESCRIPTION = "description";
 
-    private final ExtensionIO extensionIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ExampleObjectIO(AnnotationScannerContext context) {
+    public ExampleObjectIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.EXAMPLE_OBJECT, Names.create(Example.class));
-        extensionIO = new ExtensionIO(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     @Override
@@ -50,39 +44,38 @@ public class ExampleObjectIO extends MapModelIO<Example> implements ReferenceIO 
     }
 
     @Override
-    public Example read(ObjectNode node) {
+    public Example readObject(O node) {
         IoLogging.logger.singleJsonNode("ExampleObjectIO");
         Example example = new ExampleImpl();
-        example.setRef(JsonUtil.stringProperty(node, Referenceable.PROP_$REF));
-        example.setSummary(JsonUtil.stringProperty(node, PROP_SUMMARY));
-        example.setDescription(JsonUtil.stringProperty(node, PROP_DESCRIPTION));
-        example.setValue(readObject(node.get(PROP_VALUE)));
-        example.setExternalValue(JsonUtil.stringProperty(node, PROP_EXTERNAL_VALUE));
-        extensionIO.readMap(node).forEach(example::addExtension);
+        example.setRef(readReference(node));
+        example.setSummary(jsonIO.getString(node, PROP_SUMMARY));
+        example.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        example.setValue(jsonIO.fromJson(jsonIO.getValue(node, PROP_VALUE)));
+        example.setExternalValue(jsonIO.getString(node, PROP_EXTERNAL_VALUE));
+        example.setExtensions(extensionIO.readMap(node));
         return example;
     }
 
-    public Optional<ObjectNode> write(Example model) {
+    public Optional<O> write(Example model) {
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
-                JsonUtil.stringProperty(node, Referenceable.PROP_$REF, model.getRef());
+                setReference(node, model);
             } else {
-                JsonUtil.stringProperty(node, PROP_SUMMARY, model.getSummary());
-                JsonUtil.stringProperty(node, PROP_DESCRIPTION, model.getDescription());
-                ObjectWriter.writeObject(node, PROP_VALUE, model.getValue());
-                JsonUtil.stringProperty(node, PROP_EXTERNAL_VALUE, model.getExternalValue());
-                extensionIO.write(model).ifPresent(node::setAll);
+                setIfPresent(node, PROP_SUMMARY, jsonIO.toJson(model.getSummary()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+                setIfPresent(node, PROP_VALUE, jsonIO.toJson(model.getValue()));
+                setIfPresent(node, PROP_EXTERNAL_VALUE, jsonIO.toJson(model.getExternalValue()));
+                setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 
     /**
      * Reads an example value and decode it, the parsing is delegated to the extensions
      * currently set in the scanner. The default value will parse the string using Jackson.
      *
-     * @param context the scanning context
      * @param value the value to decode
      * @return a Java representation of the 'value' property, either a String or parsed value
      *

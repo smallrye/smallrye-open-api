@@ -3,38 +3,28 @@ package io.smallrye.openapi.runtime.io.security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.ObjectWriter;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class SecurityRequirementIO extends ModelIO<SecurityRequirement> {
+public class SecurityRequirementIO<V, A extends V, O extends V, AB, OB> extends ModelIO<SecurityRequirement, V, A, O, AB, OB> {
 
     private static final String PROP_NAME = "name";
     private static final String PROP_SCOPES = "scopes";
 
-    public SecurityRequirementIO(AnnotationScannerContext context) {
+    public SecurityRequirementIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SECURITY_REQUIREMENT, Names.create(SecurityRequirement.class));
     }
 
@@ -74,53 +64,60 @@ public class SecurityRequirementIO extends ModelIO<SecurityRequirement> {
         }
     }
 
-    public List<SecurityRequirement> readList(JsonNode node) {
+    public List<SecurityRequirement> readList(V node) {
         return Optional.ofNullable(node)
-                .filter(JsonNode::isArray)
-                .map(ArrayNode.class::cast)
-                .map(ArrayNode::elements)
-                .map(elements -> Spliterators.spliteratorUnknownSize(elements, Spliterator.ORDERED))
-                .map(elements -> StreamSupport.stream(elements, false))
+                .filter(jsonIO::isArray)
+                .map(jsonIO::asArray)
+                .map(jsonIO::entries)
+                .map(Collection::stream)
                 .map(elements -> {
                     IoLogging.logger.jsonArray("SecurityRequirement");
-                    return elements.filter(JsonNode::isObject)
-                            .map(ObjectNode.class::cast)
-                            .map(this::read)
+                    return elements.filter(jsonIO::isObject)
+                            .map(jsonIO::asObject)
+                            .map(this::readObject)
                             .collect(Collectors.toCollection(ArrayList::new));
                 })
                 .orElse(null);
     }
 
     @Override
-    public SecurityRequirement read(ObjectNode node) {
+    public SecurityRequirement readObject(O node) {
         SecurityRequirement requirement = new SecurityRequirementImpl();
-        for (Iterator<String> fieldNames = node.fieldNames(); fieldNames.hasNext();) {
-            String fieldName = fieldNames.next();
-            JsonNode scopesNode = node.get(fieldName);
-            Optional<List<String>> maybeScopes = JsonUtil.readStringArray(scopesNode);
-            if (maybeScopes.isPresent()) {
-                requirement.addScheme(fieldName, maybeScopes.get());
+
+        jsonIO.properties(node).forEach(field -> {
+            String schemeName = field.getKey();
+
+            if (jsonIO.isArray(field.getValue())) {
+                A scopeArray = jsonIO.asArray(field.getValue());
+                List<String> scopes = jsonIO.entries(scopeArray)
+                        .stream()
+                        .map(jsonIO::asString)
+                        .collect(Collectors.toList());
+                requirement.addScheme(schemeName, scopes);
             } else {
-                requirement.addScheme(fieldName);
+                requirement.addScheme(schemeName);
             }
-        }
+        });
+
         return requirement;
     }
 
-    public Optional<ArrayNode> write(List<SecurityRequirement> models) {
+    public Optional<A> write(List<SecurityRequirement> models) {
         return optionalJsonArray(models).map(array -> {
             for (SecurityRequirement model : models) {
-                write(model).ifPresent(array::add);
+                write(model).ifPresent(object -> jsonIO.add(array, object));
             }
             return array;
-        });
+        }).map(jsonIO::buildArray);
     }
 
     @Override
-    public Optional<ObjectNode> write(SecurityRequirement model) {
+    public Optional<O> write(SecurityRequirement model) {
         return optionalJsonObject(model.getSchemes()).map(node -> {
-            model.getSchemes().forEach((key, value) -> ObjectWriter.writeStringArray(node, value, key));
+            model.getSchemes()
+                    .forEach((schemeName, scopes) -> jsonIO.set(node, schemeName, jsonIO.toJson(scopes)
+                            .orElseGet(() -> jsonIO.buildArray(jsonIO.createArray()))));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

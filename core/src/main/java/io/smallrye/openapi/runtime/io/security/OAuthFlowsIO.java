@@ -5,29 +5,27 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class OAuthFlowsIO extends ModelIO<OAuthFlows> {
+public class OAuthFlowsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OAuthFlows, V, A, O, AB, OB> {
 
     private static final String PROP_AUTHORIZATION_CODE = "authorizationCode";
     private static final String PROP_CLIENT_CREDENTIALS = "clientCredentials";
     private static final String PROP_IMPLICIT = "implicit";
     private static final String PROP_PASSWORD = "password";
 
-    private final ExtensionIO extensionIO;
-    private final OAuthFlowIO oauthFlowIO;
+    private final OAuthFlowIO<V, A, O, AB, OB> oauthFlowIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    protected OAuthFlowsIO(AnnotationScannerContext context) {
+    protected OAuthFlowsIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OAUTH_FLOWS, Names.create(OAuthFlows.class));
-        extensionIO = new ExtensionIO(context);
-        oauthFlowIO = new OAuthFlowIO(context);
+        oauthFlowIO = new OAuthFlowIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
     @Override
@@ -43,19 +41,19 @@ public class OAuthFlowsIO extends ModelIO<OAuthFlows> {
     }
 
     @Override
-    public OAuthFlows read(ObjectNode node) {
+    public OAuthFlows readObject(O node) {
         IoLogging.logger.singleJsonObject("OAuthFlows");
         OAuthFlows flows = new OAuthFlowsImpl();
-        flows.setImplicit(oauthFlowIO.read(node.get(PROP_IMPLICIT)));
-        flows.setPassword(oauthFlowIO.read(node.get(PROP_PASSWORD)));
-        flows.setClientCredentials(oauthFlowIO.read(node.get(PROP_CLIENT_CREDENTIALS)));
-        flows.setAuthorizationCode(oauthFlowIO.read(node.get(PROP_AUTHORIZATION_CODE)));
+        flows.setImplicit(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_IMPLICIT)));
+        flows.setPassword(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_PASSWORD)));
+        flows.setClientCredentials(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_CLIENT_CREDENTIALS)));
+        flows.setAuthorizationCode(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_AUTHORIZATION_CODE)));
         flows.setExtensions(extensionIO.readMap(node));
         return flows;
     }
 
     @Override
-    public Optional<ObjectNode> write(OAuthFlows model) {
+    public Optional<O> write(OAuthFlows model) {
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_IMPLICIT, oauthFlowIO.write(model.getImplicit()));
             setIfPresent(node, PROP_PASSWORD, oauthFlowIO.write(model.getPassword()));
@@ -63,7 +61,7 @@ public class OAuthFlowsIO extends ModelIO<OAuthFlows> {
             setIfPresent(node, PROP_AUTHORIZATION_CODE, oauthFlowIO.write(model.getAuthorizationCode()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 
 }

@@ -1,15 +1,8 @@
 package io.smallrye.openapi.runtime.io;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 /**
  * Class used to serialize an OpenAPI
@@ -22,34 +15,14 @@ public class OpenApiSerializer {
     }
 
     /**
-     * Creates an {@link ObjectWriter} for the given format with the appropriate settings.
-     *
-     * @param objectMapper the {@link ObjectMapper} to use
-     * @param format the serialization format
-     * @return the {@link ObjectWriter} with the appropriate settings
-     */
-    public static ObjectWriter createObjectWriter(ObjectMapper objectMapper, Format format) {
-        if (format == Format.JSON) {
-            return objectMapper.writerWithDefaultPrettyPrinter();
-        } else {
-            YAMLFactory factory = new YAMLFactory();
-            factory.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
-            factory.enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
-            factory.enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS);
-            return objectMapper.writer().with(factory);
-        }
-    }
-
-    /**
      * Serializes the given OpenAPI object into either JSON or YAML and returns it as a string.
      *
      * @param openApi the OpenAPI object
      * @param format the serialization format
      * @return OpenAPI object as a String
-     * @throws IOException Errors in processing the JSON
      */
-    public static String serialize(OpenAPI openApi, Format format) throws IOException {
-        return serialize(openApi, new ObjectMapper(), format);
+    public static String serialize(OpenAPI openApi, Format format) {
+        return serialize(openApi, format, JsonIO.newInstance(null));
     }
 
     /**
@@ -59,31 +32,17 @@ public class OpenApiSerializer {
      * @param objectMapper the {@link ObjectMapper} to use
      * @param format the serialization format
      * @return OpenAPI object as a String
-     * @throws IOException Errors in processing the JSON
      */
-    public static String serialize(OpenAPI openApi, ObjectMapper objectMapper, Format format) throws IOException {
-        ObjectWriter writer = createObjectWriter(objectMapper, format);
-        return serialize(openApi, writer);
+    public static String serialize(OpenAPI openApi, ObjectMapper objectMapper, Format format) {
+        return serialize(openApi, format, JsonIO.newInstance(null));
     }
 
-    /**
-     * Serializes the given OpenAPI object using the provided {@link ObjectWriter} and returns it as a string.
-     *
-     * @param openApi the OpenAPI object
-     * @param writer the {@link ObjectWriter} to use
-     * @return OpenAPI object as a String
-     * @throws IOException Errors in processing the model
-     */
-    public static String serialize(OpenAPI openApi, ObjectWriter writer) throws IOException {
-        return new OpenAPIDefinitionIO(null)
+    private static <V, A extends V, O extends V, AB, OB> String serialize(OpenAPI openApi, Format format,
+            JsonIO<V, A, O, AB, OB> jsonIO) {
+        return new OpenAPIDefinitionIO<>(IOContext.forJson(jsonIO))
                 .write(openApi)
-                .map(tree -> {
-                    try {
-                        return writer.writeValueAsString(tree);
-                    } catch (JsonProcessingException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                })
+                .map(node -> jsonIO.toString(node, format))
                 .orElseThrow(IllegalStateException::new);
     }
+
 }

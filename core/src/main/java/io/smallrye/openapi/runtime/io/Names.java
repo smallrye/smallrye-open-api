@@ -34,8 +34,6 @@ import org.eclipse.microprofile.openapi.annotations.security.OAuthFlows;
 import org.eclipse.microprofile.openapi.annotations.security.OAuthScope;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirements;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSet;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSets;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
 import org.eclipse.microprofile.openapi.annotations.servers.Server;
@@ -52,6 +50,10 @@ public final class Names {
 
     public static DotName create(Class<?> clazz) {
         return DotName.createSimple(clazz);
+    }
+
+    public static DotName create(String className) {
+        return DotName.createSimple(className);
     }
 
     private static final Map<DotName, DotName> repeatContainers = new HashMap<>();
@@ -91,8 +93,11 @@ public final class Names {
     public static final DotName SCHEMA = create(Schema.class);
     public static final DotName SECURITY_REQUIREMENT = create(SecurityRequirement.class);
     public static final DotName SECURITY_REQUIREMENTS = create(SecurityRequirements.class);
-    public static final DotName SECURITY_REQUIREMENTS_SET = create(SecurityRequirementsSet.class);
-    public static final DotName SECURITY_REQUIREMENTS_SETS = create(SecurityRequirementsSets.class);
+    // Using strings for the following to allow running older versions of the TCK
+    public static final DotName SECURITY_REQUIREMENTS_SET = create(
+            "org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSet");
+    public static final DotName SECURITY_REQUIREMENTS_SETS = create(
+            "org.eclipse.microprofile.openapi.annotations.security.SecurityRequirementsSets");
     public static final DotName SECURITY_SCHEME = create(SecurityScheme.class);
     public static final DotName SECURITY_SCHEMES = create(SecuritySchemes.class);
     public static final DotName SERVER = create(Server.class);

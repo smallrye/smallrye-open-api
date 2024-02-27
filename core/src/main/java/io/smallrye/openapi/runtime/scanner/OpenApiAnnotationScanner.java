@@ -60,7 +60,7 @@ public class OpenApiAnnotationScanner {
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
-        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, AnnotationScannerExtension.DEFAULT);
+        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, AnnotationScannerExtension.defaultExtension());
     }
 
     /**
@@ -86,7 +86,7 @@ public class OpenApiAnnotationScanner {
      *        IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index) {
-        this(config, loader, index, AnnotationScannerExtension.DEFAULT);
+        this(config, loader, index, AnnotationScannerExtension.defaultExtension());
     }
 
     /**

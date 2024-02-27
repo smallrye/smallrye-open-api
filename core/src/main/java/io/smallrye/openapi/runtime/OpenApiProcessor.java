@@ -1,6 +1,5 @@
 package io.smallrye.openapi.runtime;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -103,7 +102,14 @@ public class OpenApiProcessor {
      * @return OpenApiImpl
      */
     public static OpenAPI modelFromStaticFile(OpenApiConfig config, OpenApiStaticFile staticFile) {
-        return modelFromStaticFile(staticFile, config != null ? config.getMaximumStaticFileSize() : null);
+        if (staticFile == null) {
+            return null;
+        }
+        try {
+            return OpenApiParser.parse(staticFile.getContent(), staticFile.getFormat(), config);
+        } catch (Exception e) {
+            throw new OpenApiRuntimeException(e);
+        }
     }
 
     /**
@@ -115,27 +121,7 @@ public class OpenApiProcessor {
      * @return OpenAPI model from the file
      */
     public static OpenAPI modelFromStaticFile(OpenApiStaticFile staticFile) {
-        return modelFromStaticFile(staticFile, null);
-    }
-
-    /**
-     * Parse the static file content and return the resulting model. Note that this
-     * method does NOT close the resources in the static file. The caller is
-     * responsible for that.
-     *
-     * @param staticFile OpenApiStaticFile to be parsed
-     * @param maxStaticFileSize maximum file size when the format is YAML
-     * @return OpenAPI model from the file
-     */
-    private static OpenAPI modelFromStaticFile(OpenApiStaticFile staticFile, Integer maxStaticFileSize) {
-        if (staticFile == null) {
-            return null;
-        }
-        try {
-            return OpenApiParser.parse(staticFile.getContent(), staticFile.getFormat(), maxStaticFileSize);
-        } catch (IOException e) {
-            throw new OpenApiRuntimeException(e);
-        }
+        return modelFromStaticFile(null, staticFile);
     }
 
     /**
@@ -194,7 +180,7 @@ public class OpenApiProcessor {
         }
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, loader, index, scannerSupplier,
-                AnnotationScannerExtension.DEFAULT);
+                AnnotationScannerExtension.defaultExtension());
         return scanner.scan();
     }
 

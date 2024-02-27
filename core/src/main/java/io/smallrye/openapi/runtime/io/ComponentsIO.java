@@ -5,8 +5,6 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
@@ -19,9 +17,8 @@ import io.smallrye.openapi.runtime.io.parameters.ParameterIO;
 import io.smallrye.openapi.runtime.io.parameters.RequestBodyIO;
 import io.smallrye.openapi.runtime.io.responses.APIResponseIO;
 import io.smallrye.openapi.runtime.io.security.SecuritySchemeIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class ComponentsIO extends ModelIO<Components> {
+public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Components, V, A, O, AB, OB> {
 
     private static final String PROP_CALLBACKS = "callbacks";
     private static final String PROP_LINKS = "links";
@@ -33,36 +30,36 @@ public class ComponentsIO extends ModelIO<Components> {
     private static final String PROP_RESPONSES = "responses";
     private static final String PROP_SCHEMAS = "schemas";
 
-    private final APIResponseIO responseIO;
-    private final HeaderIO headerIO;
-    private final SchemaIO schemaIO;
-    private final ExampleObjectIO exampleObjectIO;
-    private final CallbackIO callbackIO;
-    private final LinkIO linkIO;
-    private final ParameterIO parameterIO;
-    private final RequestBodyIO requestBodyIO;
-    private final SecuritySchemeIO securitySchemeIO;
-    private final ExtensionIO extensionIO;
+    private final APIResponseIO<V, A, O, AB, OB> responseIO;
+    private final HeaderIO<V, A, O, AB, OB> headerIO;
+    private final SchemaIO<V, A, O, AB, OB> schemaIO;
+    private final ExampleObjectIO<V, A, O, AB, OB> exampleObjectIO;
+    private final CallbackIO<V, A, O, AB, OB> callbackIO;
+    private final LinkIO<V, A, O, AB, OB> linkIO;
+    private final ParameterIO<V, A, O, AB, OB> parameterIO;
+    private final RequestBodyIO<V, A, O, AB, OB> requestBodyIO;
+    private final SecuritySchemeIO<V, A, O, AB, OB> securitySchemeIO;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ComponentsIO(AnnotationScannerContext context, ContentIO contentIO) {
+    public ComponentsIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
         super(context, Names.COMPONENTS, Names.create(Components.class));
-        responseIO = new APIResponseIO(context, contentIO);
-        headerIO = new HeaderIO(context, contentIO);
-        schemaIO = new SchemaIO(context);
-        exampleObjectIO = new ExampleObjectIO(context);
-        callbackIO = new CallbackIO(context, contentIO);
-        linkIO = new LinkIO(context);
-        parameterIO = new ParameterIO(context, contentIO);
-        requestBodyIO = new RequestBodyIO(context, contentIO);
-        securitySchemeIO = new SecuritySchemeIO(context);
-        extensionIO = new ExtensionIO(context);
+        responseIO = new APIResponseIO<>(context, contentIO);
+        headerIO = new HeaderIO<>(context, contentIO);
+        schemaIO = new SchemaIO<>(context);
+        exampleObjectIO = new ExampleObjectIO<>(context);
+        callbackIO = new CallbackIO<>(context, contentIO);
+        linkIO = new LinkIO<>(context);
+        parameterIO = new ParameterIO<>(context, contentIO);
+        requestBodyIO = new RequestBodyIO<>(context, contentIO);
+        securitySchemeIO = new SecuritySchemeIO<>(context);
+        extensionIO = new ExtensionIO<>(context);
     }
 
-    public CallbackIO callbacks() {
+    public CallbackIO<V, A, O, AB, OB> callbacks() {
         return callbackIO;
     }
 
-    public SecuritySchemeIO securitySchemes() {
+    public SecuritySchemeIO<V, A, O, AB, OB> securitySchemes() {
         return securitySchemeIO;
     }
 
@@ -85,23 +82,23 @@ public class ComponentsIO extends ModelIO<Components> {
     }
 
     @Override
-    public Components read(ObjectNode node) {
+    public Components readObject(O node) {
         IoLogging.logger.singleJsonNode("Components");
         Components components = new ComponentsImpl();
-        components.setCallbacks(callbackIO.readMap(node.get(PROP_CALLBACKS)));
-        components.setExamples(exampleObjectIO.readMap(node.get(PROP_EXAMPLES)));
-        components.setHeaders(headerIO.readMap(node.get(PROP_HEADERS)));
-        components.setLinks(linkIO.readMap(node.get(PROP_LINKS)));
-        components.setParameters(parameterIO.readMap(node.get(PROP_PARAMETERS)));
-        components.setRequestBodies(requestBodyIO.readMap(node.get(PROP_REQUEST_BODIES)));
-        components.setResponses(responseIO.readMap(node.get(PROP_RESPONSES)));
-        components.setSchemas(schemaIO.readMap(node.get(PROP_SCHEMAS)));
-        components.setSecuritySchemes(securitySchemeIO.readMap(node.get(PROP_SECURITY_SCHEMES)));
-        extensionIO.readMap(node).forEach(components::addExtension);
+        components.setCallbacks(callbackIO.readMap(jsonIO.getValue(node, PROP_CALLBACKS)));
+        components.setExamples(exampleObjectIO.readMap(jsonIO.getValue(node, PROP_EXAMPLES)));
+        components.setHeaders(headerIO.readMap(jsonIO.getValue(node, PROP_HEADERS)));
+        components.setLinks(linkIO.readMap(jsonIO.getValue(node, PROP_LINKS)));
+        components.setParameters(parameterIO.readMap(jsonIO.getValue(node, PROP_PARAMETERS)));
+        components.setRequestBodies(requestBodyIO.readMap(jsonIO.getValue(node, PROP_REQUEST_BODIES)));
+        components.setResponses(responseIO.readMap(jsonIO.getValue(node, PROP_RESPONSES)));
+        components.setSchemas(schemaIO.readMap(jsonIO.getValue(node, PROP_SCHEMAS)));
+        components.setSecuritySchemes(securitySchemeIO.readMap(jsonIO.getValue(node, PROP_SECURITY_SCHEMES)));
+        components.setExtensions(extensionIO.readMap(node));
         return components;
     }
 
-    public Optional<ObjectNode> write(Components model) {
+    public Optional<O> write(Components model) {
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_SCHEMAS, schemaIO.write(model.getSchemas()));
             setIfPresent(node, PROP_RESPONSES, responseIO.write(model.getResponses()));
@@ -114,6 +111,6 @@ public class ComponentsIO extends ModelIO<Components> {
             setIfPresent(node, PROP_CALLBACKS, callbackIO.write(model.getCallbacks()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        });
+        }).map(jsonIO::buildObject);
     }
 }

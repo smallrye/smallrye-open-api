@@ -5,26 +5,23 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.info.License;
 import org.jboss.jandex.AnnotationInstance;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.smallrye.openapi.api.models.info.LicenseImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.JsonUtil;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
-public class LicenseIO extends ModelIO<License> {
+public class LicenseIO<V, A extends V, O extends V, AB, OB> extends ModelIO<License, V, A, O, AB, OB> {
 
     private static final String PROP_NAME = "name";
     private static final String PROP_URL = "url";
 
-    private final ExtensionIO extension;
+    private final ExtensionIO<V, A, O, AB, OB> extension;
 
-    public LicenseIO(AnnotationScannerContext context) {
+    public LicenseIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.LICENSE, Names.create(License.class));
-        extension = new ExtensionIO(context);
+        extension = new ExtensionIO<>(context);
     }
 
     @Override
@@ -38,22 +35,21 @@ public class LicenseIO extends ModelIO<License> {
     }
 
     @Override
-    public License read(ObjectNode node) {
+    public License readObject(O node) {
         IoLogging.logger.singleJsonNode("License");
         License license = new LicenseImpl();
-        license.setName(JsonUtil.stringProperty(node, PROP_NAME));
-        license.setUrl(JsonUtil.stringProperty(node, PROP_URL));
+        license.setName(jsonIO.getString(node, PROP_NAME));
+        license.setUrl(jsonIO.getString(node, PROP_URL));
         extension.readMap(node).forEach(license::addExtension);
         return license;
     }
 
-    public Optional<ObjectNode> write(License model) {
-        return optionalJsonObject(model)
-                .map(node -> {
-                    JsonUtil.stringProperty(node, PROP_NAME, model.getName());
-                    JsonUtil.stringProperty(node, PROP_URL, model.getUrl());
-                    setAllIfPresent(node, extension.write(model));
-                    return node;
-                });
+    public Optional<O> write(License model) {
+        return optionalJsonObject(model).map(node -> {
+            setIfPresent(node, PROP_NAME, jsonIO.toJson(model.getName()));
+            setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
+            setAllIfPresent(node, extension.write(model));
+            return node;
+        }).map(jsonIO::buildObject);
     }
 }
