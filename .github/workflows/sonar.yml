@@ -113,7 +113,7 @@ jobs:
         run: |
           mvn -B --no-transfer-progress org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=smallrye_smallrye-open-api  \
-            -Dsonar.login=${SONAR_TOKEN} \
+            -Dsonar.token=${SONAR_TOKEN} \
             -Dsonar.coverage.jacoco.xmlReportPaths=$(pwd)/testsuite/coverage/target/site/jacoco-aggregate/jacoco.xml \
             -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
             -Dsonar.pullrequest.key=${{ fromJson(steps.build_context.outputs.content).event.number }} \
@@ -129,7 +129,7 @@ jobs:
         run: |
           mvn -B --no-transfer-progress org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=smallrye_smallrye-open-api \
-            -Dsonar.login=${SONAR_TOKEN} \
+            -Dsonar.token=${SONAR_TOKEN} \
             -Dsonar.coverage.jacoco.xmlReportPaths=$(pwd)/testsuite/coverage/target/site/jacoco-aggregate/jacoco.xml \
             -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
             -Dsonar.branch.name=${{ github.event.workflow_run.head_branch }}
