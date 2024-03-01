@@ -39,6 +39,14 @@
 
         <!-- Ignore the test data classes in test coverage calculation -->
         <sonar.coverage.exclusions>testsuite/data/**/*.java</sonar.coverage.exclusions>
+        <!--
+          Ignore rule java:S119 the checks type parameter names. The generic types in the
+          io.smallrye.openapi.runtime.io package use two-character type parameter names for the
+          parameters representing JSON Object Builder (OB) and JSON Array Builder (AB) types.
+        -->
+        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S119</sonar.issue.ignore.multicriteria.e1.ruleKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
     </properties>
 
     <licenses>
