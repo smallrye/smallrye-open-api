@@ -21,7 +21,6 @@ import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
@@ -179,8 +178,7 @@ public class OpenApiProcessor {
             return null;
         }
 
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, loader, index, scannerSupplier,
-                AnnotationScannerExtension.defaultExtension());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, loader, index, scannerSupplier);
         return scanner.scan();
     }
 

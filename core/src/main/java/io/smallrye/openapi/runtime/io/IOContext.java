@@ -5,7 +5,11 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 public class IOContext<V, A extends V, O extends V, AB, OB> {
 
     private AnnotationScannerContext scannerContext;
-    private final JsonIO<V, A, O, AB, OB> jsonIO;
+    private JsonIO<V, A, O, AB, OB> jsonIO;
+
+    public static <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> empty() {
+        return new IOContext<>(null, null);
+    }
 
     public static <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> forJson(JsonIO<V, A, O, AB, OB> jsonIO) {
         return new IOContext<>(null, jsonIO);
@@ -15,7 +19,7 @@ public class IOContext<V, A extends V, O extends V, AB, OB> {
         return new IOContext<>(context, null);
     }
 
-    public IOContext(AnnotationScannerContext context, JsonIO<V, A, O, AB, OB> jsonIO) {
+    private IOContext(AnnotationScannerContext context, JsonIO<V, A, O, AB, OB> jsonIO) {
         this.scannerContext = context;
         this.jsonIO = jsonIO;
     }
@@ -31,4 +35,9 @@ public class IOContext<V, A extends V, O extends V, AB, OB> {
     public JsonIO<V, A, O, AB, OB> jsonIO() {
         return jsonIO;
     }
+
+    public void jsonIO(JsonIO<V, A, O, AB, OB> jsonIO) {
+        this.jsonIO = jsonIO;
+    }
+
 }

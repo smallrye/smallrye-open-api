@@ -58,6 +58,7 @@ public class AnnotationScannerContext {
     private final SchemaRegistry schemaRegistry;
     private final JavaSecurityProcessor javaSecurityProcessor;
     private final Annotations annotations;
+    private final IOContext<?, ?, ?, ?, ?> ioContext;
     private final OpenAPIDefinitionIO<?, ?, ?, ?, ?> modelIO;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
@@ -70,16 +71,17 @@ public class AnnotationScannerContext {
         this.augmentedIndex = AugmentedIndexView.augment(index);
         this.ignoreResolver = new IgnoreResolver(this);
         this.classLoader = classLoader;
-        this.extensions = extensions;
         this.config = config;
         this.openApi = openApi;
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
         this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(new BeanValidationScanner(this))
                 : Optional.empty();
-        this.schemaRegistry = new SchemaRegistry(this);
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
-        this.modelIO = new OpenAPIDefinitionIO<>(IOContext.forScanning(this));
+        this.ioContext = IOContext.forScanning(this);
+        this.modelIO = new OpenAPIDefinitionIO<>(ioContext);
+        this.extensions = extensions.isEmpty() ? AnnotationScannerExtension.defaultExtension(this) : extensions;
+        this.schemaRegistry = new SchemaRegistry(this);
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
@@ -193,6 +195,11 @@ public class AnnotationScannerContext {
 
     public Annotations annotations() {
         return annotations;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> getIoContext() {
+        return (IOContext<V, A, O, AB, OB>) ioContext;
     }
 
     @SuppressWarnings("unchecked")

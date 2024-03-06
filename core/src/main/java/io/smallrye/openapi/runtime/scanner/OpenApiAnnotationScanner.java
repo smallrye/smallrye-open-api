@@ -60,7 +60,7 @@ public class OpenApiAnnotationScanner {
      * @param index IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index) {
-        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, AnnotationScannerExtension.defaultExtension());
+        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, Collections.emptyList());
     }
 
     /**
@@ -86,7 +86,7 @@ public class OpenApiAnnotationScanner {
      *        IndexView of deployment
      */
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index) {
-        this(config, loader, index, AnnotationScannerExtension.defaultExtension());
+        this(config, loader, index, Collections.emptyList());
     }
 
     /**
@@ -105,6 +105,11 @@ public class OpenApiAnnotationScanner {
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
             List<AnnotationScannerExtension> extensions) {
         this(config, loader, index, new AnnotationScannerFactory(loader), extensions);
+    }
+
+    public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
+            Supplier<Iterable<AnnotationScanner>> scannerSupplier) {
+        this(config, loader, index, scannerSupplier, Collections.emptyList());
     }
 
     /**

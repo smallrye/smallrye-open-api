@@ -366,9 +366,8 @@ public interface AnnotationScanner {
         Map<String, APIResponse> methodResponse = context.io().responses().readSingle(method);
         addResponses(operation, methodResponses, methodResponse, true);
 
-        context.io().responses().readResponseSchema(method).ifPresent(responseSchema -> {
-            addApiReponseSchemaFromAnnotation(responseSchema, method, operation);
-        });
+        context.io().responses().readResponseSchema(method)
+                .ifPresent(responseSchema -> addApiReponseSchemaFromAnnotation(responseSchema, method, operation));
 
         /*
          * If there is no response from annotations, try to create one from the method return value.

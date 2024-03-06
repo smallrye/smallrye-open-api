@@ -28,7 +28,6 @@ import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
-import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -197,7 +196,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                     .put(paramName(annotation), annotation);
         } else if (frameworkParam.location == In.PATH && targetType != null
                 && JaxRsConstants.PATH_SEGMENT.contains(targetType.name())) {
-            String pathSegment = scannerContext.annotations().value(annotation, Annotations.VALUE);
+            String pathSegment = scannerContext.annotations().value(annotation);
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
         } else if (frameworkParam.location != null) {
             readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
@@ -222,7 +221,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected String getDefaultAnnotationProperty() {
-        return Annotations.VALUE;
+        return "value";
     }
 
     @Override

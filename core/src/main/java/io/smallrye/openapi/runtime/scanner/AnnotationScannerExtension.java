@@ -10,10 +10,9 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.io.Format;
-import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.JsonIO;
-import io.smallrye.openapi.runtime.io.media.SchemaIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * Extension point for supporting extensions to OpenAPI Scanners.
@@ -21,12 +20,24 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
  */
 public interface AnnotationScannerExtension {
 
-    public static List<AnnotationScannerExtension> defaultExtension() {
-        return Collections.singletonList(new Default<>());
+    public static List<AnnotationScannerExtension> defaultExtension(AnnotationScannerContext scannerContext) {
+        return Collections.singletonList(new Default<>(scannerContext));
     }
 
     static class Default<V> implements AnnotationScannerExtension {
-        JsonIO<V, ?, ?, ?, ?> jackson = JsonIO.newInstance(null);
+        final AnnotationScannerContext scannerContext;
+        final JsonIO<V, ?, ?, ?, ?> jsonIO;
+
+        @SuppressWarnings("unchecked")
+        private Default(AnnotationScannerContext scannerContext) {
+            this.scannerContext = scannerContext;
+
+            if (scannerContext.getIoContext().jsonIO() == null) {
+                scannerContext.getIoContext().jsonIO(JsonIO.newInstance(scannerContext.getConfig()));
+            }
+
+            jsonIO = (JsonIO<V, ?, ?, ?, ?>) scannerContext.getIoContext().jsonIO();
+        }
 
         @Override
         public Object parseValue(String value) {
@@ -55,7 +66,7 @@ public interface AnnotationScannerExtension {
                 case '8':
                 case '9':
                     try {
-                        return jackson.fromJson(jackson.fromString(value, Format.JSON));
+                        return jsonIO.fromJson(jsonIO.fromString(value, Format.JSON));
                     } catch (Exception e) {
                         // TODO log the error
                         break;
@@ -70,8 +81,8 @@ public interface AnnotationScannerExtension {
 
         @Override
         public Schema parseSchema(String jsonSchema) {
-            return new SchemaIO<>(IOContext.forJson(jackson))
-                    .readValue(jackson.fromString(jsonSchema, Format.JSON));
+            V schemaModel = jsonIO.fromString(jsonSchema, Format.JSON);
+            return scannerContext.io().schemas().readValue(schemaModel);
         }
     }
 

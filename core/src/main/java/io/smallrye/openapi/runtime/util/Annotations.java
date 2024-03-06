@@ -33,8 +33,7 @@ public final class Annotations {
     /**
      * Default annotation property name
      */
-    public static final String VALUE = "value";
-
+    private static final String VALUE = "value";
     private static final Map<PrimitiveType.Primitive, AnnotationValue.Kind> PRIMITIVES;
     private static final DotName CLASS_NAME = DotName.createSimple("java.lang.Class");
     private static final Type ENUM_TYPE = Type.create(DotName.ENUM_NAME, Type.Kind.CLASS);

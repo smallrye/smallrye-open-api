@@ -1599,4 +1599,4 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected abstract boolean isParameter(DotName annotationName);
-};
+}

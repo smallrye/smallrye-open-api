@@ -84,6 +84,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
                 try {
                     return Enum.valueOf(type, strValue.toUpperCase(Locale.ROOT));
                 } catch (Exception e) {
+                    // Ignore exceptions from `valueOf` for illegal arguments
                 }
             }
         }
