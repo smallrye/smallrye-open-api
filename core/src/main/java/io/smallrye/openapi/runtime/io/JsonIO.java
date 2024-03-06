@@ -24,6 +24,45 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
         return jackson;
     }
 
+    default Object parseValue(String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+
+        String trimmedValue = value.trim();
+
+        switch (trimmedValue.charAt(0)) {
+            case '{': /* JSON Object */
+            case '[': /* JSON Array */
+            case '-': /* JSON Negative Number */
+            case '0': /* JSON Numbers */
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                try {
+                    return fromJson(fromString(trimmedValue, Format.JSON));
+                } catch (Exception e) {
+                    IoLogging.logger.unparseableJson(trimmedValue);
+                    break;
+                }
+            case 't':
+                return "true".equals(trimmedValue) ? Boolean.TRUE : value;
+            case 'f':
+                return "false".equals(trimmedValue) ? Boolean.FALSE : value;
+            default:
+                break;
+        }
+
+        // JSON String
+        return value;
+    }
+
     boolean isArray(V value);
 
     A asArray(V value);
@@ -114,7 +153,11 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
         }
     }
 
-    V fromReader(Reader reader, Format format);
+    default V fromReader(Reader reader) throws IOException {
+        return fromReader(reader, Format.YAML);
+    }
+
+    V fromReader(Reader reader, Format format) throws IOException;
 
     String toString(V object, Format format);
 

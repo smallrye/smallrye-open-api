@@ -71,4 +71,8 @@ public interface IoLogging extends BasicLogger {
     @Message(id = 2015, value = "Processing a json array of %s json nodes.")
     void jsonArray(String of);
 
+    @LogMessage(level = Logger.Level.INFO)
+    @Message(id = 2016, value = "JSON value could not be parsed: %s")
+    void unparseableJson(String value);
+
 }
