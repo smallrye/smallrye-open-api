@@ -32,7 +32,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.ComponentsImpl;
@@ -220,10 +220,13 @@ public class IndexScannerTestBase {
     }
 
     public static OpenApiConfig dynamicConfig(Map<String, String> properties) {
-        Config config = new SmallRyeConfigBuilder()
-                .withSources(new ConfigValuePropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
-                .build();
-
-        return OpenApiConfig.fromConfig(config);
+        return OpenApiConfig.fromConfig(config(properties));
     }
+
+    public static Config config(Map<String, String> properties) {
+        return new SmallRyeConfigBuilder()
+                .withSources(new PropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
+                .build();
+    }
+
 }

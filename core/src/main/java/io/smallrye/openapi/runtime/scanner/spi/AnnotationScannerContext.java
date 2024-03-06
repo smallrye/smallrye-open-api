@@ -37,6 +37,7 @@ import io.smallrye.openapi.runtime.util.Annotations;
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
+@SuppressWarnings("deprecation")
 public class AnnotationScannerContext {
 
     private final FilteredIndexView index;
@@ -64,10 +65,12 @@ public class AnnotationScannerContext {
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
-    public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
+    public AnnotationScannerContext(FilteredIndexView index,
+            ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
             boolean addDefaultExtension,
             OpenApiConfig config,
+            OpenAPIDefinitionIO<?, ?, ?, ?, ?> modelIO,
             OpenAPI openApi) {
         this.index = index;
         this.augmentedIndex = AugmentedIndexView.augment(index);
@@ -81,7 +84,7 @@ public class AnnotationScannerContext {
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
         this.ioContext = IOContext.forScanning(this);
-        this.modelIO = new OpenAPIDefinitionIO<>(ioContext);
+        this.modelIO = modelIO != null ? modelIO : new OpenAPIDefinitionIO<>(ioContext);
         if (extensions.isEmpty()) {
             this.extensions = AnnotationScannerExtension.defaultExtension(this);
         } else {
@@ -98,12 +101,12 @@ public class AnnotationScannerContext {
             List<AnnotationScannerExtension> extensions,
             OpenApiConfig config,
             OpenAPI openApi) {
-        this(index, classLoader, extensions, true, config, openApi);
+        this(index, classLoader, extensions, true, config, null, openApi);
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
             OpenApiConfig config) {
-        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), true, config, new OpenAPIImpl());
+        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), true, config, null, new OpenAPIImpl());
     }
 
     public FilteredIndexView getIndex() {

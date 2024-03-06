@@ -20,7 +20,7 @@ import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
@@ -136,13 +136,11 @@ class Configs implements SmallryeOpenApiProperties {
         encoding = objects.property(String.class).convention(ext.getEncoding());
     }
 
-    OpenApiConfig asOpenApiConfig() {
-        Config config = new SmallRyeConfigBuilder()
-                .withSources(
-                        new ConfigValuePropertiesConfigSource(getProperties(), "maven-plugin", ConfigSource.DEFAULT_ORDINAL))
+    Config asMicroprofileConfig() {
+        return new SmallRyeConfigBuilder()
+                .addDefaultSources()
+                .withSources(new PropertiesConfigSource(getProperties(), "gradle-plugin", ConfigSource.DEFAULT_ORDINAL))
                 .build();
-
-        return OpenApiConfig.fromConfig(config);
     }
 
     private Map<String, String> getProperties() {
