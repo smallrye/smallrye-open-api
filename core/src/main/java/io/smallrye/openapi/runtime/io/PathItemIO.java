@@ -70,10 +70,10 @@ public class PathItemIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Pat
         IoLogging.logger.singleJsonNode("PathItem");
         PathItem pathItem = new PathItemImpl();
         pathItem.setRef(readReference(node));
-        pathItem.setSummary(jsonIO.getString(node, PROP_SUMMARY));
-        pathItem.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        pathItem.setSummary(jsonIO().getString(node, PROP_SUMMARY));
+        pathItem.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
 
-        jsonIO.properties(node)
+        jsonIO().properties(node)
                 .stream()
                 .filter(entry -> OPERATION_PROPS.contains(entry.getKey()))
                 .forEach(entry -> {
@@ -82,8 +82,8 @@ public class PathItemIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Pat
                     pathItem.setOperation(method, operation);
                 });
 
-        pathItem.setParameters(parameterIO.readList(jsonIO.getValue(node, PROP_PARAMETERS)));
-        pathItem.setServers(serverIO.readList(jsonIO.getValue(node, PROP_SERVERS)));
+        pathItem.setParameters(parameterIO.readList(jsonIO().getValue(node, PROP_PARAMETERS)));
+        pathItem.setServers(serverIO.readList(jsonIO().getValue(node, PROP_SERVERS)));
         pathItem.setExtensions(extensionIO.readObjectMap(node));
 
         return pathItem;
@@ -91,13 +91,13 @@ public class PathItemIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Pat
 
     @Override
     public Optional<O> write(PathItem model) {
-        return optionalJsonObject(model).map(node -> write(model, node)).map(jsonIO::buildObject);
+        return optionalJsonObject(model).map(node -> write(model, node)).map(jsonIO()::buildObject);
     }
 
     private OB write(PathItem model, OB node) {
         setReference(node, model);
-        setIfPresent(node, PROP_SUMMARY, jsonIO.toJson(model.getSummary()));
-        setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+        setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+        setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
 
         model.getOperations()
                 .forEach((method, operation) -> setIfPresent(node, method.name().toLowerCase(), operationIO.write(operation)));

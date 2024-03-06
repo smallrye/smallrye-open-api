@@ -56,26 +56,26 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
     public Info readObject(O node) {
         IoLogging.logger.singleJsonNode("Info");
         Info info = new InfoImpl();
-        info.setTitle(jsonIO.getString(node, PROP_TITLE));
-        info.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        info.setTermsOfService(jsonIO.getString(node, PROP_TERMS_OF_SERVICE));
-        info.setContact(contact.readValue(jsonIO.getValue(node, PROP_CONTACT)));
-        info.setLicense(license.readValue(jsonIO.getValue(node, PROP_LICENSE)));
-        info.setVersion(jsonIO.getString(node, PROP_VERSION));
+        info.setTitle(jsonIO().getString(node, PROP_TITLE));
+        info.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        info.setTermsOfService(jsonIO().getString(node, PROP_TERMS_OF_SERVICE));
+        info.setContact(contact.readValue(jsonIO().getValue(node, PROP_CONTACT)));
+        info.setLicense(license.readValue(jsonIO().getValue(node, PROP_LICENSE)));
+        info.setVersion(jsonIO().getString(node, PROP_VERSION));
         info.setExtensions(extension.readMap(node));
         return info;
     }
 
     public Optional<O> write(Info model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_TITLE, jsonIO.toJson(model.getTitle()));
-            setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
-            setIfPresent(node, PROP_TERMS_OF_SERVICE, jsonIO.toJson(model.getTermsOfService()));
+            setIfPresent(node, PROP_TITLE, jsonIO().toJson(model.getTitle()));
+            setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+            setIfPresent(node, PROP_TERMS_OF_SERVICE, jsonIO().toJson(model.getTermsOfService()));
             setIfPresent(node, PROP_CONTACT, contact.write(model.getContact()));
             setIfPresent(node, PROP_LICENSE, license.write(model.getLicense()));
-            setIfPresent(node, PROP_VERSION, jsonIO.toJson(model.getVersion()));
+            setIfPresent(node, PROP_VERSION, jsonIO().toJson(model.getVersion()));
             setAllIfPresent(node, extension.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

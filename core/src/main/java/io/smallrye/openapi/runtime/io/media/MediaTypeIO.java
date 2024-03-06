@@ -48,10 +48,10 @@ public class MediaTypeIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Me
     public MediaType readObject(O node) {
         IoLogging.logger.singleJsonNode("Content");
         MediaType mediaType = new MediaTypeImpl();
-        mediaType.setSchema(schemaIO.readValue(jsonIO.getValue(node, PROP_SCHEMA)));
-        mediaType.setExample(jsonIO.fromJson(jsonIO.getValue(node, PROP_EXAMPLE)));
-        mediaType.setExamples(exampleObjectIO.readMap(jsonIO.getValue(node, PROP_EXAMPLES)));
-        mediaType.setEncoding(encodingIO.readMap(jsonIO.getValue(node, PROP_ENCODING)));
+        mediaType.setSchema(schemaIO.readValue(jsonIO().getValue(node, PROP_SCHEMA)));
+        mediaType.setExample(jsonIO().fromJson(jsonIO().getValue(node, PROP_EXAMPLE)));
+        mediaType.setExamples(exampleObjectIO.readMap(jsonIO().getValue(node, PROP_EXAMPLES)));
+        mediaType.setEncoding(encodingIO.readMap(jsonIO().getValue(node, PROP_ENCODING)));
         extensionIO.readMap(node).forEach(mediaType::addExtension);
         return mediaType;
     }
@@ -59,11 +59,11 @@ public class MediaTypeIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Me
     public Optional<O> write(MediaType model) {
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_SCHEMA, schemaIO.write(model.getSchema()));
-            setIfPresent(node, PROP_EXAMPLE, jsonIO.toJson(model.getExample()));
+            setIfPresent(node, PROP_EXAMPLE, jsonIO().toJson(model.getExample()));
             setIfPresent(node, PROP_EXAMPLES, exampleObjectIO.write(model.getExamples()));
             setIfPresent(node, PROP_ENCODING, encodingIO.write(model.getEncoding()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

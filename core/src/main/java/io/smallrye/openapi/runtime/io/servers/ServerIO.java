@@ -60,8 +60,8 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     public Server read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@Server");
         Server server = new ServerImpl();
-        server.setUrl(context.annotations().value(annotation, PROP_URL));
-        server.setDescription(context.annotations().value(annotation, PROP_DESCRIPTION));
+        server.setUrl(value(annotation, PROP_URL));
+        server.setDescription(value(annotation, PROP_DESCRIPTION));
         server.setVariables(serverVariableIO.readMap(annotation.value(PROP_VARIABLES)));
         server.setExtensions(extensionIO.readExtensible(annotation));
         return server;
@@ -76,14 +76,14 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
      */
     public List<Server> readList(V node) {
         return Optional.ofNullable(node)
-                .filter(jsonIO::isArray)
-                .map(jsonIO::asArray)
-                .map(jsonIO::entries)
+                .filter(jsonIO()::isArray)
+                .map(jsonIO()::asArray)
+                .map(jsonIO()::entries)
                 .map(Collection::stream)
                 .map(elements -> {
                     IoLogging.logger.jsonArray("Server");
-                    return elements.filter(jsonIO::isObject)
-                            .map(jsonIO::asObject)
+                    return elements.filter(jsonIO()::isObject)
+                            .map(jsonIO()::asObject)
                             .map(this::readObject)
                             .collect(Collectors.toCollection(ArrayList::new));
                 })
@@ -94,9 +94,9 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     public Server readObject(O node) {
         IoLogging.logger.singleJsonNode("Server");
         Server server = new ServerImpl();
-        server.setUrl(jsonIO.getString(node, PROP_URL));
-        server.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        server.setVariables(serverVariableIO.readMap(jsonIO.getValue(node, PROP_VARIABLES)));
+        server.setUrl(jsonIO().getString(node, PROP_URL));
+        server.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        server.setVariables(serverVariableIO.readMap(jsonIO().getValue(node, PROP_VARIABLES)));
         server.setExtensions(extensionIO.readMap(node));
         return server;
     }
@@ -104,24 +104,24 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     public Optional<A> write(List<Server> models) {
         return optionalJsonArray(models).map(array -> {
             models.forEach(model -> {
-                OB entry = jsonIO.createObject();
+                OB entry = jsonIO().createObject();
                 write(model, entry);
-                jsonIO.add(array, jsonIO.buildObject(entry));
+                jsonIO().add(array, jsonIO().buildObject(entry));
             });
             return array;
-        }).map(jsonIO::buildArray);
+        }).map(jsonIO()::buildArray);
     }
 
     public Optional<O> write(Server model) {
         return optionalJsonObject(model).map(node -> {
             write(model, node);
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
     private void write(Server model, OB node) {
-        setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
-        setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+        setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
+        setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
         setIfPresent(node, PROP_VARIABLES, serverVariableIO.write(model.getVariables()));
         setAllIfPresent(node, extensionIO.write(model));
     }

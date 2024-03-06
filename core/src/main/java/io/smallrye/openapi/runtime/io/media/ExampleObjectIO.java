@@ -48,10 +48,10 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
         IoLogging.logger.singleJsonNode("ExampleObjectIO");
         Example example = new ExampleImpl();
         example.setRef(readReference(node));
-        example.setSummary(jsonIO.getString(node, PROP_SUMMARY));
-        example.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        example.setValue(jsonIO.fromJson(jsonIO.getValue(node, PROP_VALUE)));
-        example.setExternalValue(jsonIO.getString(node, PROP_EXTERNAL_VALUE));
+        example.setSummary(jsonIO().getString(node, PROP_SUMMARY));
+        example.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        example.setValue(jsonIO().fromJson(jsonIO().getValue(node, PROP_VALUE)));
+        example.setExternalValue(jsonIO().getString(node, PROP_EXTERNAL_VALUE));
         example.setExtensions(extensionIO.readMap(node));
         return example;
     }
@@ -61,15 +61,15 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
             if (isReference(model)) {
                 setReference(node, model);
             } else {
-                setIfPresent(node, PROP_SUMMARY, jsonIO.toJson(model.getSummary()));
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
-                setIfPresent(node, PROP_VALUE, jsonIO.toJson(model.getValue()));
-                setIfPresent(node, PROP_EXTERNAL_VALUE, jsonIO.toJson(model.getExternalValue()));
+                setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                setIfPresent(node, PROP_VALUE, jsonIO().toJson(model.getValue()));
+                setIfPresent(node, PROP_EXTERNAL_VALUE, jsonIO().toJson(model.getExternalValue()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
     /**
@@ -84,7 +84,7 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
         Object parsedValue = value;
 
         if (value != null) {
-            for (AnnotationScannerExtension e : context.getExtensions()) {
+            for (AnnotationScannerExtension e : scannerContext().getExtensions()) {
                 parsedValue = e.parseValue(value);
                 if (parsedValue != null) {
                     break;

@@ -40,7 +40,7 @@ public class ExtensionIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
         if (Boolean.TRUE.equals(value(extension, PROP_PARSE_VALUE, false))) {
             String name = getName(extension).orElseThrow(IllegalStateException::new);
 
-            parsedValue = context.getExtensions()
+            parsedValue = scannerContext().getExtensions()
                     .stream()
                     .map(ext -> ext.parseExtension(name, extValue))
                     .filter(Objects::nonNull)
@@ -69,12 +69,12 @@ public class ExtensionIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
 
     @Override
     public Map<String, Object> readObjectMap(O node) {
-        return readMap(node, ExtensionIO::isExtension, jsonIO::fromJson);
+        return readMap(node, ExtensionIO::isExtension, jsonIO()::fromJson);
     }
 
     @Override
     public Object readObject(O node) {
-        return jsonIO.fromJson(node);
+        return jsonIO().fromJson(node);
     }
 
     @Override
@@ -91,8 +91,8 @@ public class ExtensionIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
                     .entrySet()
                     .stream()
                     .map(e -> isExtension(e) ? e : entry(EXTENSION_PROPERTY_PREFIX + e.getKey(), e.getValue()))
-                    .forEach(e -> setIfPresent(node, e.getKey(), jsonIO.toJson(e.getValue())));
+                    .forEach(e -> setIfPresent(node, e.getKey(), jsonIO().toJson(e.getValue())));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

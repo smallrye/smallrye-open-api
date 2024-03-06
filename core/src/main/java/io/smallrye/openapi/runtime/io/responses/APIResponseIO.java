@@ -75,16 +75,16 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         response.setDescription(value(annotation, PROP_RESPONSE_DESCRIPTION));
         response.setResponseCode(responseCode);
 
-        Optional.ofNullable(context.getCurrentProduces()).ifPresent(mediaTypes -> {
+        Optional.ofNullable(scannerContext().getCurrentProduces()).ifPresent(mediaTypes -> {
             Type responseType = value(annotation, PROP_VALUE);
 
             if (!TypeUtil.isVoid(responseType)) {
                 // Only generate the content if the endpoint declares an @Produces media type
                 Content content = new ContentImpl();
-                Schema responseSchema = SchemaFactory.typeToSchema(context,
+                Schema responseSchema = SchemaFactory.typeToSchema(scannerContext(),
                         responseType,
                         null,
-                        context.getExtensions());
+                        scannerContext().getExtensions());
 
                 for (String mediaType : mediaTypes) {
                     content.addMediaType(mediaType, new MediaTypeImpl().schema(responseSchema));
@@ -104,7 +104,7 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         if (responseCode != null) {
             return Optional.of(responseCode);
         } else if (ref != null) {
-            return Optional.ofNullable(ModelUtil.getComponent(context.getOpenApi(), ref))
+            return Optional.ofNullable(ModelUtil.getComponent(scannerContext().getOpenApi(), ref))
                     .filter(APIResponseImpl.class::isInstance)
                     .map(APIResponseImpl.class::cast)
                     .map(APIResponseImpl::getResponseCode);
@@ -118,10 +118,10 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         IoLogging.logger.singleJsonObject("Response");
         APIResponse model = new APIResponseImpl();
         model.setRef(readReference(node));
-        model.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        model.setHeaders(headerIO.readMap(jsonIO.getValue(node, PROP_HEADERS)));
-        model.setContent(contentIO.readValue(jsonIO.getValue(node, PROP_CONTENT)));
-        model.setLinks(linkIO.readMap(jsonIO.getValue(node, PROP_LINKS)));
+        model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        model.setHeaders(headerIO.readMap(jsonIO().getValue(node, PROP_HEADERS)));
+        model.setContent(contentIO.readValue(jsonIO().getValue(node, PROP_CONTENT)));
+        model.setLinks(linkIO.readMap(jsonIO().getValue(node, PROP_LINKS)));
         model.setExtensions(extensionIO.readMap(node));
         return model;
     }
@@ -131,7 +131,7 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
             if (isReference(model)) {
                 setReference(node, model);
             } else {
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_HEADERS, headerIO.write(model.getHeaders()));
                 setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
                 setIfPresent(node, PROP_LINKS, linkIO.write(model.getLinks()));
@@ -139,6 +139,6 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
             }
 
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

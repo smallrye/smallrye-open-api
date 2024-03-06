@@ -57,11 +57,11 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
         Callback callback = new CallbackImpl();
         callback.setRef(readReference(node));
 
-        jsonIO.properties(node)
+        jsonIO().properties(node)
                 .stream()
                 .filter(not(ExtensionIO::isExtension))
                 .filter(not(this::isReference))
-                .filter(property -> jsonIO.isObject(property.getValue()))
+                .filter(property -> jsonIO().isObject(property.getValue()))
                 .map(property -> entry(property.getKey(), pathItemIO.readValue(property.getValue())))
                 .forEach(pathItem -> callback.addPathItem(pathItem.getKey(), pathItem.getValue()));
 
@@ -82,6 +82,6 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
                 setAllIfPresent(node, extensionIO.write(model));
             }
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

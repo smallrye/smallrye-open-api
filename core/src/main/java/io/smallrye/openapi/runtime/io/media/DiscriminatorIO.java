@@ -77,7 +77,7 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
         String schemaRef;
 
         if (schemaType != null) {
-            Schema schema = SchemaFactory.typeToSchema(context, schemaType);
+            Schema schema = SchemaFactory.typeToSchema(scannerContext(), schemaType);
             schemaRef = schema != null ? schema.getRef() : null;
         } else {
             schemaRef = null;
@@ -94,11 +94,11 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
     @Override
     public Discriminator readObject(O node) {
         Discriminator discriminator = new DiscriminatorImpl();
-        discriminator.setPropertyName(jsonIO.getString(node, PROP_PROPERTY_NAME));
-        discriminator.setMapping(jsonIO.getObject(node, PROP_MAPPING)
-                .map(jsonIO::properties)
+        discriminator.setPropertyName(jsonIO().getString(node, PROP_PROPERTY_NAME));
+        discriminator.setMapping(jsonIO().getObject(node, PROP_MAPPING)
+                .map(jsonIO()::properties)
                 .map(properties -> properties.stream()
-                        .map(entry -> entry(entry.getKey(), jsonIO.asString(entry.getValue())))
+                        .map(entry -> entry(entry.getKey(), jsonIO().asString(entry.getValue())))
                         .collect(toLinkedMap()))
                 .orElse(null));
         return discriminator;
@@ -106,9 +106,9 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
 
     public Optional<O> write(Discriminator model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_PROPERTY_NAME, jsonIO.toJson(model.getPropertyName()));
-            setIfPresent(node, PROP_MAPPING, jsonIO.toJson(model.getMapping()));
+            setIfPresent(node, PROP_PROPERTY_NAME, jsonIO().toJson(model.getPropertyName()));
+            setIfPresent(node, PROP_MAPPING, jsonIO().toJson(model.getMapping()));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

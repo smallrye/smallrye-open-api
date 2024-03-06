@@ -63,14 +63,14 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
     public SecurityScheme readObject(O node) {
         SecurityScheme model = new SecuritySchemeImpl();
         model.setRef(readReference(node));
-        model.setType(enumValue(jsonIO.getValue(node, PROP_TYPE), SecurityScheme.Type.class));
-        model.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        model.setName(jsonIO.getString(node, PROP_NAME));
-        model.setIn(enumValue(jsonIO.getValue(node, PROP_IN), SecurityScheme.In.class));
-        model.setScheme(jsonIO.getString(node, PROP_SCHEME));
-        model.setBearerFormat(jsonIO.getString(node, PROP_BEARER_FORMAT));
-        model.setFlows(oauthFlowsIO.readValue(jsonIO.getValue(node, PROP_FLOWS)));
-        model.setOpenIdConnectUrl(jsonIO.getString(node, PROP_OPEN_ID_CONNECT_URL));
+        model.setType(enumValue(jsonIO().getValue(node, PROP_TYPE), SecurityScheme.Type.class));
+        model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        model.setName(jsonIO().getString(node, PROP_NAME));
+        model.setIn(enumValue(jsonIO().getValue(node, PROP_IN), SecurityScheme.In.class));
+        model.setScheme(jsonIO().getString(node, PROP_SCHEME));
+        model.setBearerFormat(jsonIO().getString(node, PROP_BEARER_FORMAT));
+        model.setFlows(oauthFlowsIO.readValue(jsonIO().getValue(node, PROP_FLOWS)));
+        model.setOpenIdConnectUrl(jsonIO().getString(node, PROP_OPEN_ID_CONNECT_URL));
         model.setExtensions(extensionIO.readMap(node));
         return model;
     }
@@ -81,18 +81,18 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
             if (isReference(model)) {
                 setReference(node, model);
             } else {
-                setIfPresent(node, PROP_TYPE, jsonIO.toJson(model.getType()));
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
-                setIfPresent(node, PROP_NAME, jsonIO.toJson(model.getName()));
-                setIfPresent(node, PROP_IN, jsonIO.toJson(model.getIn()));
-                setIfPresent(node, PROP_SCHEME, jsonIO.toJson(model.getScheme()));
-                setIfPresent(node, PROP_BEARER_FORMAT, jsonIO.toJson(model.getBearerFormat()));
+                setIfPresent(node, PROP_TYPE, jsonIO().toJson(model.getType()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
+                setIfPresent(node, PROP_IN, jsonIO().toJson(model.getIn()));
+                setIfPresent(node, PROP_SCHEME, jsonIO().toJson(model.getScheme()));
+                setIfPresent(node, PROP_BEARER_FORMAT, jsonIO().toJson(model.getBearerFormat()));
                 setIfPresent(node, PROP_FLOWS, oauthFlowsIO.write(model.getFlows()));
-                setIfPresent(node, PROP_OPEN_ID_CONNECT_URL, jsonIO.toJson(model.getOpenIdConnectUrl()));
+                setIfPresent(node, PROP_OPEN_ID_CONNECT_URL, jsonIO().toJson(model.getOpenIdConnectUrl()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

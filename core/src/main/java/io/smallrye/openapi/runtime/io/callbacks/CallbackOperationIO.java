@@ -31,8 +31,8 @@ public class CallbackOperationIO<V, A extends V, O extends V, AB, OB> extends Op
     public Operation read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@CallbackOperation");
         Operation operation = new OperationImpl();
-        operation.setSummary(context.annotations().value(annotation, PROP_SUMMARY));
-        operation.setDescription(context.annotations().value(annotation, PROP_DESCRIPTION));
+        operation.setSummary(value(annotation, PROP_SUMMARY));
+        operation.setDescription(value(annotation, PROP_DESCRIPTION));
         operation.setExternalDocs(externalDocIO.read(annotation.value(PROP_EXTERNAL_DOCS)));
         operation.setParameters(parameterIO.readList(annotation.value(PROP_PARAMETERS)));
         operation.setRequestBody(requestBodyIO.read(annotation.value(PROP_REQUEST_BODY)));
@@ -41,8 +41,8 @@ public class CallbackOperationIO<V, A extends V, O extends V, AB, OB> extends Op
                 annotation.value(PROP_SECURITY),
                 annotation.value(PROP_SECURITY_SETS)));
         operation.setExtensions(extensionIO.readExtensible(annotation));
-        operation.setOperationId(context.annotations().value(annotation, PROP_OPERATION_ID));
-        operation.setDeprecated(context.annotations().value(annotation, PROP_DEPRECATED));
+        operation.setOperationId(value(annotation, PROP_OPERATION_ID));
+        operation.setDeprecated(value(annotation, PROP_DEPRECATED));
 
         return operation;
     }

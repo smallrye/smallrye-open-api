@@ -47,20 +47,20 @@ public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapMo
     public ServerVariable readObject(O node) {
         IoLogging.logger.singleJsonNode("ServerVariable");
         ServerVariable variable = new ServerVariableImpl();
-        variable.setEnumeration(jsonIO.getArray(node, PROP_ENUM, jsonIO::asString).orElse(null));
-        variable.setDefaultValue(jsonIO.getString(node, PROP_DEFAULT));
-        variable.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
+        variable.setEnumeration(jsonIO().getArray(node, PROP_ENUM, jsonIO()::asString).orElse(null));
+        variable.setDefaultValue(jsonIO().getString(node, PROP_DEFAULT));
+        variable.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
         variable.setExtensions(extensionIO.readMap(node));
         return variable;
     }
 
     public Optional<O> write(ServerVariable model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_DEFAULT, jsonIO.toJson(model.getDefaultValue()));
-            setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
-            setIfPresent(node, PROP_ENUM, jsonIO.toJson(model.getEnumeration()));
+            setIfPresent(node, PROP_DEFAULT, jsonIO().toJson(model.getDefaultValue()));
+            setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+            setIfPresent(node, PROP_ENUM, jsonIO().toJson(model.getEnumeration()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

@@ -85,15 +85,15 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
     public Components readObject(O node) {
         IoLogging.logger.singleJsonNode("Components");
         Components components = new ComponentsImpl();
-        components.setCallbacks(callbackIO.readMap(jsonIO.getValue(node, PROP_CALLBACKS)));
-        components.setExamples(exampleObjectIO.readMap(jsonIO.getValue(node, PROP_EXAMPLES)));
-        components.setHeaders(headerIO.readMap(jsonIO.getValue(node, PROP_HEADERS)));
-        components.setLinks(linkIO.readMap(jsonIO.getValue(node, PROP_LINKS)));
-        components.setParameters(parameterIO.readMap(jsonIO.getValue(node, PROP_PARAMETERS)));
-        components.setRequestBodies(requestBodyIO.readMap(jsonIO.getValue(node, PROP_REQUEST_BODIES)));
-        components.setResponses(responseIO.readMap(jsonIO.getValue(node, PROP_RESPONSES)));
-        components.setSchemas(schemaIO.readMap(jsonIO.getValue(node, PROP_SCHEMAS)));
-        components.setSecuritySchemes(securitySchemeIO.readMap(jsonIO.getValue(node, PROP_SECURITY_SCHEMES)));
+        components.setCallbacks(callbackIO.readMap(jsonIO().getValue(node, PROP_CALLBACKS)));
+        components.setExamples(exampleObjectIO.readMap(jsonIO().getValue(node, PROP_EXAMPLES)));
+        components.setHeaders(headerIO.readMap(jsonIO().getValue(node, PROP_HEADERS)));
+        components.setLinks(linkIO.readMap(jsonIO().getValue(node, PROP_LINKS)));
+        components.setParameters(parameterIO.readMap(jsonIO().getValue(node, PROP_PARAMETERS)));
+        components.setRequestBodies(requestBodyIO.readMap(jsonIO().getValue(node, PROP_REQUEST_BODIES)));
+        components.setResponses(responseIO.readMap(jsonIO().getValue(node, PROP_RESPONSES)));
+        components.setSchemas(schemaIO.readMap(jsonIO().getValue(node, PROP_SCHEMAS)));
+        components.setSecuritySchemes(securitySchemeIO.readMap(jsonIO().getValue(node, PROP_SECURITY_SCHEMES)));
         components.setExtensions(extensionIO.readMap(node));
         return components;
     }
@@ -111,6 +111,6 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
             setIfPresent(node, PROP_CALLBACKS, callbackIO.write(model.getCallbacks()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

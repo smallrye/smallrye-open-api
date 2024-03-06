@@ -34,19 +34,19 @@ public class ExternalDocumentationIO<V, A extends V, O extends V, AB, OB>
     @Override
     public ExternalDocumentation readObject(O node) {
         ExternalDocumentation model = new ExternalDocumentationImpl();
-        jsonIO.getString(node, PROP_DESCRIPTION);
-        model.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        model.setUrl(jsonIO.getString(node, PROP_URL));
+        jsonIO().getString(node, PROP_DESCRIPTION);
+        model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        model.setUrl(jsonIO().getString(node, PROP_URL));
         extension.readMap(node).forEach(model::addExtension);
         return model;
     }
 
     public Optional<O> write(ExternalDocumentation model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
-            setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
+            setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+            setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
             setAllIfPresent(node, extension.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

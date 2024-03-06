@@ -56,12 +56,12 @@ public class LinkIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Link
         IoLogging.logger.singleJsonNode("Link");
         Link link = new LinkImpl();
         link.setRef(readReference(node));
-        link.setOperationRef(jsonIO.getString(node, PROP_OPERATION_REF));
-        link.setOperationId(jsonIO.getString(node, PROP_OPERATION_ID));
-        link.setParameters(linkParameterIO.readMap(jsonIO.getValue(node, PROP_PARAMETERS)));
-        link.setRequestBody(jsonIO.fromJson(jsonIO.getValue(node, PROP_REQUEST_BODY)));
-        link.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        link.setServer(serverIO.readValue(jsonIO.getValue(node, PROP_SERVER)));
+        link.setOperationRef(jsonIO().getString(node, PROP_OPERATION_REF));
+        link.setOperationId(jsonIO().getString(node, PROP_OPERATION_ID));
+        link.setParameters(linkParameterIO.readMap(jsonIO().getValue(node, PROP_PARAMETERS)));
+        link.setRequestBody(jsonIO().fromJson(jsonIO().getValue(node, PROP_REQUEST_BODY)));
+        link.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        link.setServer(serverIO.readValue(jsonIO().getValue(node, PROP_SERVER)));
         extensionIO.readMap(node).forEach(link::addExtension);
         return link;
     }
@@ -71,16 +71,16 @@ public class LinkIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Link
             if (isReference(model)) {
                 setReference(node, model);
             } else {
-                setIfPresent(node, PROP_OPERATION_REF, jsonIO.toJson(model.getOperationRef()));
-                setIfPresent(node, PROP_OPERATION_ID, jsonIO.toJson(model.getOperationId()));
+                setIfPresent(node, PROP_OPERATION_REF, jsonIO().toJson(model.getOperationRef()));
+                setIfPresent(node, PROP_OPERATION_ID, jsonIO().toJson(model.getOperationId()));
                 setIfPresent(node, PROP_PARAMETERS, linkParameterIO.write(model.getParameters()));
-                setIfPresent(node, PROP_REQUEST_BODY, jsonIO.toJson(model.getRequestBody()));
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+                setIfPresent(node, PROP_REQUEST_BODY, jsonIO().toJson(model.getRequestBody()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_SERVER, serverIO.write(model.getServer()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

@@ -20,42 +20,44 @@ import io.smallrye.openapi.runtime.util.JandexUtil;
 
 public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
 
-    protected final AnnotationScannerContext context;
+    private final IOContext<V, A, O, AB, OB> context;
     protected final DotName annotationName;
     protected final DotName modelName;
-    protected final JsonIO<V, A, O, AB, OB> jsonIO;
 
     protected ModelIO(IOContext<V, A, O, AB, OB> context, DotName annotationName, DotName modelName) {
-        this.context = context.scannerContext();
+        this.context = context;
         this.annotationName = annotationName;
         this.modelName = modelName;
-        jsonIO = context.jsonIO();
     }
 
     public JsonIO<V, A, O, AB, OB> jsonIO() {
-        return jsonIO;
+        return context.jsonIO();
+    }
+
+    public AnnotationScannerContext scannerContext() {
+        return context.scannerContext();
     }
 
     protected void setIfPresent(OB object, String key, Optional<? extends V> valueSource) {
-        valueSource.ifPresent(value -> jsonIO.set(object, key, value));
+        valueSource.ifPresent(value -> jsonIO().set(object, key, value));
     }
 
     protected void setAllIfPresent(OB object, Optional<? extends O> valueSource) {
-        valueSource.ifPresent(value -> jsonIO.setAll(object, value));
+        valueSource.ifPresent(value -> jsonIO().setAll(object, value));
     }
 
     protected Optional<OB> optionalJsonObject(Object source) {
         if (source == null) {
             return Optional.empty();
         }
-        return Optional.of(jsonIO.createObject());
+        return Optional.of(jsonIO().createObject());
     }
 
     protected Optional<AB> optionalJsonArray(Object source) {
         if (source == null) {
             return Optional.empty();
         }
-        return Optional.of(jsonIO.createArray());
+        return Optional.of(jsonIO().createArray());
     }
 
     protected static <T> Map.Entry<String, T> entry(String key, T value) {
@@ -63,20 +65,20 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
     }
 
     protected <P> P value(AnnotationInstance annotation, String propertyName) {
-        return context.annotations().value(annotation, propertyName);
+        return scannerContext().annotations().value(annotation, propertyName);
     }
 
     protected <P> P value(AnnotationInstance annotation, String propertyName, P defaultValue) {
-        return context.annotations().value(annotation, propertyName, defaultValue);
+        return scannerContext().annotations().value(annotation, propertyName, defaultValue);
     }
 
     protected <P extends Enum<P>> P enumValue(AnnotationInstance annotation, String propertyName, Class<P> type) {
-        return context.annotations().enumValue(annotation, propertyName, type);
+        return scannerContext().annotations().enumValue(annotation, propertyName, type);
     }
 
     protected <P extends Enum<P>> P enumValue(V value, Class<P> type) {
-        if (jsonIO.isString(value)) {
-            String strValue = jsonIO.asString(value);
+        if (jsonIO().isString(value)) {
+            String strValue = jsonIO().asString(value);
 
             if (strValue != null) {
                 try {
@@ -113,16 +115,16 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
     }
 
     public AnnotationInstance getAnnotation(AnnotationTarget target) {
-        return context.annotations().getAnnotation(target, annotationName);
+        return scannerContext().annotations().getAnnotation(target, annotationName);
     }
 
     public List<AnnotationInstance> getRepeatableAnnotations(AnnotationTarget target) {
-        return context.annotations()
+        return scannerContext().annotations()
                 .getRepeatableAnnotation(target, annotationName, Names.containerOf(annotationName));
     }
 
     public boolean hasRepeatableAnnotation(AnnotationTarget target) {
-        return context.annotations().hasAnnotation(target, annotationName, Names.containerOf(annotationName));
+        return scannerContext().annotations().hasAnnotation(target, annotationName, Names.containerOf(annotationName));
     }
 
     public T read(AnnotationTarget target) {
@@ -142,8 +144,8 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
 
     public T readValue(V node) {
         return Optional.ofNullable(node)
-                .filter(jsonIO::isObject)
-                .map(jsonIO::asObject)
+                .filter(jsonIO()::isObject)
+                .map(jsonIO()::asObject)
                 .map(this::readObject)
                 .orElse(null);
     }

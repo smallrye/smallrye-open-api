@@ -67,9 +67,9 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
     private String[] getDefaultMimeTypes(Direction direction) {
         switch (direction) {
             case INPUT:
-                return nonNullOrElse(context.getCurrentConsumes(), EMPTY);
+                return nonNullOrElse(scannerContext().getCurrentConsumes(), EMPTY);
             case OUTPUT:
-                return nonNullOrElse(context.getCurrentProduces(), EMPTY);
+                return nonNullOrElse(scannerContext().getCurrentProduces(), EMPTY);
             case PARAMETER:
                 return OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
             default:
@@ -90,7 +90,7 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
     public Content readObject(O node) {
         Content content = new ContentImpl();
 
-        jsonIO.properties(node)
+        jsonIO().properties(node)
                 .forEach(property -> content.addMediaType(property.getKey(), mediaTypeIO.readValue(property.getValue())));
 
         return content;
@@ -103,6 +103,6 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
                 model.getMediaTypes().forEach((key, mediaType) -> setIfPresent(node, key, mediaTypeIO.write(mediaType)));
             }
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

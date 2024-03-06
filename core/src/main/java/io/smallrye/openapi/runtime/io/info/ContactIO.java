@@ -40,9 +40,9 @@ public class ContactIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
     public Contact readObject(O node) {
         IoLogging.logger.singleJsonNode("Contact");
         Contact contact = new ContactImpl();
-        contact.setName(jsonIO.getString(node, PROP_NAME));
-        contact.setUrl(jsonIO.getString(node, PROP_URL));
-        contact.setEmail(jsonIO.getString(node, PROP_EMAIL));
+        contact.setName(jsonIO().getString(node, PROP_NAME));
+        contact.setUrl(jsonIO().getString(node, PROP_URL));
+        contact.setEmail(jsonIO().getString(node, PROP_EMAIL));
         extension.readMap(node).forEach(contact::addExtension);
         return contact;
     }
@@ -50,11 +50,11 @@ public class ContactIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
     @Override
     public Optional<O> write(Contact model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_NAME, jsonIO.toJson(model.getName()));
-            setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
-            setIfPresent(node, PROP_EMAIL, jsonIO.toJson(model.getEmail()));
+            setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
+            setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
+            setIfPresent(node, PROP_EMAIL, jsonIO().toJson(model.getEmail()));
             setAllIfPresent(node, extension.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

@@ -38,18 +38,18 @@ public class LicenseIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Lice
     public License readObject(O node) {
         IoLogging.logger.singleJsonNode("License");
         License license = new LicenseImpl();
-        license.setName(jsonIO.getString(node, PROP_NAME));
-        license.setUrl(jsonIO.getString(node, PROP_URL));
+        license.setName(jsonIO().getString(node, PROP_NAME));
+        license.setUrl(jsonIO().getString(node, PROP_URL));
         extension.readMap(node).forEach(license::addExtension);
         return license;
     }
 
     public Optional<O> write(License model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_NAME, jsonIO.toJson(model.getName()));
-            setIfPresent(node, PROP_URL, jsonIO.toJson(model.getUrl()));
+            setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
+            setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
             setAllIfPresent(node, extension.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

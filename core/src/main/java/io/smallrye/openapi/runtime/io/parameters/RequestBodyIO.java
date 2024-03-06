@@ -47,10 +47,10 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     }
 
     Stream<AnnotationInstance> getAnnotations(MethodInfo method, DotName annotation) {
-        Stream<AnnotationInstance> methodAnnos = Stream.of(context.annotations().getAnnotation(method, annotation));
+        Stream<AnnotationInstance> methodAnnos = Stream.of(scannerContext().annotations().getAnnotation(method, annotation));
         Stream<AnnotationInstance> paramAnnos = method.parameterTypes()
                 .stream()
-                .map(p -> context.annotations().getMethodParameterAnnotation(method, p, annotation));
+                .map(p -> scannerContext().annotations().getMethodParameterAnnotation(method, p, annotation));
 
         return Stream.concat(methodAnnos, paramAnnos)
                 .filter(Objects::nonNull);
@@ -61,7 +61,7 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
         if (target.kind() == Kind.METHOD) {
             return getAnnotations(target.asMethod(), Names.REQUEST_BODY).collect(Collectors.toList());
         }
-        return Collections.singletonList(context.annotations().getAnnotation(target, Names.REQUEST_BODY));
+        return Collections.singletonList(scannerContext().annotations().getAnnotation(target, Names.REQUEST_BODY));
     }
 
     @Override
@@ -77,7 +77,7 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     }
 
     public RequestBody readRequestSchema(MethodInfo target) {
-        if (context.getCurrentConsumes() == null) {
+        if (scannerContext().getCurrentConsumes() == null) {
             // Only generate the RequestBody if the endpoint declares an @Consumes media type
             return null;
         }
@@ -92,12 +92,12 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
         IoLogging.logger.singleAnnotation("@RequestBodySchema");
         Content content = new ContentImpl();
 
-        for (String mediaType : context.getCurrentConsumes()) {
+        for (String mediaType : scannerContext().getCurrentConsumes()) {
             MediaType type = new MediaTypeImpl();
-            type.setSchema(SchemaFactory.typeToSchema(context,
+            type.setSchema(SchemaFactory.typeToSchema(scannerContext(),
                     value(annotation, PROP_VALUE),
                     null,
-                    context.getExtensions()));
+                    scannerContext().getExtensions()));
             content.addMediaType(mediaType, type);
         }
 
@@ -107,9 +107,9 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     @Override
     public RequestBody readObject(O node) {
         RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        requestBody.setContent(contentIO.readValue(jsonIO.getValue(node, PROP_CONTENT)));
-        requestBody.setRequired(jsonIO.getBoolean(node, PROP_REQUIRED));
+        requestBody.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        requestBody.setContent(contentIO.readValue(jsonIO().getValue(node, PROP_CONTENT)));
+        requestBody.setRequired(jsonIO().getBoolean(node, PROP_REQUIRED));
         requestBody.setRef(readReference(node));
         requestBody.setExtensions(extensionIO.readMap(node));
         return requestBody;
@@ -120,13 +120,13 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
             if (isReference(model)) {
                 setReference(node, model);
             } else {
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
-                setIfPresent(node, PROP_REQUIRED, jsonIO.toJson(model.getRequired()));
+                setIfPresent(node, PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
 
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

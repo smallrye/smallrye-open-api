@@ -76,15 +76,15 @@ public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends
     // -------------- JSON
 
     protected Map<String, T> readMap(O node, Function<O, T> reader) {
-        return jsonIO.properties(node)
+        return jsonIO().properties(node)
                 .stream()
-                .filter(property -> jsonIO.isObject(property.getValue()))
-                .map(property -> entry(property.getKey(), reader.apply(jsonIO.asObject(property.getValue()))))
+                .filter(property -> jsonIO().isObject(property.getValue()))
+                .map(property -> entry(property.getKey(), reader.apply(jsonIO().asObject(property.getValue()))))
                 .collect(toLinkedMap());
     }
 
     protected Map<String, T> readMap(O node, Predicate<String> nameFilter, Function<V, T> reader) {
-        return jsonIO.properties(node)
+        return jsonIO().properties(node)
                 .stream()
                 .filter(property -> nameFilter.test(property.getKey()))
                 .map(property -> entry(property.getKey(), reader.apply(property.getValue())))
@@ -93,8 +93,8 @@ public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends
 
     public Map<String, T> readMap(V node) {
         return Optional.ofNullable(node)
-                .filter(jsonIO::isObject)
-                .map(jsonIO::asObject)
+                .filter(jsonIO()::isObject)
+                .map(jsonIO()::asObject)
                 .map(this::readObjectMap)
                 .orElse(null);
     }
@@ -109,12 +109,12 @@ public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends
             models.forEach((key, value) -> {
                 Optional<O> jsonValue = write(value);
                 if (jsonValue.isPresent()) {
-                    jsonIO.set(node, key, jsonValue.get());
+                    jsonIO().set(node, key, jsonValue.get());
                 } else {
-                    jsonIO.set(node, key, null);
+                    jsonIO().set(node, key, null);
                 }
             });
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

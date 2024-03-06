@@ -66,14 +66,14 @@ public class SecurityRequirementIO<V, A extends V, O extends V, AB, OB> extends 
 
     public List<SecurityRequirement> readList(V node) {
         return Optional.ofNullable(node)
-                .filter(jsonIO::isArray)
-                .map(jsonIO::asArray)
-                .map(jsonIO::entries)
+                .filter(jsonIO()::isArray)
+                .map(jsonIO()::asArray)
+                .map(jsonIO()::entries)
                 .map(Collection::stream)
                 .map(elements -> {
                     IoLogging.logger.jsonArray("SecurityRequirement");
-                    return elements.filter(jsonIO::isObject)
-                            .map(jsonIO::asObject)
+                    return elements.filter(jsonIO()::isObject)
+                            .map(jsonIO()::asObject)
                             .map(this::readObject)
                             .collect(Collectors.toCollection(ArrayList::new));
                 })
@@ -84,14 +84,14 @@ public class SecurityRequirementIO<V, A extends V, O extends V, AB, OB> extends 
     public SecurityRequirement readObject(O node) {
         SecurityRequirement requirement = new SecurityRequirementImpl();
 
-        jsonIO.properties(node).forEach(field -> {
+        jsonIO().properties(node).forEach(field -> {
             String schemeName = field.getKey();
 
-            if (jsonIO.isArray(field.getValue())) {
-                A scopeArray = jsonIO.asArray(field.getValue());
-                List<String> scopes = jsonIO.entries(scopeArray)
+            if (jsonIO().isArray(field.getValue())) {
+                A scopeArray = jsonIO().asArray(field.getValue());
+                List<String> scopes = jsonIO().entries(scopeArray)
                         .stream()
-                        .map(jsonIO::asString)
+                        .map(jsonIO()::asString)
                         .collect(Collectors.toList());
                 requirement.addScheme(schemeName, scopes);
             } else {
@@ -105,19 +105,19 @@ public class SecurityRequirementIO<V, A extends V, O extends V, AB, OB> extends 
     public Optional<A> write(List<SecurityRequirement> models) {
         return optionalJsonArray(models).map(array -> {
             for (SecurityRequirement model : models) {
-                write(model).ifPresent(object -> jsonIO.add(array, object));
+                write(model).ifPresent(object -> jsonIO().add(array, object));
             }
             return array;
-        }).map(jsonIO::buildArray);
+        }).map(jsonIO()::buildArray);
     }
 
     @Override
     public Optional<O> write(SecurityRequirement model) {
         return optionalJsonObject(model.getSchemes()).map(node -> {
             model.getSchemes()
-                    .forEach((schemeName, scopes) -> jsonIO.set(node, schemeName, jsonIO.toJson(scopes)
-                            .orElseGet(() -> jsonIO.buildArray(jsonIO.createArray()))));
+                    .forEach((schemeName, scopes) -> jsonIO().set(node, schemeName, jsonIO().toJson(scopes)
+                            .orElseGet(() -> jsonIO().buildArray(jsonIO().createArray()))));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

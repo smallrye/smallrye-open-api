@@ -27,11 +27,11 @@ public class OAuthScopeIO<V, A extends V, O extends V, AB, OB> extends MapModelI
     @Override
     public Map<String, String> readObjectMap(O node) {
         IoLogging.logger.jsonNodeMap(modelName.local());
-        return jsonIO.properties(node)
+        return jsonIO().properties(node)
                 .stream()
-                .filter(not(property -> jsonIO.isArray(property.getValue())))
-                .filter(not(property -> jsonIO.isObject(property.getValue())))
-                .map(property -> entry(property.getKey(), jsonIO.asString(property.getValue())))
+                .filter(not(property -> jsonIO().isArray(property.getValue())))
+                .filter(not(property -> jsonIO().isObject(property.getValue())))
+                .map(property -> entry(property.getKey(), jsonIO().asString(property.getValue())))
                 .collect(toLinkedMap());
     }
 
@@ -46,9 +46,9 @@ public class OAuthScopeIO<V, A extends V, O extends V, AB, OB> extends MapModelI
             models.entrySet()
                     .stream()
                     .filter(e -> Objects.nonNull(e.getValue()))
-                    .forEach(model -> setIfPresent(node, model.getKey(), jsonIO.toJson(model.getValue())));
+                    .forEach(model -> setIfPresent(node, model.getKey(), jsonIO().toJson(model.getValue())));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
     @Override

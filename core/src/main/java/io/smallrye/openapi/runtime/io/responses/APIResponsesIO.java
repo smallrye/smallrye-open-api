@@ -73,7 +73,7 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
     }
 
     public Optional<Map<String, APIResponse>> readResponseSchema(AnnotationTarget target) {
-        return Optional.ofNullable(context.annotations().getAnnotation(target, Names.API_RESPONSE_SCHEMA))
+        return Optional.ofNullable(scannerContext().annotations().getAnnotation(target, Names.API_RESPONSE_SCHEMA))
                 .map(responseIO::readResponseSchema);
     }
 
@@ -100,10 +100,10 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
         IoLogging.logger.jsonList("APIResponse");
 
         APIResponses model = new APIResponsesImpl();
-        model.setDefaultValue(responseIO.readValue(jsonIO.getValue(node, PROP_DEFAULT)));
+        model.setDefaultValue(responseIO.readValue(jsonIO().getValue(node, PROP_DEFAULT)));
         model.setExtensions(extensionIO.readMap(node));
 
-        jsonIO.properties(node)
+        jsonIO().properties(node)
                 .stream()
                 .filter(not(property -> PROP_DEFAULT.equals(property.getKey())))
                 .forEach(property -> model.addAPIResponse(property.getKey(), responseIO.readValue(property.getValue())));
@@ -117,6 +117,6 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
             setIfPresent(node, PROP_DEFAULT, responseIO.write(model.getDefaultValue()));
             setAllIfPresent(node, responseIO.write(model.getAPIResponses()));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

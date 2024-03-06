@@ -26,11 +26,11 @@ public class LinkParameterIO<V, A extends V, O extends V, AB, OB> extends MapMod
     @Override
     public Map<String, Object> readObjectMap(O node) {
         IoLogging.logger.jsonNodeMap(modelName.local());
-        return jsonIO.properties(node)
+        return jsonIO().properties(node)
                 .stream()
-                .filter(not(property -> jsonIO.isArray(property.getValue())))
-                .filter(not(property -> jsonIO.isObject(property.getValue())))
-                .map(property -> entry(property.getKey(), jsonIO.fromJson(property.getValue())))
+                .filter(not(property -> jsonIO().isArray(property.getValue())))
+                .filter(not(property -> jsonIO().isObject(property.getValue())))
+                .map(property -> entry(property.getKey(), jsonIO().fromJson(property.getValue())))
                 .collect(toLinkedMap());
     }
 
@@ -42,9 +42,9 @@ public class LinkParameterIO<V, A extends V, O extends V, AB, OB> extends MapMod
     @Override
     public Optional<O> write(Map<String, Object> models) {
         return optionalJsonObject(models).map(node -> {
-            models.forEach((key, value) -> setIfPresent(node, key, jsonIO.toJson(value)));
+            models.forEach((key, value) -> setIfPresent(node, key, jsonIO().toJson(value)));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
     @Override

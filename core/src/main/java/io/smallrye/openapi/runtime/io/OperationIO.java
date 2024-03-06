@@ -75,10 +75,10 @@ public class OperationIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Op
     public Operation read(AnnotationInstance annotationInstance) {
         IoLogging.logger.singleAnnotation("@Operation");
         Operation operation = new OperationImpl();
-        operation.setSummary(context.annotations().value(annotationInstance, PROP_SUMMARY));
-        operation.setDescription(context.annotations().value(annotationInstance, PROP_DESCRIPTION));
-        operation.setOperationId(context.annotations().value(annotationInstance, PROP_OPERATION_ID));
-        operation.setDeprecated(context.annotations().value(annotationInstance, PROP_DEPRECATED));
+        operation.setSummary(value(annotationInstance, PROP_SUMMARY));
+        operation.setDescription(value(annotationInstance, PROP_DESCRIPTION));
+        operation.setOperationId(value(annotationInstance, PROP_OPERATION_ID));
+        operation.setDeprecated(value(annotationInstance, PROP_DEPRECATED));
         operation.setExtensions(extensionIO.readExtensible(annotationInstance));
         return operation;
     }
@@ -87,38 +87,38 @@ public class OperationIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Op
     public Operation readObject(O node) {
         IoLogging.logger.singleJsonObject("Operation");
         Operation model = new OperationImpl();
-        model.setTags(jsonIO.getArray(node, PROP_TAGS, jsonIO::asString).orElse(null));
-        model.setSummary(jsonIO.getString(node, PROP_SUMMARY));
-        model.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        model.setExternalDocs(externalDocIO.readValue(jsonIO.getValue(node, PROP_EXTERNAL_DOCS)));
-        model.setOperationId(jsonIO.getString(node, PROP_OPERATION_ID));
-        model.setParameters(parameterIO.readList(jsonIO.getValue(node, PROP_PARAMETERS)));
-        model.setRequestBody(requestBodyIO.readValue(jsonIO.getValue(node, PROP_REQUEST_BODY)));
-        model.setResponses(responsesIO.readValue(jsonIO.getValue(node, PROP_RESPONSES)));
-        model.setCallbacks(callbackIO.readMap(jsonIO.getValue(node, PROP_CALLBACKS)));
-        model.setDeprecated(jsonIO.getBoolean(node, PROP_DEPRECATED));
-        model.setSecurity(securityRequirementIO.readList(jsonIO.getValue(node, PROP_SECURITY)));
-        model.setServers(serverIO.readList(jsonIO.getValue(node, PROP_SERVERS)));
+        model.setTags(jsonIO().getArray(node, PROP_TAGS, jsonIO()::asString).orElse(null));
+        model.setSummary(jsonIO().getString(node, PROP_SUMMARY));
+        model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        model.setExternalDocs(externalDocIO.readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
+        model.setOperationId(jsonIO().getString(node, PROP_OPERATION_ID));
+        model.setParameters(parameterIO.readList(jsonIO().getValue(node, PROP_PARAMETERS)));
+        model.setRequestBody(requestBodyIO.readValue(jsonIO().getValue(node, PROP_REQUEST_BODY)));
+        model.setResponses(responsesIO.readValue(jsonIO().getValue(node, PROP_RESPONSES)));
+        model.setCallbacks(callbackIO.readMap(jsonIO().getValue(node, PROP_CALLBACKS)));
+        model.setDeprecated(jsonIO().getBoolean(node, PROP_DEPRECATED));
+        model.setSecurity(securityRequirementIO.readList(jsonIO().getValue(node, PROP_SECURITY)));
+        model.setServers(serverIO.readList(jsonIO().getValue(node, PROP_SERVERS)));
         extensionIO.readMap(node).forEach(model::addExtension);
         return model;
     }
 
     public Optional<O> write(Operation model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_TAGS, jsonIO.toJson(model.getTags()));
-            setIfPresent(node, PROP_SUMMARY, jsonIO.toJson(model.getSummary()));
-            setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
+            setIfPresent(node, PROP_TAGS, jsonIO().toJson(model.getTags()));
+            setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+            setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             setIfPresent(node, PROP_EXTERNAL_DOCS, externalDocIO.write(model.getExternalDocs()));
-            setIfPresent(node, PROP_OPERATION_ID, jsonIO.toJson(model.getOperationId()));
+            setIfPresent(node, PROP_OPERATION_ID, jsonIO().toJson(model.getOperationId()));
             setIfPresent(node, PROP_PARAMETERS, parameterIO.write(model.getParameters()));
             setIfPresent(node, PROP_REQUEST_BODY, requestBodyIO.write(model.getRequestBody()));
             setIfPresent(node, PROP_RESPONSES, responsesIO.write(model.getResponses()));
             setIfPresent(node, PROP_CALLBACKS, callbackIO.write(model.getCallbacks()));
-            setIfPresent(node, PROP_DEPRECATED, jsonIO.toJson(model.getDeprecated()));
+            setIfPresent(node, PROP_DEPRECATED, jsonIO().toJson(model.getDeprecated()));
             setIfPresent(node, PROP_SECURITY, securityRequirementIO.write(model.getSecurity()));
             setIfPresent(node, PROP_SERVERS, serverIO.write(model.getServers()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

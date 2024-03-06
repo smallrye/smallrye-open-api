@@ -44,10 +44,10 @@ public class OAuthFlowsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<O
     public OAuthFlows readObject(O node) {
         IoLogging.logger.singleJsonObject("OAuthFlows");
         OAuthFlows flows = new OAuthFlowsImpl();
-        flows.setImplicit(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_IMPLICIT)));
-        flows.setPassword(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_PASSWORD)));
-        flows.setClientCredentials(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_CLIENT_CREDENTIALS)));
-        flows.setAuthorizationCode(oauthFlowIO.readValue(jsonIO.getValue(node, PROP_AUTHORIZATION_CODE)));
+        flows.setImplicit(oauthFlowIO.readValue(jsonIO().getValue(node, PROP_IMPLICIT)));
+        flows.setPassword(oauthFlowIO.readValue(jsonIO().getValue(node, PROP_PASSWORD)));
+        flows.setClientCredentials(oauthFlowIO.readValue(jsonIO().getValue(node, PROP_CLIENT_CREDENTIALS)));
+        flows.setAuthorizationCode(oauthFlowIO.readValue(jsonIO().getValue(node, PROP_AUTHORIZATION_CODE)));
         flows.setExtensions(extensionIO.readMap(node));
         return flows;
     }
@@ -61,7 +61,7 @@ public class OAuthFlowsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<O
             setIfPresent(node, PROP_AUTHORIZATION_CODE, oauthFlowIO.write(model.getAuthorizationCode()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
 }

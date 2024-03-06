@@ -31,11 +31,11 @@ public class PathsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Paths,
         // LOG ...
         Paths paths = new PathsImpl();
 
-        jsonIO.properties(node)
+        jsonIO().properties(node)
                 .stream()
                 .filter(not(ExtensionIO::isExtension))
-                .filter(property -> jsonIO.isObject(property.getValue()))
-                .map(property -> entry(property.getKey(), pathItemIO.readObject(jsonIO.asObject(property.getValue()))))
+                .filter(property -> jsonIO().isObject(property.getValue()))
+                .map(property -> entry(property.getKey(), pathItemIO.readObject(jsonIO().asObject(property.getValue()))))
                 .forEach(pathItem -> paths.addPathItem(pathItem.getKey(), pathItem.getValue()));
 
         extensionIO.readMap(node).forEach(paths::addExtension);
@@ -49,7 +49,7 @@ public class PathsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Paths,
             }
             setAllIfPresent(pathsNode, extensionIO.write(paths));
             return pathsNode;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
 }

@@ -49,11 +49,11 @@ public class HeaderIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<He
         IoLogging.logger.singleAnnotation("@Header");
         Header header = new HeaderImpl();
         header.setRef(ReferenceType.HEADER.refValue(annotation));
-        header.setDescription(context.annotations().value(annotation, PROP_DESCRIPTION));
+        header.setDescription(value(annotation, PROP_DESCRIPTION));
         header.setSchema(schemaIO.read(annotation.value(PROP_SCHEMA)));
-        header.setRequired(context.annotations().value(annotation, PROP_REQUIRED));
-        header.setDeprecated(context.annotations().value(annotation, PROP_DEPRECATED));
-        header.setAllowEmptyValue(context.annotations().value(annotation, PROP_ALLOW_EMPTY_VALUE));
+        header.setRequired(value(annotation, PROP_REQUIRED));
+        header.setDeprecated(value(annotation, PROP_DEPRECATED));
+        header.setAllowEmptyValue(value(annotation, PROP_ALLOW_EMPTY_VALUE));
         header.setExtensions(extensionIO.readExtensible(annotation));
         return header;
     }
@@ -63,16 +63,16 @@ public class HeaderIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<He
         IoLogging.logger.singleJsonNode("Header");
         Header header = new HeaderImpl();
         header.setRef(readReference(node));
-        header.setDescription(jsonIO.getString(node, PROP_DESCRIPTION));
-        header.setSchema(schemaIO.readValue(jsonIO.getValue(node, PROP_SCHEMA)));
-        header.setRequired(jsonIO.getBoolean(node, PROP_REQUIRED));
-        header.setDeprecated(jsonIO.getBoolean(node, PROP_DEPRECATED));
-        header.setAllowEmptyValue(jsonIO.getBoolean(node, PROP_ALLOW_EMPTY_VALUE));
-        header.setStyle(enumValue(jsonIO.getValue(node, PROP_STYLE), Header.Style.class));
-        header.setExplode(jsonIO.getBoolean(node, PROP_EXPLODE));
-        header.setExample(jsonIO.fromJson(jsonIO.getValue(node, PROP_EXAMPLE)));
-        header.setExamples(exampleObjectIO.readMap(jsonIO.getValue(node, PROP_EXAMPLES)));
-        header.setContent(contentIO.readValue(jsonIO.getValue(node, PROP_CONTENT)));
+        header.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
+        header.setSchema(schemaIO.readValue(jsonIO().getValue(node, PROP_SCHEMA)));
+        header.setRequired(jsonIO().getBoolean(node, PROP_REQUIRED));
+        header.setDeprecated(jsonIO().getBoolean(node, PROP_DEPRECATED));
+        header.setAllowEmptyValue(jsonIO().getBoolean(node, PROP_ALLOW_EMPTY_VALUE));
+        header.setStyle(enumValue(jsonIO().getValue(node, PROP_STYLE), Header.Style.class));
+        header.setExplode(jsonIO().getBoolean(node, PROP_EXPLODE));
+        header.setExample(jsonIO().fromJson(jsonIO().getValue(node, PROP_EXAMPLE)));
+        header.setExamples(exampleObjectIO.readMap(jsonIO().getValue(node, PROP_EXAMPLES)));
+        header.setContent(contentIO.readValue(jsonIO().getValue(node, PROP_CONTENT)));
         header.setExtensions(extensionIO.readMap(node));
         return header;
     }
@@ -83,19 +83,19 @@ public class HeaderIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<He
             if (isReference(model)) {
                 setReference(node, model);
             } else {
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO.toJson(model.getDescription()));
-                setIfPresent(node, PROP_REQUIRED, jsonIO.toJson(model.getRequired()));
-                setIfPresent(node, PROP_DEPRECATED, jsonIO.toJson(model.getDeprecated()));
-                setIfPresent(node, PROP_ALLOW_EMPTY_VALUE, jsonIO.toJson(model.getAllowEmptyValue()));
-                setIfPresent(node, PROP_STYLE, jsonIO.toJson(model.getStyle()));
-                setIfPresent(node, PROP_EXPLODE, jsonIO.toJson(model.getExplode()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                setIfPresent(node, PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
+                setIfPresent(node, PROP_DEPRECATED, jsonIO().toJson(model.getDeprecated()));
+                setIfPresent(node, PROP_ALLOW_EMPTY_VALUE, jsonIO().toJson(model.getAllowEmptyValue()));
+                setIfPresent(node, PROP_STYLE, jsonIO().toJson(model.getStyle()));
+                setIfPresent(node, PROP_EXPLODE, jsonIO().toJson(model.getExplode()));
                 setIfPresent(node, PROP_SCHEMA, schemaIO.write(model.getSchema()));
-                setIfPresent(node, PROP_EXAMPLE, jsonIO.toJson(model.getExample()));
+                setIfPresent(node, PROP_EXAMPLE, jsonIO().toJson(model.getExample()));
                 setIfPresent(node, PROP_EXAMPLES, exampleObjectIO.write(model.getExamples()));
                 setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
                 setAllIfPresent(node, extensionIO.write(model));
             }
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }

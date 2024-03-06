@@ -32,9 +32,9 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
     public OAuthFlow read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@OAuthFlow");
         OAuthFlow flow = new OAuthFlowImpl();
-        flow.setAuthorizationUrl(context.annotations().value(annotation, PROP_AUTHORIZATION_URL));
-        flow.setTokenUrl(context.annotations().value(annotation, PROP_TOKEN_URL));
-        flow.setRefreshUrl(context.annotations().value(annotation, PROP_REFRESH_URL));
+        flow.setAuthorizationUrl(value(annotation, PROP_AUTHORIZATION_URL));
+        flow.setTokenUrl(value(annotation, PROP_TOKEN_URL));
+        flow.setRefreshUrl(value(annotation, PROP_REFRESH_URL));
         flow.setScopes(oauthScopeIO.readMap(annotation.value(PROP_SCOPES)));
         flow.setExtensions(extensionIO.readExtensible(annotation));
         return flow;
@@ -44,10 +44,10 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
     public OAuthFlow readObject(O node) {
         IoLogging.logger.singleJsonObject("OAuthFlow");
         OAuthFlow flow = new OAuthFlowImpl();
-        flow.setAuthorizationUrl(jsonIO.getString(node, PROP_AUTHORIZATION_URL));
-        flow.setTokenUrl(jsonIO.getString(node, PROP_TOKEN_URL));
-        flow.setRefreshUrl(jsonIO.getString(node, PROP_REFRESH_URL));
-        flow.setScopes(oauthScopeIO.readMap(jsonIO.getValue(node, PROP_SCOPES)));
+        flow.setAuthorizationUrl(jsonIO().getString(node, PROP_AUTHORIZATION_URL));
+        flow.setTokenUrl(jsonIO().getString(node, PROP_TOKEN_URL));
+        flow.setRefreshUrl(jsonIO().getString(node, PROP_REFRESH_URL));
+        flow.setScopes(oauthScopeIO.readMap(jsonIO().getValue(node, PROP_SCOPES)));
         flow.setExtensions(extensionIO.readMap(node));
         return flow;
     }
@@ -55,13 +55,13 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
     @Override
     public Optional<O> write(OAuthFlow model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_AUTHORIZATION_URL, jsonIO.toJson(model.getAuthorizationUrl()));
-            setIfPresent(node, PROP_TOKEN_URL, jsonIO.toJson(model.getTokenUrl()));
-            setIfPresent(node, PROP_REFRESH_URL, jsonIO.toJson(model.getRefreshUrl()));
+            setIfPresent(node, PROP_AUTHORIZATION_URL, jsonIO().toJson(model.getAuthorizationUrl()));
+            setIfPresent(node, PROP_TOKEN_URL, jsonIO().toJson(model.getTokenUrl()));
+            setIfPresent(node, PROP_REFRESH_URL, jsonIO().toJson(model.getRefreshUrl()));
             setIfPresent(node, PROP_SCOPES, oauthScopeIO.write(model.getScopes()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 
 }

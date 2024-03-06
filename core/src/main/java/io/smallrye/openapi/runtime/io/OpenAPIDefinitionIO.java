@@ -133,14 +133,14 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
     public OpenAPI readObject(O node) {
         IoLogging.logger.jsonNode("OpenAPIDefinition");
         OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(jsonIO.getString(node, PROP_OPENAPI));
-        openApi.setInfo(infoIO.readValue(jsonIO.getValue(node, PROP_INFO)));
-        openApi.setTags(tagIO.readList(jsonIO.getValue(node, PROP_TAGS)));
-        openApi.setServers(serverIO.readList(jsonIO.getValue(node, PROP_SERVERS)));
-        openApi.setSecurity(securityIO.readRequirements(jsonIO.getValue(node, PROP_SECURITY)));
-        openApi.setExternalDocs(externalDocIO.readValue(jsonIO.getValue(node, PROP_EXTERNAL_DOCS)));
-        openApi.setComponents(componentIO.readValue(jsonIO.getValue(node, PROP_COMPONENTS)));
-        openApi.setPaths(pathsIO.readValue(jsonIO.getValue(node, PROP_PATHS)));
+        openApi.setOpenapi(jsonIO().getString(node, PROP_OPENAPI));
+        openApi.setInfo(infoIO.readValue(jsonIO().getValue(node, PROP_INFO)));
+        openApi.setTags(tagIO.readList(jsonIO().getValue(node, PROP_TAGS)));
+        openApi.setServers(serverIO.readList(jsonIO().getValue(node, PROP_SERVERS)));
+        openApi.setSecurity(securityIO.readRequirements(jsonIO().getValue(node, PROP_SECURITY)));
+        openApi.setExternalDocs(externalDocIO.readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
+        openApi.setComponents(componentIO.readValue(jsonIO().getValue(node, PROP_COMPONENTS)));
+        openApi.setPaths(pathsIO.readValue(jsonIO().getValue(node, PROP_PATHS)));
         openApi.setExtensions(extensionIO.readMap(node));
         return openApi;
     }
@@ -148,7 +148,7 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
     @Override
     public Optional<O> write(OpenAPI model) {
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_OPENAPI, jsonIO.toJson(model.getOpenapi()));
+            setIfPresent(node, PROP_OPENAPI, jsonIO().toJson(model.getOpenapi()));
             setIfPresent(node, PROP_INFO, infoIO.write(model.getInfo()));
             setIfPresent(node, PROP_EXTERNAL_DOCS, externalDocIO.write(model.getExternalDocs()));
             setIfPresent(node, PROP_SERVERS, serverIO.write(model.getServers()));
@@ -158,6 +158,6 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
             setIfPresent(node, PROP_COMPONENTS, componentIO.write(model.getComponents()));
             setAllIfPresent(node, extensionIO.write(model));
             return node;
-        }).map(jsonIO::buildObject);
+        }).map(jsonIO()::buildObject);
     }
 }
