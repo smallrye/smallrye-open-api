@@ -11,6 +11,9 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
   groups:
+    kotlin:
+      patterns:
+      - "org.jetbrains.kotlin:*"
     quarkus:
       patterns:
       - "version.quarkus"
