@@ -29,11 +29,11 @@ public class LinkIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Link
     private final LinkParameterIO<V, A, O, AB, OB> linkParameterIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public LinkIO(IOContext<V, A, O, AB, OB> context) {
+    public LinkIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.LINK, Names.create(Link.class));
-        serverIO = new ServerIO<>(context);
+        serverIO = new ServerIO<>(context, extensionIO);
         linkParameterIO = new LinkParameterIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     @Override

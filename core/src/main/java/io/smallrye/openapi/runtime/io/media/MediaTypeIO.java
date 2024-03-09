@@ -24,12 +24,13 @@ public class MediaTypeIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Me
     private final EncodingIO<V, A, O, AB, OB> encodingIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public MediaTypeIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public MediaTypeIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, null, Names.create(MediaType.class));
-        schemaIO = new SchemaIO<>(context);
-        exampleObjectIO = new ExampleObjectIO<>(context);
-        encodingIO = new EncodingIO<>(context, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        schemaIO = new SchemaIO<>(context, extensionIO);
+        exampleObjectIO = new ExampleObjectIO<>(context, extensionIO);
+        encodingIO = new EncodingIO<>(context, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

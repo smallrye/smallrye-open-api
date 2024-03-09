@@ -33,11 +33,11 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
     private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public SchemaIO(IOContext<V, A, O, AB, OB> context) {
+    public SchemaIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.SCHEMA, Names.create(Schema.class));
         discriminatorIO = new DiscriminatorIO<>(context);
-        externalDocIO = new ExternalDocumentationIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        externalDocIO = new ExternalDocumentationIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     public DiscriminatorIO<V, A, O, AB, OB> discriminator() {

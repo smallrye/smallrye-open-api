@@ -17,11 +17,11 @@ public class LicenseIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Lice
     private static final String PROP_NAME = "name";
     private static final String PROP_URL = "url";
 
-    private final ExtensionIO<V, A, O, AB, OB> extension;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public LicenseIO(IOContext<V, A, O, AB, OB> context) {
+    public LicenseIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.LICENSE, Names.create(License.class));
-        extension = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class LicenseIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Lice
         License license = new LicenseImpl();
         license.setName(value(annotation, PROP_NAME));
         license.setUrl(value(annotation, PROP_URL));
-        license.setExtensions(extension.readExtensible(annotation));
+        license.setExtensions(extensionIO.readExtensible(annotation));
         return license;
     }
 
@@ -40,7 +40,7 @@ public class LicenseIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Lice
         License license = new LicenseImpl();
         license.setName(jsonIO().getString(node, PROP_NAME));
         license.setUrl(jsonIO().getString(node, PROP_URL));
-        extension.readMap(node).forEach(license::addExtension);
+        license.setExtensions(extensionIO.readMap(node));
         return license;
     }
 
@@ -48,7 +48,7 @@ public class LicenseIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Lice
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
             setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
-            setAllIfPresent(node, extension.write(model));
+            setAllIfPresent(node, extensionIO.write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

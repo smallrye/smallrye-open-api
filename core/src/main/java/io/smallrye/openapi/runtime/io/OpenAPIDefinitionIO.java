@@ -46,20 +46,20 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
 
     public OpenAPIDefinitionIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OPENAPI_DEFINITION, Names.create(OpenAPI.class));
-        ContentIO<V, A, O, AB, OB> contentIO = new ContentIO<>(context);
-        infoIO = new InfoIO<>(context);
-        tagIO = new TagIO<>(context);
-        serverIO = new ServerIO<>(context);
-        securityIO = new SecurityIO<>(context);
-        operationIO = new OperationIO<>(context, contentIO);
-        pathsIO = new PathsIO<>(context, operationIO, contentIO);
-        componentIO = new ComponentsIO<>(context, contentIO);
-        responsesIO = new APIResponsesIO<>(context, contentIO);
-        externalDocIO = new ExternalDocumentationIO<>(context);
-        parameterIO = new ParameterIO<>(context, contentIO);
-        requestBodyIO = new RequestBodyIO<>(context, contentIO);
-        schemaIO = new SchemaIO<>(context);
         extensionIO = new ExtensionIO<>(context);
+        ContentIO<V, A, O, AB, OB> contentIO = new ContentIO<>(context, extensionIO);
+        infoIO = new InfoIO<>(context, extensionIO);
+        tagIO = new TagIO<>(context, extensionIO);
+        serverIO = new ServerIO<>(context, extensionIO);
+        securityIO = new SecurityIO<>(context, extensionIO);
+        operationIO = new OperationIO<>(context, contentIO, extensionIO);
+        pathsIO = new PathsIO<>(context, operationIO, contentIO, extensionIO);
+        componentIO = new ComponentsIO<>(context, contentIO, extensionIO);
+        responsesIO = new APIResponsesIO<>(context, contentIO, extensionIO);
+        externalDocIO = new ExternalDocumentationIO<>(context, extensionIO);
+        parameterIO = new ParameterIO<>(context, contentIO, extensionIO);
+        requestBodyIO = new RequestBodyIO<>(context, contentIO, extensionIO);
+        schemaIO = new SchemaIO<>(context, extensionIO);
     }
 
     public TagIO<V, A, O, AB, OB> tags() {

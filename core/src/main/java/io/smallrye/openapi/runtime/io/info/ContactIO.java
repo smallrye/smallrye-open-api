@@ -18,11 +18,11 @@ public class ContactIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
     private static final String PROP_EMAIL = "email";
     private static final String PROP_URL = "url";
 
-    private final ExtensionIO<V, A, O, AB, OB> extension;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ContactIO(IOContext<V, A, O, AB, OB> context) {
+    public ContactIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.CONTACT, Names.create(Contact.class));
-        extension = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ContactIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
         contact.setName(value(annotation, PROP_NAME));
         contact.setUrl(value(annotation, PROP_URL));
         contact.setEmail(value(annotation, PROP_EMAIL));
-        contact.setExtensions(extension.readExtensible(annotation));
+        contact.setExtensions(extensionIO.readExtensible(annotation));
         return contact;
     }
 
@@ -43,7 +43,7 @@ public class ContactIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
         contact.setName(jsonIO().getString(node, PROP_NAME));
         contact.setUrl(jsonIO().getString(node, PROP_URL));
         contact.setEmail(jsonIO().getString(node, PROP_EMAIL));
-        extension.readMap(node).forEach(contact::addExtension);
+        extensionIO.readMap(node).forEach(contact::addExtension);
         return contact;
     }
 
@@ -53,7 +53,7 @@ public class ContactIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
             setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
             setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
             setIfPresent(node, PROP_EMAIL, jsonIO().toJson(model.getEmail()));
-            setAllIfPresent(node, extension.write(model));
+            setAllIfPresent(node, extensionIO.write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

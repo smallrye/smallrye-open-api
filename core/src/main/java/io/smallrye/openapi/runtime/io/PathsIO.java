@@ -15,10 +15,10 @@ public class PathsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Paths,
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
     public PathsIO(IOContext<V, A, O, AB, OB> context, OperationIO<V, A, O, AB, OB> operationIO,
-            ContentIO<V, A, O, AB, OB> contentIO) {
+            ContentIO<V, A, O, AB, OB> contentIO, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, null, Names.create(Paths.class));
-        pathItemIO = new PathItemIO<>(context, operationIO, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        pathItemIO = new PathItemIO<>(context, operationIO, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

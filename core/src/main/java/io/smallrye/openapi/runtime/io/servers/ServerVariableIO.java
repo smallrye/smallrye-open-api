@@ -25,9 +25,9 @@ public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapMo
 
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    protected ServerVariableIO(IOContext<V, A, O, AB, OB> context) {
+    protected ServerVariableIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.SERVER_VARIABLE, Names.create(ServerVariable.class));
-        extensionIO = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     @Override

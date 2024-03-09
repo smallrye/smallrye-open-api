@@ -14,11 +14,11 @@ public class ExternalDocumentationIO<V, A extends V, O extends V, AB, OB>
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_URL = "url";
 
-    private final ExtensionIO<V, A, O, AB, OB> extension;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ExternalDocumentationIO(IOContext<V, A, O, AB, OB> context) {
+    public ExternalDocumentationIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.EXTERNAL_DOCUMENTATION, Names.create(ExternalDocumentation.class));
-        extension = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ExternalDocumentationIO<V, A extends V, O extends V, AB, OB>
         ExternalDocumentation model = new ExternalDocumentationImpl();
         model.setDescription(value(annotation, PROP_DESCRIPTION));
         model.setUrl(value(annotation, PROP_URL));
-        model.setExtensions(extension.readExtensible(annotation));
+        model.setExtensions(extensionIO.readExtensible(annotation));
         return model;
     }
 
@@ -37,7 +37,7 @@ public class ExternalDocumentationIO<V, A extends V, O extends V, AB, OB>
         jsonIO().getString(node, PROP_DESCRIPTION);
         model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
         model.setUrl(jsonIO().getString(node, PROP_URL));
-        extension.readMap(node).forEach(model::addExtension);
+        model.setExtensions(extensionIO.readMap(node));
         return model;
     }
 
@@ -45,7 +45,7 @@ public class ExternalDocumentationIO<V, A extends V, O extends V, AB, OB>
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
-            setAllIfPresent(node, extension.write(model));
+            setAllIfPresent(node, extensionIO.write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

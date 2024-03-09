@@ -27,10 +27,11 @@ public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
     private final HeaderIO<V, A, O, AB, OB> headerIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public EncodingIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public EncodingIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.ENCODING, Names.create(Encoding.class));
-        headerIO = new HeaderIO<>(context, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        headerIO = new HeaderIO<>(context, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

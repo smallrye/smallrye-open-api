@@ -45,12 +45,13 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
     private final ContentIO<V, A, O, AB, OB> contentIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public APIResponseIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public APIResponseIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.API_RESPONSE, DotName.createSimple(APIResponse.class));
-        linkIO = new LinkIO<>(context);
+        linkIO = new LinkIO<>(context, extensionIO);
         this.contentIO = contentIO;
-        headerIO = new HeaderIO<>(context, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        headerIO = new HeaderIO<>(context, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

@@ -13,6 +13,7 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
+import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Content, V, A, O, AB, OB> {
 
@@ -32,9 +33,9 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
 
     private final MediaTypeIO<V, A, O, AB, OB> mediaTypeIO;
 
-    public ContentIO(IOContext<V, A, O, AB, OB> context) {
+    public ContentIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.CONTENT, Names.create(Content.class));
-        mediaTypeIO = new MediaTypeIO<>(context, this);
+        mediaTypeIO = new MediaTypeIO<>(context, this, extensionIO);
     }
 
     public Content read(AnnotationValue annotations, Direction direction) {

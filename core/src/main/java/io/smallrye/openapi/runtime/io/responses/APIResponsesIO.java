@@ -26,10 +26,11 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
     private final APIResponseIO<V, A, O, AB, OB> responseIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public APIResponsesIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public APIResponsesIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.API_RESPONSES, Names.create(APIResponses.class));
-        responseIO = new APIResponseIO<>(context, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        responseIO = new APIResponseIO<>(context, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     public Map<String, APIResponse> readSingle(AnnotationTarget target) {

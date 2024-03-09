@@ -27,11 +27,12 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
     private final PathItemIO<V, A, O, AB, OB> pathItemIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public CallbackIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public CallbackIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.CALLBACK, DotName.createSimple(Callback.class));
-        callbackOperationIO = new CallbackOperationIO<>(context, contentIO, this);
-        pathItemIO = new PathItemIO<>(context, callbackOperationIO, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        callbackOperationIO = new CallbackOperationIO<>(context, contentIO, this, extensionIO);
+        pathItemIO = new PathItemIO<>(context, callbackOperationIO, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

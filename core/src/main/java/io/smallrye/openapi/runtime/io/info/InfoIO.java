@@ -23,13 +23,13 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
 
     private final ContactIO<V, A, O, AB, OB> contact;
     private final LicenseIO<V, A, O, AB, OB> license;
-    private final ExtensionIO<V, A, O, AB, OB> extension;
+    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public InfoIO(IOContext<V, A, O, AB, OB> context) {
+    public InfoIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.INFO, Names.create(Info.class));
-        contact = new ContactIO<>(context);
-        license = new LicenseIO<>(context);
-        extension = new ExtensionIO<>(context);
+        contact = new ContactIO<>(context, extensionIO);
+        license = new LicenseIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
         info.setContact(contact.read(annotation.value(PROP_CONTACT)));
         info.setLicense(license.read(annotation.value(PROP_LICENSE)));
         info.setVersion(value(annotation, PROP_VERSION));
-        info.setExtensions(extension.readExtensible(annotation));
+        info.setExtensions(extensionIO.readExtensible(annotation));
         return info;
     }
 
@@ -62,7 +62,7 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
         info.setContact(contact.readValue(jsonIO().getValue(node, PROP_CONTACT)));
         info.setLicense(license.readValue(jsonIO().getValue(node, PROP_LICENSE)));
         info.setVersion(jsonIO().getString(node, PROP_VERSION));
-        info.setExtensions(extension.readMap(node));
+        info.setExtensions(extensionIO.readMap(node));
         return info;
     }
 
@@ -74,7 +74,7 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
             setIfPresent(node, PROP_CONTACT, contact.write(model.getContact()));
             setIfPresent(node, PROP_LICENSE, license.write(model.getLicense()));
             setIfPresent(node, PROP_VERSION, jsonIO().toJson(model.getVersion()));
-            setAllIfPresent(node, extension.write(model));
+            setAllIfPresent(node, extensionIO.write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

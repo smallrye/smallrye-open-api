@@ -31,10 +31,10 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
     private final OAuthFlowsIO<V, A, O, AB, OB> oauthFlowsIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public SecuritySchemeIO(IOContext<V, A, O, AB, OB> context) {
+    public SecuritySchemeIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.SECURITY_SCHEME, Names.create(SecurityScheme.class));
-        oauthFlowsIO = new OAuthFlowsIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        oauthFlowsIO = new OAuthFlowsIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

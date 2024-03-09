@@ -28,10 +28,10 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     private final ServerVariableIO<V, A, O, AB, OB> serverVariableIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ServerIO(IOContext<V, A, O, AB, OB> context) {
+    public ServerIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.SERVER, Names.create(Server.class));
-        serverVariableIO = new ServerVariableIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        serverVariableIO = new ServerVariableIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     public List<Server> readList(AnnotationTarget target) {

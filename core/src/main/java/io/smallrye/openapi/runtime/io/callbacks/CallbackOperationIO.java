@@ -8,6 +8,7 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.OperationIO;
+import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.parameters.ParameterIO;
 import io.smallrye.openapi.runtime.io.parameters.RequestBodyIO;
@@ -20,11 +21,11 @@ public class CallbackOperationIO<V, A extends V, O extends V, AB, OB> extends Op
     private final SecurityIO<V, A, O, AB, OB> securityIO;
 
     public CallbackOperationIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            CallbackIO<V, A, O, AB, OB> callbackIO) {
-        super(context, Names.CALLBACK_OPERATION, contentIO, callbackIO);
-        parameterIO = new ParameterIO<>(context, contentIO);
-        requestBodyIO = new RequestBodyIO<>(context, contentIO);
-        securityIO = new SecurityIO<>(context);
+            CallbackIO<V, A, O, AB, OB> callbackIO, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+        super(context, Names.CALLBACK_OPERATION, contentIO, callbackIO, extensionIO);
+        parameterIO = new ParameterIO<>(context, contentIO, extensionIO);
+        requestBodyIO = new RequestBodyIO<>(context, contentIO, extensionIO);
+        securityIO = new SecurityIO<>(context, extensionIO);
     }
 
     @Override

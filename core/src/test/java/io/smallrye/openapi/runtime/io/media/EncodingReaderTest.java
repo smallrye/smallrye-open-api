@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -31,8 +32,6 @@ class EncodingIOTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
                 emptyConfig(), new OpenAPIImpl());
-        IOContext<?, ?, ?, ?, ?> ioContext = IOContext.forScanning(context);
-
         ClassInfo clazz = index.getClassByName(DotName.createSimple(endpointClass.getName()));
         AnnotationInstance annotation = clazz.method("getData")
                 .annotation(DotName.createSimple(APIResponse.class.getName()))
@@ -40,9 +39,13 @@ class EncodingIOTest extends IndexScannerTestBase {
                 .asNestedArray()[0]
                 .value("encoding")
                 .asNestedArray()[0];
-        ContentIO<?, ?, ?, ?, ?> contentIO = new ContentIO<>(ioContext);
+
+        IOContext<?, ?, ?, ?, ?> ioContext = IOContext.forScanning(context);
+        ExtensionIO<?, ?, ?, ?, ?> extensionIO = new ExtensionIO<>(ioContext);
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        EncodingIO<?, ?, ?, ?, ?> encodingIO = new EncodingIO(ioContext, contentIO);
+        ContentIO<?, ?, ?, ?, ?> contentIO = new ContentIO(ioContext, extensionIO);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        EncodingIO<?, ?, ?, ?, ?> encodingIO = new EncodingIO(ioContext, contentIO, extensionIO);
         Encoding.Style style = encodingIO.readStyle(annotation);
         assertEquals(expectedStyle, style);
     }

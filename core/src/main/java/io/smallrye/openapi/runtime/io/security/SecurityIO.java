@@ -14,6 +14,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class SecurityIO<V, A extends V, O extends V, AB, OB> {
 
@@ -21,10 +22,10 @@ public class SecurityIO<V, A extends V, O extends V, AB, OB> {
     private final SecurityRequirementsSetIO<V, A, O, AB, OB> securityRequirementsSetIO;
     private final SecuritySchemeIO<V, A, O, AB, OB> securitySchemeIO;
 
-    public SecurityIO(IOContext<V, A, O, AB, OB> context) {
+    public SecurityIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         securityRequirementIO = new SecurityRequirementIO<>(context);
         securityRequirementsSetIO = new SecurityRequirementsSetIO<>(context);
-        securitySchemeIO = new SecuritySchemeIO<>(context);
+        securitySchemeIO = new SecuritySchemeIO<>(context, extensionIO);
     }
 
     public List<SecurityRequirement> readRequirements(AnnotationTarget target) {

@@ -49,12 +49,13 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
     private final ExampleObjectIO<V, A, O, AB, OB> exampleObjectIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ParameterIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public ParameterIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.PARAMETER, Names.create(Parameter.class));
         this.contentIO = contentIO;
-        exampleObjectIO = new ExampleObjectIO<>(context);
-        schemaIO = new SchemaIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        exampleObjectIO = new ExampleObjectIO<>(context, extensionIO);
+        schemaIO = new SchemaIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     public List<Parameter> readList(AnnotationValue annotations) {

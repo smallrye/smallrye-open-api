@@ -41,18 +41,19 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
     private final SecuritySchemeIO<V, A, O, AB, OB> securitySchemeIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ComponentsIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public ComponentsIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.COMPONENTS, Names.create(Components.class));
-        responseIO = new APIResponseIO<>(context, contentIO);
-        headerIO = new HeaderIO<>(context, contentIO);
-        schemaIO = new SchemaIO<>(context);
-        exampleObjectIO = new ExampleObjectIO<>(context);
-        callbackIO = new CallbackIO<>(context, contentIO);
-        linkIO = new LinkIO<>(context);
-        parameterIO = new ParameterIO<>(context, contentIO);
-        requestBodyIO = new RequestBodyIO<>(context, contentIO);
-        securitySchemeIO = new SecuritySchemeIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        responseIO = new APIResponseIO<>(context, contentIO, extensionIO);
+        headerIO = new HeaderIO<>(context, contentIO, extensionIO);
+        schemaIO = new SchemaIO<>(context, extensionIO);
+        exampleObjectIO = new ExampleObjectIO<>(context, extensionIO);
+        callbackIO = new CallbackIO<>(context, contentIO, extensionIO);
+        linkIO = new LinkIO<>(context, extensionIO);
+        parameterIO = new ParameterIO<>(context, contentIO, extensionIO);
+        requestBodyIO = new RequestBodyIO<>(context, contentIO, extensionIO);
+        securitySchemeIO = new SecuritySchemeIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     public CallbackIO<V, A, O, AB, OB> callbacks() {

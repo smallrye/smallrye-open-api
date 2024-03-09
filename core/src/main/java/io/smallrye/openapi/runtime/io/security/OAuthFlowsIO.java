@@ -22,10 +22,10 @@ public class OAuthFlowsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<O
     private final OAuthFlowIO<V, A, O, AB, OB> oauthFlowIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    protected OAuthFlowsIO(IOContext<V, A, O, AB, OB> context) {
+    protected OAuthFlowsIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.OAUTH_FLOWS, Names.create(OAuthFlows.class));
-        oauthFlowIO = new OAuthFlowIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        oauthFlowIO = new OAuthFlowIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

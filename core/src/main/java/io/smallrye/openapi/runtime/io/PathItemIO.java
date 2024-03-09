@@ -37,12 +37,12 @@ public class PathItemIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Pat
     protected final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
     public PathItemIO(IOContext<V, A, O, AB, OB> context, OperationIO<V, A, O, AB, OB> operationIO,
-            ContentIO<V, A, O, AB, OB> contentIO) {
+            ContentIO<V, A, O, AB, OB> contentIO, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, null, Names.create(PathItem.class));
-        serverIO = new ServerIO<>(context);
+        serverIO = new ServerIO<>(context, extensionIO);
         this.operationIO = operationIO;
-        parameterIO = new ParameterIO<>(context, contentIO);
-        extensionIO = new ExtensionIO<>(context);
+        parameterIO = new ParameterIO<>(context, contentIO, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     @Override

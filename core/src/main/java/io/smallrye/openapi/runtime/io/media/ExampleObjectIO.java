@@ -25,9 +25,9 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
 
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public ExampleObjectIO(IOContext<V, A, O, AB, OB> context) {
+    public ExampleObjectIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.EXAMPLE_OBJECT, Names.create(Example.class));
-        extensionIO = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     @Override

@@ -40,10 +40,11 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     private final ContentIO<V, A, O, AB, OB> contentIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public RequestBodyIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
+    public RequestBodyIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.REQUEST_BODY, Names.create(RequestBody.class));
         this.contentIO = contentIO;
-        extensionIO = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
     Stream<AnnotationInstance> getAnnotations(MethodInfo method, DotName annotation) {

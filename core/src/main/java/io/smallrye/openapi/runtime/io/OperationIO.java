@@ -44,25 +44,26 @@ public class OperationIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Op
     protected final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
     public OperationIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            CallbackIO<V, A, O, AB, OB> callbackIO) {
-        this(context, Names.OPERATION, contentIO, callbackIO);
+            CallbackIO<V, A, O, AB, OB> callbackIO, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+        this(context, Names.OPERATION, contentIO, callbackIO, extensionIO);
     }
 
     public OperationIO(IOContext<V, A, O, AB, OB> context, DotName annotationName, ContentIO<V, A, O, AB, OB> contentIO,
-            CallbackIO<V, A, O, AB, OB> callbackIO) {
+            CallbackIO<V, A, O, AB, OB> callbackIO, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, annotationName, Names.create(Operation.class));
-        responsesIO = new APIResponsesIO<>(context, contentIO);
-        this.callbackIO = callbackIO != null ? callbackIO : new CallbackIO<>(context, contentIO);
-        serverIO = new ServerIO<>(context);
-        externalDocIO = new ExternalDocumentationIO<>(context);
-        parameterIO = new ParameterIO<>(context, contentIO);
-        requestBodyIO = new RequestBodyIO<>(context, contentIO);
+        responsesIO = new APIResponsesIO<>(context, contentIO, extensionIO);
+        this.callbackIO = callbackIO != null ? callbackIO : new CallbackIO<>(context, contentIO, extensionIO);
+        serverIO = new ServerIO<>(context, extensionIO);
+        externalDocIO = new ExternalDocumentationIO<>(context, extensionIO);
+        parameterIO = new ParameterIO<>(context, contentIO, extensionIO);
+        requestBodyIO = new RequestBodyIO<>(context, contentIO, extensionIO);
         securityRequirementIO = new SecurityRequirementIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        this.extensionIO = extensionIO;
     }
 
-    public OperationIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO) {
-        this(context, contentIO, null);
+    public OperationIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
+            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+        this(context, contentIO, null, extensionIO);
     }
 
     public boolean isHidden(AnnotationTarget target) {

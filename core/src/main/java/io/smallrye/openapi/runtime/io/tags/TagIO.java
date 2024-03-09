@@ -35,10 +35,10 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
     private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
     private final ExtensionIO<V, A, O, AB, OB> extensionIO;
 
-    public TagIO(IOContext<V, A, O, AB, OB> context) {
+    public TagIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
         super(context, Names.TAG, Names.create(Tag.class));
-        externalDocIO = new ExternalDocumentationIO<>(context);
-        extensionIO = new ExtensionIO<>(context);
+        externalDocIO = new ExternalDocumentationIO<>(context, extensionIO);
+        this.extensionIO = extensionIO;
     }
 
     public List<String> readReferences(AnnotationTarget target) {
