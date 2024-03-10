@@ -77,15 +77,13 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
     }
 
     protected <P extends Enum<P>> P enumValue(V value, Class<P> type) {
-        if (jsonIO().isString(value)) {
-            String strValue = jsonIO().asString(value);
+        String strValue = jsonIO().asString(value);
 
-            if (strValue != null) {
-                try {
-                    return Enum.valueOf(type, strValue.toUpperCase(Locale.ROOT));
-                } catch (Exception e) {
-                    // Ignore exceptions from `valueOf` for illegal arguments
-                }
+        if (strValue != null) {
+            try {
+                return Enum.valueOf(type, strValue.toUpperCase(Locale.ROOT));
+            } catch (Exception e) {
+                // Ignore exceptions from `valueOf` for illegal arguments
             }
         }
 

@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -65,6 +66,7 @@ public class AnnotationScannerContext {
 
     public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
+            boolean addDefaultExtension,
             OpenApiConfig config,
             OpenAPI openApi) {
         this.index = index;
@@ -80,13 +82,28 @@ public class AnnotationScannerContext {
         this.annotations = new Annotations(this);
         this.ioContext = IOContext.forScanning(this);
         this.modelIO = new OpenAPIDefinitionIO<>(ioContext);
-        this.extensions = extensions.isEmpty() ? AnnotationScannerExtension.defaultExtension(this) : extensions;
+        if (extensions.isEmpty()) {
+            this.extensions = AnnotationScannerExtension.defaultExtension(this);
+        } else {
+            List<AnnotationScannerExtension> ext = new ArrayList<>(extensions);
+            if (addDefaultExtension) {
+                ext.addAll(AnnotationScannerExtension.defaultExtension(this));
+            }
+            this.extensions = ext;
+        }
         this.schemaRegistry = new SchemaRegistry(this);
+    }
+
+    public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
+            List<AnnotationScannerExtension> extensions,
+            OpenApiConfig config,
+            OpenAPI openApi) {
+        this(index, classLoader, extensions, true, config, openApi);
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
             OpenApiConfig config) {
-        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), config, new OpenAPIImpl());
+        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), true, config, new OpenAPIImpl());
     }
 
     public FilteredIndexView getIndex() {

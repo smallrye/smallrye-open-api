@@ -6,6 +6,7 @@ import static io.smallrye.openapi.runtime.io.OpenApiSerializer.serialize;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ public class OpenApiEndpoint {
     Map<Format, byte[]> serializedOpenAPI = new HashMap<>();
 
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
         this.openAPI = (OpenAPI) servletContext.getAttribute("OpenAPI");
         this.serializedOpenAPI.put(Format.JSON, serialize(openAPI, Format.JSON).getBytes(UTF_8));
         this.serializedOpenAPI.put(Format.YAML, serialize(openAPI, Format.YAML).getBytes(UTF_8));

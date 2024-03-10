@@ -226,6 +226,7 @@ public class SchemaRegistry {
                 schema = context.getExtensions()
                         .stream()
                         .map(ext -> ext.parseSchema(jsonSchema))
+                        .filter(Objects::nonNull)
                         .findFirst()
                         .orElseThrow(NoSuchElementException::new);
             } catch (Exception e) {

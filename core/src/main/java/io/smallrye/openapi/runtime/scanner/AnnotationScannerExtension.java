@@ -21,14 +21,13 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 public interface AnnotationScannerExtension {
 
     public static List<AnnotationScannerExtension> defaultExtension(AnnotationScannerContext scannerContext) {
-        return Collections.singletonList(new Default<>(scannerContext));
+        return Collections.singletonList(new Default(scannerContext));
     }
 
-    static class Default<V> implements AnnotationScannerExtension {
+    static class Default implements AnnotationScannerExtension {
         final AnnotationScannerContext scannerContext;
-        final JsonIO<V, ?, ?, ?, ?> jsonIO;
+        final JsonIO<Object, ?, ?, ?, ?> jsonIO;
 
-        @SuppressWarnings("unchecked")
         private Default(AnnotationScannerContext scannerContext) {
             this.scannerContext = scannerContext;
 
@@ -36,7 +35,7 @@ public interface AnnotationScannerExtension {
                 scannerContext.getIoContext().jsonIO(JsonIO.newInstance(scannerContext.getConfig()));
             }
 
-            jsonIO = (JsonIO<V, ?, ?, ?, ?>) scannerContext.getIoContext().jsonIO();
+            jsonIO = scannerContext.getIoContext().jsonIO();
         }
 
         @Override
@@ -81,7 +80,7 @@ public interface AnnotationScannerExtension {
 
         @Override
         public Schema parseSchema(String jsonSchema) {
-            V schemaModel = jsonIO.fromString(jsonSchema, Format.JSON);
+            Object schemaModel = jsonIO.fromString(jsonSchema, Format.JSON);
             return scannerContext.io().schemas().readValue(schemaModel);
         }
     }
@@ -151,7 +150,9 @@ public interface AnnotationScannerExtension {
      * @param value the string value
      * @return the parsed value as Object
      */
-    Object parseValue(String value);
+    default Object parseValue(String value) {
+        return null;
+    }
 
     /**
      * Parse a string value as a Schema
@@ -159,5 +160,7 @@ public interface AnnotationScannerExtension {
      * @param jsonSchema the string value of the schema, in JSON format
      * @return the parsed value as Schema
      */
-    Schema parseSchema(String jsonSchema);
+    default Schema parseSchema(String jsonSchema) {
+        return null;
+    }
 }

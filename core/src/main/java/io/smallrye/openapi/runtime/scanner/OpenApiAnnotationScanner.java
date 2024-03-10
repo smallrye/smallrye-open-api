@@ -77,6 +77,18 @@ public class OpenApiAnnotationScanner {
     /**
      * Constructor.
      *
+     * @param config OpenApiConfig instance
+     * @param index IndexView of deployment
+     * @param extensions A set of extensions to scanning
+     */
+    public OpenApiAnnotationScanner(OpenApiConfig config, IndexView index, List<AnnotationScannerExtension> extensions,
+            boolean addDefaultExtension) {
+        this(config, ClassLoaderUtil.getDefaultClassLoader(), index, extensions, addDefaultExtension);
+    }
+
+    /**
+     * Constructor.
+     *
      * @param config
      *        OpenApiConfig instance
      * @param loader
@@ -107,6 +119,12 @@ public class OpenApiAnnotationScanner {
         this(config, loader, index, new AnnotationScannerFactory(loader), extensions);
     }
 
+    private OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
+            List<AnnotationScannerExtension> extensions,
+            boolean addDefaultExtension) {
+        this(config, loader, index, new AnnotationScannerFactory(loader), extensions, addDefaultExtension);
+    }
+
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
             Supplier<Iterable<AnnotationScanner>> scannerSupplier) {
         this(config, loader, index, scannerSupplier, Collections.emptyList());
@@ -130,6 +148,30 @@ public class OpenApiAnnotationScanner {
     public OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
             Supplier<Iterable<AnnotationScanner>> scannerSupplier,
             List<AnnotationScannerExtension> extensions) {
+        this(config, loader, index, scannerSupplier, extensions, false);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param config
+     *        OpenApiConfig instance
+     * @param loader
+     *        ClassLoader to load application classes
+     * @param index
+     *        IndexView of deployment
+     * @param scannerSupplier
+     *        supplier of AnnotationScanner instances to use to generate the
+     *        OpenAPI model for the application
+     * @param extensions
+     *        A set of extensions to scanning
+     * @param addDefaultExtension
+     *        Whether the {@linkplain AnnotationScannerExtension.Default default extension} should always be added.
+     */
+    private OpenApiAnnotationScanner(OpenApiConfig config, ClassLoader loader, IndexView index,
+            Supplier<Iterable<AnnotationScanner>> scannerSupplier,
+            List<AnnotationScannerExtension> extensions,
+            boolean addDefaultExtension) {
         FilteredIndexView filteredIndexView;
 
         if (index instanceof FilteredIndexView) {
@@ -138,7 +180,8 @@ public class OpenApiAnnotationScanner {
             filteredIndexView = new FilteredIndexView(index, config);
         }
 
-        this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, config,
+        this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, addDefaultExtension,
+                config,
                 new OpenAPIImpl());
         this.scannerSupplier = scannerSupplier;
     }

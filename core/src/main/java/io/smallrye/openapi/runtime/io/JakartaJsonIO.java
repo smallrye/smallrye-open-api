@@ -118,7 +118,19 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
 
     @Override
     public String asString(JsonValue value) {
-        return ((JsonString) value).getString();
+        if (value == null) {
+            return null;
+        }
+        switch (value.getValueType()) {
+            case ARRAY:
+            case OBJECT:
+            case NULL:
+                return null;
+            case STRING:
+                return ((JsonString) value).getString();
+            default:
+                return value.toString();
+        }
     }
 
     @Override
@@ -129,8 +141,7 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
 
     @Override
     public String getJsonString(JsonObject object, String key) {
-        JsonValue value = object.get(key);
-        return isString(value) ? asString(value) : null;
+        return asString(object.get(key));
     }
 
     @Override

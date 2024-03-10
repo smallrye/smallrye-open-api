@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io;
 
+import java.io.IOException;
+
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,8 +22,9 @@ public class OpenApiSerializer {
      * @param openApi the OpenAPI object
      * @param format the serialization format
      * @return OpenAPI object as a String
+     * @throws IOException Errors in processing the JSON
      */
-    public static String serialize(OpenAPI openApi, Format format) {
+    public static String serialize(OpenAPI openApi, Format format) throws IOException {
         return serialize(openApi, format, JsonIO.newInstance(null));
     }
 
@@ -32,17 +35,18 @@ public class OpenApiSerializer {
      * @param objectMapper the {@link ObjectMapper} to use
      * @param format the serialization format
      * @return OpenAPI object as a String
+     * @throws IOException Errors in processing the JSON
      */
-    public static String serialize(OpenAPI openApi, ObjectMapper objectMapper, Format format) {
+    public static String serialize(OpenAPI openApi, ObjectMapper objectMapper, Format format) throws IOException {
         return serialize(openApi, format, JsonIO.newInstance(null));
     }
 
     private static <V, A extends V, O extends V, AB, OB> String serialize(OpenAPI openApi, Format format,
-            JsonIO<V, A, O, AB, OB> jsonIO) {
+            JsonIO<V, A, O, AB, OB> jsonIO) throws IOException {
         return new OpenAPIDefinitionIO<>(IOContext.forJson(jsonIO))
                 .write(openApi)
                 .map(node -> jsonIO.toString(node, format))
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(IOException::new);
     }
 
 }

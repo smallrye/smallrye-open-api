@@ -114,7 +114,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
 
     @Override
     public String asString(JsonNode value) {
-        return value.asText();
+        return value != null && value.isValueNode() ? value.asText() : null;
     }
 
     @Override
@@ -125,8 +125,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
 
     @Override
     public String getJsonString(ObjectNode object, String key) {
-        JsonNode value = object.get(key);
-        return value != null && value.isTextual() ? value.asText() : null;
+        return asString(object.get(key));
     }
 
     @Override
