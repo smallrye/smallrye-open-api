@@ -17,7 +17,6 @@ import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
-import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
@@ -50,9 +49,7 @@ class DeprecatedAnnotationTest extends IndexScannerTestBase {
 
     @Test
     void testDeprecatedClassSetsOperationsDeprecated() throws IOException, JSONException {
-        Index index = Index.of(DeprecatedResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scan(DeprecatedResource.class);
         assertTrue(result.getPaths().getPathItem("/deprecated/d1").getGET().getDeprecated());
         assertTrue(result.getPaths().getPathItem("/deprecated/d2").getGET().getDeprecated());
     }
@@ -81,9 +78,7 @@ class DeprecatedAnnotationTest extends IndexScannerTestBase {
 
     @Test
     void testDeprecatedMethodSetsOperationsDeprecated() throws IOException, JSONException {
-        Index index = Index.of(MixedDeprecationResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scan(MixedDeprecationResource.class);
         assertNull(result.getPaths().getPathItem("/mixed/m1").getGET().getDeprecated());
         assertTrue(result.getPaths().getPathItem("/mixed/d1").getGET().getDeprecated());
     }
@@ -117,9 +112,7 @@ class DeprecatedAnnotationTest extends IndexScannerTestBase {
 
     @Test
     void testDeprecatedParametersSetDeprecated() throws IOException, JSONException {
-        Index index = Index.of(DeprecatedParamResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scan(DeprecatedParamResource.class);
 
         assertTrue(result.getPaths().getPathItem("/params/o1").getGET().getParameters().get(0).getDeprecated());
         assertNull(result.getPaths().getPathItem("/params/o1").getGET().getParameters().get(1).getDeprecated());

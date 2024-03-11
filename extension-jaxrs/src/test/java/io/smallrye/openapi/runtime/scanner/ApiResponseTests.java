@@ -11,8 +11,6 @@ import java.util.NavigableMap;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
@@ -21,131 +19,123 @@ import org.junit.jupiter.api.Test;
  */
 class ApiResponseTests extends IndexScannerTestBase {
 
-    private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
-        Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals(expectedResource, result);
-    }
-
     @Test
     void testJavaxResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
-        test("responses.generation-suppressed-by-api-responses-annotation.json",
+        assertJsonEquals("responses.generation-suppressed-by-api-responses-annotation.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
     void testJakartaResponseGenerationSuppressedByApiResourcesAnnotation() throws IOException, JSONException {
-        test("responses.generation-suppressed-by-api-responses-annotation.json",
+        assertJsonEquals("responses.generation-suppressed-by-api-responses-annotation.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseGenerationSuppressedByApiResourcesAnnotationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Pet.class, jakarta.json.JsonString.class);
     }
 
     @Test
     void testJavaxResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
-        test("responses.generation-suppressed-by-supplied-default-api-response.json",
+        assertJsonEquals("responses.generation-suppressed-by-supplied-default-api-response.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
     void testJakartaResponseGenerationSuppressedBySuppliedDefaultApiResource() throws IOException, JSONException {
-        test("responses.generation-suppressed-by-supplied-default-api-response.json",
+        assertJsonEquals("responses.generation-suppressed-by-supplied-default-api-response.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseGenerationSuppressedBySuppliedDefaultApiResourceTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Pet.class, jakarta.json.JsonString.class);
     }
 
     @Test
     void testJavaxResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
-        test("responses.generation-suppressed-by-status-omission.json",
+        assertJsonEquals("responses.generation-suppressed-by-status-omission.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationSuppressedByStatusOmissionTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
     void testJakartaResponseGenerationSuppressedByStatusOmission() throws IOException, JSONException {
-        test("responses.generation-suppressed-by-status-omission.json",
+        assertJsonEquals("responses.generation-suppressed-by-status-omission.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseGenerationSuppressedByStatusOmissionTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Pet.class, jakarta.json.JsonString.class);
     }
 
     @Test
     void testJavaxResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
-        test("responses.generation-enabled-by-incomplete-api-response.json",
+        assertJsonEquals("responses.generation-enabled-by-incomplete-api-response.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
     void testJakartaResponseGenerationEnabledByIncompleteApiResponse() throws IOException, JSONException {
-        test("responses.generation-enabled-by-incomplete-api-response.json",
+        assertJsonEquals("responses.generation-enabled-by-incomplete-api-response.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseGenerationEnabledByIncompleteApiResponseTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Pet.class, jakarta.json.JsonString.class);
     }
 
     @Test
     void testJakartaResponseGenerationJsonExampleApiResourceTestResource() throws IOException, JSONException {
-        test("responses.generation-json-example-api-response.json",
+        assertJsonEquals("responses.generation-json-example-api-response.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseGenerationJsonExampleApiResourceTestResource.class);
     }
 
     @Test
     void testJavaxResponseMultipartGeneration() throws IOException, JSONException {
-        test("responses.multipart-generation.json",
+        assertJsonEquals("responses.multipart-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ResponseMultipartGenerationTestResource.class);
     }
 
     @Test
     void testJakartaResponseMultipartGeneration() throws IOException, JSONException {
-        test("responses.multipart-generation.json",
+        assertJsonEquals("responses.multipart-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResponseMultipartGenerationTestResource.class);
     }
 
     @Test
     void testJavaxVoidPostResponseGeneration() throws IOException, JSONException {
-        test("responses.void-post-response-generation.json",
+        assertJsonEquals("responses.void-post-response-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.VoidPostResponseGenerationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Pet.class, javax.json.JsonString.class);
     }
 
     @Test
     void testJakartaVoidPostResponseGeneration() throws IOException, JSONException {
-        test("responses.void-post-response-generation.json",
+        assertJsonEquals("responses.void-post-response-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.VoidPostResponseGenerationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Pet.class, jakarta.json.JsonString.class);
     }
 
     @Test
     void testJavaxVoidNonPostResponseGeneration() throws IOException, JSONException {
-        test("responses.void-nonpost-response-generation.json",
+        assertJsonEquals("responses.void-nonpost-response-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.VoidNonPostResponseGenerationTestResource.class);
     }
 
     @Test
     void testJakartaVoidNonPostResponseGeneration() throws IOException, JSONException {
-        test("responses.void-nonpost-response-generation.json",
+        assertJsonEquals("responses.void-nonpost-response-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.VoidNonPostResponseGenerationTestResource.class);
     }
 
     @Test
     void testJavaxVoidAsyncResponseGeneration() throws IOException, JSONException {
-        test("responses.void-async-response-generation.json",
+        assertJsonEquals("responses.void-async-response-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.VoidAsyncResponseGenerationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.ServerError.class);
     }
 
     @Test
     void testJakartaVoidAsyncResponseGeneration() throws IOException, JSONException {
-        test("responses.void-async-response-generation.json",
+        assertJsonEquals("responses.void-async-response-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.VoidAsyncResponseGenerationTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.ServerError.class);
     }
 
     @Test
     void testJavaxReferenceResponse() throws IOException, JSONException {
-        test("responses.component-status-reuse.json",
+        assertJsonEquals("responses.component-status-reuse.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ReferenceResponseTestApp.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.ReferenceResponseTestResource.class,
                 javax.json.JsonObject.class);
@@ -153,7 +143,7 @@ class ApiResponseTests extends IndexScannerTestBase {
 
     @Test
     void testJakartaReferenceResponse() throws IOException, JSONException {
-        test("responses.component-status-reuse.json",
+        assertJsonEquals("responses.component-status-reuse.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ReferenceResponseTestApp.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ReferenceResponseTestResource.class,
                 jakarta.json.JsonObject.class);
@@ -161,7 +151,7 @@ class ApiResponseTests extends IndexScannerTestBase {
 
     @Test
     void testJavaxGenericTypeVariableResponses() throws IOException, JSONException {
-        test("responses.generic-type-variables.json",
+        assertJsonEquals("responses.generic-type-variables.json",
                 test.io.smallrye.openapi.runtime.scanner.Apple.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.BaseResource2.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.TestResource3.class);
@@ -169,7 +159,7 @@ class ApiResponseTests extends IndexScannerTestBase {
 
     @Test
     void testJakartaGenericTypeVariableResponses() throws IOException, JSONException {
-        test("responses.generic-type-variables.json",
+        assertJsonEquals("responses.generic-type-variables.json",
                 test.io.smallrye.openapi.runtime.scanner.Apple.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.BaseResource2.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.TestResource3.class);
@@ -197,7 +187,7 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        test("responses.nested-parameterized-collection-types.json",
+        assertJsonEquals("responses.nested-parameterized-collection-types.json",
                 Resource.class,
                 Resource.CustomRequest.class,
                 Resource.CustomResponse.class,
@@ -231,7 +221,7 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        test("responses.nested-parameterized-collection-types.json",
+        assertJsonEquals("responses.nested-parameterized-collection-types.json",
                 Resource.class,
                 Resource.CustomRequest.class,
                 Resource.CustomResponse.class,
@@ -275,7 +265,7 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        test("responses.kotlin-continuation.json",
+        assertJsonEquals("responses.kotlin-continuation.json",
                 Resource.class,
                 kotlin.coroutines.Continuation.class,
                 kotlin.coroutines.CoroutineContext.class);
@@ -299,11 +289,8 @@ class ApiResponseTests extends IndexScannerTestBase {
                 return null;
             }
         }
-        Index index = indexOf(Test.class, Either.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("responses.standin-generic-type-resolved.json", result);
+
+        assertJsonEquals("responses.standin-generic-type-resolved.json", Test.class, Either.class);
     }
 
     @Test
@@ -328,11 +315,7 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        Index index = Index.of(Resource.class, kotlin.Pair.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("responses.kotlin-continuation-opaque.json", result);
+        assertJsonEquals("responses.kotlin-continuation-opaque.json", Resource.class, kotlin.Pair.class);
     }
 
     @Test
@@ -351,11 +334,7 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        Index index = indexOf(TestResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("responses.mutiny-uni.json", result);
+        assertJsonEquals("responses.mutiny-uni.json", TestResource.class);
     }
 
     @Test
@@ -390,11 +369,7 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        Index index = indexOf(TestResource.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("responses.api-response-schema-variations.json", result);
+        assertJsonEquals("responses.api-response-schema-variations.json", TestResource.class);
     }
 
     @Test
@@ -435,14 +410,9 @@ class ApiResponseTests extends IndexScannerTestBase {
             }
         }
 
-        Index index = indexOf(
-                TreeApi.class,
-                HttpTreeApi.class,
-                Reference.class,
-                ReferencesResponse.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("responses.nonjaxrs-methods-skipped.json", result);
+        assertJsonEquals("responses.nonjaxrs-methods-skipped.json", TreeApi.class,
+            HttpTreeApi.class,
+            Reference.class,
+            ReferencesResponse.class);
     }
 }

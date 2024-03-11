@@ -350,16 +350,15 @@ public class SmallRyeOpenAPI {
                 return;
             }
             ApiLogging.logger.addingModel(source);
-            debugMap("callbacks", source, Optional.ofNullable(model.getComponents()).map(Components::getCallbacks));
-            debugMap("examples", source, Optional.ofNullable(model.getComponents()).map(Components::getExamples));
-            debugMap("headers", source, Optional.ofNullable(model.getComponents()).map(Components::getHeaders));
-            debugMap("links", source, Optional.ofNullable(model.getComponents()).map(Components::getLinks));
-            debugMap("parameters", source, Optional.ofNullable(model.getComponents()).map(Components::getParameters));
-            debugMap("request bodies", source, Optional.ofNullable(model.getComponents()).map(Components::getRequestBodies));
-            debugMap("responses", source, Optional.ofNullable(model.getComponents()).map(Components::getResponses));
-            debugMap("schemas", source, Optional.ofNullable(model.getComponents()).map(Components::getSchemas));
-            debugMap("security schemes", source,
-                    Optional.ofNullable(model.getComponents()).map(Components::getSecuritySchemes));
+            debugMap("callbacks", source, getMap(model, Components::getCallbacks));
+            debugMap("examples", source, getMap(model, Components::getExamples));
+            debugMap("headers", source, getMap(model, Components::getHeaders));
+            debugMap("links", source, getMap(model, Components::getLinks));
+            debugMap("parameters", source, getMap(model, Components::getParameters));
+            debugMap("request bodies", source, getMap(model, Components::getRequestBodies));
+            debugMap("responses", source, getMap(model, Components::getResponses));
+            debugMap("schemas", source, getMap(model, Components::getSchemas));
+            debugMap("security schemes", source, getMap(model, Components::getSecuritySchemes));
             debugList("servers", source, Optional.ofNullable(model.getServers()));
             debugMap("path items", source, Optional.ofNullable(model.getPaths()).map(Paths::getPathItems));
             debugList("security", source, Optional.ofNullable(model.getSecurity()));
@@ -367,7 +366,11 @@ public class SmallRyeOpenAPI {
             debugMap("extensions", source, Optional.ofNullable(model.getExtensions()));
         }
 
-        private void debugMap(String name, String source, Optional<Map<?, ?>> collection) {
+        private Optional<Map<String, ?>> getMap(OpenAPI model, Function<Components, Map<String, ?>> extract) {
+            return Optional.ofNullable(model.getComponents()).map(extract);
+        }
+
+        private void debugMap(String name, String source, Optional<Map<String, ?>> collection) {
             debugModel(name, source, collection.map(Map::size));
         }
 

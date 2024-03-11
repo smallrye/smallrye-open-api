@@ -19,7 +19,7 @@ class SchemaPropertyTest extends IndexScannerTestBase {
         SmallRyeOpenAPI result1 = SmallRyeOpenAPI.builder()
                 .withConfig(config(Collections.emptyMap()))
                 .withIndex(index)
-                .setDefaultRequiredProperties(false)
+                .defaultRequiredProperties(false)
                 .build();
         printToConsole(result1.model());
         assertJsonEquals("components.schemas.schemaproperty-merge.json", result1.model());
