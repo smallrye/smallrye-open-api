@@ -9,16 +9,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
@@ -27,69 +26,47 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
 
     @Test
     void testSnakeCase() throws Exception {
-        Index index = indexOf(NameStrategyBean1.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                         "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
-                index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+                NameStrategyBean1.class);
         assertJsonEquals("components.schemas.name-strategy-snake.json", result);
     }
 
     @Test
     void testJacksonNamingIgnoresConfig() throws Exception {
-        Index index = indexOf(NameStrategyBean2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                         "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
-                index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+            NameStrategyBean2.class);
         assertJsonEquals("components.schemas.name-strategy-ignored.json", result);
     }
 
     @Test
     void testJacksonNamingOverridesConfig() throws Exception {
-        Index index = indexOf(NameStrategyKebab.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                         "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
-                index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+            NameStrategyKebab.class);
         assertJsonEquals("components.schemas.name-strategy-kebab.json", result);
     }
 
     @Test
     void testInvalidNamingStrategyClass() throws Exception {
-        Index index = indexOf(NameStrategyKebab.class);
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 "com.fasterxml.jackson.databind.PropertyNamingStrategies$InvalidStrategy");
-        assertThrows(OpenApiRuntimeException.class, () -> new OpenApiAnnotationScanner(config, index));
+        assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 
     @Test
     void testNoValidTranslationMethods() throws Exception {
-        Index index = indexOf(NameStrategyKebab.class);
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
-                NoValidTranslationMethods.class.getName());
-        assertThrows(OpenApiRuntimeException.class, () -> new OpenApiAnnotationScanner(config, index));
+        Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+            NoValidTranslationMethods.class.getName());
+        assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 
     @Test
     void testInvalidPropertyNameTranslationAttempt() throws Exception {
-        Index index = indexOf(NameStrategyBean3.class);
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 TranslationThrowsException.class.getName());
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
-        assertThrows(OpenApiRuntimeException.class, () -> scanner.scan());
+        assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyBean3.class));
     }
 
     @ParameterizedTest(name = "testJsonbConstantStrategy-{0}")
@@ -102,14 +79,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
             JsonbConstants.CASE_INSENSITIVE + ", simpleStringOne|anotherField|Y|z"
     })
     void testJsonbConstantStrategy(String strategy, String expectedNames) throws Exception {
-        Index index = indexOf(NameStrategyBean3.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY, strategy),
-                index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY, strategy), NameStrategyBean3.class);
         Set<String> expectedNameSet = new TreeSet<>(Arrays.asList(expectedNames.split("\\|")));
         Map<String, org.eclipse.microprofile.openapi.models.media.Schema> schemas = result.getComponents().getSchemas();
         org.eclipse.microprofile.openapi.models.media.Schema schema = schemas.get(NameStrategyBean3.class.getSimpleName());

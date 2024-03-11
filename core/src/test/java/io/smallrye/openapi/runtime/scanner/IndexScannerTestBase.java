@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -35,12 +36,9 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.models.ComponentsImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
-import io.smallrye.openapi.runtime.io.Format;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 
 public class IndexScannerTestBase {
 
@@ -113,14 +111,27 @@ public class IndexScannerTestBase {
         return name;
     }
 
-    public static void printToConsole(String entityName, Schema schema) throws IOException {
+    public static void printToConsole(String entityName, Schema schema) {
         // Remember to set debug level logging.
         LOG.debug(schemaToString(entityName, schema));
     }
 
-    public static void printToConsole(OpenAPI oai) throws IOException {
+    public static void printToConsole(OpenAPI oai) {
         // Remember to set debug level logging.
-        LOG.debug(OpenApiSerializer.serialize(oai, Format.JSON));
+        LOG.debug(toJSON(oai));
+    }
+
+    public static String toJSON(OpenAPI oai) {
+        return SmallRyeOpenAPI.builder()
+                .withConfig(config(Collections.emptyMap()))
+                .withInitialModel(oai)
+                .defaultRequiredProperties(false)
+                .enableModelReader(false)
+                .enableStandardStaticFiles(false)
+                .enableAnnotationScan(false)
+                .enableStandardFilter(false)
+                .build()
+                .toJSON();
     }
 
     public static void verifyMethodAndParamRefsPresent(OpenAPI oai) {
@@ -156,14 +167,10 @@ public class IndexScannerTestBase {
                 && parameter.getSchema() != null && parameter.getSchema().getType() == Schema.SchemaType.OBJECT;
     }
 
-    public static String schemaToString(String entityName, Schema schema) throws IOException {
-        Map<String, Schema> map = new HashMap<>();
-        map.put(entityName, schema);
-        OpenAPIImpl oai = new OpenAPIImpl();
-        ComponentsImpl comp = new ComponentsImpl();
-        comp.setSchemas(map);
-        oai.setComponents(comp);
-        return OpenApiSerializer.serialize(oai, Format.JSON);
+    public static String schemaToString(String entityName, Schema schema) {
+        return toJSON(OASFactory.createOpenAPI()
+                        .components(OASFactory.createComponents()
+                                .addSchema(entityName, schema)));
     }
 
     public static void assertJsonEquals(String entityName, String expectedResource, Schema actual)
@@ -178,17 +185,42 @@ public class IndexScannerTestBase {
     }
 
     public static void assertJsonEquals(URL expectedResourceUrl, OpenAPI actual) throws JSONException, IOException {
-        JSONAssert.assertEquals(loadResource(expectedResourceUrl), OpenApiSerializer.serialize(actual, Format.JSON),
-                true);
+        JSONAssert.assertEquals(loadResource(expectedResourceUrl), toJSON(actual), true);
     }
 
-    public static void assertJsonEquals(String expectedResource, Class<?>... classes)
-            throws IOException, JSONException {
+    public static OpenAPI scan(Class<?>... classes) {
+        return scan(config(Collections.emptyMap()), null, classes);
+    }
+
+    public static OpenAPI scan(InputStream customStaticFile, Class<?>... classes) {
+        return scan(config(Collections.emptyMap()), customStaticFile, classes);
+    }
+
+    public static OpenAPI scan(Config config, InputStream customStaticFile, Class<?>... classes) {
+        return scan(config, false, customStaticFile, classes);
+    }
+
+    public static OpenAPI scan(Config config, Class<?>... classes) {
+        return scan(config, false, null, classes);
+    }
+
+    public static OpenAPI scan(Config config, boolean defaultRequiredProperties, InputStream customStaticFile, Class<?>... classes) {
         Index index = indexOf(classes);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), index);
-        OpenAPI result = scanner.scan();
+
+        OpenAPI result = SmallRyeOpenAPI.builder()
+                .defaultRequiredProperties(defaultRequiredProperties)
+                .withCustomStaticFile(customStaticFile)
+                .withIndex(index)
+                .withConfig(config)
+                .build()
+                .model();
+
         printToConsole(result);
-        assertJsonEquals(expectedResource, result);
+        return result;
+    }
+
+    public static void assertJsonEquals(String expectedResource, Class<?>... classes) throws IOException, JSONException {
+        assertJsonEquals(expectedResource, scan(config(Collections.emptyMap()), null, classes));
     }
 
     public static String loadResource(URL testResource) throws IOException {
@@ -223,10 +255,16 @@ public class IndexScannerTestBase {
         return OpenApiConfig.fromConfig(config(properties));
     }
 
+    public static Config config(String key, Object value) {
+        Map<String, String> config = new HashMap<>(1);
+        config.put(key, value.toString());
+        return config(config);
+    }
+
     public static Config config(Map<String, String> properties) {
         return new SmallRyeConfigBuilder()
+                .addDefaultSources()
                 .withSources(new PropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
                 .build();
     }
-
 }
