@@ -27,7 +27,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
     @Test
     void testSnakeCase() throws Exception {
         OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
-                        "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
+                "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
                 NameStrategyBean1.class);
         assertJsonEquals("components.schemas.name-strategy-snake.json", result);
     }
@@ -35,16 +35,16 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
     @Test
     void testJacksonNamingIgnoresConfig() throws Exception {
         OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
-                        "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
-            NameStrategyBean2.class);
+                "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
+                NameStrategyBean2.class);
         assertJsonEquals("components.schemas.name-strategy-ignored.json", result);
     }
 
     @Test
     void testJacksonNamingOverridesConfig() throws Exception {
         OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
-                        "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
-            NameStrategyKebab.class);
+                "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
+                NameStrategyKebab.class);
         assertJsonEquals("components.schemas.name-strategy-kebab.json", result);
     }
 
@@ -58,7 +58,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
     @Test
     void testNoValidTranslationMethods() throws Exception {
         Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
-            NoValidTranslationMethods.class.getName());
+                NoValidTranslationMethods.class.getName());
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 

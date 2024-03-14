@@ -27,12 +27,14 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
      */
     @Test
     void testJavaxSettingViaProvidedSchema() throws IOException, JSONException {
-        testSettingViaProvidedSchema(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
+        testSettingViaProvidedSchema(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class,
+                Greeting.class);
     }
 
     @Test
     void testJakartaSettingViaProvidedSchema() throws IOException, JSONException {
-        testSettingViaProvidedSchema(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
+        testSettingViaProvidedSchema(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class,
+                Greeting.class);
     }
 
     void testSettingViaProvidedSchema(Class<?>... classes) throws IOException, JSONException {
@@ -42,12 +44,14 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxSettingViaConfig() throws IOException, JSONException {
-        testSettingViaConfig(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfig(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class,
+                Greeting.class);
     }
 
     @Test
     void testJakartaSettingViaConfig() throws IOException, JSONException {
-        testSettingViaConfig(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfig(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class,
+                Greeting.class);
     }
 
     void testSettingViaConfig(Class<?>... classes) throws IOException, JSONException {
@@ -63,12 +67,14 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testJavaxSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
-        testSettingViaConfigWhenStaticPresent(test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfigWhenStaticPresent(
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class);
     }
 
     @Test
     void testJakartaSettingViaConfigWhenStaticPresent() throws IOException, JSONException {
-        testSettingViaConfigWhenStaticPresent(test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
+        testSettingViaConfigWhenStaticPresent(
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class);
     }
 
     void testSettingViaConfigWhenStaticPresent(Class<?>... classes) throws IOException, JSONException {

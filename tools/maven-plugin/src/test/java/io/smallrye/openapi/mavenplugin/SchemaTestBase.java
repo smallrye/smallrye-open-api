@@ -12,6 +12,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 
 import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 
+import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
 public class SchemaTestBase {
@@ -44,6 +45,7 @@ public class SchemaTestBase {
                 .resolve(path);
 
         return SmallRyeOpenAPI.builder()
+                .withConfig(new SmallRyeConfigBuilder().addDefaultSources().build())
                 .enableAnnotationScan(false)
                 .enableModelReader(false)
                 .enableStandardFilter(false)

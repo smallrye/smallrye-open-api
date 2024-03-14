@@ -159,11 +159,11 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Test
     void testRegisteredSchemaTypePreserved() throws IOException, JSONException {
         assertJsonEquals("components.schemas.registered-schema-type-preserved.json",
-            RegisteredSchemaTypePreservedModel.Animal.class,
-            RegisteredSchemaTypePreservedModel.AnimalListEnvelope.class,
-            RegisteredSchemaTypePreservedModel.MessageBase.class,
-            RegisteredSchemaTypePreservedModel.MessageData.class,
-            RegisteredSchemaTypePreservedModel.MessageDataItems.class);
+                RegisteredSchemaTypePreservedModel.Animal.class,
+                RegisteredSchemaTypePreservedModel.AnimalListEnvelope.class,
+                RegisteredSchemaTypePreservedModel.MessageBase.class,
+                RegisteredSchemaTypePreservedModel.MessageData.class,
+                RegisteredSchemaTypePreservedModel.MessageDataItems.class);
     }
 
     static class RegisteredSchemaTypePreservedModel {
@@ -313,13 +313,13 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Test
     void testJavaxJaxbElementUnwrapped() throws IOException, JSONException {
         assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json",
-            test.io.smallrye.openapi.runtime.scanner.javax.JAXBElementDto.class);
+                test.io.smallrye.openapi.runtime.scanner.javax.JAXBElementDto.class);
     }
 
     @Test
     void testJakartaJaxbElementUnwrapped() throws IOException, JSONException {
         assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json",
-            test.io.smallrye.openapi.runtime.scanner.jakarta.JAXBElementDto.class);
+                test.io.smallrye.openapi.runtime.scanner.jakarta.JAXBElementDto.class);
     }
 
     /****************************************************************/
@@ -330,8 +330,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Test
     void testJacksonJsonUnwrapped() throws IOException, JSONException {
         assertJsonEquals("components.schemas-jackson-jsonunwrapped.json",
-            JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
-            JacksonJsonPersonWithSuffixedAddress.class, JacksonJsonAddress.class);
+                JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
+                JacksonJsonPersonWithSuffixedAddress.class, JacksonJsonAddress.class);
     }
 
     @Schema
@@ -378,17 +378,17 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     void testNestedCollectionSchemas() throws IOException, JSONException {
         // Place the JDK classes in the index to simulate Quarkus
         assertJsonEquals("components.schemas.nested-parameterized-collection-types.json", CollectionBean.class,
-            EntryBean.class,
-            MultivaluedCollection.class,
-            MultivaluedMap.class,
-            // CustomMap.class excluded intentionally
-            Collection.class,
-            ArrayList.class,
-            HashMap.class,
-            List.class,
-            Map.class,
-            Set.class,
-            UUID.class);
+                EntryBean.class,
+                MultivaluedCollection.class,
+                MultivaluedMap.class,
+                // CustomMap.class excluded intentionally
+                Collection.class,
+                ArrayList.class,
+                HashMap.class,
+                List.class,
+                Map.class,
+                Set.class,
+                UUID.class);
     }
 
     @Schema
@@ -447,7 +447,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testNestedCustomGenericSchemas() throws IOException, JSONException {
-        assertJsonEquals("components.schemas.nested-custom-generics.json", Foo.class, Generic0.class, Generic1.class, Generic2.class, CustomMap.class);
+        assertJsonEquals("components.schemas.nested-custom-generics.json", Foo.class, Generic0.class, Generic1.class,
+                Generic2.class, CustomMap.class);
     }
 
     /*
@@ -497,7 +498,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             public List<Optional<B>> listOfOptionalB;
         }
 
-        assertJsonEquals("components.schemas.optional-arraytype.json", B.class, A.class, UUID.class, List.class, Optional.class);
+        assertJsonEquals("components.schemas.optional-arraytype.json", B.class, A.class, UUID.class, List.class,
+                Optional.class);
     }
 
     @Target(ElementType.TYPE_USE)
@@ -629,7 +631,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             OtherBean third;
         }
 
-        assertJsonEquals("components.schemas.field-overrides-type.json", OtherBean.class, /* BeanTwo.class, BeanThree.class, */ Bean.class);
+        assertJsonEquals("components.schemas.field-overrides-type.json", OtherBean.class,
+                /* BeanTwo.class, BeanThree.class, */ Bean.class);
     }
 
     /*
@@ -673,7 +676,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             ZonedDateTime[] now;
         }
 
-        assertJsonEquals("components.schemas.terminal-array-item-registration.json", ZonedDateTimeArrayWrapper.class, ZonedDateTime.class);
+        assertJsonEquals("components.schemas.terminal-array-item-registration.json", ZonedDateTimeArrayWrapper.class,
+                ZonedDateTime.class);
     }
 
     /*
@@ -720,9 +724,9 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         String nullableStringArySig = Nullable.class.getName() + "<java.lang.String[]>";
         OpenAPI result = scan(config(
-                    OASConfig.SCHEMA_PREFIX + nullableStringArySig,
-                    "{ \"name\": \"NullableStringArray\", \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"nullable\": true }"),
-            Nullable.class, Bean.class);
+                OASConfig.SCHEMA_PREFIX + nullableStringArySig,
+                "{ \"name\": \"NullableStringArray\", \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"nullable\": true }"),
+                Nullable.class, Bean.class);
         assertJsonEquals("components.schemas.parameterized-type-schema-config.json", result);
     }
 

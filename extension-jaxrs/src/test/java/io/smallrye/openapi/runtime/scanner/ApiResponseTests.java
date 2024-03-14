@@ -411,8 +411,8 @@ class ApiResponseTests extends IndexScannerTestBase {
         }
 
         assertJsonEquals("responses.nonjaxrs-methods-skipped.json", TreeApi.class,
-            HttpTreeApi.class,
-            Reference.class,
-            ReferencesResponse.class);
+                HttpTreeApi.class,
+                Reference.class,
+                ReferencesResponse.class);
     }
 }
