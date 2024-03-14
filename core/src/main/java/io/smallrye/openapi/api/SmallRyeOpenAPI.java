@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -223,7 +224,8 @@ public class SmallRyeOpenAPI {
             ClassLoader appClassLoader = applicationClassLoader != null ? applicationClassLoader
                     : Thread.currentThread().getContextClassLoader();
 
-            OpenApiConfig buildConfig = OpenApiConfig.fromConfig(this.config);
+            OpenApiConfig buildConfig = OpenApiConfig.fromConfig(Optional.ofNullable(this.config)
+                    .orElseGet(ConfigProvider::getConfig));
             IOContext<V, A, O, AB, OB> io = IOContext.forJson(JsonIO.newInstance(buildConfig));
             OpenAPIDefinitionIO<V, A, O, AB, OB> modelIO = new OpenAPIDefinitionIO<>(io);
             FilteredIndexView filteredIndex = new FilteredIndexView(index, buildConfig);
@@ -252,7 +254,8 @@ public class SmallRyeOpenAPI {
                                 debugModel("static file", fileModel);
                                 return fileModel;
                             } catch (IOException e) {
-                                throw new OpenApiRuntimeException("IOException reading " + file.getFormat() + " static file", e);
+                                throw new OpenApiRuntimeException("IOException reading " + file.getFormat() + " static file",
+                                        e);
                             }
                         })
                         .reduce(MergeUtil::merge)

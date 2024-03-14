@@ -169,8 +169,8 @@ public class IndexScannerTestBase {
 
     public static String schemaToString(String entityName, Schema schema) {
         return toJSON(OASFactory.createOpenAPI()
-                        .components(OASFactory.createComponents()
-                                .addSchema(entityName, schema)));
+                .components(OASFactory.createComponents()
+                        .addSchema(entityName, schema)));
     }
 
     public static void assertJsonEquals(String entityName, String expectedResource, Schema actual)
@@ -204,7 +204,8 @@ public class IndexScannerTestBase {
         return scan(config, false, null, classes);
     }
 
-    public static OpenAPI scan(Config config, boolean defaultRequiredProperties, InputStream customStaticFile, Class<?>... classes) {
+    public static OpenAPI scan(Config config, boolean defaultRequiredProperties, InputStream customStaticFile,
+            Class<?>... classes) {
         Index index = indexOf(classes);
 
         OpenAPI result = SmallRyeOpenAPI.builder()

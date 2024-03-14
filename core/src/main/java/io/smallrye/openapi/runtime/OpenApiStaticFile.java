@@ -32,7 +32,6 @@ public class OpenApiStaticFile implements Closeable {
         this(null, content, format);
     }
 
-
     /**
      * @see java.io.Closeable#close()
      */
