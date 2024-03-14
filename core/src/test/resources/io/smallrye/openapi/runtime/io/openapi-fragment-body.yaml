@@ -11,7 +11,7 @@
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProxyEntity'
+                  $ref: "#/components/schemas/ProxyEntity"
       x-routing-fqdn: provider.acme.unknown
       x-string-property: string-value
       x-boolean-property: true
@@ -52,7 +52,7 @@
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProxyEntity'
+                $ref: "#/components/schemas/ProxyEntity"
       x-routing-fqdn: provider.acme.unknown
     patch:
       summary: Updates a @@ID@@ type proxy data
@@ -68,7 +68,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProxyEntity'
+              $ref: "#/components/schemas/ProxyEntity"
       responses:
         "404":
           description: Requested @@ID@@ type proxy was not found
@@ -77,7 +77,7 @@
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProxyEntity'
+                $ref: "#/components/schemas/ProxyEntity"
               example: "{\"code\": \"@@ID@@\", \"name\": \"@@ID@@ type proxy\", \"obsolete\"\
                 : false}"
       x-routing-fqdn: provider.acme.unknown
