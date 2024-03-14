@@ -49,8 +49,7 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
-import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
+import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -73,7 +72,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
 public abstract class AbstractParameterProcessor {
 
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(
-            Arrays.asList(ParameterConstant.DOTNAME_PARAMETER, ParameterConstant.DOTNAME_PARAMETERS));
+            Arrays.asList(Names.PARAMETER, Names.PARAMETERS));
 
     protected static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
@@ -578,11 +577,8 @@ public abstract class AbstractParameterProcessor {
     }
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
-        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(scannerContext,
-                context.target);
-
-        if (param.getExtensions() == null && !extensionAnnotations.isEmpty()) {
-            param.setExtensions(ExtensionReader.readExtensions(this.scannerContext, extensionAnnotations));
+        if (param.getExtensions() == null) {
+            param.setExtensions(scannerContext.io().extensions().readMap(context.target));
         }
     }
 
@@ -932,9 +928,9 @@ public abstract class AbstractParameterProcessor {
     protected void readParameterAnnotation(AnnotationInstance annotation) {
         DotName name = annotation.name();
 
-        if (ParameterConstant.DOTNAME_PARAMETER.equals(name)) {
+        if (Names.PARAMETER.equals(name)) {
             readAnnotatedType(annotation, null, false);
-        } else if (ParameterConstant.DOTNAME_PARAMETERS.equals(name)) {
+        } else if (Names.PARAMETERS.equals(name)) {
             AnnotationValue annotationValue = annotation.value();
 
             if (annotationValue != null) {
@@ -1263,7 +1259,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected boolean isReadableParameterAnnotation(DotName name) {
-        return ParameterConstant.DOTNAME_PARAMETER.equals(name) && readerFunction != null;
+        return Names.PARAMETER.equals(name) && readerFunction != null;
     }
 
     protected void readParameterAnnotation(AnnotationInstance annotation, boolean overriddenParametersOnly) {
@@ -1514,7 +1510,7 @@ public abstract class AbstractParameterProcessor {
         clazz.annotationsMap()
                 .entrySet()
                 .stream()
-                .filter(e -> ParameterConstant.DOTNAME_PARAMETER.equals(e.getKey()) || isParameter(e.getKey()))
+                .filter(e -> Names.PARAMETER.equals(e.getKey()) || isParameter(e.getKey()))
                 .flatMap(a -> a.getValue().stream())
                 .filter(this::isBeanPropertyParam)
                 .forEach(annotation -> readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly));

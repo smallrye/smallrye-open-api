@@ -17,7 +17,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
+import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
@@ -237,9 +237,9 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
         if (SpringParameter.isParameter(annotationName)) {
             return true;
         }
-        if (ParameterConstant.DOTNAME_PARAMETER.equals(annotationName)) {
+        if (Names.PARAMETER.equals(annotationName)) {
             return true;
         }
-        return ParameterConstant.DOTNAME_PARAMETERS.equals(annotationName);
+        return Names.PARAMETERS.equals(annotationName);
     }
 }

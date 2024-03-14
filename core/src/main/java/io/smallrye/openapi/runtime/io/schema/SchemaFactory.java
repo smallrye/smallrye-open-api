@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
@@ -27,13 +26,9 @@ import org.jboss.jandex.Type.Kind;
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.IoLogging;
-import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
-import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
-import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -41,7 +36,6 @@ import io.smallrye.openapi.runtime.scanner.dataobject.EnumProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
-import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -175,22 +169,17 @@ public class SchemaFactory {
         schema.setNullable(readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        AnnotationInstance externalDocsAnnotation = context.annotations().value(annotation,
-                ExternalDocsConstant.PROP_EXTERNAL_DOCS);
-        schema.setExternalDocs(ExternalDocsReader.readExternalDocs(context, externalDocsAnnotation));
+        schema.setExternalDocs(context.io().externalDocumentation().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
         schema.setDeprecated(readAttr(context, annotation, SchemaConstant.PROP_DEPRECATED, defaults));
         schema.setType(readSchemaType(context, annotation, schema, defaults));
         schema.setExample(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
         schema.setDefaultValue(
                 parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, schema.getType()));
-        schema.setDiscriminator(
-                readDiscriminator(context,
-                        context.annotations().value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY),
-                        context.annotations().value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING)));
+        schema.setDiscriminator(context.io().schemas().discriminator().read(annotation));
         schema.setMaxItems(readAttr(context, annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
         schema.setMinItems(readAttr(context, annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(context, annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
-        schema.setExtensions(ExtensionReader.readExtensions(context, annotation));
+        schema.setExtensions(context.io().extensions().readExtensible(annotation));
 
         schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(context, annotation,
                 SchemaConstant.PROP_PROPERTIES, properties -> {
@@ -470,6 +459,17 @@ public class SchemaFactory {
      *
      * @param context scanning context
      * @param type the implementation type of the item to scan
+     * @return Schema model
+     */
+    public static Schema typeToSchema(AnnotationScannerContext context, Type type) {
+        return typeToSchema(context, type, null, context.getExtensions());
+    }
+
+    /**
+     * Converts a Jandex type to a {@link Schema} model.
+     *
+     * @param context scanning context
+     * @param type the implementation type of the item to scan
      * @param extensions list of AnnotationScannerExtensions
      * @return Schema model
      */
@@ -716,69 +716,6 @@ public class SchemaFactory {
                 return asyncType;
         }
         return type;
-    }
-
-    /**
-     * Reads a discriminator property name and an optional array of
-     * {@link org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping @DiscriminatorMapping}
-     * annotations into a {@link Discriminator} model.
-     *
-     * @param context scanning context
-     * @param propertyName the OAS required value specified by the
-     *        {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorProperty() discriminatorProperty}
-     *        attribute.
-     * @param annotation reference to the array of
-     *        {@link org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping @DiscriminatorMapping} annotations
-     *        given by {@link org.eclipse.microprofile.openapi.annotations.media.Schema#discriminatorMapping()
-     *        discriminatorMapping}
-     */
-    private static Discriminator readDiscriminator(final AnnotationScannerContext context,
-            String propertyName,
-            AnnotationInstance[] annotation) {
-
-        if (propertyName == null && annotation == null) {
-            return null;
-        }
-
-        Discriminator discriminator = new DiscriminatorImpl();
-
-        /*
-         * The name is required by OAS, however MP OpenAPI allows for a default
-         * (blank) name. This results in an invalid OpenAPI document if
-         * considering annotation scanning in isolation.
-         */
-        if (propertyName != null) {
-            discriminator.setPropertyName(propertyName);
-        }
-
-        if (annotation != null) {
-            IoLogging.logger.annotationsList("@DiscriminatorMapping");
-            Arrays.stream(annotation).forEach(mapping -> readDiscriminatorMapping(context, discriminator, mapping));
-        }
-
-        return discriminator;
-    }
-
-    private static void readDiscriminatorMapping(AnnotationScannerContext context, Discriminator discriminator,
-            AnnotationInstance mapping) {
-        String propertyValue = context.annotations().value(mapping, SchemaConstant.PROP_VALUE);
-        Type schemaType = context.annotations().value(mapping, SchemaConstant.PROP_SCHEMA);
-
-        String schemaRef;
-
-        if (schemaType != null) {
-            Schema schema = introspectClassToSchema(context, schemaType.asClassType(), true);
-            schemaRef = schema != null ? schema.getRef() : null;
-        } else {
-            schemaRef = null;
-        }
-
-        if (propertyValue == null && schemaRef != null) {
-            // No mapping key provided, use the implied value.
-            propertyValue = ModelUtil.nameFromRef(schemaRef);
-        }
-
-        discriminator.addMapping(propertyValue, schemaRef);
     }
 
     private static BigDecimal tolerantParseBigDecimal(String value) {

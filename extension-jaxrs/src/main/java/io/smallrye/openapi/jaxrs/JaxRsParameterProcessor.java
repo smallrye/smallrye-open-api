@@ -21,7 +21,7 @@ import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.models.media.EncodingImpl;
-import io.smallrye.openapi.runtime.io.parameter.ParameterConstant;
+import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
@@ -196,7 +196,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                     .put(paramName(annotation), annotation);
         } else if (frameworkParam.location == In.PATH && targetType != null
                 && JaxRsConstants.PATH_SEGMENT.contains(targetType.name())) {
-            String pathSegment = scannerContext.annotations().value(annotation, ParameterConstant.PROP_VALUE);
+            String pathSegment = scannerContext.annotations().value(annotation);
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>());
         } else if (frameworkParam.location != null) {
             readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
@@ -221,7 +221,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected String getDefaultAnnotationProperty() {
-        return ParameterConstant.PROP_VALUE;
+        return "value";
     }
 
     @Override
@@ -305,9 +305,9 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         if (JaxRsParameter.isParameter(annotationName)) {
             return true;
         }
-        if (ParameterConstant.DOTNAME_PARAMETER.equals(annotationName)) {
+        if (Names.PARAMETER.equals(annotationName)) {
             return true;
         }
-        return ParameterConstant.DOTNAME_PARAMETERS.equals(annotationName);
+        return Names.PARAMETERS.equals(annotationName);
     }
 }

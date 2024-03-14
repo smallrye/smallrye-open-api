@@ -30,6 +30,9 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 public final class Annotations {
 
+    /**
+     * Default annotation property name
+     */
     private static final String VALUE = "value";
     private static final Map<PrimitiveType.Primitive, AnnotationValue.Kind> PRIMITIVES;
     private static final DotName CLASS_NAME = DotName.createSimple("java.lang.Class");

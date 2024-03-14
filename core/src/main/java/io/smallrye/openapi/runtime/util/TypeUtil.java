@@ -4,7 +4,15 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,7 +37,6 @@ import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
-import io.smallrye.openapi.runtime.io.externaldocs.ExternalDocsConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -409,7 +416,7 @@ public class TypeUtil {
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
         schema.setExample(properties.get(SchemaConstant.PROP_EXAMPLE));
-        schema.setExternalDocs((ExternalDocumentation) properties.get(ExternalDocsConstant.PROP_EXTERNAL_DOCS));
+        schema.setExternalDocs((ExternalDocumentation) properties.get(SchemaConstant.PROP_EXTERNAL_DOCS));
     }
 
     /**
@@ -824,7 +831,7 @@ public class TypeUtil {
                 ExternalDocumentation doc = new ExternalDocumentationImpl();
                 doc.setDescription(description);
                 doc.setUrl(url);
-                properties.put(ExternalDocsConstant.PROP_EXTERNAL_DOCS, doc);
+                properties.put(SchemaConstant.PROP_EXTERNAL_DOCS, doc);
                 return this;
             }
 

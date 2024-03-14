@@ -5,20 +5,14 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
-import org.yaml.snakeyaml.LoaderOptions;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
-
-import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
-import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
-import io.smallrye.openapi.runtime.io.schema.SchemaReader;
+import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
+import io.smallrye.openapi.runtime.io.media.SchemaIO;
 
 /**
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.
@@ -26,6 +20,9 @@ import io.smallrye.openapi.runtime.io.schema.SchemaReader;
  * @author eric.wittmann@gmail.com
  */
 public class OpenApiParser {
+
+    private OpenApiParser() {
+    }
 
     /**
      * Parses the resource found at the given URL. This method accepts resources
@@ -54,7 +51,7 @@ public class OpenApiParser {
             }
 
             try (InputStream stream = url.openStream()) {
-                return parse(stream, isJson ? Format.JSON : Format.YAML);
+                return parse(stream, isJson ? Format.JSON : Format.YAML, OpenApiConfig.fromConfig(ConfigProvider.getConfig()));
             }
         } catch (URISyntaxException e) {
             throw new IOException(e);
@@ -67,30 +64,17 @@ public class OpenApiParser {
      *
      * @param stream InputStream containing an OpenAPI document
      * @param format Format of the stream
-     * @param maximumStaticFileSize Integer to change (usually to increase) the maximum static file size
      * @return OpenAPIImpl parsed from the stream
-     * @throws IOException Errors in reading the stream
      */
-    public static final OpenAPI parse(InputStream stream, Format format, final Integer maximumStaticFileSize)
-            throws IOException {
-        ObjectMapper mapper;
-        if (format == Format.JSON) {
-            mapper = new ObjectMapper();
-        } else {
-            LoaderOptions loaderOptions = new LoaderOptions();
-            if (maximumStaticFileSize != null) {
-                loaderOptions.setCodePointLimit(maximumStaticFileSize);
-            }
-            mapper = new ObjectMapper(new YAMLFactoryBuilder(new YAMLFactory()).loaderOptions(loaderOptions).build());
-        }
-        JsonNode tree = mapper.readTree(stream);
-
-        OpenApiParser parser = new OpenApiParser(tree);
-        return parser.parse();
+    public static OpenAPI parse(InputStream stream, Format format, OpenApiConfig config) {
+        return parse(stream, format, JsonIO.newInstance(config));
     }
 
-    public static final OpenAPI parse(InputStream stream, Format format) throws IOException {
-        return parse(stream, format, null);
+    private static <V, A extends V, O extends V, AB, OB> OpenAPI parse(InputStream stream, Format format,
+            JsonIO<V, A, O, AB, OB> jsonIO) {
+        IOContext<V, A, O, AB, OB> context = IOContext.forJson(jsonIO);
+        return new OpenAPIDefinitionIO<>(context).readValue(jsonIO.fromStream(stream, format));
+
     }
 
     /**
@@ -101,34 +85,23 @@ public class OpenApiParser {
      * @return Schema parsed from the String
      * @throws OpenApiRuntimeException Errors in reading the String
      */
-    public static final Schema parseSchema(String schemaJson) {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode tree;
-        try {
-            tree = mapper.readTree(schemaJson);
-        } catch (JsonProcessingException e) {
-            throw new OpenApiRuntimeException("Exception parsing JSON Schema representation", e);
-        }
-        return SchemaReader.readSchema(tree);
+    public static Schema parseSchema(String schemaJson) {
+        return parseSchema(schemaJson, JsonIO.newInstance(null));
     }
 
-    private final JsonNode tree;
-
     /**
-     * Constructor.
+     * Parses the schema in the provided String. The format of the stream must
+     * be JSON.
      *
-     * @param tree JsonNode
+     * @param schemaJson String containing a JSON formatted schema
+     * @param jsonIO JsonIO implementation for a low-level JSON reader/parser
+     * @return Schema parsed from the String
+     * @throws OpenApiRuntimeException Errors in reading the String
      */
-    public OpenApiParser(JsonNode tree) {
-        this.tree = tree;
+    private static <V, A extends V, O extends V, AB, OB> Schema parseSchema(String schemaJson, JsonIO<V, A, O, AB, OB> jsonIO) {
+        IOContext<V, A, O, AB, OB> context = IOContext.forJson(jsonIO);
+        V schemaValue = jsonIO.fromString(schemaJson, Format.JSON);
+        return new SchemaIO<>(context, new ExtensionIO<>(context)).readValue(schemaValue);
     }
 
-    /**
-     * Parses the json tree into an OpenAPI data model.
-     */
-    private OpenAPI parse() {
-        OpenAPI oai = new OpenAPIImpl();
-        DefinitionReader.processDefinition(oai, tree);
-        return oai;
-    }
 }

@@ -271,13 +271,12 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testTagScanning_OrderGivenStaticFile(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(new HashMap<String, String>()), i);
+        OpenApiConfig config = dynamicConfig(new HashMap<String, String>());
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, i);
+        String json = "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}";
         OpenAPI scanResult = scanner.scan("JAX-RS");
-        OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(
-                "{\"info\" : {\"title\" : \"Tag order in static file\",\"version\" : \"1.0.0-static\"},\"tags\": [{\"name\":\"tag3\"},{\"name\":\"tag1\"}]}"
-                        .getBytes()),
-                Format.JSON);
-        OpenApiDocument doc = OpenApiDocument.INSTANCE;
+        OpenAPI staticResult = OpenApiParser.parse(new ByteArrayInputStream(json.getBytes()), Format.JSON, config);
+        OpenApiDocument doc = OpenApiDocument.newInstance();
         doc.config(dynamicConfig(new HashMap<String, String>()));
         doc.modelFromStaticFile(staticResult);
         doc.modelFromAnnotations(scanResult);
@@ -285,7 +284,6 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         OpenAPI result = doc.get();
         printToConsole(result);
         assertJsonEquals("resource.tags.ordergiven.staticfile.json", result);
-        doc.reset();
     }
 
     @Test

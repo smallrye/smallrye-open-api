@@ -1,6 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.OpenAPIDefinitionIO;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -56,31 +59,51 @@ public class AnnotationScannerContext {
     private final SchemaRegistry schemaRegistry;
     private final JavaSecurityProcessor javaSecurityProcessor;
     private final Annotations annotations;
+    private final IOContext<?, ?, ?, ?, ?> ioContext;
+    private final OpenAPIDefinitionIO<?, ?, ?, ?, ?> modelIO;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
     public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
             List<AnnotationScannerExtension> extensions,
+            boolean addDefaultExtension,
             OpenApiConfig config,
             OpenAPI openApi) {
         this.index = index;
         this.augmentedIndex = AugmentedIndexView.augment(index);
         this.ignoreResolver = new IgnoreResolver(this);
         this.classLoader = classLoader;
-        this.extensions = extensions;
         this.config = config;
         this.openApi = openApi;
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
         this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(new BeanValidationScanner(this))
                 : Optional.empty();
-        this.schemaRegistry = new SchemaRegistry(this);
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
+        this.ioContext = IOContext.forScanning(this);
+        this.modelIO = new OpenAPIDefinitionIO<>(ioContext);
+        if (extensions.isEmpty()) {
+            this.extensions = AnnotationScannerExtension.defaultExtension(this);
+        } else {
+            List<AnnotationScannerExtension> ext = new ArrayList<>(extensions);
+            if (addDefaultExtension) {
+                ext.addAll(AnnotationScannerExtension.defaultExtension(this));
+            }
+            this.extensions = ext;
+        }
+        this.schemaRegistry = new SchemaRegistry(this);
+    }
+
+    public AnnotationScannerContext(FilteredIndexView index, ClassLoader classLoader,
+            List<AnnotationScannerExtension> extensions,
+            OpenApiConfig config,
+            OpenAPI openApi) {
+        this(index, classLoader, extensions, true, config, openApi);
     }
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
             OpenApiConfig config) {
-        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), config, new OpenAPIImpl());
+        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), true, config, new OpenAPIImpl());
     }
 
     public FilteredIndexView getIndex() {
@@ -189,5 +212,15 @@ public class AnnotationScannerContext {
 
     public Annotations annotations() {
         return annotations;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> getIoContext() {
+        return (IOContext<V, A, O, AB, OB>) ioContext;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V, A extends V, O extends V, AB, OB> OpenAPIDefinitionIO<V, A, O, AB, OB> io() { // NOSONAR - ignore wildcards in return type
+        return (OpenAPIDefinitionIO<V, A, O, AB, OB>) modelIO;
     }
 }

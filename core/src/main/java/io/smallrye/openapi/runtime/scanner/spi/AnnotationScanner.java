@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +13,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
-import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
@@ -28,9 +26,7 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
-import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.models.servers.Server;
-import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
@@ -46,6 +42,7 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
+import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
@@ -53,19 +50,9 @@ import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.io.callback.CallbackReader;
-import io.smallrye.openapi.runtime.io.definition.DefinitionReader;
-import io.smallrye.openapi.runtime.io.extension.ExtensionReader;
-import io.smallrye.openapi.runtime.io.operation.OperationReader;
-import io.smallrye.openapi.runtime.io.requestbody.RequestBodyReader;
-import io.smallrye.openapi.runtime.io.response.ResponseReader;
+import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
-import io.smallrye.openapi.runtime.io.securityrequirement.SecurityRequirementReader;
-import io.smallrye.openapi.runtime.io.securityscheme.SecuritySchemeReader;
-import io.smallrye.openapi.runtime.io.server.ServerReader;
-import io.smallrye.openapi.runtime.io.tag.TagConstant;
-import io.smallrye.openapi.runtime.io.tag.TagReader;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
@@ -137,14 +124,10 @@ public interface AnnotationScanner {
      *
      * @param context the scanning context
      * @param targetClass the class that contain the server annotation
-     * @param openApi the current OpenApi model being created
      */
-    default void processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
-            OpenAPI openApi) {
-        AnnotationInstance openApiDefAnno = DefinitionReader.getDefinitionAnnotation(context, targetClass);
-        if (openApiDefAnno != null) {
-            DefinitionReader.processDefinition(context, openApi, openApiDefAnno);
-        }
+    default OpenAPI processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass) {
+        return Optional.ofNullable(context.io().read(targetClass))
+                .orElseGet(() -> new OpenAPIImpl().openapi(OpenApiConstants.OPEN_API_VERSION));
     }
 
     /**
@@ -155,20 +138,9 @@ public interface AnnotationScanner {
      */
     default void processSecuritySchemeAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
             OpenAPI openApi) {
-        List<AnnotationInstance> securitySchemeAnnotations = SecuritySchemeReader.getSecuritySchemeAnnotations(context,
-                targetClass);
 
-        for (AnnotationInstance annotation : securitySchemeAnnotations) {
-            String name = SecuritySchemeReader.getSecuritySchemeName(context, annotation);
-            if (name == null && JandexUtil.isRef(annotation)) {
-                name = JandexUtil.nameFromRef(annotation);
-            }
-            if (name != null) {
-                SecurityScheme securityScheme = SecuritySchemeReader.readSecurityScheme(context, annotation);
-                Components components = ModelUtil.components(openApi);
-                components.addSecurityScheme(name, securityScheme);
-            }
-        }
+        context.io().security().readSchemes(targetClass)
+                .forEach((name, scheme) -> ModelUtil.components(openApi).addSecurityScheme(name, scheme));
     }
 
     /**
@@ -178,11 +150,7 @@ public interface AnnotationScanner {
      * @param openApi the current OpenApi model being created
      */
     default void processServerAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass, OpenAPI openApi) {
-        List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(context, targetClass);
-        for (AnnotationInstance annotation : serverAnnotations) {
-            Server server = ServerReader.readServer(context, annotation);
-            openApi.addServer(server);
-        }
+        context.io().servers().readList(targetClass).forEach(openApi::addServer);
     }
 
     /**
@@ -238,32 +206,22 @@ public interface AnnotationScanner {
      */
     default Set<String> processTags(final AnnotationScannerContext context, final AnnotationTarget target, OpenAPI openApi,
             final boolean nullWhenMissing) {
-        if (!TagReader.hasTagAnnotation(context, target)) {
+
+        if (!context.io().tags().hasRepeatableAnnotation(target)) {
             return nullWhenMissing ? null : Collections.emptySet();
         }
 
         Set<String> tags = new LinkedHashSet<>();
-        List<AnnotationInstance> tagAnnos = TagReader.getTagAnnotations(context, target);
 
-        for (AnnotationInstance ta : tagAnnos) {
-            if (JandexUtil.isRef(ta)) {
-                tags.add(context.annotations().value(ta, OpenApiConstants.REF));
-            } else {
-                Tag tag = TagReader.readTag(context, ta);
-
-                if (tag.getName() != null) {
-                    ModelUtil.addTag(openApi, tag);
+        context.io().tags().readList(target)
+                .stream()
+                .filter(tag -> Objects.nonNull(tag.getName()))
+                .forEach(tag -> {
                     tags.add(tag.getName());
-                }
-            }
-        }
+                    ModelUtil.addTag(openApi, tag);
+                });
 
-        String[] refs = context.annotations().getAnnotationValue(target, TagConstant.DOTNAME_TAGS,
-                OpenApiConstants.REFS);
-
-        if (refs != null) {
-            Arrays.stream(refs).forEach(tags::add);
-        }
+        context.io().tags().readReferences(target).forEach(tags::add);
 
         return tags;
     }
@@ -310,11 +268,11 @@ public interface AnnotationScanner {
     default Optional<Operation> processOperation(final AnnotationScannerContext context,
             final ClassInfo resourceClass,
             final MethodInfo method) {
-        if (OperationReader.operationIsHidden(method)) {
+        if (context.io().operations().isHidden(method)) {
             return Optional.empty();
         }
-        AnnotationInstance operationAnnotation = OperationReader.getOperationAnnotation(method);
-        OperationImpl operation = (OperationImpl) OperationReader.readOperation(context, operationAnnotation, method);
+
+        OperationImpl operation = (OperationImpl) context.io().operations().read(method);
 
         if (operation == null) {
             operation = new OperationImpl();
@@ -395,23 +353,21 @@ public interface AnnotationScanner {
 
     default void processResponse(final AnnotationScannerContext context, final ClassInfo resourceClass, final MethodInfo method,
             Operation operation,
-            Map<DotName, List<AnnotationInstance>> exceptionAnnotationMap) {
+            Map<DotName, Map<String, APIResponse>> exceptionResponseMap) {
 
         setJsonViewContext(context, context.annotations().getAnnotationValue(method, JacksonConstants.JSON_VIEW));
 
-        List<AnnotationInstance> classApiResponseAnnotations = ResponseReader.getResponseAnnotations(context, resourceClass);
-        for (AnnotationInstance annotation : classApiResponseAnnotations) {
-            addApiReponseFromAnnotation(context, annotation, operation);
-        }
+        Optional<APIResponses> classResponses = Optional.ofNullable(context.io().responses().read(resourceClass));
+        Map<String, APIResponse> classResponse = context.io().responses().readSingle(resourceClass);
+        addResponses(operation, classResponses, classResponse, false);
 
         // Method annotations override class annotations
-        List<AnnotationInstance> methodApiResponseAnnotations = ResponseReader.getResponseAnnotations(context, method);
-        for (AnnotationInstance annotation : methodApiResponseAnnotations) {
-            addApiReponseFromAnnotation(context, annotation, operation);
-        }
+        Optional<APIResponses> methodResponses = Optional.ofNullable(context.io().responses().read(method));
+        Map<String, APIResponse> methodResponse = context.io().responses().readSingle(method);
+        addResponses(operation, methodResponses, methodResponse, true);
 
-        AnnotationInstance responseSchemaAnnotation = ResponseReader.getResponseSchemaAnnotation(method);
-        addApiReponseSchemaFromAnnotation(context, responseSchemaAnnotation, method, operation);
+        context.io().responses().readResponseSchema(method)
+                .ifPresent(responseSchema -> addApiReponseSchemaFromAnnotation(responseSchema, method, operation));
 
         /*
          * If there is no response from annotations, try to create one from the method return value.
@@ -419,32 +375,41 @@ public interface AnnotationScanner {
          * provides a way for the application to indicate that responses will be supplied some other
          * way (i.e. static file).
          */
-        AnnotationInstance apiResponses = ResponseReader.getResponsesAnnotation(method);
-        if (apiResponses == null || !JandexUtil.isEmpty(apiResponses)) {
+        if (methodResponses.isPresent() || context.io().responses().getAnnotation(method) == null) {
             createResponseFromRestMethod(context, method, operation);
-        }
-
-        if (apiResponses != null) {
-            ResponseReader.readResponsesExtensions(context, apiResponses, operation.getResponses());
         }
 
         //Add api response using list of exceptions in the methods and exception mappers
         List<Type> methodExceptions = method.exceptions();
 
-        for (Type type : methodExceptions) {
-            DotName exceptionDotName = type.name();
-            if (exceptionAnnotationMap != null && !exceptionAnnotationMap.isEmpty()
-                    && exceptionAnnotationMap.containsKey(exceptionDotName)) {
-                for (AnnotationInstance exMapperApiResponseAnnotation : exceptionAnnotationMap.get(exceptionDotName)) {
-                    if (!this.responseCodeExistInMethodAnnotations(context, exMapperApiResponseAnnotation,
-                            methodApiResponseAnnotations)) {
-                        addApiReponseFromAnnotation(context, exMapperApiResponseAnnotation, operation);
-                    }
-                }
-            }
+        if (exceptionResponseMap != null) {
+            methodExceptions.stream()
+                    .map(Type::name)
+                    .filter(exceptionResponseMap::containsKey)
+                    .map(exceptionResponseMap::get)
+                    .forEach(responseMap -> responseMap.forEach((code, response) -> {
+                        APIResponses responses = ModelUtil.responses(operation);
+
+                        if (!responses.hasAPIResponse(code)) {
+                            responses.addAPIResponse(code, response);
+                        }
+                    }));
         }
 
         clearJsonViewContext(context);
+    }
+
+    default void addResponses(Operation operation, Optional<APIResponses> responses, Map<String, APIResponse> singleResponse,
+            boolean includeExtensions) {
+        responses.ifPresent(resp -> {
+            resp.getAPIResponses().forEach(ModelUtil.responses(operation)::addAPIResponse);
+            if (includeExtensions && resp.getExtensions() != null) {
+                resp.getExtensions().forEach(ModelUtil.responses(operation)::addExtension);
+            }
+        });
+        if (singleResponse != null) {
+            singleResponse.forEach(ModelUtil.responses(operation)::addAPIResponse);
+        }
     }
 
     /**
@@ -634,41 +599,23 @@ public interface AnnotationScanner {
     }
 
     /**
-     * Add api response to api responses using the annotation information
+     * Add API response to API responses using the annotation information
      *
-     * @param context The current scanning context
-     * @param apiResponseAnnotation The api response annotation
-     * @param operation The method operation
+     * @param responseSchema
+     *        The APIResponseSchema created from a
+     *        {@link org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema
+     *        APIResponseSchema} annotation
+     * @param method
+     *        the current method
+     * @param operation
+     *        the method operation
      */
-    default void addApiReponseFromAnnotation(final AnnotationScannerContext context, AnnotationInstance apiResponseAnnotation,
-            Operation operation) {
-        String responseCode = ResponseReader.getResponseName(context, apiResponseAnnotation);
-        if (responseCode == null) {
-            responseCode = APIResponses.DEFAULT;
-        }
-        APIResponse response = ResponseReader.readResponse(context, apiResponseAnnotation);
-        APIResponses responses = ModelUtil.responses(operation);
-        responses.addAPIResponse(responseCode, response);
-    }
+    default void addApiReponseSchemaFromAnnotation(Map<String, APIResponse> responseSchema,
+            MethodInfo method, Operation operation) {
 
-    /**
-     * Add api response to api responses using the annotation information
-     *
-     * @param context the scanning context
-     * @param annotation The APIResponseSchema annotation
-     * @param method the current method
-     * @param operation the method operation
-     */
-    default void addApiReponseSchemaFromAnnotation(AnnotationScannerContext context,
-            AnnotationInstance annotation,
-            MethodInfo method,
-            Operation operation) {
+        Map.Entry<String, APIResponse> entry = responseSchema.entrySet().iterator().next();
+        String responseCode = entry.getKey();
 
-        if (annotation == null) {
-            return;
-        }
-
-        String responseCode = ResponseReader.getResponseName(context, annotation);
         final int status;
 
         if (responseCode != null && responseCode.matches("\\d{3}")) {
@@ -678,35 +625,13 @@ public interface AnnotationScanner {
             responseCode = String.valueOf(status);
         }
 
-        APIResponse response = ResponseReader.readResponseSchema(context, annotation);
+        APIResponse response = entry.getValue();
 
         if (response.getDescription() == null) {
             response.setDescription(getReasonPhrase(status));
         }
 
-        APIResponses responses = ModelUtil.responses(operation);
-        responses.addAPIResponse(responseCode, response);
-    }
-
-    /**
-     * Check if the response code declared in the ExceptionMapper already defined in one of the ApiReponse annotations of the
-     * method.
-     * If the response code already exists then ignore the exception mapper annotation.
-     *
-     * @param exMapperApiResponseAnnotation ApiResponse annotation declared in the exception mapper
-     * @param methodApiResponseAnnotations List of ApiResponse annotations declared in the jax-rs/spring method.
-     * @return response code exist or not
-     */
-    default boolean responseCodeExistInMethodAnnotations(AnnotationScannerContext context,
-            AnnotationInstance exMapperApiResponseAnnotation,
-            List<AnnotationInstance> methodApiResponseAnnotations) {
-
-        String exMapperResponseCode = ResponseReader.getResponseName(context, exMapperApiResponseAnnotation);
-
-        return methodApiResponseAnnotations.stream()
-                .map(a -> ResponseReader.getResponseName(context, a))
-                .filter(Objects::nonNull)
-                .anyMatch(code -> code.equals(exMapperResponseCode));
+        ModelUtil.responses(operation).addAPIResponse(responseCode, response);
     }
 
     /**
@@ -720,33 +645,17 @@ public interface AnnotationScanner {
             final MethodInfo method,
             Operation operation) {
 
-        List<AnnotationInstance> requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(context, method);
-        List<AnnotationInstance> requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(context,
-                method);
+        List<SecurityRequirement> securityRequirements = context.io().security().readRequirements(method);
         boolean emptyContainerPresent = isEmptySecurityRequirements(context, method);
 
-        if (requirements.isEmpty() && requirementSets.isEmpty() && !emptyContainerPresent) {
-            requirements = SecurityRequirementReader.getSecurityRequirementAnnotations(context, resourceClass);
-            requirementSets = SecurityRequirementReader.getSecurityRequirementsSetAnnotations(context, resourceClass);
-            emptyContainerPresent = isEmptySecurityRequirements(context, resourceClass);
+        if (securityRequirements.isEmpty() && !emptyContainerPresent) {
+            securityRequirements = context.io().security().readRequirements(resourceClass);
         }
 
-        for (AnnotationInstance annotation : requirements) {
-            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirement(context, annotation);
-            if (requirement != null) {
-                operation.addSecurityRequirement(requirement);
-            }
-        }
-
-        for (AnnotationInstance annotation : requirementSets) {
-            SecurityRequirement requirement = SecurityRequirementReader.readSecurityRequirementsSet(context, annotation);
-            if (requirement != null) {
-                operation.addSecurityRequirement(requirement);
-            }
-        }
-
-        if (requirements.isEmpty() && requirementSets.isEmpty() && emptyContainerPresent) {
+        if (securityRequirements.isEmpty() && emptyContainerPresent) {
             operation.setSecurity(new ArrayList<>(0));
+        } else {
+            securityRequirements.forEach(operation::addSecurityRequirement);
         }
     }
 
@@ -758,30 +667,11 @@ public interface AnnotationScanner {
      * @return true if an empty annotation is present, otherwise false
      */
     default boolean isEmptySecurityRequirements(AnnotationScannerContext context, AnnotationTarget target) {
-        boolean foundEmptyAnnotation = false;
-
-        AnnotationInstance securityRequirements = SecurityRequirementReader.getSecurityRequirementsAnnotation(context, target);
-        if (securityRequirements != null) {
-            AnnotationInstance[] values = context.annotations().value(securityRequirements, "value");
-            if (values == null || values.length == 0) {
-                foundEmptyAnnotation = true;
-            } else {
-                return false;
-            }
-        }
-
-        AnnotationInstance securityRequirementsSets = SecurityRequirementReader.getSecurityRequirementsSetsAnnotation(context,
-                target);
-        if (securityRequirementsSets != null) {
-            AnnotationInstance[] values = context.annotations().value(securityRequirementsSets, "value");
-            if (values == null || values.length == 0) {
-                foundEmptyAnnotation = true;
-            } else {
-                return false;
-            }
-        }
-
-        return foundEmptyAnnotation;
+        return Stream.of(Names.SECURITY_REQUIREMENTS, Names.SECURITY_REQUIREMENTS_SETS)
+                .map(name -> context.annotations().getAnnotation(target, name))
+                .filter(Objects::nonNull)
+                .map(annotation -> context.annotations().<AnnotationInstance[]> value(annotation))
+                .anyMatch(values -> values == null || values.length == 0);
     }
 
     /**
@@ -792,21 +682,10 @@ public interface AnnotationScanner {
      * @param operation the operation to add this to
      */
     default void processCallback(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<AnnotationInstance> callbackAnnotations = CallbackReader.getCallbackAnnotations(context, method);
+        Map<String, Callback> callbacks = context.io().components().callbacks().readMap(method);
 
-        Map<String, Callback> callbacks = new LinkedHashMap<>();
-        for (AnnotationInstance annotation : callbackAnnotations) {
-            String name = CallbackReader.getCallbackName(context, annotation);
-            if (name == null && JandexUtil.isRef(annotation)) {
-                name = JandexUtil.nameFromRef(annotation);
-            }
-            if (name != null) {
-                callbacks.put(name, CallbackReader.readCallback(context, annotation));
-            }
-
-            if (!callbacks.isEmpty()) {
-                operation.setCallbacks(callbacks);
-            }
+        if (!callbacks.isEmpty()) {
+            operation.setCallbacks(callbacks);
         }
     }
 
@@ -817,14 +696,13 @@ public interface AnnotationScanner {
      * @param operation the current Operation model being created
      */
     default void processServerAnnotation(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<AnnotationInstance> serverAnnotations = ServerReader.getServerAnnotations(context, method);
-        if (serverAnnotations.isEmpty()) {
-            serverAnnotations.addAll(ServerReader.getServerAnnotations(context, method.declaringClass()));
+        List<Server> servers = context.io().servers().readList(method);
+
+        if (servers.isEmpty()) {
+            servers = context.io().servers().readList(method.declaringClass());
         }
-        for (AnnotationInstance annotation : serverAnnotations) {
-            Server server = ServerReader.readServer(context, annotation);
-            operation.addServer(server);
-        }
+
+        servers.forEach(operation::addServer);
     }
 
     /**
@@ -835,54 +713,12 @@ public interface AnnotationScanner {
      * @param operation the current operation
      */
     default void processExtensions(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<AnnotationInstance> extensionAnnotations = ExtensionReader.getExtensionsAnnotations(context, method);
+        Map<String, Object> methodExtensions = context.io().extensions().readMap(method);
 
-        if (extensionAnnotations.isEmpty()) {
-            extensionAnnotations.addAll(ExtensionReader.getExtensionsAnnotations(context, method.declaringClass()));
-        }
-        for (AnnotationInstance annotation : extensionAnnotations) {
-            if (annotation.target() == null || !METHOD_PARAMETER.equals(annotation.target().kind())) {
-                String name = ExtensionReader.getExtensionName(context, annotation);
-                operation.addExtension(name, ExtensionReader.readExtensionValue(context, name, annotation));
-            }
-        }
-    }
-
-    /**
-     * Set the created operation to the pathItem
-     *
-     * @param methodType the HTTP method type
-     * @param pathItem the pathItem to set
-     * @param operation the operation
-     */
-    default void setOperationOnPathItem(PathItem.HttpMethod methodType, PathItem pathItem, Operation operation) {
-        switch (methodType) {
-            case DELETE:
-                pathItem.setDELETE(operation);
-                break;
-            case GET:
-                pathItem.setGET(operation);
-                break;
-            case HEAD:
-                pathItem.setHEAD(operation);
-                break;
-            case OPTIONS:
-                pathItem.setOPTIONS(operation);
-                break;
-            case PATCH:
-                pathItem.setPATCH(operation);
-                break;
-            case POST:
-                pathItem.setPOST(operation);
-                break;
-            case PUT:
-                pathItem.setPUT(operation);
-                break;
-            case TRACE:
-                pathItem.setTRACE(operation);
-                break;
-            default:
-                break;
+        if (methodExtensions.isEmpty()) {
+            context.io().extensions().readMap(method.declaringClass()).forEach(operation::addExtension);
+        } else {
+            methodExtensions.forEach(operation::addExtension);
         }
     }
 
@@ -912,9 +748,8 @@ public interface AnnotationScanner {
             final ResourceParameters params) {
         RequestBody requestBody = null;
 
-        List<AnnotationInstance> requestBodyAnnotations = RequestBodyReader.getRequestBodyAnnotations(context, method);
-        for (AnnotationInstance annotation : requestBodyAnnotations) {
-            requestBody = RequestBodyReader.readRequestBody(context, annotation);
+        for (AnnotationInstance annotation : context.io().requestBodies().getRepeatableAnnotations(method)) {
+            requestBody = context.io().requestBodies().read(annotation);
             Content formBodyContent = params.getFormBodyContent();
 
             if (formBodyContent != null) {
@@ -959,8 +794,7 @@ public interface AnnotationScanner {
         }
 
         if (requestBody == null) {
-            requestBody = RequestBodyReader.readRequestBodySchema(context,
-                    RequestBodyReader.getRequestBodySchemaAnnotation(context, method));
+            requestBody = context.io().requestBodies().readRequestSchema(method);
         }
 
         // If the request body is null, figure it out from the parameters.  Only if the

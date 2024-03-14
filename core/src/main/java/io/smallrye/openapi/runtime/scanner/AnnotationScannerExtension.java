@@ -9,9 +9,10 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.runtime.io.JsonUtil;
-import io.smallrye.openapi.runtime.io.OpenApiParser;
+import io.smallrye.openapi.runtime.io.Format;
+import io.smallrye.openapi.runtime.io.JsonIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
+import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
  * Extension point for supporting extensions to OpenAPI Scanners.
@@ -19,10 +20,69 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
  */
 public interface AnnotationScannerExtension {
 
-    static final List<AnnotationScannerExtension> DEFAULT = Collections.singletonList(new Default());
+    public static List<AnnotationScannerExtension> defaultExtension(AnnotationScannerContext scannerContext) {
+        return Collections.singletonList(new Default(scannerContext));
+    }
 
     static class Default implements AnnotationScannerExtension {
-        // All default methods
+        final AnnotationScannerContext scannerContext;
+        final JsonIO<Object, ?, ?, ?, ?> jsonIO;
+
+        private Default(AnnotationScannerContext scannerContext) {
+            this.scannerContext = scannerContext;
+
+            if (scannerContext.getIoContext().jsonIO() == null) {
+                scannerContext.getIoContext().jsonIO(JsonIO.newInstance(scannerContext.getConfig()));
+            }
+
+            jsonIO = scannerContext.getIoContext().jsonIO();
+        }
+
+        @Override
+        public Object parseValue(String value) {
+            if (value == null || value.isEmpty()) {
+                return null;
+            }
+
+            value = value.trim();
+
+            if ("true".equals(value) || "false".equals(value)) {
+                return Boolean.valueOf(value);
+            }
+
+            switch (value.charAt(0)) {
+                case '{': /* JSON Object */
+                case '[': /* JSON Array */
+                case '-': /* JSON Negative Number */
+                case '0': /* JSON Numbers */
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    try {
+                        return jsonIO.fromJson(jsonIO.fromString(value, Format.JSON));
+                    } catch (Exception e) {
+                        // TODO log the error
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            // JSON String
+            return value;
+        }
+
+        @Override
+        public Schema parseSchema(String jsonSchema) {
+            Object schemaModel = jsonIO.fromString(jsonSchema, Format.JSON);
+            return scannerContext.io().schemas().readValue(schemaModel);
+        }
     }
 
     /**
@@ -91,7 +151,7 @@ public interface AnnotationScannerExtension {
      * @return the parsed value as Object
      */
     default Object parseValue(String value) {
-        return JsonUtil.parseValue(value);
+        return null;
     }
 
     /**
@@ -101,6 +161,6 @@ public interface AnnotationScannerExtension {
      * @return the parsed value as Schema
      */
     default Schema parseSchema(String jsonSchema) {
-        return OpenApiParser.parseSchema(jsonSchema);
+        return null;
     }
 }

@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.util;
 
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
@@ -24,40 +23,6 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
  * @author eric.wittmann@gmail.com
  */
 public class JandexUtil {
-
-    private static final Pattern COMPONENT_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9\\.\\-_]+$");
-
-    /**
-     * Simple enum to indicate the type of a $ref being read/written.
-     *
-     * @author eric.wittmann@gmail.com
-     */
-    public enum RefType {
-        HEADER("headers"),
-        SCHEMA("schemas"),
-        SECURITY_SCHEME("securitySchemes"),
-        CALLBACK("callbacks"),
-        LINK("links"),
-        RESPONSE("responses"),
-        PARAMETER("parameters"),
-        EXAMPLE("examples"),
-        REQUEST_BODY("requestBodies");
-
-        String componentPath;
-
-        RefType(String componentPath) {
-            this.componentPath = componentPath;
-        }
-
-        public static RefType fromComponentPath(String path) {
-            for (RefType ref : values()) {
-                if (ref.componentPath.equals(path)) {
-                    return ref;
-                }
-            }
-            return null;
-        }
-    }
 
     /**
      * Constructor.
@@ -92,35 +57,6 @@ public class JandexUtil {
         final MethodInfo methodInfo = methodParameter.method();
         final ClassInfo classInfo = methodInfo.declaringClass();
         return "p" + classInfo.hashCode() + "_" + methodInfo.hashCode() + "_" + methodParameter.position();
-    }
-
-    /**
-     * Reads a string property named "ref" value from the given annotation and converts it
-     * to a value appropriate for setting on a model's "$ref" property.
-     *
-     * @param annotation AnnotationInstance
-     * @param refType RefType
-     * @return String value
-     */
-    public static String refValue(AnnotationInstance annotation, RefType refType) {
-        AnnotationValue value = annotation.value(OpenApiConstants.REF);
-        if (value == null) {
-            return null;
-        }
-
-        String ref = value.asString();
-
-        if (!COMPONENT_KEY_PATTERN.matcher(ref).matches()) {
-            return ref;
-        }
-
-        if (refType != null) {
-            ref = "#/components/" + refType.componentPath + "/" + ref;
-        } else {
-            throw UtilMessages.msg.refTypeNotNull();
-        }
-
-        return ref;
     }
 
     /**

@@ -2,6 +2,8 @@ package io.smallrye.openapi.runtime.io;
 
 import static io.smallrye.openapi.runtime.scanner.IndexScannerTestBase.loadResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
@@ -20,14 +22,10 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 /**
  * @author eric.wittmann@gmail.com
@@ -543,13 +541,20 @@ class OpenApiParserAndSerializerTest {
         // let's check that parsing a file bigger than the default (3 MB) allowed by the underlying implementation
         // would fail
         Path tempFile = generateBigStaticFile();
-        Assertions.assertThrows(JacksonYAMLParseException.class, () -> doTest(tempFile.toUri().toURL(), Format.YAML));
+        URL tempFileLoc = tempFile.toUri().toURL();
+        Exception thrown = assertThrows(OpenApiRuntimeException.class, () -> doTest(tempFileLoc, Format.YAML));
+        assertNotNull(thrown.getCause());
+        Throwable rootCause = thrown.getCause().getCause();
+        assertTrue(rootCause instanceof YAMLException);
+
         // now let's set a higher limit
         final Integer maximumFileSize = 8 * 1024 * 1024;
         // and finally, let's parse the file but pass the custom limit
         try {
+            System.setProperty(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE, maximumFileSize.toString());
+
             try (InputStream is = new FileInputStream(tempFile.toFile())) {
-                doTest(tempFile.toUri().toURL(), Format.YAML, OpenApiParser.parse(is, Format.YAML, maximumFileSize));
+                doTest(tempFile.toUri().toURL(), Format.YAML, OpenApiParser.parse(is, Format.YAML, null));
             }
         } finally {
             System.clearProperty(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE);
@@ -578,25 +583,17 @@ class OpenApiParserAndSerializerTest {
 
     @Test
     void testJsonObjectWriter() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectWriter writer = objectMapper.writer();
         OpenAPI doc = OASFactory.createOpenAPI();
         doc.addExtension("x-foo", "bar");
-        String json = OpenApiSerializer.serialize(doc, writer);
+        String json = OpenApiSerializer.serialize(doc, Format.JSON);
         assertJsonEquals("{\"x-foo\":\"bar\"}", json);
     }
 
     @Test
     void testYamlObjectWriter() throws Exception {
-        YAMLFactory factory = new YAMLFactory();
-        factory.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
-        factory.enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
-        factory.enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS);
-        ObjectMapper mapper = new ObjectMapper(factory);
-        ObjectWriter writer = mapper.writer();
         OpenAPI doc = OASFactory.createOpenAPI();
         doc.addExtension("x-foo", "bar");
-        String yaml = OpenApiSerializer.serialize(doc, writer);
+        String yaml = OpenApiSerializer.serialize(doc, Format.YAML);
         assertYamlEquals("x-foo: bar", yaml);
     }
 }

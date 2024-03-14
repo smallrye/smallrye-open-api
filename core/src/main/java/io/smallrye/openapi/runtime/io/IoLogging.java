@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.io;
 import org.jboss.jandex.Type;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
-import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
@@ -55,10 +54,6 @@ public interface IoLogging extends BasicLogger {
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 2010, value = "Processing a json map of %s.")
     void jsonMap(String node);
-
-    @LogMessage(level = Logger.Level.ERROR)
-    @Message(id = 2011, value = "Error reading a CallbackOperation annotation.")
-    void readingCallbackOperation(@Cause Throwable cause);
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 2012, value = "Processing a list of %s annotations into an %s.")

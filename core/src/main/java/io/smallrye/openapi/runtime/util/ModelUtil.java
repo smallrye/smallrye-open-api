@@ -28,7 +28,7 @@ import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
-import io.smallrye.openapi.runtime.util.JandexUtil.RefType;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 
 /**
  * Class with some convenience methods useful for working with the OAI data model.
@@ -113,7 +113,7 @@ public class ModelUtil {
 
             if (split.length > 1) {
                 String name = split[split.length - 1];
-                RefType type = RefType.fromComponentPath(split[split.length - 2]);
+                ReferenceType type = ReferenceType.fromComponentPath(split[split.length - 2]);
 
                 if (type != null) {
                     switch (type) {
