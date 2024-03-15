@@ -2,6 +2,7 @@ package io.smallrye.openapi.mavenplugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,14 +45,16 @@ public class SchemaTestBase {
                 .getTargetProjectDirectory()
                 .resolve(path);
 
-        return SmallRyeOpenAPI.builder()
-                .withConfig(new SmallRyeConfigBuilder().addDefaultSources().build())
-                .enableAnnotationScan(false)
-                .enableModelReader(false)
-                .enableStandardFilter(false)
-                .enableStandardStaticFiles(false)
-                .withCustomStaticFile(Files.newInputStream(openapiFile))
-                .build()
-                .model();
+        try (InputStream openapiStream = Files.newInputStream(openapiFile)) {
+            return SmallRyeOpenAPI.builder()
+                    .withConfig(new SmallRyeConfigBuilder().addDefaultSources().build())
+                    .enableAnnotationScan(false)
+                    .enableModelReader(false)
+                    .enableStandardFilter(false)
+                    .enableStandardStaticFiles(false)
+                    .withCustomStaticFile(() -> openapiStream)
+                    .build()
+                    .model();
+        }
     }
 }
