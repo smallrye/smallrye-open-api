@@ -210,7 +210,7 @@ public class IndexScannerTestBase {
 
         OpenAPI result = SmallRyeOpenAPI.builder()
                 .defaultRequiredProperties(defaultRequiredProperties)
-                .withCustomStaticFile(customStaticFile)
+                .withCustomStaticFile(() -> customStaticFile)
                 .withIndex(index)
                 .withConfig(config)
                 .build()
