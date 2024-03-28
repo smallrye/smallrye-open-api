@@ -13,11 +13,11 @@ import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.XML;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -161,7 +161,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     @Override
     public void setRef(String ref) {
         if (ref != null && !ref.contains("/")) {
-            ref = OpenApiConstants.REF_PREFIX_SCHEMA + ref;
+            ref = ReferenceType.SCHEMA.referenceOf(ref);
         }
         incrementModCount();
         this.ref = ref;

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.yaml.snakeyaml.error.YAMLException;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 /**
@@ -551,13 +551,13 @@ class OpenApiParserAndSerializerTest {
         final Integer maximumFileSize = 8 * 1024 * 1024;
         // and finally, let's parse the file but pass the custom limit
         try {
-            System.setProperty(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE, maximumFileSize.toString());
+            System.setProperty(SmallRyeOASConfig.MAXIMUM_STATIC_FILE_SIZE, maximumFileSize.toString());
 
             try (InputStream is = new FileInputStream(tempFile.toFile())) {
                 doTest(tempFile.toUri().toURL(), Format.YAML, OpenApiParser.parse(is, Format.YAML, null));
             }
         } finally {
-            System.clearProperty(OpenApiConstants.MAXIMUM_STATIC_FILE_SIZE);
+            System.clearProperty(SmallRyeOASConfig.MAXIMUM_STATIC_FILE_SIZE);
         }
     }
 

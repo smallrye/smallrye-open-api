@@ -2,9 +2,9 @@ package io.smallrye.openapi.api.models.examples;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 
 /**
  * An implementation of the {@link Example} OpenAPI model interface.
@@ -31,7 +31,7 @@ public class ExampleImpl extends ExtensibleImpl<Example> implements Example, Mod
     @Override
     public void setRef(String ref) {
         if (ref != null && !ref.contains("/")) {
-            ref = OpenApiConstants.REF_PREFIX_EXAMPLE + ref;
+            ref = ReferenceType.EXAMPLE.referenceOf(ref);
         }
         this.ref = ref;
     }

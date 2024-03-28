@@ -37,19 +37,12 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.OASConfig;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
-import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiDocument;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
-import io.smallrye.openapi.runtime.OpenApiProcessor;
-import io.smallrye.openapi.runtime.OpenApiStaticFile;
-import io.smallrye.openapi.runtime.io.Format;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer;
-import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
 @Mojo(name = "generate-schema", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true)
 public class GenerateSchemaMojo extends AbstractMojo {
@@ -185,7 +178,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
     /**
      * To specify a custom OpenAPI version.
      */
-    @Parameter(defaultValue = OpenApiConstants.OPEN_API_VERSION, property = "openApiVersion")
+    @Parameter(defaultValue = SmallRyeOASConfig.Defaults.VERSION, property = "openApiVersion")
     private String openApiVersion;
 
     @Parameter(property = "infoTitle")
@@ -279,50 +272,31 @@ public class GenerateSchemaMojo extends AbstractMojo {
             try {
                 IndexView index = mavenDependencyIndexCreator.createIndex(mavenProject, scanDependenciesDisable,
                         includeDependenciesScopes, includeDependenciesTypes);
-                OpenApiDocument schema = generateSchema(index);
-                write(schema);
+                SmallRyeOpenAPI openAPI = generateOpenAPI(index);
+                write(openAPI);
             } catch (Exception ex) {
                 getLog().error(ex);
-                throw new MojoExecutionException("Could not generate OpenAPI Schema", ex); // TODO allow failOnError = false ?
+                // allow failOnError = false ?
+                throw new MojoExecutionException("Could not generate OpenAPI Schema", ex);
             }
         }
     }
 
-    private OpenApiDocument generateSchema(IndexView index) throws IOException, DependencyResolutionRequiredException {
+    private SmallRyeOpenAPI generateOpenAPI(IndexView index) throws IOException, DependencyResolutionRequiredException {
         if (systemPropertyVariables != null) {
             systemPropertyVariables.forEach(System::setProperty);
         }
 
         Config config = new SmallRyeConfigBuilder()
-                .withSources(
-                        new ConfigValuePropertiesConfigSource(getProperties(), "maven-plugin", ConfigSource.DEFAULT_ORDINAL))
+                .addDefaultSources()
+                .withSources(new PropertiesConfigSource(getProperties(), "maven-plugin", ConfigSource.DEFAULT_ORDINAL))
                 .build();
 
-        OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
-        ClassLoader classLoader = getClassLoader();
-
-        OpenAPI staticModel = generateStaticModel(openApiConfig);
-        OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, classLoader);
-        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader, index);
-
-        OpenApiDocument document = OpenApiDocument.newInstance();
-
-        document.reset();
-        document.config(openApiConfig);
-
-        if (annotationModel != null) {
-            document.modelFromAnnotations(annotationModel);
-        }
-        if (readerModel != null) {
-            document.modelFromReader(readerModel);
-        }
-        if (staticModel != null) {
-            document.modelFromStaticFile(staticModel);
-        }
-        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader, index));
-        document.initialize();
-
-        return document;
+        return SmallRyeOpenAPI.builder()
+                .withConfig(config)
+                .withApplicationClassLoader(getClassLoader())
+                .withIndex(index)
+                .build();
     }
 
     private ClassLoader getClassLoader() throws DependencyResolutionRequiredException {
@@ -353,61 +327,6 @@ public class GenerateSchemaMojo extends AbstractMojo {
         return URLClassLoader.newInstance(locators, Thread.currentThread().getContextClassLoader());
     }
 
-    private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig, ClassLoader classLoader) {
-        OpenApiAnnotationScanner openApiAnnotationScanner = new OpenApiAnnotationScanner(openApiConfig, classLoader, indexView);
-        return openApiAnnotationScanner.scan();
-    }
-
-    private OpenAPI generateStaticModel(OpenApiConfig openApiConfig) throws IOException {
-        Path staticFile = getStaticFile();
-        if (staticFile != null) {
-            try (InputStream is = Files.newInputStream(staticFile);
-                    OpenApiStaticFile openApiStaticFile = new OpenApiStaticFile(is, getFormat(staticFile))) {
-                return OpenApiProcessor.modelFromStaticFile(openApiConfig, openApiStaticFile);
-            }
-        }
-        return null;
-    }
-
-    private Path getStaticFile() {
-        Path classesPath = new File(mavenProject.getBuild().getOutputDirectory()).toPath();
-
-        if (Files.exists(classesPath)) {
-            Path resourcePath = Paths.get(classesPath.toString(), META_INF_OPENAPI_YAML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), WEB_INF_CLASSES_META_INF_OPENAPI_YAML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), META_INF_OPENAPI_YML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), WEB_INF_CLASSES_META_INF_OPENAPI_YML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), META_INF_OPENAPI_JSON);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), WEB_INF_CLASSES_META_INF_OPENAPI_JSON);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-        }
-        return null;
-    }
-
-    private Format getFormat(Path path) {
-        if (path.endsWith(".json")) {
-            return Format.JSON;
-        }
-        return Format.YAML;
-    }
-
     private Map<String, String> getProperties() throws IOException {
         // First check if the configProperties is set, if so, load that.
         Map<String, String> cp = new HashMap<>();
@@ -431,23 +350,23 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, OASConfig.SERVERS, servers);
         addToPropertyMap(cp, OASConfig.SERVERS_PATH_PREFIX, pathServers);
         addToPropertyMap(cp, OASConfig.SERVERS_OPERATION_PREFIX, operationServers);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
-        addToPropertyMap(cp, OpenApiConstants.VERSION, openApiVersion);
-        addToPropertyMap(cp, OpenApiConstants.INFO_TITLE, infoTitle);
-        addToPropertyMap(cp, OpenApiConstants.INFO_VERSION, infoVersion);
-        addToPropertyMap(cp, OpenApiConstants.INFO_DESCRIPTION, infoDescription);
-        addToPropertyMap(cp, OpenApiConstants.INFO_TERMS, infoTermsOfService);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_EMAIL, infoContactEmail);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_NAME, infoContactName);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_URL, infoContactUrl);
-        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_NAME, infoLicenseName);
-        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_URL, infoLicenseUrl);
-        addToPropertyMap(cp, OpenApiConstants.OPERATION_ID_STRAGEGY, operationIdStrategy);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_PROFILES, scanProfiles);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
+        addToPropertyMap(cp, SmallRyeOASConfig.VERSION, openApiVersion);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_TITLE, infoTitle);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_VERSION, infoVersion);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_DESCRIPTION, infoDescription);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_TERMS, infoTermsOfService);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_EMAIL, infoContactEmail);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_NAME, infoContactName);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_URL, infoContactUrl);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_NAME, infoLicenseName);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_URL, infoLicenseUrl);
+        addToPropertyMap(cp, SmallRyeOASConfig.OPERATION_ID_STRAGEGY, operationIdStrategy);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_PROFILES, scanProfiles);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
 
         return cp;
     }
@@ -476,10 +395,11 @@ public class GenerateSchemaMojo extends AbstractMojo {
         }
     }
 
-    private void write(OpenApiDocument schema) throws MojoExecutionException {
+    private void write(SmallRyeOpenAPI openAPI) throws MojoExecutionException {
         try {
-            String yaml = OpenApiSerializer.serialize(schema.get(), Format.YAML);
-            String json = OpenApiSerializer.serialize(schema.get(), Format.JSON);
+            String yaml = openAPI.toYAML();
+            String json = openAPI.toJSON();
+
             if (outputDirectory == null) {
                 // no destination file specified => print to stdout
                 getLog().info(yaml);
@@ -493,12 +413,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
 
                 if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.YAML)
                         .anyMatch(f -> f.equals(OutputFileFilter.valueOf(this.outputFileTypeFilter)))) {
-                    writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
+                    writeFile(directory, "yaml", yaml.getBytes(charset));
                 }
 
                 if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.JSON)
                         .anyMatch(f -> f.equals(OutputFileFilter.valueOf(this.outputFileTypeFilter)))) {
-                    writeSchemaFile(directory, "json", json.getBytes(charset));
+                    writeFile(directory, "json", json.getBytes(charset));
                 }
 
                 getLog().info("Wrote the schema files to " + outputDirectory.getAbsolutePath());
@@ -526,7 +446,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         return charset;
     }
 
-    private void writeSchemaFile(Path directory, String type, byte[] contents) throws IOException {
+    private void writeFile(Path directory, String type, byte[] contents) throws IOException {
         Path file = Paths.get(directory.toString(), schemaFilename + "." + type);
         if (!Files.exists(file)) {
             Files.createFile(file);
@@ -542,10 +462,4 @@ public class GenerateSchemaMojo extends AbstractMojo {
         }
     }
 
-    private static final String META_INF_OPENAPI_YAML = "META-INF/openapi.yaml";
-    private static final String WEB_INF_CLASSES_META_INF_OPENAPI_YAML = "WEB-INF/classes/META-INF/openapi.yaml";
-    private static final String META_INF_OPENAPI_YML = "META-INF/openapi.yml";
-    private static final String WEB_INF_CLASSES_META_INF_OPENAPI_YML = "WEB-INF/classes/META-INF/openapi.yml";
-    private static final String META_INF_OPENAPI_JSON = "META-INF/openapi.json";
-    private static final String WEB_INF_CLASSES_META_INF_OPENAPI_JSON = "WEB-INF/classes/META-INF/openapi.json";
 }

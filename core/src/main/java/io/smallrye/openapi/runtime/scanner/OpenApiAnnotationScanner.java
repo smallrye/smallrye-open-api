@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -26,7 +28,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
@@ -47,7 +49,12 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
  * https://github.com/eclipse/microprofile-open-api/blob/master/spec/src/main/asciidoc/microprofile-openapi-spec.adoc#annotations
  *
  * @author eric.wittmann@gmail.com
+ *
+ * @deprecated use the {@link io.smallrye.openapi.api.SmallRyeOpenAPI
+ *             SmallRyeOpenAPI} builder API instead. This class may be moved,
+ *             have reduced visibility, or be removed in a future release.
  */
+@Deprecated
 public class OpenApiAnnotationScanner {
 
     private final AnnotationScannerContext annotationScannerContext;
@@ -182,7 +189,13 @@ public class OpenApiAnnotationScanner {
 
         this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, addDefaultExtension,
                 config,
+                null,
                 new OpenAPIImpl());
+        this.scannerSupplier = scannerSupplier;
+    }
+
+    public OpenApiAnnotationScanner(AnnotationScannerContext context, Supplier<Iterable<AnnotationScanner>> scannerSupplier) {
+        this.annotationScannerContext = context;
         this.scannerSupplier = scannerSupplier;
     }
 
@@ -194,6 +207,21 @@ public class OpenApiAnnotationScanner {
      * @return OpenAPI generated from scanning annotations
      */
     public OpenAPI scan(String... filter) {
+        Set<String> included = Optional.ofNullable(filter)
+                .map(f -> Arrays.stream(f).distinct().collect(Collectors.toSet()))
+                .orElseGet(Collections::emptySet);
+
+        return scan(name -> included.isEmpty() || included.stream().anyMatch(name::equals));
+    }
+
+    /**
+     * Scan the deployment for relevant annotations. Returns an OpenAPI data model that was
+     * built from those found annotations.
+     *
+     * @param filter Predicate to only include certain scanners. Based on the scanner name. (JAX-RS, Spring, Vert.x)
+     * @return OpenAPI generated from scanning annotations
+     */
+    public OpenAPI scan(Predicate<String> filter) {
         // First scan the MicroProfile OpenAPI Annotations. Maybe later we can load this with SPI as well, and allow other Annotation sets.
         OpenAPI openApi = scanMicroProfileOpenApiAnnotations();
 
@@ -210,15 +238,9 @@ public class OpenApiAnnotationScanner {
         return openApi;
     }
 
-    private Iterable<AnnotationScanner> getScanners(String[] filters) {
-        List<String> enabledScanners = Optional.ofNullable(filters).map(Arrays::asList).orElseGet(Collections::emptyList);
-
-        if (enabledScanners.isEmpty()) {
-            return scannerSupplier.get();
-        }
-
+    private Iterable<AnnotationScanner> getScanners(Predicate<String> filter) {
         return StreamSupport.stream(scannerSupplier.get().spliterator(), false)
-                .filter(s -> enabledScanners.contains(s.getName()))
+                .filter(scanner -> filter.test(scanner.getName()))
                 .collect(Collectors.toList());
     }
 
@@ -226,7 +248,7 @@ public class OpenApiAnnotationScanner {
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
         OpenAPI openApi = this.annotationScannerContext.getOpenApi();
-        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        openApi.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
 
         // Register custom schemas if available
         getCustomSchemaRegistry(annotationScannerContext.getConfig())

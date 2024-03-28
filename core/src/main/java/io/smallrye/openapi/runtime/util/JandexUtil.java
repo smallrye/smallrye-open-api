@@ -13,7 +13,7 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -67,7 +67,7 @@ public class JandexUtil {
      * @return Whether it's a "ref"
      */
     public static boolean isRef(AnnotationInstance annotation) {
-        return annotation != null && annotation.value(OpenApiConstants.REF) != null;
+        return ReferenceType.isReference(annotation);
     }
 
     /**
@@ -89,7 +89,7 @@ public class JandexUtil {
      * @return Name of item from ref
      */
     public static String nameFromRef(AnnotationInstance annotation) {
-        String ref = annotation.value(OpenApiConstants.REF).asString();
+        String ref = annotation.value(ReferenceType.PROP_ANNOTATION).asString();
         return ModelUtil.nameFromRef(ref);
     }
 

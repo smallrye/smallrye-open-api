@@ -1,11 +1,10 @@
 package io.smallrye.openapi.runtime.io;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
-
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 /**
  * Simple enum to indicate the type of a $ref being read/written.
@@ -24,6 +23,9 @@ public enum ReferenceType {
     REQUEST_BODY("requestBodies");
 
     private static final Pattern COMPONENT_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9\\.\\-_]+$");
+    public static final String PROP_ANNOTATION = "ref";
+    public static final String PROP_STANDARD = "$ref";
+
     String componentPath;
 
     ReferenceType(String componentPath) {
@@ -39,6 +41,24 @@ public enum ReferenceType {
         return null;
     }
 
+    public static boolean isReference(AnnotationInstance annotation) {
+        return annotation != null && annotation.value(PROP_ANNOTATION) != null;
+    }
+
+    public static String referenceValue(AnnotationInstance annotation) {
+        return Optional.ofNullable(annotation.value(PROP_ANNOTATION))
+                .map(AnnotationValue::asString)
+                .orElse(null);
+    }
+
+    public String referencePrefix() {
+        return "#/components/" + componentPath;
+    }
+
+    public String referenceOf(String ref) {
+        return referencePrefix() + "/" + ref;
+    }
+
     /**
      * Reads a string property named "ref" value from the given annotation and converts it
      * to a value appropriate for setting on a model's "$ref" property.
@@ -47,17 +67,16 @@ public enum ReferenceType {
      * @return String value
      */
     public String refValue(AnnotationInstance annotation) {
-        AnnotationValue value = annotation.value(OpenApiConstants.REF);
-        if (value == null) {
+        String ref = referenceValue(annotation);
+
+        if (ref == null) {
             return null;
         }
-
-        String ref = value.asString();
 
         if (!COMPONENT_KEY_PATTERN.matcher(ref).matches()) {
             return ref;
         }
 
-        return "#/components/" + componentPath + "/" + ref;
+        return referenceOf(ref);
     }
 }

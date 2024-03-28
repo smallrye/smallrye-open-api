@@ -6,7 +6,6 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.info.InfoImpl;
@@ -23,7 +22,12 @@ import io.smallrye.openapi.api.util.UnusedSchemaFilter;
  * </p>
  *
  * @author Martin Kouba
+ *
+ * @deprecated use the {@link io.smallrye.openapi.api.SmallRyeOpenAPI
+ *             SmallRyeOpenAPI} builder API instead. This class may be moved,
+ *             have reduced visibility, or be removed in a future release.
  */
+@Deprecated
 public class OpenApiDocument {
 
     public static final OpenApiDocument INSTANCE = new OpenApiDocument();
@@ -34,6 +38,7 @@ public class OpenApiDocument {
     private transient OpenAPI readerModel;
     private transient OpenAPI staticFileModel;
     private transient Map<String, OASFilter> filters = new LinkedHashMap<>();
+    private transient boolean defaultRequiredProperties = true;
     private transient String archiveName;
     private transient String version;
 
@@ -104,6 +109,10 @@ public class OpenApiDocument {
         }
     }
 
+    public void defaultRequiredProperties(boolean defaultRequiredProperties) {
+        set(() -> this.defaultRequiredProperties = defaultRequiredProperties);
+    }
+
     public void archiveName(String archiveName) {
         set(() -> this.archiveName = archiveName);
     }
@@ -136,25 +145,27 @@ public class OpenApiDocument {
         // Phase 5: Default empty document if model == null
         if (merged == null) {
             merged = new OpenAPIImpl();
-            merged.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+            merged.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
         }
 
         // Phase 6: Provide missing required elements using defaults
-        if (merged.getPaths() == null) {
-            merged.setPaths(new PathsImpl());
-        }
-        if (merged.getInfo() == null) {
-            merged.setInfo(new InfoImpl());
-        }
-        if (merged.getInfo().getTitle() == null) {
-            merged.getInfo().setTitle((archiveName == null ? "Generated" : archiveName) + " API");
-        }
-        if (merged.getInfo().getVersion() == null) {
-            merged.getInfo().setVersion((version == null ? "1.0" : version));
+        if (defaultRequiredProperties) {
+            if (merged.getPaths() == null) {
+                merged.setPaths(new PathsImpl());
+            }
+            if (merged.getInfo() == null) {
+                merged.setInfo(new InfoImpl());
+            }
+            if (merged.getInfo().getTitle() == null) {
+                merged.getInfo().setTitle((archiveName == null ? "Generated" : archiveName) + " API");
+            }
+            if (merged.getInfo().getVersion() == null) {
+                merged.getInfo().setVersion((version == null ? "1.0" : version));
+            }
         }
 
         // Phase 7: Use Config values to add Servers (global, pathItem, operation)
-        ConfigUtil.applyConfig(config, merged);
+        ConfigUtil.applyConfig(config, merged, defaultRequiredProperties);
 
         model = merged;
         clear();
@@ -197,6 +208,7 @@ public class OpenApiDocument {
         staticFileModel = null;
         filters.clear();
         archiveName = null;
+        defaultRequiredProperties = true;
     }
 
 }

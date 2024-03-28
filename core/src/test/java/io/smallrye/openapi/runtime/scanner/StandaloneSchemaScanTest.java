@@ -29,7 +29,6 @@ import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
@@ -38,60 +37,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
 
 class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testUnreferencedSchemasInComponents() throws Exception {
-        Index index = indexOf(Cat.class, Dog.class, Class.forName(getClass().getPackage().getName() + ".package-info"));
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+        OpenAPI result = scan(Cat.class, Dog.class, Class.forName(getClass().getPackage().getName() + ".package-info"));
         assertJsonEquals("components.schemas.unreferenced.json", result);
     }
 
     @Test
     void testInheritanceAnyOf() throws Exception {
-        Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class, Alligator.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+        OpenAPI result = scan(Reptile.class, Lizard.class, Snake.class, Turtle.class, Alligator.class);
         assertJsonEquals("components.schemas.inheritance.json", result);
-
     }
 
     @Test
     void testInheritanceAutomaticAnyOf() throws Exception {
-        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class,
-                AlligatorNoAllOf.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.AUTO_INHERITANCE, "BOTH"), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+        OpenAPI result = scan(config(SmallRyeOASConfig.AUTO_INHERITANCE, "BOTH"),
+                ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class, AlligatorNoAllOf.class);
         assertJsonEquals("components.schemas.inheritance.json", result);
-
     }
 
     @Test
     void testInheritanceAutomaticAnyOfParentOnly() throws Exception {
-        Index index = indexOf(ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class,
-                AlligatorNoAllOf.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.AUTO_INHERITANCE, "PARENT_ONLY"), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+        OpenAPI result = scan(config(SmallRyeOASConfig.AUTO_INHERITANCE, "PARENT_ONLY"),
+                ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class, AlligatorNoAllOf.class);
         assertJsonEquals("components.schemas.inheritance-parent-only.json", result);
-
     }
 
     /****************************************************************/
@@ -184,17 +158,12 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testRegisteredSchemaTypePreserved() throws IOException, JSONException {
-        Index index = indexOf(RegisteredSchemaTypePreservedModel.Animal.class,
+        assertJsonEquals("components.schemas.registered-schema-type-preserved.json",
+                RegisteredSchemaTypePreservedModel.Animal.class,
                 RegisteredSchemaTypePreservedModel.AnimalListEnvelope.class,
                 RegisteredSchemaTypePreservedModel.MessageBase.class,
                 RegisteredSchemaTypePreservedModel.MessageData.class,
                 RegisteredSchemaTypePreservedModel.MessageDataItems.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.registered-schema-type-preserved.json", result);
     }
 
     static class RegisteredSchemaTypePreservedModel {
@@ -343,20 +312,14 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testJavaxJaxbElementUnwrapped() throws IOException, JSONException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.javax.JAXBElementDto.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json", result);
+        assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json",
+                test.io.smallrye.openapi.runtime.scanner.javax.JAXBElementDto.class);
     }
 
     @Test
     void testJakartaJaxbElementUnwrapped() throws IOException, JSONException {
-        Index index = indexOf(test.io.smallrye.openapi.runtime.scanner.jakarta.JAXBElementDto.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json", result);
+        assertJsonEquals("components.schemas.jaxbelement-generic-type-unwrapped.json",
+                test.io.smallrye.openapi.runtime.scanner.jakarta.JAXBElementDto.class);
     }
 
     /****************************************************************/
@@ -366,12 +329,9 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testJacksonJsonUnwrapped() throws IOException, JSONException {
-        Index index = indexOf(JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
+        assertJsonEquals("components.schemas-jackson-jsonunwrapped.json",
+                JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
                 JacksonJsonPersonWithSuffixedAddress.class, JacksonJsonAddress.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas-jackson-jsonunwrapped.json", result);
     }
 
     @Schema
@@ -417,7 +377,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Test
     void testNestedCollectionSchemas() throws IOException, JSONException {
         // Place the JDK classes in the index to simulate Quarkus
-        Index index = indexOf(CollectionBean.class,
+        assertJsonEquals("components.schemas.nested-parameterized-collection-types.json", CollectionBean.class,
                 EntryBean.class,
                 MultivaluedCollection.class,
                 MultivaluedMap.class,
@@ -429,10 +389,6 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
                 Map.class,
                 Set.class,
                 UUID.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.nested-parameterized-collection-types.json", result);
     }
 
     @Schema
@@ -491,11 +447,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testNestedCustomGenericSchemas() throws IOException, JSONException {
-        Index index = indexOf(Foo.class, Generic0.class, Generic1.class, Generic2.class, CustomMap.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.nested-custom-generics.json", result);
+        assertJsonEquals("components.schemas.nested-custom-generics.json", Foo.class, Generic0.class, Generic1.class,
+                Generic2.class, CustomMap.class);
     }
 
     /*
@@ -544,11 +497,9 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             public Optional<B>[] arrayOfOptionalB;
             public List<Optional<B>> listOfOptionalB;
         }
-        Index index = indexOf(B.class, A.class, UUID.class, List.class, Optional.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.optional-arraytype.json", result);
+
+        assertJsonEquals("components.schemas.optional-arraytype.json", B.class, A.class, UUID.class, List.class,
+                Optional.class);
     }
 
     @Target(ElementType.TYPE_USE)
@@ -573,11 +524,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             public char[] arrayFromType;
         }
 
-        Index index = indexOf(Sample.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.array-type-override.json", result);
+        assertJsonEquals("components.schemas.array-type-override.json", Sample.class);
     }
 
     /*
@@ -585,11 +532,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
      */
     @Test
     void testSingleAnnotatedConstructorArgumentIgnored() throws IOException, JSONException {
-        Index index = indexOf(SingleAnnotatedConstructorArgument.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.annotated-constructor-arg-ignored.json", result);
+        assertJsonEquals("components.schemas.annotated-constructor-arg-ignored.json", SingleAnnotatedConstructorArgument.class);
     }
 
     /*
@@ -613,11 +556,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             Pair<String, String> pair;
         }
 
-        Index index = indexOf(Bean.class, Pair.class, Tuple.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.nonparameterized-ancestry-chain-link.json", result);
+        assertJsonEquals("components.schemas.nonparameterized-ancestry-chain-link.json", Bean.class, Pair.class, Tuple.class);
     }
 
     /*
@@ -648,9 +587,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             Bean2 prop3;
         }
 
-        Index index = indexOf(Bean1.class, Bean2.class, Bean3.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
+        OpenAPI result = scan(Bean1.class, Bean2.class, Bean3.class);
 
         assertTrue(result.getComponents().getSchemas().get("Bean1").getDeprecated());
         assertNull(result.getComponents().getSchemas().get("Bean1").getProperties().get("prop1").getDeprecated());
@@ -694,11 +631,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             OtherBean third;
         }
 
-        Index index = indexOf(OtherBean.class, /* BeanTwo.class, BeanThree.class, */ Bean.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.field-overrides-type.json", result);
+        assertJsonEquals("components.schemas.field-overrides-type.json", OtherBean.class,
+                /* BeanTwo.class, BeanThree.class, */ Bean.class);
     }
 
     /*
@@ -725,11 +659,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             Collection anyArrayFromRawCollection;
         }
 
-        Index index = indexOf(Bean.class, StringArray.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.iterator-stream-map-types.json", result);
+        assertJsonEquals("components.schemas.iterator-stream-map-types.json", Bean.class, StringArray.class);
     }
 
     /**
@@ -746,13 +676,8 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             ZonedDateTime[] now;
         }
 
-        Index index = indexOf(ZonedDateTimeArrayWrapper.class, ZonedDateTime.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.terminal-array-item-registration.json", result);
+        assertJsonEquals("components.schemas.terminal-array-item-registration.json", ZonedDateTimeArrayWrapper.class,
+                ZonedDateTime.class);
     }
 
     /*
@@ -777,11 +702,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             Class2 value;
         }
 
-        Index index = indexOf(Class1.class, Class2.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-        OpenAPI result = scanner.scan();
-        printToConsole(result);
-        assertJsonEquals("components.schemas.no-self-ref-for-property-schema.json", result);
+        assertJsonEquals("components.schemas.no-self-ref-for-property-schema.json", Class1.class, Class2.class);
     }
 
     @Test
@@ -801,16 +722,11 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             Nullable<String[]> nullableString;
         }
 
-        Index index = indexOf(Nullable.class, Bean.class);
         String nullableStringArySig = Nullable.class.getName() + "<java.lang.String[]>";
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(dynamicConfig(
+        OpenAPI result = scan(config(
                 OASConfig.SCHEMA_PREFIX + nullableStringArySig,
                 "{ \"name\": \"NullableStringArray\", \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"nullable\": true }"),
-                index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
+                Nullable.class, Bean.class);
         assertJsonEquals("components.schemas.parameterized-type-schema-config.json", result);
     }
 
@@ -845,12 +761,6 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             }
         }
 
-        Index index = indexOf(Bean.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.jackson-property-access.json", result);
+        assertJsonEquals("components.schemas.jackson-property-access.json", Bean.class);
     }
 }

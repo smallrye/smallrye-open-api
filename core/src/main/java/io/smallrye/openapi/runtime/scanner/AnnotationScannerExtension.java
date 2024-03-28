@@ -17,7 +17,12 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 /**
  * Extension point for supporting extensions to OpenAPI Scanners.
  * Implement this directly
+ *
+ * @deprecated use the {@link io.smallrye.openapi.api.SmallRyeOpenAPI
+ *             SmallRyeOpenAPI} builder API instead. This class may be moved,
+ *             have reduced visibility, or be removed in a future release.
  */
+@Deprecated
 public interface AnnotationScannerExtension {
 
     public static List<AnnotationScannerExtension> defaultExtension(AnnotationScannerContext scannerContext) {
@@ -40,42 +45,7 @@ public interface AnnotationScannerExtension {
 
         @Override
         public Object parseValue(String value) {
-            if (value == null || value.isEmpty()) {
-                return null;
-            }
-
-            value = value.trim();
-
-            if ("true".equals(value) || "false".equals(value)) {
-                return Boolean.valueOf(value);
-            }
-
-            switch (value.charAt(0)) {
-                case '{': /* JSON Object */
-                case '[': /* JSON Array */
-                case '-': /* JSON Negative Number */
-                case '0': /* JSON Numbers */
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    try {
-                        return jsonIO.fromJson(jsonIO.fromString(value, Format.JSON));
-                    } catch (Exception e) {
-                        // TODO log the error
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            // JSON String
-            return value;
+            return jsonIO.parseValue(value);
         }
 
         @Override

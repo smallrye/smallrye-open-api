@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 
 class JsonViewTests extends IndexScannerTestBase {
 
@@ -81,7 +81,7 @@ class JsonViewTests extends IndexScannerTestBase {
 
         Index index = Index.of(Views.Public.class, Views.WriteOnly.class, Views.Internal.class, Bean.class, InnerBean1.class,
                 InnerBean2.class, TestResource.class);
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.TRUE);
+        OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.TRUE);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
 
         OpenApiDocument document = OpenApiDocument.newInstance();

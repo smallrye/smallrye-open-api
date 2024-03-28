@@ -38,9 +38,9 @@ import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.models.OperationImpl;
@@ -127,7 +127,7 @@ public interface AnnotationScanner {
      */
     default OpenAPI processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass) {
         return Optional.ofNullable(context.io().read(targetClass))
-                .orElseGet(() -> new OpenAPIImpl().openapi(OpenApiConstants.OPEN_API_VERSION));
+                .orElseGet(() -> new OpenAPIImpl().openapi(SmallRyeOASConfig.Defaults.VERSION));
     }
 
     /**

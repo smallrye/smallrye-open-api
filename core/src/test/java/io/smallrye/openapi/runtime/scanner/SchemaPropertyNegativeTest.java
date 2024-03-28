@@ -8,8 +8,6 @@ import java.util.logging.LogRecord;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -27,13 +25,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyBlankName() throws Exception {
-        Index index = indexOf(BlankNameTest.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-blankname.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-blankname.json", BlankNameTest.class);
 
     }
 
@@ -44,13 +36,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyDuplicateName() throws Exception {
-        Index index = indexOf(DuplicateNameTest.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-duplicatename.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-duplicatename.json", DuplicateNameTest.class);
     }
 
     // Last instance replaces others, instances are not merged
@@ -61,13 +47,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyNegativeMultipleOf() throws Exception {
-        Index index = indexOf(NegativeMultipleOf.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-negativemultipleof.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-negativemultipleof.json", NegativeMultipleOf.class);
     }
 
     @Schema(properties = { @SchemaProperty(name = "test", type = SchemaType.INTEGER, multipleOf = -2) })
@@ -76,13 +56,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMaximumNotNumber() throws Exception {
-        Index index = indexOf(MaximumNotNumber.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-maximumnotnumber.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-maximumnotnumber.json", MaximumNotNumber.class);
     }
 
     // maximum should be ignored
@@ -92,13 +66,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMinimumNotNumber() throws Exception {
-        Index index = indexOf(MinimumNotNumber.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-minimumnotnumber.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-minimumnotnumber.json", MinimumNotNumber.class);
     }
 
     // minimum should be ignored
@@ -108,13 +76,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMinLengthNegative() throws Exception {
-        Index index = indexOf(MinLengthNegative.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-minlengthnegative.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-minlengthnegative.json", MinLengthNegative.class);
     }
 
     // Negative value used in document
@@ -124,13 +86,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMaxLengthNegative() throws Exception {
-        Index index = indexOf(MaxLengthNegative.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-maxlengthnegative.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-maxlengthnegative.json", MaxLengthNegative.class);
     }
 
     // Negative value used in document
@@ -140,13 +96,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyPatternInvalid() throws Exception {
-        Index index = indexOf(PatternInvalid.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-patterninvalid.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-patterninvalid.json", PatternInvalid.class);
     }
 
     // Invalid pattern used in document
@@ -156,13 +106,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMaxPropertiesNegative() throws Exception {
-        Index index = indexOf(MaxPropertiesNegative.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-maxpropertiesnegative.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-maxpropertiesnegative.json", MaxPropertiesNegative.class);
     }
 
     // Negative value used in document
@@ -172,13 +116,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMinPropertiesNegative() throws Exception {
-        Index index = indexOf(MinPropertiesNegative.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-minpropertiesnegative.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-minpropertiesnegative.json", MinPropertiesNegative.class);
     }
 
     // Negative value used in document
@@ -188,13 +126,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyRefWithOtherProps() throws Exception {
-        Index index = indexOf(RefWithOtherProps.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-refwithotherprops.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-refwithotherprops.json", RefWithOtherProps.class);
     }
 
     // Name and ref used in document, other attributes ignored
@@ -204,13 +136,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyDefaultValueWrongType() throws Exception {
-        Index index = indexOf(DefaultValueWrongType.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-defaultvaluewrongtype.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-defaultvaluewrongtype.json", DefaultValueWrongType.class);
     }
 
     // Invalid default value used in document
@@ -220,13 +146,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMaxItemsNegative() throws Exception {
-        Index index = indexOf(MaxItemsNegative.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-maxitemsnegative.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-maxitemsnegative.json", MaxItemsNegative.class);
     }
 
     // Negative value used in document
@@ -236,13 +156,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMinItemsNegative() throws Exception {
-        Index index = indexOf(MinItemsNegative.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-minitemsnegative.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-minitemsnegative.json", MinItemsNegative.class);
     }
 
     // Negative value used in document
@@ -256,13 +170,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyImplementationMissing() throws Exception {
-        Index index = indexOf(ImplementationMissing.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-implementationmissing.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-implementationmissing.json", ImplementationMissing.class);
     }
 
     // Implementation attribute not included in document
@@ -272,13 +180,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyNotMissing() throws Exception {
-        Index index = indexOf(NotMissing.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-notmissing.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-notmissing.json", NotMissing.class);
 
         String expectedMessage = String.format("Could not find schema class in index: %s", MissingClass.class.getName());
         LogRecord record = logs.assertLogContaining(expectedMessage);
@@ -292,13 +194,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyOneOfMissing() throws Exception {
-        Index index = indexOf(OneOfMissing.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-oneofmissing.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-oneofmissing.json", OneOfMissing.class);
 
         String expectedMessage = String.format("Could not find schema class in index: %s", MissingClass.class.getName());
         LogRecord record = logs.assertLogContaining(expectedMessage);
@@ -312,13 +208,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyAnyOfMissing() throws Exception {
-        Index index = indexOf(AnyOfMissing.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-anyofmissing.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-anyofmissing.json", AnyOfMissing.class);
 
         String expectedMessage = String.format("Could not find schema class in index: %s", MissingClass.class.getName());
         LogRecord record = logs.assertLogContaining(expectedMessage);
@@ -332,13 +222,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyAllOfMissing() throws Exception {
-        Index index = indexOf(AllOfMissing.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-allofmissing.json", result);
+        assertJsonEquals("components.schemas.schemaproperty-allofmissing.json", AllOfMissing.class);
 
         String expectedMessage = String.format("Could not find schema class in index: %s", MissingClass.class.getName());
         LogRecord record = logs.assertLogContaining(expectedMessage);

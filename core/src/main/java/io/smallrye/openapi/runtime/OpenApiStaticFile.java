@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import io.smallrye.openapi.runtime.io.Format;
 
@@ -11,6 +12,7 @@ import io.smallrye.openapi.runtime.io.Format;
  */
 public class OpenApiStaticFile implements Closeable {
 
+    private URL locator;
     private Format format;
     private InputStream content;
 
@@ -20,9 +22,14 @@ public class OpenApiStaticFile implements Closeable {
     public OpenApiStaticFile() {
     }
 
-    public OpenApiStaticFile(InputStream content, Format format) {
+    public OpenApiStaticFile(URL locator, InputStream content, Format format) {
+        this.locator = locator;
         this.content = content;
         this.format = format;
+    }
+
+    public OpenApiStaticFile(InputStream content, Format format) {
+        this(null, content, format);
     }
 
     /**
@@ -33,6 +40,10 @@ public class OpenApiStaticFile implements Closeable {
         if (this.getContent() != null) {
             this.getContent().close();
         }
+    }
+
+    public URL getLocator() {
+        return locator;
     }
 
     /**
