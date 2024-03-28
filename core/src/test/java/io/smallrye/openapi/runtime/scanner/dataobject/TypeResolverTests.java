@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -532,7 +532,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
-                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
         assertEquals(4, properties.size());
@@ -556,7 +556,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
-                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
         assertEquals(4, properties.size());
@@ -578,7 +578,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
-                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
         assertEquals(4, properties.size());
@@ -611,7 +611,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
-                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
         assertEquals(4, properties.size());
@@ -648,7 +648,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
-                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
         assertEquals(4, properties.size());
@@ -682,7 +682,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         }
 
         Map<String, TypeResolver> properties = getProperties(Test.class,
-                dynamicConfig(OpenApiConstants.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_PRIVATE_PROPERTIES_ENABLE, false),
                 Test.class);
 
         assertEquals(4, properties.size());
@@ -728,7 +728,7 @@ class TypeResolverTests extends IndexScannerTestBase {
             int a;
         }
 
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_SORTED_PROPERTIES_ENABLE, unsortedEnabled);
+        OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PROPERTIES_ENABLE, unsortedEnabled);
         Map<String, TypeResolver> properties = getProperties(Test.class, config, Test.class);
         assertEquals(3, properties.size());
         Iterator<String> keys = properties.keySet().iterator();

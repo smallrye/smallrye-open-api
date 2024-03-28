@@ -31,6 +31,7 @@ public class SchemaConstant {
     public static final String PROP_PATTERN = "pattern";
     public static final String PROP_EXAMPLE = "example";
     public static final String PROP_EXTERNAL_DOCS = "externalDocs";
+    public static final String REF = "ref";
 
     public static final String PROP_MIN_PROPERTIES = "minProperties";
     public static final String PROP_ALL_OF = "allOf";

@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
 
 class StandaloneSchemaScanTest extends IndexScannerTestBase {
@@ -56,14 +56,14 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testInheritanceAutomaticAnyOf() throws Exception {
-        OpenAPI result = scan(config(OpenApiConstants.AUTO_INHERITANCE, "BOTH"),
+        OpenAPI result = scan(config(SmallRyeOASConfig.AUTO_INHERITANCE, "BOTH"),
                 ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class, AlligatorNoAllOf.class);
         assertJsonEquals("components.schemas.inheritance.json", result);
     }
 
     @Test
     void testInheritanceAutomaticAnyOfParentOnly() throws Exception {
-        OpenAPI result = scan(config(OpenApiConstants.AUTO_INHERITANCE, "PARENT_ONLY"),
+        OpenAPI result = scan(config(SmallRyeOASConfig.AUTO_INHERITANCE, "PARENT_ONLY"),
                 ReptileNoAllOf.class, LizardNoAllOf.class, SnakeNoAllOf.class, TurtleNoAllOf.class, AlligatorNoAllOf.class);
         assertJsonEquals("components.schemas.inheritance-parent-only.json", result);
     }

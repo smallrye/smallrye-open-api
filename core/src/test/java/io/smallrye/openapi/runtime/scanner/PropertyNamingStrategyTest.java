@@ -18,15 +18,15 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.constants.JsonbConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 class PropertyNamingStrategyTest extends IndexScannerTestBase {
 
     @Test
     void testSnakeCase() throws Exception {
-        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        OpenAPI result = scan(config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
                 NameStrategyBean1.class);
         assertJsonEquals("components.schemas.name-strategy-snake.json", result);
@@ -34,7 +34,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
 
     @Test
     void testJacksonNamingIgnoresConfig() throws Exception {
-        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        OpenAPI result = scan(config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
                 NameStrategyBean2.class);
         assertJsonEquals("components.schemas.name-strategy-ignored.json", result);
@@ -42,7 +42,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
 
     @Test
     void testJacksonNamingOverridesConfig() throws Exception {
-        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        OpenAPI result = scan(config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 "com.fasterxml.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy"),
                 NameStrategyKebab.class);
         assertJsonEquals("components.schemas.name-strategy-kebab.json", result);
@@ -50,21 +50,21 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
 
     @Test
     void testInvalidNamingStrategyClass() throws Exception {
-        Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        Config config = config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 "com.fasterxml.jackson.databind.PropertyNamingStrategies$InvalidStrategy");
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 
     @Test
     void testNoValidTranslationMethods() throws Exception {
-        Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        Config config = config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 NoValidTranslationMethods.class.getName());
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 
     @Test
     void testInvalidPropertyNameTranslationAttempt() throws Exception {
-        Config config = config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY,
+        Config config = config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 TranslationThrowsException.class.getName());
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyBean3.class));
     }
@@ -79,7 +79,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
             JsonbConstants.CASE_INSENSITIVE + ", simpleStringOne|anotherField|Y|z"
     })
     void testJsonbConstantStrategy(String strategy, String expectedNames) throws Exception {
-        OpenAPI result = scan(config(OpenApiConstants.SMALLRYE_PROPERTY_NAMING_STRATEGY, strategy), NameStrategyBean3.class);
+        OpenAPI result = scan(config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY, strategy), NameStrategyBean3.class);
         Set<String> expectedNameSet = new TreeSet<>(Arrays.asList(expectedNames.split("\\|")));
         Map<String, org.eclipse.microprofile.openapi.models.media.Schema> schemas = result.getComponents().getSchemas();
         org.eclipse.microprofile.openapi.models.media.Schema schema = schemas.get(NameStrategyBean3.class.getSimpleName());

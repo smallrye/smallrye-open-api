@@ -28,7 +28,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
@@ -248,7 +248,7 @@ public class OpenApiAnnotationScanner {
 
         // Initialize a new OAI document.  Even if nothing is found, this will be returned.
         OpenAPI openApi = this.annotationScannerContext.getOpenApi();
-        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        openApi.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
 
         // Register custom schemas if available
         getCustomSchemaRegistry(annotationScannerContext.getConfig())

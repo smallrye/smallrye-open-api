@@ -3,9 +3,9 @@ package io.smallrye.openapi.api.models.parameters;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 
 /**
  * An implementation of the {@link RequestBody} OpenAPI model interface.
@@ -31,7 +31,7 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     @Override
     public void setRef(String ref) {
         if (ref != null && !ref.contains("/")) {
-            ref = OpenApiConstants.REF_PREFIX_REQUEST_BODY + ref;
+            ref = ReferenceType.REQUEST_BODY.referenceOf(ref);
         }
         this.ref = ref;
     }

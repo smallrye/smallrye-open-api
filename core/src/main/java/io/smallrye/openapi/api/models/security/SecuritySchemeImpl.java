@@ -3,9 +3,9 @@ package io.smallrye.openapi.api.models.security;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 
 /**
  * An implementation of the {@link SecurityScheme} OpenAPI model interface.
@@ -36,7 +36,7 @@ public class SecuritySchemeImpl extends ExtensibleImpl<SecurityScheme> implement
     @Override
     public void setRef(String ref) {
         if (ref != null && !ref.contains("/")) {
-            ref = OpenApiConstants.REF_PREFIX_SECURITY_SCHEME + ref;
+            ref = ReferenceType.SECURITY_SCHEME.referenceOf(ref);
         }
         this.ref = ref;
     }

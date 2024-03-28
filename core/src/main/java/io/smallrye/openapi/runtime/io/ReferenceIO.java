@@ -5,8 +5,6 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.Reference;
 import org.jboss.jandex.AnnotationInstance;
 
-import io.smallrye.openapi.runtime.util.JandexUtil;
-
 public interface ReferenceIO<V, A extends V, O extends V, AB, OB> {
 
     static final String REF = "$ref";
@@ -26,7 +24,7 @@ public interface ReferenceIO<V, A extends V, O extends V, AB, OB> {
     }
 
     default boolean isReference(AnnotationInstance annotation) {
-        return JandexUtil.isRef(annotation);
+        return ReferenceType.isReference(annotation);
     }
 
     default boolean isReference(Reference<?> model) {
