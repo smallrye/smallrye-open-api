@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.info.InfoIO;
@@ -111,7 +111,7 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
         IoLogging.logger.annotation("@OpenAPIDefinition");
 
         OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        openApi.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
         openApi.setInfo(infoIO.read(annotation.value(PROP_INFO)));
         openApi.setTags(tagIO.readList(annotation.value(PROP_TAGS)));
         openApi.setServers(serverIO.readList(annotation.value(PROP_SERVERS)));

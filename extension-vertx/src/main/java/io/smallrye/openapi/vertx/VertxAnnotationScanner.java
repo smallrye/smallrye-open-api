@@ -22,10 +22,10 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
@@ -209,12 +209,12 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public String[] getDefaultConsumes(AnnotationScannerContext context, MethodInfo methodInfo, ResourceParameters params) {
-        return context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        return context.getConfig().getDefaultConsumes().orElseGet(ContentIO::defaultMediaTypes);
     }
 
     @Override
     public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo) {
-        return context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        return context.getConfig().getDefaultProduces().orElseGet(ContentIO::defaultMediaTypes);
     }
 
     /**

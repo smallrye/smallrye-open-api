@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
@@ -77,9 +77,9 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
         Map<String, String> cfg = new HashMap<>();
         // fail hard to trigger the failure in this test
-        cfg.put(OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.toString());
+        cfg.put(SmallRyeOASConfig.DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.toString());
         // method-strategy needed for this test
-        cfg.put(OpenApiConstants.OPERATION_ID_STRAGEGY, OpenApiConfig.OperationIdStrategy.METHOD.toString());
+        cfg.put(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, OpenApiConfig.OperationIdStrategy.METHOD.toString());
         OpenApiConfig config = dynamicConfig(cfg);
 
         OpenApiAnnotationScanner s = new OpenApiAnnotationScanner(config, index);
@@ -157,7 +157,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testRequestBodyComponentGeneration(Index i) throws IOException, JSONException {
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS,
+        OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS,
                 MyCustomSchemaRegistry.class.getName());
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, i);
 
@@ -428,7 +428,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     void testIncludeProfile() {
         Index index = indexOf(ProfileResource.class);
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SCAN_PROFILES,
+        OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.SCAN_PROFILES,
                 "external");
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
@@ -442,7 +442,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
     @Test
     void testExcludeProfile() {
         Index index = indexOf(ProfileResource.class);
-        OpenApiConfig config = dynamicConfig(OpenApiConstants.SCAN_EXCLUDE_PROFILES,
+        OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES,
                 "external");
 
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);

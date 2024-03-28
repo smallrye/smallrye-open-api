@@ -41,8 +41,8 @@ import org.jboss.jandex.IndexView;
 
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.SmallRyeOpenAPI;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 
 @Mojo(name = "generate-schema", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true)
 public class GenerateSchemaMojo extends AbstractMojo {
@@ -178,7 +178,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
     /**
      * To specify a custom OpenAPI version.
      */
-    @Parameter(defaultValue = OpenApiConstants.OPEN_API_VERSION, property = "openApiVersion")
+    @Parameter(defaultValue = SmallRyeOASConfig.Defaults.VERSION, property = "openApiVersion")
     private String openApiVersion;
 
     @Parameter(property = "infoTitle")
@@ -350,23 +350,23 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, OASConfig.SERVERS, servers);
         addToPropertyMap(cp, OASConfig.SERVERS_PATH_PREFIX, pathServers);
         addToPropertyMap(cp, OASConfig.SERVERS_OPERATION_PREFIX, operationServers);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
-        addToPropertyMap(cp, OpenApiConstants.VERSION, openApiVersion);
-        addToPropertyMap(cp, OpenApiConstants.INFO_TITLE, infoTitle);
-        addToPropertyMap(cp, OpenApiConstants.INFO_VERSION, infoVersion);
-        addToPropertyMap(cp, OpenApiConstants.INFO_DESCRIPTION, infoDescription);
-        addToPropertyMap(cp, OpenApiConstants.INFO_TERMS, infoTermsOfService);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_EMAIL, infoContactEmail);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_NAME, infoContactName);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_URL, infoContactUrl);
-        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_NAME, infoLicenseName);
-        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_URL, infoLicenseUrl);
-        addToPropertyMap(cp, OpenApiConstants.OPERATION_ID_STRAGEGY, operationIdStrategy);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_PROFILES, scanProfiles);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
+        addToPropertyMap(cp, SmallRyeOASConfig.VERSION, openApiVersion);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_TITLE, infoTitle);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_VERSION, infoVersion);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_DESCRIPTION, infoDescription);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_TERMS, infoTermsOfService);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_EMAIL, infoContactEmail);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_NAME, infoContactName);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_URL, infoContactUrl);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_NAME, infoLicenseName);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_URL, infoLicenseUrl);
+        addToPropertyMap(cp, SmallRyeOASConfig.OPERATION_ID_STRAGEGY, operationIdStrategy);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_PROFILES, scanProfiles);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
 
         return cp;
     }

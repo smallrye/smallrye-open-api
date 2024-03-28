@@ -6,10 +6,10 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.MapModel;
 import io.smallrye.openapi.api.models.ModelImpl;
+import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -34,7 +34,7 @@ public class CallbackImpl extends ExtensibleImpl<Callback> implements Callback, 
     @Override
     public void setRef(String ref) {
         if (ref != null && !ref.contains("/")) {
-            ref = OpenApiConstants.REF_PREFIX_CALLBACK + ref;
+            ref = ReferenceType.CALLBACK.referenceOf(ref);
         }
         this.ref = ref;
     }

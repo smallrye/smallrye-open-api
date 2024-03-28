@@ -25,7 +25,6 @@ import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.IoLogging;
@@ -165,7 +164,7 @@ public class SchemaFactory {
         schema.setRequired(readAttr(context, annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
         schema.setDescription(readAttr(context, annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
         schema.setFormat(readAttr(context, annotation, SchemaConstant.PROP_FORMAT, defaults));
-        schema.setRef(readAttr(context, annotation, OpenApiConstants.REF, defaults));
+        schema.setRef(readAttr(context, annotation, SchemaConstant.REF, defaults));
         schema.setNullable(readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));

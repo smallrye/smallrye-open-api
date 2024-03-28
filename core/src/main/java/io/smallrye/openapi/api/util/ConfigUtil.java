@@ -15,7 +15,7 @@ import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.info.ContactImpl;
 import io.smallrye.openapi.api.models.info.InfoImpl;
 import io.smallrye.openapi.api.models.info.LicenseImpl;
@@ -44,7 +44,7 @@ public class ConfigUtil {
         if (versionInConfig != null && !versionInConfig.isEmpty()) {
             oai.setOpenapi(versionInConfig);
         } else if (defaultRequiredProperties && (oai.getOpenapi() == null || oai.getOpenapi().isEmpty())) {
-            oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+            oai.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
         }
     }
 
