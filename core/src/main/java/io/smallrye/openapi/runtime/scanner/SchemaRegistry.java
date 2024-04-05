@@ -269,7 +269,7 @@ public class SchemaRegistry {
         registry.put(key, new GeneratedSchemaInfo(name, null, schemaRef));
         names.add(name);
 
-        return schemaRef;
+        return new SchemaImpl().ref(schemaRef.getRef());
     }
 
     /**
@@ -296,7 +296,7 @@ public class SchemaRegistry {
 
         ModelUtil.components(oai).addSchema(name, schema);
 
-        return schemaRef;
+        return new SchemaImpl().ref(schemaRef.getRef());
     }
 
     String deriveName(TypeKey key, String schemaName) {
