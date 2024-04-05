@@ -457,7 +457,7 @@ public interface AnnotationScanner {
                 Schema schema;
 
                 if (isMultipartOutput(returnType)) {
-                    schema = new SchemaImpl().type(Schema.SchemaType.OBJECT);
+                    schema = new SchemaImpl().addType(Schema.SchemaType.OBJECT);
                 } else if (hasKotlinContinuation(method)) {
                     schema = kotlinContinuationToSchema(context, method);
                 } else {
@@ -471,7 +471,7 @@ public interface AnnotationScanner {
                     produces = getDefaultProduces(context, method);
                 }
 
-                if (schema != null && schema.getNullable() == null && TypeUtil.isOptional(returnType)) {
+                if (schema != null && SchemaImpl.getNullable(schema) == null && TypeUtil.isOptional(returnType)) {
                     if (schema.getType() != null) {
                         schema.addType(Schema.SchemaType.NULL);
                     }
@@ -834,7 +834,7 @@ public interface AnnotationScanner {
 
                     if (isMultipartInput(requestBodyType)) {
                         schema = new SchemaImpl();
-                        schema.setType(Schema.SchemaType.OBJECT);
+                        schema.addType(Schema.SchemaType.OBJECT);
                     } else {
                         AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method,
                                 requestBodyType,

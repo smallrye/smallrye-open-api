@@ -208,7 +208,7 @@ public class OpenApiDataObjectScanner {
         if (rootClassInfo == null && objectStack.isEmpty()) {
             // If there's something on the objectStack stack then pre-scanning may have found something.
             ScannerLogging.logger.schemaTypeNotFound(rootClassType.name());
-            return new SchemaImpl().type(SchemaType.OBJECT);
+            return new SchemaImpl().addType(SchemaType.OBJECT);
         }
 
         // Create root node.

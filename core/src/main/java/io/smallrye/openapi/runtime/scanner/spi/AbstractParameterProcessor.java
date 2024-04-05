@@ -464,7 +464,7 @@ public abstract class AbstractParameterProcessor {
             if (schemas.isEmpty()) {
                 // ParameterContext was generated above or no @Schema was provided on the @Parameter style=matrix
                 Schema schema = new SchemaImpl();
-                schema.setType(SchemaType.OBJECT);
+                schema.addType(SchemaType.OBJECT);
                 ModelUtil.setParameterSchema(context.oaiParam, schema);
                 schemas = Arrays.asList(schema);
             }
@@ -626,7 +626,7 @@ public abstract class AbstractParameterProcessor {
             if (refSchema != null) {
                 localSchema = new SchemaImpl().type(refSchema.getType());
             } else {
-                localSchema = new SchemaImpl().type(SchemaType
+                localSchema = new SchemaImpl().addType(SchemaType
                         .valueOf(TypeUtil.getTypeAttributes(paramType).get(SchemaConstant.PROP_TYPE).toString().toUpperCase()));
             }
         } else {
@@ -697,8 +697,8 @@ public abstract class AbstractParameterProcessor {
                         (target, name) -> setRequired(name, schema));
             }
 
-            if (paramSchema.getNullable() == null && TypeUtil.isOptional(paramType)) {
-                paramSchema.setNullable(Boolean.TRUE);
+            if (SchemaImpl.getNullable(paramSchema) == null && TypeUtil.isOptional(paramType)) {
+                SchemaImpl.setNullable(paramSchema, Boolean.TRUE);
             }
 
             if (schema.getProperties() != null) {
@@ -754,7 +754,7 @@ public abstract class AbstractParameterProcessor {
                     MediaType mediaType = new MediaTypeImpl();
                     Schema schema = new SchemaImpl();
                     Map<String, Encoding> encodings = new HashMap<>();
-                    schema.setType(SchemaType.OBJECT);
+                    schema.addType(SchemaType.OBJECT);
                     mediaType.setSchema(schema);
 
                     if (APPLICATION_FORM_URLENCODED.equals(mediaTypeName)) {

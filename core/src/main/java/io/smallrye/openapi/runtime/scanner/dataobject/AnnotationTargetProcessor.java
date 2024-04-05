@@ -195,8 +195,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             }
         }
 
-        if (fieldSchema.getNullable() == null && TypeUtil.isOptional(entityType)) {
-            fieldSchema.setNullable(Boolean.TRUE);
+        if (SchemaImpl.getNullable(fieldSchema) == null && TypeUtil.isOptional(entityType)) {
+            SchemaImpl.setNullable(fieldSchema, Boolean.TRUE);
         }
 
         if (fieldSchema.getReadOnly() == null && typeResolver.isReadOnly()) {

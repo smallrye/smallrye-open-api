@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +38,7 @@ import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -415,7 +415,7 @@ public class TypeUtil {
     public static void applyTypeAttributes(Type classType, Schema schema) {
         Map<String, Object> properties = getTypeAttributes(classType);
 
-        schema.setType((SchemaType) properties.get(SchemaConstant.PROP_TYPE));
+        SchemaImpl.setType(schema, (SchemaType) properties.get(SchemaConstant.PROP_TYPE));
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
         schema.setExamples(wrapInList(properties.get(SchemaConstant.PROP_EXAMPLE)));

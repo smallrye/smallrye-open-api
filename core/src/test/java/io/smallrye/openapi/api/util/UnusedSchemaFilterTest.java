@@ -40,7 +40,7 @@ class UnusedSchemaFilterTest {
                                                                         "http://example.com/schemas/Data?type=html")))))))))
                 .components(createComponents()
                         .addSchema("Data", createSchema()
-                                .type(SchemaType.STRING)
+                                .addType(SchemaType.STRING)
                                 .description("The data returned by the API")));
     }
 
@@ -48,7 +48,7 @@ class UnusedSchemaFilterTest {
     void testUnusedSchemaPropertyRemoved() {
         openAPI.getComponents()
                 .addSchema("RemovedSchema", createSchema()
-                        .type(SchemaType.OBJECT)
+                        .addType(SchemaType.OBJECT)
                         .description("Schema to be removed, pass 1")
                         .addProperty("prop1", createSchema()
                                 .ref("#/components/schemas/RemovedPropertySchema"))
@@ -62,7 +62,7 @@ class UnusedSchemaFilterTest {
                                 .addOneOf(createSchema()
                                         .ref("#/components/schemas/RemovedPropertySchema"))))
                 .addSchema("RemovedPropertySchema", createSchema()
-                        .type(SchemaType.STRING)
+                        .addType(SchemaType.STRING)
                         .description("Schema to be removed, pass 2"));
 
         assertEquals(3, openAPI.getComponents().getSchemas().size());
@@ -76,19 +76,19 @@ class UnusedSchemaFilterTest {
     void testUnusedOneOfSchemasRemoved() {
         openAPI.getComponents()
                 .addSchema("RemovedSchema", createSchema()
-                        .type(SchemaType.OBJECT)
+                        .addType(SchemaType.OBJECT)
                         .description("Schema to be removed, pass 1")
                         .addOneOf(createSchema()
                                 .ref("#/components/schemas/RemovedAllOfSchema1"))
                         .addOneOf(createSchema()
                                 .ref("#/components/schemas/RemovedAllOfSchema2"))
                         .addOneOf(createSchema()
-                                .type(SchemaType.BOOLEAN)))
+                                .addType(SchemaType.BOOLEAN)))
                 .addSchema("RemovedAllOfSchema1", createSchema()
-                        .type(SchemaType.INTEGER)
+                        .addType(SchemaType.INTEGER)
                         .description("Schema to be removed, pass 2"))
                 .addSchema("RemovedAllOfSchema2", createSchema()
-                        .type(SchemaType.STRING)
+                        .addType(SchemaType.STRING)
                         .description("Schema to be removed, pass 2"));
 
         assertEquals(4, openAPI.getComponents().getSchemas().size());

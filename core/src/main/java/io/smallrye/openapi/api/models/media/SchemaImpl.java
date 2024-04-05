@@ -215,6 +215,96 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
     }
 
     /**
+     * Implements the old logic of setType(SchemaType).
+     * <p>
+     * {@link #setType(Schema, SchemaType)}, {@link #setNullable(Schema, Boolean)} and {@link #getNullable(Schema)} can
+     * be used together allow the type and nullability of a schema to be set separately by different parts of the
+     * scanning process, even though that information is now contained in one field.
+     */
+    public static void setType(Schema schema, SchemaType type) {
+        if (!(schema instanceof SchemaImpl)) {
+            return;
+        }
+
+        SchemaImpl s = (SchemaImpl) schema;
+        List<SchemaType> currentValue = s.getListProperty(PROP_TYPE);
+        if (currentValue != null && currentValue.contains(SchemaType.NULL)) {
+            if (type == null) {
+                s.setListProperty(PROP_TYPE, Arrays.asList(SchemaType.NULL));
+            } else {
+                s.setListProperty(PROP_TYPE, Arrays.asList(type, SchemaType.NULL));
+            }
+        } else {
+            if (type == null) {
+                s.setListProperty(PROP_TYPE, null);
+            } else {
+                s.setListProperty(PROP_TYPE, Collections.singletonList(type));
+            }
+        }
+
+        if (s.typeObservers != null) {
+            s.typeObservers.forEach(o -> SchemaImpl.setType(o, type));
+        }
+    }
+
+    /**
+     * Implements the old logic of getNullable().
+     * <p>
+     * {@link #setType(Schema, SchemaType)}, {@link #setNullable(Schema, Boolean)} and {@link #getNullable(Schema)} can
+     * be used together allow the type and nullability of a schema to be set separately by different parts of the
+     * scanning process, even though that information is now contained in one field.
+     */
+    public static Boolean getNullable(Schema schema) {
+        List<SchemaType> types = schema.getType();
+
+        if (!(schema instanceof SchemaImpl)) {
+            return types != null && types.contains(SchemaType.NULL);
+        }
+
+        SchemaImpl s = (SchemaImpl) schema;
+
+        if (types != null) {
+            boolean nullPermitted = types.contains(SchemaType.NULL);
+            // Retain old tri-state behaviour of getNullable
+            // If setNullable has not been called and null is not permitted, return null rather than false
+            if (!nullPermitted && s.nullable == null) {
+                return null;
+            } else {
+                return nullPermitted;
+            }
+        } else {
+            // If types is unset, return any value passed to setNullable
+            return s.nullable;
+        }
+    }
+
+    /**
+     * Implements the old logic of setNullable(Boolean).
+     * <p>
+     * {@link #setType(Schema, SchemaType)}, {@link #setNullable(Schema, Boolean)} and {@link #getNullable(Schema)} can
+     * be used together allow the type and nullability of a schema to be set separately by different parts of the
+     * scanning process, even though that information is now contained in one field.
+     */
+    public static void setNullable(Schema schema, Boolean nullable) {
+        if (!(schema instanceof SchemaImpl)) {
+            return;
+        }
+
+        SchemaImpl s = (SchemaImpl) schema;
+
+        s.incrementModCount();
+        s.nullable = nullable;
+        if (nullable == Boolean.TRUE) {
+            List<SchemaType> types = s.getType();
+            if (types == null || !types.contains(SchemaType.NULL)) {
+                s.addType(SchemaType.NULL);
+            }
+        } else {
+            s.removeType(SchemaType.NULL);
+        }
+    }
+
+    /**
      * @see org.eclipse.microprofile.openapi.models.Reference#getRef()
      */
     @Override
@@ -615,33 +705,6 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
     }
 
     /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#setType(org.eclipse.microprofile.openapi.models.media.Schema.SchemaType)
-     */
-    @SuppressWarnings("deprecation")
-    @Override
-    public void setType(SchemaType type) {
-        incrementModCount();
-        List<SchemaType> currentValue = getListProperty(PROP_TYPE);
-        if (currentValue != null && currentValue.contains(SchemaType.NULL)) {
-            if (type == null) {
-                setListProperty(PROP_TYPE, Arrays.asList(SchemaType.NULL));
-            } else {
-                setListProperty(PROP_TYPE, Arrays.asList(type, SchemaType.NULL));
-            }
-        } else {
-            if (type == null) {
-                setListProperty(PROP_TYPE, null);
-            } else {
-                setListProperty(PROP_TYPE, Collections.singletonList(type));
-            }
-        }
-
-        if (typeObservers != null) {
-            typeObservers.forEach(o -> o.setType(type));
-        }
-    }
-
-    /**
      * @see org.eclipse.microprofile.openapi.models.media.Schema#getNot()
      */
     @Override
@@ -752,44 +815,6 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
     @Override
     public void setFormat(String format) {
         setProperty(PROP_FORMAT, format);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#getNullable()
-     */
-    @Override
-    public Boolean getNullable() {
-        List<SchemaType> types = getType();
-        if (types != null) {
-            boolean nullPermitted = types.contains(SchemaType.NULL);
-            // Retain old tri-state behaviour of getNullable
-            // If setNullable has not been called and null is not permitted, return null rather than false
-            if (!nullPermitted && nullable == null) {
-                return null;
-            } else {
-                return nullPermitted;
-            }
-        } else {
-            // If types is unset, return any value passed to setNullable
-            return nullable;
-        }
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Schema#setNullable(java.lang.Boolean)
-     */
-    @Override
-    public void setNullable(Boolean nullable) {
-        incrementModCount();
-        this.nullable = nullable;
-        if (nullable == Boolean.TRUE) {
-            List<SchemaType> types = getType();
-            if (types == null || !types.contains(SchemaType.NULL)) {
-                addType(SchemaType.NULL);
-            }
-        } else {
-            removeType(SchemaType.NULL);
-        }
     }
 
     /**

@@ -154,7 +154,7 @@ public class TypeProcessor {
 
         // Array-type schema
         Schema itemSchema = new SchemaImpl();
-        arraySchema.type(Schema.SchemaType.ARRAY);
+        arraySchema.addType(Schema.SchemaType.ARRAY);
 
         Type componentType = typeResolver.resolve(arrayType.component());
         boolean isOptional = TypeUtil.isOptional(componentType);
@@ -179,7 +179,7 @@ public class TypeProcessor {
 
         while (arrayType.dimensions() > 1) {
             Schema parentArrSchema = new SchemaImpl();
-            parentArrSchema.setType(Schema.SchemaType.ARRAY);
+            parentArrSchema.addType(Schema.SchemaType.ARRAY);
             parentArrSchema.setItems(itemSchema);
 
             itemSchema = parentArrSchema;
@@ -203,7 +203,7 @@ public class TypeProcessor {
         // If it's a collection, iterable, or a stream, we should treat it as an array.
         if (seekType != null && seekType != MAP_TYPE) {
             DataObjectLogging.logger.processingTypeAs("Java Iterable or Stream", "Array");
-            schema.type(Schema.SchemaType.ARRAY);
+            SchemaImpl.setType(schema, Schema.SchemaType.ARRAY);
             ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, seekType)
                     .orElse(pType);
 
@@ -228,7 +228,7 @@ public class TypeProcessor {
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (seekType == MAP_TYPE) {
             DataObjectLogging.logger.processingTypeAs("Map", "object");
-            schema.type(Schema.SchemaType.OBJECT);
+            SchemaImpl.setType(schema, Schema.SchemaType.OBJECT);
             ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, seekType)
                     .orElse(pType);
 
@@ -291,7 +291,7 @@ public class TypeProcessor {
                 valueType.kind() == Type.Kind.WILDCARD_TYPE) {
             Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
-                propsSchema.type(Schema.SchemaType.OBJECT);
+                SchemaImpl.setType(propsSchema, Schema.SchemaType.OBJECT);
                 propsSchema = context.getSchemaRegistry().registerReference(valueType, context.getJsonViews(), typeResolver,
                         propsSchema);
             }
@@ -300,7 +300,7 @@ public class TypeProcessor {
                 DataObjectLogging.logger.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(context, valueType);
             } else {
-                propsSchema.type(Schema.SchemaType.OBJECT);
+                SchemaImpl.setType(propsSchema, Schema.SchemaType.OBJECT);
             }
 
             SchemaRegistry registry = context.getSchemaRegistry();

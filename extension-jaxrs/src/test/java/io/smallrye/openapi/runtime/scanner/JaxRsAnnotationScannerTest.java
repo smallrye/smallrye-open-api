@@ -412,7 +412,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         public void registerCustomSchemas(SchemaRegistry schemaRegistry) {
             Type uuidType = Type.create(componentize(UUID.class.getName()), Kind.CLASS);
             Schema schema = new SchemaImpl();
-            schema.setType(Schema.SchemaType.STRING);
+            schema.addType(Schema.SchemaType.STRING);
             schema.setFormat("uuid");
             schema.setPattern("^[a-f0-9]{8}-?[a-f0-9]{4}-?[1-5][a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}$");
             schema.setTitle("UUID");
