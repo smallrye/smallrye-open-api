@@ -130,6 +130,7 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(byte[].class.getName()), BINARY_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.io.File.class.getName()), BINARY_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.io.InputStream.class.getName()), BINARY_FORMAT);
+        TYPE_MAP.put(DotName.createSimple("org.jboss.resteasy.reactive.multipart.FileUpload"), BINARY_FORMAT);
 
         // Number
         TYPE_MAP.put(DotName.createSimple(Number.class.getName()), NUMBER_FORMAT);
