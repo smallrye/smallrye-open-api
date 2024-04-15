@@ -1,0 +1,35 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "A": {
+        "description": "A",
+        "type": "object"
+      },
+      "B": {
+        "description": "B",
+        "type": "object"
+      },
+      "C": {
+        "description": "C",
+        "type": "object"
+      },
+      "TestIfThenElseProperty": {
+        "properties": {
+          "prop": {
+            "if": {
+              "$ref": "#/components/schemas/A"
+            },
+            "then": {
+              "$ref": "#/components/schemas/B"
+            },
+            "else": {
+              "$ref": "#/components/schemas/C"
+            }
+          }
+        },
+        "type": "object"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "TestDependentRequired" : {
+        "properties" : {
+          "field1" : {
+            "type" : "string"
+          },
+          "field2" : {
+            "type" : "string"
+          },
+          "field3" : {
+            "type" : "string"
+          }
+        },
+        "dependentRequired": {
+          "field1" : [
+            "field2",
+            "field3"
+          ],
+          "field4" : [
+            "field5"
+          ]
+        },
+        "type" : "object"
+      }
+    }
+  }
+}
