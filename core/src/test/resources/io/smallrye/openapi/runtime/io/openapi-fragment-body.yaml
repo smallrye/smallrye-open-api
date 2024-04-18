@@ -45,14 +45,14 @@
         schema:
           type: boolean
       responses:
-        "204":
-          description: Requested @@ID@@ type proxy was not found
         "200":
           description: Requested @@ID@@ type proxy
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProxyEntity"
+        "204":
+          description: Requested @@ID@@ type proxy was not found
       x-routing-fqdn: provider.acme.unknown
     patch:
       summary: Updates a @@ID@@ type proxy data
@@ -70,8 +70,6 @@
             schema:
               $ref: "#/components/schemas/ProxyEntity"
       responses:
-        "404":
-          description: Requested @@ID@@ type proxy was not found
         "200":
           description: Updated @@ID@@ type proxy
           content:
@@ -80,6 +78,8 @@
                 $ref: "#/components/schemas/ProxyEntity"
               example: "{\"code\": \"@@ID@@\", \"name\": \"@@ID@@ type proxy\", \"obsolete\"\
                 : false}"
+        "404":
+          description: Requested @@ID@@ type proxy was not found
       x-routing-fqdn: provider.acme.unknown
       x-string-property: string-value
       x-boolean-property: true

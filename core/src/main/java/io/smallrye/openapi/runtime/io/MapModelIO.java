@@ -1,7 +1,9 @@
 package io.smallrye.openapi.runtime.io;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -104,17 +106,25 @@ public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends
         return readMap(node, this::readObject);
     }
 
-    public Optional<O> write(Map<String, T> models) {
+    public Optional<O> write(Map<String, T> models, boolean sortByKey) {
         return optionalJsonObject(models).map(node -> {
-            models.forEach((key, value) -> {
-                Optional<O> jsonValue = write(value);
+            List<Map.Entry<String, T>> modelEntries = new ArrayList<>(models.entrySet());
+            if (sortByKey) {
+                modelEntries.sort(Map.Entry.comparingByKey());
+            }
+            modelEntries.forEach((model) -> {
+                Optional<O> jsonValue = write(model.getValue());
                 if (jsonValue.isPresent()) {
-                    jsonIO().set(node, key, jsonValue.get());
+                    jsonIO().set(node, model.getKey(), jsonValue.get());
                 } else {
-                    jsonIO().set(node, key, null);
+                    jsonIO().set(node, model.getKey(), null);
                 }
             });
             return node;
         }).map(jsonIO()::buildObject);
+    }
+
+    public Optional<O> write(Map<String, T> models) {
+        return write(models, false);
     }
 }

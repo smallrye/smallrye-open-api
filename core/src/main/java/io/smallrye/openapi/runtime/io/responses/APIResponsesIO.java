@@ -116,7 +116,7 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
         return optionalJsonObject(model).map(node -> {
             setAllIfPresent(node, extensionIO.write(model));
             setIfPresent(node, PROP_DEFAULT, responseIO.write(model.getDefaultValue()));
-            setAllIfPresent(node, responseIO.write(model.getAPIResponses()));
+            setAllIfPresent(node, responseIO.write(model.getAPIResponses(), true));
             return node;
         }).map(jsonIO()::buildObject);
     }
