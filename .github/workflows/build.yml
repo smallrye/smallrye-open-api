@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'main-[1-9].[0-9]'
       - '[1-9].[0-9].x'
       - '1.x'
       - '!dependabot/**'
@@ -16,6 +17,7 @@ on:
   pull_request:
     branches:
       - 'main'
+      - 'main-[1-9].[0-9]'
       - '[1-9].[0-9].x'
       - '1.x'
     paths-ignore:
