@@ -220,10 +220,14 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
             return json.createValue((Double) value);
         } else if (value instanceof Float) {
             return json.createValue((Float) value);
+        } else if (value instanceof Short) {
+            return json.createValue((short) value);
         } else if (value instanceof Integer) {
             return json.createValue((Integer) value);
         } else if (value instanceof Long) {
             return json.createValue((Long) value);
+        } else if (value instanceof Character) {
+            return json.createValue(((Character) value).toString());
         } else if (value instanceof List) {
             JsonArrayBuilder array = createArray();
             ((List<?>) value).stream()

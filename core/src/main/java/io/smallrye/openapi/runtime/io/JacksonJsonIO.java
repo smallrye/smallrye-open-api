@@ -218,10 +218,14 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
             return factory.numberNode((Double) value);
         } else if (value instanceof Float) {
             return factory.numberNode((Float) value);
+        } else if (value instanceof Short) {
+            return factory.numberNode((short) value);
         } else if (value instanceof Integer) {
             return factory.numberNode((Integer) value);
         } else if (value instanceof Long) {
             return factory.numberNode((Long) value);
+        } else if (value instanceof Character) {
+            return factory.textNode(((Character) value).toString());
         } else if (value instanceof List) {
             ArrayNode array = createArray();
             ((List<?>) value).stream()
