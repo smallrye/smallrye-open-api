@@ -12,7 +12,6 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<ServerVariable, V, A, O, AB, OB> {
 
@@ -23,11 +22,8 @@ public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapMo
     // for annotations (reserved words in Java)
     private static final String PROP_ENUMERATION = "enumeration";
 
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    protected ServerVariableIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public ServerVariableIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SERVER_VARIABLE, Names.create(ServerVariable.class));
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -40,7 +36,7 @@ public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapMo
             variable.setEnumeration(new ArrayList<>(Arrays.asList(enumeration)));
         }
         variable.setDefaultValue(value(annotation, PROP_DEFAULT_VALUE));
-        variable.setExtensions(extensionIO.readExtensible(annotation));
+        variable.setExtensions(extensionIO().readExtensible(annotation));
         return variable;
     }
 
@@ -50,7 +46,7 @@ public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapMo
         variable.setEnumeration(jsonIO().getArray(node, PROP_ENUM, jsonIO()::asString).orElse(null));
         variable.setDefaultValue(jsonIO().getString(node, PROP_DEFAULT));
         variable.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        variable.setExtensions(extensionIO.readMap(node));
+        variable.setExtensions(extensionIO().readMap(node));
         return variable;
     }
 
@@ -59,7 +55,7 @@ public class ServerVariableIO<V, A extends V, O extends V, AB, OB> extends MapMo
             setIfPresent(node, PROP_DEFAULT, jsonIO().toJson(model.getDefaultValue()));
             setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             setIfPresent(node, PROP_ENUM, jsonIO().toJson(model.getEnumeration()));
-            setAllIfPresent(node, extensionIO.write(model));
+            setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

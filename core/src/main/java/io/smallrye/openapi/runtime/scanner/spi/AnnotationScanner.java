@@ -127,7 +127,7 @@ public interface AnnotationScanner {
      * @param targetClass the class that contain the server annotation
      */
     default OpenAPI processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass) {
-        return Optional.ofNullable(context.io().read(targetClass))
+        return Optional.ofNullable(context.io().openApiDefinitionIO().read(targetClass))
                 .orElseGet(() -> new OpenAPIImpl().openapi(SmallRyeOASConfig.Defaults.VERSION));
     }
 
@@ -140,7 +140,7 @@ public interface AnnotationScanner {
     default void processSecuritySchemeAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass,
             OpenAPI openApi) {
 
-        context.io().security().readSchemes(targetClass)
+        context.io().securityIO().readSchemes(targetClass)
                 .forEach((name, scheme) -> ModelUtil.components(openApi).addSecurityScheme(name, scheme));
     }
 
@@ -151,7 +151,7 @@ public interface AnnotationScanner {
      * @param openApi the current OpenApi model being created
      */
     default void processServerAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass, OpenAPI openApi) {
-        context.io().servers().readList(targetClass).forEach(openApi::addServer);
+        context.io().serverIO().readList(targetClass).forEach(openApi::addServer);
     }
 
     /**
@@ -208,13 +208,13 @@ public interface AnnotationScanner {
     default Set<String> processTags(final AnnotationScannerContext context, final AnnotationTarget target, OpenAPI openApi,
             final boolean nullWhenMissing) {
 
-        if (!context.io().tags().hasRepeatableAnnotation(target)) {
+        if (!context.io().tagIO().hasRepeatableAnnotation(target)) {
             return nullWhenMissing ? null : Collections.emptySet();
         }
 
         Set<String> tags = new LinkedHashSet<>();
 
-        context.io().tags().readList(target)
+        context.io().tagIO().readList(target)
                 .stream()
                 .filter(tag -> Objects.nonNull(tag.getName()))
                 .forEach(tag -> {
@@ -222,7 +222,7 @@ public interface AnnotationScanner {
                     ModelUtil.addTag(openApi, tag);
                 });
 
-        context.io().tags().readReferences(target).forEach(tags::add);
+        context.io().tagIO().readReferences(target).forEach(tags::add);
 
         return tags;
     }
@@ -269,11 +269,11 @@ public interface AnnotationScanner {
     default Optional<Operation> processOperation(final AnnotationScannerContext context,
             final ClassInfo resourceClass,
             final MethodInfo method) {
-        if (context.io().operations().isHidden(method)) {
+        if (context.io().operationIO().isHidden(method)) {
             return Optional.empty();
         }
 
-        OperationImpl operation = (OperationImpl) context.io().operations().read(method);
+        OperationImpl operation = (OperationImpl) context.io().operationIO().read(method);
 
         if (operation == null) {
             operation = new OperationImpl();
@@ -358,16 +358,16 @@ public interface AnnotationScanner {
 
         setJsonViewContext(context, context.annotations().getAnnotationValue(method, JacksonConstants.JSON_VIEW));
 
-        Optional<APIResponses> classResponses = Optional.ofNullable(context.io().responses().read(resourceClass));
-        Map<String, APIResponse> classResponse = context.io().responses().readSingle(resourceClass);
+        Optional<APIResponses> classResponses = Optional.ofNullable(context.io().apiResponsesIO().read(resourceClass));
+        Map<String, APIResponse> classResponse = context.io().apiResponsesIO().readSingle(resourceClass);
         addResponses(operation, classResponses, classResponse, false);
 
         // Method annotations override class annotations
-        Optional<APIResponses> methodResponses = Optional.ofNullable(context.io().responses().read(method));
-        Map<String, APIResponse> methodResponse = context.io().responses().readSingle(method);
+        Optional<APIResponses> methodResponses = Optional.ofNullable(context.io().apiResponsesIO().read(method));
+        Map<String, APIResponse> methodResponse = context.io().apiResponsesIO().readSingle(method);
         addResponses(operation, methodResponses, methodResponse, true);
 
-        context.io().responses().readResponseSchema(method)
+        context.io().apiResponsesIO().readResponseSchema(method)
                 .ifPresent(responseSchema -> addApiReponseSchemaFromAnnotation(responseSchema, method, operation));
 
         /*
@@ -376,7 +376,7 @@ public interface AnnotationScanner {
          * provides a way for the application to indicate that responses will be supplied some other
          * way (i.e. static file).
          */
-        if (methodResponses.isPresent() || context.io().responses().getAnnotation(method) == null) {
+        if (methodResponses.isPresent() || context.io().apiResponsesIO().getAnnotation(method) == null) {
             createResponseFromRestMethod(context, method, operation);
         }
 
@@ -660,11 +660,11 @@ public interface AnnotationScanner {
             final MethodInfo method,
             Operation operation) {
 
-        List<SecurityRequirement> securityRequirements = context.io().security().readRequirements(method);
+        List<SecurityRequirement> securityRequirements = context.io().securityIO().readRequirements(method);
         boolean emptyContainerPresent = isEmptySecurityRequirements(context, method);
 
         if (securityRequirements.isEmpty() && !emptyContainerPresent) {
-            securityRequirements = context.io().security().readRequirements(resourceClass);
+            securityRequirements = context.io().securityIO().readRequirements(resourceClass);
         }
 
         if (securityRequirements.isEmpty() && emptyContainerPresent) {
@@ -697,7 +697,7 @@ public interface AnnotationScanner {
      * @param operation the operation to add this to
      */
     default void processCallback(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        Map<String, Callback> callbacks = context.io().components().callbacks().readMap(method);
+        Map<String, Callback> callbacks = context.io().componentsIO().callbacks().readMap(method);
 
         if (!callbacks.isEmpty()) {
             operation.setCallbacks(callbacks);
@@ -711,10 +711,10 @@ public interface AnnotationScanner {
      * @param operation the current Operation model being created
      */
     default void processServerAnnotation(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        List<Server> servers = context.io().servers().readList(method);
+        List<Server> servers = context.io().serverIO().readList(method);
 
         if (servers.isEmpty()) {
-            servers = context.io().servers().readList(method.declaringClass());
+            servers = context.io().serverIO().readList(method.declaringClass());
         }
 
         servers.forEach(operation::addServer);
@@ -728,10 +728,10 @@ public interface AnnotationScanner {
      * @param operation the current operation
      */
     default void processExtensions(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        Map<String, Object> methodExtensions = context.io().extensions().readMap(method);
+        Map<String, Object> methodExtensions = context.io().extensionIO().readMap(method);
 
         if (methodExtensions.isEmpty()) {
-            context.io().extensions().readMap(method.declaringClass()).forEach(operation::addExtension);
+            context.io().extensionIO().readMap(method.declaringClass()).forEach(operation::addExtension);
         } else {
             methodExtensions.forEach(operation::addExtension);
         }
@@ -763,8 +763,8 @@ public interface AnnotationScanner {
             final ResourceParameters params) {
         RequestBody requestBody = null;
 
-        for (AnnotationInstance annotation : context.io().requestBodies().getRepeatableAnnotations(method)) {
-            requestBody = context.io().requestBodies().read(annotation);
+        for (AnnotationInstance annotation : context.io().requestBodyIO().getRepeatableAnnotations(method)) {
+            requestBody = context.io().requestBodyIO().read(annotation);
             Content formBodyContent = params.getFormBodyContent();
 
             if (formBodyContent != null) {
@@ -809,7 +809,7 @@ public interface AnnotationScanner {
         }
 
         if (requestBody == null) {
-            requestBody = context.io().requestBodies().readRequestSchema(method);
+            requestBody = context.io().requestBodyIO().readRequestSchema(method);
         }
 
         // If the request body is null, figure it out from the parameters.  Only if the

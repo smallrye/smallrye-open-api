@@ -186,7 +186,7 @@ public class SchemaFactory {
         SchemaImpl.setNullable(schema, readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        schema.setExternalDocs(context.io().externalDocumentation().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
+        schema.setExternalDocs(context.io().extDocIO().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
         schema.setDeprecated(readAttr(context, annotation, SchemaConstant.PROP_DEPRECATED, defaults));
 
         final SchemaType type = readSchemaType(context, annotation, schema, defaults);
@@ -194,11 +194,11 @@ public class SchemaFactory {
         schema.setExamples(wrapInList(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, type)));
         schema.setDefaultValue(
                 parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, type));
-        schema.setDiscriminator(context.io().schemas().discriminator().read(annotation));
+        schema.setDiscriminator(context.io().discriminatorIO().read(annotation));
         schema.setMaxItems(readAttr(context, annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
         schema.setMinItems(readAttr(context, annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(context, annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
-        schema.setExtensions(context.io().extensions().readExtensible(annotation));
+        schema.setExtensions(context.io().extensionIO().readExtensible(annotation));
 
         schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(context, annotation,
                 SchemaConstant.PROP_PROPERTIES, properties -> {

@@ -15,6 +15,35 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
+import io.smallrye.openapi.runtime.io.callbacks.CallbackOperationIO;
+import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
+import io.smallrye.openapi.runtime.io.headers.HeaderIO;
+import io.smallrye.openapi.runtime.io.info.ContactIO;
+import io.smallrye.openapi.runtime.io.info.InfoIO;
+import io.smallrye.openapi.runtime.io.info.LicenseIO;
+import io.smallrye.openapi.runtime.io.links.LinkIO;
+import io.smallrye.openapi.runtime.io.links.LinkParameterIO;
+import io.smallrye.openapi.runtime.io.media.ContentIO;
+import io.smallrye.openapi.runtime.io.media.DiscriminatorIO;
+import io.smallrye.openapi.runtime.io.media.EncodingIO;
+import io.smallrye.openapi.runtime.io.media.ExampleObjectIO;
+import io.smallrye.openapi.runtime.io.media.MediaTypeIO;
+import io.smallrye.openapi.runtime.io.media.SchemaIO;
+import io.smallrye.openapi.runtime.io.parameters.ParameterIO;
+import io.smallrye.openapi.runtime.io.parameters.RequestBodyIO;
+import io.smallrye.openapi.runtime.io.responses.APIResponseIO;
+import io.smallrye.openapi.runtime.io.responses.APIResponsesIO;
+import io.smallrye.openapi.runtime.io.security.OAuthFlowIO;
+import io.smallrye.openapi.runtime.io.security.OAuthFlowsIO;
+import io.smallrye.openapi.runtime.io.security.OAuthScopeIO;
+import io.smallrye.openapi.runtime.io.security.SecurityIO;
+import io.smallrye.openapi.runtime.io.security.SecurityRequirementIO;
+import io.smallrye.openapi.runtime.io.security.SecurityRequirementsSetIO;
+import io.smallrye.openapi.runtime.io.security.SecuritySchemeIO;
+import io.smallrye.openapi.runtime.io.servers.ServerIO;
+import io.smallrye.openapi.runtime.io.servers.ServerVariableIO;
+import io.smallrye.openapi.runtime.io.tags.TagIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -152,4 +181,149 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
     public abstract T readObject(O node);
 
     public abstract Optional<? extends V> write(T model);
+
+    public ComponentsIO<V, A, O, AB, OB> componentsIO() {
+        return context.componentsIO();
+    }
+
+    public ExternalDocumentationIO<V, A, O, AB, OB> extDocIO() {
+        return context.extDocIO();
+    }
+
+    public OpenAPIDefinitionIO<V, A, O, AB, OB> openApiDefinitionIO() {
+        return context.openApiDefinitionIO();
+    }
+
+    public OperationIO<V, A, O, AB, OB> operationIO() {
+        return context.operationIO();
+    }
+
+    public PathItemIO<V, A, O, AB, OB> pathItemIO() {
+        return context.pathItemIO();
+    }
+
+    public PathItemIO<V, A, O, AB, OB> pathItemCallbackIO() {
+        return context.pathItemCallbackIO();
+    }
+
+    public PathsIO<V, A, O, AB, OB> pathsIO() {
+        return context.pathsIO();
+    }
+
+    public CallbackIO<V, A, O, AB, OB> callbackIO() {
+        return context.callbackIO();
+    }
+
+    public CallbackOperationIO<V, A, O, AB, OB> callbackOperationIO() {
+        return context.callbackOperationIO();
+    }
+
+    public ExtensionIO<V, A, O, AB, OB> extensionIO() {
+        return context.extensionIO();
+    }
+
+    public HeaderIO<V, A, O, AB, OB> headerIO() {
+        return context.headerIO();
+    }
+
+    public ContactIO<V, A, O, AB, OB> contactIO() {
+        return context.contactIO();
+    }
+
+    public InfoIO<V, A, O, AB, OB> infoIO() {
+        return context.infoIO();
+    }
+
+    public LicenseIO<V, A, O, AB, OB> licenseIO() {
+        return context.licenseIO();
+    }
+
+    public LinkIO<V, A, O, AB, OB> linkIO() {
+        return context.linkIO();
+    }
+
+    public LinkParameterIO<V, A, O, AB, OB> linkParameterIO() {
+        return context.linkParameterIO();
+    }
+
+    public ContentIO<V, A, O, AB, OB> contentIO() {
+        return context.contentIO();
+    }
+
+    public DiscriminatorIO<V, A, O, AB, OB> discriminatorIO() {
+        return context.discriminatorIO();
+    }
+
+    public EncodingIO<V, A, O, AB, OB> encodingIO() {
+        return context.encodingIO();
+    }
+
+    public ExampleObjectIO<V, A, O, AB, OB> exampleObjectIO() {
+        return context.exampleObjectIO();
+    }
+
+    public MediaTypeIO<V, A, O, AB, OB> mediaTypeIO() {
+        return context.mediaTypeIO();
+    }
+
+    public SchemaIO<V, A, O, AB, OB> schemaIO() {
+        return context.schemaIO();
+    }
+
+    public ParameterIO<V, A, O, AB, OB> parameterIO() {
+        return context.parameterIO();
+    }
+
+    public RequestBodyIO<V, A, O, AB, OB> requestBodyIO() {
+        return context.requestBodyIO();
+    }
+
+    public APIResponseIO<V, A, O, AB, OB> apiResponseIO() {
+        return context.apiResponseIO();
+    }
+
+    public APIResponsesIO<V, A, O, AB, OB> apiResponsesIO() {
+        return context.apiResponsesIO();
+    }
+
+    public OAuthFlowIO<V, A, O, AB, OB> oauthFlowIO() {
+        return context.oauthFlowIO();
+    }
+
+    public OAuthFlowsIO<V, A, O, AB, OB> oauthFlowsIO() {
+        return context.oauthFlowsIO();
+    }
+
+    public OAuthScopeIO<V, A, O, AB, OB> oauthScopeIO() {
+        return context.oauthScopeIO();
+    }
+
+    public SecurityIO<V, A, O, AB, OB> securityIO() {
+        return context.securityIO();
+    }
+
+    public SecurityRequirementIO<V, A, O, AB, OB> securityRequirementIO() {
+        return context.securityRequirementIO();
+    }
+
+    public SecurityRequirementsSetIO<V, A, O, AB, OB> securityRequirementsSetIO() {
+        return context.securityRequirementsSetIO();
+    }
+
+    public SecuritySchemeIO<V, A, O, AB, OB> securitySchemeIO() {
+        return context.securitySchemeIO();
+    }
+
+    public ServerIO<V, A, O, AB, OB> serverIO() {
+        return context.serverIO();
+    }
+
+    public ServerVariableIO<V, A, O, AB, OB> serverVariableIO() {
+        return context.serverVariableIO();
+    }
+
+    public TagIO<V, A, O, AB, OB> tagIO() {
+        return context.tagIO();
+    }
+
 }

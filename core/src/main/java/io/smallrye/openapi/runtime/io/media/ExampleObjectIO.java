@@ -12,7 +12,6 @@ import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 
 public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Example, V, A, O, AB, OB>
@@ -23,11 +22,8 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
     private static final String PROP_EXTERNAL_VALUE = "externalValue";
     private static final String PROP_DESCRIPTION = "description";
 
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public ExampleObjectIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public ExampleObjectIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.EXAMPLE_OBJECT, Names.create(Example.class));
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -39,7 +35,7 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
         example.setDescription(value(annotation, PROP_DESCRIPTION));
         example.setValue(parseValue(value(annotation, PROP_VALUE)));
         example.setExternalValue(value(annotation, PROP_EXTERNAL_VALUE));
-        example.setExtensions(extensionIO.readExtensible(annotation));
+        example.setExtensions(extensionIO().readExtensible(annotation));
         return example;
     }
 
@@ -52,7 +48,7 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
         example.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
         example.setValue(jsonIO().fromJson(jsonIO().getValue(node, PROP_VALUE)));
         example.setExternalValue(jsonIO().getString(node, PROP_EXTERNAL_VALUE));
-        example.setExtensions(extensionIO.readMap(node));
+        example.setExtensions(extensionIO().readMap(node));
         return example;
     }
 
@@ -65,7 +61,7 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_VALUE, jsonIO().toJson(model.getValue()));
                 setIfPresent(node, PROP_EXTERNAL_VALUE, jsonIO().toJson(model.getExternalValue()));
-                setAllIfPresent(node, extensionIO.write(model));
+                setAllIfPresent(node, extensionIO().write(model));
             }
 
             return node;

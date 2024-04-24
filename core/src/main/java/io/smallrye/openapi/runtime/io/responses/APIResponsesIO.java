@@ -16,32 +16,24 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.io.media.ContentIO;
 
 public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO<APIResponses, V, A, O, AB, OB> {
 
     private static final String PROP_DEFAULT = "default";
 
-    private final APIResponseIO<V, A, O, AB, OB> responseIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public APIResponsesIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public APIResponsesIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.API_RESPONSES, Names.create(APIResponses.class));
-        responseIO = new APIResponseIO<>(context, contentIO, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     public Map<String, APIResponse> readSingle(AnnotationTarget target) {
-        return Optional.ofNullable(responseIO.getAnnotation(target))
+        return Optional.ofNullable(apiResponseIO().getAnnotation(target))
                 .map(Collections::singleton)
-                .map(annotations -> responseIO.readMap(annotations, responseIO::responseCode))
+                .map(annotations -> apiResponseIO().readMap(annotations, apiResponseIO()::responseCode))
                 .orElse(null);
     }
 
     public Map<String, APIResponse> readAll(AnnotationTarget target) {
-        return responseIO.readMap(target, responseIO::responseCode);
+        return apiResponseIO().readMap(target, apiResponseIO()::responseCode);
     }
 
     @Override
@@ -61,7 +53,7 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
                         .toArray(AnnotationInstance[]::new))
                 // End
                 .map(this::read)
-                .map(responses -> responses.extensions(extensionIO.readExtensible(annotation)))
+                .map(responses -> responses.extensions(extensionIO().readExtensible(annotation)))
                 .orElse(null);
     }
 
@@ -75,7 +67,7 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
 
     public Optional<Map<String, APIResponse>> readResponseSchema(AnnotationTarget target) {
         return Optional.ofNullable(scannerContext().annotations().getAnnotation(target, Names.API_RESPONSE_SCHEMA))
-                .map(responseIO::readResponseSchema);
+                .map(apiResponseIO()::readResponseSchema);
     }
 
     /**
@@ -89,8 +81,8 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
         APIResponses responses = new APIResponsesImpl();
 
         for (AnnotationInstance nested : annotations) {
-            responseIO.responseCode(nested)
-                    .ifPresent(responseCode -> responses.addAPIResponse(responseCode, responseIO.read(nested)));
+            apiResponseIO().responseCode(nested)
+                    .ifPresent(responseCode -> responses.addAPIResponse(responseCode, apiResponseIO().read(nested)));
         }
 
         return responses;
@@ -101,22 +93,22 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
         IoLogging.logger.jsonList("APIResponse");
 
         APIResponses model = new APIResponsesImpl();
-        model.setDefaultValue(responseIO.readValue(jsonIO().getValue(node, PROP_DEFAULT)));
-        model.setExtensions(extensionIO.readMap(node));
+        model.setDefaultValue(apiResponseIO().readValue(jsonIO().getValue(node, PROP_DEFAULT)));
+        model.setExtensions(extensionIO().readMap(node));
 
         jsonIO().properties(node)
                 .stream()
                 .filter(not(property -> PROP_DEFAULT.equals(property.getKey())))
-                .forEach(property -> model.addAPIResponse(property.getKey(), responseIO.readValue(property.getValue())));
+                .forEach(property -> model.addAPIResponse(property.getKey(), apiResponseIO().readValue(property.getValue())));
 
         return model;
     }
 
     public Optional<O> write(APIResponses model) {
         return optionalJsonObject(model).map(node -> {
-            setAllIfPresent(node, extensionIO.write(model));
-            setIfPresent(node, PROP_DEFAULT, responseIO.write(model.getDefaultValue()));
-            setAllIfPresent(node, responseIO.write(model.getAPIResponses()));
+            setAllIfPresent(node, extensionIO().write(model));
+            setIfPresent(node, PROP_DEFAULT, apiResponseIO().write(model.getDefaultValue()));
+            setAllIfPresent(node, apiResponseIO().write(model.getAPIResponses()));
             return node;
         }).map(jsonIO()::buildObject);
     }

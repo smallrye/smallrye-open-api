@@ -21,13 +21,11 @@ import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.media.XMLImpl;
-import io.smallrye.openapi.runtime.io.ExternalDocumentationIO;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.schema.DataType;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
@@ -41,19 +39,12 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
     private static final String PROP_WRAPPED = "wrapped";
     private static final String PROP_ATTRIBUTE = "attribute";
 
-    private final DiscriminatorIO<V, A, O, AB, OB> discriminatorIO;
-    private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public SchemaIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public SchemaIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SCHEMA, Names.create(Schema.class));
-        discriminatorIO = new DiscriminatorIO<>(context);
-        externalDocIO = new ExternalDocumentationIO<>(context, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     public DiscriminatorIO<V, A, O, AB, OB> discriminator() {
-        return discriminatorIO;
+        return discriminatorIO();
     }
 
     @Override
@@ -197,10 +188,10 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
                 return readXML(node);
             }
             if (desiredType == ExternalDocumentation.class) {
-                return externalDocIO.readValue(node);
+                return extDocIO().readValue(node);
             }
             if (desiredType == Discriminator.class) {
-                return discriminatorIO.readValue(node);
+                return discriminatorIO().readValue(node);
             }
         }
         return jsonIO().fromJson(node);
@@ -217,7 +208,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
                     xml.setPrefix(jsonIO().getString(node, PROP_PREFIX));
                     xml.setAttribute(jsonIO().getBoolean(node, PROP_ATTRIBUTE));
                     xml.setWrapped(jsonIO().getBoolean(node, PROP_WRAPPED));
-                    xml.setExtensions(extensionIO.readMap(node));
+                    xml.setExtensions(extensionIO().readMap(node));
                     return xml;
                 })
                 .orElse(null);
@@ -243,9 +234,9 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         } else if (value instanceof XML) {
             return write((XML) value);
         } else if (value instanceof ExternalDocumentation) {
-            return externalDocIO.write((ExternalDocumentation) value);
+            return extDocIO().write((ExternalDocumentation) value);
         } else if (value instanceof Discriminator) {
-            return discriminatorIO.write((Discriminator) value);
+            return discriminatorIO().write((Discriminator) value);
         } else if (value instanceof List<?>) {
             return writeList((List<?>) value);
         } else if (value instanceof Map<?, ?>) {
@@ -290,7 +281,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             setIfPresent(node, PROP_PREFIX, jsonIO().toJson(model.getPrefix()));
             setIfPresent(node, PROP_ATTRIBUTE, jsonIO().toJson(model.getAttribute()));
             setIfPresent(node, PROP_WRAPPED, jsonIO().toJson(model.getWrapped()));
-            setAllIfPresent(node, extensionIO.write(model));
+            setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

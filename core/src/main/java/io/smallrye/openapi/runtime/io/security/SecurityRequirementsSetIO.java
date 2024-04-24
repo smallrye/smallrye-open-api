@@ -20,11 +20,8 @@ import io.smallrye.openapi.runtime.io.Names;
 public class SecurityRequirementsSetIO<V, A extends V, O extends V, AB, OB>
         extends ModelIO<SecurityRequirement, V, A, O, AB, OB> {
 
-    private final SecurityRequirementIO<V, A, O, AB, OB> securityRequirementIO;
-
     public SecurityRequirementsSetIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SECURITY_REQUIREMENTS_SET, Names.create(SecurityRequirement.class));
-        securityRequirementIO = new SecurityRequirementIO<>(context);
     }
 
     public List<SecurityRequirement> readList(AnnotationTarget target) {
@@ -56,7 +53,7 @@ public class SecurityRequirementsSetIO<V, A extends V, O extends V, AB, OB>
         SecurityRequirement requirement = new SecurityRequirementImpl();
 
         Arrays.stream(annotations)
-                .map(securityRequirementIO::readEntry)
+                .map(securityRequirementIO()::readEntry)
                 .forEach(scheme -> requirement.addScheme(scheme.getKey(), scheme.getValue()));
 
         return requirement;

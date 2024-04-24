@@ -19,10 +19,7 @@ import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
-import io.smallrye.openapi.runtime.io.media.ExampleObjectIO;
-import io.smallrye.openapi.runtime.io.media.SchemaIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -44,18 +41,8 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
     private static final String PROP_SCHEMA = "schema";
     private static final String PROP_STYLE = "style";
 
-    private final SchemaIO<V, A, O, AB, OB> schemaIO;
-    private final ContentIO<V, A, O, AB, OB> contentIO;
-    private final ExampleObjectIO<V, A, O, AB, OB> exampleObjectIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public ParameterIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public ParameterIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.PARAMETER, Names.create(Parameter.class));
-        this.contentIO = contentIO;
-        exampleObjectIO = new ExampleObjectIO<>(context, extensionIO);
-        schemaIO = new SchemaIO<>(context, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     public List<Parameter> readList(AnnotationValue annotations) {
@@ -96,10 +83,10 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
         parameter.setStyle(enumValue(annotation, PROP_STYLE, Parameter.Style.class));
         parameter.setExplode(readExplode(scannerContext(), annotation));
         parameter.setAllowReserved(value(annotation, PROP_ALLOW_RESERVED));
-        parameter.setSchema(schemaIO.read(annotation.value(PROP_SCHEMA)));
-        parameter.setContent(contentIO.read(annotation.value(PROP_CONTENT), ContentIO.Direction.PARAMETER));
-        parameter.setExamples(exampleObjectIO.readMap(annotation.value(PROP_EXAMPLES)));
-        parameter.setExample(exampleObjectIO.parseValue(value(annotation, PROP_EXAMPLE)));
+        parameter.setSchema(schemaIO().read(annotation.value(PROP_SCHEMA)));
+        parameter.setContent(contentIO().read(annotation.value(PROP_CONTENT), ContentIO.Direction.PARAMETER));
+        parameter.setExamples(exampleObjectIO().readMap(annotation.value(PROP_EXAMPLES)));
+        parameter.setExample(exampleObjectIO().parseValue(value(annotation, PROP_EXAMPLE)));
         parameter.setRef(ReferenceType.PARAMETER.refValue(annotation));
 
         if (annotation.target() != null) {
@@ -111,7 +98,7 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
                      * instead to the operation.
                      *
                      */
-                    parameter.setExtensions(extensionIO.readExtensible(annotation));
+                    parameter.setExtensions(extensionIO().readExtensible(annotation));
                     break;
                 default:
                     break;
@@ -152,12 +139,12 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
         parameter.setStyle(enumValue(jsonIO().getValue(node, PROP_STYLE), Parameter.Style.class));
         parameter.setExplode(jsonIO().getBoolean(node, PROP_EXPLODE));
         parameter.setAllowReserved(jsonIO().getBoolean(node, PROP_ALLOW_RESERVED));
-        parameter.setSchema(schemaIO.readValue(jsonIO().getValue(node, PROP_SCHEMA)));
-        parameter.setContent(contentIO.readValue(jsonIO().getValue(node, PROP_CONTENT)));
-        parameter.setExamples(exampleObjectIO.readMap(jsonIO().getValue(node, PROP_EXAMPLES)));
+        parameter.setSchema(schemaIO().readValue(jsonIO().getValue(node, PROP_SCHEMA)));
+        parameter.setContent(contentIO().readValue(jsonIO().getValue(node, PROP_CONTENT)));
+        parameter.setExamples(exampleObjectIO().readMap(jsonIO().getValue(node, PROP_EXAMPLES)));
         parameter.setExample(jsonIO().fromJson(jsonIO().getValue(node, PROP_EXAMPLE)));
         parameter.setRef(readReference(node));
-        parameter.setExtensions(extensionIO.readMap(node));
+        parameter.setExtensions(extensionIO().readMap(node));
 
         return parameter;
     }
@@ -183,16 +170,16 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
                 setIfPresent(node, PROP_IN, jsonIO().toJson(model.getIn()));
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
-                setIfPresent(node, PROP_SCHEMA, schemaIO.write(model.getSchema()));
+                setIfPresent(node, PROP_SCHEMA, schemaIO().write(model.getSchema()));
                 setIfPresent(node, PROP_ALLOW_EMPTY_VALUE, jsonIO().toJson(model.getAllowEmptyValue()));
                 setIfPresent(node, PROP_DEPRECATED, jsonIO().toJson(model.getDeprecated()));
                 setIfPresent(node, PROP_STYLE, jsonIO().toJson(model.getStyle()));
                 setIfPresent(node, PROP_EXPLODE, jsonIO().toJson(model.getExplode()));
                 setIfPresent(node, PROP_ALLOW_RESERVED, jsonIO().toJson(model.getAllowReserved()));
                 setIfPresent(node, PROP_EXAMPLE, jsonIO().toJson(model.getExample()));
-                setIfPresent(node, PROP_EXAMPLES, exampleObjectIO.write(model.getExamples()));
-                setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
-                setAllIfPresent(node, extensionIO.write(model));
+                setIfPresent(node, PROP_EXAMPLES, exampleObjectIO().write(model.getExamples()));
+                setIfPresent(node, PROP_CONTENT, contentIO().write(model.getContent()));
+                setAllIfPresent(node, extensionIO().write(model));
             }
             return node;
         }).map(jsonIO()::buildObject);

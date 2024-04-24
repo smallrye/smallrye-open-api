@@ -579,7 +579,7 @@ public abstract class AbstractParameterProcessor {
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
         if (param.getExtensions() == null) {
-            param.setExtensions(scannerContext.io().extensions().readMap(context.target));
+            param.setExtensions(scannerContext.io().extensionIO().readMap(context.target));
         }
     }
 
