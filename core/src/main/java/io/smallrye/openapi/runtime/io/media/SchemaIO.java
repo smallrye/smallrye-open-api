@@ -13,10 +13,37 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.eclipse.microprofile.openapi.models.Components;
+import org.eclipse.microprofile.openapi.models.Constructible;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
+import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Operation;
+import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.Paths;
+import org.eclipse.microprofile.openapi.models.callbacks.Callback;
+import org.eclipse.microprofile.openapi.models.examples.Example;
+import org.eclipse.microprofile.openapi.models.headers.Header;
+import org.eclipse.microprofile.openapi.models.info.Contact;
+import org.eclipse.microprofile.openapi.models.info.Info;
+import org.eclipse.microprofile.openapi.models.info.License;
+import org.eclipse.microprofile.openapi.models.links.Link;
+import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
+import org.eclipse.microprofile.openapi.models.media.Encoding;
+import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.XML;
+import org.eclipse.microprofile.openapi.models.parameters.Parameter;
+import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.models.responses.APIResponse;
+import org.eclipse.microprofile.openapi.models.responses.APIResponses;
+import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
+import org.eclipse.microprofile.openapi.models.security.OAuthFlows;
+import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
+import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
+import org.eclipse.microprofile.openapi.models.servers.Server;
+import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
+import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.media.SchemaImpl;
@@ -41,10 +68,6 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
 
     public SchemaIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SCHEMA, Names.create(Schema.class));
-    }
-
-    public DiscriminatorIO<V, A, O, AB, OB> discriminator() {
-        return discriminatorIO();
     }
 
     @Override
@@ -233,14 +256,75 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             return write((Schema) value);
         } else if (value instanceof XML) {
             return write((XML) value);
-        } else if (value instanceof ExternalDocumentation) {
-            return extDocIO().write((ExternalDocumentation) value);
-        } else if (value instanceof Discriminator) {
-            return discriminatorIO().write((Discriminator) value);
+        } else if (value instanceof Constructible) {
+            return writeConstructible((Constructible) value);
         } else if (value instanceof List<?>) {
             return writeList((List<?>) value);
         } else if (value instanceof Map<?, ?>) {
             return writeMap((Map<?, ?>) value);
+        } else {
+            return jsonIO().toJson(value);
+        }
+    }
+
+    private Optional<? extends V> writeConstructible(Constructible value) {
+        // Java 21 cannot come soon enough
+        if (value instanceof ExternalDocumentation) {
+            return extDocIO().write((ExternalDocumentation) value);
+        } else if (value instanceof Discriminator) {
+            return discriminatorIO().write((Discriminator) value);
+        } else if (value instanceof Components) {
+            return componentsIO().write((Components) value);
+        } else if (value instanceof OpenAPI) {
+            return openApiDefinitionIO().write((OpenAPI) value);
+        } else if (value instanceof Operation) {
+            return operationIO().write((Operation) value);
+        } else if (value instanceof PathItem) {
+            return pathItemIO().write((PathItem) value);
+        } else if (value instanceof Paths) {
+            return pathsIO().write((Paths) value);
+        } else if (value instanceof Callback) {
+            return callbackIO().write((Callback) value);
+        } else if (value instanceof Header) {
+            return headerIO().write((Header) value);
+        } else if (value instanceof Contact) {
+            return contactIO().write((Contact) value);
+        } else if (value instanceof Info) {
+            return infoIO().write((Info) value);
+        } else if (value instanceof License) {
+            return licenseIO().write((License) value);
+        } else if (value instanceof Link) {
+            return linkIO().write((Link) value);
+        } else if (value instanceof Content) {
+            return contentIO().write((Content) value);
+        } else if (value instanceof Encoding) {
+            return encodingIO().write((Encoding) value);
+        } else if (value instanceof Example) {
+            return exampleObjectIO().write((Example) value);
+        } else if (value instanceof MediaType) {
+            return mediaTypeIO().write((MediaType) value);
+        } else if (value instanceof Parameter) {
+            return parameterIO().write((Parameter) value);
+        } else if (value instanceof RequestBody) {
+            return requestBodyIO().write((RequestBody) value);
+        } else if (value instanceof APIResponse) {
+            return apiResponseIO().write((APIResponse) value);
+        } else if (value instanceof APIResponses) {
+            return apiResponsesIO().write((APIResponses) value);
+        } else if (value instanceof OAuthFlow) {
+            return oauthFlowIO().write((OAuthFlow) value);
+        } else if (value instanceof OAuthFlows) {
+            return oauthFlowsIO().write((OAuthFlows) value);
+        } else if (value instanceof SecurityRequirement) {
+            return securityRequirementIO().write((SecurityRequirement) value);
+        } else if (value instanceof SecurityScheme) {
+            return securitySchemeIO().write((SecurityScheme) value);
+        } else if (value instanceof Server) {
+            return serverIO().write((Server) value);
+        } else if (value instanceof ServerVariable) {
+            return serverVariableIO().write((ServerVariable) value);
+        } else if (value instanceof Tag) {
+            return tagIO().write((Tag) value);
         } else {
             return jsonIO().toJson(value);
         }
