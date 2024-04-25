@@ -4,6 +4,7 @@
     "title" : "My own awesome REST service",
     "description" : "This service is awesome",
     "termsOfService" : "The terms is also awesome",
+    "summary" : "This summary is rather boring",
     "contact" : {
       "name" : "Phillip Kruger",
       "url" : "https://www.phillip-kruger.com",

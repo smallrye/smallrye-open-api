@@ -39,6 +39,7 @@ public class BasicIT extends SchemaTestBase {
             assertEquals(properties.get("infoTitle"), schema.getInfo().getTitle());
             assertEquals(properties.get("infoDescription"), schema.getInfo().getDescription());
             assertEquals(properties.get("infoTermsOfService"), schema.getInfo().getTermsOfService());
+            assertEquals(properties.get("infoSummary"), schema.getInfo().getSummary());
             assertEquals(properties.get("infoContactName"), schema.getInfo().getContact().getName());
             assertEquals(properties.get("infoContactUrl"), schema.getInfo().getContact().getUrl());
             assertEquals(properties.get("infoContactEmail"), schema.getInfo().getContact().getEmail());
