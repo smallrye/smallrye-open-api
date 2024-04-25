@@ -10,7 +10,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 
@@ -69,10 +69,10 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testConfigured(Index i) throws IOException, JSONException {
-        System.setProperty(OpenApiConstants.DEFAULT_CONSUMES, "application/json");
-        System.setProperty(OpenApiConstants.DEFAULT_PRODUCES, "application/json");
-        System.setProperty(OpenApiConstants.DEFAULT_CONSUMES_PRIMITIVES, "text/plain");
-        System.setProperty(OpenApiConstants.DEFAULT_PRODUCES_PRIMITIVES, "text/plain");
+        System.setProperty(SmallRyeOASConfig.DEFAULT_CONSUMES, "application/json");
+        System.setProperty(SmallRyeOASConfig.DEFAULT_PRODUCES, "application/json");
+        System.setProperty(SmallRyeOASConfig.DEFAULT_CONSUMES_PRIMITIVES, "text/plain");
+        System.setProperty(SmallRyeOASConfig.DEFAULT_PRODUCES_PRIMITIVES, "text/plain");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
 
@@ -83,10 +83,10 @@ class DefaultContentTypeTest extends JaxRsDataObjectScannerTestBase {
             printToConsole(result);
             assertJsonEquals("resource.testDefaultContentTypeConfigured.json", result);
         } finally {
-            System.clearProperty(OpenApiConstants.DEFAULT_CONSUMES);
-            System.clearProperty(OpenApiConstants.DEFAULT_PRODUCES);
-            System.clearProperty(OpenApiConstants.DEFAULT_CONSUMES_PRIMITIVES);
-            System.clearProperty(OpenApiConstants.DEFAULT_PRODUCES_PRIMITIVES);
+            System.clearProperty(SmallRyeOASConfig.DEFAULT_CONSUMES);
+            System.clearProperty(SmallRyeOASConfig.DEFAULT_PRODUCES);
+            System.clearProperty(SmallRyeOASConfig.DEFAULT_CONSUMES_PRIMITIVES);
+            System.clearProperty(SmallRyeOASConfig.DEFAULT_PRODUCES_PRIMITIVES);
         }
     }
 

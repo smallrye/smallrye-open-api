@@ -13,6 +13,7 @@ import org.jboss.jandex.IndexView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Deprecated
 class OpenApiProcessorTest {
 
     ClassLoader loader;

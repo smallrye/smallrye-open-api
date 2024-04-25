@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.Salutation;
@@ -33,7 +33,7 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
     void testOperationIdStrategies(String strategy, String resourceClass, String expectedResultResourceName)
             throws Exception {
 
-        System.setProperty(OpenApiConstants.OPERATION_ID_STRAGEGY, strategy);
+        System.setProperty(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, strategy);
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
 
@@ -44,20 +44,20 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             printToConsole(result);
             assertJsonEquals(expectedResultResourceName, result);
         } finally {
-            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
+            System.clearProperty(SmallRyeOASConfig.OPERATION_ID_STRAGEGY);
         }
     }
 
     @Test
     void testInheritedOperationIdsUtilizeConcreteClassName() throws Exception {
         try {
-            OpenApiConfig config = dynamicConfig(OpenApiConstants.OPERATION_ID_STRAGEGY, "CLASS_METHOD");
+            OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, "CLASS_METHOD");
             Index index = indexOf(Salutation.class, SalutationEnglish.class, SalutationSpanish.class);
             OpenAPI result = OpenApiProcessor.bootstrap(config, index);
             printToConsole(result);
             assertJsonEquals("resource.testOperationIdWithInheritance.json", result);
         } finally {
-            System.clearProperty(OpenApiConstants.OPERATION_ID_STRAGEGY);
+            System.clearProperty(SmallRyeOASConfig.OPERATION_ID_STRAGEGY);
         }
     }
 }

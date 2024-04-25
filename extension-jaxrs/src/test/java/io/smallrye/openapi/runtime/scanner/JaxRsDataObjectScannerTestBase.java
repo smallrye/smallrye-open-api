@@ -8,7 +8,7 @@ import org.jboss.jandex.Indexer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -45,7 +45,7 @@ public class JaxRsDataObjectScannerTestBase extends IndexScannerTestBase {
     @BeforeEach
     public void createContext() {
         context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
-                dynamicConfig(OpenApiConstants.SMALLRYE_SORTED_PROPERTIES_ENABLE, Boolean.TRUE));
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PROPERTIES_ENABLE, Boolean.TRUE));
     }
 
     public FieldInfo getFieldFromKlazz(String containerName, String fieldName) {

@@ -25,7 +25,6 @@ import org.jboss.jandex.TypeVariable;
 import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
@@ -265,9 +264,7 @@ public class SchemaRegistry {
 
     private Schema registerReference(TypeKey key) {
         String name = deriveName(key, null);
-        Schema schemaRef = new SchemaImpl();
-        schemaRef.setRef(OpenApiConstants.REF_PREFIX_SCHEMA + name);
-
+        Schema schemaRef = new SchemaImpl().ref(name);
         registry.put(key, new GeneratedSchemaInfo(name, null, schemaRef));
         names.add(name);
 
@@ -292,9 +289,7 @@ public class SchemaRegistry {
      */
     private Schema register(TypeKey key, Schema schema, String schemaName) {
         String name = deriveName(key, schemaName);
-        Schema schemaRef = new SchemaImpl();
-        schemaRef.setRef(OpenApiConstants.REF_PREFIX_SCHEMA + name);
-
+        Schema schemaRef = new SchemaImpl().ref(name);
         registry.put(key, new GeneratedSchemaInfo(name, schema, schemaRef));
         names.add(name);
 

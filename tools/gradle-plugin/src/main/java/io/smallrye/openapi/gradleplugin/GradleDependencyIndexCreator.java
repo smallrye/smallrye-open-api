@@ -12,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.Logger;
 import org.jboss.jandex.CompositeIndex;
@@ -35,7 +33,7 @@ public class GradleDependencyIndexCreator {
     }
 
     IndexView createIndex(Set<File> dependencies, FileCollection classesDirs)
-            throws Exception {
+            throws IOException {
 
         List<Entry<File, Duration>> indexDurations = new ArrayList<>();
         List<IndexView> indexes = new ArrayList<>();
@@ -57,7 +55,7 @@ public class GradleDependencyIndexCreator {
                     IndexView artifactIndex = logger.isDebugEnabled() ? timedIndex(indexDurations, artifact) : index(artifact);
                     indexes.add(artifactIndex);
                 }
-            } catch (IOException | ExecutionException e) {
+            } catch (IOException e) {
                 logger.error(
                         "Can't compute index of {}, skipping", artifact.getAbsolutePath(),
                         e);
@@ -88,17 +86,13 @@ public class GradleDependencyIndexCreator {
 
     private IndexView timedIndex(
             List<Map.Entry<File, Duration>> indexDurations,
-            File artifact) throws Exception {
+            File artifact) throws IOException {
         LocalDateTime start = LocalDateTime.now();
         IndexView result = index(artifact);
         LocalDateTime end = LocalDateTime.now();
         Duration duration = Duration.between(start, end);
         indexDurations.add(new AbstractMap.SimpleEntry<>(artifact, duration));
         return result;
-    }
-
-    private Index indexModuleClasses(ResolvedArtifact artifact) throws IOException {
-        return indexModuleClasses(artifact.getFile());
     }
 
     private Index indexModuleClasses(File file) throws IOException {

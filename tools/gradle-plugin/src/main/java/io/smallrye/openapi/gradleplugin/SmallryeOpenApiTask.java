@@ -2,7 +2,6 @@ package io.smallrye.openapi.gradleplugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,15 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.openapi.models.Components;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.DirectoryProperty;
@@ -46,12 +41,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.jandex.IndexView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.OpenApiDocument;
-import io.smallrye.openapi.runtime.OpenApiProcessor;
-import io.smallrye.openapi.runtime.OpenApiStaticFile;
-import io.smallrye.openapi.runtime.io.Format;
-import io.smallrye.openapi.runtime.io.OpenApiSerializer;
-import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
 /**
  * Schema generation task implementation.
@@ -65,13 +55,6 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     private final FileCollection classpath;
     private final FileCollection resourcesSrcDirs;
     private final FileCollection classesDirs;
-
-    private static final String META_INF_OPENAPI_YAML = "META-INF/openapi.yaml";
-    private static final String WEB_INF_CLASSES_META_INF_OPENAPI_YAML = "WEB-INF/classes/META-INF/openapi.yaml";
-    private static final String META_INF_OPENAPI_YML = "META-INF/openapi.yml";
-    private static final String WEB_INF_CLASSES_META_INF_OPENAPI_YML = "WEB-INF/classes/META-INF/openapi.yml";
-    private static final String META_INF_OPENAPI_JSON = "META-INF/openapi.json";
-    private static final String WEB_INF_CLASSES_META_INF_OPENAPI_JSON = "WEB-INF/classes/META-INF/openapi.json";
 
     /**
      * Directory where to output the schemas. If no path is specified, the schema will be printed to
@@ -117,79 +100,36 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
 
             IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(dependencies,
                     classesDirs);
-            OpenApiDocument schema = generateSchema(index, resourcesSrcDirs);
-            write(schema);
+            SmallRyeOpenAPI openAPI = generateOpenAPI(index, resourcesSrcDirs);
+            write(openAPI);
         } catch (Exception ex) {
-            throw new GradleException(
-                    "Could not generate OpenAPI Schema",
-                    ex); // TODO allow failOnError = false ?
+            // allow failOnError = false ?
+            throw new GradleException("Could not generate OpenAPI Schema", ex);
         }
     }
 
-    private OpenApiDocument generateSchema(
-            IndexView index,
-            FileCollection resourcesSrcDirs) throws IOException {
-        OpenApiConfig openApiConfig = properties.asOpenApiConfig();
-        ClassLoader classLoader = getClassLoader();
-
-        OpenAPI staticModel = generateStaticModel(openApiConfig, resourcesSrcDirs);
-        OpenAPI annotationModel = generateAnnotationModel(index, openApiConfig, SmallryeOpenApiTask.class.getClassLoader());
-        OpenAPI readerModel = OpenApiProcessor.modelFromReader(openApiConfig, classLoader, index);
-
-        OpenApiDocument document = OpenApiDocument.newInstance();
-
-        document.reset();
-        document.config(openApiConfig);
-
-        if (annotationModel != null) {
-            addingModelDebug("annotations", annotationModel);
-            document.modelFromAnnotations(annotationModel);
-        }
-        if (readerModel != null) {
-            addingModelDebug("reader", readerModel);
-            document.modelFromReader(readerModel);
-        }
-        if (staticModel != null) {
-            addingModelDebug("static", staticModel);
-            document.modelFromStaticFile(staticModel);
-        }
-        document.filter(OpenApiProcessor.getFilter(openApiConfig, classLoader, index));
-        document.initialize();
-
-        return document;
-    }
-
-    private void addingModelDebug(String from, OpenAPI model) {
-        getLogger().debug("Adding model from {}...", from);
-        nullSafeMap("callbacks", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getCallbacks));
-        nullSafeMap("examples", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getExamples));
-        nullSafeMap("headers", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getHeaders));
-        nullSafeMap("links", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getLinks));
-        nullSafeMap("parameters", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getParameters));
-        nullSafeMap("request bodies", from,
-                java.util.Optional.ofNullable(model.getComponents()).map(Components::getRequestBodies));
-        nullSafeMap("responses", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getResponses));
-        nullSafeMap("schemas", from, java.util.Optional.ofNullable(model.getComponents()).map(Components::getSchemas));
-        nullSafeMap("security schemes", from,
-                java.util.Optional.ofNullable(model.getComponents()).map(Components::getSecuritySchemes));
-        nullSafeColl("servers", from, java.util.Optional.ofNullable(model.getServers()));
-        nullSafeMap("path items", from, java.util.Optional.ofNullable(model.getPaths()).map(
-                org.eclipse.microprofile.openapi.models.Paths::getPathItems));
-        nullSafeColl("security", from, java.util.Optional.ofNullable(model.getSecurity()));
-        nullSafeColl("tags", from, java.util.Optional.ofNullable(model.getTags()));
-        nullSafeMap("extensions", from, java.util.Optional.ofNullable(model.getExtensions()));
-    }
-
-    private void nullSafeMap(String what, String from, java.util.Optional<Map<?, ?>> collection) {
-        nullSafe(what, from, collection.map(Map::size));
-    }
-
-    private void nullSafeColl(String what, String from, java.util.Optional<Collection<?>> collection) {
-        nullSafe(what, from, collection.map(Collection::size));
-    }
-
-    private void nullSafe(String what, String from, java.util.Optional<Integer> collection) {
-        getLogger().debug("Adding {} {} from {}", collection.map(Object::toString).orElse("<no>"), what, from);
+    private SmallRyeOpenAPI generateOpenAPI(IndexView index, FileCollection resourcesSrcDirs) {
+        return SmallRyeOpenAPI.builder()
+                .withConfig(properties.asMicroprofileConfig())
+                .withApplicationClassLoader(getClassLoader())
+                .withResourceLocator(path -> resourcesSrcDirs.getFiles()
+                        .stream()
+                        .map(File::toPath)
+                        .filter(Files::exists)
+                        .map(Path::toString)
+                        .map(dirPath -> Paths.get(dirPath, path))
+                        .filter(Files::exists)
+                        .map(staticFile -> {
+                            try {
+                                return staticFile.toUri().toURL();
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        })
+                        .findFirst()
+                        .orElse(null))
+                .withIndex(index)
+                .build();
     }
 
     private ClassLoader getClassLoader() {
@@ -208,74 +148,6 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
                 .toArray(URL[]::new);
 
         return URLClassLoader.newInstance(locators, Thread.currentThread().getContextClassLoader());
-    }
-
-    private OpenAPI generateAnnotationModel(IndexView indexView, OpenApiConfig openApiConfig,
-            ClassLoader classLoader) {
-        OpenApiAnnotationScanner openApiAnnotationScanner = new OpenApiAnnotationScanner(openApiConfig,
-                classLoader, indexView);
-        return openApiAnnotationScanner.scan();
-    }
-
-    private OpenAPI generateStaticModel(OpenApiConfig openApiConfig, FileCollection resourcesSrcDirs) throws IOException {
-        Path staticFile = getStaticFile(resourcesSrcDirs);
-        if (staticFile != null) {
-            try (InputStream is = Files.newInputStream(staticFile)) {
-                try (OpenApiStaticFile openApiStaticFile = new OpenApiStaticFile(is,
-                        getFormat(staticFile))) {
-                    return OpenApiProcessor.modelFromStaticFile(openApiConfig, openApiStaticFile);
-                }
-            }
-        }
-        return null;
-    }
-
-    private Path getStaticFile(FileCollection resourcesSrcDirs) {
-        return resourcesSrcDirs.getFiles()
-                .stream()
-                .map(this::getStaticFile)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
-    }
-
-    private Path getStaticFile(File dir) {
-        getLogger().debug("Checking for static file in {}", dir);
-        Path classesPath = dir.toPath();
-        if (Files.exists(classesPath)) {
-            Path resourcePath = Paths.get(classesPath.toString(), META_INF_OPENAPI_YAML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), WEB_INF_CLASSES_META_INF_OPENAPI_YAML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), META_INF_OPENAPI_YML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), WEB_INF_CLASSES_META_INF_OPENAPI_YML);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), META_INF_OPENAPI_JSON);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-            resourcePath = Paths.get(classesPath.toString(), WEB_INF_CLASSES_META_INF_OPENAPI_JSON);
-            if (Files.exists(resourcePath)) {
-                return resourcePath;
-            }
-        }
-        return null;
-    }
-
-    private Format getFormat(Path path) {
-        if (path.endsWith(".json")) {
-            return Format.JSON;
-        }
-        return Format.YAML;
     }
 
     private void clearOutput() {
@@ -298,10 +170,10 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         file.delete();
     }
 
-    private void write(OpenApiDocument schema) throws GradleException {
+    private void write(SmallRyeOpenAPI openAPI) throws GradleException {
         try {
-            String yaml = OpenApiSerializer.serialize(schema.get(), Format.YAML);
-            String json = OpenApiSerializer.serialize(schema.get(), Format.JSON);
+            String yaml = openAPI.toYAML();
+            String json = openAPI.toJSON();
             Path directory = outputDirectory.get().getAsFile().toPath();
 
             if (!Files.exists(directory)) {
@@ -320,13 +192,13 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
             if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.YAML)
                     .anyMatch(f -> f
                             .equals(OutputFileFilter.valueOf(OutputFileFilter.class, properties.outputFileTypeFilter.get())))) {
-                writeSchemaFile(directory, "yaml", yaml.getBytes(charset));
+                writeFile(directory, "yaml", yaml.getBytes(charset));
             }
 
             if (Stream.of(OutputFileFilter.ALL, OutputFileFilter.JSON)
                     .anyMatch(f -> f
                             .equals(OutputFileFilter.valueOf(OutputFileFilter.class, properties.outputFileTypeFilter.get())))) {
-                writeSchemaFile(directory, "json", json.getBytes(charset));
+                writeFile(directory, "json", json.getBytes(charset));
             }
 
             getLogger().info("Wrote the schema files to {}",
@@ -336,7 +208,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
         }
     }
 
-    private void writeSchemaFile(Path directory, String type, byte[] contents) throws IOException {
+    private void writeFile(Path directory, String type, byte[] contents) throws IOException {
         Path file = Paths.get(directory.toString(), properties.schemaFilename.get() + "." + type);
         if (!Files.exists(file.getParent())) {
             Files.createDirectories(file.getParent());

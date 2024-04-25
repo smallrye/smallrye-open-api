@@ -13,7 +13,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -282,7 +282,7 @@ class ResourceParameterTests extends JaxRsDataObjectScannerTestBase {
 
     void testGenericSetResponseWithSetIndexedWithoutArrayRefs(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_ARRAY_REFERENCES_ENABLE,
                         Boolean.FALSE),
                 i);
         OpenAPI result = scanner.scan();

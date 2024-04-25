@@ -9,7 +9,7 @@ import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 
 class GenericModelTypesResourceTest extends IndexScannerTestBase {
 
@@ -110,7 +110,7 @@ class GenericModelTypesResourceTest extends IndexScannerTestBase {
 
     void testGenericsApplicationWithoutArrayRefs(Index i) throws IOException, JSONException {
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(
-                dynamicConfig(OpenApiConstants.SMALLRYE_ARRAY_REFERENCES_ENABLE,
+                dynamicConfig(SmallRyeOASConfig.SMALLRYE_ARRAY_REFERENCES_ENABLE,
                         Boolean.FALSE),
                 i);
         OpenAPI result = scanner.scan();

@@ -18,7 +18,12 @@ import io.smallrye.openapi.runtime.io.media.SchemaIO;
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.
  *
  * @author eric.wittmann@gmail.com
+ *
+ * @deprecated use the {@link io.smallrye.openapi.api.SmallRyeOpenAPI
+ *             SmallRyeOpenAPI} builder API instead. This class may be moved,
+ *             have reduced visibility, or be removed in a future release.
  */
+@Deprecated
 public class OpenApiParser {
 
     private OpenApiParser() {

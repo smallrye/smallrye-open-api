@@ -1,11 +1,15 @@
 package io.smallrye.openapi.runtime;
 
-import java.io.InputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.eclipse.microprofile.config.Config;
@@ -29,7 +33,12 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
  * Provides some core archive processing functionality.
  *
  * @author eric.wittmann@gmail.com
+ *
+ * @deprecated use the {@link io.smallrye.openapi.api.SmallRyeOpenAPI
+ *             SmallRyeOpenAPI} builder API instead. This class may be moved,
+ *             have reduced visibility, or be removed in a future release.
  */
+@Deprecated
 public class OpenApiProcessor {
 
     static final IndexView EMPTY_INDEX = new Indexer().complete();
@@ -54,7 +63,7 @@ public class OpenApiProcessor {
     }
 
     public static OpenAPI bootstrap(OpenApiConfig config, IndexView index, ClassLoader classLoader) {
-        List<OpenApiStaticFile> staticfiles = loadOpenApiStaticFiles(classLoader);
+        List<OpenApiStaticFile> staticfiles = loadOpenApiStaticFiles(classLoader::getResource);
         return bootstrap(config, index, classLoader, staticfiles.toArray(new OpenApiStaticFile[] {}));
     }
 
@@ -278,25 +287,32 @@ public class OpenApiProcessor {
         }
     }
 
-    private static List<OpenApiStaticFile> loadOpenApiStaticFiles(ClassLoader classLoader) {
+    public static List<OpenApiStaticFile> loadOpenApiStaticFiles(Function<String, URL> loadFunction) {
         List<OpenApiStaticFile> apiStaticFiles = new ArrayList<>();
 
-        loadOpenApiStaticFile(apiStaticFiles, classLoader, "/META-INF/openapi.yaml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, classLoader, "/WEB-INF/classes/META-INF/openapi.yaml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, classLoader, "/META-INF/openapi.yml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, classLoader, "/WEB-INF/classes/META-INF/openapi.yml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, classLoader, "/META-INF/openapi.json", Format.JSON);
-        loadOpenApiStaticFile(apiStaticFiles, classLoader, "/WEB-INF/classes/META-INF/openapi.json", Format.JSON);
+        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.yaml", Format.YAML);
+        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.yaml", Format.YAML);
+        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.yml", Format.YAML);
+        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.yml", Format.YAML);
+        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.json", Format.JSON);
+        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.json", Format.JSON);
 
         return apiStaticFiles;
     }
 
     private static List<OpenApiStaticFile> loadOpenApiStaticFile(List<OpenApiStaticFile> apiStaticFiles,
-            ClassLoader classLoader, String path, Format format) {
-        InputStream staticStream = classLoader.getResourceAsStream(path);
-        if (staticStream != null) {
-            apiStaticFiles.add(new OpenApiStaticFile(staticStream, format));
-        }
+            Function<String, URL> loadFunction, String path, Format format) {
+
+        Optional.ofNullable(loadFunction.apply(path))
+                .map(locator -> {
+                    try {
+                        return new OpenApiStaticFile(locator, locator.openStream(), format);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+                .ifPresent(apiStaticFiles::add);
+
         return apiStaticFiles;
     }
 }

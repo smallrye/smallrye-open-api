@@ -2,16 +2,22 @@ package io.smallrye.openapi.api.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.servers.Server;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.info.ContactImpl;
+import io.smallrye.openapi.api.models.info.InfoImpl;
 import io.smallrye.openapi.api.models.info.LicenseImpl;
 import io.smallrye.openapi.api.models.servers.ServerImpl;
 
@@ -25,61 +31,75 @@ public class ConfigUtil {
     private ConfigUtil() {
     }
 
-    public static final void applyConfig(OpenApiConfig config, OpenAPI oai) {
+    public static final void applyConfig(OpenApiConfig config, OpenAPI oai, boolean defaultRequiredProperties) {
         // From the spec
         configureServers(config, oai);
         // Our own extension
-        configureVersion(config, oai);
+        configureVersion(config, oai, defaultRequiredProperties);
         configureInfo(config, oai);
     }
 
-    protected static final void configureVersion(OpenApiConfig config, OpenAPI oai) {
+    protected static final void configureVersion(OpenApiConfig config, OpenAPI oai, boolean defaultRequiredProperties) {
         String versionInConfig = config.getOpenApiVersion();
         if (versionInConfig != null && !versionInConfig.isEmpty()) {
             oai.setOpenapi(versionInConfig);
-        } else if (oai.getOpenapi() == null || oai.getOpenapi().isEmpty()) {
-            oai.setOpenapi(OpenApiConstants.OPEN_API_VERSION);
+        } else if (defaultRequiredProperties && (oai.getOpenapi() == null || oai.getOpenapi().isEmpty())) {
+            oai.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
         }
     }
 
     protected static final void configureInfo(OpenApiConfig config, OpenAPI oai) {
-        if (config.getInfoTitle() != null) {
-            oai.getInfo().setTitle(config.getInfoTitle());
-        }
-        if (config.getInfoVersion() != null) {
-            oai.getInfo().setVersion(config.getInfoVersion());
-        }
-        if (config.getInfoDescription() != null) {
-            oai.getInfo().setDescription(config.getInfoDescription());
-        }
-        if (config.getInfoTermsOfService() != null) {
-            oai.getInfo().setTermsOfService(config.getInfoTermsOfService());
+        if (!defaultIfNecessary(oai.getInfo(), InfoImpl::new, oai::setInfo,
+                config.getInfoTitle(),
+                config.getInfoVersion(),
+                config.getInfoDescription(),
+                config.getInfoTermsOfService(),
+                config.getInfoContactName(),
+                config.getInfoContactEmail(),
+                config.getInfoContactUrl(),
+                config.getInfoLicenseName(),
+                config.getInfoLicenseUrl())) {
+            // Nothing to configure
+            return;
         }
 
+        setIfPresent(config.getInfoTitle(), oai.getInfo()::setTitle);
+        setIfPresent(config.getInfoVersion(), oai.getInfo()::setVersion);
+        setIfPresent(config.getInfoDescription(), oai.getInfo()::setDescription);
+        setIfPresent(config.getInfoTermsOfService(), oai.getInfo()::setTermsOfService);
+
         // Contact
-        if (oai.getInfo().getContact() == null && (config.getInfoContactEmail() != null || config.getInfoContactName() != null
-                || config.getInfoContactUrl() != null)) {
-            oai.getInfo().setContact(new ContactImpl());
-        }
-        if (config.getInfoContactEmail() != null) {
-            oai.getInfo().getContact().setEmail(config.getInfoContactEmail());
-        }
-        if (config.getInfoContactName() != null) {
-            oai.getInfo().getContact().setName(config.getInfoContactName());
-        }
-        if (config.getInfoContactUrl() != null) {
-            oai.getInfo().getContact().setUrl(config.getInfoContactUrl());
+        if (defaultIfNecessary(oai.getInfo().getContact(), ContactImpl::new, oai.getInfo()::setContact,
+                config.getInfoContactName(),
+                config.getInfoContactEmail(),
+                config.getInfoContactUrl())) {
+            setIfPresent(config.getInfoContactName(), oai.getInfo().getContact()::setName);
+            setIfPresent(config.getInfoContactEmail(), oai.getInfo().getContact()::setEmail);
+            setIfPresent(config.getInfoContactUrl(), oai.getInfo().getContact()::setUrl);
         }
 
         // License
-        if (oai.getInfo().getLicense() == null && (config.getInfoLicenseName() != null || config.getInfoLicenseUrl() != null)) {
-            oai.getInfo().setLicense(new LicenseImpl());
+        if (defaultIfNecessary(oai.getInfo().getLicense(), LicenseImpl::new, oai.getInfo()::setLicense,
+                config.getInfoLicenseName(),
+                config.getInfoLicenseUrl())) {
+            setIfPresent(config.getInfoLicenseName(), oai.getInfo().getLicense()::setName);
+            setIfPresent(config.getInfoLicenseUrl(), oai.getInfo().getLicense()::setUrl);
         }
-        if (config.getInfoLicenseName() != null) {
-            oai.getInfo().getLicense().setName(config.getInfoLicenseName());
+    }
+
+    private static <T> boolean defaultIfNecessary(T value, Supplier<T> factory, Consumer<T> mutator, Object... sources) {
+        if (Stream.of(sources).anyMatch(Objects::nonNull)) {
+            if (value == null) {
+                mutator.accept(factory.get());
+            }
+            return true;
         }
-        if (config.getInfoLicenseUrl() != null) {
-            oai.getInfo().getLicense().setUrl(config.getInfoLicenseUrl());
+        return false;
+    }
+
+    private static <T> void setIfPresent(T value, Consumer<T> mutator) {
+        if (value != null) {
+            mutator.accept(value);
         }
     }
 
@@ -96,10 +116,9 @@ public class ConfigUtil {
         }
 
         // Now the PathItem and Operation servers
-        Map<String, PathItem> pathItems = oai.getPaths().getPathItems();
-        if (pathItems != null) {
-            pathItems.entrySet().forEach(entry -> configureServers(config, entry.getKey(), entry.getValue()));
-        }
+        Optional.ofNullable(oai.getPaths())
+                .map(Paths::getPathItems)
+                .ifPresent(pathItems -> pathItems.forEach((key, value) -> configureServers(config, key, value)));
     }
 
     /**

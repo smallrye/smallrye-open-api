@@ -1,26 +1,28 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.util.Collections;
 import java.util.Locale;
 
 import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
+
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
 class SchemaPropertyTest extends IndexScannerTestBase {
 
     @Test
     void testClassSchemaPropertyMergesWithFieldSchemas() throws Exception {
         Index index = indexOf(Reptile.class, Lizard.class, Snake.class, Turtle.class, LengthUnits.class, Speed.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("components.schemas.schemaproperty-merge.json", result);
-
+        SmallRyeOpenAPI result1 = SmallRyeOpenAPI.builder()
+                .withConfig(config(Collections.emptyMap()))
+                .withIndex(index)
+                .defaultRequiredProperties(false)
+                .build();
+        printToConsole(result1.model());
+        assertJsonEquals("components.schemas.schemaproperty-merge.json", result1.model());
     }
 
     /****************************************************************/

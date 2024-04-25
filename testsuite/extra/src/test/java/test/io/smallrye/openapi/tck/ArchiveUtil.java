@@ -19,7 +19,6 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.runtime.OpenApiStaticFile;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
@@ -30,6 +29,11 @@ import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
  * @author eric.wittmann@gmail.com
  */
 public class ArchiveUtil {
+
+    private static final String CLASS_SUFFIX = ".class";
+    private static final String JAR_SUFFIX = ".jar";
+    private static final String WEB_ARCHIVE_CLASS_PREFIX = "/WEB-INF/classes/";
+
     private ArchiveUtil() {
     }
 
@@ -121,7 +125,7 @@ public class ArchiveUtil {
         try {
             for (Map.Entry<ArchivePath, Node> each : c.entrySet()) {
                 ArchivePath archivePath = each.getKey();
-                if (archivePath.get().endsWith(OpenApiConstants.CLASS_SUFFIX)
+                if (archivePath.get().endsWith(CLASS_SUFFIX)
                         && acceptClassForScanning(filter, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
                         ExtraSuiteLogging.log.indexing(archivePath.get(), archive.getName());
@@ -129,7 +133,7 @@ public class ArchiveUtil {
                     }
                     continue;
                 }
-                if (archivePath.get().endsWith(OpenApiConstants.JAR_SUFFIX)
+                if (archivePath.get().endsWith(JAR_SUFFIX)
                         && acceptJarForScanning(config, archivePath.get())) {
                     try (InputStream contentStream = each.getValue().getAsset().openStream()) {
                         JavaArchive jarArchive = ShrinkWrap.create(JavaArchive.class, archivePath.get())
@@ -175,11 +179,11 @@ public class ArchiveUtil {
             return false;
         }
 
-        if (archivePath.startsWith(OpenApiConstants.WEB_ARCHIVE_CLASS_PREFIX)) {
-            archivePath = archivePath.substring(OpenApiConstants.WEB_ARCHIVE_CLASS_PREFIX.length());
+        if (archivePath.startsWith(WEB_ARCHIVE_CLASS_PREFIX)) {
+            archivePath = archivePath.substring(WEB_ARCHIVE_CLASS_PREFIX.length());
         }
 
-        String fqcn = archivePath.replaceAll("/", ".").substring(0, archivePath.lastIndexOf(OpenApiConstants.CLASS_SUFFIX));
+        String fqcn = archivePath.replaceAll("/", ".").substring(0, archivePath.lastIndexOf(CLASS_SUFFIX));
 
         if (fqcn.startsWith(".")) {
             fqcn = fqcn.substring(1);

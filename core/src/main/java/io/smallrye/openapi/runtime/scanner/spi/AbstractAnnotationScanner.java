@@ -17,7 +17,7 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -28,6 +28,7 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public abstract class AbstractAnnotationScanner implements AnnotationScanner {
     private static final String EMPTY = "";
+    private static final String EXTENSION_PROFILE_PREFIX = "x-smallrye-profile-";
 
     private static final Set<DotName> PRIMITIVE_OBJECTS = new HashSet<>();
     private static final Set<DotName> STREAM_OBJECTS = new HashSet<>();
@@ -113,11 +114,11 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
             extensions = new HashMap<>(extensions);
 
             for (String name : extensions.keySet()) {
-                if (!name.startsWith(OpenApiConstants.EXTENSION_PROFILE_PREFIX)) {
+                if (!name.startsWith(EXTENSION_PROFILE_PREFIX)) {
                     continue;
                 }
 
-                String profile = name.substring(OpenApiConstants.EXTENSION_PROFILE_PREFIX.length());
+                String profile = name.substring(EXTENSION_PROFILE_PREFIX.length());
                 profiles.add(profile);
                 extensible.removeExtension(name);
             }
@@ -146,12 +147,12 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
         if (requestBodyType != null) {
             if (isStreaming(requestBodyType)) {
                 return context.getConfig().getDefaultStreamingConsumes()
-                        .orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+                        .orElseGet(ContentIO::defaultMediaTypes);
             } else if (isPrimimive(requestBodyType)) {
                 return context.getConfig().getDefaultPrimitivesConsumes()
-                        .orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+                        .orElseGet(ContentIO::defaultMediaTypes);
             }
-            return context.getConfig().getDefaultConsumes().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+            return context.getConfig().getDefaultConsumes().orElseGet(ContentIO::defaultMediaTypes);
         }
         return new String[] {};
     }
@@ -159,11 +160,11 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
     @Override
     public String[] getDefaultProduces(AnnotationScannerContext context, MethodInfo methodInfo) {
         if (isStreaming(methodInfo.returnType())) {
-            return context.getConfig().getDefaultStreamingProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+            return context.getConfig().getDefaultStreamingProduces().orElseGet(ContentIO::defaultMediaTypes);
         } else if (isPrimimive(methodInfo.returnType())) {
-            return context.getConfig().getDefaultPrimitivesProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+            return context.getConfig().getDefaultPrimitivesProduces().orElseGet(ContentIO::defaultMediaTypes);
         }
-        return context.getConfig().getDefaultProduces().orElseGet(OpenApiConstants.DEFAULT_MEDIA_TYPES);
+        return context.getConfig().getDefaultProduces().orElseGet(ContentIO::defaultMediaTypes);
     }
 
     private boolean isPrimimive(Type type) {

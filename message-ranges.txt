@@ -2,7 +2,9 @@
 
 # Range     = owner
 
-00000-00999 = smallrye-open-api [io.smallrye.openapi.api] (messages)
+00000-00499 = smallrye-open-api [io.smallrye.openapi.api] (messages)
+
+00500-00999 = smallrye-open-api [io.smallrye.openapi.api] (logging)
 
 01000-01999 = smallrye-open-api [io.smallrye.openapi.api.util] (logging)
 

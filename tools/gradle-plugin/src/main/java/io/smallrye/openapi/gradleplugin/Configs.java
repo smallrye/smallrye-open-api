@@ -20,10 +20,10 @@ import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.constants.OpenApiConstants;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 
 /**
  * Bag for all properties exposed by {@link SmallryeOpenApiExtension} and {@link SmallryeOpenApiTask}, latter takes its defaults
@@ -80,7 +80,7 @@ class Configs implements SmallryeOpenApiProperties {
         operationServers = objects.mapProperty(String.class, String.class);
         customSchemaRegistryClass = objects.property(String.class);
         applicationPathDisable = objects.property(Boolean.class).convention(false);
-        openApiVersion = objects.property(String.class).convention(OpenApiConstants.OPEN_API_VERSION);
+        openApiVersion = objects.property(String.class).convention(SmallRyeOASConfig.Defaults.VERSION);
         infoTitle = objects.property(String.class);
         infoVersion = objects.property(String.class);
         infoDescription = objects.property(String.class);
@@ -136,13 +136,11 @@ class Configs implements SmallryeOpenApiProperties {
         encoding = objects.property(String.class).convention(ext.getEncoding());
     }
 
-    OpenApiConfig asOpenApiConfig() {
-        Config config = new SmallRyeConfigBuilder()
-                .withSources(
-                        new ConfigValuePropertiesConfigSource(getProperties(), "maven-plugin", ConfigSource.DEFAULT_ORDINAL))
+    Config asMicroprofileConfig() {
+        return new SmallRyeConfigBuilder()
+                .addDefaultSources()
+                .withSources(new PropertiesConfigSource(getProperties(), "gradle-plugin", ConfigSource.DEFAULT_ORDINAL))
                 .build();
-
-        return OpenApiConfig.fromConfig(config);
     }
 
     private Map<String, String> getProperties() {
@@ -172,23 +170,23 @@ class Configs implements SmallryeOpenApiProperties {
         addToPropertyMap(cp, OASConfig.SERVERS, servers);
         addToPropertyMap(cp, OASConfig.SERVERS_PATH_PREFIX, pathServers);
         addToPropertyMap(cp, OASConfig.SERVERS_OPERATION_PREFIX, operationServers);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
-        addToPropertyMap(cp, OpenApiConstants.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
-        addToPropertyMap(cp, OpenApiConstants.VERSION, openApiVersion);
-        addToPropertyMap(cp, OpenApiConstants.INFO_TITLE, infoTitle);
-        addToPropertyMap(cp, OpenApiConstants.INFO_VERSION, infoVersion);
-        addToPropertyMap(cp, OpenApiConstants.INFO_DESCRIPTION, infoDescription);
-        addToPropertyMap(cp, OpenApiConstants.INFO_TERMS, infoTermsOfService);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_EMAIL, infoContactEmail);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_NAME, infoContactName);
-        addToPropertyMap(cp, OpenApiConstants.INFO_CONTACT_URL, infoContactUrl);
-        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_NAME, infoLicenseName);
-        addToPropertyMap(cp, OpenApiConstants.INFO_LICENSE_URL, infoLicenseUrl);
-        addToPropertyMap(cp, OpenApiConstants.OPERATION_ID_STRAGEGY, operationIdStrategy);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_PROFILES, scanProfiles);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
-        addToPropertyMap(cp, OpenApiConstants.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_SCAN_DEPENDENCIES_DISABLE, scanDependenciesDisable);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_CUSTOM_SCHEMA_REGISTRY_CLASS, customSchemaRegistryClass);
+        addToPropertyMap(cp, SmallRyeOASConfig.SMALLRYE_APP_PATH_DISABLE, applicationPathDisable);
+        addToPropertyMap(cp, SmallRyeOASConfig.VERSION, openApiVersion);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_TITLE, infoTitle);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_VERSION, infoVersion);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_DESCRIPTION, infoDescription);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_TERMS, infoTermsOfService);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_EMAIL, infoContactEmail);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_NAME, infoContactName);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_URL, infoContactUrl);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_NAME, infoLicenseName);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_URL, infoLicenseUrl);
+        addToPropertyMap(cp, SmallRyeOASConfig.OPERATION_ID_STRAGEGY, operationIdStrategy);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_PROFILES, scanProfiles);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
+        addToPropertyMap(cp, SmallRyeOASConfig.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
 
         return cp;
     }

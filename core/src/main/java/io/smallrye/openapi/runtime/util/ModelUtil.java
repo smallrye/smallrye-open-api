@@ -21,7 +21,6 @@ import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 
-import io.smallrye.openapi.api.constants.OpenApiConstants;
 import io.smallrye.openapi.api.models.ComponentsImpl;
 import io.smallrye.openapi.api.models.PathsImpl;
 import io.smallrye.openapi.api.models.media.ContentImpl;
@@ -29,6 +28,7 @@ import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.ReferenceType;
+import io.smallrye.openapi.runtime.io.media.ContentIO;
 
 /**
  * Class with some convenience methods useful for working with the OAI data model.
@@ -271,8 +271,7 @@ public class ModelUtil {
         Content content = parameter.getContent();
         Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(content);
         if (mediaTypes.isEmpty()) {
-            String[] defMediaTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
-            for (String mediaTypeName : defMediaTypes) {
+            for (String mediaTypeName : ContentIO.defaultMediaTypes()) {
                 MediaType mediaType = new MediaTypeImpl();
                 mediaType.setSchema(schema);
                 content.addMediaType(mediaTypeName, mediaType);
@@ -324,7 +323,7 @@ public class ModelUtil {
             if (mediaTypes != null && mediaTypes.length > 0) {
                 requestBodyTypes = mediaTypes;
             } else {
-                requestBodyTypes = OpenApiConstants.DEFAULT_MEDIA_TYPES.get();
+                requestBodyTypes = ContentIO.defaultMediaTypes();
             }
             for (String mediaTypeName : requestBodyTypes) {
                 MediaType mediaType = new MediaTypeImpl();

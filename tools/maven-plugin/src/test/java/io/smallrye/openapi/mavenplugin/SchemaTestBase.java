@@ -2,6 +2,7 @@ package io.smallrye.openapi.mavenplugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +13,8 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 
 import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 
-import io.smallrye.openapi.runtime.io.OpenApiParser;
+import io.smallrye.config.SmallRyeConfigBuilder;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
 public class SchemaTestBase {
 
@@ -23,8 +25,8 @@ public class SchemaTestBase {
      * @param schemaConsumer
      */
     protected void testSchema(MavenExecutionResult result, Consumer<OpenAPI> schemaConsumer) throws IOException {
-        schemaConsumer.accept(readJson(result));
-        schemaConsumer.accept(readYaml(result));
+        schemaConsumer.accept(read(result, "target/generated/openapi.json"));
+        schemaConsumer.accept(read(result, "target/generated/openapi.yaml"));
     }
 
     protected void deleteDirectory(Path directory) {
@@ -38,21 +40,21 @@ public class SchemaTestBase {
         }
     }
 
-    private OpenAPI readJson(MavenExecutionResult result) throws IOException {
-        File openapiFile = result.getMavenProjectResult()
+    private OpenAPI read(MavenExecutionResult result, String path) throws IOException {
+        Path openapiFile = result.getMavenProjectResult()
                 .getTargetProjectDirectory()
-                .resolve("target/generated/openapi.json")
-                .toFile();
+                .resolve(path);
 
-        return OpenApiParser.parse(openapiFile.toURI().toURL());
-    }
-
-    private OpenAPI readYaml(MavenExecutionResult result) throws IOException {
-        File openapiFile = result.getMavenProjectResult()
-                .getTargetProjectDirectory()
-                .resolve("target/generated/openapi.yaml")
-                .toFile();
-
-        return OpenApiParser.parse(openapiFile.toURI().toURL());
+        try (InputStream openapiStream = Files.newInputStream(openapiFile)) {
+            return SmallRyeOpenAPI.builder()
+                    .withConfig(new SmallRyeConfigBuilder().addDefaultSources().build())
+                    .enableAnnotationScan(false)
+                    .enableModelReader(false)
+                    .enableStandardFilter(false)
+                    .enableStandardStaticFiles(false)
+                    .withCustomStaticFile(() -> openapiStream)
+                    .build()
+                    .model();
+        }
     }
 }
