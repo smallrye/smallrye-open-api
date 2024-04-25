@@ -62,6 +62,7 @@ public final class SmallRyeOASConfig {
     public static final String INFO_TITLE = SMALLRYE_PREFIX + "info.title";
     public static final String INFO_VERSION = SMALLRYE_PREFIX + "info.version";
     public static final String INFO_DESCRIPTION = SMALLRYE_PREFIX + "info.description";
+    public static final String INFO_SUMMARY = SMALLRYE_PREFIX + "info.summary";
     public static final String INFO_TERMS = SMALLRYE_PREFIX + "info.termsOfService";
     public static final String INFO_CONTACT_EMAIL = SMALLRYE_PREFIX + "info.contact.email";
     public static final String INFO_CONTACT_NAME = SMALLRYE_PREFIX + "info.contact.name";

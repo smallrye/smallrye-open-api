@@ -297,6 +297,7 @@ class SmallryeOpenApiPluginTest {
             assertThat(info).isNotNull();
             assertThat(info.get("title").asText()).isEqualTo("Info Title");
             assertThat(info.get("description").asText()).isEqualTo("Info Description");
+            assertThat(info.get("summary").asText()).isEqualTo("Info Summary");
             assertThat(info.get("termsOfService").asText()).isEqualTo("Info TOS");
             assertThat(info.get("version").asText()).isEqualTo("Info Version");
             assertThat(info.get("contact").get("email").asText()).isEqualTo("Info Email");

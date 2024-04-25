@@ -66,6 +66,7 @@ public class ConfigUtil {
         setIfPresent(config.getInfoTitle(), oai.getInfo()::setTitle);
         setIfPresent(config.getInfoVersion(), oai.getInfo()::setVersion);
         setIfPresent(config.getInfoDescription(), oai.getInfo()::setDescription);
+        setIfPresent(config.getInfoSummary(), oai.getInfo()::setSummary);
         setIfPresent(config.getInfoTermsOfService(), oai.getInfo()::setTermsOfService);
 
         // Contact
