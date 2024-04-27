@@ -106,6 +106,7 @@ public class SmallRyeOpenAPI {
 
         private IndexView index = EMPTY_INDEX;
         private boolean enableAnnotationScan = true;
+        private boolean enableUnannotatedPathParameters = false;
         private ClassLoader scannerClassLoader;
         private Predicate<String> scannerFilter = n -> true;
 
@@ -340,6 +341,20 @@ public class SmallRyeOpenAPI {
         }
 
         /**
+         * Enable (true) or disable (false) path parameters to be optionally annotated.
+         *
+         * Default is false.
+         *
+         * @param enableUnannotatedPathParameters
+         *        true if annotation use on path parameters is optional, otherwise false.
+         * @return this builder
+         */
+        public Builder enableUnannotatedPathParameters(boolean enableUnannotatedPathParameters) {
+            this.enableUnannotatedPathParameters = enableUnannotatedPathParameters;
+            return this;
+        }
+
+        /**
          * Provide a class loader used to load AnnotationScanner instances via
          * the {@link ServiceLoader}. If not set, instances will be loaded using the
          * {@linkplain #withApplicationClassLoader(ClassLoader) application
@@ -501,6 +516,7 @@ public class SmallRyeOpenAPI {
             }
 
             if (enableAnnotationScan && !buildConfig.scanDisable()) {
+                buildConfig.setAllowNakedPathParameter(enableUnannotatedPathParameters);
                 AnnotationScannerExtension ext = newExtension(modelIO);
                 AnnotationScannerContext scannerContext = new AnnotationScannerContext(filteredIndex, appClassLoader,
                         Collections.singletonList(ext), false, buildConfig, modelIO, new OpenAPIImpl());
