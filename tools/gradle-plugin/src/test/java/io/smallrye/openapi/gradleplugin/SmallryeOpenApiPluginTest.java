@@ -71,7 +71,7 @@ class SmallryeOpenApiPluginTest {
         ext.applicationPathDisable.set(true);
         ext.configProperties.set(new File("/foo/bar"));
         ext.encoding.set("ISO-8859-1");
-        ext.openApiVersion.set("3.0.0");
+        ext.openApiVersion.set("999.999.999"); //intentionally invalid
         ext.customSchemaRegistryClass.set("foo.bar.Baz");
         ext.filter.set("filter");
         ext.infoContactEmail.set("info-email");

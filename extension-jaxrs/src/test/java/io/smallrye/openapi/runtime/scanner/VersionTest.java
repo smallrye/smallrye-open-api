@@ -38,7 +38,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testSettingViaProvidedSchema(Class<?>... classes) throws IOException, JSONException {
-        OpenAPI result = scan(config(Collections.emptyMap()), true, loadStaticFile(), classes);
+        OpenAPI result = scan(config(Collections.emptyMap()), true, loadStaticFile("version-valid.json"), classes);
         assertJsonEquals("resource.testVersionViaSchema.json", result);
     }
 
@@ -55,7 +55,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testSettingViaConfig(Class<?>... classes) throws IOException, JSONException {
-        System.setProperty(VERSION_PROPERTY, "3.0.0");
+        System.setProperty(VERSION_PROPERTY, "3.1.0");
 
         try {
             OpenAPI result = scan(config(Collections.emptyMap()), true, null, classes);
@@ -78,19 +78,20 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testSettingViaConfigWhenStaticPresent(Class<?>... classes) throws IOException, JSONException {
-        System.setProperty(VERSION_PROPERTY, "3.0.0");
+        //The test will pass if this version matches the one in the file of expected JSON (resource.testVersionViaConfig.json) and the file read by loadStaticFile() (version.json) is overriden.
+        System.setProperty(VERSION_PROPERTY, "3.1.0");
 
         try {
-            OpenAPI result = scan(config(Collections.emptyMap()), true, loadStaticFile(), classes);
+            OpenAPI result = scan(config(Collections.emptyMap()), true, loadStaticFile("version-broken.json"), classes);
             assertJsonEquals("resource.testVersionViaConfig.json", result);
         } finally {
             System.clearProperty(VERSION_PROPERTY);
         }
     }
 
-    private InputStream loadStaticFile() {
+    private InputStream loadStaticFile(String fileName) {
         ClassLoader classLoader = this.getClass().getClassLoader();
-        InputStream versionJson = classLoader.getResourceAsStream("io/smallrye/openapi/runtime/scanner/static/version.json");
+        InputStream versionJson = classLoader.getResourceAsStream("io/smallrye/openapi/runtime/scanner/static/" + fileName);
         return versionJson;
     }
 
