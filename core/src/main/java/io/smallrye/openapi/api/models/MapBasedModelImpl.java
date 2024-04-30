@@ -106,9 +106,12 @@ public abstract class MapBasedModelImpl implements ModelImpl {
     }
 
     protected <T> void addToListProperty(String propertyName, T value) {
-        List<T> list = (List<T>) data.get(propertyName);
         if (value != null) {
-            if (list == null) {
+            Object existing = data.get(propertyName);
+            List<T> list;
+            if (existing instanceof List) {
+                list = (List<T>) existing;
+            } else {
                 list = new ArrayList<>();
                 data.put(propertyName, list);
             }
@@ -117,8 +120,11 @@ public abstract class MapBasedModelImpl implements ModelImpl {
     }
 
     protected <T> void removeFromListProperty(String propertyName, T toRemove) {
-        List<T> list = (List<T>) data.get(propertyName);
-        ModelUtil.remove(list, toRemove);
+        Object existing = data.get(propertyName);
+        if (existing instanceof List) {
+            List<T> list = (List<T>) existing;
+            ModelUtil.remove(list, toRemove);
+        }
     }
 
     protected <T> void setMapProperty(String propertyName, Map<String, T> value) {
@@ -141,8 +147,11 @@ public abstract class MapBasedModelImpl implements ModelImpl {
 
     protected <T> void addToMapProperty(String propertyName, String key, T value) {
         if (value != null) {
-            Map<String, T> map = (Map<String, T>) data.get(propertyName);
-            if (map == null) {
+            Object existing = data.get(propertyName);
+            Map<String, T> map;
+            if (existing instanceof Map) {
+                map = (Map<String, T>) existing;
+            } else {
                 map = new HashMap<>();
                 data.put(propertyName, map);
             }
@@ -151,8 +160,11 @@ public abstract class MapBasedModelImpl implements ModelImpl {
     }
 
     protected <T> void removeFromMapProperty(String propertyName, String key) {
-        Map<String, T> map = (Map<String, T>) data.get(propertyName);
-        ModelUtil.remove(map, key);
+        Object existing = data.get(propertyName);
+        if (existing instanceof Map) {
+            Map<String, T> map = (Map<String, T>) existing;
+            ModelUtil.remove(map, key);
+        }
     }
 
     /**
