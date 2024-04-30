@@ -90,6 +90,8 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
     private List<Schema> typeObservers;
     // Value set via setNullable, unless overwritten by call to setType(List)
     private Boolean nullable = null;
+    // Whether user has explicitly added extensions
+    private boolean explicitSetExtensions = false;
 
     /**
      * The boolean value of this schema. {@code null} in most cases where the schema is an object
@@ -1036,12 +1038,13 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
                 extensions.put(k, v);
             }
         });
-        return extensions;
+        return extensions.isEmpty() && !explicitSetExtensions ? null : extensions;
     }
 
     @Override
     public Schema addExtension(String name, Object value) {
         setProperty(name, value);
+        explicitSetExtensions = true;
         return this;
     }
 
@@ -1059,10 +1062,13 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
 
         // Add all the new extensions
         if (extensions != null) {
+            explicitSetExtensions = true;
             extensions.forEach((k, v) -> {
                 k = k.startsWith("x-") ? k : "x-" + k;
                 setProperty(k, v);
             });
+        } else {
+            explicitSetExtensions = false;
         }
     }
 
