@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
+import test.io.smallrye.openapi.runtime.scanner.entities.GreetingParam;
 
 /**
  * Spring.
@@ -55,6 +57,12 @@ public class GreetingGetController {
     @Secured({ "roles:retrieval-by-query" })
     public Greeting helloRequestParam(@RequestParam(value = "name", required = false) String name) {
         return new Greeting("Hello " + name);
+    }
+
+    // 4a) Basic request with parameter-object test
+    @GetMapping("/helloParameterObject")
+    public Greeting helloParameterObject(@ParameterObject() GreetingParam params) {
+        return new Greeting("Hello " + params.getName());
     }
 
     // 5) ResponseEntity without a type specified
