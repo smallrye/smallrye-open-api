@@ -78,43 +78,44 @@ import io.smallrye.openapi.api.models.tags.TagImpl;
  */
 public class OASFactoryResolverImpl extends OASFactoryResolver {
 
-    private static final Map<Class<? extends Constructible>, Supplier<? extends Constructible>> registry = new HashMap<>();
+    private static class OASFactoryResolverRegistry {
 
-    static <K extends Constructible, V extends K> void put(Class<K> key, Supplier<V> value) {
-        registry.put(key, value);
-    }
+        private static final Map<Class<? extends Constructible>, Supplier<? extends Constructible>> REGISTRY;
 
-    static {
-        put(APIResponse.class, APIResponseImpl::new);
-        put(APIResponses.class, APIResponsesImpl::new);
-        put(Callback.class, CallbackImpl::new);
-        put(Components.class, ComponentsImpl::new);
-        put(Contact.class, ContactImpl::new);
-        put(Content.class, ContentImpl::new);
-        put(Discriminator.class, DiscriminatorImpl::new);
-        put(Encoding.class, EncodingImpl::new);
-        put(Example.class, ExampleImpl::new);
-        put(ExternalDocumentation.class, ExternalDocumentationImpl::new);
-        put(Header.class, HeaderImpl::new);
-        put(Info.class, InfoImpl::new);
-        put(License.class, LicenseImpl::new);
-        put(Link.class, LinkImpl::new);
-        put(MediaType.class, MediaTypeImpl::new);
-        put(OAuthFlow.class, OAuthFlowImpl::new);
-        put(OAuthFlows.class, OAuthFlowsImpl::new);
-        put(OpenAPI.class, OpenAPIImpl::new);
-        put(Operation.class, OperationImpl::new);
-        put(Parameter.class, ParameterImpl::new);
-        put(PathItem.class, PathItemImpl::new);
-        put(Paths.class, PathsImpl::new);
-        put(RequestBody.class, RequestBodyImpl::new);
-        put(Schema.class, SchemaImpl::new);
-        put(SecurityRequirement.class, SecurityRequirementImpl::new);
-        put(SecurityScheme.class, SecuritySchemeImpl::new);
-        put(Server.class, ServerImpl::new);
-        put(ServerVariable.class, ServerVariableImpl::new);
-        put(Tag.class, TagImpl::new);
-        put(XML.class, XMLImpl::new);
+        static {
+            Map<Class<? extends Constructible>, Supplier<? extends Constructible>> registry = new HashMap<>(30);
+            registry.put(APIResponse.class, APIResponseImpl::new);
+            registry.put(APIResponses.class, APIResponsesImpl::new);
+            registry.put(Callback.class, CallbackImpl::new);
+            registry.put(Components.class, ComponentsImpl::new);
+            registry.put(Contact.class, ContactImpl::new);
+            registry.put(Content.class, ContentImpl::new);
+            registry.put(Discriminator.class, DiscriminatorImpl::new);
+            registry.put(Encoding.class, EncodingImpl::new);
+            registry.put(Example.class, ExampleImpl::new);
+            registry.put(ExternalDocumentation.class, ExternalDocumentationImpl::new);
+            registry.put(Header.class, HeaderImpl::new);
+            registry.put(Info.class, InfoImpl::new);
+            registry.put(License.class, LicenseImpl::new);
+            registry.put(Link.class, LinkImpl::new);
+            registry.put(MediaType.class, MediaTypeImpl::new);
+            registry.put(OAuthFlow.class, OAuthFlowImpl::new);
+            registry.put(OAuthFlows.class, OAuthFlowsImpl::new);
+            registry.put(OpenAPI.class, OpenAPIImpl::new);
+            registry.put(Operation.class, OperationImpl::new);
+            registry.put(Parameter.class, ParameterImpl::new);
+            registry.put(PathItem.class, PathItemImpl::new);
+            registry.put(Paths.class, PathsImpl::new);
+            registry.put(RequestBody.class, RequestBodyImpl::new);
+            registry.put(Schema.class, SchemaImpl::new);
+            registry.put(SecurityRequirement.class, SecurityRequirementImpl::new);
+            registry.put(SecurityScheme.class, SecuritySchemeImpl::new);
+            registry.put(Server.class, ServerImpl::new);
+            registry.put(ServerVariable.class, ServerVariableImpl::new);
+            registry.put(Tag.class, TagImpl::new);
+            registry.put(XML.class, XMLImpl::new);
+            REGISTRY = registry;
+        }
     }
 
     /**
@@ -124,7 +125,7 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
     @Override
     public <T extends Constructible> T createObject(Class<T> clazz) {
         Objects.requireNonNull(clazz, "clazz");
-        return (T) registry.getOrDefault(clazz, () -> this.unknownType(clazz)).get();
+        return (T) OASFactoryResolverRegistry.REGISTRY.getOrDefault(clazz, () -> this.unknownType(clazz)).get();
     }
 
     <T extends Constructible> T unknownType(Class<T> clazz) {
