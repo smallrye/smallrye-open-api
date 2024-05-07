@@ -11,11 +11,9 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.PathItemIO;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.io.media.ContentIO;
 
 public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Callback, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
@@ -23,16 +21,8 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
     private static final String PROP_OPERATIONS = "operations";
     private static final String PROP_CALLBACK_URL_EXPRESSION = "callbackUrlExpression";
 
-    private final CallbackOperationIO<V, A, O, AB, OB> callbackOperationIO;
-    private final PathItemIO<V, A, O, AB, OB> pathItemIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public CallbackIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public CallbackIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.CALLBACK, DotName.createSimple(Callback.class));
-        callbackOperationIO = new CallbackOperationIO<>(context, contentIO, this, extensionIO);
-        pathItemIO = new PathItemIO<>(context, callbackOperationIO, contentIO, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -43,12 +33,12 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
 
         Optional.ofNullable(value(annotation, PROP_OPERATIONS))
                 .map(AnnotationInstance[].class::cast)
-                .map(pathItemIO::read)
+                .map(pathItemCallbackIO()::read)
                 .ifPresent(pathItem -> callback.addPathItem(
                         value(annotation, PROP_CALLBACK_URL_EXPRESSION),
                         pathItem));
 
-        callback.setExtensions(extensionIO.readExtensible(annotation));
+        callback.setExtensions(extensionIO().readExtensible(annotation));
         return callback;
     }
 
@@ -63,10 +53,10 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
                 .filter(not(ExtensionIO::isExtension))
                 .filter(not(this::isReference))
                 .filter(property -> jsonIO().isObject(property.getValue()))
-                .map(property -> entry(property.getKey(), pathItemIO.readValue(property.getValue())))
+                .map(property -> entry(property.getKey(), pathItemCallbackIO().readValue(property.getValue())))
                 .forEach(pathItem -> callback.addPathItem(pathItem.getKey(), pathItem.getValue()));
 
-        extensionIO.readMap(node).forEach(callback::addExtension);
+        extensionIO().readMap(node).forEach(callback::addExtension);
 
         return callback;
     }
@@ -78,9 +68,10 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
                 setReference(node, model);
             } else {
                 Optional.ofNullable(model.getPathItems())
-                        .ifPresent(items -> items.forEach((key, value) -> setIfPresent(node, key, pathItemIO.write(value))));
+                        .ifPresent(items -> items
+                                .forEach((key, value) -> setIfPresent(node, key, pathItemCallbackIO().write(value))));
 
-                setAllIfPresent(node, extensionIO.write(model));
+                setAllIfPresent(node, extensionIO().write(model));
             }
             return node;
         }).map(jsonIO()::buildObject);

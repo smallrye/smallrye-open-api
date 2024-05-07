@@ -12,7 +12,6 @@ import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<SecurityScheme, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
@@ -28,13 +27,8 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
     private static final String PROP_API_KEY_NAME = "apiKeyName";
     private static final String PROP_SECURITY_SCHEME_NAME = "securitySchemeName";
 
-    private final OAuthFlowsIO<V, A, O, AB, OB> oauthFlowsIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public SecuritySchemeIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public SecuritySchemeIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SECURITY_SCHEME, Names.create(SecurityScheme.class));
-        oauthFlowsIO = new OAuthFlowsIO<>(context, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -52,10 +46,10 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
         securityScheme.setIn(enumValue(annotation, PROP_IN, SecurityScheme.In.class));
         securityScheme.setScheme(value(annotation, PROP_SCHEME));
         securityScheme.setBearerFormat(value(annotation, PROP_BEARER_FORMAT));
-        securityScheme.setFlows(oauthFlowsIO.read(annotation.value(PROP_FLOWS)));
+        securityScheme.setFlows(oauthFlowsIO().read(annotation.value(PROP_FLOWS)));
         securityScheme.setOpenIdConnectUrl(value(annotation, PROP_OPEN_ID_CONNECT_URL));
         securityScheme.setRef(ReferenceType.SECURITY_SCHEME.refValue(annotation));
-        securityScheme.setExtensions(extensionIO.readExtensible(annotation));
+        securityScheme.setExtensions(extensionIO().readExtensible(annotation));
         return securityScheme;
     }
 
@@ -69,9 +63,9 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
         model.setIn(enumValue(jsonIO().getValue(node, PROP_IN), SecurityScheme.In.class));
         model.setScheme(jsonIO().getString(node, PROP_SCHEME));
         model.setBearerFormat(jsonIO().getString(node, PROP_BEARER_FORMAT));
-        model.setFlows(oauthFlowsIO.readValue(jsonIO().getValue(node, PROP_FLOWS)));
+        model.setFlows(oauthFlowsIO().readValue(jsonIO().getValue(node, PROP_FLOWS)));
         model.setOpenIdConnectUrl(jsonIO().getString(node, PROP_OPEN_ID_CONNECT_URL));
-        model.setExtensions(extensionIO.readMap(node));
+        model.setExtensions(extensionIO().readMap(node));
         return model;
     }
 
@@ -87,9 +81,9 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
                 setIfPresent(node, PROP_IN, jsonIO().toJson(model.getIn()));
                 setIfPresent(node, PROP_SCHEME, jsonIO().toJson(model.getScheme()));
                 setIfPresent(node, PROP_BEARER_FORMAT, jsonIO().toJson(model.getBearerFormat()));
-                setIfPresent(node, PROP_FLOWS, oauthFlowsIO.write(model.getFlows()));
+                setIfPresent(node, PROP_FLOWS, oauthFlowsIO().write(model.getFlows()));
                 setIfPresent(node, PROP_OPEN_ID_CONNECT_URL, jsonIO().toJson(model.getOpenIdConnectUrl()));
-                setAllIfPresent(node, extensionIO.write(model));
+                setAllIfPresent(node, extensionIO().write(model));
             }
 
             return node;

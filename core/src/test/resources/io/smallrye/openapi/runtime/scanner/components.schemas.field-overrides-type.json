@@ -20,13 +20,9 @@
             }
           },
           "second": {
-            "title": "Property with `allOf` referring to `OtherBean`",
+            "title": "Property with `type` and reference to `OtherBean`",
             "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/OtherBean"
-              }
-            ]
+            "$ref": "#/components/schemas/OtherBean"
           },
           "third": {
             "$ref": "#/components/schemas/OtherBean"

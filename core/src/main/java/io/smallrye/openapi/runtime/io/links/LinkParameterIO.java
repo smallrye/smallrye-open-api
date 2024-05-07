@@ -14,7 +14,7 @@ public class LinkParameterIO<V, A extends V, O extends V, AB, OB> extends MapMod
 
     private static final String PROP_EXPRESSION = "expression";
 
-    protected LinkParameterIO(IOContext<V, A, O, AB, OB> context) {
+    public LinkParameterIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OAUTH_SCOPE, Names.create(String.class));
     }
 

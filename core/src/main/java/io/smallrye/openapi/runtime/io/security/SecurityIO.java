@@ -14,32 +14,27 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
 import io.smallrye.openapi.runtime.io.IOContext;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class SecurityIO<V, A extends V, O extends V, AB, OB> {
 
-    private final SecurityRequirementIO<V, A, O, AB, OB> securityRequirementIO;
-    private final SecurityRequirementsSetIO<V, A, O, AB, OB> securityRequirementsSetIO;
-    private final SecuritySchemeIO<V, A, O, AB, OB> securitySchemeIO;
+    private final IOContext<V, A, O, AB, OB> context;
 
-    public SecurityIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
-        securityRequirementIO = new SecurityRequirementIO<>(context);
-        securityRequirementsSetIO = new SecurityRequirementsSetIO<>(context);
-        securitySchemeIO = new SecuritySchemeIO<>(context, extensionIO);
+    public SecurityIO(IOContext<V, A, O, AB, OB> context) {
+        this.context = context;
     }
 
     public List<SecurityRequirement> readRequirements(AnnotationTarget target) {
         return Stream.of(
-                securityRequirementIO.readList(target),
-                securityRequirementsSetIO.readList(target))
+                context.securityRequirementIO().readList(target),
+                context.securityRequirementsSetIO().readList(target))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
     public List<SecurityRequirement> readRequirements(AnnotationValue annotations, AnnotationValue setAnnotations) {
         List<List<SecurityRequirement>> requirements = Stream.of(
-                securityRequirementIO.readList(annotations),
-                securityRequirementsSetIO.readList(setAnnotations))
+                context.securityRequirementIO().readList(annotations),
+                context.securityRequirementsSetIO().readList(setAnnotations))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -53,14 +48,14 @@ public class SecurityIO<V, A extends V, O extends V, AB, OB> {
     }
 
     public Map<String, SecurityScheme> readSchemes(AnnotationTarget target) {
-        return securitySchemeIO.readMap(target);
+        return context.securitySchemeIO().readMap(target);
     }
 
     public List<SecurityRequirement> readRequirements(V node) {
-        return securityRequirementIO.readList(node);
+        return context.securityRequirementIO().readList(node);
     }
 
     public Optional<A> write(List<SecurityRequirement> models) {
-        return securityRequirementIO.write(models);
+        return context.securityRequirementIO().write(models);
     }
 }

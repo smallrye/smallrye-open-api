@@ -35,13 +35,13 @@
             "items": {
               "format": "date-time",
               "type": "string",
-              "example": "2022-03-10T12:15:50"
+              "examples" : [ "2022-03-10T12:15:50" ]
             }
           },
           "genericFieldK": {
             "format": "date-time",
             "type": "string",
-            "example": "2022-03-10T12:15:50"
+            "examples" : [ "2022-03-10T12:15:50" ]
           },
           "mapOfKToFoo": {
             "type": "object",
@@ -54,7 +54,7 @@
             "additionalProperties": {
               "format": "date-time",
               "type": "string",
-              "example": "2022-03-10T12:15:50"
+              "examples" : [ "2022-03-10T12:15:50" ]
             }
           }
         }

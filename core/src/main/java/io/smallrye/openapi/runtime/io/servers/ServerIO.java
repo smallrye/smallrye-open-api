@@ -17,7 +17,6 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Server, V, A, O, AB, OB> {
 
@@ -25,13 +24,8 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_URL = "url";
 
-    private final ServerVariableIO<V, A, O, AB, OB> serverVariableIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public ServerIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public ServerIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SERVER, Names.create(Server.class));
-        serverVariableIO = new ServerVariableIO<>(context, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     public List<Server> readList(AnnotationTarget target) {
@@ -62,8 +56,8 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
         Server server = new ServerImpl();
         server.setUrl(value(annotation, PROP_URL));
         server.setDescription(value(annotation, PROP_DESCRIPTION));
-        server.setVariables(serverVariableIO.readMap(annotation.value(PROP_VARIABLES)));
-        server.setExtensions(extensionIO.readExtensible(annotation));
+        server.setVariables(serverVariableIO().readMap(annotation.value(PROP_VARIABLES)));
+        server.setExtensions(extensionIO().readExtensible(annotation));
         return server;
     }
 
@@ -96,8 +90,8 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
         Server server = new ServerImpl();
         server.setUrl(jsonIO().getString(node, PROP_URL));
         server.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        server.setVariables(serverVariableIO.readMap(jsonIO().getValue(node, PROP_VARIABLES)));
-        server.setExtensions(extensionIO.readMap(node));
+        server.setVariables(serverVariableIO().readMap(jsonIO().getValue(node, PROP_VARIABLES)));
+        server.setExtensions(extensionIO().readMap(node));
         return server;
     }
 
@@ -122,8 +116,8 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     private void write(Server model, OB node) {
         setIfPresent(node, PROP_URL, jsonIO().toJson(model.getUrl()));
         setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-        setIfPresent(node, PROP_VARIABLES, serverVariableIO.write(model.getVariables()));
-        setAllIfPresent(node, extensionIO.write(model));
+        setIfPresent(node, PROP_VARIABLES, serverVariableIO().write(model.getVariables()));
+        setAllIfPresent(node, extensionIO().write(model));
     }
 
 }

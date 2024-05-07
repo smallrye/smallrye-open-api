@@ -21,7 +21,14 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Greeting"
+                  "anyOf": [
+                    {
+                      "$ref" : "#/components/schemas/Greeting"
+                    },
+                    {
+                      "type" : "null"
+                    }
+                  ]
                 }
               }
             }
@@ -155,7 +162,8 @@
   "components" : {
     "schemas" : {
       "message" : {
-        "type" : "string"
+        "type" : "string",
+        "unknown-property" : "This should appear in output document"
       },
      "Greeting" : {
         "type" : "object",

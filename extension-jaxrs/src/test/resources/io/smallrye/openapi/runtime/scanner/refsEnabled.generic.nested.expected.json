@@ -31,11 +31,7 @@
           "foo": {
             "type": "object",
             "maxLength": 123456,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/KustomPairStringString"
-              }
-            ]
+            "$ref": "#/components/schemas/KustomPairStringString"
           }
         }
       }

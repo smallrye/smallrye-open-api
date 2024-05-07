@@ -400,7 +400,8 @@ public abstract class AbstractParameterProcessor {
         return Parameter.In.PATH.equals(param.getIn())
                 && !Style.MATRIX.equals(param.getStyle())
                 && param.getSchema() != null
-                && SchemaType.STRING.equals(param.getSchema().getType())
+                && param.getSchema().getType() != null
+                && param.getSchema().getType().contains(SchemaType.STRING)
                 && param.getSchema().getPattern() == null;
     }
 
@@ -463,7 +464,7 @@ public abstract class AbstractParameterProcessor {
             if (schemas.isEmpty()) {
                 // ParameterContext was generated above or no @Schema was provided on the @Parameter style=matrix
                 Schema schema = new SchemaImpl();
-                schema.setType(SchemaType.OBJECT);
+                schema.addType(SchemaType.OBJECT);
                 ModelUtil.setParameterSchema(context.oaiParam, schema);
                 schemas = Arrays.asList(schema);
             }
@@ -578,7 +579,7 @@ public abstract class AbstractParameterProcessor {
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
         if (param.getExtensions() == null) {
-            param.setExtensions(scannerContext.io().extensions().readMap(context.target));
+            param.setExtensions(scannerContext.io().extensionIO().readMap(context.target));
         }
     }
 
@@ -625,7 +626,7 @@ public abstract class AbstractParameterProcessor {
             if (refSchema != null) {
                 localSchema = new SchemaImpl().type(refSchema.getType());
             } else {
-                localSchema = new SchemaImpl().type(SchemaType
+                localSchema = new SchemaImpl().addType(SchemaType
                         .valueOf(TypeUtil.getTypeAttributes(paramType).get(SchemaConstant.PROP_TYPE).toString().toUpperCase()));
             }
         } else {
@@ -647,7 +648,7 @@ public abstract class AbstractParameterProcessor {
 
         if (localOnlySchemaModified(paramSchema, localSchema, modCount)) {
             // Add new `allOf` schema, erasing `type` derived above from the local schema
-            Schema allOf = new SchemaImpl().addAllOf(paramSchema).addAllOf(localSchema.type(null));
+            Schema allOf = new SchemaImpl().addAllOf(paramSchema).addAllOf(localSchema.type((List<SchemaType>) null));
             param.setSchema(allOf);
         }
     }
@@ -696,8 +697,8 @@ public abstract class AbstractParameterProcessor {
                         (target, name) -> setRequired(name, schema));
             }
 
-            if (paramSchema.getNullable() == null && TypeUtil.isOptional(paramType)) {
-                paramSchema.setNullable(Boolean.TRUE);
+            if (SchemaImpl.getNullable(paramSchema) == null && TypeUtil.isOptional(paramType)) {
+                SchemaImpl.setNullable(paramSchema, Boolean.TRUE);
             }
 
             if (schema.getProperties() != null) {
@@ -753,7 +754,7 @@ public abstract class AbstractParameterProcessor {
                     MediaType mediaType = new MediaTypeImpl();
                     Schema schema = new SchemaImpl();
                     Map<String, Encoding> encodings = new HashMap<>();
-                    schema.setType(SchemaType.OBJECT);
+                    schema.addType(SchemaType.OBJECT);
                     mediaType.setSchema(schema);
 
                     if (APPLICATION_FORM_URLENCODED.equals(mediaTypeName)) {

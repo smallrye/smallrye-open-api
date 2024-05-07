@@ -28,11 +28,7 @@
           "message": {
             "type": "string",
             "description": "Used to send a message",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SimpleString"
-              }
-            ]
+            "$ref": "#/components/schemas/SimpleString"
           },
           "optionalMessage": {
             "type": "string",

@@ -1,10 +1,12 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -40,8 +42,9 @@ class OpenApiDataObjectScannerTest {
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 IndexScannerTestBase.emptyConfig());
         Schema out = OpenApiDataObjectScanner.process(context, Type.create(DotName.createSimple(type), Kind.CLASS));
-        assertEquals(Schema.SchemaType.ARRAY, out.getType());
-        assertEquals(itemType, out.getItems().getType());
+        assertEquals(singletonList(Schema.SchemaType.ARRAY), out.getType());
+        List<Schema.SchemaType> expectedTypes = itemType == null ? null : singletonList(itemType);
+        assertEquals(expectedTypes, out.getItems().getType());
         assertEquals(itemFormat, out.getItems().getFormat());
     }
 

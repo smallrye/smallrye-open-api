@@ -5,6 +5,7 @@ import static io.smallrye.openapi.runtime.util.TypeUtil.getSchemaAnnotation;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -268,7 +269,7 @@ public class SchemaRegistry {
         registry.put(key, new GeneratedSchemaInfo(name, null, schemaRef));
         names.add(name);
 
-        return schemaRef;
+        return new SchemaImpl().ref(schemaRef.getRef());
     }
 
     /**
@@ -295,7 +296,7 @@ public class SchemaRegistry {
 
         ModelUtil.components(oai).addSchema(name, schema);
 
-        return schemaRef;
+        return new SchemaImpl().ref(schemaRef.getRef());
     }
 
     String deriveName(TypeKey key, String schemaName) {
@@ -343,7 +344,8 @@ public class SchemaRegistry {
             return false;
         }
         if (!config.arrayReferencesEnable()) {
-            return !SchemaType.ARRAY.equals(schema.getType());
+            List<Schema.SchemaType> types = schema.getType();
+            return types == null || !types.contains(SchemaType.ARRAY);
         }
         return true;
     }

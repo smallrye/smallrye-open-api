@@ -16,8 +16,7 @@
             "maximum": 20
           },
           "color": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           },
           "name": {
             "type": "string"

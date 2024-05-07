@@ -77,18 +77,20 @@ class OpenApiParserAndSerializerTest {
 
     private static Path generateBigStaticFile() throws IOException {
         //  let's build a big openapi file, start by its header
-        String bigFileContents = loadResource(OpenApiParserAndSerializerTest.class.getResource("openapi-fragment-header.yaml"));
+        String bigFileHeader = loadResource(OpenApiParserAndSerializerTest.class.getResource("openapi-fragment-header.yaml"));
+        StringBuilder bigFileContents = new StringBuilder(bigFileHeader);
         // body
         final String bodyChunk = loadResource(OpenApiParserAndSerializerTest.class.getResource("openapi-fragment-body.yaml"));
         for (int i = 0; i < REPEAT_BODY_CONTENTS_ITERATIONS; i++) {
             //  n-chunk of body
-            bigFileContents += bodyChunk.replaceAll("@@ID@@", String.valueOf(i));
+            bigFileContents.append(bodyChunk.replaceAll("@@ID@@", String.valueOf(i)));
         }
         //  footer
-        bigFileContents += loadResource(OpenApiParserAndSerializerTest.class.getResource("openapi-fragment-footer.yaml"));
+        String bigFileFooter = loadResource(OpenApiParserAndSerializerTest.class.getResource("openapi-fragment-footer.yaml"));
+        bigFileContents.append(bigFileFooter);
 
         Path tempFile = Files.createTempFile("sroap-big-file-test-", "-generated.yaml");
-        Files.write(tempFile, bigFileContents.getBytes(StandardCharsets.UTF_8));
+        Files.write(tempFile, bigFileContents.toString().getBytes(StandardCharsets.UTF_8));
         return tempFile;
     }
 

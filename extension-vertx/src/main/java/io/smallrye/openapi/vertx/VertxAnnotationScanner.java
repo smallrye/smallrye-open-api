@@ -310,7 +310,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
             final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameters().read(t);
+        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
         return VertxParameterProcessor.process(context, currentAppPath, resourceClass,
                 method, reader,
                 context.getExtensions());
@@ -337,7 +337,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         if (context.annotations().value(route, "regex") != null) {
-            return Objects.nonNull(context.io().operations().getAnnotation(resourceMethod));
+            return Objects.nonNull(context.io().operationIO().getAnnotation(resourceMethod));
         }
 
         return true;

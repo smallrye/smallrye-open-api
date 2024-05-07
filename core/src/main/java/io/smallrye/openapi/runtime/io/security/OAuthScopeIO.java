@@ -15,7 +15,7 @@ public class OAuthScopeIO<V, A extends V, O extends V, AB, OB> extends MapModelI
 
     private static final String PROP_DESCRIPTION = "description";
 
-    protected OAuthScopeIO(IOContext<V, A, O, AB, OB> context) {
+    public OAuthScopeIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OAUTH_SCOPE, Names.create(String.class));
     }
 

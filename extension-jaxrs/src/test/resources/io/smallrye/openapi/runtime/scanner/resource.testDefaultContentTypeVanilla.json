@@ -94,8 +94,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "string",
-                  "nullable" : true
+                  "type" : [ "string", "null" ]
                 }
               }
             }

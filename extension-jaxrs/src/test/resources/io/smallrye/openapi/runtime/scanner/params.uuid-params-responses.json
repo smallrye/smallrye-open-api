@@ -61,11 +61,7 @@
           "theUUID": {
             "type": "string",
             "description": "test",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UUID"
-              }
-            ]
+            "$ref": "#/components/schemas/UUID"
           }
         }
       },

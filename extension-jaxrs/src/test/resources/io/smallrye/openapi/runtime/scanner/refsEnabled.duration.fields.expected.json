@@ -35,13 +35,13 @@
             "items": {
               "format": "duration",
               "type": "string",
-              "example" : "P1D"
+              "examples" : [ "P1D" ]
             }
           },
           "genericFieldK": {
             "format": "duration",
             "type": "string",
-            "example" : "P1D"
+            "examples" : [ "P1D" ]
           },
           "mapOfKToFoo": {
             "type": "object",
@@ -54,7 +54,7 @@
             "additionalProperties": {
               "format": "duration",
               "type": "string",
-              "example" : "P1D"
+              "examples" : [ "P1D" ]
             }
           }
         }

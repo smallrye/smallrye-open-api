@@ -585,7 +585,7 @@ public class SmallRyeOpenAPI {
                             .map(parser -> parser.apply(jsonSchema))
                             .orElseGet(() -> {
                                 V schemaModel = modelIO.jsonIO().fromString(jsonSchema, Format.JSON);
-                                return modelIO.schemas().readValue(schemaModel);
+                                return modelIO.schemaIO().readValue(schemaModel);
                             });
                 }
             };

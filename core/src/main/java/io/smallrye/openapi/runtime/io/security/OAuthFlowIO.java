@@ -10,7 +10,6 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OAuthFlow, V, A, O, AB, OB> {
 
@@ -19,13 +18,8 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
     private static final String PROP_TOKEN_URL = "tokenUrl";
     private static final String PROP_AUTHORIZATION_URL = "authorizationUrl";
 
-    private final OAuthScopeIO<V, A, O, AB, OB> oauthScopeIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    protected OAuthFlowIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public OAuthFlowIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OAUTH_FLOW, Names.create(OAuthFlow.class));
-        oauthScopeIO = new OAuthScopeIO<>(context);
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -35,8 +29,8 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
         flow.setAuthorizationUrl(value(annotation, PROP_AUTHORIZATION_URL));
         flow.setTokenUrl(value(annotation, PROP_TOKEN_URL));
         flow.setRefreshUrl(value(annotation, PROP_REFRESH_URL));
-        flow.setScopes(oauthScopeIO.readMap(annotation.value(PROP_SCOPES)));
-        flow.setExtensions(extensionIO.readExtensible(annotation));
+        flow.setScopes(oauthScopeIO().readMap(annotation.value(PROP_SCOPES)));
+        flow.setExtensions(extensionIO().readExtensible(annotation));
         return flow;
     }
 
@@ -47,8 +41,8 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
         flow.setAuthorizationUrl(jsonIO().getString(node, PROP_AUTHORIZATION_URL));
         flow.setTokenUrl(jsonIO().getString(node, PROP_TOKEN_URL));
         flow.setRefreshUrl(jsonIO().getString(node, PROP_REFRESH_URL));
-        flow.setScopes(oauthScopeIO.readMap(jsonIO().getValue(node, PROP_SCOPES)));
-        flow.setExtensions(extensionIO.readMap(node));
+        flow.setScopes(oauthScopeIO().readMap(jsonIO().getValue(node, PROP_SCOPES)));
+        flow.setExtensions(extensionIO().readMap(node));
         return flow;
     }
 
@@ -58,8 +52,8 @@ public class OAuthFlowIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OA
             setIfPresent(node, PROP_AUTHORIZATION_URL, jsonIO().toJson(model.getAuthorizationUrl()));
             setIfPresent(node, PROP_TOKEN_URL, jsonIO().toJson(model.getTokenUrl()));
             setIfPresent(node, PROP_REFRESH_URL, jsonIO().toJson(model.getRefreshUrl()));
-            setIfPresent(node, PROP_SCOPES, oauthScopeIO.write(model.getScopes()));
-            setAllIfPresent(node, extensionIO.write(model));
+            setIfPresent(node, PROP_SCOPES, oauthScopeIO().write(model.getScopes()));
+            setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

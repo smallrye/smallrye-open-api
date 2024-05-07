@@ -11,8 +11,6 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.io.media.SchemaIO;
 
 /**
  * A class used to parse an OpenAPI document (either YAML or JSON) into a Microprofile OpenAPI model tree.
@@ -106,7 +104,7 @@ public class OpenApiParser {
     private static <V, A extends V, O extends V, AB, OB> Schema parseSchema(String schemaJson, JsonIO<V, A, O, AB, OB> jsonIO) {
         IOContext<V, A, O, AB, OB> context = IOContext.forJson(jsonIO);
         V schemaValue = jsonIO.fromString(schemaJson, Format.JSON);
-        return new SchemaIO<>(context, new ExtensionIO<>(context)).readValue(schemaValue);
+        return context.schemaIO().readValue(schemaValue);
     }
 
 }

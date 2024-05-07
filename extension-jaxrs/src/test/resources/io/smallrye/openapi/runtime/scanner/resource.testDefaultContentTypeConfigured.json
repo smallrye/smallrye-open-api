@@ -103,8 +103,7 @@
             "content" : {
               "text/plain" : {
                 "schema" : {
-                  "type" : "string",
-                  "nullable" : true
+                  "type" : ["string", "null" ]
                 }
               }
             }
