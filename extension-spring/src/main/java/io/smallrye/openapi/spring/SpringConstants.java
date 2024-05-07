@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jboss.jandex.DotName;
 
 /**
@@ -33,6 +34,14 @@ public class SpringConstants {
     static final DotName PATH_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.PathVariable");
     static final DotName HEADER_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.RequestHeader");
     static final DotName MATRIX_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.MatrixVariable");
+    
+    static final Set<DotName> CONTEXTS = Stream.of("javax")
+        .map(prefix -> DotName.createComponentized(null, prefix))
+        .map(prefix -> DotName.createComponentized(prefix, "servlet"))
+        .map(prefix -> DotName.createComponentized(prefix, "http"))
+        .flatMap(prefix -> Stream.of("HttpServletRequest", "HttpServletResponse", "HttpSession")
+                .map(simpleName -> DotName.createComponentized(prefix, simpleName)))
+        .collect(Collectors.toSet());
 
     public static final Set<DotName> MULTIPART_OUTPUTS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(MUTIPART_FILE)));

@@ -63,6 +63,12 @@
             <artifactId>spring-webmvc</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+		    <artifactId>javax.servlet-api</artifactId>
+		    <version>3.1.0</version>
+		    <scope>test</scope>
+        </dependency>
 
         <!-- Depend on core tests -->
         <dependency>
