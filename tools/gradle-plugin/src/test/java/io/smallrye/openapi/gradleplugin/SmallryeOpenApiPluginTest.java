@@ -195,7 +195,7 @@ class SmallryeOpenApiPluginTest {
                         "}",
                         "",
                         "smallryeOpenApi {",
-                        "  openApiVersion.set(\"3.0.2\")",
+                        "  openApiVersion.set(\"999.999.999\")", //Intentionally invalid
                         "  schemaFilename.set(\"my-openapi-schema-file\")",
                         "  infoTitle.set(\"Info Title\")",
                         "  infoVersion.set(\"Info Version\")",
@@ -290,7 +290,7 @@ class SmallryeOpenApiPluginTest {
             JsonNode root = new ObjectMapper().readValue(
                     targetOpenapiDir.resolve("my-openapi-schema-file.json").toUri().toURL(),
                     JsonNode.class);
-            assertThat(root.get("openapi").asText()).isEqualTo("3.0.2");
+            assertThat(root.get("openapi").asText()).isEqualTo("999.999.999");
             assertThat(root.get("x-smallrye-gradle-generated").booleanValue()).isTrue();
 
             JsonNode info = root.get("info");
