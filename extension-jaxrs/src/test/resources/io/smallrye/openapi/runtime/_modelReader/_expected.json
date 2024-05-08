@@ -1,5 +1,5 @@
 {
-	"openapi": "3.0.1",
+	"openapi": "3.1.0",
 	"info": {
 		"title": "Model Reader API",
 		"description": "This is an API created by the Model Reader.",
