@@ -84,6 +84,7 @@ public class ConfigUtil {
                 config.getInfoLicenseName(),
                 config.getInfoLicenseUrl())) {
             setIfPresent(config.getInfoLicenseName(), oai.getInfo().getLicense()::setName);
+            setIfPresent(config.getInfoLicenseIdentifier(), oai.getInfo().getLicense()::setIdentifier);
             setIfPresent(config.getInfoLicenseUrl(), oai.getInfo().getLicense()::setUrl);
         }
     }

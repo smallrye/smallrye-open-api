@@ -229,6 +229,10 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.INFO_LICENSE_NAME, String.class, () -> null);
     }
 
+    default String getInfoLicenseIdentifier() {
+        return getConfigValue(SmallRyeOASConfig.INFO_LICENSE_IDENTIFIER, String.class, () -> null);
+    }
+
     default String getInfoLicenseUrl() {
         return getConfigValue(SmallRyeOASConfig.INFO_LICENSE_URL, String.class, () -> null);
     }
