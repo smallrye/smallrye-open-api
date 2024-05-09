@@ -1,11 +1,14 @@
 package io.smallrye.openapi.api.models;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.info.Info;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
@@ -26,6 +29,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     private List<SecurityRequirement> security;
     private List<Tag> tags;
     private Paths paths;
+    private Map<String, PathItem> webhooks;
     private Components components;
 
     /**
@@ -225,5 +229,26 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
     @Override
     public void setComponents(Components components) {
         this.components = components;
+    }
+
+    @Override
+    public Map<String, PathItem> getWebhooks() {
+        return ModelUtil.unmodifiableMap(this.webhooks);
+    }
+
+    @Override
+    public void setWebhooks(Map<String, PathItem> webhooks) {
+        this.webhooks = ModelUtil.replace(webhooks, LinkedHashMap<String, PathItem>::new);
+    }
+
+    @Override
+    public OpenAPI addWebhook(String name, PathItem webhook) {
+        this.webhooks = ModelUtil.add(name, webhook, this.webhooks, LinkedHashMap<String, PathItem>::new);
+        return this;
+    }
+
+    @Override
+    public void removeWebhook(String name) {
+        ModelUtil.remove(this.webhooks, name);
     }
 }

@@ -14,7 +14,7 @@ import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.PathItemImpl;
 
-public class PathItemIO<V, A extends V, O extends V, AB, OB> extends ModelIO<PathItem, V, A, O, AB, OB>
+public class PathItemIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<PathItem, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
 
     private static final String PROP_DESCRIPTION = "description";
