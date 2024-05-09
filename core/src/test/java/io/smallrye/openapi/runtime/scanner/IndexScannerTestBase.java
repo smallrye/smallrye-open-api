@@ -186,7 +186,13 @@ public class IndexScannerTestBase {
     }
 
     public static void assertJsonEquals(URL expectedResourceUrl, OpenAPI actual) throws JSONException, IOException {
-        JSONAssert.assertEquals(loadResource(expectedResourceUrl), toJSON(actual), true);
+        String json = toJSON(actual);
+        try {
+            JSONAssert.assertEquals(loadResource(expectedResourceUrl), json, true);
+        } catch (AssertionError e) {
+            // If the JSON did not match, we want to add the serialized version to the end
+            throw new AssertionError(e.getMessage() + "\nFull result:\n" + json, e);
+        }
     }
 
     public static OpenAPI scan(Class<?>... classes) {

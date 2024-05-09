@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "A": {
+        "description": "A",
+        "type": "object"
+      },
+      "B": {
+        "description": "B",
+        "type": "object"
+      },
+      "C": {
+        "description": "C",
+        "type": "object"
+      },
+      "TestAnyOfProperty": {
+        "properties": {
+          "prop": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/A"
+              },
+              {
+                "$ref": "#/components/schemas/B"
+              },
+              {
+                "$ref": "#/components/schemas/C"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "TestAllOfProperty": {
+        "properties": {
+          "prop": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/A"
+              },
+              {
+                "$ref": "#/components/schemas/B"
+              },
+              {
+                "$ref": "#/components/schemas/C"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "TestNotProperty": {
+        "properties": {
+          "prop": {
+            "not": {
+              "$ref": "#/components/schemas/A"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "TestOneOfProperty": {
+        "properties": {
+          "prop": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/A"
+              },
+              {
+                "$ref": "#/components/schemas/B"
+              },
+              {
+                "$ref": "#/components/schemas/C"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      }
+    }
+  }
+}

@@ -107,11 +107,18 @@ public class SchemaConstant {
     public static final String PROP_PREFIX_ITEMS = "prefixItems";
     public static final String PROP_CONTAINS = "contains";
     public static final String PROP_PATTERN_PROPERTIES = "patternProperties";
+    public static final String PROP_IF_SCHEMA = "ifSchema";
+    public static final String PROP_THEN_SCHEMA = "thenSchema";
+    public static final String PROP_ELSE_SCHEMA = "elseSchema";
+    public static final String PROP_CONST_VALUE = "constValue";
+    public static final String PROP_COMMENT_FIELD = "comment";
 
     // Only in SchemaFactory ?
     public static final String PROP_REQUIRED_PROPERTIES = "requiredProperties";
     public static final String PROP_PROPERTIES = "properties";
     public static final String PROP_NOT = "not";
+    public static final String PROP_REGEX = "regex";
+    public static final String PROP_REQUIRES = "requires";
 
     public static final String DIALECT_OAS31 = "https://spec.openapis.org/oas/3.1/dialect/base";
     public static final String DIALECT_JSON_2020_12 = "https://json-schema.org/draft/2020-12/schema";

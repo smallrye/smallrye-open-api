@@ -1,0 +1,31 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "A" : {
+        "description" : "A",
+        "type" : "object"
+      },
+      "B" : {
+        "description" : "B",
+        "type" : "object"
+      },
+      "TestDepedentSchemas" : {
+        "properties" : {
+          "field1" : {
+            "type" : "string"
+          }
+        },
+        "dependentSchemas": {
+          "field1" : {
+            "$ref" : "#/components/schemas/A"
+          },
+          "field2" : {
+            "$ref" : "#/components/schemas/B"
+          }
+        },
+        "type" : "object"
+      }
+    }
+  }
+}
