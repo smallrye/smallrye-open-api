@@ -103,6 +103,8 @@ public interface SmallryeOpenApiProperties {
 
     Property<String> getInfoDescription();
 
+    Property<String> getInfoSummary();
+
     Property<String> getInfoTermsOfService();
 
     Property<String> getInfoContactEmail();

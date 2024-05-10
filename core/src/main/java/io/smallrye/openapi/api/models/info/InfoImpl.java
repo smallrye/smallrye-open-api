@@ -18,6 +18,7 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     private Contact contact;
     private License license;
     private String version;
+    private String summary;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.info.Info#getTitle()
@@ -113,6 +114,22 @@ public class InfoImpl extends ExtensibleImpl<Info> implements Info, ModelImpl {
     @Override
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.info.Info#getSummary()
+     */
+    @Override
+    public String getSummary() {
+        return summary;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.info.Info#setSummary(java.lang.String)
+     */
+    @Override
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 
 }

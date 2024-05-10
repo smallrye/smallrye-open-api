@@ -25,6 +25,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     private static final String TITLE = "mp.openapi.extensions.smallrye.info.title";
     private static final String VERSION = "mp.openapi.extensions.smallrye.info.version";
     private static final String DESCRIPTION = "mp.openapi.extensions.smallrye.info.description";
+    private static final String SUMMARY = "mp.openapi.extensions.smallrye.info.summary";
     private static final String TERMS = "mp.openapi.extensions.smallrye.info.termsOfService";
     private static final String CONTACT_EMAIL = "mp.openapi.extensions.smallrye.info.contact.email";
     private static final String CONTACT_NAME = "mp.openapi.extensions.smallrye.info.contact.name";
@@ -85,10 +86,10 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
 
     @Test
     void testSettingAllInfo() throws IOException, JSONException {
-
         System.setProperty(TITLE, "My own awesome REST service");
         System.setProperty(VERSION, "1.2.3");
         System.setProperty(DESCRIPTION, "This service is awesome");
+        System.setProperty(SUMMARY, "This summary is rather boring");
         System.setProperty(TERMS, "The terms is also awesome");
         System.setProperty(CONTACT_EMAIL, "phillip.kruger@redhat.com");
         System.setProperty(CONTACT_NAME, "Phillip Kruger");
@@ -109,6 +110,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
             System.clearProperty(TITLE);
             System.clearProperty(VERSION);
             System.clearProperty(DESCRIPTION);
+            System.clearProperty(SUMMARY);
             System.clearProperty(TERMS);
             System.clearProperty(CONTACT_EMAIL);
             System.clearProperty(CONTACT_NAME);

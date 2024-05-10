@@ -190,6 +190,9 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "infoDescription")
     private String infoDescription;
 
+    @Parameter(property = "infoSummary")
+    private String infoSummary;
+
     @Parameter(property = "infoTermsOfService")
     private String infoTermsOfService;
 
@@ -357,6 +360,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_TITLE, infoTitle);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_VERSION, infoVersion);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_DESCRIPTION, infoDescription);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_SUMMARY, infoSummary);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_TERMS, infoTermsOfService);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_EMAIL, infoContactEmail);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_NAME, infoContactName);

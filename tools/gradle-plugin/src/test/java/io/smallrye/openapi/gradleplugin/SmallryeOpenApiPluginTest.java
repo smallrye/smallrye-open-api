@@ -82,6 +82,7 @@ class SmallryeOpenApiPluginTest {
         ext.infoLicenseUrl.set("info-license-url");
         ext.infoTermsOfService.set("info-tos");
         ext.infoTitle.set("info-title");
+        ext.infoSummary.set("info-summary");
         ext.infoVersion.set("info-version");
         ext.modelReader.set("model-reader");
         ext.operationIdStrategy.set(OperationIdStrategy.CLASS_METHOD);
@@ -112,6 +113,7 @@ class SmallryeOpenApiPluginTest {
                 SmallryeOpenApiProperties::getInfoDescription,
                 SmallryeOpenApiProperties::getInfoLicenseName,
                 SmallryeOpenApiProperties::getInfoLicenseUrl,
+                SmallryeOpenApiProperties::getInfoSummary,
                 SmallryeOpenApiProperties::getInfoTermsOfService,
                 SmallryeOpenApiProperties::getInfoTitle,
                 SmallryeOpenApiProperties::getInfoVersion,
@@ -199,6 +201,7 @@ class SmallryeOpenApiPluginTest {
                         "  infoVersion.set(\"Info Version\")",
                         "  infoDescription.set(\"Info Description\")",
                         "  infoTermsOfService.set(\"Info TOS\")",
+                        "  infoSummary.set(\"Info Summary\")",
                         "  infoContactEmail.set(\"Info Email\")",
                         "  infoContactName.set(\"Info Contact\")",
                         "  infoContactUrl.set(\"https://github.com/smallrye/smallrye-open-api/issues/1231\")",
@@ -294,6 +297,7 @@ class SmallryeOpenApiPluginTest {
             assertThat(info).isNotNull();
             assertThat(info.get("title").asText()).isEqualTo("Info Title");
             assertThat(info.get("description").asText()).isEqualTo("Info Description");
+            assertThat(info.get("summary").asText()).isEqualTo("Info Summary");
             assertThat(info.get("termsOfService").asText()).isEqualTo("Info TOS");
             assertThat(info.get("version").asText()).isEqualTo("Info Version");
             assertThat(info.get("contact").get("email").asText()).isEqualTo("Info Email");
