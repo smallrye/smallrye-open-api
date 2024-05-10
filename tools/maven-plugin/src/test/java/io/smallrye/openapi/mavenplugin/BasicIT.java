@@ -44,8 +44,9 @@ public class BasicIT extends SchemaTestBase {
             assertEquals(properties.get("infoContactUrl"), schema.getInfo().getContact().getUrl());
             assertEquals(properties.get("infoContactEmail"), schema.getInfo().getContact().getEmail());
             assertEquals(properties.get("infoLicenseName"), schema.getInfo().getLicense().getName());
-            assertEquals(properties.get("infoLicenseUrl"),
-                    schema.getInfo().getLicense().getUrl());
+            assertEquals(properties.get("infoLicenseIdentifier"),
+                    schema.getInfo().getLicense().getIdentifier());
+            //The URL is not tested here due to being exclusive with Identifier
             assertEquals(properties.get("infoVersion"), schema.getInfo().getVersion());
 
             List<String> servers = schema.getServers().stream().map(Server::getUrl).collect(Collectors.toList());
