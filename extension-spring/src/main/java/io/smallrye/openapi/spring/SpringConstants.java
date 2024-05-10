@@ -35,7 +35,7 @@ public class SpringConstants {
     static final DotName HEADER_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.RequestHeader");
     static final DotName MATRIX_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.MatrixVariable");
     
-    static final Set<DotName> CONTEXTS = Stream.of("javax")
+    static final Set<DotName> CONTEXTS = Stream.of("javax", "jakarta")
         .map(prefix -> DotName.createComponentized(null, prefix))
         .map(prefix -> DotName.createComponentized(prefix, "servlet"))
         .map(prefix -> DotName.createComponentized(prefix, "http"))
