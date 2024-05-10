@@ -15,10 +15,10 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerA
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt2;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerWithServletContext;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerWithServletContext;
+import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingPostControllerWithServletContext;
+import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingPutControllerWithServletContext;
 
 /**
  * Basic Spring annotation scanning
@@ -115,7 +115,7 @@ class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase {
         printToConsole(result);
         assertJsonEquals("resource.testBasicSpringPostDefinitionScanning.json", result);
     }
-    
+
     /**
      * This test a basic, no OpenApi annotations, hello world service
      *
@@ -123,8 +123,29 @@ class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase {
      * @throws JSONException
      */
     @Test
-    void testBasicPostSpringDefinitionScanningWithServletContext() throws IOException, JSONException {
-        Index i = indexOf(GreetingPostControllerWithServletContext.class, Greeting.class);
+    void testBasicPostSpringDefinitionScanningWithServletContextJakarta() throws IOException, JSONException {
+        Index i = indexOf(
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingPostControllerWithServletContext.class,
+                Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicSpringPostDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     *
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    void testBasicPostSpringDefinitionScanningWithServletContextJavax() throws IOException, JSONException {
+        Index i = indexOf(
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingPostControllerWithServletContext.class,
+                Greeting.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();
@@ -174,8 +195,29 @@ class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase {
      * @throws JSONException
      */
     @Test
-    void testBasicPutSpringDefinitionScanningWithServletContext() throws IOException, JSONException {
-        Index i = indexOf(GreetingPutControllerWithServletContext.class, Greeting.class);
+    void testBasicPutSpringDefinitionScanningWithServletContextJakarta() throws IOException, JSONException {
+        Index i = indexOf(
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingPutControllerWithServletContext.class,
+                Greeting.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testBasicSpringPutDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     *
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    void testBasicPutSpringDefinitionScanningWithServletContextJavax() throws IOException, JSONException {
+        Index i = indexOf(
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingPutControllerWithServletContext.class,
+                Greeting.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();

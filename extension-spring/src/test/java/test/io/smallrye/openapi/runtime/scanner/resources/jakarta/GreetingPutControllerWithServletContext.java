@@ -1,8 +1,9 @@
-package test.io.smallrye.openapi.runtime.scanner.resources;
+package test.io.smallrye.openapi.runtime.scanner.resources.jakarta;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -29,14 +30,16 @@ public class GreetingPutControllerWithServletContext {
 
     // 1) Basic path var test
     @PutMapping("/greet/{id}")
-    public Greeting greet(HttpServletRequest request, HttpServletResponse response, @RequestBody Greeting greeting, @PathVariable(name = "id") String id) {
+    public Greeting greet(HttpServletRequest request, HttpServletResponse response, @RequestBody Greeting greeting,
+            @PathVariable(name = "id") String id) {
         return greeting;
     }
 
     // 2) ResponseEntity without a type specified
     @PutMapping("/greetWithResponse/{id}")
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public ResponseEntity greetWithResponse(@RequestBody Greeting greeting, @PathVariable(name = "id") String id, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity greetWithResponse(@RequestBody Greeting greeting, @PathVariable(name = "id") String id,
+            HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(greeting);
     }
 

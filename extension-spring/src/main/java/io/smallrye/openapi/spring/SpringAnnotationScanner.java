@@ -92,7 +92,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // TODO: Check this
         return SpringConstants.MULTIPART_INPUTS.contains(inputType.name());
     }
-    
+
     @Override
     public boolean isFrameworkContextType(Type type) {
         return SpringConstants.CONTEXTS.contains(type.name());
