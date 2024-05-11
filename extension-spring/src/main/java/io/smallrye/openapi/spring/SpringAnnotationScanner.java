@@ -94,6 +94,11 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
+    public boolean isFrameworkContextType(Type type) {
+        return SpringConstants.CONTEXTS.contains(type.name());
+    }
+
+    @Override
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
