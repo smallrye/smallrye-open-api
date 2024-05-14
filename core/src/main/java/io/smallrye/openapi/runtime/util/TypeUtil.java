@@ -110,7 +110,7 @@ public class TypeUtil {
     public static final IndexView jdkIndex;
     private static final Set<DotName> wrapperTypes = new HashSet<>();
 
-    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#dataTypeFormat
+    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypeFormat
     static {
         TYPE_MAP.put(DOTNAME_OBJECT, ANY);
 

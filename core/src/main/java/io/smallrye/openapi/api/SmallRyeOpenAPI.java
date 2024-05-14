@@ -216,7 +216,7 @@ public class SmallRyeOpenAPI {
          * <li>Set a generated value for {@code info.title} if none specified
          * <li>Set a generated value for {@code info.version} if none specified
          * <li>Set a default value for {@code openapi} (the specification
-         * version) if none specified. E.g. 3.0.3
+         * version) if none specified. E.g. 3.1.0
          * </ul>
          *
          * @param defaultRequiredProperties
