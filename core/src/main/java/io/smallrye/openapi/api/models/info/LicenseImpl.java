@@ -12,6 +12,7 @@ public class LicenseImpl extends ExtensibleImpl<License> implements License, Mod
 
     private String name;
     private String url;
+    private String identifier;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.info.License#getName()
@@ -43,6 +44,22 @@ public class LicenseImpl extends ExtensibleImpl<License> implements License, Mod
     @Override
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.info.License#getIdentifier()
+     */
+    @Override
+    public String getIdentifier() {
+        return this.identifier;
+    }
+
+    /**
+     * @see org.eclipse.microprofile.openapi.models.info.License#setIdentifier(java.lang.String)
+     */
+    @Override
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
 }

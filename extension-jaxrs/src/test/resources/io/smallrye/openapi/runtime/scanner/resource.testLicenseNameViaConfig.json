@@ -4,7 +4,8 @@
     "title" : "Generated API",
     "version" : "1.0",
     "license" : {
-            "name" : "Apache License 2.0"
+            "name" : "Apache License 2.0",
+            "identifier" : "Apache-2.0"
     }    
   },
   "paths" : {
