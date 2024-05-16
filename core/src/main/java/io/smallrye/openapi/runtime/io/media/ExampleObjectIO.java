@@ -56,6 +56,8 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             } else {
                 setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));

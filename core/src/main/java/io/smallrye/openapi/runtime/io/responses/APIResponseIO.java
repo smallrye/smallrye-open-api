@@ -118,6 +118,7 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             } else {
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_HEADERS, headerIO().write(model.getHeaders()));
