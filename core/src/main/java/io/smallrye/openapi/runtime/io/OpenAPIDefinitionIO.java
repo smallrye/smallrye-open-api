@@ -19,6 +19,7 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
     public static final String PROP_SECURITY_SETS = "securitySets";
     public static final String PROP_SERVERS = "servers";
     public static final String PROP_TAGS = "tags";
+    public static final String PROP_WEBHOOKS = "webhooks";
 
     public OpenAPIDefinitionIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.OPENAPI_DEFINITION, Names.create(OpenAPI.class));
@@ -60,6 +61,7 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
         openApi.setExternalDocs(extDocIO().readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
         openApi.setComponents(componentsIO().readValue(jsonIO().getValue(node, PROP_COMPONENTS)));
         openApi.setPaths(pathsIO().readValue(jsonIO().getValue(node, PROP_PATHS)));
+        openApi.setWebhooks(pathItemIO().readMap(jsonIO().getValue(node, PROP_WEBHOOKS)));
         openApi.setExtensions(extensionIO().readMap(node));
         return openApi;
     }
@@ -74,6 +76,7 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
             setIfPresent(node, PROP_SECURITY, securityIO().write(model.getSecurity()));
             setIfPresent(node, PROP_TAGS, tagIO().write(model.getTags()));
             setIfPresent(node, PROP_PATHS, pathsIO().write(model.getPaths()));
+            setIfPresent(node, PROP_WEBHOOKS, pathItemIO().write(model.getWebhooks()));
             setIfPresent(node, PROP_COMPONENTS, componentsIO().write(model.getComponents()));
             setAllIfPresent(node, extensionIO().write(model));
             return node;
