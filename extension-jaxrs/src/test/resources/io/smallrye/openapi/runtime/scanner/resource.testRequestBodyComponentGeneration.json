@@ -39,6 +39,7 @@
     "/requestbodies/any": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "*/*": {
               "schema": {
@@ -72,7 +73,27 @@
           }
         }
       }
+    },
+    "/requestbodies/notRequired": {
+      "post": {
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SomeObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
     }
+
   },
   "components": {
     "schemas": {
@@ -114,6 +135,26 @@
           }
         },
         "required": true
+      },
+      "testRequiredDefault": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DifferentObject"
+            }
+          }
+        },
+        "required": true
+      },
+      "testNotRequired": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DifferentObject"
+            }
+          }
+        },
+        "required": false
       }
     }
   }

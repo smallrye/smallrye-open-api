@@ -4,6 +4,7 @@
     "/multipart-form-data-input/post": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {

@@ -5,6 +5,7 @@
       "post": {
         "summary": "Convert an array of integer types to an array of floating point types",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {

@@ -4,6 +4,7 @@
     "/multipart-mixed/post": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "multipart/mixed": {
               "schema": {

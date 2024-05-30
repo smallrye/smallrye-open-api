@@ -23,7 +23,10 @@ import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.RequestBodyTes
  *
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
-@OpenAPIDefinition(info = @Info(title = "Test Request Body", version = "1.0"), components = @Components(requestBodies = @RequestBody(name = "test", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DifferentObject.class)), required = true)))
+@OpenAPIDefinition(info = @Info(title = "Test Request Body", version = "1.0"), components = @Components(requestBodies = {
+        @RequestBody(name = "test", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DifferentObject.class)), required = true),
+        @RequestBody(name = "testRequiredDefault", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DifferentObject.class))),
+        @RequestBody(name = "testNotRequired", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DifferentObject.class)), required = false) }))
 public class RequestBodyTestApplication extends Application {
 
     public static class SomeObject {
@@ -56,7 +59,7 @@ public class RequestBodyTestApplication extends Application {
         @POST
         @Consumes(MediaType.APPLICATION_JSON)
         @Path("defaults")
-        public void testDefaults(@RequestBody(required = true) SomeObject body) {
+        public void testDefaults(@RequestBody SomeObject body) {
             return;
         }
 
@@ -64,6 +67,13 @@ public class RequestBodyTestApplication extends Application {
         @Path("any")
         @Consumes
         public void testAny(SomeObject body) {
+            return;
+        }
+
+        @POST
+        @Path("notRequired")
+        @Consumes(MediaType.APPLICATION_JSON)
+        public void testNotRequired(@RequestBody(required = false) SomeObject body) {
             return;
         }
     }

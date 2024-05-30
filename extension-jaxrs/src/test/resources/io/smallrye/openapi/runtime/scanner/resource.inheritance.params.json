@@ -4,6 +4,7 @@
     "/hello/speak": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {
@@ -29,6 +30,7 @@
     "/hi/speak": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {
@@ -120,6 +122,7 @@
       ],
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
@@ -186,6 +189,7 @@
       ],
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {

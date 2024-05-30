@@ -5,6 +5,7 @@
       "post": {
         "summary": "Convert an array of doubles to an array of floats",
         "requestBody": {
+          "required": true,
           "content": {
               "application/json": {
                 "schema": {

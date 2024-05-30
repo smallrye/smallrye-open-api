@@ -107,6 +107,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -126,6 +127,7 @@
       },
       "patch": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {

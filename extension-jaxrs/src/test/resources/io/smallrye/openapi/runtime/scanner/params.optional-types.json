@@ -82,6 +82,7 @@
     "/optional/n4": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {

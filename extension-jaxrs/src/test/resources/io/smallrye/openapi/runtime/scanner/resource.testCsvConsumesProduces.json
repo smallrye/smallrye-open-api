@@ -17,6 +17,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {
