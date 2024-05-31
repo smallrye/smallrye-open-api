@@ -4,6 +4,7 @@
     "/greeting/greet" : {
       "post" : {
         "requestBody" : {
+          "required": true,
           "content" : {
             "application/json" : {
               "schema" : {
@@ -29,6 +30,7 @@
     "/greeting/greetWithResponse" : {
       "post" : {
         "requestBody" : {
+          "required": true,
           "content" : {
             "application/json" : {
               "schema" : {
@@ -54,6 +56,7 @@
     "/greeting/greetWithResponseTyped" : {
       "post" : {
         "requestBody" : {
+          "required": true,
           "content" : {
             "application/json" : {
               "schema" : {
