@@ -61,12 +61,17 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     @Override
     public RequestBody read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@RequestBody");
-        RequestBody requestBody = new RequestBodyImpl();
+        RequestBodyImpl requestBody = new RequestBodyImpl();
         requestBody.setDescription(value(annotation, PROP_DESCRIPTION));
         requestBody.setContent(contentIO().read(annotation.value(PROP_CONTENT), ContentIO.Direction.INPUT));
-        requestBody.setRequired(value(annotation, PROP_REQUIRED));
         requestBody.setRef(ReferenceType.REQUEST_BODY.refValue(annotation));
         requestBody.setExtensions(extensionIO().readExtensible(annotation));
+        Boolean required = value(annotation, PROP_REQUIRED);
+        if (required != null) {
+            requestBody.setRequired(required);
+        } else {
+            requestBody.setRequiredDefault(Boolean.TRUE);
+        }
         return requestBody;
     }
 
