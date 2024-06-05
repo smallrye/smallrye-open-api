@@ -74,6 +74,7 @@ public class SecuritySchemeIO<V, A extends V, O extends V, AB, OB> extends MapMo
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             } else {
                 setIfPresent(node, PROP_TYPE, jsonIO().toJson(model.getType()));
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));

@@ -69,6 +69,7 @@ public class HeaderIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<He
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             } else {
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_REQUIRED, jsonIO().toJson(model.getRequired()));

@@ -61,6 +61,7 @@ public class LinkIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Link
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             } else {
                 setIfPresent(node, PROP_OPERATION_REF, jsonIO().toJson(model.getOperationRef()));
                 setIfPresent(node, PROP_OPERATION_ID, jsonIO().toJson(model.getOperationId()));

@@ -165,6 +165,7 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
             } else {
                 setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
                 setIfPresent(node, PROP_IN, jsonIO().toJson(model.getIn()));
