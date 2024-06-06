@@ -36,13 +36,6 @@ jobs:
           gpg-private-key: ${{secrets.MAVEN_GPG_PRIVATE_KEY}}
           gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
 
-      - name: maven cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
       - name: maven release ${{steps.metadata.outputs.current-version}}
         env:
           MAVEN_DEPLOY_USERNAME: ${{secrets.MAVEN_DEPLOY_USERNAME}}
