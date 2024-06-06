@@ -800,7 +800,7 @@ public interface AnnotationScanner {
                     }
                 }
 
-                if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
+                if (!RequestBodyImpl.isRequiredSet(requestBody) && TypeUtil.isOptional(requestBodyType)) {
                     requestBody.setRequired(Boolean.FALSE);
                 }
 
@@ -818,7 +818,7 @@ public interface AnnotationScanner {
                 && getConsumes(context) != null) {
             if (params.getFormBodyContent() != null) {
                 if (requestBody == null) {
-                    requestBody = new RequestBodyImpl();
+                    requestBody = new RequestBodyImpl().setRequiredDefault(Boolean.TRUE);
                 }
                 requestBody.setContent(params.getFormBodyContent());
             } else {
@@ -844,14 +844,14 @@ public interface AnnotationScanner {
                     }
 
                     if (requestBody == null) {
-                        requestBody = new RequestBodyImpl();
+                        requestBody = new RequestBodyImpl().setRequiredDefault(Boolean.TRUE);
                     }
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, getConsumesForRequestBody(context));
                     }
 
-                    if (requestBody.getRequired() == null && TypeUtil.isOptional(requestBodyType)) {
+                    if (!RequestBodyImpl.isRequiredSet(requestBody) && TypeUtil.isOptional(requestBodyType)) {
                         requestBody.setRequired(Boolean.FALSE);
                     }
 
@@ -929,7 +929,7 @@ public interface AnnotationScanner {
                     .filter(Objects::nonNull)
                     .forEach(schema -> constraintScanner.get().applyConstraints(paramTarget, schema, null,
                             (target, name) -> {
-                                if (requestBody.getRequired() == null) {
+                                if (!RequestBodyImpl.isRequiredSet(requestBody)) {
                                     requestBody.setRequired(Boolean.TRUE);
                                 }
                             }));

@@ -30,6 +30,7 @@
       "post" : {
         "tags" : [ "tag1" ],
         "requestBody" : {
+          "required": true,
           "content" : {
             "text/plain" : {
               "schema" : {
@@ -46,6 +47,7 @@
       },
       "patch" : {
         "requestBody" : {
+          "required": true,
           "content" : {
             "text/plain" : {
               "schema" : {
@@ -80,6 +82,7 @@
       "post" : {
         "tags" : [ "tag1", "http://example/com/tag2" ],
         "requestBody" : {
+          "required": true,
           "content" : {
             "text/plain" : {
               "schema" : {
@@ -96,6 +99,7 @@
       },
       "patch" : {
         "requestBody" : {
+          "required": true,
           "content" : {
             "text/plain" : {
               "schema" : {

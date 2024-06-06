@@ -22,6 +22,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -49,6 +50,7 @@
       },
       "delete": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {

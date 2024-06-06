@@ -61,6 +61,7 @@
     "/uploadIcon": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -91,6 +92,7 @@
     "/uploadIcon/reactive": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
