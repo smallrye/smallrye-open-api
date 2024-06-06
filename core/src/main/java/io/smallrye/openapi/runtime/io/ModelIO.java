@@ -198,12 +198,12 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
         return context.operationIO();
     }
 
-    public PathItemIO<V, A, O, AB, OB> pathItemIO() {
-        return context.pathItemIO();
+    public PathItemOperationIO<V, A, O, AB, OB> pathItemOperationIO() {
+        return context.pathItemOperationIO();
     }
 
-    public PathItemIO<V, A, O, AB, OB> pathItemCallbackIO() {
-        return context.pathItemCallbackIO();
+    public PathItemIO<V, A, O, AB, OB> pathItemIO() {
+        return context.pathItemIO();
     }
 
     public PathsIO<V, A, O, AB, OB> pathsIO() {

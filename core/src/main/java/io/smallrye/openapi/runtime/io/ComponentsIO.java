@@ -43,6 +43,7 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
         components.setHeaders(headerIO().readMap(annotation.value(PROP_HEADERS)));
         components.setLinks(linkIO().readMap(annotation.value(PROP_LINKS)));
         components.setParameters(parameterIO().readMap(annotation.value(PROP_PARAMETERS)));
+        components.setPathItems(pathItemIO().readMap(annotation.value(PROP_PATH_ITEMS)));
         components.setRequestBodies(requestBodyIO().readMap(annotation.value(PROP_REQUEST_BODIES)));
         components.setResponses(apiResponseIO().readMap(annotation.value(PROP_RESPONSES)));
         components.setSchemas(schemaIO().readMap(annotation.value(PROP_SCHEMAS)));
