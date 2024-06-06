@@ -37,7 +37,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit5}")
     testImplementation(gradleTestKit())
-    testImplementation("org.assertj:assertj-core:3.25.3")
+    testImplementation("org.assertj:assertj-core:3.26.0")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${versionJackson}")
 }
 
