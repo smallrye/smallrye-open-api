@@ -20,6 +20,7 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
     private static final String PROP_PARAMETERS = "parameters";
     private static final String PROP_RESPONSES = "responses";
     private static final String PROP_SCHEMAS = "schemas";
+    private static final String PROP_PATH_ITEMS = "pathItems";
 
     public ComponentsIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.COMPONENTS, Names.create(Components.class));
@@ -64,6 +65,7 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
         components.setResponses(apiResponseIO().readMap(jsonIO().getValue(node, PROP_RESPONSES)));
         components.setSchemas(schemaIO().readMap(jsonIO().getValue(node, PROP_SCHEMAS)));
         components.setSecuritySchemes(securitySchemeIO().readMap(jsonIO().getValue(node, PROP_SECURITY_SCHEMES)));
+        components.setPathItems(pathItemIO().readMap(jsonIO().getValue(node, PROP_PATH_ITEMS)));
         components.setExtensions(extensionIO().readMap(node));
         return components;
     }
@@ -79,6 +81,7 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
             setIfPresent(node, PROP_SECURITY_SCHEMES, securitySchemeIO().write(model.getSecuritySchemes()));
             setIfPresent(node, PROP_LINKS, linkIO().write(model.getLinks()));
             setIfPresent(node, PROP_CALLBACKS, callbackIO().write(model.getCallbacks()));
+            setIfPresent(node, PROP_PATH_ITEMS, pathItemIO().write(model.getPathItems()));
             setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
