@@ -21,7 +21,7 @@ public enum ReferenceType {
     PARAMETER("parameters"),
     EXAMPLE("examples"),
     REQUEST_BODY("requestBodies"),
-    PATH_ITEMS("pathItems");
+    PATH_ITEM("pathItems");
 
     private static final Pattern COMPONENT_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9\\.\\-_]+$");
     public static final String PROP_ANNOTATION = "ref";

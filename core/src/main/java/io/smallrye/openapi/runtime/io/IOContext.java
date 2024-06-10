@@ -41,8 +41,8 @@ public class IOContext<V, A extends V, O extends V, AB, OB> {
     private OpenAPIDefinitionIO<V, A, O, AB, OB> openApiDefinitionIO = new OpenAPIDefinitionIO<>(this);
     private OperationIO<V, A, O, AB, OB> operationIO = new OperationIO<>(this);
     private CallbackOperationIO<V, A, O, AB, OB> callbackOperationIO = new CallbackOperationIO<>(this);
-    private PathItemIO<V, A, O, AB, OB> pathItemIO = new PathItemIO<>(this, operationIO);
-    private PathItemIO<V, A, O, AB, OB> pathItemCallbackIO = new PathItemIO<>(this, callbackOperationIO);
+    private PathItemOperationIO<V, A, O, AB, OB> pathItemOperationIO = new PathItemOperationIO<>(this);
+    private PathItemIO<V, A, O, AB, OB> pathItemIO = new PathItemIO<>(this);
     private PathsIO<V, A, O, AB, OB> pathsIO = new PathsIO<>(this);
     private CallbackIO<V, A, O, AB, OB> callbackIO = new CallbackIO<>(this);
     private ExtensionIO<V, A, O, AB, OB> extensionIO = new ExtensionIO<>(this);
@@ -122,12 +122,12 @@ public class IOContext<V, A extends V, O extends V, AB, OB> {
         return operationIO;
     }
 
-    public PathItemIO<V, A, O, AB, OB> pathItemIO() {
-        return pathItemIO;
+    public PathItemOperationIO<V, A, O, AB, OB> pathItemOperationIO() {
+        return pathItemOperationIO;
     }
 
-    public PathItemIO<V, A, O, AB, OB> pathItemCallbackIO() {
-        return pathItemCallbackIO;
+    public PathItemIO<V, A, O, AB, OB> pathItemIO() {
+        return pathItemIO;
     }
 
     public PathsIO<V, A, O, AB, OB> pathsIO() {

@@ -6,6 +6,7 @@ import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
@@ -20,6 +21,7 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
 
     private static final String PROP_OPERATIONS = "operations";
     private static final String PROP_CALLBACK_URL_EXPRESSION = "callbackUrlExpression";
+    private static final String PROP_PATH_ITEM_REF = "pathItemRef";
 
     public CallbackIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.CALLBACK, DotName.createSimple(Callback.class));
@@ -31,9 +33,15 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
         Callback callback = new CallbackImpl();
         callback.setRef(ReferenceType.CALLBACK.refValue(annotation));
 
+        Optional.ofNullable(this.<String> value(annotation, PROP_PATH_ITEM_REF))
+                .map(ReferenceType.PATH_ITEM::referenceOf)
+                .ifPresent(ref -> callback.addPathItem(
+                        value(annotation, PROP_CALLBACK_URL_EXPRESSION),
+                        new PathItemImpl().ref(ref)));
+
         Optional.ofNullable(value(annotation, PROP_OPERATIONS))
                 .map(AnnotationInstance[].class::cast)
-                .map(pathItemCallbackIO()::read)
+                .map(pathItemIO()::readCallbackOperations)
                 .ifPresent(pathItem -> callback.addPathItem(
                         value(annotation, PROP_CALLBACK_URL_EXPRESSION),
                         pathItem));
@@ -53,7 +61,7 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
                 .filter(not(ExtensionIO::isExtension))
                 .filter(not(this::isReference))
                 .filter(property -> jsonIO().isObject(property.getValue()))
-                .map(property -> entry(property.getKey(), pathItemCallbackIO().readValue(property.getValue())))
+                .map(property -> entry(property.getKey(), pathItemIO().readValue(property.getValue())))
                 .forEach(pathItem -> callback.addPathItem(pathItem.getKey(), pathItem.getValue()));
 
         extensionIO().readMap(node).forEach(callback::addExtension);
@@ -69,7 +77,7 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
             } else {
                 Optional.ofNullable(model.getPathItems())
                         .ifPresent(items -> items
-                                .forEach((key, value) -> setIfPresent(node, key, pathItemCallbackIO().write(value))));
+                                .forEach((key, value) -> setIfPresent(node, key, pathItemIO().write(value))));
 
                 setAllIfPresent(node, extensionIO().write(model));
             }

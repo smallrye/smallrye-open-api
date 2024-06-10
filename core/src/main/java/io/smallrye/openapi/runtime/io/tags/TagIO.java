@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io.tags;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +47,20 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
                 .map(tag -> value(tag, PROP_REF));
 
         return Stream.concat(tagsRefs, tagRefs).collect(Collectors.toList());
+    }
+
+    public List<String> readReferences(AnnotationInstance[] annotations) {
+        return Optional.ofNullable(annotations)
+                .map(Arrays::asList)
+                .map(this::readReferences)
+                .orElse(null);
+    }
+
+    public List<String> readReferences(Collection<AnnotationInstance> annotations) {
+        return annotations.stream()
+                .map(a -> this.<String> value(a, PROP_REF))
+                .filter(Objects::nonNull)
+                .collect(toList());
     }
 
     public List<Tag> readList(AnnotationTarget target) {
