@@ -23,7 +23,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -429,7 +428,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
     }
 
     static Charset getCharset(String encoding) throws MojoExecutionException {
-        if (StringUtils.isBlank(encoding)) {
+        if (encoding == null || encoding.isEmpty() || encoding.chars().allMatch(Character::isWhitespace)) {
             return Charset.defaultCharset();
         }
 
