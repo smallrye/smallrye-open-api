@@ -66,6 +66,7 @@ E.g. for includeDependenciesScopes could be configured as:
 - `skip` (boolean, default: false) - Skip execution of the plugin.
 - `encoding` (String) - Encoding of output OpenAPI files.
 - `outputFileTypeFilter` (String, default: ALL) - Set this to `YAML` in order to let the generation process produce just *.yaml output, `JSON` to obtain *.json files only. The default is `ALL`, which will generate both file types.
+- `scanners` (List<String>) - To set the names of the AnnotationScanner implementations that should be executed.
 
 == MicroProfile OpenAPI Properties
 
