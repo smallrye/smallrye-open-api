@@ -1,0 +1,45 @@
+{
+  "openapi" : "3.1.0",
+  "tags" : [ {
+    "name" : "foobar",
+    "description" : "baz"
+  } ],
+  "paths" : {
+    "/foobar/ping" : {
+      "get" : {
+        "tags" : [ "foobar" ],
+        "summary" : "Bla",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/foobar/pong" : {
+      "get" : {
+        "tags" : [ "foobar" ],
+        "summary" : "Bla",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
