@@ -217,10 +217,34 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             TypeResolver resolver = TypeResolver.forClass(context, resourceClass, null);
             context.getResolverStack().push(resolver);
             // Process tags (both declarations and references).
-            Set<String> tags = processTags(context, resourceClass, openApi, false);
+            Set<String> tags = processResourceClassTags(openApi, resourceClass);
             processResourceClass(openApi, resourceClass, null, tags);
             context.getResolverStack().pop();
         }
+    }
+
+    /**
+     * Find Tag annotations on the resource class or any super type. Stop searching the
+     * class hierarchy when any Tags are found
+     *
+     * @param openApi
+     * @param resourceClass
+     * @return set of tag names found on the resourceClass or inherited from a super type
+     */
+    private Set<String> processResourceClassTags(OpenAPI openApi, ClassInfo resourceClass) {
+        Set<String> tags = null;
+
+        while ((tags = processTags(context, resourceClass, openApi, true)) == null) {
+            Type superType = resourceClass.superClassType();
+            resourceClass = superType != null ? context.getAugmentedIndex().getClass(superType) : null;
+
+            if (resourceClass == null) {
+                tags = Collections.emptySet();
+                break;
+            }
+        }
+
+        return tags;
     }
 
     /**
