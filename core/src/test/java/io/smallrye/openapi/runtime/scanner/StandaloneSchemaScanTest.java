@@ -763,4 +763,30 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         assertJsonEquals("components.schemas.jackson-property-access.json", Bean.class);
     }
+
+    @Test
+    void testExceptionalExampleParsing() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+            @Schema(example = "{ Looks like object, but invalid }")
+            public Object property1;
+            @Schema(example = "{ \"key\": \"object end missing\"")
+            public Object property2;
+            @Schema(example = "[ Looks like array, but invalid ]")
+            public Object property3;
+            @Schema(example = "[ \"array end missing\"")
+            public Object property4;
+            @Schema(example = "trick") // not Boolean.TRUE
+            public Object property5;
+            @Schema(example = "fake") // not Boolean.FALSE
+            public Object property6;
+            @Schema(example = "1046\n1049\n1051") // not a number
+            public Object property7;
+            @Schema(example = "") // empty
+            public Object property8;
+
+        }
+
+        assertJsonEquals("components.schemas.exceptional-examples.json", Bean.class);
+    }
 }
