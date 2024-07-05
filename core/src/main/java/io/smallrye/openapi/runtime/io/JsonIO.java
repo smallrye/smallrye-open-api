@@ -24,6 +24,10 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
         return jackson;
     }
 
+    private boolean wrapped(String value, String prefix, String suffix) {
+        return value.startsWith(prefix) && value.endsWith(suffix);
+    }
+
     default Object parseValue(String value) {
         if (value == null || value.isEmpty()) {
             return null;
@@ -32,10 +36,19 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
         String trimmedValue = value.trim();
 
         switch (trimmedValue.charAt(0)) {
-            case '{': /* JSON Object */
-            case '[': /* JSON Array */
-            case '-': /* JSON Negative Number */
-            case '0': /* JSON Numbers */
+            case '{':
+            case '[':
+                if (wrapped(trimmedValue, "{", "}") || wrapped(trimmedValue, "[", "]")) {
+                    /* Looks like a JSON Object or Array */
+                    try {
+                        return fromJson(fromString(trimmedValue, Format.JSON));
+                    } catch (Exception e) {
+                        IoLogging.logger.unparseableJson(trimmedValue);
+                    }
+                }
+                break;
+            case '-': /* Negative Number */
+            case '0': /* Numbers */
             case '1':
             case '2':
             case '3':
@@ -46,11 +59,11 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
             case '8':
             case '9':
                 try {
-                    return fromJson(fromString(trimmedValue, Format.JSON));
-                } catch (Exception e) {
+                    return new BigDecimal(trimmedValue);
+                } catch (NumberFormatException e) {
                     IoLogging.logger.unparseableJson(trimmedValue);
-                    break;
                 }
+                break;
             case 't':
                 return "true".equals(trimmedValue) ? Boolean.TRUE : value;
             case 'f':
