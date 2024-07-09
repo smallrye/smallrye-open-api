@@ -93,7 +93,17 @@
         </repository>
         <repository>
             <id>mp-openapi-4.0</id>
-            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1688/</url>
+            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1700/</url>
+            <releases>
+               <enabled>true</enabled>
+            </releases>
+            <snapshots>
+              <enabled>false</enabled>
+           </snapshots>
+        </repository>
+        <repository>
+            <id>mp-restclient-4.0</id>
+            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1694/</url>
             <releases>
                <enabled>true</enabled>
             </releases>
