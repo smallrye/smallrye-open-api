@@ -100,6 +100,12 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "configProperties")
     private File configProperties;
 
+    /**
+     * Configuration property to specify the list of scanners to use. If the list is empty the default scanners are used.
+     */
+    @Parameter(property = "scanners")
+    private List<String> scanners;
+
     // Properies as per OpenAPI Config.
 
     /**
@@ -298,6 +304,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
                 .withConfig(config)
                 .withApplicationClassLoader(getClassLoader())
                 .withIndex(index)
+                .withScannerFilter(scanners != null && !scanners.isEmpty() ? x -> scanners.contains(x) : x -> true)
                 .build();
     }
 

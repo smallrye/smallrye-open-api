@@ -1,0 +1,36 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "property1" : {
+            "examples" : [ "{ Looks like object, but invalid }" ]
+          },
+          "property2" : {
+            "examples" : [ "{ \"key\": \"object end missing\"" ]
+          },
+          "property3" : {
+            "examples" : [ "[ Looks like array, but invalid ]" ]
+          },
+          "property4" : {
+            "examples" : [ "[ \"array end missing\"" ]
+          },
+          "property5" : {
+            "examples" : [ "trick" ]
+          },
+          "property6" : {
+            "examples" : [ "fake" ]
+          },
+          "property7" : {
+            "examples" : [ "1046\n1049\n1051" ]
+          },
+          "property8" : {
+            "examples" : [ "" ]
+          }
+        }
+      }
+    }
+  }
+}
