@@ -139,6 +139,20 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
         return (Predicate<T>) predicate.negate();
     }
 
+    /**
+     * Creates a Collector for a stream of Map.Entry where the entry keys are Strings.
+     *
+     * Null map entry values are allowed, but duplicate keys will result in an
+     * IllegalStateException being thrown.
+     *
+     * This method is the equivalent of
+     * {@link java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function)}
+     * where the given key and value mapping functions are simply {@code Map.Entry.getKey()} and
+     * {@code Map.Entry.getValue()}, and where null values are tolerated.
+     *
+     * @param <T> the type of the map entry values
+     * @return a collector allowing null values but forbidding duplicate keys.
+     */
     protected static <T> Collector<Map.Entry<String, T>, ?, Map<String, T>> toLinkedMap() {
         BiConsumer<Map<String, T>, Map.Entry<String, T>> accumulator = (map, entry) -> {
             String k = entry.getKey();
