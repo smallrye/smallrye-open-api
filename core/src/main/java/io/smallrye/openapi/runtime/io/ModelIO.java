@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -138,8 +139,40 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
         return (Predicate<T>) predicate.negate();
     }
 
+    /**
+     * Creates a Collector for a stream of Map.Entry where the entry keys are Strings.
+     *
+     * Null map entry values are allowed, but duplicate keys will result in an
+     * IllegalStateException being thrown.
+     *
+     * This method is the equivalent of
+     * {@link java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function)}
+     * where the given key and value mapping functions are simply {@code Map.Entry.getKey()} and
+     * {@code Map.Entry.getValue()}, and where null values are tolerated.
+     *
+     * @param <T> the type of the map entry values
+     * @return a collector allowing null values but forbidding duplicate keys.
+     */
     protected static <T> Collector<Map.Entry<String, T>, ?, Map<String, T>> toLinkedMap() {
-        return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new);
+        BiConsumer<Map<String, T>, Map.Entry<String, T>> accumulator = (map, entry) -> {
+            String k = entry.getKey();
+            T v = entry.getValue();
+
+            if (map.containsKey(k)) {
+                throw new IllegalStateException(String.format(
+                        "Duplicate key %s (attempted merging values %s and %s)",
+                        k, map.get(k), v));
+            }
+
+            map.put(k, v);
+        };
+
+        BinaryOperator<Map<String, T>> combiner = (m1, m2) -> {
+            m2.entrySet().forEach(entry -> accumulator.accept(m1, entry));
+            return m1;
+        };
+
+        return Collector.of(LinkedHashMap::new, accumulator, combiner);
     }
 
     public AnnotationInstance getAnnotation(AnnotationTarget target) {
