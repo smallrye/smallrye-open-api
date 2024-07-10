@@ -14,6 +14,7 @@ import org.jboss.jandex.AnnotationValue;
 
 import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -165,7 +166,9 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                if (openApiVersion() == OpenApiVersion.V3_1) {
+                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                }
             } else {
                 setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
                 setIfPresent(node, PROP_IN, jsonIO().toJson(model.getIn()));

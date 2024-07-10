@@ -7,6 +7,7 @@ import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.examples.ExampleImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -56,8 +57,10 @@ public class ExampleObjectIO<V, A extends V, O extends V, AB, OB> extends MapMod
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
-                setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                if (openApiVersion() == OpenApiVersion.V3_1) {
+                    setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                }
             } else {
                 setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));

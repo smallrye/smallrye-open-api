@@ -3,8 +3,14 @@ package io.smallrye.openapi.runtime.io.media;
 import static io.smallrye.openapi.runtime.io.schema.DataType.listOf;
 import static io.smallrye.openapi.runtime.io.schema.DataType.type;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROPERTIES_DATA_TYPES;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIVE_MAXIMUM;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIVE_MINIMUM;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MAXIMUM;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MINIMUM;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_NULLABLE;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_TYPE;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +38,7 @@ import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.eclipse.microprofile.openapi.models.media.XML;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
@@ -49,6 +56,7 @@ import org.jboss.jandex.AnnotationInstance;
 import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -103,12 +111,17 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         IoLogging.logger.singleJsonObject("Schema");
         String name = getName(node);
         SchemaImpl schema = new SchemaImpl(name);
-        String dialect = jsonIO().getString(node, SchemaConstant.PROP_SCHEMA_DIALECT);
-        if (dialect == null || dialect.equals(SchemaConstant.DIALECT_OAS31)
-                || dialect.equals(SchemaConstant.DIALECT_JSON_2020_12)) {
-            populateSchemaObject(schema, node);
+
+        if (openApiVersion() == OpenApiVersion.V3_1) {
+            String dialect = jsonIO().getString(node, SchemaConstant.PROP_SCHEMA_DIALECT);
+            if (dialect == null || dialect.equals(SchemaConstant.DIALECT_OAS31)
+                    || dialect.equals(SchemaConstant.DIALECT_JSON_2020_12)) {
+                populateSchemaObject(schema, node);
+            } else {
+                schema.getDataMap().putAll((Map<? extends String, ? extends Object>) jsonIO().fromJson(node));
+            }
         } else {
-            schema.getDataMap().putAll((Map<? extends String, ? extends Object>) jsonIO().fromJson(node));
+            populateSchemaObject30(schema, node);
         }
         return schema;
     }
@@ -146,6 +159,47 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
                 dataMap.put(name, jsonIO().fromJson(fieldNode));
             }
         }
+    }
+
+    private void populateSchemaObject30(SchemaImpl schema, O node) {
+        Map<String, Object> dataMap = schema.getDataMap();
+
+        // Call our internal methods for type/nullable handling
+        SchemaImpl.setType(schema, enumValue(jsonIO().getValue(node, PROP_TYPE), Schema.SchemaType.class));
+        SchemaImpl.setNullable(schema, jsonIO().getBoolean(node, PROP_NULLABLE));
+
+        // Translate minimum
+        BigDecimal minimum = jsonIO().getBigDecimal(node, PROP_MINIMUM);
+        if (minimum != null) {
+            if (jsonIO().getBoolean(node, PROP_EXCLUSIVE_MINIMUM) == Boolean.TRUE) {
+                schema.setExclusiveMinimum(minimum);
+            } else {
+                schema.setMinimum(minimum);
+            }
+        }
+
+        // Translate maximum
+        BigDecimal maximum = jsonIO().getBigDecimal(node, PROP_MAXIMUM);
+        if (maximum != null) {
+            if (jsonIO().getBoolean(node, PROP_EXCLUSIVE_MAXIMUM) == Boolean.TRUE) {
+                schema.setExclusiveMaximum(maximum);
+            } else {
+                schema.setMaximum(maximum);
+            }
+        }
+
+        // Read known fields
+        for (Map.Entry<String, DataType> entry : SchemaConstant.PROPERTIES_DATA_TYPES_3_0.entrySet()) {
+            String key = entry.getKey();
+            DataType dataType = entry.getValue();
+            V fieldNode = jsonIO().getValue(node, key);
+            if (fieldNode != null) {
+                dataMap.put(key, readJson(fieldNode, dataType));
+            }
+        }
+
+        // Read extensions
+        extensionIO().readMap(node).forEach(schema::addExtension);
     }
 
     private String getName(O node) {
@@ -242,6 +296,14 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             return Optional.empty();
         }
 
+        if (openApiVersion() == OpenApiVersion.V3_1) {
+            return write31(model);
+        } else {
+            return write30(model);
+        }
+    }
+
+    private Optional<? extends V> write31(Schema model) {
         if (model.getBooleanSchema() != null) {
             return jsonIO().toJson(model.getBooleanSchema());
         }
@@ -249,6 +311,106 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         SchemaImpl impl = (SchemaImpl) model;
         Map<String, Object> data = impl.getDataMap();
         return writeMap(data);
+    }
+
+    @SuppressWarnings("deprecation")
+    public Optional<O> write30(Schema model) {
+        return optionalJsonObject(model).map(node -> {
+            if (isReference(model)) {
+                setReference(node, model);
+            } else {
+                Fields30 fields = transformFields30(model);
+                setIfPresent(node, SchemaConstant.PROP_FORMAT, jsonIO().toJson(model.getFormat()));
+                setIfPresent(node, SchemaConstant.PROP_TITLE, jsonIO().toJson(model.getTitle()));
+                setIfPresent(node, SchemaConstant.PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                setIfPresent(node, SchemaConstant.PROP_DEFAULT, jsonIO().toJson(model.getDefaultValue()));
+                setIfPresent(node, SchemaConstant.PROP_MULTIPLE_OF, jsonIO().toJson(model.getMultipleOf()));
+                setIfPresent(node, SchemaConstant.PROP_MAXIMUM, jsonIO().toJson(fields.maximum));
+                setIfPresent(node, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, jsonIO().toJson(fields.exclusiveMaximum));
+                setIfPresent(node, SchemaConstant.PROP_MINIMUM, jsonIO().toJson(fields.minimum));
+                setIfPresent(node, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, jsonIO().toJson(fields.exclusiveMinimum));
+                setIfPresent(node, SchemaConstant.PROP_MAX_LENGTH, jsonIO().toJson(model.getMaxLength()));
+                setIfPresent(node, SchemaConstant.PROP_MIN_LENGTH, jsonIO().toJson(model.getMinLength()));
+                setIfPresent(node, SchemaConstant.PROP_PATTERN, jsonIO().toJson(model.getPattern()));
+                setIfPresent(node, SchemaConstant.PROP_MAX_ITEMS, jsonIO().toJson(model.getMaxItems()));
+                setIfPresent(node, SchemaConstant.PROP_MIN_ITEMS, jsonIO().toJson(model.getMinItems()));
+                setIfPresent(node, SchemaConstant.PROP_UNIQUE_ITEMS, jsonIO().toJson(model.getUniqueItems()));
+                setIfPresent(node, SchemaConstant.PROP_MAX_PROPERTIES, jsonIO().toJson(model.getMaxProperties()));
+                setIfPresent(node, SchemaConstant.PROP_MIN_PROPERTIES, jsonIO().toJson(model.getMinProperties()));
+                setIfPresent(node, SchemaConstant.PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
+                setIfPresent(node, SchemaConstant.PROP_ENUM, jsonIO().toJson(model.getEnumeration()));
+                setIfPresent(node, SchemaConstant.PROP_TYPE, jsonIO().toJson(fields.type));
+                setIfPresent(node, SchemaConstant.PROP_ITEMS, write(model.getItems()));
+                setIfPresent(node, SchemaConstant.PROP_ALL_OF, writeList(model.getAllOf()));
+                setIfPresent(node, SchemaConstant.PROP_PROPERTIES, writeMap(model.getProperties()));
+                if (model.getAdditionalPropertiesBoolean() != null) {
+                    setIfPresent(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES,
+                            jsonIO().toJson(model.getAdditionalPropertiesBoolean()));
+                } else {
+                    setIfPresent(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES, write(model.getAdditionalPropertiesSchema()));
+                }
+                setIfPresent(node, SchemaConstant.PROP_READ_ONLY, jsonIO().toJson(model.getReadOnly()));
+                setIfPresent(node, SchemaConstant.PROP_XML, write(model.getXml()));
+                setIfPresent(node, SchemaConstant.PROP_EXTERNAL_DOCS, extDocIO().write(model.getExternalDocs()));
+                setIfPresent(node, SchemaConstant.PROP_EXAMPLE, jsonIO().toJson(fields.example));
+                setIfPresent(node, SchemaConstant.PROP_ONE_OF, writeList(model.getOneOf()));
+                setIfPresent(node, SchemaConstant.PROP_ANY_OF, writeList(model.getAnyOf()));
+                setIfPresent(node, SchemaConstant.PROP_NOT, write(model.getNot()));
+                setIfPresent(node, SchemaConstant.PROP_DISCRIMINATOR, discriminatorIO().write(model.getDiscriminator()));
+                setIfPresent(node, SchemaConstant.PROP_NULLABLE, jsonIO().toJson(fields.nullable));
+                setIfPresent(node, SchemaConstant.PROP_WRITE_ONLY, jsonIO().toJson(model.getWriteOnly()));
+                setIfPresent(node, SchemaConstant.PROP_DEPRECATED, jsonIO().toJson(model.getDeprecated()));
+                setAllIfPresent(node, extensionIO().write(model));
+            }
+
+            return node;
+        }).map(jsonIO()::buildObject);
+    }
+
+    @SuppressWarnings("deprecation")
+    private Fields30 transformFields30(Schema schema31) {
+        Fields30 result = new Fields30();
+
+        List<SchemaType> types = schema31.getType();
+        if (types != null) {
+            result.type = types.stream().filter(t -> t != SchemaType.NULL).findFirst().orElse(null);
+            result.nullable = SchemaImpl.getNullable(schema31);
+        }
+
+        BigDecimal oldMinimum = schema31.getMinimum();
+        BigDecimal oldExclusiveMinimum = schema31.getExclusiveMinimum();
+        if (oldMinimum != null) {
+            result.minimum = oldMinimum;
+            if (oldExclusiveMinimum != null && oldExclusiveMinimum.compareTo(oldMinimum) >= 0) {
+                result.minimum = oldExclusiveMinimum;
+                result.exclusiveMinimum = Boolean.TRUE;
+            }
+        } else if (oldExclusiveMinimum != null) {
+            result.minimum = oldExclusiveMinimum;
+            result.exclusiveMinimum = Boolean.TRUE;
+        }
+
+        BigDecimal oldMaximum = schema31.getMaximum();
+        BigDecimal oldExclusiveMaximum = schema31.getExclusiveMaximum();
+        if (oldMaximum != null) {
+            result.maximum = oldMaximum;
+            if (oldExclusiveMaximum != null && oldExclusiveMaximum.compareTo(oldMaximum) <= 0) {
+                result.maximum = oldExclusiveMaximum;
+                result.exclusiveMaximum = Boolean.TRUE;
+            }
+        } else if (oldExclusiveMaximum != null) {
+            result.maximum = oldExclusiveMaximum;
+            result.exclusiveMaximum = Boolean.TRUE;
+        }
+
+        result.example = schema31.getExample();
+        if (result.example == null) {
+            result.example = Optional.ofNullable(schema31.getExamples())
+                    .flatMap(l -> l.stream().findFirst())
+                    .orElse(null);
+        }
+
+        return result;
     }
 
     private Optional<? extends V> writeObject(Object value) {
@@ -369,4 +531,15 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             return node;
         }).map(jsonIO()::buildObject);
     }
+
+    private static class Fields30 {
+        private SchemaType type;
+        private Boolean nullable;
+        private BigDecimal minimum;
+        private Boolean exclusiveMinimum;
+        private BigDecimal maximum;
+        private Boolean exclusiveMaximum;
+        private Object example;
+    }
+
 }

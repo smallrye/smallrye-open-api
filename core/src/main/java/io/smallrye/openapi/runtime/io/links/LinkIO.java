@@ -7,6 +7,7 @@ import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.links.LinkImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -61,7 +62,9 @@ public class LinkIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Link
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                if (openApiVersion() == OpenApiVersion.V3_1) {
+                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                }
             } else {
                 setIfPresent(node, PROP_OPERATION_REF, jsonIO().toJson(model.getOperationRef()));
                 setIfPresent(node, PROP_OPERATION_ID, jsonIO().toJson(model.getOperationId()));

@@ -7,6 +7,7 @@ import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.info.InfoImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -52,7 +53,9 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
         Info info = new InfoImpl();
         info.setTitle(jsonIO().getString(node, PROP_TITLE));
         info.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        info.setSummary(jsonIO().getString(node, PROP_SUMMARY));
+        if (openApiVersion() == OpenApiVersion.V3_1) {
+            info.setSummary(jsonIO().getString(node, PROP_SUMMARY));
+        }
         info.setTermsOfService(jsonIO().getString(node, PROP_TERMS_OF_SERVICE));
         info.setContact(contactIO().readValue(jsonIO().getValue(node, PROP_CONTACT)));
         info.setLicense(licenseIO().readValue(jsonIO().getValue(node, PROP_LICENSE)));
@@ -65,7 +68,9 @@ public class InfoIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Info, V
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_TITLE, jsonIO().toJson(model.getTitle()));
             setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-            setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+            if (openApiVersion() == OpenApiVersion.V3_1) {
+                setIfPresent(node, PROP_SUMMARY, jsonIO().toJson(model.getSummary()));
+            }
             setIfPresent(node, PROP_TERMS_OF_SERVICE, jsonIO().toJson(model.getTermsOfService()));
             setIfPresent(node, PROP_CONTACT, contactIO().write(model.getContact()));
             setIfPresent(node, PROP_LICENSE, licenseIO().write(model.getLicense()));

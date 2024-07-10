@@ -20,6 +20,7 @@ import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -118,7 +119,9 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                if (openApiVersion() == OpenApiVersion.V3_1) {
+                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                }
             } else {
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
                 setIfPresent(node, PROP_CONTENT, contentIO().write(model.getContent()));
