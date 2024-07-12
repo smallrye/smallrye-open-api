@@ -531,6 +531,39 @@ class OpenApiParserAndSerializerTest {
         doTest("_everything.yaml", Format.YAML);
     }
 
+    @Test
+    void testEverything30() throws IOException, JSONException {
+        doTest("_everything30.json", Format.JSON);
+    }
+
+    @Test
+    void testEverything30Yaml() throws IOException, JSONException {
+        doTest("_everything30.yaml", Format.YAML);
+    }
+
+    /**
+     * Test that we can read a 3.1 model and output it as a 3.0 model
+     */
+    @Test
+    void testEverythingRead31Write30() throws IOException, JSONException {
+        URL testResource = OpenApiParserAndSerializerTest.class.getResource("_everything.json");
+        OpenAPI impl = OpenApiParser.parse(testResource);
+        URL testResourceOutput = OpenApiParserAndSerializerTest.class.getResource("_everything30.json");
+
+        impl.setOpenapi("3.0.3");
+        doTest(testResourceOutput, Format.JSON, impl);
+    }
+
+    @Test
+    void testEverythingRead30Write31() throws IOException, JSONException {
+        URL testResource = OpenApiParserAndSerializerTest.class.getResource("_everything30.json");
+        OpenAPI impl = OpenApiParser.parse(testResource);
+        URL testResourceOutput = OpenApiParserAndSerializerTest.class.getResource("_everything30_31.json");
+
+        impl.setOpenapi("3.1.0");
+        doTest(testResourceOutput, Format.JSON, impl);
+    }
+
     /**
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      *

@@ -1,5 +1,5 @@
 ---
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Sample Pet Store App
   description: This is a sample server for a pet store.
@@ -234,18 +234,19 @@ paths:
 components:
   schemas:
     mySchema:
-      type:
-      - object
-      - "null"
       description: mySchema
+      type: object
       properties:
         number:
+          maximum: 10
+          exclusiveMaximum: true
+          minimum: 0
+          exclusiveMinimum: true
           type: integer
-          exclusiveMinimum: 0
-          exclusiveMaximum: 10
         string:
-          type: string
           maxLength: 5
+          type: string
+      nullable: true
     Schema-1: {}
     Schema-2: {}
   responses:
