@@ -1,0 +1,72 @@
+{
+  "openapi": "3.1.0",
+  "components": {
+    "schemas": {
+      "NullRef": {
+        "description": "nullable reference",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/mySchema"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "NullRefWithAnyOf": {
+        "allOf": [
+          {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/mySchema"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "multipleOf": 3
+              },
+              {
+                "multipleOf": 5
+              }
+            ]
+          }
+        ]
+      },
+      "MultiAnyNullRef": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/mySchema"
+          },
+          {
+            "$ref": "#/components/schemas/mySchema2"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "MultiAllNullRef": {
+        "anyOf": [
+          {
+            "allOf" : [
+              {
+                "$ref": "#/components/schemas/mySchema"
+              },
+              {
+                "$ref": "#/components/schemas/mySchema2"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    }
+  }
+}

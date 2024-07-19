@@ -343,6 +343,21 @@
 						"maxLength": 5
 					}
 				}
+			},
+			"mySchema2": {
+				"description": "nullable reference",
+				"nullable": true,
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/mySchema"
+					}
+				]
+			},
+			"mySchema3": {
+				"enum": [4]
+			},
+			"mySchema4": {
+				"enum": [null]
 			}
 		},
 		"responses": {

@@ -1,0 +1,43 @@
+{
+	"openapi": "3.0.3",
+	"components": {
+		"schemas": {
+			"min": {
+				"type": "number",
+				"minimum": 5
+			},
+			"exMin": {
+				"type": "number",
+				"minimum": 5,
+				"exclusiveMinimum": true
+			},
+			"bothMin": {
+				"type": "number",
+				"minimum": 5
+			},
+			"bothExMin": {
+				"type": "number",
+				"minimum": 5,
+				"exclusiveMinimum": true
+			},
+			"max": {
+				"type": "number",
+				"maximum": 5
+			},
+			"exMax": {
+				"type": "number",
+				"maximum": 5,
+				"exclusiveMaximum": true
+			},
+			"bothMax": {
+				"type": "number",
+				"maximum": 3
+			},
+			"bothExMax": {
+				"type": "number",
+				"maximum": 3,
+				"exclusiveMaximum": true
+			}
+		}
+	}
+}

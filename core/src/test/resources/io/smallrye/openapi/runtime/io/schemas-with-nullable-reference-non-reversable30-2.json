@@ -1,0 +1,52 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "NullableAlone": {
+        "description": "nullable alone"
+      },
+      "NullableWithAnyOf": {
+        "anyOf": [
+          {
+            "multipleOf": 3
+          },
+          {
+            "multipleOf": 5
+          }
+        ],
+        "allOf": [
+          {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mySchema"
+              }
+            ]
+          }
+        ]
+      },
+      "NullableWithMultiRef": {
+        "description": "nullable should really be kept here, but currently it gets dropped",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/mySchema"
+          },
+          {
+            "$ref": "#/components/schemas/mySchema2"
+          }
+        ]
+      },
+      "NullableWithMultiAltRef": {
+        "description": "nullable should really be kept here, but currently it gets dropped",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/mySchema"
+          },
+          {
+            "$ref": "#/components/schemas/mySchema2"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -340,6 +340,23 @@
 						"maxLength": 5
 					}
 				}
+			},
+			"mySchema2": {
+				"description": "nullable reference",
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/mySchema"
+					},
+					{
+						"type": "null"
+					}
+				]
+			},
+			"mySchema3": {
+				"const": 4
+			},
+			"mySchema4": {
+				"type": "null"
 			}
 		},
 		"responses": {
