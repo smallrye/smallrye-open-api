@@ -21,12 +21,10 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "anyOf": [
+                  "nullable": true,
+                  "allOf": [
                     {
                       "$ref" : "#/components/schemas/Greeting"
-                    },
-                    {
-                      "nullable" : true
                     }
                   ]
                 }

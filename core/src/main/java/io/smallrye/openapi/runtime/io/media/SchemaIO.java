@@ -8,6 +8,7 @@ import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIV
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MAXIMUM;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MINIMUM;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_NULLABLE;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_REF;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_TYPE;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.Constructible;
@@ -64,6 +66,7 @@ import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.schema.DataType;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Schema, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
@@ -200,6 +203,50 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
 
         // Read extensions
         extensionIO().readMap(node).forEach(schema::addExtension);
+
+        // Move allOf[{$ref=....}] to the top level
+        List<Schema> allOf = schema.getAllOf();
+        if (schema.getRef() == null && allOf != null) {
+            List<Schema> allOfRefs = allOf.stream()
+                    .filter(s -> isSoloRef(s))
+                    .collect(Collectors.toList());
+
+            if (allOfRefs.size() == 1) {
+                Schema refSchema = allOfRefs.get(0);
+                schema.removeAllOf(refSchema);
+                schema.setRef(refSchema.getRef());
+                if (schema.getAllOf().isEmpty()) {
+                    schema.setAllOf(null);
+                }
+            }
+        }
+
+        // Detect {$ref=....,nullable=true} and convert to anyOf[{$ref=...}, {type=null}]
+        if (schema.getRef() != null && schema.getType() == null && SchemaImpl.getNullable(schema) == Boolean.TRUE) {
+            List<Schema> newAnyOfSchemas = new ArrayList<>();
+            newAnyOfSchemas.add(new SchemaImpl().ref(schema.getRef()));
+            newAnyOfSchemas.add(new SchemaImpl().addType(SchemaType.NULL));
+            if (schema.getAnyOf() == null || schema.getAnyOf().isEmpty()) {
+                schema.setAnyOf(newAnyOfSchemas);
+            } else {
+                schema.addAllOf(new SchemaImpl().anyOf(newAnyOfSchemas));
+            }
+            schema.setRef(null);
+            SchemaImpl.setNullable(schema, null);
+        }
+
+        // Detect {enum=[null]} and convert to {type=null}
+        // Detect {enum=[value]} and convert to {const=value}
+        List<Object> enumeration = schema.getEnumeration();
+        if (enumeration != null && enumeration.size() == 1) {
+            if (enumeration.get(0) == null) {
+                schema.setType(Collections.singletonList(SchemaType.NULL));
+                schema.setEnumeration(null);
+            } else if (schema.getConstValue() == null) {
+                schema.setConstValue(enumeration.get(0));
+                schema.setEnumeration(null);
+            }
+        }
     }
 
     private String getName(O node) {
@@ -257,20 +304,19 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             }
         }
 
-        if (jsonIO().isObject(node)) {
-            if (desiredType == Schema.class) {
-                return readValue(node);
-            }
-            if (desiredType == XML.class) {
-                return readXML(node);
-            }
-            if (desiredType == ExternalDocumentation.class) {
-                return extDocIO().readValue(node);
-            }
-            if (desiredType == Discriminator.class) {
-                return discriminatorIO().readValue(node);
-            }
+        if (desiredType == Schema.class) {
+            return readValue(node);
         }
+        if (desiredType == XML.class) {
+            return readXML(node);
+        }
+        if (desiredType == ExternalDocumentation.class) {
+            return extDocIO().readValue(node);
+        }
+        if (desiredType == Discriminator.class) {
+            return discriminatorIO().readValue(node);
+        }
+
         return jsonIO().fromJson(node);
     }
 
@@ -316,10 +362,10 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
     @SuppressWarnings("deprecation")
     public Optional<O> write30(Schema model) {
         return optionalJsonObject(model).map(node -> {
-            if (isReference(model)) {
+            ReplacementFields fields = compute30ReplacementFields(model);
+            if (fields.ref != null && !fields.ref.isEmpty()) {
                 setReference(node, model);
             } else {
-                Fields30 fields = transformFields30(model);
                 setIfPresent(node, SchemaConstant.PROP_FORMAT, jsonIO().toJson(model.getFormat()));
                 setIfPresent(node, SchemaConstant.PROP_TITLE, jsonIO().toJson(model.getTitle()));
                 setIfPresent(node, SchemaConstant.PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
@@ -338,10 +384,10 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
                 setIfPresent(node, SchemaConstant.PROP_MAX_PROPERTIES, jsonIO().toJson(model.getMaxProperties()));
                 setIfPresent(node, SchemaConstant.PROP_MIN_PROPERTIES, jsonIO().toJson(model.getMinProperties()));
                 setIfPresent(node, SchemaConstant.PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
-                setIfPresent(node, SchemaConstant.PROP_ENUM, jsonIO().toJson(model.getEnumeration()));
+                setIfPresent(node, SchemaConstant.PROP_ENUM, jsonIO().toJson(fields.enumeration));
                 setIfPresent(node, SchemaConstant.PROP_TYPE, jsonIO().toJson(fields.type));
                 setIfPresent(node, SchemaConstant.PROP_ITEMS, write(model.getItems()));
-                setIfPresent(node, SchemaConstant.PROP_ALL_OF, writeList(model.getAllOf()));
+                setIfPresent(node, SchemaConstant.PROP_ALL_OF, writeList(fields.allOf));
                 setIfPresent(node, SchemaConstant.PROP_PROPERTIES, writeMap(model.getProperties()));
                 if (model.getAdditionalPropertiesBoolean() != null) {
                     setIfPresent(node, SchemaConstant.PROP_ADDITIONAL_PROPERTIES,
@@ -354,7 +400,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
                 setIfPresent(node, SchemaConstant.PROP_EXTERNAL_DOCS, extDocIO().write(model.getExternalDocs()));
                 setIfPresent(node, SchemaConstant.PROP_EXAMPLE, jsonIO().toJson(fields.example));
                 setIfPresent(node, SchemaConstant.PROP_ONE_OF, writeList(model.getOneOf()));
-                setIfPresent(node, SchemaConstant.PROP_ANY_OF, writeList(model.getAnyOf()));
+                setIfPresent(node, SchemaConstant.PROP_ANY_OF, writeList(fields.anyOf));
                 setIfPresent(node, SchemaConstant.PROP_NOT, write(model.getNot()));
                 setIfPresent(node, SchemaConstant.PROP_DISCRIMINATOR, discriminatorIO().write(model.getDiscriminator()));
                 setIfPresent(node, SchemaConstant.PROP_NULLABLE, jsonIO().toJson(fields.nullable));
@@ -368,15 +414,26 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
     }
 
     @SuppressWarnings("deprecation")
-    private Fields30 transformFields30(Schema schema31) {
-        Fields30 result = new Fields30();
+    private ReplacementFields compute30ReplacementFields(Schema schema31) {
+        ReplacementFields result = new ReplacementFields();
 
+        // Transform types and nullable
         List<SchemaType> types = schema31.getType();
         if (types != null) {
             result.type = types.stream().filter(t -> t != SchemaType.NULL).findFirst().orElse(null);
             result.nullable = SchemaImpl.getNullable(schema31);
         }
 
+        // Convert type=null to enum=[null] and const=value to enum=[value]
+        result.enumeration = schema31.getEnumeration();
+        if (result.type == null && result.nullable == Boolean.TRUE) {
+            result.nullable = null;
+            result.enumeration = Collections.singletonList(null);
+        } else if (schema31.getConstValue() != null) {
+            result.enumeration = Collections.singletonList(schema31.getConstValue());
+        }
+
+        // Convert numeric exclusiveMinimum to boolean
         BigDecimal oldMinimum = schema31.getMinimum();
         BigDecimal oldExclusiveMinimum = schema31.getExclusiveMinimum();
         if (oldMinimum != null) {
@@ -390,6 +447,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             result.exclusiveMinimum = Boolean.TRUE;
         }
 
+        // Convert numeric exclusiveMaximum to boolean
         BigDecimal oldMaximum = schema31.getMaximum();
         BigDecimal oldExclusiveMaximum = schema31.getExclusiveMaximum();
         if (oldMaximum != null) {
@@ -403,11 +461,36 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
             result.exclusiveMaximum = Boolean.TRUE;
         }
 
+        // Transform example
         result.example = schema31.getExample();
         if (result.example == null) {
             result.example = Optional.ofNullable(schema31.getExamples())
                     .flatMap(l -> l.stream().findFirst())
                     .orElse(null);
+        }
+
+        result.ref = schema31.getRef();
+        result.allOf = schema31.getAllOf();
+        result.anyOf = schema31.getAnyOf();
+
+        // If $ref is used with any other properties, move it to an allOf
+        if (result.ref != null && !isSoloRef(schema31)) {
+            result.ref = null;
+            Schema refSchema = new SchemaImpl().ref(schema31.getRef());
+            result.allOf = ModelUtil.replace(result.allOf, ArrayList::new); // replace first because result.allOf may be immutable
+            result.allOf = ModelUtil.add(refSchema, result.allOf, ArrayList::new);
+        }
+
+        // If we have anyOf = [{type=null}, {$ref=...}], remove it and set nullable and allOf = [{$ref=...}]
+        if (result.anyOf != null && result.anyOf.size() == 2 && result.ref == null && result.type == null) {
+            Optional<Schema> typeNullSchema = result.anyOf.stream().filter(s -> isSoloTypeNull(s)).findFirst();
+            Optional<Schema> refSchema = result.anyOf.stream().filter(s -> isSoloRef(s)).findFirst();
+            if (typeNullSchema.isPresent() && refSchema.isPresent()) {
+                result.anyOf = null;
+                result.nullable = Boolean.TRUE;
+                result.allOf = ModelUtil.replace(result.allOf, ArrayList::new); // replace first because result.allOf may be immutable
+                result.allOf = ModelUtil.add(refSchema.get(), result.allOf, ArrayList::new);
+            }
         }
 
         return result;
@@ -532,7 +615,45 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         }).map(jsonIO()::buildObject);
     }
 
-    private static class Fields30 {
+    /**
+     * Checks whether a schema has only the {@code $ref} property set
+     *
+     * @param schema the schema to check
+     * @return {@code true} if {@code schema} has one property and it's named {@code $ref}, otherwise {@code false}
+     */
+    private static boolean isSoloRef(Schema schema) {
+        if (!(schema instanceof SchemaImpl)) {
+            return false;
+        }
+        SchemaImpl s = (SchemaImpl) schema;
+        Map<String, Object> data = s.getDataMap();
+        return data.size() == 1 && data.containsKey(PROP_REF);
+    }
+
+    /**
+     * Checks whether a schema has only the {@code type} property set with the value {@code [null]}
+     *
+     * @param schema the schema to check
+     * @return {@code true} if {@code schema} has one property and it's named {@code type} and has value {@code [null]},
+     *         otherwise {@code false}
+     */
+    private static boolean isSoloTypeNull(Schema schema) {
+        if (!(schema instanceof SchemaImpl)) {
+            return false;
+        }
+        SchemaImpl s = (SchemaImpl) schema;
+        Map<String, Object> data = s.getDataMap();
+        return data.size() == 1 && s.getType() != null && s.getType().equals(Collections.singletonList(SchemaType.NULL));
+    }
+
+    /**
+     * Replacement field values which should be used when writing a Schema in 3.0 format.
+     * <p>
+     * All fields which may need to change value between 3.1 and 3.0 have an entry in here.
+     * <p>
+     * This is written by compute30ReplacementFields and read by populateSchemaObject30
+     */
+    private static class ReplacementFields {
         private SchemaType type;
         private Boolean nullable;
         private BigDecimal minimum;
@@ -540,6 +661,10 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         private BigDecimal maximum;
         private Boolean exclusiveMaximum;
         private Object example;
+        private String ref;
+        private List<Schema> allOf;
+        private List<Schema> anyOf;
+        private List<Object> enumeration;
     }
 
 }
