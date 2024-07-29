@@ -21,7 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
@@ -62,7 +62,7 @@ class QuarkusAnnotationScanIT {
 
     static OpenApiConfig dynamicConfig(Map<String, String> properties) {
         Config config = new SmallRyeConfigBuilder()
-                .withSources(new ConfigValuePropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
+                .withSources(new PropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
                 .build();
         return OpenApiConfig.fromConfig(config);
     }
