@@ -559,7 +559,7 @@ public class TypeResolver {
     }
 
     private static boolean acceptMethod(MethodInfo method) {
-        if (Modifier.isStatic(method.flags())) {
+        if (Modifier.isStatic(method.flags()) || method.isSynthetic()) {
             return false;
         }
         String name = method.name();
@@ -603,11 +603,11 @@ public class TypeResolver {
      * @param target the field or method to be checked for ignoring or exposure in the API
      * @param reference an annotated member (field or method) that referenced the type of target's declaring class
      * @param descendants list of classes that descend from the class containing target
-     * @param ignoreResolver resolver to determine if the field is ignored
+     * @param properties map of other known properties that are peers of the target
      */
     private void processVisibility(AnnotationScannerContext context, AnnotationTarget target, AnnotationTarget reference,
             List<ClassInfo> descendants,
-            IgnoreResolver ignoreResolver) {
+            Map<String, TypeResolver> properties) {
         if (this.exposed || this.ignored) {
             // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
             return;
@@ -619,7 +619,7 @@ public class TypeResolver {
             return;
         }
 
-        switch (getVisibility(context, target, reference, descendants, ignoreResolver)) {
+        switch (getVisibility(context, target, reference, descendants, properties)) {
             case EXPOSED:
                 this.exposed = true;
                 break;
@@ -674,22 +674,23 @@ public class TypeResolver {
      * @param target the field or method to be checked for ignoring or exposure in the API
      * @param reference an annotated member (field or method) that referenced the type of target's declaring class
      * @param descendants list of classes that descend from the class containing target
-     * @param ignoreResolver resolver to determine if the field is ignored
+     * @param properties map of other known properties that are peers of the target
      */
     private IgnoreResolver.Visibility getVisibility(AnnotationScannerContext context, AnnotationTarget target,
             AnnotationTarget reference,
             List<ClassInfo> descendants,
-            IgnoreResolver ignoreResolver) {
+            Map<String, TypeResolver> properties) {
 
         if (!isViewable(context, target)) {
             return IgnoreResolver.Visibility.IGNORED;
         }
 
+        IgnoreResolver ignoreResolver = context.getIgnoreResolver();
         // First check if a descendant class has hidden/exposed the property
         IgnoreResolver.Visibility visibility = ignoreResolver.getDescendantVisibility(propertyName, descendants);
 
         if (visibility == IgnoreResolver.Visibility.UNSET) {
-            visibility = ignoreResolver.isIgnore(target, reference);
+            visibility = ignoreResolver.isIgnore(properties, target, reference);
         }
 
         return visibility;
@@ -773,7 +774,7 @@ public class TypeResolver {
             // Ignored for getters/setters
             resolver.ignored = true;
         } else {
-            resolver.processVisibility(context, field, reference, descendants, context.getIgnoreResolver());
+            resolver.processVisibility(context, field, reference, descendants, properties);
             resolver.processAccess(field);
         }
     }
@@ -841,7 +842,7 @@ public class TypeResolver {
         if (propertyType != null) {
             TypeResolver resolver = updateTypeResolvers(context, properties, stack, method, propertyType);
             if (resolver != null) {
-                resolver.processVisibility(context, method, reference, descendants, context.getIgnoreResolver());
+                resolver.processVisibility(context, method, reference, descendants, properties);
                 resolver.processAccess(method);
             }
         }
@@ -865,7 +866,7 @@ public class TypeResolver {
             MethodInfo method,
             Type propertyType) {
 
-        final String propertyName = propertyName(method);
+        final String propertyName = propertyName(properties, method);
 
         if (propertyName == null) {
             return null;
@@ -913,13 +914,18 @@ public class TypeResolver {
      * @param method either an accessor (getter) or mutator (setter) for the property
      * @return the property name
      */
-    static String propertyName(MethodInfo method) {
+    static String propertyName(Map<String, TypeResolver> properties, MethodInfo method) {
         final String methodName = method.name();
         final ClassInfo declaringClass = method.declaringClass();
 
         if (declaringClass.isRecord() && declaringClass.recordComponent(methodName) != null) {
             // This is a record and the method name is generated (or overridden) and
             // matches the record component name. Do not modify further.
+            return methodName;
+        }
+
+        if (Optional.ofNullable(properties.get(methodName)).map(p -> p.field).isPresent()) {
+            // The method name matches the field name. Do not modify further.
             return methodName;
         }
 
