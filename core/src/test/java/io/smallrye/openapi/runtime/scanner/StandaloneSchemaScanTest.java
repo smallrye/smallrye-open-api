@@ -799,7 +799,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             public String getProperty1;
 
             @Schema(name = "propertyTwo")
-            public String getProperty2;
+            public java.net.URL getProperty2;
 
             public String getProperty1() {
                 return getProperty1;
@@ -809,15 +809,15 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
                 this.getProperty1 = getProperty1;
             }
 
-            public String getProperty2() {
+            public java.net.URL getProperty2() {
                 return getProperty2;
             }
 
-            public void getProperty2(String getProperty2) {
+            public void getProperty2(java.net.URL getProperty2) {
                 this.getProperty2 = getProperty2;
             }
         }
 
-        assertJsonEquals("components.schemas.javabean-property-prefix.json", Bean.class);
+        assertJsonEquals("components.schemas.javabean-property-prefix.json", Bean.class, java.net.URL.class);
     }
 }
