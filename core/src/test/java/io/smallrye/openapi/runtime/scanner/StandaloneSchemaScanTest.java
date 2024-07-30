@@ -789,4 +789,35 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         assertJsonEquals("components.schemas.exceptional-examples.json", Bean.class);
     }
+
+    @Test
+    void testPropertyWithJavaBeanPrefixes() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        @SuppressWarnings("unused")
+        class Bean {
+            @Schema(name = "getProperty1")
+            public String getProperty1;
+
+            @Schema(name = "propertyTwo")
+            public String getProperty2;
+
+            public String getProperty1() {
+                return getProperty1;
+            }
+
+            public void getProperty1(String getProperty1) {
+                this.getProperty1 = getProperty1;
+            }
+
+            public String getProperty2() {
+                return getProperty2;
+            }
+
+            public void getProperty2(String getProperty2) {
+                this.getProperty2 = getProperty2;
+            }
+        }
+
+        assertJsonEquals("components.schemas.javabean-property-prefix.json", Bean.class);
+    }
 }
