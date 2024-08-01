@@ -15,7 +15,7 @@ interface UtilLogging extends BasicLogger {
     @Message(id = 1000, value = "Failed to introspect BeanInfo for: %s")
     void failedToIntrospectBeanInfo(Class<?> clazz, @Cause Throwable cause);
 
-    @LogMessage(level = Logger.Level.INFO)
+    @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 1001, value = "Schema with zero references removed from #/components/schemas: %s")
     void unusedSchemaRemoved(String name);
 
