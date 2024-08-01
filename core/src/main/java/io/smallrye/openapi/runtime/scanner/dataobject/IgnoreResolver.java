@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -54,9 +55,10 @@ public class IgnoreResolver {
         UNSET
     }
 
-    public Visibility isIgnore(AnnotationTarget annotationTarget, AnnotationTarget reference) {
+    public Visibility isIgnore(Map<String, TypeResolver> properties,
+            AnnotationTarget annotationTarget, AnnotationTarget reference) {
         for (IgnoreAnnotationHandler handler : ignoreHandlers) {
-            Visibility v = handler.shouldIgnore(annotationTarget, reference);
+            Visibility v = handler.shouldIgnore(properties, annotationTarget, reference);
 
             if (v != Visibility.UNSET) {
                 return v;
@@ -82,7 +84,8 @@ public class IgnoreResolver {
      */
     private final class SchemaHiddenHandler implements IgnoreAnnotationHandler {
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
             AnnotationInstance annotationInstance = context.annotations().getAnnotation(target, getNames());
             if (annotationInstance != null) {
                 Boolean hidden = context.annotations().value(annotationInstance, SchemaConstant.PROP_HIDDEN);
@@ -105,7 +108,8 @@ public class IgnoreResolver {
      */
     private final class JsonbTransientHandler implements IgnoreAnnotationHandler {
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
             return context.annotations().hasAnnotation(target, getNames()) ? Visibility.IGNORED : Visibility.UNSET;
         }
 
@@ -121,14 +125,15 @@ public class IgnoreResolver {
     private final class JsonIgnorePropertiesHandler implements IgnoreAnnotationHandler {
 
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
-            Visibility visibility = declaringClassIgnore(target);
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
+            Visibility visibility = declaringClassIgnore(properties, target);
 
             if (visibility != Visibility.UNSET) {
                 return visibility;
             }
 
-            return nestingPropertyIgnore(reference, propertyName(target));
+            return nestingPropertyIgnore(reference, propertyName(properties, target));
         }
 
         /**
@@ -146,10 +151,10 @@ public class IgnoreResolver {
          * @param target
          * @return
          */
-        private Visibility declaringClassIgnore(AnnotationTarget target) {
+        private Visibility declaringClassIgnore(Map<String, TypeResolver> properties, AnnotationTarget target) {
             AnnotationInstance declaringClassJIP = context.annotations().getAnnotation(TypeUtil.getDeclaringClass(target),
                     getNames());
-            return shouldIgnoreTarget(declaringClassJIP, propertyName(target));
+            return shouldIgnoreTarget(declaringClassJIP, propertyName(properties, target));
         }
 
         /**
@@ -181,12 +186,12 @@ public class IgnoreResolver {
             return shouldIgnoreTarget(nestedTypeJIP, propertyName);
         }
 
-        private String propertyName(AnnotationTarget target) {
+        private String propertyName(Map<String, TypeResolver> properties, AnnotationTarget target) {
             if (target.kind() == Kind.FIELD) {
                 return target.asField().name();
             }
             // Assuming this is a getter or setter
-            return TypeResolver.propertyName(target.asMethod());
+            return TypeResolver.propertyName(properties, target.asMethod());
         }
 
         private Visibility shouldIgnoreTarget(AnnotationInstance jipAnnotation, String targetName) {
@@ -227,7 +232,8 @@ public class IgnoreResolver {
     private final class JsonIgnoreHandler implements IgnoreAnnotationHandler {
 
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
             AnnotationInstance annotationInstance = context.annotations().getAnnotation(target, getNames());
             if (annotationInstance != null && valueAsBooleanOrTrue(annotationInstance)) {
                 return Visibility.IGNORED;
@@ -248,7 +254,8 @@ public class IgnoreResolver {
         private final Set<DotName> ignoredTypes = new LinkedHashSet<>();
 
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
             Type classType;
 
             switch (target.kind()) {
@@ -277,7 +284,7 @@ public class IgnoreResolver {
             // Primitive and non-indexed types will result in a null
             if (classType.kind() == Type.Kind.PRIMITIVE ||
                     classType.kind() == Type.Kind.VOID ||
-                    (classType.kind() == Type.Kind.ARRAY && classType.asArrayType().component().kind() == Type.Kind.PRIMITIVE)
+                    (classType.kind() == Type.Kind.ARRAY && classType.asArrayType().constituent().kind() == Type.Kind.PRIMITIVE)
                     ||
                     !index.containsClass(classType)) {
                 return Visibility.UNSET;
@@ -309,7 +316,8 @@ public class IgnoreResolver {
 
     private final class TransientIgnoreHandler implements IgnoreAnnotationHandler {
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
             if (target.kind() == AnnotationTarget.Kind.FIELD) {
                 FieldInfo field = target.asField();
                 // If field has transient modifier, e.g. `transient String foo;`, then hide it.
@@ -336,7 +344,8 @@ public class IgnoreResolver {
 
     private final class JaxbAccessibilityHandler implements IgnoreAnnotationHandler {
         @Override
-        public Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference) {
+        public Visibility shouldIgnore(Map<String, TypeResolver> properties, AnnotationTarget target,
+                AnnotationTarget reference) {
             if (hasXmlTransient(target)) {
                 return Visibility.IGNORED;
             }
@@ -411,7 +420,9 @@ public class IgnoreResolver {
     }
 
     private interface IgnoreAnnotationHandler {
-        Visibility shouldIgnore(AnnotationTarget target, AnnotationTarget reference);
+        Visibility shouldIgnore(Map<String, TypeResolver> properties,
+                AnnotationTarget target,
+                AnnotationTarget reference);
 
         List<DotName> getNames();
 

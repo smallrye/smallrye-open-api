@@ -120,6 +120,7 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(StringBuilder.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(CharSequence.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.net.URI.class.getName()), URI_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(java.net.URL.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.util.UUID.class.getName()), UUID_FORMAT);
 
         // B64 String
@@ -669,7 +670,7 @@ public class TypeUtil {
 
     public static DotName getName(Type type) {
         if (type.kind() == Type.Kind.ARRAY) {
-            return type.asArrayType().component().name();
+            return type.asArrayType().constituent().name();
         }
         if (type.kind() == Type.Kind.WILDCARD_TYPE) {
             return getBound(type.asWildcardType()).name();

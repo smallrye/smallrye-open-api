@@ -1,0 +1,18 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "getProperty1" : {
+            "type" : "string"
+          },
+          "propertyTwo" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}
