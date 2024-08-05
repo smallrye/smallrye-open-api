@@ -45,6 +45,14 @@ class OpenApiParserAndSerializerTest {
         JSONAssert.assertEquals(expected, actual, true);
     }
 
+    private static void assertJsonEquals(String message, String expected, String actual) throws JSONException {
+        try {
+            JSONAssert.assertEquals(expected, actual, true);
+        } catch (AssertionError e) {
+            throw new AssertionError(message + "\n" + e.getMessage(), e);
+        }
+    }
+
     /**
      * @param original
      * @param roundTrip
@@ -92,6 +100,56 @@ class OpenApiParserAndSerializerTest {
         Path tempFile = Files.createTempFile("sroap-big-file-test-", "-generated.yaml");
         Files.write(tempFile, bigFileContents.toString().getBytes(StandardCharsets.UTF_8));
         return tempFile;
+    }
+
+    private static enum ConversionDirection {
+        TO_31_ONLY,
+        TO_30_ONLY,
+        BOTH_WAYS
+    }
+
+    /**
+     * Tests parse+serialize+version conversion between two resources.
+     * <p>
+     * <ul>
+     * <li>parse+serialize testResource31 and check the result matches the input
+     * <li>parse+serialize testResource30 and check the result matches the input
+     * <li>parse testResource31, set version to 3.0, serialize and check result matches testResource30
+     * <li>parse testResource30, set version to 3.1, serialize and check result matches testResource31
+     * </ul>
+     *
+     * @param resource31 resource in OpenAPI 3.1 format
+     * @param resource30 resource in OpenAPI 3.0 format
+     */
+    @SuppressWarnings("deprecation")
+    private static void doMultiVersionTest(String resource31, String resource30, ConversionDirection direction)
+            throws IOException, JSONException {
+        URL testResource31 = OpenApiParserAndSerializerTest.class.getResource(resource31);
+        URL testResource30 = OpenApiParserAndSerializerTest.class.getResource(resource30);
+
+        OpenAPI model31 = OpenApiParser.parse(testResource31);
+        OpenAPI model30 = OpenApiParser.parse(testResource30);
+
+        String json31 = loadResource(testResource31);
+        String json30 = loadResource(testResource30);
+
+        assertJsonEquals("Round-trip " + resource31, json31, OpenApiSerializer.serialize(model31, Format.JSON));
+
+        if (direction == ConversionDirection.BOTH_WAYS || direction == ConversionDirection.TO_30_ONLY) {
+            model31.setOpenapi("3.0.3");
+            assertJsonEquals("Convert " + resource31 + " to " + resource30, json30,
+                    OpenApiSerializer.serialize(model31, Format.JSON));
+
+            // Note, not testing round-trip of 3.0 model for TO_31_ONLY case
+            // when testing 3.0 -> 3.1 conversion, some data is lost on read, therefore the 3.0 model is not expected to round-trip
+            assertJsonEquals("Round-trip " + resource30, json30, OpenApiSerializer.serialize(model30, Format.JSON));
+        }
+
+        if (direction == ConversionDirection.BOTH_WAYS || direction == ConversionDirection.TO_31_ONLY) {
+            model30.setOpenapi("3.1.0");
+            assertJsonEquals("Convert " + resource30 + " to " + resource31, json31,
+                    OpenApiSerializer.serialize(model30, Format.JSON));
+        }
     }
 
     /**
@@ -456,7 +514,7 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_Discriminator() throws IOException, JSONException {
-        doTest("schemas-discriminator.json", Format.JSON);
+        doMultiVersionTest("schemas-discriminator.json", "schemas-discriminator30.json", ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -464,7 +522,8 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_AdditionalProperties() throws IOException, JSONException {
-        doTest("schemas-with-additionalProperties.json", Format.JSON);
+        doMultiVersionTest("schemas-with-additionalProperties.json", "schemas-with-additionalProperties30.json",
+                ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -472,7 +531,7 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_AllOf() throws IOException, JSONException {
-        doTest("schemas-with-allOf.json", Format.JSON);
+        doMultiVersionTest("schemas-with-allOf.json", "schemas-with-allOf30.json", ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -480,7 +539,7 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_Composition() throws IOException, JSONException {
-        doTest("schemas-with-composition.json", Format.JSON);
+        doMultiVersionTest("schemas-with-composition.json", "schemas-with-composition30.json", ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -488,7 +547,7 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_Example() throws IOException, JSONException {
-        doTest("schemas-with-example.json", Format.JSON);
+        doMultiVersionTest("schemas-with-example.json", "schemas-with-example30.json", ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -496,7 +555,15 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_ExternalDocs() throws IOException, JSONException {
-        doTest("schemas-with-externalDocs.json", Format.JSON);
+        doMultiVersionTest("schemas-with-externalDocs.json", "schemas-with-externalDocs30.json", ConversionDirection.BOTH_WAYS);
+    }
+
+    @Test
+    void testSchemas_MinMax() throws IOException, JSONException {
+        doMultiVersionTest("schemas-with-minmax.json", "schemas-with-minmax30.json", ConversionDirection.BOTH_WAYS);
+
+        // One way test because it has both minimum and exclusiveMinimum set on the same schema, so data is lost when converting 3.1->3.0
+        doMultiVersionTest("schemas-with-minmax-both.json", "schemas-with-minmax-both30.json", ConversionDirection.TO_30_ONLY);
     }
 
     /**
@@ -504,7 +571,21 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_MetaData() throws IOException, JSONException {
-        doTest("schemas-with-metaData.json", Format.JSON);
+        doMultiVersionTest("schemas-with-metaData.json", "schemas-with-metaData30.json", ConversionDirection.BOTH_WAYS);
+    }
+
+    @Test
+    void testSchemas_NullableReference() throws IOException, JSONException {
+        doMultiVersionTest("schemas-with-nullable-reference.json", "schemas-with-nullable-reference30.json",
+                ConversionDirection.BOTH_WAYS);
+    }
+
+    @Test
+    void testSchemas_NullableReferenceNonReversable() throws IOException, JSONException {
+        doMultiVersionTest("schemas-with-nullable-reference-non-reversable.json",
+                "schemas-with-nullable-reference-non-reversable30-1.json", ConversionDirection.TO_31_ONLY);
+        doMultiVersionTest("schemas-with-nullable-reference-non-reversable.json",
+                "schemas-with-nullable-reference-non-reversable30-2.json", ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -512,7 +593,7 @@ class OpenApiParserAndSerializerTest {
      */
     @Test
     void testSchemas_XML() throws IOException, JSONException {
-        doTest("schemas-with-xml.json", Format.JSON);
+        doMultiVersionTest("schemas-with-xml.json", "schemas-with-xml30.json", ConversionDirection.BOTH_WAYS);
     }
 
     /**
@@ -529,6 +610,19 @@ class OpenApiParserAndSerializerTest {
     @Test
     void testEverythingYaml() throws IOException, JSONException {
         doTest("_everything.yaml", Format.YAML);
+    }
+
+    @Test
+    void testEverything30() throws IOException, JSONException {
+        // Tests non-30 fields in _everything are dropped
+        doMultiVersionTest("_everything.json", "_everything30.json", ConversionDirection.TO_30_ONLY);
+        // Tests conversion of features supported differently by 3.1 and 3.0
+        doMultiVersionTest("_everything30_31.json", "_everything30.json", ConversionDirection.BOTH_WAYS);
+    }
+
+    @Test
+    void testEverything30Yaml() throws IOException, JSONException {
+        doTest("_everything30.yaml", Format.YAML);
     }
 
     /**

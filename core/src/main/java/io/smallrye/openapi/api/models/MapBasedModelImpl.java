@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,7 +18,7 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
  */
 public abstract class MapBasedModelImpl implements ModelImpl {
 
-    protected final HashMap<String, Object> data = new HashMap<>();
+    protected final LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 
     protected MapBasedModelImpl() {
     }

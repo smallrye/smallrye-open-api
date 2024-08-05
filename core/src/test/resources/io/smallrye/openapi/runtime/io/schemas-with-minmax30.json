@@ -1,0 +1,25 @@
+{
+	"openapi": "3.0.3",
+	"components": {
+		"schemas": {
+			"min": {
+				"type": "number",
+				"minimum": 5
+			},
+			"exMin": {
+				"type": "number",
+				"minimum": 5,
+				"exclusiveMinimum": true
+			},
+			"max": {
+				"type": "number",
+				"maximum": 5
+			},
+			"exMax": {
+				"type": "number",
+				"maximum": 5,
+				"exclusiveMaximum": true
+			}
+		}
+	}
+}

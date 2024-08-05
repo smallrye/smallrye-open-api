@@ -229,10 +229,9 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
         }
 
         SchemaImpl s = (SchemaImpl) schema;
-        List<SchemaType> currentValue = s.getListProperty(PROP_TYPE);
-        if (currentValue != null && currentValue.contains(SchemaType.NULL)) {
+        if (getNullable(schema) == Boolean.TRUE) {
             if (type == null) {
-                s.setListProperty(PROP_TYPE, Arrays.asList(SchemaType.NULL));
+                s.setListProperty(PROP_TYPE, null);
             } else {
                 s.setListProperty(PROP_TYPE, Arrays.asList(type, SchemaType.NULL));
             }
@@ -298,7 +297,7 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
         s.nullable = nullable;
         if (nullable == Boolean.TRUE) {
             List<SchemaType> types = s.getType();
-            if (types == null || !types.contains(SchemaType.NULL)) {
+            if (types != null && !types.contains(SchemaType.NULL)) {
                 s.addType(SchemaType.NULL);
             }
         } else {

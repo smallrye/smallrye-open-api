@@ -16,6 +16,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackOperationIO;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
@@ -214,6 +215,14 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
     public abstract T readObject(O node);
 
     public abstract Optional<? extends V> write(T model);
+
+    public OpenApiVersion openApiVersion() {
+        return context.openApiVersion();
+    }
+
+    public void setOpenApiVersion(OpenApiVersion version) {
+        context.setOpenApiVersion(version);
+    }
 
     public ComponentsIO<V, A, O, AB, OB> componentsIO() {
         return context.componentsIO();

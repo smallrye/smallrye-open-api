@@ -3,11 +3,9 @@
   "components": {
     "schemas": {
 	    "Example": {
+	      "$ref": "#/definitions/address",
 	      "type": "object",
 	      "allOf": [
-	        {
-	          "$ref": "#/definitions/address"
-	        },
 	        {
 	          "properties": {
 	            "type": {

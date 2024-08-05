@@ -1,5 +1,5 @@
 {
-	"openapi": "3.1.0",
+	"openapi": "3.0.3",
 	"info": {
 		"title": "Sample Pet Store App",
 		"description": "This is a sample server for a pet store.",
@@ -327,13 +327,16 @@
 			"Schema-1": {},
 			"Schema-2": {},
 			"mySchema": {
-				"type": ["object", "null"],
+				"type": "object",
+				"nullable": true,
 				"description": "mySchema",
 				"properties": {
 					"number": {
 						"type": "integer",
-						"exclusiveMinimum": 0,
-						"exclusiveMaximum": 10
+						"minimum": 0,
+						"exclusiveMinimum": true,
+						"maximum": 10,
+						"exclusiveMaximum": true
 					},
 					"string": {
 						"type": "string",
@@ -343,20 +346,18 @@
 			},
 			"mySchema2": {
 				"description": "nullable reference",
-				"anyOf": [
+				"nullable": true,
+				"allOf": [
 					{
 						"$ref": "#/components/schemas/mySchema"
-					},
-					{
-						"type": "null"
 					}
 				]
 			},
 			"mySchema3": {
-				"const": 4
+				"enum": [4]
 			},
 			"mySchema4": {
-				"type": "null"
+				"enum": [null]
 			}
 		},
 		"responses": {

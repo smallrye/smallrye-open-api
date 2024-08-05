@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
+import test.io.smallrye.openapi.runtime.scanner.entities.Schema31Changes;
 
 /**
  * Basic tests to check the version configuration
@@ -55,7 +56,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
     }
 
     void testSettingViaConfig(Class<?>... classes) throws IOException, JSONException {
-        System.setProperty(VERSION_PROPERTY, "3.1.0");
+        System.setProperty(VERSION_PROPERTY, "3.1.2");
 
         try {
             OpenAPI result = scan(config(Collections.emptyMap()), true, null, classes);
@@ -79,7 +80,7 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
 
     void testSettingViaConfigWhenStaticPresent(Class<?>... classes) throws IOException, JSONException {
         //The test will pass if this version matches the one in the file of expected JSON (resource.testVersionViaConfig.json) and the file read by loadStaticFile() (version.json) is overriden.
-        System.setProperty(VERSION_PROPERTY, "3.1.0");
+        System.setProperty(VERSION_PROPERTY, "3.1.2");
 
         try {
             OpenAPI result = scan(config(Collections.emptyMap()), true, loadStaticFile("version-broken.json"), classes);
@@ -87,6 +88,33 @@ class VersionTest extends JaxRsDataObjectScannerTestBase {
         } finally {
             System.clearProperty(VERSION_PROPERTY);
         }
+    }
+
+    @Test
+    void testJavaxSetting30ViaConfig() throws IOException, JSONException {
+        testSetting30ViaConfig(
+                test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingGetResource.class, Greeting.class,
+                Schema31Changes.class);
+    }
+
+    @Test
+    void testJakartaSetting30ViaConfig() throws IOException, JSONException {
+        testSetting30ViaConfig(
+                test.io.smallrye.openapi.runtime.scanner.resources.jakarta.GreetingGetResource.class, Greeting.class,
+                Schema31Changes.class);
+    }
+
+    void testSetting30ViaConfig(Class<?>... classes) throws JSONException, IOException {
+        //The test will pass if this version matches the one in the file of expected JSON (resource.testVersionViaConfig.json) and the file read by loadStaticFile() (version.json) is overriden.
+        System.setProperty(VERSION_PROPERTY, "3.0.3");
+
+        try {
+            OpenAPI result = scan(config(Collections.emptyMap()), true, null, classes);
+            assertJsonEquals("resource.testVersion30ViaConfig.json", result);
+        } finally {
+            System.clearProperty(VERSION_PROPERTY);
+        }
+
     }
 
     private InputStream loadStaticFile(String fileName) {

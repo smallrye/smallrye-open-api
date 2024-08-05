@@ -7,6 +7,7 @@ import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 
 public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OpenAPI, V, A, O, AB, OB> {
 
@@ -53,8 +54,12 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
     @Override
     public OpenAPI readObject(O node) {
         IoLogging.logger.jsonNode("OpenAPIDefinition");
+
+        String version = jsonIO().getString(node, PROP_OPENAPI);
+        setOpenApiVersion(OpenApiVersion.fromString(version));
+
         OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(jsonIO().getString(node, PROP_OPENAPI));
+        openApi.setOpenapi(version);
         openApi.setInfo(infoIO().readValue(jsonIO().getValue(node, PROP_INFO)));
         openApi.setTags(tagIO().readList(jsonIO().getValue(node, PROP_TAGS)));
         openApi.setServers(serverIO().readList(jsonIO().getValue(node, PROP_SERVERS)));
@@ -62,22 +67,29 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
         openApi.setExternalDocs(extDocIO().readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
         openApi.setComponents(componentsIO().readValue(jsonIO().getValue(node, PROP_COMPONENTS)));
         openApi.setPaths(pathsIO().readValue(jsonIO().getValue(node, PROP_PATHS)));
-        openApi.setWebhooks(pathItemIO().readMap(jsonIO().getValue(node, PROP_WEBHOOKS)));
+        if (openApiVersion() == OpenApiVersion.V3_1) {
+            openApi.setWebhooks(pathItemIO().readMap(jsonIO().getValue(node, PROP_WEBHOOKS)));
+        }
         openApi.setExtensions(extensionIO().readMap(node));
         return openApi;
     }
 
     @Override
     public Optional<O> write(OpenAPI model) {
+        String version = model.getOpenapi();
+        setOpenApiVersion(OpenApiVersion.fromString(version));
+
         return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_OPENAPI, jsonIO().toJson(model.getOpenapi()));
+            setIfPresent(node, PROP_OPENAPI, jsonIO().toJson(version));
             setIfPresent(node, PROP_INFO, infoIO().write(model.getInfo()));
             setIfPresent(node, PROP_EXTERNAL_DOCS, extDocIO().write(model.getExternalDocs()));
             setIfPresent(node, PROP_SERVERS, serverIO().write(model.getServers()));
             setIfPresent(node, PROP_SECURITY, securityIO().write(model.getSecurity()));
             setIfPresent(node, PROP_TAGS, tagIO().write(model.getTags()));
             setIfPresent(node, PROP_PATHS, pathsIO().write(model.getPaths()));
-            setIfPresent(node, PROP_WEBHOOKS, pathItemIO().write(model.getWebhooks()));
+            if (openApiVersion() == OpenApiVersion.V3_1) {
+                setIfPresent(node, PROP_WEBHOOKS, pathItemIO().write(model.getWebhooks()));
+            }
             setIfPresent(node, PROP_COMPONENTS, componentsIO().write(model.getComponents()));
             setAllIfPresent(node, extensionIO().write(model));
             return node;

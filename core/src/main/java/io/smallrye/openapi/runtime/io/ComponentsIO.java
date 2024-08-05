@@ -6,6 +6,7 @@ import org.eclipse.microprofile.openapi.models.Components;
 import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.models.ComponentsImpl;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
 import io.smallrye.openapi.runtime.io.security.SecuritySchemeIO;
 
@@ -66,7 +67,9 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
         components.setResponses(apiResponseIO().readMap(jsonIO().getValue(node, PROP_RESPONSES)));
         components.setSchemas(schemaIO().readMap(jsonIO().getValue(node, PROP_SCHEMAS)));
         components.setSecuritySchemes(securitySchemeIO().readMap(jsonIO().getValue(node, PROP_SECURITY_SCHEMES)));
-        components.setPathItems(pathItemIO().readMap(jsonIO().getValue(node, PROP_PATH_ITEMS)));
+        if (openApiVersion() == OpenApiVersion.V3_1) {
+            components.setPathItems(pathItemIO().readMap(jsonIO().getValue(node, PROP_PATH_ITEMS)));
+        }
         components.setExtensions(extensionIO().readMap(node));
         return components;
     }
@@ -82,7 +85,9 @@ public class ComponentsIO<V, A extends V, O extends V, AB, OB> extends ModelIO<C
             setIfPresent(node, PROP_SECURITY_SCHEMES, securitySchemeIO().write(model.getSecuritySchemes()));
             setIfPresent(node, PROP_LINKS, linkIO().write(model.getLinks()));
             setIfPresent(node, PROP_CALLBACKS, callbackIO().write(model.getCallbacks()));
-            setIfPresent(node, PROP_PATH_ITEMS, pathItemIO().write(model.getPathItems()));
+            if (openApiVersion() == OpenApiVersion.V3_1) {
+                setIfPresent(node, PROP_PATH_ITEMS, pathItemIO().write(model.getPathItems()));
+            }
             setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
