@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-testsuite</artifactId>
-        <version>3.11.1-SNAPSHOT</version>
+        <version>3.12.0</version>
         <relativePath>../</relativePath>
     </parent>
 
