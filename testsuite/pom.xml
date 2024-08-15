@@ -38,7 +38,7 @@
   <properties>
     <version.org.jboss.arquillian>1.9.1.Final</version.org.jboss.arquillian>
     <version.shrinkwrap_core>1.2.6</version.shrinkwrap_core>
-    <version.shrinkwrap_resolver>3.3.0</version.shrinkwrap_resolver>
+    <version.shrinkwrap_resolver>3.3.1</version.shrinkwrap_resolver>
   </properties>
 
   <dependencyManagement>
