@@ -75,10 +75,10 @@ All properties from the MicroProfile OpenAPI Spec is supported. Properties set h
 - `modelReader` (String) - Configuration property to specify the fully qualified name of the OASModelReader implementation.
 - `filter` (String) - Configuration property to specify the fully qualified name of the OASFilter implementation.
 - `scanDisabled` (boolean) - Configuration property to disable annotation scanning.
-- `scanPackages` (regex) - Configuration property to specify the list of packages to scan.
-- `scanClasses` (regex) - Configuration property to specify the list of classes to scan.
-- `scanExcludePackages` (regex) - Configuration property to specify the list of packages to exclude from scans.
-- `scanExcludeClasses` (regex) - Configuration property to specify the list of classes to exclude from scans.
+- `scanPackages` (comma-separated Strings) - Configuration property to specify the list of packages to scan. If a String starts with `^` and ends with `$`, it's treated as regex. Otherwise it corresponds to the MP OpenAPI specification.
+- `scanClasses` (comma-separated Strings) - Configuration property to specify the list of classes to scan. If a String starts with `^` and ends with `$`, it's treated as regex. Otherwise it corresponds to the MP OpenAPI specification.
+- `scanExcludePackages` (comma-separated Strings) - Configuration property to specify the list of packages to exclude from scans. If a String starts with `^` and ends with `$`, it's treated as regex. Otherwise it corresponds to the MP OpenAPI specification.
+- `scanExcludeClasses` (comma-separated Strings) - Configuration property to specify the list of classes to exclude from scans. If a String starts with `^` and ends with `$`, it's treated as regex. Otherwise it corresponds to the MP OpenAPI specification.
 - `servers` (List<String>) - Configuration property to specify the list of global servers that provide connectivity information.
 - `pathServers` (List<String>) - Prefix of the configuration property to specify an alternative list of servers to service all operations in a path
 - `operationServers` (List<String>) -  Prefix of the configuration property to specify an alternative list of servers to service an operation.
