@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -556,15 +555,15 @@ public class SchemaFactory {
         ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = context.annotations().getAnnotation(enumKlazz, SchemaConstant.DOTNAME_SCHEMA);
         Schema enumSchema = new SchemaImpl();
+        Type enumValueType = enumeration.isEmpty() ? Type.create(String.class) : Type.create(enumeration.get(0).getClass());
 
         if (schemaAnnotation != null) {
-            Map<String, Object> defaults = new HashMap<>(2);
-            defaults.put(SchemaConstant.PROP_TYPE, SchemaType.STRING);
+            Map<String, Object> defaults = new LinkedHashMap<>(TypeUtil.getTypeAttributes(enumValueType));
             defaults.put(SchemaConstant.PROP_ENUMERATION, enumeration);
 
             enumSchema = readSchema(context, enumSchema, schemaAnnotation, enumKlazz, defaults);
         } else {
-            enumSchema.setType(SchemaType.STRING);
+            TypeUtil.applyTypeAttributes(enumValueType, enumSchema);
             enumSchema.setEnumeration(enumeration);
         }
 
