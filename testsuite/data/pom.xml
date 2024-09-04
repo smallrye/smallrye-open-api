@@ -13,15 +13,15 @@
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
-        <eclipse.microprofile.openapi.version>4.0-RC1</eclipse.microprofile.openapi.version>
-        <kotlin.version>2.0.0</kotlin.version>
+        <eclipse.microprofile.openapi.version>4.0</eclipse.microprofile.openapi.version>
+        <kotlin.version>2.0.20</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.13.0</quarkus.platform.version>
+        <quarkus.platform.version>3.14.2</quarkus.platform.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <quarkus.package.add-runner-suffix>false</quarkus.package.add-runner-suffix>
     </properties>
@@ -240,7 +240,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <goals>

@@ -668,7 +668,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     private boolean hasImplementationOrIsIncluded(ClassInfo clazz) {
-        if (neitherIterfaceNorSyntheticRestClient(clazz)) {
+        if (neitherAbstractNorSyntheticRestClient(clazz)) {
             return true;
         }
 
@@ -682,14 +682,14 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     /**
-     * Determine whether the provided ClassInfo is an interface or a synthetic implementation
+     * Determine whether the provided ClassInfo is an abstract class/interface or a synthetic implementation
      * of an interface annotated with {@code org.eclipse.microprofile.rest.client.inject.RegisterRestClient}.
      *
      * @return {@code true} if the class is neither an interface nor a synthetic (generated) class annotated with
      *         {@code org.eclipse.microprofile.rest.client.inject.RegisterRestClient}, otherwise {@code false}.
      */
-    private boolean neitherIterfaceNorSyntheticRestClient(ClassInfo clazz) {
-        if (Modifier.isInterface(clazz.flags())) {
+    private boolean neitherAbstractNorSyntheticRestClient(ClassInfo clazz) {
+        if (Modifier.isAbstract(clazz.flags())) {
             return false;
         }
 

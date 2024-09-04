@@ -17,6 +17,7 @@ class TagInheritanceTest extends IndexScannerTestBase {
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         OpenAPI result = scan(classes);
+        printToConsole(result);
         assertJsonEquals(expectedResource, result);
     }
 
