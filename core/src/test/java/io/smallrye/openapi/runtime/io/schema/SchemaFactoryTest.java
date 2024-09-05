@@ -69,7 +69,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
         Schema result = SchemaFactory.enumToSchema(context, Type.create(ExampleEnum1.class));
-        assertEquals(Schema.SchemaType.INTEGER, result.getType());
+        assertEquals(Arrays.asList(Schema.SchemaType.INTEGER), result.getType());
         assertEquals("int32", result.getFormat());
         assertEquals("An example enum with a value-driven schema type", result.getDescription());
     }
@@ -97,7 +97,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
         Schema result = SchemaFactory.enumToSchema(context, Type.create(ExampleEnum2.class));
-        assertEquals(Schema.SchemaType.INTEGER, result.getType());
+        assertEquals(Arrays.asList(Schema.SchemaType.INTEGER), result.getType());
         assertEquals("int64", result.getFormat());
         assertNull(result.getDescription());
     }
@@ -113,7 +113,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
         Schema result = SchemaFactory.enumToSchema(context, Type.create(ExampleEnum3.class));
-        assertEquals(Schema.SchemaType.STRING, result.getType());
+        assertEquals(Arrays.asList(Schema.SchemaType.STRING), result.getType());
         assertEquals(Arrays.asList("VAL1", "VAL2"), result.getEnumeration());
     }
 
