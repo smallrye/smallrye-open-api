@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.1.0",
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {
@@ -17,7 +17,14 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Greeting"
+                  "anyOf": [
+                    {
+                      "$ref" : "#/components/schemas/Greeting"
+                    },
+                    {
+                      "type" : "null"
+                    }
+                  ]
                 }
               }
             }

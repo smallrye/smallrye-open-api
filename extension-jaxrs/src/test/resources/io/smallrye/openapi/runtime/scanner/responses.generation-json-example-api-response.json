@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.1.0",
   "paths" : {
     "/pets/{id}" : {
       "get" : {
@@ -12,6 +12,7 @@
           }
         } ],
         "requestBody" : {
+          "required": true,
           "content" : {
             "application/json" : {
               "schema" : {

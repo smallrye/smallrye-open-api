@@ -40,11 +40,11 @@
         "properties": {
           "contactPhone": {
             "type": "string",
-            "example": "1-888-1234-567"
+            "examples" : [ "1-888-1234-567" ]
           },
           "name": {
             "type": "string",
-            "example": "Acme Air"
+            "examples" : [ "Acme Air" ]
           }
         },
         "additionalProperties": true
@@ -66,28 +66,28 @@
           },
           "airportFrom": {
             "type": "string",
-            "example": "YYZ"
+            "examples" : [ "YYZ" ]
           },
           "airportTo": {
             "type": "string",
-            "example": "LAX"
+            "examples" : [ "LAX" ]
           },
           "dateTime": {
             "pattern": "dateTime",
             "type": "string",
-            "example": "2016-03-05 18:00"
+            "examples" : [ "2016-03-05 18:00" ]
           },
           "number": {
             "type": "string",
-            "example": "AC190"
+            "examples" : [ "AC190" ]
           },
           "price": {
             "type": "string",
-            "example": "US$350"
+            "examples" : [ "US$350" ]
           },
           "status": {
             "type": "string",
-            "example": "On Schedule"
+            "examples" : [ "On Schedule" ]
           }
         },
         "additionalProperties": {
@@ -106,23 +106,23 @@
         "properties": {
           "cardNumber": {
             "type": "string",
-            "example": "**********1234"
+            "examples" : [ "**********1234" ]
           },
           "cardholderName": {
             "type": "string",
-            "example": "Joe Smith"
+            "examples" : [ "Joe Smith" ]
           },
           "cvv": {
             "type": "string",
-            "example": "0322"
+            "examples" : [ "0322" ]
           },
           "expiryDate": {
             "type": "string",
-            "example": "04/19"
+            "examples" : [ "04/19" ]
           },
           "issuer": {
             "type": "string",
-            "example": "VISA"
+            "examples" : [ "VISA" ]
           }
         },
         "additionalProperties": false
@@ -139,7 +139,7 @@
         "properties": {
           "airMiles": {
             "type": "string",
-            "example": "32126319"
+            "examples" : [ "32126319" ]
           },
           "creditCard": {
             "$ref": "#/components/schemas/CreditCard"
@@ -152,7 +152,7 @@
           },
           "seatPreference": {
             "type": "string",
-            "example": "window"
+            "examples" : [ "window" ]
           }
         }
       },
@@ -219,11 +219,7 @@
           "foo": {
             "type": "object",
             "maxLength": 123456,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FuzzStringObject"
-              }
-            ]
+            "$ref": "#/components/schemas/FuzzStringObject"
           }
         }
       },
@@ -280,11 +276,7 @@
           "qValue": {
             "type": "object",
             "description": "Ah, Q, my favourite variable!",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FooExtendsFoo"
-              }
-            ]
+            "$ref": "#/components/schemas/FooExtendsFoo"
           },
           "tAgain2": {
             "type": "string"
@@ -327,11 +319,7 @@
           "foo": {
             "type": "object",
             "maxLength": 123456,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/KustomPairStringString"
-              }
-            ]
+            "$ref": "#/components/schemas/KustomPairStringString"
           }
         }
       },
@@ -502,7 +490,7 @@
           "seatPreference": {
             "maxLength": 999,
             "type": "string",
-            "example": "window"
+            "examples" : [ "window" ]
           },
           "simpleParameterizedType": {
             "$ref": "#/components/schemas/KustomPairStringInteger"
@@ -532,7 +520,7 @@
             }
           }
         },
-        "example": "This is the KitchenSink example field in Schema",
+        "examples" : [ "This is the KitchenSink example field in Schema" ],
         "deprecated": true
       }
     }

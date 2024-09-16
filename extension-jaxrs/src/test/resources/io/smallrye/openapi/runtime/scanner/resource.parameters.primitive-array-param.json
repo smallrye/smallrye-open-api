@@ -1,10 +1,11 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/v1": {
       "post": {
         "summary": "Convert an array of doubles to an array of floats",
         "requestBody": {
+          "required": true,
           "content": {
               "application/json": {
                 "schema": {

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -37,6 +38,7 @@ import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -108,7 +110,7 @@ public class TypeUtil {
     public static final IndexView jdkIndex;
     private static final Set<DotName> wrapperTypes = new HashSet<>();
 
-    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#dataTypeFormat
+    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypeFormat
     static {
         TYPE_MAP.put(DOTNAME_OBJECT, ANY);
 
@@ -414,11 +416,19 @@ public class TypeUtil {
     public static void applyTypeAttributes(Type classType, Schema schema) {
         Map<String, Object> properties = getTypeAttributes(classType);
 
-        schema.setType((SchemaType) properties.get(SchemaConstant.PROP_TYPE));
+        SchemaImpl.setType(schema, (SchemaType) properties.get(SchemaConstant.PROP_TYPE));
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
-        schema.setExample(properties.get(SchemaConstant.PROP_EXAMPLE));
+        schema.setExamples(wrapInList(properties.get(SchemaConstant.PROP_EXAMPLE)));
         schema.setExternalDocs((ExternalDocumentation) properties.get(SchemaConstant.PROP_EXTERNAL_DOCS));
+    }
+
+    private static <E> List<E> wrapInList(E item) {
+        if (item == null) {
+            return null;
+        } else {
+            return Collections.singletonList(item);
+        }
     }
 
     /**
@@ -432,6 +442,7 @@ public class TypeUtil {
     public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
         clearIfEqual(fieldSchema.getFormat(), typeSchema.getFormat(), fieldSchema::setFormat);
         clearIfEqual(fieldSchema.getPattern(), typeSchema.getPattern(), fieldSchema::setPattern);
+        clearIfEqual(fieldSchema.getExamples(), typeSchema.getExamples(), fieldSchema::setExamples);
         clearIfEqual(fieldSchema.getExample(), typeSchema.getExample(), fieldSchema::setExample);
         clearIfEqual(fieldSchema.getExternalDocs(), typeSchema.getExternalDocs(), fieldSchema::setExternalDocs);
     }

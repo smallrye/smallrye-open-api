@@ -7,6 +7,8 @@ import org.eclipse.microprofile.openapi.annotations.Components;
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.PathItem;
+import org.eclipse.microprofile.openapi.annotations.PathItemOperation;
 import org.eclipse.microprofile.openapi.annotations.callbacks.Callback;
 import org.eclipse.microprofile.openapi.annotations.callbacks.CallbackOperation;
 import org.eclipse.microprofile.openapi.annotations.callbacks.Callbacks;
@@ -88,6 +90,8 @@ public final class Names {
     public static final DotName OPERATION = create(Operation.class);
     public static final DotName PARAMETER = create(Parameter.class);
     public static final DotName PARAMETERS = create(Parameters.class);
+    public static final DotName PATH_ITEM = create(PathItem.class);
+    public static final DotName PATH_ITEM_OPERATION = create(PathItemOperation.class);
     public static final DotName REQUEST_BODY = create(RequestBody.class);
     public static final DotName REQUEST_BODY_SCHEMA = create(RequestBodySchema.class);
     public static final DotName SCHEMA = create(Schema.class);

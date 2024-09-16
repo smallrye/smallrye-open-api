@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.BaseStream;
@@ -207,7 +208,7 @@ public class OpenApiDataObjectScanner {
         if (rootClassInfo == null && objectStack.isEmpty()) {
             // If there's something on the objectStack stack then pre-scanning may have found something.
             ScannerLogging.logger.schemaTypeNotFound(rootClassType.name());
-            return new SchemaImpl().type(SchemaType.OBJECT);
+            return new SchemaImpl().addType(SchemaType.OBJECT);
         }
 
         // Create root node.
@@ -251,14 +252,15 @@ public class OpenApiDataObjectScanner {
             TypeUtil.mapDeprecated(context, currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
 
-            if (currentSchema.getType() == null) {
+            if (!hasNonNullType(currentSchema)) {
                 // If not schema has yet been set, consider this an "object"
-                currentSchema.setType(Schema.SchemaType.OBJECT);
+                currentSchema.setType(Collections.singletonList(Schema.SchemaType.OBJECT));
             } else {
                 maybeRegisterSchema(currentType, currentSchema, entrySchema);
             }
 
-            if (currentSchema.getType() == Schema.SchemaType.OBJECT) {
+            List<Schema.SchemaType> types = currentSchema.getType();
+            if (types != null && types.contains(Schema.SchemaType.OBJECT)) {
                 // Only 'object' type schemas should have properties of their own
                 ScannerLogging.logger.gettingFields(currentType, currentClass);
 
@@ -295,13 +297,20 @@ public class OpenApiDataObjectScanner {
          * - the target of the ref is the schema currently being processed and using the ref would
          * result in a self-referencing schema.
          */
-        if (ref != currentSchema && currentSchema.getType() != Schema.SchemaType.OBJECT) {
+        if (ref != currentSchema && !currentSchema.getType().contains(Schema.SchemaType.OBJECT) && ref.getRef() != null) {
             Schema refTarget = context.getSchemaRegistry().lookupSchema(currentType, context.getJsonViews());
 
             if (refTarget != entrySchema) {
+                SchemaImpl.clear(entrySchema);
                 entrySchema.setRef(ref.getRef());
             }
         }
+    }
+
+    private static boolean hasNonNullType(Schema schema) {
+        List<Schema.SchemaType> types = schema.getType();
+
+        return types != null && types.stream().anyMatch(t -> t != SchemaType.NULL);
     }
 
     private void processClassAnnotations(Schema schema, ClassInfo classInfo) {

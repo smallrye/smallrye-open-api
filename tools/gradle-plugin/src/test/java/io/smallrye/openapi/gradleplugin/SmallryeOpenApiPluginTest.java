@@ -71,7 +71,7 @@ class SmallryeOpenApiPluginTest {
         ext.applicationPathDisable.set(true);
         ext.configProperties.set(new File("/foo/bar"));
         ext.encoding.set("ISO-8859-1");
-        ext.openApiVersion.set("3.0.0");
+        ext.openApiVersion.set("999.999.999"); //intentionally invalid
         ext.customSchemaRegistryClass.set("foo.bar.Baz");
         ext.filter.set("filter");
         ext.infoContactEmail.set("info-email");
@@ -82,6 +82,7 @@ class SmallryeOpenApiPluginTest {
         ext.infoLicenseUrl.set("info-license-url");
         ext.infoTermsOfService.set("info-tos");
         ext.infoTitle.set("info-title");
+        ext.infoSummary.set("info-summary");
         ext.infoVersion.set("info-version");
         ext.modelReader.set("model-reader");
         ext.operationIdStrategy.set(OperationIdStrategy.CLASS_METHOD);
@@ -112,6 +113,7 @@ class SmallryeOpenApiPluginTest {
                 SmallryeOpenApiProperties::getInfoDescription,
                 SmallryeOpenApiProperties::getInfoLicenseName,
                 SmallryeOpenApiProperties::getInfoLicenseUrl,
+                SmallryeOpenApiProperties::getInfoSummary,
                 SmallryeOpenApiProperties::getInfoTermsOfService,
                 SmallryeOpenApiProperties::getInfoTitle,
                 SmallryeOpenApiProperties::getInfoVersion,
@@ -193,12 +195,13 @@ class SmallryeOpenApiPluginTest {
                         "}",
                         "",
                         "smallryeOpenApi {",
-                        "  openApiVersion.set(\"3.0.2\")",
+                        "  openApiVersion.set(\"999.999.999\")", //Intentionally invalid
                         "  schemaFilename.set(\"my-openapi-schema-file\")",
                         "  infoTitle.set(\"Info Title\")",
                         "  infoVersion.set(\"Info Version\")",
                         "  infoDescription.set(\"Info Description\")",
                         "  infoTermsOfService.set(\"Info TOS\")",
+                        "  infoSummary.set(\"Info Summary\")",
                         "  infoContactEmail.set(\"Info Email\")",
                         "  infoContactName.set(\"Info Contact\")",
                         "  infoContactUrl.set(\"https://github.com/smallrye/smallrye-open-api/issues/1231\")",
@@ -287,13 +290,14 @@ class SmallryeOpenApiPluginTest {
             JsonNode root = new ObjectMapper().readValue(
                     targetOpenapiDir.resolve("my-openapi-schema-file.json").toUri().toURL(),
                     JsonNode.class);
-            assertThat(root.get("openapi").asText()).isEqualTo("3.0.2");
+            assertThat(root.get("openapi").asText()).isEqualTo("999.999.999");
             assertThat(root.get("x-smallrye-gradle-generated").booleanValue()).isTrue();
 
             JsonNode info = root.get("info");
             assertThat(info).isNotNull();
             assertThat(info.get("title").asText()).isEqualTo("Info Title");
             assertThat(info.get("description").asText()).isEqualTo("Info Description");
+            assertThat(info.get("summary").asText()).isEqualTo("Info Summary");
             assertThat(info.get("termsOfService").asText()).isEqualTo("Info TOS");
             assertThat(info.get("version").asText()).isEqualTo("Info Version");
             assertThat(info.get("contact").get("email").asText()).isEqualTo("Info Email");

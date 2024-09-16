@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io.tags;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,13 +17,11 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
 import io.smallrye.openapi.api.models.tags.TagImpl;
-import io.smallrye.openapi.runtime.io.ExternalDocumentationIO;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
@@ -32,13 +32,8 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
     private static final String PROP_REF = "ref";
     private static final String PROP_EXTERNAL_DOCS = "externalDocs";
 
-    private final ExternalDocumentationIO<V, A, O, AB, OB> externalDocIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public TagIO(IOContext<V, A, O, AB, OB> context, ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public TagIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.TAG, Names.create(Tag.class));
-        externalDocIO = new ExternalDocumentationIO<>(context, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     public List<String> readReferences(AnnotationTarget target) {
@@ -52,6 +47,20 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
                 .map(tag -> value(tag, PROP_REF));
 
         return Stream.concat(tagsRefs, tagRefs).collect(Collectors.toList());
+    }
+
+    public List<String> readReferences(AnnotationInstance[] annotations) {
+        return Optional.ofNullable(annotations)
+                .map(Arrays::asList)
+                .map(this::readReferences)
+                .orElse(null);
+    }
+
+    public List<String> readReferences(Collection<AnnotationInstance> annotations) {
+        return annotations.stream()
+                .map(a -> this.<String> value(a, PROP_REF))
+                .filter(Objects::nonNull)
+                .collect(toList());
     }
 
     public List<Tag> readList(AnnotationTarget target) {
@@ -83,8 +92,8 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
         Tag tag = new TagImpl();
         tag.setName(value(annotation, PROP_NAME));
         tag.setDescription(value(annotation, PROP_DESCRIPTION));
-        tag.setExternalDocs(externalDocIO.read(annotation.value(PROP_EXTERNAL_DOCS)));
-        tag.setExtensions(extensionIO.readExtensible(annotation));
+        tag.setExternalDocs(extDocIO().read(annotation.value(PROP_EXTERNAL_DOCS)));
+        tag.setExtensions(extensionIO().readExtensible(annotation));
 
         return tag;
     }
@@ -111,8 +120,8 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
         Tag tag = new TagImpl();
         tag.setName(jsonIO().getString(node, PROP_NAME));
         tag.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        tag.setExternalDocs(externalDocIO.readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
-        tag.setExtensions(extensionIO.readMap(node));
+        tag.setExternalDocs(extDocIO().readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
+        tag.setExtensions(extensionIO().readMap(node));
         return tag;
     }
 
@@ -127,8 +136,8 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
             setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-            setIfPresent(node, PROP_EXTERNAL_DOCS, externalDocIO.write(model.getExternalDocs()));
-            setAllIfPresent(node, extensionIO.write(model));
+            setIfPresent(node, PROP_EXTERNAL_DOCS, extDocIO().write(model.getExternalDocs()));
+            setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

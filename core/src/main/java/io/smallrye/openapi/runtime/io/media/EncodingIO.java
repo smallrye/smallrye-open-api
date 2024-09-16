@@ -13,8 +13,6 @@ import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.io.headers.HeaderIO;
 
 public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Encoding, V, A, O, AB, OB> {
 
@@ -24,14 +22,8 @@ public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
     private static final String PROP_EXPLODE = "explode";
     private static final String PROP_STYLE = "style";
 
-    private final HeaderIO<V, A, O, AB, OB> headerIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public EncodingIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public EncodingIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.ENCODING, Names.create(Encoding.class));
-        headerIO = new HeaderIO<>(context, contentIO, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -42,8 +34,8 @@ public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
         encoding.setStyle(readStyle(annotation));
         encoding.setExplode(value(annotation, PROP_EXPLODE));
         encoding.setAllowReserved(value(annotation, PROP_ALLOW_RESERVED));
-        encoding.setHeaders(headerIO.readMap(annotation.value(PROP_HEADERS)));
-        encoding.setExtensions(extensionIO.readExtensible(annotation));
+        encoding.setHeaders(headerIO().readMap(annotation.value(PROP_HEADERS)));
+        encoding.setExtensions(extensionIO().readExtensible(annotation));
         return encoding;
     }
 
@@ -52,11 +44,11 @@ public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
         IoLogging.logger.singleJsonNode("Encoding");
         Encoding encoding = new EncodingImpl();
         encoding.setContentType(jsonIO().getString(node, PROP_CONTENT_TYPE));
-        encoding.setHeaders(headerIO.readMap(jsonIO().getValue(node, PROP_HEADERS)));
+        encoding.setHeaders(headerIO().readMap(jsonIO().getValue(node, PROP_HEADERS)));
         encoding.setStyle(readStyle(jsonIO().getValue(node, PROP_STYLE)));
         encoding.setExplode(jsonIO().getBoolean(node, PROP_EXPLODE));
         encoding.setAllowReserved(jsonIO().getBoolean(node, PROP_ALLOW_RESERVED));
-        encoding.setExtensions(extensionIO.readMap(node));
+        encoding.setExtensions(extensionIO().readMap(node));
         return encoding;
     }
 
@@ -64,11 +56,11 @@ public class EncodingIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
     public Optional<O> write(Encoding model) {
         return optionalJsonObject(model).map(node -> {
             setIfPresent(node, PROP_CONTENT_TYPE, jsonIO().toJson(model.getContentType()));
-            setIfPresent(node, PROP_HEADERS, headerIO.write(model.getHeaders()));
+            setIfPresent(node, PROP_HEADERS, headerIO().write(model.getHeaders()));
             setIfPresent(node, PROP_STYLE, jsonIO().toJson(model.getStyle()));
             setIfPresent(node, PROP_EXPLODE, jsonIO().toJson(model.getExplode()));
             setIfPresent(node, PROP_ALLOW_RESERVED, jsonIO().toJson(model.getAllowReserved()));
-            setAllIfPresent(node, extensionIO.write(model));
+            setAllIfPresent(node, extensionIO().write(model));
             return node;
         }).map(jsonIO()::buildObject);
     }

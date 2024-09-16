@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
+import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
@@ -165,35 +167,39 @@ public class BeanValidationScanner {
             String propertyKey,
             RequirementHandler handler) {
 
-        SchemaType schemaType = schema.getType();
+        List<SchemaType> schemaTypes = schema.getType();
 
         /*
          * The type be set. Attributes set in this function are not application
          * to $ref type schemas.
          */
-        if (schemaType == null || schema.getRef() != null) {
+        if (schemaTypes == null || schemaTypes.isEmpty() || schema.getRef() != null) {
             return;
         }
 
-        switch (schemaType) {
-            case ARRAY:
-                applyArrayConstraints(target, schema, propertyKey, handler);
-                break;
-            case BOOLEAN:
-                applyBooleanConstraints(target, schema, propertyKey, handler);
-                break;
-            case INTEGER:
-                applyNumberConstraints(target, schema, propertyKey, handler);
-                break;
-            case NUMBER:
-                applyNumberConstraints(target, schema, propertyKey, handler);
-                break;
-            case OBJECT:
-                applyObjectConstraints(target, schema, propertyKey, handler);
-                break;
-            case STRING:
-                applyStringConstraints(target, schema, propertyKey, handler);
-                break;
+        for (SchemaType schemaType : new ArrayList<>(schemaTypes)) {
+            switch (schemaType) {
+                case ARRAY:
+                    applyArrayConstraints(target, schema, propertyKey, handler);
+                    break;
+                case BOOLEAN:
+                    applyBooleanConstraints(target, schema, propertyKey, handler);
+                    break;
+                case INTEGER:
+                    applyNumberConstraints(target, schema, propertyKey, handler);
+                    break;
+                case NUMBER:
+                    applyNumberConstraints(target, schema, propertyKey, handler);
+                    break;
+                case OBJECT:
+                    applyObjectConstraints(target, schema, propertyKey, handler);
+                    break;
+                case STRING:
+                    applyStringConstraints(target, schema, propertyKey, handler);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -270,16 +276,16 @@ public class BeanValidationScanner {
     void decimalMax(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_DECIMAL_MAX);
 
-        if (constraint != null && schema.getMaximum() == null) {
+        if (constraint != null && schema.getMaximum() == null && schema.getExclusiveMaximum() == null) {
             String decimalValue = context.annotations().value(constraint, VALUE);
+            Boolean inclusive = context.annotations().value(constraint, INCLUSIVE);
             try {
                 BigDecimal decimal = new BigDecimal(decimalValue);
-                schema.setMaximum(decimal);
 
-                Boolean inclusive = context.annotations().value(constraint, INCLUSIVE);
-
-                if (schema.getExclusiveMaximum() == null && Boolean.FALSE.equals(inclusive)) {
-                    schema.setExclusiveMaximum(Boolean.TRUE);
+                if (Boolean.FALSE.equals(inclusive)) {
+                    schema.setExclusiveMaximum(decimal);
+                } else {
+                    schema.setMaximum(decimal);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 DataObjectLogging.logger.invalidAnnotationFormat(decimalValue);
@@ -290,15 +296,16 @@ public class BeanValidationScanner {
     void decimalMin(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_DECIMAL_MIN);
 
-        if (constraint != null && schema.getMinimum() == null) {
+        if (constraint != null && schema.getMinimum() == null && schema.getExclusiveMinimum() == null) {
             String decimalValue = context.annotations().value(constraint, VALUE);
+            Boolean inclusive = context.annotations().value(constraint, INCLUSIVE);
             try {
                 BigDecimal decimal = new BigDecimal(decimalValue);
-                schema.setMinimum(decimal);
-                Boolean inclusive = context.annotations().value(constraint, INCLUSIVE);
 
-                if (schema.getExclusiveMinimum() == null && Boolean.FALSE.equals(inclusive)) {
-                    schema.setExclusiveMinimum(Boolean.TRUE);
+                if (Boolean.FALSE.equals(inclusive)) {
+                    schema.setExclusiveMinimum(decimal);
+                } else {
+                    schema.setMinimum(decimal);
                 }
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 DataObjectLogging.logger.invalidAnnotationFormat(decimalValue);
@@ -362,29 +369,16 @@ public class BeanValidationScanner {
     void negative(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_NEGATIVE);
 
-        if (constraint != null && schema.getMaximum() == null) {
-            Boolean exclusive = schema.getExclusiveMaximum();
-
-            if (exclusive == null || exclusive) {
-                schema.setMaximum(BigDecimal.ZERO);
-                schema.setExclusiveMaximum(Boolean.TRUE);
-            } else {
-                schema.setMaximum(NEGATIVE_ONE);
-            }
+        if (constraint != null && schema.getMaximum() == null && schema.getExclusiveMaximum() == null) {
+            schema.setExclusiveMaximum(BigDecimal.ZERO);
         }
     }
 
     void negativeOrZero(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_NEGATIVE_OR_ZERO);
 
-        if (constraint != null && schema.getMaximum() == null) {
-            Boolean exclusive = schema.getExclusiveMaximum();
-
-            if (exclusive != null && exclusive) {
-                schema.setMaximum(BigDecimal.ONE);
-            } else {
-                schema.setMaximum(BigDecimal.ZERO);
-            }
+        if (constraint != null && schema.getMaximum() == null && schema.getExclusiveMaximum() == null) {
+            schema.setMaximum(BigDecimal.ZERO);
         }
     }
 
@@ -455,8 +449,8 @@ public class BeanValidationScanner {
     }
 
     void nullableKotlin(AnnotationTarget target, Schema schema) {
-        if (context.annotations().hasAnnotation(target, KOTLIN_NULLABLE) && schema.getNullable() == null) {
-            schema.setNullable(Boolean.TRUE);
+        if (context.annotations().hasAnnotation(target, KOTLIN_NULLABLE) && SchemaImpl.getNullable(schema) == null) {
+            SchemaImpl.setNullable(schema, Boolean.TRUE);
         }
     }
 
@@ -471,29 +465,16 @@ public class BeanValidationScanner {
     void positive(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_POSITIVE);
 
-        if (constraint != null && schema.getMinimum() == null) {
-            Boolean exclusive = schema.getExclusiveMinimum();
-
-            if (exclusive == null || exclusive) {
-                schema.setMinimum(BigDecimal.ZERO);
-                schema.setExclusiveMinimum(Boolean.TRUE);
-            } else {
-                schema.setMinimum(BigDecimal.ONE);
-            }
+        if (constraint != null && schema.getMinimum() == null && schema.getExclusiveMinimum() == null) {
+            schema.setExclusiveMinimum(BigDecimal.ZERO);
         }
     }
 
     void positiveOrZero(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_POSITIVE_OR_ZERO);
 
-        if (constraint != null && schema.getMinimum() == null) {
-            Boolean exclusive = schema.getExclusiveMinimum();
-
-            if (exclusive != null && exclusive) {
-                schema.setMinimum(NEGATIVE_ONE);
-            } else {
-                schema.setMinimum(BigDecimal.ZERO);
-            }
+        if (constraint != null && schema.getMinimum() == null && schema.getExclusiveMinimum() == null) {
+            schema.setMinimum(BigDecimal.ZERO);
         }
     }
 
@@ -561,12 +542,6 @@ public class BeanValidationScanner {
     }
 
     boolean allowsAdditionalProperties(Schema schema) {
-        Boolean additionalProperties = schema.getAdditionalPropertiesBoolean();
-
-        if (additionalProperties != null) {
-            return additionalProperties;
-        }
-
         return schema.getAdditionalPropertiesSchema() != null;
     }
 

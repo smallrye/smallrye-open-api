@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "components": {
     "schemas": {
 	    "ErrorModel": {
@@ -20,10 +20,8 @@
 	      }
 	    },
 	    "ExtendedErrorModel": {
+	      "$ref": "#/definitions/ErrorModel",
 	      "allOf": [
-	        {
-	          "$ref": "#/definitions/ErrorModel"
-	        },
 	        {
 	          "type": "object",
 	          "required": [

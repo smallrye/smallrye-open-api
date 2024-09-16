@@ -623,7 +623,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             })
             OtherBean first;
 
-            @Schema(title = "Property with `allOf` referring to `OtherBean`")
+            @Schema(title = "Property with `type` and reference to `OtherBean`")
             OtherBean second;
 
             // Direct ref only

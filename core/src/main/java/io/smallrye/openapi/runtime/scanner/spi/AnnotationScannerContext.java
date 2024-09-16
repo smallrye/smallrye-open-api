@@ -218,12 +218,7 @@ public class AnnotationScannerContext {
     }
 
     @SuppressWarnings("unchecked")
-    public <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> getIoContext() {
+    public <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> io() { // NOSONAR - ignore wildcards in return type
         return (IOContext<V, A, O, AB, OB>) ioContext;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V, A extends V, O extends V, AB, OB> OpenAPIDefinitionIO<V, A, O, AB, OB> io() { // NOSONAR - ignore wildcards in return type
-        return (OpenAPIDefinitionIO<V, A, O, AB, OB>) modelIO;
     }
 }

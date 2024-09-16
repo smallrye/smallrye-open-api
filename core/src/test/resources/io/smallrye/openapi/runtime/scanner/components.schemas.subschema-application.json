@@ -1,0 +1,55 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "A" : {
+        "description" : "A",
+        "type" : "object"
+      },
+      "B" : {
+        "description" : "B",
+        "type" : "object"
+      },
+      "C" : {
+        "description" : "C",
+        "type" : "object"
+      },
+      "TestAnyOf" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/A"
+        }, {
+          "$ref" : "#/components/schemas/B"
+        }, {
+          "$ref" : "#/components/schemas/C"
+        } ],
+        "type" : "object"
+      },
+      "TestAllOf" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/A"
+        }, {
+          "$ref" : "#/components/schemas/B"
+        }, {
+          "$ref" : "#/components/schemas/C"
+        } ],
+        "type" : "object"
+      },
+      "TestNot" : {
+        "not" : {
+          "$ref" : "#/components/schemas/A"
+        },
+        "type" : "object"
+      },
+      "TestOneOf" : {
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/A"
+        }, {
+          "$ref" : "#/components/schemas/B"
+        }, {
+          "$ref" : "#/components/schemas/C"
+        } ],
+        "type" : "object"
+      }
+    }
+  }
+}

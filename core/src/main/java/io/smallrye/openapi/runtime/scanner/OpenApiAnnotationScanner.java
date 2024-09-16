@@ -280,7 +280,7 @@ public class OpenApiAnnotationScanner {
                 .collect(Collectors.toList());
 
         for (AnnotationInstance packageDef : packageDefs) {
-            OpenAPI packageOai = context.io().read(packageDef);
+            OpenAPI packageOai = context.io().openApiDefinitionIO().read(packageDef);
             oai = MergeUtil.merge(oai, packageOai);
         }
         return oai;

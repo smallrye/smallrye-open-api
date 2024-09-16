@@ -12,7 +12,7 @@
           "in" : "path",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -21,7 +21,12 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Greeting"
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref" : "#/components/schemas/Greeting"
+                    }
+                  ]
                 }
               }
             }
@@ -36,7 +41,7 @@
           "in" : "path",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -60,7 +65,7 @@
           "in" : "path",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -84,7 +89,7 @@
           "in" : "path",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -107,7 +112,7 @@
           "name" : "name",
           "in" : "query",
           "schema" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -131,7 +136,7 @@
           "in" : "path",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -154,14 +159,28 @@
   },
   "components" : {
     "schemas" : {
-      "message" : {
-        "type" : "string"
-      },
-     "Greeting" : {
+      "Greeting" : {
         "type" : "object",
         "properties" : {
           "message" : {
-            "$ref" : "#/components/schemas/message"
+            "type" : "string"
+          }
+        }
+      },
+      "Schema31Changes": {
+        "type" : "object",
+        "properties" : {
+          "nullableString" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "rangedInt" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 4,
+            "exclusiveMinimum" : true,
+            "maximum" : 10,
+            "exclusiveMaximum" : true
           }
         }
       }

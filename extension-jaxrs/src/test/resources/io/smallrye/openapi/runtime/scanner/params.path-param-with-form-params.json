@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/path-param-with-form-params/{id}": {
       "parameters": [
@@ -17,6 +17,7 @@
       ],
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {

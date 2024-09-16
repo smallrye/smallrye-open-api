@@ -129,7 +129,7 @@ class SchemaPropertyNegativeTest extends IndexScannerTestBase {
         assertJsonEquals("components.schemas.schemaproperty-refwithotherprops.json", RefWithOtherProps.class);
     }
 
-    // Name and ref used in document, other attributes ignored
+    // Ref is no longer treated as special, all properties are emitted
     @Schema(properties = @SchemaProperty(name = "test", type = SchemaType.STRING, ref = "foobar"))
     static class RefWithOtherProps {
     }

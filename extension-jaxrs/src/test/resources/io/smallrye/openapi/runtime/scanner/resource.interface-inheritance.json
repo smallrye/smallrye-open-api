@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/fruits": {
       "get": {
@@ -72,7 +72,7 @@
             "format": "date-time",
             "description": "When the entity was modified as a Unix timestamp.",
             "type": "string",
-            "example": "0"
+            "examples" : [ "0" ]
           },
           "modifier": {
             "format": "uuid",
@@ -86,7 +86,7 @@
             "format": "date-time",
             "description": "When the entity was created as a Unix timestamp. For create operations, this will not need to be defined.",
             "type": "string",
-            "example": "0"
+            "examples" : [ "0" ]
           },
           "creator": {
             "format": "uuid",

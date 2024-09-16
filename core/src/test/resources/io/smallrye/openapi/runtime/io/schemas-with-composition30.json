@@ -1,0 +1,42 @@
+{
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+	    "ErrorModel": {
+	      "type": "object",
+	      "required": [
+	        "message",
+	        "code"
+	      ],
+	      "properties": {
+	        "message": {
+	          "type": "string"
+	        },
+	        "code": {
+	          "type": "integer",
+	          "minimum": 100,
+	          "maximum": 600
+	        }
+	      }
+	    },
+	    "ExtendedErrorModel": {
+	      "allOf": [
+	        {
+	          "type": "object",
+	          "required": [
+	            "rootCause"
+	          ],
+	          "properties": {
+	            "rootCause": {
+	              "type": "string"
+	            }
+	          }
+	        },
+	        {
+	          "$ref": "#/definitions/ErrorModel"
+	        }
+	      ]
+	    }
+    }
+  }
+}

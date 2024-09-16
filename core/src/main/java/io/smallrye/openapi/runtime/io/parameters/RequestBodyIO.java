@@ -20,12 +20,12 @@ import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 
@@ -37,14 +37,8 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     private static final String PROP_CONTENT = "content";
     private static final String PROP_VALUE = "value";
 
-    private final ContentIO<V, A, O, AB, OB> contentIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public RequestBodyIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public RequestBodyIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.REQUEST_BODY, Names.create(RequestBody.class));
-        this.contentIO = contentIO;
-        this.extensionIO = extensionIO;
     }
 
     Stream<AnnotationInstance> getAnnotations(MethodInfo method, DotName annotation) {
@@ -68,12 +62,17 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     @Override
     public RequestBody read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@RequestBody");
-        RequestBody requestBody = new RequestBodyImpl();
+        RequestBodyImpl requestBody = new RequestBodyImpl();
         requestBody.setDescription(value(annotation, PROP_DESCRIPTION));
-        requestBody.setContent(contentIO.read(annotation.value(PROP_CONTENT), ContentIO.Direction.INPUT));
-        requestBody.setRequired(value(annotation, PROP_REQUIRED));
+        requestBody.setContent(contentIO().read(annotation.value(PROP_CONTENT), ContentIO.Direction.INPUT));
         requestBody.setRef(ReferenceType.REQUEST_BODY.refValue(annotation));
-        requestBody.setExtensions(extensionIO.readExtensible(annotation));
+        requestBody.setExtensions(extensionIO().readExtensible(annotation));
+        Boolean required = value(annotation, PROP_REQUIRED);
+        if (required != null) {
+            requestBody.setRequired(required);
+        } else {
+            requestBody.setRequiredDefault(Boolean.TRUE);
+        }
         return requestBody;
     }
 
@@ -109,10 +108,10 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     public RequestBody readObject(O node) {
         RequestBody requestBody = new RequestBodyImpl();
         requestBody.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        requestBody.setContent(contentIO.readValue(jsonIO().getValue(node, PROP_CONTENT)));
+        requestBody.setContent(contentIO().readValue(jsonIO().getValue(node, PROP_CONTENT)));
         requestBody.setRequired(jsonIO().getBoolean(node, PROP_REQUIRED));
         requestBody.setRef(readReference(node));
-        requestBody.setExtensions(extensionIO.readMap(node));
+        requestBody.setExtensions(extensionIO().readMap(node));
         return requestBody;
     }
 
@@ -120,11 +119,14 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                if (openApiVersion() == OpenApiVersion.V3_1) {
+                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                }
             } else {
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-                setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
+                setIfPresent(node, PROP_CONTENT, contentIO().write(model.getContent()));
                 setIfPresent(node, PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
-                setAllIfPresent(node, extensionIO.write(model));
+                setAllIfPresent(node, extensionIO().write(model));
             }
 
             return node;

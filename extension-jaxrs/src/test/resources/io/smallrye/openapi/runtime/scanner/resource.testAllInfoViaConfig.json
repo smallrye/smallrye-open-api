@@ -1,9 +1,10 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.1.0",
   "info" : {
     "title" : "My own awesome REST service",
     "description" : "This service is awesome",
     "termsOfService" : "The terms is also awesome",
+    "summary" : "This summary is rather boring",
     "contact" : {
       "name" : "Phillip Kruger",
       "url" : "https://www.phillip-kruger.com",
@@ -32,7 +33,14 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Greeting"
+                  "anyOf": [
+                    {
+                      "$ref" : "#/components/schemas/Greeting"
+                    },
+                    {
+                      "type" : "null"
+                    }
+                  ]
                 }
               }
             }

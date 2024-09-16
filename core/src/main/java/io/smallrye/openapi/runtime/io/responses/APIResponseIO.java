@@ -16,14 +16,12 @@ import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.api.models.media.MediaTypeImpl;
 import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
+import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
-import io.smallrye.openapi.runtime.io.headers.HeaderIO;
-import io.smallrye.openapi.runtime.io.links.LinkIO;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -40,18 +38,8 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
     private static final String PROP_RESPONSE_DESCRIPTION = "responseDescription";
     private static final String PROP_VALUE = "value";
 
-    private final LinkIO<V, A, O, AB, OB> linkIO;
-    private final HeaderIO<V, A, O, AB, OB> headerIO;
-    private final ContentIO<V, A, O, AB, OB> contentIO;
-    private final ExtensionIO<V, A, O, AB, OB> extensionIO;
-
-    public APIResponseIO(IOContext<V, A, O, AB, OB> context, ContentIO<V, A, O, AB, OB> contentIO,
-            ExtensionIO<V, A, O, AB, OB> extensionIO) {
+    public APIResponseIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.API_RESPONSE, DotName.createSimple(APIResponse.class));
-        linkIO = new LinkIO<>(context, extensionIO);
-        this.contentIO = contentIO;
-        headerIO = new HeaderIO<>(context, contentIO, extensionIO);
-        this.extensionIO = extensionIO;
     }
 
     @Override
@@ -59,10 +47,10 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         IoLogging.logger.singleAnnotation("@APIResponse");
         APIResponseImpl response = new APIResponseImpl();
         response.setDescription(value(annotation, PROP_DESCRIPTION));
-        response.setHeaders(headerIO.readMap(annotation.value(PROP_HEADERS)));
-        response.setLinks(linkIO.readMap(annotation.value(PROP_LINKS)));
-        response.setContent(contentIO.read(annotation.value(PROP_CONTENT), ContentIO.Direction.OUTPUT));
-        response.setExtensions(extensionIO.readExtensible(annotation));
+        response.setHeaders(headerIO().readMap(annotation.value(PROP_HEADERS)));
+        response.setLinks(linkIO().readMap(annotation.value(PROP_LINKS)));
+        response.setContent(contentIO().read(annotation.value(PROP_CONTENT), ContentIO.Direction.OUTPUT));
+        response.setExtensions(extensionIO().readExtensible(annotation));
         response.setRef(ReferenceType.RESPONSE.refValue(annotation));
         response.setResponseCode(responseCode(annotation).orElse(null));
         return response;
@@ -120,10 +108,10 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         APIResponse model = new APIResponseImpl();
         model.setRef(readReference(node));
         model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        model.setHeaders(headerIO.readMap(jsonIO().getValue(node, PROP_HEADERS)));
-        model.setContent(contentIO.readValue(jsonIO().getValue(node, PROP_CONTENT)));
-        model.setLinks(linkIO.readMap(jsonIO().getValue(node, PROP_LINKS)));
-        model.setExtensions(extensionIO.readMap(node));
+        model.setHeaders(headerIO().readMap(jsonIO().getValue(node, PROP_HEADERS)));
+        model.setContent(contentIO().readValue(jsonIO().getValue(node, PROP_CONTENT)));
+        model.setLinks(linkIO().readMap(jsonIO().getValue(node, PROP_LINKS)));
+        model.setExtensions(extensionIO().readMap(node));
         return model;
     }
 
@@ -131,12 +119,15 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         return optionalJsonObject(model).map(node -> {
             if (isReference(model)) {
                 setReference(node, model);
+                if (openApiVersion() == OpenApiVersion.V3_1) {
+                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
+                }
             } else {
                 setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-                setIfPresent(node, PROP_HEADERS, headerIO.write(model.getHeaders()));
-                setIfPresent(node, PROP_CONTENT, contentIO.write(model.getContent()));
-                setIfPresent(node, PROP_LINKS, linkIO.write(model.getLinks()));
-                setAllIfPresent(node, extensionIO.write(model));
+                setIfPresent(node, PROP_HEADERS, headerIO().write(model.getHeaders()));
+                setIfPresent(node, PROP_CONTENT, contentIO().write(model.getContent()));
+                setIfPresent(node, PROP_LINKS, linkIO().write(model.getLinks()));
+                setAllIfPresent(node, extensionIO().write(model));
             }
 
             return node;

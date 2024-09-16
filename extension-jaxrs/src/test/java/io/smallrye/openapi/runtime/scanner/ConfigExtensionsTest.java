@@ -25,11 +25,13 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     private static final String TITLE = "mp.openapi.extensions.smallrye.info.title";
     private static final String VERSION = "mp.openapi.extensions.smallrye.info.version";
     private static final String DESCRIPTION = "mp.openapi.extensions.smallrye.info.description";
+    private static final String SUMMARY = "mp.openapi.extensions.smallrye.info.summary";
     private static final String TERMS = "mp.openapi.extensions.smallrye.info.termsOfService";
     private static final String CONTACT_EMAIL = "mp.openapi.extensions.smallrye.info.contact.email";
     private static final String CONTACT_NAME = "mp.openapi.extensions.smallrye.info.contact.name";
     private static final String CONTACT_URL = "mp.openapi.extensions.smallrye.info.contact.url";
     private static final String LICENSE_NAME = "mp.openapi.extensions.smallrye.info.license.name";
+    private static final String LICENSE_IDENTIFIER = "mp.openapi.extensions.smallrye.info.license.identifier";
     private static final String LICENSE_URL = "mp.openapi.extensions.smallrye.info.license.url";
 
     @Test
@@ -67,8 +69,9 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
     }
 
     @Test
-    void testSettingJustLicenseName() throws IOException, JSONException {
+    void testSettingJustLicenseNameAndIdentifier() throws IOException, JSONException {
         System.setProperty(LICENSE_NAME, "Apache License 2.0");
+        System.setProperty(LICENSE_IDENTIFIER, "Apache-2.0");
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
         try {
@@ -80,21 +83,23 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
 
         } finally {
             System.clearProperty(LICENSE_NAME);
+            System.clearProperty(LICENSE_IDENTIFIER);
         }
     }
 
     @Test
     void testSettingAllInfo() throws IOException, JSONException {
-
         System.setProperty(TITLE, "My own awesome REST service");
         System.setProperty(VERSION, "1.2.3");
         System.setProperty(DESCRIPTION, "This service is awesome");
+        System.setProperty(SUMMARY, "This summary is rather boring");
         System.setProperty(TERMS, "The terms is also awesome");
         System.setProperty(CONTACT_EMAIL, "phillip.kruger@redhat.com");
         System.setProperty(CONTACT_NAME, "Phillip Kruger");
         System.setProperty(CONTACT_URL, "https://www.phillip-kruger.com");
         System.setProperty(LICENSE_NAME, "Apache License 2.0");
         System.setProperty(LICENSE_URL, "https://choosealicense.com/licenses/apache-2.0/");
+        //Licence Identifier excluded for being exclusive with URL
 
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
@@ -109,6 +114,7 @@ class ConfigExtensionsTest extends JaxRsDataObjectScannerTestBase {
             System.clearProperty(TITLE);
             System.clearProperty(VERSION);
             System.clearProperty(DESCRIPTION);
+            System.clearProperty(SUMMARY);
             System.clearProperty(TERMS);
             System.clearProperty(CONTACT_EMAIL);
             System.clearProperty(CONTACT_NAME);

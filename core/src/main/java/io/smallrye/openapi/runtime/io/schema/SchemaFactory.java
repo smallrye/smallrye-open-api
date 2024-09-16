@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io.schema;
 
+import static java.util.Arrays.asList;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -138,6 +140,13 @@ public class SchemaFactory {
             return schema;
         }
 
+        String ref = readAttr(context, annotation, SchemaConstant.REF, defaults);
+        if (ref != null) {
+            schema.setRef(ref);
+            // If the annotation sets a ref, ignore any defaults passed in
+            defaults = Collections.emptyMap();
+        }
+
         schema.setNot(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_NOT,
                 types -> readClassSchema(context, types, true), defaults));
         schema.setOneOf(SchemaFactory.<Type[], List<Schema>> readAttr(context, annotation, SchemaConstant.PROP_ONE_OF,
@@ -146,15 +155,33 @@ public class SchemaFactory {
                 types -> readClassSchemas(context, types, false), defaults));
         schema.setAllOf(SchemaFactory.<Type[], List<Schema>> readAttr(context, annotation, SchemaConstant.PROP_ALL_OF,
                 types -> readClassSchemas(context, types, true), defaults));
+        schema.setIfSchema(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_IF_SCHEMA,
+                types -> readClassSchema(context, types, true), defaults));
+        schema.setThenSchema(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_THEN_SCHEMA,
+                types -> readClassSchema(context, types, true), defaults));
+        schema.setElseSchema(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_ELSE_SCHEMA,
+                types -> readClassSchema(context, types, true), defaults));
         schema.setTitle(readAttr(context, annotation, SchemaConstant.PROP_TITLE, defaults));
         schema.setMultipleOf(SchemaFactory.<Double, BigDecimal> readAttr(context, annotation, SchemaConstant.PROP_MULTIPLE_OF,
                 BigDecimal::valueOf, defaults));
-        schema.setMaximum(SchemaFactory.readAttr(context, annotation, SchemaConstant.PROP_MAXIMUM,
-                SchemaFactory::tolerantParseBigDecimal, defaults));
-        schema.setMinimum(SchemaFactory.readAttr(context, annotation, SchemaConstant.PROP_MINIMUM,
-                SchemaFactory::tolerantParseBigDecimal, defaults));
-        schema.setExclusiveMaximum(readAttr(context, annotation, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, defaults));
-        schema.setExclusiveMinimum(readAttr(context, annotation, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, defaults));
+        BigDecimal maximum = SchemaFactory.readAttr(context, annotation, SchemaConstant.PROP_MAXIMUM,
+                SchemaFactory::tolerantParseBigDecimal, defaults);
+        BigDecimal minimum = SchemaFactory.readAttr(context, annotation, SchemaConstant.PROP_MINIMUM,
+                SchemaFactory::tolerantParseBigDecimal, defaults);
+        if (maximum != null) {
+            if (Boolean.TRUE.equals(readAttr(context, annotation, SchemaConstant.PROP_EXCLUSIVE_MAXIMUM, defaults))) {
+                schema.setExclusiveMaximum(maximum);
+            } else {
+                schema.setMaximum(maximum);
+            }
+        }
+        if (minimum != null) {
+            if (Boolean.TRUE.equals(readAttr(context, annotation, SchemaConstant.PROP_EXCLUSIVE_MINIMUM, defaults))) {
+                schema.setExclusiveMinimum(minimum);
+            } else {
+                schema.setMinimum(minimum);
+            }
+        }
         schema.setMaxLength(readAttr(context, annotation, SchemaConstant.PROP_MAX_LENGTH, defaults));
         schema.setMinLength(readAttr(context, annotation, SchemaConstant.PROP_MIN_LENGTH, defaults));
         schema.setPattern(readAttr(context, annotation, SchemaConstant.PROP_PATTERN, defaults));
@@ -163,21 +190,40 @@ public class SchemaFactory {
         schema.setRequired(readAttr(context, annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
         schema.setDescription(readAttr(context, annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
         schema.setFormat(readAttr(context, annotation, SchemaConstant.PROP_FORMAT, defaults));
-        schema.setRef(readAttr(context, annotation, SchemaConstant.REF, defaults));
-        schema.setNullable(readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
+        SchemaImpl.setNullable(schema, readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
-        schema.setExternalDocs(context.io().externalDocumentation().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
+        schema.setExternalDocs(context.io().extDocIO().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
         schema.setDeprecated(readAttr(context, annotation, SchemaConstant.PROP_DEPRECATED, defaults));
-        schema.setType(readSchemaType(context, annotation, schema, defaults));
-        schema.setExample(parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, schema.getType()));
+
+        final SchemaType type = readSchemaType(context, annotation, schema, defaults);
+        SchemaImpl.setType(schema, type);
+
+        Object example = parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, type);
+        List<Object> examples = SchemaFactory.<String[], List<Object>> readAttr(context, annotation,
+                SchemaConstant.PROP_EXAMPLES,
+                egs -> Arrays.stream(egs)
+                        .map(e -> parseValue(context, e, type))
+                        .collect(Collectors.toCollection(ArrayList::new)),
+                defaults);
+        if (examples != null) {
+            if (example != null) {
+                examples.add(example);
+            }
+            schema.setExamples(examples);
+        } else {
+            schema.setExamples(wrapInList(example));
+        }
+
         schema.setDefaultValue(
-                parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, schema.getType()));
-        schema.setDiscriminator(context.io().schemas().discriminator().read(annotation));
+                parseSchemaAttr(context, annotation, SchemaConstant.PROP_DEFAULT_VALUE, defaults, type));
+        schema.setDiscriminator(context.io().discriminatorIO().read(annotation));
         schema.setMaxItems(readAttr(context, annotation, SchemaConstant.PROP_MAX_ITEMS, defaults));
         schema.setMinItems(readAttr(context, annotation, SchemaConstant.PROP_MIN_ITEMS, defaults));
         schema.setUniqueItems(readAttr(context, annotation, SchemaConstant.PROP_UNIQUE_ITEMS, defaults));
-        schema.setExtensions(context.io().extensions().readExtensible(annotation));
+        schema.setExtensions(context.io().extensionIO().readExtensible(annotation));
+        schema.setComment(readAttr(context, annotation, SchemaConstant.PROP_COMMENT_FIELD, defaults));
+        schema.setConstValue(parseSchemaAttr(context, annotation, SchemaConstant.PROP_CONST_VALUE, defaults, type));
 
         schema.setProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(context, annotation,
                 SchemaConstant.PROP_PROPERTIES, properties -> {
@@ -194,19 +240,35 @@ public class SchemaFactory {
                     return propertySchemas;
                 }, defaults));
 
-        Type additionalProperties = readAttr(context, annotation, "additionalProperties", defaults);
+        schema.setAdditionalPropertiesSchema(
+                SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_ADDITIONAL_PROPERTIES,
+                        types -> readClassSchema(context, types, true), defaults));
 
-        if (additionalProperties != null) {
-            if (additionalProperties.name().equals(SchemaConstant.DOTNAME_TRUE_SCHEMA)) {
-                schema.setAdditionalPropertiesBoolean(Boolean.TRUE);
-            } else if (additionalProperties.name().equals(SchemaConstant.DOTNAME_FALSE_SCHEMA)) {
-                schema.setAdditionalPropertiesBoolean(Boolean.FALSE);
-            } else {
-                schema.setAdditionalPropertiesSchema(readClassSchema(context, additionalProperties, true));
-            }
-        }
+        schema.setDependentRequired(SchemaFactory.<AnnotationInstance[], Map<String, List<String>>> readAttr(context,
+                annotation, SchemaConstant.PROP_DEPENDENT_REQUIRED,
+                annos -> readDependentRequired(context, annos), defaults));
 
-        final Schema.SchemaType type = schema.getType();
+        schema.setDependentSchemas(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(context, annotation,
+                SchemaConstant.PROP_DEPENDENT_SCHEMAS,
+                annos -> readDependentSchemas(context, annos), defaults));
+
+        schema.setContentEncoding(readAttr(context, annotation, SchemaConstant.PROP_CONTENT_ENCODING, defaults));
+        schema.setContentMediaType(readAttr(context, annotation, SchemaConstant.PROP_CONTENT_MEDIA_TYPE, defaults));
+        schema.setContentSchema(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_CONTENT_SCHEMA,
+                types -> readClassSchema(context, types, true), defaults));
+
+        schema.setContains(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_CONTAINS,
+                types -> readClassSchema(context, types, true), defaults));
+        schema.setMaxContains(readAttr(context, annotation, SchemaConstant.PROP_MAX_CONTAINS, defaults));
+        schema.setMinContains(readAttr(context, annotation, SchemaConstant.PROP_MIN_CONTAINS, defaults));
+        schema.setPrefixItems(
+                SchemaFactory.<Type[], List<Schema>> readAttr(context, annotation, SchemaConstant.PROP_PREFIX_ITEMS,
+                        types -> readClassSchemas(context, types, true), defaults));
+        schema.setPropertyNames(SchemaFactory.<Type, Schema> readAttr(context, annotation, SchemaConstant.PROP_PROPERTY_NAMES,
+                types -> readClassSchema(context, types, true), defaults));
+        schema.setPatternProperties(SchemaFactory.<AnnotationInstance[], Map<String, Schema>> readAttr(context, annotation,
+                SchemaConstant.PROP_PATTERN_PROPERTIES,
+                annos -> readPatternProperties(context, annos), defaults));
 
         List<Object> enumeration = readAttr(context, annotation, SchemaConstant.PROP_ENUMERATION, (Object[] values) -> {
             List<Object> parsed = new ArrayList<>(values.length);
@@ -256,7 +318,7 @@ public class SchemaFactory {
             implSchema = readClassSchema(context, type, false);
         }
 
-        if (schema.getType() == Schema.SchemaType.ARRAY && implSchema != null) {
+        if (schema.getType() != null && schema.getType().contains(Schema.SchemaType.ARRAY) && implSchema != null) {
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
@@ -399,7 +461,17 @@ public class SchemaFactory {
     static SchemaType readSchemaType(AnnotationScannerContext context, AnnotationInstance annotation, Schema schema,
             Map<String, Object> defaults) {
         SchemaType type = readAttr(context, annotation, SchemaConstant.PROP_TYPE, SchemaFactory::parseSchemaType, defaults);
-        return type != null ? type : schema.getType();
+        if (type != null) {
+            return type;
+        }
+        List<SchemaType> types = schema.getType();
+        if (types != null) {
+            return types.stream()
+                    .filter(t -> t != SchemaType.NULL)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
     }
 
     /**
@@ -417,6 +489,14 @@ public class SchemaFactory {
         }
     }
 
+    static <T> List<T> wrapInList(T value) {
+        if (value == null) {
+            return null;
+        } else {
+            return Collections.singletonList(value);
+        }
+    }
+
     /**
      * Introspect into the given Class to generate a Schema model. The boolean indicates
      * whether this class type should be turned into a reference.
@@ -430,8 +510,12 @@ public class SchemaFactory {
             return null;
         }
         Schema schema;
-        if (type.kind() == Type.Kind.ARRAY) {
-            schema = new SchemaImpl().type(SchemaType.ARRAY);
+        if (type.name().equals(SchemaConstant.DOTNAME_TRUE_SCHEMA)) {
+            schema = new SchemaImpl().booleanSchema(true);
+        } else if (type.name().equals(SchemaConstant.DOTNAME_FALSE_SCHEMA)) {
+            schema = new SchemaImpl().booleanSchema(false);
+        } else if (type.kind() == Type.Kind.ARRAY) {
+            schema = new SchemaImpl().addType(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
             int dimensions = array.dimensions();
             Type componentType = array.component();
@@ -500,7 +584,7 @@ public class SchemaFactory {
             TypeUtil.applyTypeAttributes(type, schema);
             schema = schemaRegistration(context, type, schema);
         } else if (type.kind() == Type.Kind.ARRAY) {
-            schema = new SchemaImpl().type(SchemaType.ARRAY);
+            schema = new SchemaImpl().addType(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
             int dimensions = array.dimensions();
             Type componentType = array.component();
@@ -687,7 +771,7 @@ public class SchemaFactory {
             List<AnnotationScannerExtension> extensions) {
         if (TypeUtil.isA(context, type, MutinyConstants.MULTI_TYPE)) {
             // Treat as an Array
-            Schema schema = new SchemaImpl().type(SchemaType.ARRAY);
+            Schema schema = new SchemaImpl().addType(SchemaType.ARRAY);
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements
@@ -722,5 +806,57 @@ public class SchemaFactory {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private static Map<String, List<String>> readDependentRequired(AnnotationScannerContext context,
+            AnnotationInstance[] requireds) {
+        if (requireds == null || requireds.length == 0) {
+            return null;
+        }
+
+        Map<String, List<String>> result = new LinkedHashMap<>();
+        for (AnnotationInstance required : requireds) {
+            String name = context.annotations().value(required, SchemaConstant.PROP_NAME);
+            String[] requires = context.annotations().value(required, SchemaConstant.PROP_REQUIRES);
+            result.put(name, new ArrayList<>(asList(requires)));
+        }
+
+        return result;
+    }
+
+    private static Map<String, Schema> readDependentSchemas(AnnotationScannerContext context,
+            AnnotationInstance[] dependentSchemas) {
+        if (dependentSchemas == null || dependentSchemas.length == 0) {
+            return null;
+        }
+
+        Map<String, Schema> result = new LinkedHashMap<>();
+        for (AnnotationInstance dependentSchema : dependentSchemas) {
+            String name = context.annotations().value(dependentSchema, SchemaConstant.PROP_NAME);
+            Type schemaClass = context.annotations().value(dependentSchema, SchemaConstant.PROP_SCHEMA);
+            Schema schema = readClassSchema(context, schemaClass, true);
+            if (schema != null) {
+                result.put(name, schema);
+            }
+        }
+        return result;
+    }
+
+    private static Map<String, Schema> readPatternProperties(AnnotationScannerContext context,
+            AnnotationInstance[] patternProperties) {
+        if (patternProperties == null || patternProperties.length == 0) {
+            return null;
+        }
+
+        Map<String, Schema> result = new LinkedHashMap<>();
+        for (AnnotationInstance patternProperty : patternProperties) {
+            String regex = context.annotations().value(patternProperty, SchemaConstant.PROP_REGEX);
+            Type schemaClass = context.annotations().value(patternProperty, SchemaConstant.PROP_SCHEMA);
+            Schema schema = readClassSchema(context, schemaClass, true);
+            if (schema != null) {
+                result.put(regex, schema);
+            }
+        }
+        return result;
     }
 }

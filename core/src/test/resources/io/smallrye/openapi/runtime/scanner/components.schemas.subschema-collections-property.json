@@ -1,0 +1,83 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "JavaTypeString" : {
+        "type" : "string",
+        "pattern" : "^[A-Z][a-zA-Z0-9]*$"
+      },
+      "A" : {
+        "description" : "A",
+        "type" : "object"
+      },
+      "TestCollectionsProperty" : {
+        "properties" : {
+          "mustStartWithTwoTypeNames" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "prefixItems" : [
+              {
+                "$ref" : "#/components/schemas/JavaTypeString"
+              }, {
+                "$ref" : "#/components/schemas/JavaTypeString"
+              }
+            ]
+          },
+          "mustContainATypeName" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "contains" : {
+              "$ref" : "#/components/schemas/JavaTypeString"
+            }
+          },
+          "mustContain3To5TypeNames" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "contains" : {
+              "$ref" : "#/components/schemas/JavaTypeString"
+            },
+            "minContains" : 3,
+            "maxContains" : 5
+          },
+          "keysMustBeTypeNames" : {
+            "type" : "object",
+            "propertyNames" : {
+              "$ref" : "#/components/schemas/JavaTypeString"
+            },
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "keysNamedByType" : {
+            "type" : "object",
+            "patternProperties" : {
+              "^str" : {
+                "type" : "string"
+              },
+              "^int" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            },
+            "additionalProperties" : {}
+          },
+          "encodedJson" : {
+            "type" : "string",
+            "contentEncoding" : "base64",
+            "contentMediaType" : "application/json",
+            "contentSchema" : {
+              "$ref" : "#/components/schemas/A"
+            }
+          }
+        },
+        "type" : "object"
+      }
+    }
+  }
+}

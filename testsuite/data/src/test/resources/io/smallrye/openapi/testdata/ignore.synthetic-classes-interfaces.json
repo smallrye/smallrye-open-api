@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.1.0",
   "info" : {
     "title" : "Generated API",
     "version" : "1.0"
@@ -75,6 +75,7 @@
       "post" : {
         "tags" : [ "PeopleResource" ],
         "requestBody" : {
+          "required": true,
           "content" : {
             "application/json" : {
               "schema" : {
@@ -151,6 +152,7 @@
           }
         } ],
         "requestBody" : {
+          "required": true,
           "content" : {
             "application/json" : {
               "schema" : {

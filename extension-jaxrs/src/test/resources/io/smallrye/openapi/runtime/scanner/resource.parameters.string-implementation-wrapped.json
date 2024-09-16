@@ -1,9 +1,10 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/hello": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -28,11 +29,7 @@
           "message": {
             "type": "string",
             "description": "Used to send a message",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SimpleString"
-              }
-            ]
+            "$ref": "#/components/schemas/SimpleString"
           },
           "optionalMessage": {
             "type": "string",

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/beanparamimpl": {
       "get": {
@@ -35,7 +35,7 @@
             "description": "Condition string.",
             "minLength": 1,
             "type": "string",
-            "example": "arch = \"x86_64\""
+            "examples" : [ "arch = \"x86_64\"" ]
           },
           "ctime": {
             "format": "yyyy-MM-dd hh:mm:ss.ddd",

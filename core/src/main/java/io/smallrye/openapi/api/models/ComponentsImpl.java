@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Components;
+import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.eclipse.microprofile.openapi.models.examples.Example;
 import org.eclipse.microprofile.openapi.models.headers.Header;
@@ -30,6 +31,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     private Map<String, SecurityScheme> securitySchemes;
     private Map<String, Link> links;
     private Map<String, Callback> callbacks;
+    private Map<String, PathItem> pathItems;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.Components#getSchemas()
@@ -336,6 +338,27 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
     @Override
     public void removeCallback(String key) {
         ModelUtil.remove(this.callbacks, key);
+    }
+
+    @Override
+    public Map<String, PathItem> getPathItems() {
+        return ModelUtil.unmodifiableMap(this.pathItems);
+    }
+
+    @Override
+    public void setPathItems(Map<String, PathItem> pathItems) {
+        this.pathItems = ModelUtil.replace(pathItems, LinkedHashMap<String, PathItem>::new);
+    }
+
+    @Override
+    public Components addPathItem(String name, PathItem pathItem) {
+        this.pathItems = ModelUtil.add(name, pathItem, this.pathItems, LinkedHashMap<String, PathItem>::new);
+        return this;
+    }
+
+    @Override
+    public void removePathItem(String name) {
+        ModelUtil.remove(this.pathItems, name);
     }
 
 }

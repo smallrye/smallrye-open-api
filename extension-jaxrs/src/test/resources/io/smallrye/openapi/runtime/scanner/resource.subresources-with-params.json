@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/recursion/alternate1/alternate2/fetch": {
       "get": {
@@ -107,6 +107,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -126,6 +127,7 @@
       },
       "patch": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {
@@ -351,7 +353,7 @@
       "LocalDateTime": {
         "format": "date-time",
         "type": "string",
-        "example": "2022-03-10T12:15:50"
+        "examples" : [ "2022-03-10T12:15:50" ]
       }
     }
   }

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/generic/map": {
       "get": {
@@ -55,6 +55,7 @@
     "/generic/save": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {

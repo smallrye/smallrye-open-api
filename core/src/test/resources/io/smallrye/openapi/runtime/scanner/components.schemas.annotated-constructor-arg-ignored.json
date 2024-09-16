@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "components": {
     "schemas": {
       "SingleAnnotatedConstructorArgument": {
@@ -9,7 +9,7 @@
           "property1": {
             "description": "The single property",
             "type": "string",
-            "example": "some value"
+            "examples": ["some value"]
           }
         }
       }

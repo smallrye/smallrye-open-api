@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "components": {
     "schemas": {
       "Lizard": {
@@ -32,11 +32,7 @@
                 "type": "string",
                 "description": "The units of measure for length",
                 "default": "CM",
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/LengthUnitsEnum"
-                  }
-                ]
+                "$ref": "#/components/schemas/LengthUnitsEnum"
               },
               "length": {
                 "format": "double",

@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.1.0",
   "components" : {
     "schemas" : {
       "CollectionBean" : {
@@ -18,9 +18,7 @@
           "b_multivaluedEntryMap" : {
             "type": "object",
             "description" : "Reference to `MultivaluedMapStringEntryBean",
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/MultivaluedMapStringEntryBean"
-            } ]
+            "$ref" : "#/components/schemas/MultivaluedMapStringEntryBean"
           },
           "c_mapStringListEntryBean" : {
             "description" : "In-line schema, `additionalProperties` array `items` reference `EntryBean`",
@@ -64,9 +62,7 @@
           "f_listOfStringLists" : {
             "type": "array",
             "description" : "Reference to `MultivaluedCollectionString`",
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/MultivaluedCollectionString"
-            } ]
+            "$ref" : "#/components/schemas/MultivaluedCollectionString"
           }
         }
       },

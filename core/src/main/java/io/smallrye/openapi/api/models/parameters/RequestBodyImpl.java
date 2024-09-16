@@ -16,6 +16,8 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     private String description;
     private Content content;
     private Boolean required;
+    private Boolean requiredDefault;
+    private boolean isRequiredSet = false;
 
     /**
      * @see org.eclipse.microprofile.openapi.models.Reference#getRef()
@@ -73,7 +75,11 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
      */
     @Override
     public Boolean getRequired() {
-        return this.required;
+        if (isRequiredSet) {
+            return this.required;
+        } else {
+            return this.requiredDefault;
+        }
     }
 
     /**
@@ -82,6 +88,35 @@ public class RequestBodyImpl extends ExtensibleImpl<RequestBody> implements Requ
     @Override
     public void setRequired(Boolean required) {
         this.required = required;
+        isRequiredSet = true;
     }
 
+    /**
+     * Sets the value to use for {@code required} if {@link #setRequired(Boolean)} has not been called.
+     * <p>
+     * If this method is called, {@link #getRequired()} will return this value unless {@link #setRequired(Boolean)} is called.
+     *
+     * @param requiredDefault the default value for {@code required}
+     * @return this instance
+     */
+    public RequestBodyImpl setRequiredDefault(Boolean requiredDefault) {
+        this.requiredDefault = requiredDefault;
+        return this;
+    }
+
+    /**
+     * Returns whether {@link #setRequired(Boolean)} has been called on a request body.
+     * <p>
+     * Always returns {@code true} if the request body is not a {@code RequestBodyImpl}
+     *
+     * @param requestBody the request body
+     * @return {@code true} if {@code setRequired} has been called
+     */
+    public static boolean isRequiredSet(RequestBody requestBody) {
+        if (requestBody instanceof RequestBodyImpl) {
+            return ((RequestBodyImpl) requestBody).isRequiredSet;
+        } else {
+            return true;
+        }
+    }
 }

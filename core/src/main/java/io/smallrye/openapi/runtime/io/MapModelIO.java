@@ -107,7 +107,7 @@ public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends
     public Optional<O> write(Map<String, T> models) {
         return optionalJsonObject(models).map(node -> {
             models.forEach((key, value) -> {
-                Optional<O> jsonValue = write(value);
+                Optional<? extends V> jsonValue = write(value);
                 if (jsonValue.isPresent()) {
                     jsonIO().set(node, key, jsonValue.get());
                 } else {

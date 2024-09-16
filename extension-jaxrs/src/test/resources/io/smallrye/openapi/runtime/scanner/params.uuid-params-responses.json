@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/uuid": {
       "get": {
@@ -30,6 +30,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {
@@ -61,11 +62,7 @@
           "theUUID": {
             "type": "string",
             "description": "test",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UUID"
-              }
-            ]
+            "$ref": "#/components/schemas/UUID"
           }
         }
       },

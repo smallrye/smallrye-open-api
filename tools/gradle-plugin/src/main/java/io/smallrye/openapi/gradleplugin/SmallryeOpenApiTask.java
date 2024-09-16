@@ -373,6 +373,13 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     @Input
     @Optional
     @Override
+    public Property<String> getInfoSummary() {
+        return properties.infoSummary;
+    }
+
+    @Input
+    @Optional
+    @Override
     public Property<String> getInfoContactEmail() {
         return properties.infoContactEmail;
     }

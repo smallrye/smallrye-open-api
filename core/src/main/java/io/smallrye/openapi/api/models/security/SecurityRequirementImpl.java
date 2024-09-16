@@ -73,7 +73,9 @@ public class SecurityRequirementImpl extends LinkedHashMap<String, List<String>>
     @Override
     public void setSchemes(Map<String, List<String>> items) {
         this.clear();
-        items.forEach(this::addScheme);
+        if (items != null) {
+            items.forEach(this::addScheme);
+        }
     }
 
 }

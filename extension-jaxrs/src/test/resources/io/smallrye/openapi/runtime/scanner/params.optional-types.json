@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/optional/n1": {
       "get": {
@@ -71,8 +71,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -83,14 +82,14 @@
     "/optional/n4": {
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "text/plain": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "name4": {
-                    "type": "string",
-                    "nullable": true
+                    "type": ["string", "null"]
                   }
                 }
               }
@@ -140,8 +139,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -176,8 +174,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -229,8 +226,7 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "nullable": true
+                  "type": ["string", "null"]
                 }
               }
             }
@@ -272,8 +268,7 @@
         "required": [ "title" ],
         "properties": {
           "title": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           }
         }
       },
@@ -282,19 +277,18 @@
         "properties": {
           "age": {
             "format": "double",
-            "type": "number",
-            "nullable": true
+            "type": ["number", "null"]
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           },
           "nested": {
-            "type": "object",
-            "nullable": true,
-            "allOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/NestedBean"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -304,8 +298,7 @@
         "type": "object",
         "properties": {
           "value": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           }
         }
       }

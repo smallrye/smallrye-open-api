@@ -1,11 +1,12 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.1.0",
   "components" : {
     "schemas" : {
       "RefWithOtherProps" : {
         "type" : "object",
         "properties" : {
           "test" : {
+            "type" : "string",
             "$ref" : "#/components/schemas/foobar"
           }
         }

@@ -66,6 +66,7 @@ public class ConfigUtil {
         setIfPresent(config.getInfoTitle(), oai.getInfo()::setTitle);
         setIfPresent(config.getInfoVersion(), oai.getInfo()::setVersion);
         setIfPresent(config.getInfoDescription(), oai.getInfo()::setDescription);
+        setIfPresent(config.getInfoSummary(), oai.getInfo()::setSummary);
         setIfPresent(config.getInfoTermsOfService(), oai.getInfo()::setTermsOfService);
 
         // Contact
@@ -83,6 +84,7 @@ public class ConfigUtil {
                 config.getInfoLicenseName(),
                 config.getInfoLicenseUrl())) {
             setIfPresent(config.getInfoLicenseName(), oai.getInfo().getLicense()::setName);
+            setIfPresent(config.getInfoLicenseIdentifier(), oai.getInfo().getLicense()::setIdentifier);
             setIfPresent(config.getInfoLicenseUrl(), oai.getInfo().getLicense()::setUrl);
         }
     }

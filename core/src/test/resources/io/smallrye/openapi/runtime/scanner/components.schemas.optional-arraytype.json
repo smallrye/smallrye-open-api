@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "components": {
     "schemas": {
       "A": {
@@ -8,8 +8,10 @@
           "arrayOfOptionalB": {
             "type": "array",
             "items": {
-              "nullable": true,
-              "allOf": [
+              "anyOf": [
+                {
+                  "type": "null"
+                },
                 {
                   "$ref": "#/components/schemas/B"
                 }
@@ -28,8 +30,10 @@
           "listOfOptionalB": {
             "type": "array",
             "items": {
-              "nullable": true,
-              "allOf": [
+              "anyOf": [
+                {
+                  "type": "null"
+                },
                 {
                   "$ref": "#/components/schemas/B"
                 }
@@ -37,25 +41,24 @@
             }
           },
           "optionalArrayOfB": {
-            "type": "array",
+            "type": ["array", "null"],
             "items": {
               "$ref": "#/components/schemas/B"
-            },
-            "nullable": true
+            }
           },
           "optionalListOfB": {
-            "type": "array",
+            "type": ["array","null"],
             "items": {
               "$ref": "#/components/schemas/B"
-            },
-            "nullable": true
+            }
           },
           "optionalOfB": {
-            "type": "object",
-            "nullable": true,
-            "allOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/B"
+              },
+              {
+                "type": "null"
               }
             ]
           }

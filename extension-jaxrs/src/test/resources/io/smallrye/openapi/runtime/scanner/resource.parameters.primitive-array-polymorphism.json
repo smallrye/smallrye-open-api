@@ -1,10 +1,11 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "paths": {
     "/v1": {
       "post": {
         "summary": "Convert an array of integer types to an array of floating point types",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {

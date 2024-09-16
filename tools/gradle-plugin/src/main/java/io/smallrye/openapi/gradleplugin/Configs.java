@@ -50,6 +50,7 @@ class Configs implements SmallryeOpenApiProperties {
     final Property<String> infoTitle;
     final Property<String> infoVersion;
     final Property<String> infoDescription;
+    final Property<String> infoSummary;
     final Property<String> infoTermsOfService;
     final Property<String> infoContactEmail;
     final Property<String> infoContactName;
@@ -84,6 +85,7 @@ class Configs implements SmallryeOpenApiProperties {
         infoTitle = objects.property(String.class);
         infoVersion = objects.property(String.class);
         infoDescription = objects.property(String.class);
+        infoSummary = objects.property(String.class);
         infoTermsOfService = objects.property(String.class);
         infoContactEmail = objects.property(String.class);
         infoContactName = objects.property(String.class);
@@ -119,6 +121,7 @@ class Configs implements SmallryeOpenApiProperties {
         infoTitle = objects.property(String.class).convention(ext.getInfoTitle());
         infoVersion = objects.property(String.class).convention(ext.getInfoVersion());
         infoDescription = objects.property(String.class).convention(ext.getInfoDescription());
+        infoSummary = objects.property(String.class).convention(ext.getInfoSummary());
         infoTermsOfService = objects.property(String.class).convention(ext.getInfoTermsOfService());
         infoContactEmail = objects.property(String.class).convention(ext.getInfoContactEmail());
         infoContactName = objects.property(String.class).convention(ext.getInfoContactName());
@@ -177,6 +180,7 @@ class Configs implements SmallryeOpenApiProperties {
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_TITLE, infoTitle);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_VERSION, infoVersion);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_DESCRIPTION, infoDescription);
+        addToPropertyMap(cp, SmallRyeOASConfig.INFO_SUMMARY, infoSummary);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_TERMS, infoTermsOfService);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_EMAIL, infoContactEmail);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_CONTACT_NAME, infoContactName);
@@ -287,6 +291,10 @@ class Configs implements SmallryeOpenApiProperties {
 
     public Property<String> getInfoDescription() {
         return infoDescription;
+    }
+
+    public Property<String> getInfoSummary() {
+        return infoSummary;
     }
 
     public Property<String> getInfoTermsOfService() {

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "API - Service",
     "version": "V1"
@@ -68,6 +68,7 @@
       },
       "put": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -91,6 +92,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -114,6 +116,7 @@
       },
       "delete": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -197,6 +200,7 @@
       },
       "put": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -220,6 +224,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -243,6 +248,7 @@
       },
       "delete": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -310,6 +316,7 @@
       },
       "put": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -333,6 +340,7 @@
       },
       "post": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -356,6 +364,7 @@
       },
       "delete": {
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {

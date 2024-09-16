@@ -62,11 +62,13 @@ public final class SmallRyeOASConfig {
     public static final String INFO_TITLE = SMALLRYE_PREFIX + "info.title";
     public static final String INFO_VERSION = SMALLRYE_PREFIX + "info.version";
     public static final String INFO_DESCRIPTION = SMALLRYE_PREFIX + "info.description";
+    public static final String INFO_SUMMARY = SMALLRYE_PREFIX + "info.summary";
     public static final String INFO_TERMS = SMALLRYE_PREFIX + "info.termsOfService";
     public static final String INFO_CONTACT_EMAIL = SMALLRYE_PREFIX + "info.contact.email";
     public static final String INFO_CONTACT_NAME = SMALLRYE_PREFIX + "info.contact.name";
     public static final String INFO_CONTACT_URL = SMALLRYE_PREFIX + "info.contact.url";
     public static final String INFO_LICENSE_NAME = SMALLRYE_PREFIX + "info.license.name";
+    public static final String INFO_LICENSE_IDENTIFIER = SMALLRYE_PREFIX + "info.license.identifier";
     public static final String INFO_LICENSE_URL = SMALLRYE_PREFIX + "info.license.url";
     public static final String OPERATION_ID_STRAGEGY = SMALLRYE_PREFIX + "operationIdStrategy";
     public static final String DUPLICATE_OPERATION_ID_BEHAVIOR = SMALLRYE_PREFIX + "duplicateOperationIdBehavior";
@@ -81,7 +83,7 @@ public final class SmallRyeOASConfig {
     public static final String AUTO_INHERITANCE = SMALLRYE_PREFIX + "auto-inheritance";
 
     public static final class Defaults {
-        public static final String VERSION = "3.0.3";
+        public static final String VERSION = "3.1.0";
 
         private Defaults() {
         }

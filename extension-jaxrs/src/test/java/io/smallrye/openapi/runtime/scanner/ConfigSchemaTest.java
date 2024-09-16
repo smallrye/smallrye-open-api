@@ -36,7 +36,7 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
     private static final String INVALID_PROPERTY_VALUE_SCHEMA = Json.createObjectBuilder()
             .add("name", "message")
             .add("type", "string")
-            .add("malformed-property", "This should not appear in output document")
+            .add("unknown-property", "This should appear in output document")
             .build()
             .toString();
 
@@ -79,9 +79,9 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
         }
     }
 
-    // Technically correct behaviour as malformed-property is not rendered in schema, but no feedback
+    // Unknown properties should be passed through untouched
     @Test
-    void testValidSchemaKeyWithInvalidSchemaPropertyValueViaConfig() throws IOException, JSONException {
+    void testValidSchemaKeyWithUnknownSchemaPropertyValueViaConfig() throws IOException, JSONException {
         System.setProperty(VALID_SCHEMA_PROPERTY_KEY, INVALID_PROPERTY_VALUE_SCHEMA);
         Config config = ConfigProvider.getConfig();
         OpenApiConfig openApiConfig = OpenApiConfig.fromConfig(config);
@@ -90,7 +90,7 @@ class ConfigSchemaTest extends JaxRsDataObjectScannerTestBase {
             OpenAPI result = OpenApiProcessor.bootstrap(openApiConfig, i);
 
             printToConsole(result);
-            assertJsonEquals("resource.testValidSchemaKeyWithInvalidSchemaPropertyValueViaConfig.json", result);
+            assertJsonEquals("resource.testValidSchemaKeyWithUnknownSchemaPropertyValueViaConfig.json", result);
 
         } finally {
             System.clearProperty(VALID_SCHEMA_PROPERTY_KEY);

@@ -359,7 +359,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
             final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameters().read(t);
+        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
         return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
                 method, reader,
                 context.getExtensions());

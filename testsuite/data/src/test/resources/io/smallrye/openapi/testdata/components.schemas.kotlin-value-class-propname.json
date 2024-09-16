@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "components": {
     "schemas": {
       "KotlinBean": {
@@ -10,12 +10,10 @@
         "properties": {
           "id": {
             "format": "int64",
-            "type": "integer",
-            "nullable": true
+            "type": ["integer", "null"]
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": ["string", "null"]
           },
           "description": {
             "type": "string"
