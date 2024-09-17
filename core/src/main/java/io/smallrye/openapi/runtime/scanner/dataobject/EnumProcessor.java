@@ -7,12 +7,12 @@ import static io.smallrye.openapi.api.constants.JacksonConstants.PROP_VALUE;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -32,12 +32,18 @@ public class EnumProcessor {
     }
 
     public static List<Object> enumConstants(AnnotationScannerContext context, Type enumType) {
-        ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
+        AugmentedIndexView index = context.getAugmentedIndex();
+        ClassInfo enumKlazz = index.getClassByName(TypeUtil.getName(enumType));
         Function<FieldInfo, String> nameTranslator = nameTranslator(context, enumKlazz);
 
-        return enumKlazz.annotationsMap()
-                .getOrDefault(JSON_VALUE, Collections.emptyList())
+        return index.inheritanceChain(enumKlazz, enumType)
+                .keySet()
                 .stream()
+                .flatMap(clazz -> Stream.concat(
+                        Stream.of(clazz),
+                        clazz.interfaceTypes().stream().map(index::getClass).filter(Objects::nonNull)))
+                .filter(clazz -> clazz.hasAnnotation(JSON_VALUE))
+                .flatMap(clazz -> clazz.annotationsMap().get(JSON_VALUE).stream())
                 // @JsonValue#value (default = true) allows for the functionality to be disabled
                 .filter(atJsonValue -> context.annotations().value(atJsonValue, PROP_VALUE, true))
                 .map(AnnotationInstance::target)
