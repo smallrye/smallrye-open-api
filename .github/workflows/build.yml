@@ -6,6 +6,7 @@ on:
       - 'main'
       - 'main-[1-9].[0-9]'
       - '[1-9].[0-9].x'
+      - '[1-9].x'
       - '1.x'
       - '!dependabot/**'
     paths-ignore:
@@ -19,6 +20,7 @@ on:
       - 'main'
       - 'main-[1-9].[0-9]'
       - '[1-9].[0-9].x'
+      - '[1-9].x'
       - '1.x'
     paths-ignore:
       - '.gitignore'
