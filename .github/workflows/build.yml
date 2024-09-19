@@ -89,7 +89,7 @@ jobs:
         include:
         - tck-version: "2.0.1"
         - tck-version: "3.0"
-        - tck-version: "3.1.1"
+        - tck-version: "3.1.2"
 
     name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
     steps:
