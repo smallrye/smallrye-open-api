@@ -172,6 +172,9 @@ public class TypeParser {
     }
 
     private DotName parseName() {
+        while (Character.isWhitespace(signature.charAt(pos))) {
+            pos++;
+        }
         int start = pos;
         int end = advanceNameEnd();
         return DotName.createSimple(signature.substring(start, end));
