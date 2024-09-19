@@ -91,17 +91,6 @@
               <enabled>true</enabled>
            </snapshots>
         </repository>
-        <repository>
-            <id>orgeclipsemicroprofile-1724</id>
-            <name>MicroProfile OpenAPI 4.0.1 Staging</name>
-            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1724/</url>
-            <releases>
-               <enabled>true</enabled>
-            </releases>
-            <snapshots>
-              <enabled>false</enabled>
-           </snapshots>
-        </repository>
     </repositories>
 
     <dependencyManagement>
