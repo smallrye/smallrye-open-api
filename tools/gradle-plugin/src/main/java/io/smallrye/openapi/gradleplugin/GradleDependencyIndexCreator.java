@@ -2,12 +2,17 @@ package io.smallrye.openapi.gradleplugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,11 +37,23 @@ public class GradleDependencyIndexCreator {
         this.logger = logger;
     }
 
-    IndexView createIndex(Set<File> dependencies, FileCollection classesDirs)
+    IndexView createIndex(SmallryeOpenApiTask task)
             throws IOException {
+
+        Set<File> dependencies = task.getScanDependenciesDisable().get().booleanValue()
+                ? Collections.emptySet()
+                : task.getClasspath().getFiles();
+        FileCollection classesDirs = task.getClassesDirs();
 
         List<Entry<File, Duration>> indexDurations = new ArrayList<>();
         List<IndexView> indexes = new ArrayList<>();
+
+        List<String> includeStandardJavaModules = task.getIncludeStandardJavaModules().getOrElse(Collections.emptyList());
+        logger.info("includeStandardJavaModules: " + includeStandardJavaModules);
+
+        for (String moduleName : includeStandardJavaModules) {
+            indexes.add(indexJdkModule(moduleName));
+        }
 
         for (File f : classesDirs.getFiles()) {
             indexes.add(indexModuleClasses(f));
@@ -63,6 +80,37 @@ public class GradleDependencyIndexCreator {
         }
         printIndexDurations(indexDurations);
         return CompositeIndex.create(indexes);
+    }
+
+    private Index indexJdkModule(String moduleName) throws IOException {
+        Indexer indexer = new Indexer();
+        FileSystem jrt = FileSystems.getFileSystem(URI.create("jrt:/"));
+
+        for (Path root : jrt.getRootDirectories()) {
+            try (var walker = Files.walk(root)) {
+                walker
+                        .filter(path -> path.startsWith("/modules/" + moduleName))
+                        .filter(path -> path.getFileName().toString().endsWith(".class"))
+                        .map(path -> {
+                            try {
+                                return Files.newInputStream(path);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        })
+                        .forEach(stream -> {
+                            try {
+                                indexer.index(stream);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        return indexer.complete();
     }
 
     private Index index(File artifact) throws IOException {

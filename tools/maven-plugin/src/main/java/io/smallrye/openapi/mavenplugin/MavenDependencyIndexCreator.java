@@ -2,6 +2,10 @@ package io.smallrye.openapi.mavenplugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -72,10 +76,13 @@ public class MavenDependencyIndexCreator {
         ignoredArtifacts.add("org.apache.httpcomponents");
     }
 
-    public IndexView createIndex(MavenProject mavenProject, boolean scanDependenciesDisable,
-            List<String> includeDependenciesScopes, List<String> includeDependenciesTypes) {
+    public IndexView createIndex(MavenProject mavenProject,
+            boolean scanDependenciesDisable,
+            List<String> includeDependenciesScopes,
+            List<String> includeDependenciesTypes,
+            List<String> includeStandardJavaModules) {
 
-        List<Map.Entry<File, Duration>> indexDurations = new ArrayList<>();
+        List<Map.Entry<Object, Duration>> indexDurations = new ArrayList<>();
 
         List<File> artifacts = new ArrayList<>();
         String buildOutput = mavenProject.getBuild().getOutputDirectory();
@@ -96,6 +103,16 @@ public class MavenDependencyIndexCreator {
         }
 
         List<IndexView> indexes = new ArrayList<>();
+
+        if (includeStandardJavaModules != null) {
+            for (String moduleName : includeStandardJavaModules) {
+                LocalDateTime start = LocalDateTime.now();
+                indexes.add(indexJdkModule(moduleName));
+                Duration duration = Duration.between(start, LocalDateTime.now());
+                indexDurations.add(new AbstractMap.SimpleEntry<>("module:" + moduleName, duration));
+            }
+        }
+
         for (File artifact : artifacts) {
             try {
                 if (artifact.isDirectory()) {
@@ -124,7 +141,7 @@ public class MavenDependencyIndexCreator {
         return CompositeIndex.create(indexes);
     }
 
-    private void printIndexDurations(List<Map.Entry<File, Duration>> indexDurations) {
+    private void printIndexDurations(List<Map.Entry<Object, Duration>> indexDurations) {
         if (logger.isDebugEnabled()) {
             logger.debug("Indexed directories/artifacts for annotation scanning:");
             indexDurations.forEach(e -> logger.debug("  " + e.getKey() + " (index time " + e.getValue() + ")"));
@@ -144,7 +161,7 @@ public class MavenDependencyIndexCreator {
                 || ignoredArtifacts.contains(artifact.getGroupId() + ":" + artifact.getArtifactId());
     }
 
-    private IndexView timeAndCache(List<Map.Entry<File, Duration>> indexDurations, File artifact,
+    private IndexView timeAndCache(List<Map.Entry<Object, Duration>> indexDurations, File artifact,
             Callable<IndexView> callable) throws ExecutionException {
         LocalDateTime start = LocalDateTime.now();
         IndexView result = indexCache.get(artifact.getAbsolutePath(), callable);
@@ -154,6 +171,37 @@ public class MavenDependencyIndexCreator {
         indexDurations.add(new AbstractMap.SimpleEntry<>(artifact, duration));
 
         return result;
+    }
+
+    private Index indexJdkModule(String moduleName) {
+        Indexer indexer = new Indexer();
+        FileSystem jrt = FileSystems.getFileSystem(URI.create("jrt:/"));
+
+        for (Path root : jrt.getRootDirectories()) {
+            try (var walker = Files.walk(root)) {
+                walker
+                        .filter(path -> path.startsWith("/modules/" + moduleName))
+                        .filter(path -> path.getFileName().toString().endsWith(".class"))
+                        .map(path -> {
+                            try {
+                                return Files.newInputStream(path);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        })
+                        .forEach(stream -> {
+                            try {
+                                indexer.index(stream);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        return indexer.complete();
     }
 
     // index the classes of this Maven module
