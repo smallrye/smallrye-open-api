@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
@@ -103,5 +104,23 @@ class RequestBodyScanTests extends IndexScannerTestBase {
             }
         }
         test("params.request-body-constraints.json", Resource.class);
+    }
+
+    @Test
+    void testResponseAnnotationUsed() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("foo")
+        class FooApi {
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.Path("{name}/bar")
+            @jakarta.ws.rs.Consumes("text/plain")
+            @jakarta.ws.rs.Produces("application/json")
+            public jakarta.ws.rs.core.Response putDescription(
+                    @Parameter(description = "The name", required = true) @jakarta.ws.rs.PathParam("name") String name,
+                    @RequestBody(description = "The description", required = true) String description) {
+                return null;
+            }
+        }
+
+        assertJsonEquals("params.request-body-annotation-on-arg.json", FooApi.class);
     }
 }
