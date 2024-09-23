@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.media.Content;
@@ -43,9 +44,8 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
 
     Stream<AnnotationInstance> getAnnotations(MethodInfo method, DotName annotation) {
         Stream<AnnotationInstance> methodAnnos = Stream.of(scannerContext().annotations().getAnnotation(method, annotation));
-        Stream<AnnotationInstance> paramAnnos = method.parameterTypes()
-                .stream()
-                .map(p -> scannerContext().annotations().getMethodParameterAnnotation(method, p, annotation));
+        Stream<AnnotationInstance> paramAnnos = IntStream.range(0, method.parametersCount())
+                .mapToObj(p -> scannerContext().annotations().getMethodParameterAnnotation(method, p, annotation));
 
         return Stream.concat(methodAnnos, paramAnnos)
                 .filter(Objects::nonNull);
