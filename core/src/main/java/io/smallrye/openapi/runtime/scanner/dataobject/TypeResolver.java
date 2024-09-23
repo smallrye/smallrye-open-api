@@ -1147,7 +1147,9 @@ public class TypeResolver {
         List<Type> arguments = parameterizedType.arguments();
 
         if (arguments.size() != typeVariables.size()) {
-            DataObjectLogging.logger.classNotAvailable(typeVariables, arguments);
+            String vars = typeVariables.stream().map(TypeVariable::toString).collect(Collectors.joining(", "));
+            DataObjectLogging.logger.classNotAvailable(klazz.name() + "<" + vars + ">", parameterizedType.toString());
+            return Collections.emptyMap();
         }
 
         Map<String, Type> resolutionMap = new LinkedHashMap<>();
