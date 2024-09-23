@@ -117,6 +117,38 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         assertEquals(Arrays.asList("VAL1", "VAL2"), result.getEnumeration());
     }
 
+    interface EnumValue4 {
+        @com.fasterxml.jackson.annotation.JsonValue
+        // type derived as int with format int64 due to JsonValue return type
+        boolean getValue();
+    }
+
+    @org.eclipse.microprofile.openapi.annotations.media.Schema
+    public static enum ExampleEnum4 implements EnumValue4 {
+        TRUE(true),
+        FALSE(false);
+
+        final boolean value;
+
+        ExampleEnum4(boolean value) {
+            this.value = value;
+        }
+
+        public boolean getValue() {
+            return value;
+        }
+    }
+
+    @Test
+    void testEnumToSchemaTypeWithInheritance() {
+        Index index = indexOf(ExampleEnum4.class, EnumValue4.class);
+        AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
+                emptyConfig());
+        Schema result = SchemaFactory.enumToSchema(context, Type.create(ExampleEnum4.class));
+        assertEquals(Arrays.asList(Schema.SchemaType.BOOLEAN), result.getType());
+        assertEquals(Arrays.asList(true, false), result.getEnumeration());
+    }
+
     @Test
     void testParseSchemaType() {
         for (SchemaType type : SchemaType.values()) {
