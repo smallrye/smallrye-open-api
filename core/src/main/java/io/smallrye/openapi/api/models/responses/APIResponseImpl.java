@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.responses;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.headers.Header;
@@ -73,7 +72,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
+        this.headers = ModelUtil.replace(headers);
     }
 
     /**
@@ -82,7 +81,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse addHeader(String name, Header header) {
-        this.headers = ModelUtil.add(name, header, this.headers, LinkedHashMap<String, Header>::new);
+        this.headers = ModelUtil.add(name, header, this.headers);
         return this;
     }
 
@@ -123,7 +122,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public void setLinks(Map<String, Link> links) {
-        this.links = ModelUtil.replace(links, LinkedHashMap<String, Link>::new);
+        this.links = ModelUtil.replace(links);
     }
 
     /**
@@ -132,7 +131,7 @@ public class APIResponseImpl extends ExtensibleImpl<APIResponse> implements APIR
      */
     @Override
     public APIResponse addLink(String name, Link link) {
-        this.links = ModelUtil.add(name, link, this.links, LinkedHashMap<String, Link>::new);
+        this.links = ModelUtil.add(name, link, this.links);
         return this;
     }
 

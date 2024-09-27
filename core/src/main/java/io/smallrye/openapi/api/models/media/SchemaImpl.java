@@ -130,7 +130,7 @@ public class SchemaImpl extends MapBasedModelImpl implements Schema, ModelImpl {
     public static void addTypeObserver(Schema observable, Schema observer) {
         if (observable instanceof SchemaImpl) {
             SchemaImpl obs = (SchemaImpl) observable;
-            obs.typeObservers = ModelUtil.add(observer, obs.typeObservers, ArrayList<Schema>::new);
+            obs.typeObservers = ModelUtil.add(observer, obs.typeObservers);
         }
 
         setTypeRetainingNull(observer, observable.getType());

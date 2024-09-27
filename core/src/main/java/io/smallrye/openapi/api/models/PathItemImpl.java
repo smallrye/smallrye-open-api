@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -290,7 +289,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.replace(servers);
     }
 
     /**
@@ -298,7 +297,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public PathItem addServer(Server server) {
-        this.servers = ModelUtil.add(server, this.servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.add(server, this.servers);
         return this;
     }
 
@@ -323,7 +322,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public void setParameters(List<Parameter> parameters) {
-        this.parameters = ModelUtil.replace(parameters, ArrayList<Parameter>::new);
+        this.parameters = ModelUtil.replace(parameters);
     }
 
     /**
@@ -331,7 +330,7 @@ public class PathItemImpl extends ExtensibleImpl<PathItem> implements PathItem, 
      */
     @Override
     public PathItem addParameter(Parameter parameter) {
-        this.parameters = ModelUtil.add(parameter, this.parameters, ArrayList<Parameter>::new);
+        this.parameters = ModelUtil.add(parameter, this.parameters);
         return this;
     }
 

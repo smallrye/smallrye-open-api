@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.headers;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
@@ -174,7 +173,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.replace(examples);
     }
 
     /**
@@ -183,7 +182,7 @@ public class HeaderImpl extends ExtensibleImpl<Header> implements Header, ModelI
      */
     @Override
     public Header addExample(String key, Example example) {
-        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.add(key, example, this.examples);
         return this;
     }
 

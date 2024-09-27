@@ -1,7 +1,5 @@
 package io.smallrye.openapi.api.models;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +55,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setTags(List<String> tags) {
-        this.tags = ModelUtil.replace(tags, ArrayList<String>::new);
+        this.tags = ModelUtil.replace(tags);
     }
 
     /**
@@ -65,7 +63,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addTag(String tag) {
-        this.tags = ModelUtil.add(tag, this.tags, ArrayList<String>::new);
+        this.tags = ModelUtil.add(tag, this.tags);
         return this;
     }
 
@@ -154,7 +152,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setParameters(List<Parameter> parameters) {
-        this.parameters = ModelUtil.replace(parameters, ArrayList<Parameter>::new);
+        this.parameters = ModelUtil.replace(parameters);
     }
 
     /**
@@ -162,7 +160,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addParameter(Parameter parameter) {
-        this.parameters = ModelUtil.add(parameter, this.parameters, ArrayList<Parameter>::new);
+        this.parameters = ModelUtil.add(parameter, this.parameters);
         return this;
     }
 
@@ -219,7 +217,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setCallbacks(Map<String, Callback> callbacks) {
-        this.callbacks = ModelUtil.replace(callbacks, LinkedHashMap<String, Callback>::new);
+        this.callbacks = ModelUtil.replace(callbacks);
     }
 
     /**
@@ -228,7 +226,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addCallback(String key, Callback callback) {
-        this.callbacks = ModelUtil.add(key, callback, this.callbacks, LinkedHashMap<String, Callback>::new);
+        this.callbacks = ModelUtil.add(key, callback, this.callbacks);
         return this;
     }
 
@@ -269,7 +267,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setSecurity(List<SecurityRequirement> security) {
-        this.security = ModelUtil.replace(security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.replace(security);
     }
 
     /**
@@ -277,7 +275,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addSecurityRequirement(SecurityRequirement securityRequirement) {
-        this.security = ModelUtil.add(securityRequirement, this.security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.add(securityRequirement, this.security);
         return this;
     }
 
@@ -302,7 +300,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.replace(servers);
     }
 
     /**
@@ -310,7 +308,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
      */
     @Override
     public Operation addServer(Server server) {
-        this.servers = ModelUtil.add(server, this.servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.add(server, this.servers);
         return this;
     }
 
@@ -335,7 +333,7 @@ public class OperationImpl extends ExtensibleImpl<Operation> implements Operatio
         this.methodRef = methodRef;
     }
 
-    static public String getMethodRef(Operation operation) {
+    public static String getMethodRef(Operation operation) {
         return (operation instanceof OperationImpl) ? ((OperationImpl) operation).getMethodRef() : null;
     }
 }

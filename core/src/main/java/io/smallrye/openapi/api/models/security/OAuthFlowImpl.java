@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.security;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
@@ -80,7 +79,7 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
      */
     @Override
     public void setScopes(Map<String, String> scopes) {
-        this.scopes = ModelUtil.replace(scopes, LinkedHashMap<String, String>::new);
+        this.scopes = ModelUtil.replace(scopes);
     }
 
     /*
@@ -88,7 +87,7 @@ public class OAuthFlowImpl extends ExtensibleImpl<OAuthFlow> implements OAuthFlo
      */
     @Override
     public OAuthFlow addScope(String scope, String description) {
-        this.scopes = ModelUtil.add(scope, description, this.scopes, LinkedHashMap<String, String>::new);
+        this.scopes = ModelUtil.add(scope, description, this.scopes);
         return this;
     }
 

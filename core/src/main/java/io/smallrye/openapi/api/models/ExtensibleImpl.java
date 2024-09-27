@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
@@ -31,7 +30,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
     @SuppressWarnings("unchecked")
     @Override
     public T addExtension(String name, Object value) {
-        this.extensions = ModelUtil.add(name, value, this.extensions, LinkedHashMap<String, Object>::new);
+        this.extensions = ModelUtil.add(name, value, this.extensions);
         return (T) this;
     }
 
@@ -48,7 +47,7 @@ public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensi
      */
     @Override
     public void setExtensions(Map<String, Object> extensions) {
-        this.extensions = ModelUtil.replace(extensions, LinkedHashMap<String, Object>::new);
+        this.extensions = ModelUtil.replace(extensions);
     }
 
 }
