@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.media;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.headers.Header;
@@ -43,7 +42,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public Encoding addHeader(String key, Header header) {
-        this.headers = ModelUtil.add(key, header, this.headers, LinkedHashMap<String, Header>::new);
+        this.headers = ModelUtil.add(key, header, this.headers);
         return this;
     }
 
@@ -68,7 +67,7 @@ public class EncodingImpl extends ExtensibleImpl<Encoding> implements Encoding, 
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
+        this.headers = ModelUtil.replace(headers);
     }
 
     /**

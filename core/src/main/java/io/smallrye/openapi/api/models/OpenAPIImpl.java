@@ -89,7 +89,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.replace(servers);
     }
 
     /**
@@ -97,7 +97,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addServer(Server server) {
-        this.servers = ModelUtil.add(server, this.servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.add(server, this.servers);
         return this;
     }
 
@@ -122,7 +122,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setSecurity(List<SecurityRequirement> security) {
-        this.security = ModelUtil.replace(security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.replace(security);
     }
 
     /**
@@ -130,7 +130,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addSecurityRequirement(SecurityRequirement securityRequirement) {
-        this.security = ModelUtil.add(securityRequirement, this.security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.add(securityRequirement, this.security);
         return this;
     }
 
@@ -155,7 +155,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setTags(List<Tag> tags) {
-        this.tags = ModelUtil.replace(tags, ArrayList<Tag>::new);
+        this.tags = ModelUtil.replace(tags);
     }
 
     /**

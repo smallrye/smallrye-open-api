@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -21,7 +20,7 @@ public class PathsImpl extends ExtensibleImpl<Paths> implements Paths, ModelImpl
      */
     @Override
     public Paths addPathItem(String name, PathItem item) {
-        this.pathItems = ModelUtil.add(name, item, this.pathItems, LinkedHashMap<String, PathItem>::new);
+        this.pathItems = ModelUtil.add(name, item, this.pathItems);
         return this;
     }
 
@@ -46,7 +45,7 @@ public class PathsImpl extends ExtensibleImpl<Paths> implements Paths, ModelImpl
      */
     @Override
     public void setPathItems(Map<String, PathItem> items) {
-        this.pathItems = ModelUtil.replace(items, LinkedHashMap<String, PathItem>::new);
+        this.pathItems = ModelUtil.replace(items);
     }
 
     // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1

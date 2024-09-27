@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.Components;
@@ -44,7 +43,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setSchemas(Map<String, Schema> schemas) {
-        this.schemas = ModelUtil.replace(schemas, LinkedHashMap<String, Schema>::new);
+        this.schemas = ModelUtil.replace(schemas);
     }
 
     /**
@@ -53,7 +52,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addSchema(String key, Schema schema) {
-        this.schemas = ModelUtil.add(key, schema, this.schemas, LinkedHashMap<String, Schema>::new);
+        this.schemas = ModelUtil.add(key, schema, this.schemas);
         return this;
     }
 
@@ -78,7 +77,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setResponses(Map<String, APIResponse> responses) {
-        this.responses = ModelUtil.replace(responses, LinkedHashMap<String, APIResponse>::new);
+        this.responses = ModelUtil.replace(responses);
     }
 
     /**
@@ -87,7 +86,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addResponse(String key, APIResponse response) {
-        this.responses = ModelUtil.add(key, response, this.responses, LinkedHashMap<String, APIResponse>::new);
+        this.responses = ModelUtil.add(key, response, this.responses);
         return this;
     }
 
@@ -112,7 +111,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setParameters(Map<String, Parameter> parameters) {
-        this.parameters = ModelUtil.replace(parameters, LinkedHashMap<String, Parameter>::new);
+        this.parameters = ModelUtil.replace(parameters);
     }
 
     /**
@@ -121,7 +120,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addParameter(String key, Parameter parameter) {
-        this.parameters = ModelUtil.add(key, parameter, this.parameters, LinkedHashMap<String, Parameter>::new);
+        this.parameters = ModelUtil.add(key, parameter, this.parameters);
         return this;
     }
 
@@ -146,7 +145,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.replace(examples);
     }
 
     /**
@@ -155,7 +154,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addExample(String key, Example example) {
-        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.add(key, example, this.examples);
         return this;
     }
 
@@ -180,7 +179,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setRequestBodies(Map<String, RequestBody> requestBodies) {
-        this.requestBodies = ModelUtil.replace(requestBodies, LinkedHashMap<String, RequestBody>::new);
+        this.requestBodies = ModelUtil.replace(requestBodies);
     }
 
     /**
@@ -189,7 +188,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addRequestBody(String key, RequestBody requestBody) {
-        this.requestBodies = ModelUtil.add(key, requestBody, this.requestBodies, LinkedHashMap<String, RequestBody>::new);
+        this.requestBodies = ModelUtil.add(key, requestBody, this.requestBodies);
         return this;
     }
 
@@ -214,7 +213,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setHeaders(Map<String, Header> headers) {
-        this.headers = ModelUtil.replace(headers, LinkedHashMap<String, Header>::new);
+        this.headers = ModelUtil.replace(headers);
     }
 
     /**
@@ -223,7 +222,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addHeader(String key, Header header) {
-        this.headers = ModelUtil.add(key, header, this.headers, LinkedHashMap<String, Header>::new);
+        this.headers = ModelUtil.add(key, header, this.headers);
         return this;
     }
 
@@ -248,7 +247,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setSecuritySchemes(Map<String, SecurityScheme> securitySchemes) {
-        this.securitySchemes = ModelUtil.replace(securitySchemes, LinkedHashMap<String, SecurityScheme>::new);
+        this.securitySchemes = ModelUtil.replace(securitySchemes);
     }
 
     /**
@@ -257,8 +256,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addSecurityScheme(String key, SecurityScheme securityScheme) {
-        this.securitySchemes = ModelUtil.add(key, securityScheme, this.securitySchemes,
-                LinkedHashMap<String, SecurityScheme>::new);
+        this.securitySchemes = ModelUtil.add(key, securityScheme, this.securitySchemes);
         return this;
     }
 
@@ -283,7 +281,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setLinks(Map<String, Link> links) {
-        this.links = ModelUtil.replace(links, LinkedHashMap<String, Link>::new);
+        this.links = ModelUtil.replace(links);
     }
 
     /**
@@ -292,7 +290,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addLink(String key, Link link) {
-        this.links = ModelUtil.add(key, link, this.links, LinkedHashMap<String, Link>::new);
+        this.links = ModelUtil.add(key, link, this.links);
         return this;
     }
 
@@ -317,7 +315,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public void setCallbacks(Map<String, Callback> callbacks) {
-        this.callbacks = ModelUtil.replace(callbacks, LinkedHashMap<String, Callback>::new);
+        this.callbacks = ModelUtil.replace(callbacks);
     }
 
     /**
@@ -326,7 +324,7 @@ public class ComponentsImpl extends ExtensibleImpl<Components> implements Compon
      */
     @Override
     public Components addCallback(String key, Callback callback) {
-        this.callbacks = ModelUtil.add(key, callback, this.callbacks, LinkedHashMap<String, Callback>::new);
+        this.callbacks = ModelUtil.add(key, callback, this.callbacks);
         return this;
     }
 

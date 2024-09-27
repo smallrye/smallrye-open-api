@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.media;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
@@ -51,7 +50,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.replace(examples);
     }
 
     /**
@@ -60,7 +59,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType addExample(String key, Example example) {
-        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.add(key, example, this.examples);
         return this;
     }
 
@@ -101,7 +100,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public void setEncoding(Map<String, Encoding> encoding) {
-        this.encoding = ModelUtil.replace(encoding, LinkedHashMap<String, Encoding>::new);
+        this.encoding = ModelUtil.replace(encoding);
     }
 
     /**
@@ -110,7 +109,7 @@ public class MediaTypeImpl extends ExtensibleImpl<MediaType> implements MediaTyp
      */
     @Override
     public MediaType addEncoding(String key, Encoding encodingItem) {
-        this.encoding = ModelUtil.add(key, encodingItem, this.encoding, LinkedHashMap<String, Encoding>::new);
+        this.encoding = ModelUtil.add(key, encodingItem, this.encoding);
         return this;
     }
 
