@@ -114,6 +114,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         IoLogging.logger.singleJsonObject("Schema");
         String name = getName(node);
         SchemaImpl schema = new SchemaImpl(name);
+        schema.setRef(jsonIO().getJsonString(node, PROP_REF));
 
         if (openApiVersion() == OpenApiVersion.V3_1) {
             String dialect = jsonIO().getString(node, SchemaConstant.PROP_SCHEMA_DIALECT);
@@ -158,7 +159,8 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         for (Entry<String, V> entry : jsonIO().properties(node)) {
             String name = entry.getKey();
             V fieldNode = entry.getValue();
-            if (!PROPERTIES_DATA_TYPES.containsKey(name) && !name.equals(PROP_TYPE) && !name.equals(PROP_NAME)) {
+            if (!PROPERTIES_DATA_TYPES.containsKey(name) && !name.equals(PROP_TYPE) && !name.equals(PROP_NAME)
+                    && !name.equals(PROP_REF)) {
                 dataMap.put(name, jsonIO().fromJson(fieldNode));
             }
         }

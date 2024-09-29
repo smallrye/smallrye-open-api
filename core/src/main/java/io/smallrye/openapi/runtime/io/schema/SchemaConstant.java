@@ -74,7 +74,7 @@ public class SchemaConstant {
 
     public static final String PROP_SCHEMA_DIALECT = "$schema";
     public static final String PROP_COMMENT = "$comment";
-    public static final String PROP_REF = "$ref";
+    public static final String PROP_REF = ReferenceIO.REF;
 
     public static final String PROP_IF = "if";
     public static final String PROP_THEN = "then";
@@ -136,7 +136,6 @@ public class SchemaConstant {
         Map<String, DataType> propertiesDataTypes30 = new HashMap<>();
         Map<String, DataType> propertiesDataTypes = new HashMap<>();
 
-        propertiesDataTypes30.put(ReferenceIO.REF, type(String.class));
         propertiesDataTypes30.put(SchemaConstant.PROP_DISCRIMINATOR, type(Discriminator.class));
         propertiesDataTypes30.put(SchemaConstant.PROP_TITLE, type(String.class));
         propertiesDataTypes30.put(SchemaConstant.PROP_DEFAULT, type(Object.class));
