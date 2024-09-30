@@ -145,7 +145,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
         Schema result = SchemaFactory.enumToSchema(context, Type.create(ExampleEnum4.class));
-        assertEquals(Arrays.asList(Schema.SchemaType.BOOLEAN), result.getType());
+        assertEquals(Schema.SchemaType.BOOLEAN, result.getType());
         assertEquals(Arrays.asList(true, false), result.getEnumeration());
     }
 
