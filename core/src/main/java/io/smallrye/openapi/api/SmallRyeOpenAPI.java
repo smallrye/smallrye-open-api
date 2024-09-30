@@ -53,7 +53,7 @@ public class SmallRyeOpenAPI {
     private final BiFunction<? super Object, Format, String> toString;
 
     @SuppressWarnings("unchecked")
-    private SmallRyeOpenAPI(OpenAPI model, Object jsonModel, BiFunction<?, Format, String> toString) {
+    protected SmallRyeOpenAPI(OpenAPI model, Object jsonModel, BiFunction<?, Format, String> toString) {
         this.model = model;
         this.jsonModel = jsonModel;
         this.toString = (BiFunction<? super Object, Format, String>) toString;
@@ -92,6 +92,9 @@ public class SmallRyeOpenAPI {
     public static class Builder {
 
         private static final IndexView EMPTY_INDEX = new Indexer().complete();
+
+        private transient BuildContext<?, ?, ?, ?, ?> buildContext;
+
         private Config config;
         private ClassLoader applicationClassLoader;
         private OpenAPI initialModel;
@@ -118,7 +121,19 @@ public class SmallRyeOpenAPI {
         private boolean enableStandardFilter = true;
         private Map<String, OASFilter> filters = new LinkedHashMap<>();
 
-        private Builder() {
+        protected Builder() {
+        }
+
+        protected void removeContext() {
+            this.buildContext = null;
+        }
+
+        @SuppressWarnings("unchecked")
+        protected <V, A extends V, O extends V, AB, OB> BuildContext<V, A, O, AB, OB> getContext() {
+            if (buildContext == null) {
+                buildContext = new BuildContext<>(this);
+            }
+            return (BuildContext<V, A, O, AB, OB>) buildContext;
         }
 
         /**
@@ -133,6 +148,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withConfig(Config config) {
+            removeContext();
             this.config = Objects.requireNonNull(config);
             return this;
         }
@@ -146,6 +162,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withApplicationClassLoader(ClassLoader classLoader) {
+            removeContext();
             this.applicationClassLoader = Objects.requireNonNull(classLoader);
             return this;
         }
@@ -160,6 +177,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withInitialModel(OpenAPI initialModel) {
+            removeContext();
             this.initialModel = initialModel;
             return this;
         }
@@ -174,6 +192,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder enableModelReader(boolean enableModelReader) {
+            removeContext();
             this.enableModelReader = enableModelReader;
             return this;
         }
@@ -189,6 +208,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder enableStandardStaticFiles(boolean enableStandardStaticFiles) {
+            removeContext();
             this.enableStandardStaticFiles = enableStandardStaticFiles;
             return this;
         }
@@ -203,6 +223,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder enableStandardFilter(boolean enableStandardFilter) {
+            removeContext();
             this.enableStandardFilter = enableStandardFilter;
             return this;
         }
@@ -225,6 +246,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder defaultRequiredProperties(boolean defaultRequiredProperties) {
+            removeContext();
             this.defaultRequiredProperties = defaultRequiredProperties;
             return this;
         }
@@ -240,6 +262,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withResourceLocator(Function<String, URL> resourceLocator) {
+            removeContext();
             this.resourceLocator = resourceLocator;
             return this;
         }
@@ -254,6 +277,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withCustomStaticFile(Supplier<InputStream> customStaticFile) {
+            removeContext();
             this.customStaticFile = Objects.requireNonNull(customStaticFile);
             return this;
         }
@@ -265,6 +289,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withIndex(IndexView index) {
+            removeContext();
             this.index = Objects.requireNonNull(index);
             return this;
         }
@@ -281,6 +306,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withContextRootResolver(Function<Collection<ClassInfo>, String> contextRootResolver) {
+            removeContext();
             this.contextRootResolver = Objects.requireNonNull(contextRootResolver);
             return this;
         }
@@ -295,6 +321,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withTypeConverter(UnaryOperator<Type> typeConverter) {
+            removeContext();
             this.typeConverter = Objects.requireNonNull(typeConverter);
             return this;
         }
@@ -310,6 +337,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withJsonParser(Function<String, Object> jsonParser) {
+            removeContext();
             this.jsonParser = jsonParser;
             return this;
         }
@@ -324,6 +352,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withSchemaParser(Function<String, Schema> schemaParser) {
+            removeContext();
             this.schemaParser = schemaParser;
             return this;
         }
@@ -336,6 +365,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder enableAnnotationScan(boolean enableAnnotationScan) {
+            removeContext();
             this.enableAnnotationScan = enableAnnotationScan;
             return this;
         }
@@ -350,6 +380,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder enableUnannotatedPathParameters(boolean enableUnannotatedPathParameters) {
+            removeContext();
             this.enableUnannotatedPathParameters = enableUnannotatedPathParameters;
             return this;
         }
@@ -369,6 +400,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withScannerClassLoader(ClassLoader scannerClassLoader) {
+            removeContext();
             this.scannerClassLoader = scannerClassLoader;
             return this;
         }
@@ -381,6 +413,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withScannerFilter(Predicate<String> scannerFilter) {
+            removeContext();
             this.scannerFilter = Objects.requireNonNull(scannerFilter);
             return this;
         }
@@ -393,9 +426,10 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withFilters(Collection<OASFilter> filters) {
+            removeContext();
             Objects.requireNonNull(filters);
             this.filters.clear();
-            filters.forEach(filter -> this.filters.put(filter.getClass().getName(), filter));
+            filters.forEach(this::addFilter);
             return this;
         }
 
@@ -413,9 +447,31 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder withFilterNames(Collection<String> filterNames) {
+            removeContext();
             Objects.requireNonNull(filterNames);
-            filters.clear();
-            filterNames.forEach(filter -> this.filters.put(filter, null));
+            this.filters.clear();
+            filterNames.forEach(this::addFilterName);
+            return this;
+        }
+
+        /**
+         * AProvide a collection of OASFilter implementation class names to apply to the final OpenAPI model. New
+         * instances of the named classes will be instantiated immediately using the
+         * {@linkplain ClassLoader} provided. If the given index is null, the filters will be
+         * created with a non-null, empty index.
+         *
+         * The filters will be executed in the same order as given in the collection.
+         *
+         * @param filterNames collection of OASFilter implementation class names
+         * @param classLoader CLassLoader use to load the filter
+         * @param index IndexView passed to the filter, possibly null
+         * @return this builder
+         */
+        public Builder withFilterNames(Collection<String> filterNames, ClassLoader classLoader, IndexView index) {
+            removeContext();
+            Objects.requireNonNull(filterNames);
+            this.filters.clear();
+            filterNames.forEach(name -> this.addFilter(name, classLoader, index));
             return this;
         }
 
@@ -427,6 +483,7 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder addFilter(OASFilter filter) {
+            removeContext();
             Objects.requireNonNull(filter);
             filters.put(filter.getClass().getName(), filter);
             return this;
@@ -446,51 +503,52 @@ public class SmallRyeOpenAPI {
          * @return this builder
          */
         public Builder addFilterName(String filterName) {
+            removeContext();
             Objects.requireNonNull(filterName);
             filters.put(filterName, null);
             return this;
         }
 
         /**
-         * Build a new {@linkplain SmallRyeOpenAPI} instance based on the current state of this builder.
+         * Add an OASFilter implementation class name to apply to the final OpenAPI model. A new
+         * instance of the named class will be instantiated immediately using the
+         * {@linkplain ClassLoader} provided. If the given index is null, the filter will be
+         * created with a non-null, empty index.
          *
-         * @param <V> JSON value type
-         * @param <A> JSON array type
-         * @param <O> JSON object type
-         * @param <AB> JSON array builder type
-         * @param <OB> JSON object builder type
-         * @return a new {@linkplain SmallRyeOpenAPI} instance
+         * Filters will be executed in the order they are added.
+         *
+         * @param filterName OASFilter implementation class name
+         * @param classLoader CLassLoader use to load the filter
+         * @param index IndexView passed to the filter, possibly null
+         * @return this builder
          */
-        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI build() {
-            ClassLoader appClassLoader = applicationClassLoader != null ? applicationClassLoader
-                    : Thread.currentThread().getContextClassLoader();
+        public Builder addFilter(String filterName, ClassLoader classLoader, IndexView index) {
+            removeContext();
+            Objects.requireNonNull(filterName);
+            Objects.requireNonNull(classLoader);
+            OASFilter filter = OpenApiProcessor.getFilter(filterName, classLoader, index != null ? index : EMPTY_INDEX);
+            filters.put(filterName, filter);
+            return this;
+        }
 
-            OpenApiConfig buildConfig = OpenApiConfig.fromConfig(Optional.ofNullable(this.config)
-                    .orElseGet(() -> ConfigProvider.getConfig(appClassLoader)));
-            IOContext<V, A, O, AB, OB> io = IOContext.forJson(JsonIO.newInstance(buildConfig));
-            OpenAPIDefinitionIO<V, A, O, AB, OB> modelIO = new OpenAPIDefinitionIO<>(io);
-            FilteredIndexView filteredIndex = new FilteredIndexView(index, buildConfig);
-
-            OpenAPI readerModel = null;
-            OpenAPI staticModel = null;
-            OpenAPI annotationModel = null;
-            OASFilter standardFilter = null;
-
+        protected void buildReaderModel(BuildContext<?, ?, ?, ?, ?> ctx) {
             if (enableModelReader) {
-                readerModel = OpenApiProcessor.modelFromReader(buildConfig, appClassLoader, filteredIndex);
-                debugModel("reader", readerModel);
+                ctx.readerModel = OpenApiProcessor.modelFromReader(ctx.buildConfig, ctx.appClassLoader, index);
+                debugModel("reader", ctx.readerModel);
             }
+        }
 
+        protected <V, A extends V, O extends V, AB, OB> void buildStaticModel(BuildContext<V, A, O, AB, OB> ctx) {
             if (enableStandardStaticFiles) {
                 Function<String, URL> loadFn = Optional.ofNullable(resourceLocator)
-                        .orElse(appClassLoader::getResource);
+                        .orElse(ctx.appClassLoader::getResource);
 
-                staticModel = OpenApiProcessor.loadOpenApiStaticFiles(loadFn)
+                ctx.staticModel = OpenApiProcessor.loadOpenApiStaticFiles(loadFn)
                         .stream()
                         .map(file -> {
                             try (Reader reader = new InputStreamReader(file.getContent())) {
-                                V dom = io.jsonIO().fromReader(reader, file.getFormat());
-                                OpenAPI fileModel = modelIO.readValue(dom);
+                                V dom = ctx.modelIO.jsonIO().fromReader(reader, file.getFormat());
+                                OpenAPI fileModel = ctx.modelIO.readValue(dom);
                                 debugModel("static file", fileModel);
                                 return fileModel;
                             } catch (IOException e) {
@@ -506,56 +564,123 @@ public class SmallRyeOpenAPI {
 
             if (customFile != null) {
                 try (Reader reader = new InputStreamReader(customFile)) {
-                    V dom = io.jsonIO().fromReader(reader);
-                    OpenAPI customStaticModel = modelIO.readValue(dom);
+                    V dom = ctx.modelIO.jsonIO().fromReader(reader);
+                    OpenAPI customStaticModel = ctx.modelIO.readValue(dom);
                     debugModel("static file", customStaticModel);
-                    staticModel = MergeUtil.merge(customStaticModel, staticModel);
+                    ctx.staticModel = MergeUtil.merge(customStaticModel, ctx.staticModel);
                 } catch (IOException e) {
                     throw new OpenApiRuntimeException("IOException reading custom static file", e);
                 }
             }
+        }
 
-            if (enableAnnotationScan && !buildConfig.scanDisable()) {
-                buildConfig.setAllowNakedPathParameter(enableUnannotatedPathParameters);
-                AnnotationScannerExtension ext = newExtension(modelIO);
-                AnnotationScannerContext scannerContext = new AnnotationScannerContext(filteredIndex, appClassLoader,
-                        Collections.singletonList(ext), false, buildConfig, modelIO, new OpenAPIImpl());
-                io.scannerContext(scannerContext);
+        protected <V, A extends V, O extends V, AB, OB> void buildAnnotationModel(BuildContext<V, A, O, AB, OB> ctx) {
+            if (enableAnnotationScan && !ctx.buildConfig.scanDisable()) {
+                ctx.buildConfig.setAllowNakedPathParameter(enableUnannotatedPathParameters);
+                AnnotationScannerExtension ext = newExtension(ctx.modelIO);
+                AnnotationScannerContext scannerContext = new AnnotationScannerContext(ctx.filteredIndex, ctx.appClassLoader,
+                        Collections.singletonList(ext), false, ctx.buildConfig, ctx.modelIO, new OpenAPIImpl());
+                ctx.modelIO.ioContext().scannerContext(scannerContext);
                 Supplier<Iterable<AnnotationScanner>> supplier = Optional.ofNullable(scannerClassLoader)
                         .map(AnnotationScannerFactory::new)
-                        .orElseGet(() -> new AnnotationScannerFactory(appClassLoader));
+                        .orElseGet(() -> new AnnotationScannerFactory(ctx.appClassLoader));
                 OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(scannerContext, supplier);
-                annotationModel = scanner.scan(scannerFilter);
-                debugModel("annotation", annotationModel);
+                ctx.annotationModel = scanner.scan(scannerFilter);
+                debugModel("annotation", ctx.annotationModel);
             }
+        }
 
+        protected void buildStandardFilter(BuildContext<?, ?, ?, ?, ?> ctx) {
             if (enableStandardFilter) {
-                standardFilter = OpenApiProcessor.getFilter(buildConfig, appClassLoader, filteredIndex);
+                ctx.standardFilter = OpenApiProcessor.getFilter(
+                        ctx.buildConfig,
+                        ctx.appClassLoader,
+                        ctx.filteredIndex);
             }
+        }
 
-            OpenApiDocument doc = OpenApiDocument.newInstance();
-            doc.config(buildConfig);
-            doc.defaultRequiredProperties(defaultRequiredProperties);
-            doc.modelFromReader(MergeUtil.merge(initialModel, readerModel));
-            doc.modelFromStaticFile(staticModel);
-            doc.modelFromAnnotations(annotationModel);
+        protected void buildPrepare(BuildContext<?, ?, ?, ?, ?> ctx) {
+            ctx.doc.set(null);
+        }
+
+        protected <V> SmallRyeOpenAPI buildFinalize(BuildContext<V, ?, ?, ?, ?> ctx) {
+            ctx.doc.config(ctx.buildConfig);
+            ctx.doc.defaultRequiredProperties(ctx.defaultRequiredProperties);
+            ctx.doc.modelFromReader(MergeUtil.merge(ctx.initialModel, ctx.readerModel));
+            ctx.doc.modelFromStaticFile(ctx.staticModel);
+            ctx.doc.modelFromAnnotations(ctx.annotationModel);
 
             filters.entrySet()
                     .stream()
                     .map(e -> Optional.ofNullable(e.getValue())
                             // Create an instance from the key (class name) when the value is null
-                            .orElseGet(() -> OpenApiProcessor.getFilter(e.getKey(), appClassLoader, filteredIndex)))
-                    .forEach(doc::filter);
+                            .orElseGet(() -> OpenApiProcessor.getFilter(
+                                    e.getKey(),
+                                    ctx.appClassLoader,
+                                    ctx.filteredIndex)))
+                    .forEach(ctx.doc::filter);
 
-            if (standardFilter != null && !filters.containsKey(standardFilter.getClass().getName())) {
-                doc.filter(standardFilter);
+            if (ctx.standardFilter != null && !filters.containsKey(ctx.standardFilter.getClass().getName())) {
+                ctx.doc.filter(ctx.standardFilter);
             }
 
-            doc.initialize();
+            ctx.doc.initialize();
+            OpenAPI model = ctx.doc.get();
+            BiFunction<V, Format, String> toString = ctx.modelIO.jsonIO()::toString;
+            return new SmallRyeOpenAPI(model, ctx.modelIO.write(model).orElse(null), toString);
+        }
 
-            OpenAPI model = doc.get();
-            BiFunction<V, Format, String> toString = io.jsonIO()::toString;
-            return new SmallRyeOpenAPI(model, modelIO.write(model).orElse(null), toString);
+        protected static class BuildContext<V, A extends V, O extends V, AB, OB> {
+            ClassLoader appClassLoader;
+            OpenApiConfig buildConfig;
+            OpenAPIDefinitionIO<V, A, O, AB, OB> modelIO;
+            FilteredIndexView filteredIndex;
+            OpenAPI initialModel;
+            OpenAPI readerModel;
+            OpenAPI staticModel;
+            OpenAPI annotationModel;
+            OASFilter standardFilter;
+            boolean defaultRequiredProperties;
+
+            OpenApiDocument doc;
+
+            BuildContext(Builder builder) {
+                this.appClassLoader = builder.applicationClassLoader != null
+                        ? builder.applicationClassLoader
+                        : Thread.currentThread().getContextClassLoader();
+
+                this.buildConfig = OpenApiConfig.fromConfig(Optional.ofNullable(builder.config)
+                        .orElseGet(() -> ConfigProvider.getConfig(this.appClassLoader)));
+                IOContext<V, A, O, AB, OB> io = IOContext.forJson(JsonIO.newInstance(this.buildConfig));
+                this.modelIO = new OpenAPIDefinitionIO<>(io);
+                this.filteredIndex = new FilteredIndexView(builder.index, this.buildConfig);
+                this.initialModel = builder.initialModel;
+                this.defaultRequiredProperties = builder.defaultRequiredProperties;
+
+                this.doc = OpenApiDocument.newInstance();
+            }
+        }
+
+        /**
+         * Build a new {@linkplain SmallRyeOpenAPI} instance based on the current state of this builder.
+         *
+         * @param <V> JSON value type
+         * @param <A> JSON array type
+         * @param <O> JSON object type
+         * @param <AB> JSON array builder type
+         * @param <OB> JSON object builder type
+         * @return a new {@linkplain SmallRyeOpenAPI} instance
+         */
+        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI build() {
+            BuildContext<V, A, O, AB, OB> ctx = getContext();
+
+            buildPrepare(ctx);
+            buildReaderModel(ctx);
+            buildStaticModel(ctx);
+            buildAnnotationModel(ctx);
+            buildStandardFilter(ctx);
+
+            return buildFinalize(ctx);
         }
 
         private <V, A extends V, O extends V, AB, OB> AnnotationScannerExtension newExtension(

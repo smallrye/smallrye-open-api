@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.servers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
@@ -31,7 +30,7 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
      */
     @Override
     public void setEnumeration(List<String> enumeration) {
-        this.enumeration = ModelUtil.replace(enumeration, ArrayList<String>::new);
+        this.enumeration = ModelUtil.replace(enumeration);
     }
 
     /**
@@ -39,7 +38,7 @@ public class ServerVariableImpl extends ExtensibleImpl<ServerVariable> implement
      */
     @Override
     public ServerVariable addEnumeration(String enumeration) {
-        this.enumeration = ModelUtil.add(enumeration, this.enumeration, ArrayList<String>::new);
+        this.enumeration = ModelUtil.add(enumeration, this.enumeration);
         return this;
     }
 

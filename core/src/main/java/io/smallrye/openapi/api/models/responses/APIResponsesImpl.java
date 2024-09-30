@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.responses;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
@@ -24,7 +23,7 @@ public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements AP
      */
     @Override
     public APIResponses addAPIResponse(String name, APIResponse apiResponse) {
-        this.apiResponses = ModelUtil.add(name, apiResponse, this.apiResponses, LinkedHashMap<String, APIResponse>::new);
+        this.apiResponses = ModelUtil.add(name, apiResponse, this.apiResponses);
         return this;
     }
 
@@ -43,7 +42,7 @@ public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements AP
 
     @Override
     public void setAPIResponses(Map<String, APIResponse> items) {
-        this.apiResponses = ModelUtil.replace(items, LinkedHashMap<String, APIResponse>::new);
+        this.apiResponses = ModelUtil.replace(items);
     }
 
     /**

@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.parameters;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.examples.Example;
@@ -211,7 +210,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public void setExamples(Map<String, Example> examples) {
-        this.examples = ModelUtil.replace(examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.replace(examples);
     }
 
     /**
@@ -220,7 +219,7 @@ public class ParameterImpl extends ExtensibleImpl<Parameter> implements Paramete
      */
     @Override
     public Parameter addExample(String key, Example example) {
-        this.examples = ModelUtil.add(key, example, this.examples, LinkedHashMap<String, Example>::new);
+        this.examples = ModelUtil.add(key, example, this.examples);
         return this;
     }
 
