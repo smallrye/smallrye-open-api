@@ -20,6 +20,7 @@ import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -30,7 +31,6 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
@@ -599,7 +599,7 @@ public class SmallRyeOpenAPI {
                 ctx.buildConfig.setAllowNakedPathParameter(enableUnannotatedPathParameters);
                 AnnotationScannerExtension ext = newExtension(ctx.modelIO);
                 AnnotationScannerContext scannerContext = new AnnotationScannerContext(ctx.filteredIndex, ctx.appClassLoader,
-                        Collections.singletonList(ext), false, ctx.buildConfig, operationHandler, new OpenAPIImpl());
+                        Collections.singletonList(ext), false, ctx.buildConfig, operationHandler, OASFactory.createOpenAPI());
                 ctx.modelIO.ioContext().scannerContext(scannerContext);
                 Supplier<Iterable<AnnotationScanner>> supplier = Optional.ofNullable(scannerClassLoader)
                         .map(AnnotationScannerFactory::new)

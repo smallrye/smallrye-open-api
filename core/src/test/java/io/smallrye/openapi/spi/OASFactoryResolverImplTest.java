@@ -35,8 +35,6 @@ import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.openapi.api.models.info.LicenseImpl;
-
 /**
  * @author eric.wittmann@gmail.com
  */
@@ -69,7 +67,7 @@ class OASFactoryResolverImplTest {
     void testCreateObject_License() {
         License license = OASFactory.createObject(License.class).name("Test License").url("urn:test-url");
         Assertions.assertNotNull(license);
-        Assertions.assertEquals(LicenseImpl.class, license.getClass());
+        Assertions.assertEquals(io.smallrye.openapi.internal.models.info.License.class, license.getClass());
         Assertions.assertEquals("Test License", license.getName());
         Assertions.assertEquals("urn:test-url", license.getUrl());
     }

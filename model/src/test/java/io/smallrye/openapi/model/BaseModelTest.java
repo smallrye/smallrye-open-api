@@ -1,4 +1,4 @@
-package io.smallrye.openapi.api.models;
+package io.smallrye.openapi.model;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,15 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.models.Constructible;
 import org.junit.jupiter.api.Test;
 
-public class MapBasedModelmplTest {
+class BaseModelTest {
 
-    public static class TestMapModel extends MapBasedModelImpl {
-    };
+    static class TestMapModel extends BaseModel<Constructible> {
+    }
 
     @Test
-    public void getWrongType() {
+    void getWrongType() {
         TestMapModel test = new TestMapModel();
         test.setProperty("test", "Hello");
 
@@ -25,28 +26,28 @@ public class MapBasedModelmplTest {
     }
 
     @Test
-    public void addToNonList() {
+    void addToNonList() {
         TestMapModel test = new TestMapModel();
         test.setProperty("test", "Hello");
-        test.addToListProperty("test", 4);
+        test.addListPropertyEntry("test", 4);
 
         assertEquals(asList(4), test.getProperty("test", Object.class));
     }
 
     @Test
-    public void removeFromNonList() {
+    void removeFromNonList() {
         TestMapModel test = new TestMapModel();
         test.setProperty("test", "Hello");
-        test.removeFromListProperty("test", 4);
+        test.removeListPropertyEntry("test", 4);
 
         assertEquals("Hello", test.getProperty("test", Object.class));
     }
 
     @Test
-    public void addToNonMap() {
+    void addToNonMap() {
         TestMapModel test = new TestMapModel();
         test.setProperty("test", "Hello");
-        test.addToMapProperty("test", "foo", 4);
+        test.putMapPropertyEntry("test", "foo", 4);
 
         Map<String, Integer> expected = new HashMap<>();
         expected.put("foo", 4);
@@ -54,10 +55,10 @@ public class MapBasedModelmplTest {
     }
 
     @Test
-    public void removeFromNonMap() {
+    void removeFromNonMap() {
         TestMapModel test = new TestMapModel();
         test.setProperty("test", "Hello");
-        test.removeFromMapProperty("test", "foo");
+        test.removeMapPropertyEntry("test", "foo");
 
         assertEquals("Hello", test.getProperty("test", Object.class));
     }

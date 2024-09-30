@@ -3,12 +3,10 @@ package io.smallrye.openapi.api;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.api.models.PathsImpl;
-import io.smallrye.openapi.api.models.info.InfoImpl;
 import io.smallrye.openapi.api.util.ConfigUtil;
 import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
@@ -144,17 +142,17 @@ public class OpenApiDocument {
 
         // Phase 5: Default empty document if model == null
         if (merged == null) {
-            merged = new OpenAPIImpl();
+            merged = OASFactory.createOpenAPI();
             merged.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
         }
 
         // Phase 6: Provide missing required elements using defaults
         if (defaultRequiredProperties) {
             if (merged.getPaths() == null) {
-                merged.setPaths(new PathsImpl());
+                merged.setPaths(OASFactory.createPaths());
             }
             if (merged.getInfo() == null) {
-                merged.setInfo(new InfoImpl());
+                merged.setInfo(OASFactory.createInfo());
             }
             if (merged.getInfo().getTitle() == null) {
                 merged.getInfo().setTitle((archiveName == null ? "Generated" : archiveName) + " API");

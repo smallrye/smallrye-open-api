@@ -1,8 +1,8 @@
 package io.smallrye.openapi.runtime.io.schema;
 
-import static io.smallrye.openapi.runtime.io.schema.DataType.listOf;
-import static io.smallrye.openapi.runtime.io.schema.DataType.mapOf;
-import static io.smallrye.openapi.runtime.io.schema.DataType.type;
+import static io.smallrye.openapi.model.DataType.listOf;
+import static io.smallrye.openapi.model.DataType.mapOf;
+import static io.smallrye.openapi.model.DataType.type;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -17,6 +17,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.XML;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.model.DataType;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
 
 /**

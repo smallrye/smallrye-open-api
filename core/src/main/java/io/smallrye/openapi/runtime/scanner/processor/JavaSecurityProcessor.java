@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
@@ -17,7 +18,6 @@ import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 import org.jboss.jandex.MethodInfo;
 
 import io.smallrye.openapi.api.constants.SecurityConstants;
-import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
@@ -135,7 +135,7 @@ public class JavaSecurityProcessor {
         List<SecurityRequirement> requirements = operation.getSecurity();
 
         if (requirements == null) {
-            SecurityRequirement requirement = new SecurityRequirementImpl();
+            SecurityRequirement requirement = OASFactory.createSecurityRequirement();
             requirement.addScheme(currentSecurityScheme, new ArrayList<>(Arrays.asList(roles)));
             operation.setSecurity(new ArrayList<>(Arrays.asList(requirement)));
         } else if (requirements.size() == 1) {

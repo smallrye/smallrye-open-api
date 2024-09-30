@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.annotations.security.OAuthFlows;
@@ -16,7 +17,6 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
@@ -30,7 +30,7 @@ class SecuritySchemeIOTest extends IndexScannerTestBase {
 
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
-                emptyConfig(), new OpenAPIImpl());
+                emptyConfig(), OASFactory.createOpenAPI());
 
         ClassInfo clazz = index.getClassByName(Endpoint1.class);
         AnnotationInstance annotation = clazz.annotation(SecurityScheme.class);

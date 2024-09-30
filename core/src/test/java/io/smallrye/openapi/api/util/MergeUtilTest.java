@@ -7,6 +7,7 @@ import java.net.URL;
 import java.text.ParseException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -20,6 +21,8 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
  */
 class MergeUtilTest {
 
+    private static final Logger LOG = Logger.getLogger(MergeUtilTest.class);
+
     /**
      * Compares two JSON strings.
      *
@@ -28,6 +31,7 @@ class MergeUtilTest {
      * @throws JSONException
      */
     private static void assertJsonEquals(String expected, String actual) throws JSONException {
+        LOG.debug(actual);
         JSONAssert.assertEquals(expected, actual, true);
     }
 
