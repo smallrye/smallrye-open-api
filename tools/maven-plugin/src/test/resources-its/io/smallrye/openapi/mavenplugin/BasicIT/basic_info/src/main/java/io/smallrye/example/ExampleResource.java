@@ -1,5 +1,7 @@
 package io.smallrye.example;
 
+import java.util.concurrent.TimeUnit;
+
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
@@ -13,4 +15,9 @@ public class ExampleResource {
         return greeting + " world!";
     }
 
+    @GET
+    @Path("/timeunit")
+    public TimeUnit getTimeUnit() {
+        return TimeUnit.HOURS;
+    }
 }
