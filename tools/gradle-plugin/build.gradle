@@ -1,19 +1,15 @@
 plugins {
     id 'java-gradle-plugin'
-    id("com.gradle.plugin-publish") version "1.2.2"
+    id("com.gradle.plugin-publish") version "1.3.0"
     id("com.github.vlsi.jandex") version "1.90"
 }
 
 group = "io.smallrye"
 
-if (JavaVersion.current().isJava9Compatible()) {
-    compileJava.options.compilerArgs.addAll(['--release', '8'])
-}
-
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
 }
 
 compileTestJava {

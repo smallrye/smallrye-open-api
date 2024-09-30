@@ -1,13 +1,10 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
-import java.util.List;
-
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
-import org.jboss.jandex.TypeVariable;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.LogMessage;
@@ -83,9 +80,9 @@ interface DataObjectLogging extends BasicLogger {
     void classNotAvailable(Type type);
 
     @LogMessage(level = Logger.Level.ERROR)
-    @Message(id = 31016, value = "Unanticipated mismatch between type arguments and type variables \n" +
-            "Args: %s\n Vars:%s")
-    void classNotAvailable(List<TypeVariable> typeVariables, List<Type> arguments);
+    @Message(id = 31016, value = "Unanticipated mismatch between type arguments and type variables declared on class\n" +
+            "Class: %s\nType: %s")
+    void classNotAvailable(String classDeclaration, String typeSignature);
 
     @LogMessage(level = Logger.Level.WARN)
     @Message(id = 31017, value = "Failed to read enumeration values from enum %s method %s with `@JsonValue`: %s")

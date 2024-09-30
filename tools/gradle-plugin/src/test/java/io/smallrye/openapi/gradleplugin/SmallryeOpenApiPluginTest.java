@@ -21,10 +21,13 @@ import org.gradle.api.provider.Provider;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 
@@ -136,7 +139,7 @@ class SmallryeOpenApiPluginTest {
     }
 
     @Test
-    void simpleProject(@TempDir Path buildDir) throws Exception {
+    void simpleProject(@TempDir(cleanup = CleanupMode.ON_SUCCESS) Path buildDir) throws Exception {
         // "Simple" Gradle project
         smokeProject(buildDir, false, SmallryeOpenApiPlugin.TASK_NAME);
     }
@@ -154,13 +157,13 @@ class SmallryeOpenApiPluginTest {
     }
 
     @Test
-    void quarkusProjectGenApiOnly(@TempDir Path buildDir) throws Exception {
+    void quarkusProjectGenApiOnly(@TempDir(cleanup = CleanupMode.ON_SUCCESS) Path buildDir) throws Exception {
         // Quarkus Gradle project, just call the generateOpenApiSpec task
         smokeProject(buildDir, true, SmallryeOpenApiPlugin.TASK_NAME);
     }
 
     @Test
-    void quarkusProject(@TempDir Path buildDir) throws Exception {
+    void quarkusProject(@TempDir(cleanup = CleanupMode.ON_SUCCESS) Path buildDir) throws Exception {
         // Quarkus Gradle project, perform a "full Quarkus build"
         smokeProject(buildDir, true, "quarkusBuild");
     }
@@ -188,8 +191,8 @@ class SmallryeOpenApiPluginTest {
                         "}",
                         "",
                         "dependencies {",
-                        "  implementation(\"javax.ws.rs:javax.ws.rs-api:2.1.1\")",
-                        "  implementation(\"org.eclipse.microprofile.openapi:microprofile-openapi-api:3.0\")",
+                        "  implementation(\"jakarta.ws.rs:jakarta.ws.rs-api:3.1.0\")",
+                        "  implementation(\"org.eclipse.microprofile.openapi:microprofile-openapi-api:4.0.1\")",
                         "}",
                         "",
                         "smallryeOpenApi {",
@@ -207,6 +210,7 @@ class SmallryeOpenApiPluginTest {
                         "  operationIdStrategy.set(OperationIdStrategy.METHOD)",
                         "  filter.set(\"testcases.CustomOASFilter\")",
                         "  outputFileTypeFilter.set(\"" + outputFileTypeFilter + "\")",
+                        "  includeStandardJavaModules.set([ \"java.base\" ])",
                         "}"));
 
         Path javaDir = Paths.get("src/main/java/testcases");
@@ -215,12 +219,13 @@ class SmallryeOpenApiPluginTest {
         Files.write(buildDir.resolve(javaDir.resolve("DummyJaxRs.java")),
                 asList("package testcases;",
                         "",
-                        "import javax.ws.rs.GET;",
-                        "import javax.ws.rs.Path;",
-                        "import javax.ws.rs.Produces;",
-                        "import javax.ws.rs.core.MediaType;",
+                        "import jakarta.ws.rs.GET;",
+                        "import jakarta.ws.rs.Path;",
+                        "import jakarta.ws.rs.Produces;",
+                        "import jakarta.ws.rs.core.MediaType;",
                         "import org.eclipse.microprofile.openapi.annotations.Operation;",
                         "import org.eclipse.microprofile.openapi.annotations.media.Content;",
+                        "import org.eclipse.microprofile.openapi.annotations.media.Schema;",
                         "import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;",
                         "import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;",
                         "",
@@ -232,10 +237,11 @@ class SmallryeOpenApiPluginTest {
                         "    @APIResponses({",
                         "      @APIResponse(",
                         "          description = \"Dummy get thing.\",",
-                        "          content = @Content(mediaType = \"application/text\")",
+                        "          content = @Content(mediaType = \"application/text\",",
+                        "                             schema = @Schema(implementation = java.util.concurrent.TimeUnit.class))",
                         "      )})",
-                        "    public String dummyThing() {",
-                        "        return \"foo\";",
+                        "    public java.util.concurrent.TimeUnit dummyThing() {",
+                        "        return java.util.concurrent.TimeUnit.HOURS;",
                         "    }",
                         "}"));
 
@@ -305,6 +311,9 @@ class SmallryeOpenApiPluginTest {
 
             JsonNode paths = root.get("paths");
             assertThat(paths.get("/mypath").get("get").get("operationId").asText()).isEqualTo("dummyThing");
+
+            JsonNode schemas = root.get("components").get("schemas");
+            assertThat(((ArrayNode) schemas.get("TimeUnit").get("enum"))).contains(new TextNode("HOURS"));
         }
 
         if ("YAML".equals(expectedOutputFileType)) {

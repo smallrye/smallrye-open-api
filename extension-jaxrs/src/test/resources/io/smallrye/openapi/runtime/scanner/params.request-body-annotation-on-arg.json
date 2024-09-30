@@ -1,0 +1,34 @@
+{
+  "openapi" : "3.0.3",
+  "paths" : {
+    "/foo/{name}/bar" : {
+      "put" : {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "description" : "The name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The description",
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    }
+  }
+}

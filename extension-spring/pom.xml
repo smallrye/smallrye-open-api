@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI extension - Spring </name>
 
     <properties>
-        <version.spring>5.3.39</version.spring>
+        <version.spring>6.1.13</version.spring>
     </properties>
 
     <dependencyManagement>
