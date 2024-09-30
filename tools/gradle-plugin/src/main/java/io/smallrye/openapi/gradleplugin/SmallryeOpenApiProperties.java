@@ -149,4 +149,9 @@ public interface SmallryeOpenApiProperties {
      * Output encoding for openapi document.
      */
     Property<String> getEncoding();
+
+    /**
+     * List of standard Java modules that should be made available to annotation scanning for introspection.
+     */
+    ListProperty<String> getIncludeStandardJavaModules();
 }

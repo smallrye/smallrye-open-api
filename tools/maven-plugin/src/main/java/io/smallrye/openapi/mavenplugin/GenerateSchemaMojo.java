@@ -76,6 +76,13 @@ public class GenerateSchemaMojo extends AbstractMojo {
     private List<String> includeDependenciesTypes;
 
     /**
+     * List of standard Java modules that should be made available to annotation
+     * scanning for introspection.
+     */
+    @Parameter(property = "includeStandardJavaModules")
+    private List<String> includeStandardJavaModules;
+
+    /**
      * Skip execution of the plugin.
      */
     @Parameter(defaultValue = "false", property = "skip")
@@ -276,7 +283,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
         if (!skip) {
             try {
                 IndexView index = mavenDependencyIndexCreator.createIndex(mavenProject, scanDependenciesDisable,
-                        includeDependenciesScopes, includeDependenciesTypes);
+                        includeDependenciesScopes, includeDependenciesTypes, includeStandardJavaModules);
                 SmallRyeOpenAPI openAPI = generateOpenAPI(index);
                 write(openAPI);
             } catch (Exception ex) {

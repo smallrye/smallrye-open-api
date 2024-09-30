@@ -14,8 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -33,6 +31,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
@@ -93,19 +92,23 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     public void generate() {
         try {
             clearOutput();
-
-            Set<File> dependencies = properties.scanDependenciesDisable.get().booleanValue()
-                    ? Collections.emptySet()
-                    : classpath.getFiles();
-
-            IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(dependencies,
-                    classesDirs);
+            IndexView index = new GradleDependencyIndexCreator(getLogger()).createIndex(this);
             SmallRyeOpenAPI openAPI = generateOpenAPI(index, resourcesSrcDirs);
             write(openAPI);
         } catch (Exception ex) {
             // allow failOnError = false ?
             throw new GradleException("Could not generate OpenAPI Schema", ex);
         }
+    }
+
+    @Internal
+    FileCollection getClasspath() {
+        return this.classpath;
+    }
+
+    @Internal
+    FileCollection getClassesDirs() {
+        return this.classesDirs;
     }
 
     private SmallRyeOpenAPI generateOpenAPI(IndexView index, FileCollection resourcesSrcDirs) {
@@ -452,5 +455,12 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     @Override
     public Property<String> getEncoding() {
         return properties.encoding;
+    }
+
+    @Input
+    @Optional
+    @Override
+    public ListProperty<String> getIncludeStandardJavaModules() {
+        return properties.includeStandardJavaModules;
     }
 }

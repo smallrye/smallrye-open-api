@@ -53,6 +53,7 @@ public class BasicIT extends SchemaTestBase {
             assertTrue(servers.contains(properties.get("server2").toString()));
 
             assertTrue(schema.getPaths().hasPathItem("/hello"));
+            assertTrue(schema.getComponents().getSchemas().get("TimeUnit").getEnumeration().contains("HOURS"));
         };
 
         testSchema(result, schemaConsumer);

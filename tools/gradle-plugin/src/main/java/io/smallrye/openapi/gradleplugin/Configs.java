@@ -63,6 +63,7 @@ class Configs implements SmallryeOpenApiProperties {
     final MapProperty<String, String> scanResourceClasses;
     final Property<String> outputFileTypeFilter;
     final Property<String> encoding;
+    final ListProperty<String> includeStandardJavaModules;
 
     Configs(ObjectFactory objects) {
         configProperties = objects.fileProperty();
@@ -97,6 +98,7 @@ class Configs implements SmallryeOpenApiProperties {
         scanResourceClasses = objects.mapProperty(String.class, String.class);
         outputFileTypeFilter = objects.property(String.class).convention("ALL");
         encoding = objects.property(String.class).convention(StandardCharsets.UTF_8.name());
+        includeStandardJavaModules = objects.listProperty(String.class);
     }
 
     Configs(ObjectFactory objects, SmallryeOpenApiExtension ext) {
@@ -134,6 +136,7 @@ class Configs implements SmallryeOpenApiProperties {
         scanResourceClasses = objects.mapProperty(String.class, String.class).convention(ext.getScanResourceClasses());
         outputFileTypeFilter = objects.property(String.class).convention(ext.getOutputFileTypeFilter());
         encoding = objects.property(String.class).convention(ext.getEncoding());
+        includeStandardJavaModules = objects.listProperty(String.class).convention(ext.getIncludeStandardJavaModules());
     }
 
     Config asMicroprofileConfig() {
@@ -341,4 +344,7 @@ class Configs implements SmallryeOpenApiProperties {
         return encoding;
     }
 
+    public ListProperty<String> getIncludeStandardJavaModules() {
+        return includeStandardJavaModules;
+    }
 }
