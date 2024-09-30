@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.links;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.links.Link;
@@ -120,7 +119,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public void setParameters(Map<String, Object> parameters) {
-        this.parameters = ModelUtil.replace(parameters, LinkedHashMap<String, Object>::new);
+        this.parameters = ModelUtil.replace(parameters);
     }
 
     /**
@@ -128,7 +127,7 @@ public class LinkImpl extends ExtensibleImpl<Link> implements Link, ModelImpl {
      */
     @Override
     public Link addParameter(String name, Object parameter) {
-        this.parameters = ModelUtil.add(name, parameter, this.parameters, LinkedHashMap<String, Object>::new);
+        this.parameters = ModelUtil.add(name, parameter, this.parameters);
         return this;
     }
 

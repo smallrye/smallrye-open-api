@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -360,8 +361,11 @@ public class ModelUtil {
         return map != null ? Collections.unmodifiableMap(map) : null;
     }
 
-    public static <V> Map<String, V> replace(Map<String, V> modified, UnaryOperator<Map<String, V>> factory) {
+    public static <V> Map<String, V> replace(Map<String, V> modified) {
+        return replace(modified, LinkedHashMap<String, V>::new);
+    }
 
+    public static <V> Map<String, V> replace(Map<String, V> modified, UnaryOperator<Map<String, V>> factory) {
         final Map<String, V> replacement;
 
         if (modified == null) {
@@ -371,6 +375,10 @@ public class ModelUtil {
         }
 
         return replacement;
+    }
+
+    public static <V> Map<String, V> add(String key, V value, Map<String, V> map) {
+        return add(key, value, map, LinkedHashMap<String, V>::new);
     }
 
     public static <V> Map<String, V> add(String key, V value, Map<String, V> map, Supplier<Map<String, V>> factory) {
@@ -393,6 +401,10 @@ public class ModelUtil {
         return list != null ? Collections.unmodifiableList(list) : null;
     }
 
+    public static <V> List<V> replace(List<V> modified) {
+        return replace(modified, ArrayList<V>::new);
+    }
+
     public static <V> List<V> replace(List<V> modified, UnaryOperator<List<V>> factory) {
         final List<V> replacement;
 
@@ -403,6 +415,10 @@ public class ModelUtil {
         }
 
         return replacement;
+    }
+
+    public static <V> List<V> add(V value, List<V> list) {
+        return add(value, list, ArrayList<V>::new);
     }
 
     public static <V> List<V> add(V value, List<V> list, Supplier<List<V>> factory) {

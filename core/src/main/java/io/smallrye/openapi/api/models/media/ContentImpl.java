@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.media;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Content;
@@ -23,7 +22,7 @@ public class ContentImpl implements Content, ModelImpl, MapModel<MediaType> {
      */
     @Override
     public Content addMediaType(String name, MediaType mediaType) {
-        this.mediaTypes = ModelUtil.add(name, mediaType, this.mediaTypes, LinkedHashMap<String, MediaType>::new);
+        this.mediaTypes = ModelUtil.add(name, mediaType, this.mediaTypes);
         return this;
     }
 
@@ -48,7 +47,7 @@ public class ContentImpl implements Content, ModelImpl, MapModel<MediaType> {
      */
     @Override
     public void setMediaTypes(Map<String, MediaType> mediaTypes) {
-        this.mediaTypes = ModelUtil.replace(mediaTypes, LinkedHashMap<String, MediaType>::new);
+        this.mediaTypes = ModelUtil.replace(mediaTypes);
     }
 
     // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1

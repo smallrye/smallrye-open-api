@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.servers;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.servers.Server;
@@ -64,7 +63,7 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
      */
     @Override
     public void setVariables(Map<String, ServerVariable> variables) {
-        this.variables = ModelUtil.replace(variables, LinkedHashMap<String, ServerVariable>::new);
+        this.variables = ModelUtil.replace(variables);
     }
 
     /*
@@ -72,7 +71,7 @@ public class ServerImpl extends ExtensibleImpl<Server> implements Server, ModelI
      */
     @Override
     public Server addVariable(String variableName, ServerVariable variable) {
-        this.variables = ModelUtil.add(variableName, variable, this.variables, LinkedHashMap<String, ServerVariable>::new);
+        this.variables = ModelUtil.add(variableName, variable, this.variables);
         return this;
     }
 

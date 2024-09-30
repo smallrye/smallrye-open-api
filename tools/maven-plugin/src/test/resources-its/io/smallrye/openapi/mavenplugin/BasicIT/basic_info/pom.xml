@@ -68,6 +68,9 @@
                         </server>
                     </servers>
                     <encoding>UTF-8</encoding>
+                    <includeStandardJavaModules>
+                        <includeStandardJavaModule>java.base</includeStandardJavaModule>
+                    </includeStandardJavaModules>
                 </configuration>
             </plugin>
         </plugins>

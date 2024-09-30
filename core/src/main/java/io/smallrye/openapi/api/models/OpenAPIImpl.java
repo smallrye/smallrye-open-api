@@ -1,7 +1,6 @@
 package io.smallrye.openapi.api.models;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +92,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setServers(List<Server> servers) {
-        this.servers = ModelUtil.replace(servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.replace(servers);
     }
 
     /**
@@ -101,7 +100,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addServer(Server server) {
-        this.servers = ModelUtil.add(server, this.servers, ArrayList<Server>::new);
+        this.servers = ModelUtil.add(server, this.servers);
         return this;
     }
 
@@ -126,7 +125,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setSecurity(List<SecurityRequirement> security) {
-        this.security = ModelUtil.replace(security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.replace(security);
     }
 
     /**
@@ -134,7 +133,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public OpenAPI addSecurityRequirement(SecurityRequirement securityRequirement) {
-        this.security = ModelUtil.add(securityRequirement, this.security, ArrayList<SecurityRequirement>::new);
+        this.security = ModelUtil.add(securityRequirement, this.security);
         return this;
     }
 
@@ -159,7 +158,7 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
      */
     @Override
     public void setTags(List<Tag> tags) {
-        this.tags = ModelUtil.replace(tags, ArrayList<Tag>::new);
+        this.tags = ModelUtil.replace(tags);
     }
 
     /**
@@ -238,12 +237,12 @@ public class OpenAPIImpl extends ExtensibleImpl<OpenAPI> implements OpenAPI, Mod
 
     @Override
     public void setWebhooks(Map<String, PathItem> webhooks) {
-        this.webhooks = ModelUtil.replace(webhooks, LinkedHashMap<String, PathItem>::new);
+        this.webhooks = ModelUtil.replace(webhooks);
     }
 
     @Override
     public OpenAPI addWebhook(String name, PathItem webhook) {
-        this.webhooks = ModelUtil.add(name, webhook, this.webhooks, LinkedHashMap<String, PathItem>::new);
+        this.webhooks = ModelUtil.add(name, webhook, this.webhooks);
         return this;
     }
 

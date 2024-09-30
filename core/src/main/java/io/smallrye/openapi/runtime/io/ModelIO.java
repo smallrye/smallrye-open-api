@@ -61,6 +61,10 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
         this.modelName = modelName;
     }
 
+    public IOContext<V, A, O, AB, OB> ioContext() {
+        return context;
+    }
+
     public JsonIO<V, A, O, AB, OB> jsonIO() {
         return context.jsonIO();
     }
