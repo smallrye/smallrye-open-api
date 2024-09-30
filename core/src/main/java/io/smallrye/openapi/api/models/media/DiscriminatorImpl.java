@@ -1,6 +1,5 @@
 package io.smallrye.openapi.api.models.media;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
@@ -37,7 +36,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public Discriminator addMapping(String name, String value) {
-        this.mapping = ModelUtil.add(name, value, this.mapping, LinkedHashMap<String, String>::new);
+        this.mapping = ModelUtil.add(name, value, this.mapping);
         return this;
     }
 
@@ -62,7 +61,7 @@ public class DiscriminatorImpl implements Discriminator, ModelImpl {
      */
     @Override
     public void setMapping(Map<String, String> mapping) {
-        this.mapping = ModelUtil.replace(mapping, LinkedHashMap<String, String>::new);
+        this.mapping = ModelUtil.replace(mapping);
     }
 
 }

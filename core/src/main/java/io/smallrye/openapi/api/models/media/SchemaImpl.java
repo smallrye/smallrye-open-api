@@ -79,7 +79,7 @@ public class SchemaImpl extends ExtensibleImpl<Schema> implements Schema, ModelI
     public static void addTypeObserver(Schema observable, Schema observer) {
         if (observable instanceof SchemaImpl) {
             SchemaImpl obs = (SchemaImpl) observable;
-            obs.typeObservers = ModelUtil.add(observer, obs.typeObservers, ArrayList<Schema>::new);
+            obs.typeObservers = ModelUtil.add(observer, obs.typeObservers);
         }
 
         observer.setType(observable.getType());
