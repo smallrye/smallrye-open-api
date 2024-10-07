@@ -6,10 +6,10 @@ import jakarta.ws.rs.Path;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirements;
 
 @Path("/public")
-@SecurityRequirements
-public class EmptySecurityRequirementsResource {
+public class EmptySecurityRequirementsResourceMethod {
 
     @GET
+    @SecurityRequirements
     public String getPublicResponse() {
         return "response value";
     }

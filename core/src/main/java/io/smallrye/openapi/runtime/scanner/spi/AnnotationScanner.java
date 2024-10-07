@@ -665,6 +665,7 @@ public interface AnnotationScanner {
 
         if (securityRequirements.isEmpty() && !emptyContainerPresent) {
             securityRequirements = context.io().securityIO().readRequirements(resourceClass);
+            emptyContainerPresent = isEmptySecurityRequirements(context, resourceClass);
         }
 
         if (securityRequirements.isEmpty() && emptyContainerPresent) {
