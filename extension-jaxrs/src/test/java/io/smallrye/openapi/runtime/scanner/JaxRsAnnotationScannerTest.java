@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
@@ -286,24 +287,15 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         assertJsonEquals("resource.tags.ordergiven.staticfile.json", result);
     }
 
-    @Test
-    void testJavaxEmptySecurityRequirements() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/javax/EmptySecurityRequirementsResource.class");
-
-        testEmptySecurityRequirements(indexer.complete());
-    }
-
-    @Test
-    void testJakartaEmptySecurityRequirements() throws IOException, JSONException {
-        Indexer indexer = new Indexer();
-        index(indexer, "test/io/smallrye/openapi/runtime/scanner/resources/jakarta/EmptySecurityRequirementsResource.class");
-
-        testEmptySecurityRequirements(indexer.complete());
-    }
-
-    void testEmptySecurityRequirements(Index i) throws IOException, JSONException {
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+    @ParameterizedTest
+    @ValueSource(classes = {
+            test.io.smallrye.openapi.runtime.scanner.resources.jakarta.EmptySecurityRequirementsResource.class,
+            test.io.smallrye.openapi.runtime.scanner.resources.jakarta.EmptySecurityRequirementsResourceMethod.class,
+            test.io.smallrye.openapi.runtime.scanner.resources.javax.EmptySecurityRequirementsResource.class,
+            test.io.smallrye.openapi.runtime.scanner.resources.javax.EmptySecurityRequirementsResourceMethod.class,
+    })
+    void testEmptySecurityRequirements(Class<?> resourceClass) throws IOException, JSONException {
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), Index.of(resourceClass));
 
         OpenAPI result = scanner.scan("JAX-RS");
 
