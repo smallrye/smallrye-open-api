@@ -14,7 +14,7 @@
 
     <properties>
         <eclipse.microprofile.openapi.version>4.0</eclipse.microprofile.openapi.version>
-        <kotlin.version>2.0.20</kotlin.version>
+        <kotlin.version>2.0.21</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
