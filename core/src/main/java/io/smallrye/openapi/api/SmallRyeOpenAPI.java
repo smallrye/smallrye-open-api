@@ -541,7 +541,13 @@ public class SmallRyeOpenAPI {
         protected <V, A extends V, O extends V, AB, OB> void buildStaticModel(BuildContext<V, A, O, AB, OB> ctx) {
             if (enableStandardStaticFiles) {
                 Function<String, URL> loadFn = Optional.ofNullable(resourceLocator)
-                        .orElse(ctx.appClassLoader::getResource);
+                        .orElse(path -> {
+                            StringBuilder loadPath = new StringBuilder(path);
+                            if (loadPath.charAt(0) == '/') {
+                                loadPath.delete(0, 1);
+                            }
+                            return ctx.appClassLoader.getResource(loadPath.toString());
+                        });
 
                 ctx.staticModel = OpenApiProcessor.loadOpenApiStaticFiles(loadFn)
                         .stream()

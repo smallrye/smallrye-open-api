@@ -44,6 +44,7 @@ public class BasicIT extends SchemaTestBase {
             assertEquals(properties.get("infoContactUrl"), schema.getInfo().getContact().getUrl());
             assertEquals(properties.get("infoContactEmail"), schema.getInfo().getContact().getEmail());
             assertEquals(properties.get("infoLicenseName"), schema.getInfo().getLicense().getName());
+            assertEquals("My Custom Extension", schema.getInfo().getExtensions().get("x-custom-extension"));
             assertEquals(properties.get("infoLicenseIdentifier"),
                     schema.getInfo().getLicense().getIdentifier());
             //The URL is not tested here due to being exclusive with Identifier
