@@ -112,6 +112,7 @@ public class SmallRyeOpenAPI {
         private boolean enableUnannotatedPathParameters = false;
         private ClassLoader scannerClassLoader;
         private Predicate<String> scannerFilter = n -> true;
+        private OperationHandler operationHandler = OperationHandler.DEFAULT;
 
         private Function<Collection<ClassInfo>, String> contextRootResolver = apps -> null;
         private UnaryOperator<Type> typeConverter = UnaryOperator.identity();
@@ -419,6 +420,19 @@ public class SmallRyeOpenAPI {
         }
 
         /**
+         * Provide an {@link OperationHandler} to be called for each operation discovered
+         * during annotation scanning.
+         *
+         * @param handler a non-null implementation of an {@link OperationHandler}
+         * @return this builder
+         */
+        public Builder withOperationHandler(OperationHandler handler) {
+            removeContext();
+            this.operationHandler = Objects.requireNonNull(handler);
+            return this;
+        }
+
+        /**
          * Provide a collection of OASFilter instances to apply to the final OpenAPI model. The
          * filters will be executed in the same order as given in the collection.
          *
@@ -585,7 +599,7 @@ public class SmallRyeOpenAPI {
                 ctx.buildConfig.setAllowNakedPathParameter(enableUnannotatedPathParameters);
                 AnnotationScannerExtension ext = newExtension(ctx.modelIO);
                 AnnotationScannerContext scannerContext = new AnnotationScannerContext(ctx.filteredIndex, ctx.appClassLoader,
-                        Collections.singletonList(ext), false, ctx.buildConfig, ctx.modelIO, new OpenAPIImpl());
+                        Collections.singletonList(ext), false, ctx.buildConfig, operationHandler, new OpenAPIImpl());
                 ctx.modelIO.ioContext().scannerContext(scannerContext);
                 Supplier<Iterable<AnnotationScanner>> supplier = Optional.ofNullable(scannerClassLoader)
                         .map(AnnotationScannerFactory::new)
