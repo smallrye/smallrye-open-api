@@ -307,6 +307,8 @@ public interface AnnotationScanner {
             operation.setOperationId(operationId);
         }
 
+        context.getOperationHandler().handleOperation(operation, resourceClass, method);
+
         // validate operationId
         String operationId = operation.getOperationId();
         if (operationId != null) {
