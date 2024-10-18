@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -18,9 +19,9 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OperationHandler;
 import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
-import io.smallrye.openapi.runtime.io.OpenAPIDefinitionIO;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -47,6 +48,7 @@ public class AnnotationScannerContext {
     private final OpenApiConfig config;
     private final UnaryOperator<String> propertyNameTranslator;
     private final ClassLoader classLoader;
+    private final OperationHandler operationHandler;
     private final OpenAPI openApi;
     private final Deque<Type> scanStack = new ArrayDeque<>();
     private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
@@ -61,7 +63,6 @@ public class AnnotationScannerContext {
     private final JavaSecurityProcessor javaSecurityProcessor;
     private final Annotations annotations;
     private final IOContext<?, ?, ?, ?, ?> ioContext;
-    private final OpenAPIDefinitionIO<?, ?, ?, ?, ?> modelIO;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
 
@@ -70,13 +71,14 @@ public class AnnotationScannerContext {
             List<AnnotationScannerExtension> extensions,
             boolean addDefaultExtension,
             OpenApiConfig config,
-            OpenAPIDefinitionIO<?, ?, ?, ?, ?> modelIO,
+            OperationHandler operationHandler,
             OpenAPI openApi) {
         this.index = index;
         this.augmentedIndex = AugmentedIndexView.augment(index);
         this.ignoreResolver = new IgnoreResolver(this);
         this.classLoader = classLoader;
         this.config = config;
+        this.operationHandler = Objects.requireNonNullElse(operationHandler, OperationHandler.DEFAULT);
         this.openApi = openApi;
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
         this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(new BeanValidationScanner(this))
@@ -84,7 +86,6 @@ public class AnnotationScannerContext {
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
         this.ioContext = IOContext.forScanning(this);
-        this.modelIO = modelIO != null ? modelIO : new OpenAPIDefinitionIO<>(ioContext);
         if (extensions.isEmpty()) {
             this.extensions = AnnotationScannerExtension.defaultExtension(this);
         } else {
@@ -127,6 +128,10 @@ public class AnnotationScannerContext {
 
     public OpenApiConfig getConfig() {
         return config;
+    }
+
+    public OperationHandler getOperationHandler() {
+        return operationHandler;
     }
 
     public UnaryOperator<String> getPropertyNameTranslator() {
