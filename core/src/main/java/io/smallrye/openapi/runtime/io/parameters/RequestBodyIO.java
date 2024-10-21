@@ -3,11 +3,11 @@ package io.smallrye.openapi.runtime.io.parameters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
@@ -17,16 +17,13 @@ import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
+import io.smallrye.openapi.model.Extensions;
+import io.smallrye.openapi.model.ReferenceType;
 import io.smallrye.openapi.runtime.io.IOContext;
-import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
-import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 
@@ -62,7 +59,7 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
     @Override
     public RequestBody read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@RequestBody");
-        RequestBodyImpl requestBody = new RequestBodyImpl();
+        RequestBody requestBody = OASFactory.createRequestBody();
         requestBody.setDescription(value(annotation, PROP_DESCRIPTION));
         requestBody.setContent(contentIO().read(annotation.value(PROP_CONTENT), ContentIO.Direction.INPUT));
         requestBody.setRef(ReferenceType.REQUEST_BODY.refValue(annotation));
@@ -71,7 +68,7 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
         if (required != null) {
             requestBody.setRequired(required);
         } else {
-            requestBody.setRequiredDefault(Boolean.TRUE);
+            Extensions.setRequiredDefault(requestBody, Boolean.TRUE);
         }
         return requestBody;
     }
@@ -90,10 +87,10 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
 
     private RequestBody readRequestSchema(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@RequestBodySchema");
-        Content content = new ContentImpl();
+        Content content = OASFactory.createContent();
 
         for (String mediaType : scannerContext().getCurrentConsumes()) {
-            MediaType type = new MediaTypeImpl();
+            MediaType type = OASFactory.createMediaType();
             type.setSchema(SchemaFactory.typeToSchema(scannerContext(),
                     value(annotation, PROP_VALUE),
                     null,
@@ -101,35 +98,6 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
             content.addMediaType(mediaType, type);
         }
 
-        return new RequestBodyImpl().content(content);
-    }
-
-    @Override
-    public RequestBody readObject(O node) {
-        RequestBody requestBody = new RequestBodyImpl();
-        requestBody.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        requestBody.setContent(contentIO().readValue(jsonIO().getValue(node, PROP_CONTENT)));
-        requestBody.setRequired(jsonIO().getBoolean(node, PROP_REQUIRED));
-        requestBody.setRef(readReference(node));
-        requestBody.setExtensions(extensionIO().readMap(node));
-        return requestBody;
-    }
-
-    public Optional<O> write(RequestBody model) {
-        return optionalJsonObject(model).map(node -> {
-            if (isReference(model)) {
-                setReference(node, model);
-                if (openApiVersion() == OpenApiVersion.V3_1) {
-                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-                }
-            } else {
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-                setIfPresent(node, PROP_CONTENT, contentIO().write(model.getContent()));
-                setIfPresent(node, PROP_REQUIRED, jsonIO().toJson(model.getRequired()));
-                setAllIfPresent(node, extensionIO().write(model));
-            }
-
-            return node;
-        }).map(jsonIO()::buildObject);
+        return OASFactory.createRequestBody().content(content);
     }
 }

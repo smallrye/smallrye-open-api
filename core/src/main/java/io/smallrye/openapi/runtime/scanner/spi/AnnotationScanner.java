@@ -1,6 +1,5 @@
 package io.smallrye.openapi.runtime.scanner.spi;
 
-import static java.util.Collections.singletonList;
 import static org.jboss.jandex.AnnotationTarget.Kind.METHOD_PARAMETER;
 
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
@@ -43,14 +43,9 @@ import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.SecurityConstants;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
-import io.smallrye.openapi.api.models.responses.APIResponseImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
@@ -59,7 +54,6 @@ import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -128,7 +122,7 @@ public interface AnnotationScanner {
      */
     default OpenAPI processDefinitionAnnotation(final AnnotationScannerContext context, final ClassInfo targetClass) {
         return Optional.ofNullable(context.io().openApiDefinitionIO().read(targetClass))
-                .orElseGet(() -> new OpenAPIImpl().openapi(SmallRyeOASConfig.Defaults.VERSION));
+                .orElseGet(() -> OASFactory.createOpenAPI().openapi(SmallRyeOASConfig.Defaults.VERSION));
     }
 
     /**
@@ -273,13 +267,13 @@ public interface AnnotationScanner {
             return Optional.empty();
         }
 
-        OperationImpl operation = (OperationImpl) context.io().operationIO().read(method);
+        Operation operation = context.io().operationIO().read(method);
 
         if (operation == null) {
-            operation = new OperationImpl();
+            operation = OASFactory.createOperation();
         }
 
-        operation.setMethodRef(JandexUtil.createUniqueMethodReference(resourceClass, method));
+        Extensions.setMethodRef(operation, resourceClass, method);
 
         // @Deprecrated may be on either the method or the class
         TypeUtil.mapDeprecated(context, method, operation::getDeprecated, operation::setDeprecated);
@@ -443,10 +437,10 @@ public interface AnnotationScanner {
 
         if (isVoidResponse(method)) {
             if (generateResponse(code, operation)) {
-                response = new APIResponseImpl().description(description);
+                response = OASFactory.createAPIResponse().description(description);
             }
         } else if (generateResponse(code, operation)) {
-            response = new APIResponseImpl().description(description);
+            response = OASFactory.createAPIResponse().description(description);
 
             /*
              * Only generate content if not already supplied in annotations and the
@@ -459,40 +453,43 @@ public interface AnnotationScanner {
                 Schema schema;
 
                 if (isMultipartOutput(returnType)) {
-                    schema = new SchemaImpl().addType(Schema.SchemaType.OBJECT);
+                    schema = OASFactory.createSchema().addType(Schema.SchemaType.OBJECT);
                 } else if (hasKotlinContinuation(method)) {
                     schema = kotlinContinuationToSchema(context, method);
                 } else {
                     schema = SchemaFactory.typeToSchema(context, returnType, null, context.getExtensions());
                 }
 
-                Content content = new ContentImpl();
+                Content content = OASFactory.createContent();
                 String[] produces = context.getCurrentProduces();
 
                 if (produces == null || produces.length == 0) {
                     produces = getDefaultProduces(context, method);
                 }
 
-                if (schema != null && SchemaImpl.getNullable(schema) == null && TypeUtil.isOptional(returnType)) {
+                if (schema != null && SchemaSupport.getNullable(schema) == null
+                        && TypeUtil.isOptional(returnType)) {
                     if (schema.getType() != null) {
-                        schema.addType(Schema.SchemaType.NULL);
+                        SchemaSupport.setNullable(schema, Boolean.TRUE);
                     }
                     if (schema.getRef() != null) {
-                        Schema nullSchema = new SchemaImpl().type(singletonList(Schema.SchemaType.NULL));
                         // Move reference to type into its own subschema
-                        Schema refSchema = new SchemaImpl().ref(schema.getRef());
+                        Schema refSchema = OASFactory.createSchema().ref(schema.getRef());
                         schema.setRef(null);
                         if (schema.getAnyOf() == null) {
-                            schema.addAnyOf(refSchema).addAnyOf(nullSchema);
+                            schema.addAnyOf(refSchema)
+                                    .addAnyOf(SchemaSupport.nullSchema());
                         } else {
-                            Schema anyOfSchema = new SchemaImpl().addAnyOf(refSchema).addAnyOf(nullSchema);
+                            Schema anyOfSchema = OASFactory.createSchema()
+                                    .addAnyOf(refSchema)
+                                    .addAnyOf(SchemaSupport.nullSchema());
                             schema.addAllOf(anyOfSchema);
                         }
                     }
                 }
 
                 for (String producesType : produces) {
-                    MediaType mt = new MediaTypeImpl();
+                    MediaType mt = OASFactory.createMediaType();
                     mt.setSchema(schema);
                     content.addMediaType(producesType, mt);
                 }
@@ -700,7 +697,7 @@ public interface AnnotationScanner {
      * @param operation the operation to add this to
      */
     default void processCallback(final AnnotationScannerContext context, final MethodInfo method, Operation operation) {
-        Map<String, Callback> callbacks = context.io().componentsIO().callbacks().readMap(method);
+        Map<String, Callback> callbacks = context.io().callbackIO().readMap(method);
 
         if (!callbacks.isEmpty()) {
             operation.setCallbacks(callbacks);
@@ -803,7 +800,7 @@ public interface AnnotationScanner {
                     }
                 }
 
-                if (!RequestBodyImpl.isRequiredSet(requestBody) && TypeUtil.isOptional(requestBodyType)) {
+                if (!Extensions.getIsRequiredSet(requestBody) && TypeUtil.isOptional(requestBodyType)) {
                     requestBody.setRequired(Boolean.FALSE);
                 }
 
@@ -821,7 +818,8 @@ public interface AnnotationScanner {
                 && getConsumes(context) != null) {
             if (params.getFormBodyContent() != null) {
                 if (requestBody == null) {
-                    requestBody = new RequestBodyImpl().setRequiredDefault(Boolean.TRUE);
+                    requestBody = OASFactory.createRequestBody();
+                    Extensions.setRequiredDefault(requestBody, Boolean.TRUE);
                 }
                 requestBody.setContent(params.getFormBodyContent());
             } else {
@@ -836,7 +834,7 @@ public interface AnnotationScanner {
                     Schema schema = null;
 
                     if (isMultipartInput(requestBodyType)) {
-                        schema = new SchemaImpl();
+                        schema = OASFactory.createSchema();
                         schema.addType(Schema.SchemaType.OBJECT);
                     } else {
                         AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method,
@@ -847,14 +845,15 @@ public interface AnnotationScanner {
                     }
 
                     if (requestBody == null) {
-                        requestBody = new RequestBodyImpl().setRequiredDefault(Boolean.TRUE);
+                        requestBody = OASFactory.createRequestBody();
+                        Extensions.setRequiredDefault(requestBody, Boolean.TRUE);
                     }
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, getConsumesForRequestBody(context));
                     }
 
-                    if (!RequestBodyImpl.isRequiredSet(requestBody) && TypeUtil.isOptional(requestBodyType)) {
+                    if (!Extensions.getIsRequiredSet(requestBody) && TypeUtil.isOptional(requestBodyType)) {
                         requestBody.setRequired(Boolean.FALSE);
                     }
 
@@ -932,7 +931,7 @@ public interface AnnotationScanner {
                     .filter(Objects::nonNull)
                     .forEach(schema -> constraintScanner.get().applyConstraints(paramTarget, schema, null,
                             (target, name) -> {
-                                if (!RequestBodyImpl.isRequiredSet(requestBody)) {
+                                if (!Extensions.getIsRequiredSet(requestBody)) {
                                     requestBody.setRequired(Boolean.TRUE);
                                 }
                             }));

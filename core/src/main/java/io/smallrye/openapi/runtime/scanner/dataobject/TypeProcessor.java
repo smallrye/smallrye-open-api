@@ -8,13 +8,12 @@ import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.SET_T
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STREAM_TYPE;
 import static io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner.STRING_TYPE;
 import static io.smallrye.openapi.runtime.util.TypeUtil.isTerminalType;
-import static java.util.Collections.singletonList;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Schema;
-import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ArrayType;
@@ -22,8 +21,8 @@ import org.jboss.jandex.ParameterizedType;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
-import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -153,10 +152,10 @@ public class TypeProcessor {
         DataObjectLogging.logger.processingArray(arrayType);
 
         // Array-type schema
-        Schema itemSchema = new SchemaImpl();
+        Schema itemSchema = OASFactory.createSchema();
         arraySchema.addType(Schema.SchemaType.ARRAY);
 
-        Type componentType = typeResolver.resolve(arrayType.component());
+        Type componentType = typeResolver.resolve(arrayType.constituent());
         boolean isOptional = TypeUtil.isOptional(componentType);
 
         if (isOptional) {
@@ -178,12 +177,12 @@ public class TypeProcessor {
         }
 
         while (arrayType.dimensions() > 1) {
-            Schema parentArrSchema = new SchemaImpl();
+            Schema parentArrSchema = OASFactory.createSchema();
             parentArrSchema.addType(Schema.SchemaType.ARRAY);
             parentArrSchema.setItems(itemSchema);
 
             itemSchema = parentArrSchema;
-            arrayType = ArrayType.create(arrayType.component(), arrayType.dimensions() - 1);
+            arrayType = ArrayType.create(arrayType.constituent(), arrayType.dimensions() - 1);
         }
 
         if (isOptional) {
@@ -203,7 +202,7 @@ public class TypeProcessor {
         // If it's a collection, iterable, or a stream, we should treat it as an array.
         if (seekType != null && seekType != MAP_TYPE) {
             DataObjectLogging.logger.processingTypeAs("Java Iterable or Stream", "Array");
-            SchemaImpl.setType(schema, Schema.SchemaType.ARRAY);
+            SchemaSupport.setType(schema, Schema.SchemaType.ARRAY);
             ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, seekType)
                     .orElse(pType);
 
@@ -228,7 +227,7 @@ public class TypeProcessor {
             typeRead = ARRAY_TYPE_OBJECT; // Representing collection as JSON array
         } else if (seekType == MAP_TYPE) {
             DataObjectLogging.logger.processingTypeAs("Map", "object");
-            SchemaImpl.setType(schema, Schema.SchemaType.OBJECT);
+            SchemaSupport.setType(schema, Schema.SchemaType.OBJECT);
             ParameterizedType ancestorType = TypeResolver.resolveParameterizedAncestor(context, pType, seekType)
                     .orElse(pType);
 
@@ -266,13 +265,13 @@ public class TypeProcessor {
     }
 
     private static Schema wrapOptionalItemSchema(Schema itemSchema) {
-        return new SchemaImpl()
-                .addAnyOf(new SchemaImpl().type(singletonList(Schema.SchemaType.NULL)))
+        return OASFactory.createSchema()
+                .addAnyOf(SchemaSupport.nullSchema())
                 .addAnyOf(itemSchema);
     }
 
     private Schema readGenericValueType(Type valueType) {
-        Schema valueSchema = new SchemaImpl();
+        Schema valueSchema = OASFactory.createSchema();
 
         if (isTerminalType(valueType)) {
             TypeUtil.applyTypeAttributes(valueType, valueSchema);
@@ -291,8 +290,9 @@ public class TypeProcessor {
                 valueType.kind() == Type.Kind.WILDCARD_TYPE) {
             Type resolved = resolveTypeVariable(propsSchema, valueType, true);
             if (index.containsClass(resolved)) {
-                SchemaImpl.setType(propsSchema, Schema.SchemaType.OBJECT);
-                propsSchema = context.getSchemaRegistry().registerReference(valueType, context.getJsonViews(), typeResolver,
+                SchemaSupport.setType(propsSchema, Schema.SchemaType.OBJECT);
+                propsSchema = context.getSchemaRegistry().registerReference(valueType, context.getJsonViews(),
+                        typeResolver,
                         propsSchema);
             }
         } else if (index.containsClass(valueType)) {
@@ -300,7 +300,7 @@ public class TypeProcessor {
                 DataObjectLogging.logger.processingEnum(type);
                 propsSchema = SchemaFactory.enumToSchema(context, valueType);
             } else {
-                SchemaImpl.setType(propsSchema, Schema.SchemaType.OBJECT);
+                SchemaSupport.setType(propsSchema, Schema.SchemaType.OBJECT);
             }
 
             SchemaRegistry registry = context.getSchemaRegistry();

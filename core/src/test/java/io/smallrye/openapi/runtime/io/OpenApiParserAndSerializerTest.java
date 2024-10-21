@@ -6,11 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,11 +16,15 @@ import java.nio.file.Path;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.jboss.logging.Logger;
 import org.json.JSONException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.error.YAMLException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
@@ -32,6 +34,7 @@ import io.smallrye.openapi.runtime.OpenApiRuntimeException;
  */
 class OpenApiParserAndSerializerTest {
 
+    private static final Logger LOG = Logger.getLogger(OpenApiParserAndSerializerTest.class);
     static final int REPEAT_BODY_CONTENTS_ITERATIONS = 1536; // ~8MB?
 
     /**
@@ -49,6 +52,7 @@ class OpenApiParserAndSerializerTest {
         try {
             JSONAssert.assertEquals(expected, actual, true);
         } catch (AssertionError e) {
+            LOG.debug(actual);
             throw new AssertionError(message + "\n" + e.getMessage(), e);
         }
     }
@@ -56,31 +60,21 @@ class OpenApiParserAndSerializerTest {
     /**
      * @param original
      * @param roundTrip
+     * @throws IOException
+     * @throws JSONException
      */
-    private static void assertYamlEquals(String original, String roundTrip) {
-        Assertions.assertEquals(normalizeYaml(original), normalizeYaml(roundTrip));
+    private static void assertYamlEquals(String original, String roundTrip) throws IOException, JSONException {
+        JSONAssert.assertEquals(convertYamlToJson(original), convertYamlToJson(roundTrip), true);
     }
 
-    /**
-     * Normalizes the YAML by removing any comments.
-     *
-     * @param yaml
-     */
-    private static String normalizeYaml(String yaml) {
-        try {
-            StringBuilder builder = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new StringReader(yaml));
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                if (line.startsWith("--")) {
-                    continue;
-                }
-                builder.append(line);
-                builder.append("\n");
-            }
-            return builder.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private static String convertYamlToJson(String yaml) throws IOException {
+        LoaderOptions yamlLoadOptons = new LoaderOptions();
+        yamlLoadOptons.setCodePointLimit(yaml.length());
+        ObjectMapper yamlReader = new ObjectMapper(YAMLFactory.builder().loaderOptions(yamlLoadOptons).build());
+        Object obj = yamlReader.readValue(yaml, Object.class);
+
+        ObjectMapper jsonWriter = new ObjectMapper();
+        return jsonWriter.writeValueAsString(obj);
     }
 
     private static Path generateBigStaticFile() throws IOException {

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode, ObjectNode> {
@@ -203,9 +204,17 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     }
 
     @Override
-    public JsonNode toJson(Object value, JsonNode defaultValue) {
+    public JsonNode toJson(Object value, JsonNode defaultValue, PropertyMapper<JsonNode, ObjectNode> propertyMapper) {
         if (value instanceof String) {
             return factory.textNode((String) value);
+        } else if (value instanceof List) {
+            return toJson((List<?>) value, propertyMapper);
+        } else if (value instanceof Map) {
+            return toJson((Map<?, ?>) value, propertyMapper);
+        } else if (value instanceof Enum) {
+            return factory.textNode(value.toString());
+        } else if (value instanceof BaseModel) {
+            return toJson((BaseModel<?>) value, propertyMapper);
         } else if (value instanceof JsonNode) {
             return (JsonNode) value;
         } else if (value instanceof BigDecimal) {
@@ -226,21 +235,58 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
             return factory.numberNode((Long) value);
         } else if (value instanceof Character) {
             return factory.textNode(((Character) value).toString());
-        } else if (value instanceof List) {
-            ArrayNode array = createArray();
-            ((List<?>) value).stream()
-                    .map(v -> toJson(v, factory.nullNode()))
-                    .forEach(array::add);
-            return array;
-        } else if (value instanceof Map) {
-            ObjectNode object = createObject();
-            ((Map<?, ?>) value).forEach((key, obj) -> object.set(String.valueOf(key), toJson(obj, factory.nullNode())));
-            return object;
-        } else if (value instanceof Enum) {
-            return factory.textNode(value.toString());
         } else {
             return defaultValue;
         }
+    }
+
+    private JsonNode toJson(List<?> value, PropertyMapper<JsonNode, ObjectNode> propertyMapper) {
+        ArrayNode array = createArray();
+        for (var entry : (List<?>) value) {
+            JsonNode node = toJson(entry, factory.nullNode(), propertyMapper);
+            array.add(node);
+        }
+        return array;
+    }
+
+    private JsonNode toJson(Map<?, ?> value, PropertyMapper<JsonNode, ObjectNode> propertyMapper) {
+        ObjectNode object = createObject();
+        for (var entry : ((Map<?, ?>) value).entrySet()) {
+            JsonNode node = toJson(entry.getValue(), factory.nullNode(), propertyMapper);
+            object.set(String.valueOf(entry.getKey()), node);
+        }
+        return object;
+    }
+
+    private JsonNode toJson(BaseModel<?> value, PropertyMapper<JsonNode, ObjectNode> propertyMapper) {
+        Optional<JsonNode> override = propertyMapper.mapObject(value);
+
+        if (override.isPresent()) {
+            return override.get();
+        }
+
+        ObjectNode object = createObject();
+
+        for (var entry : value.getAllProperties().entrySet()) {
+            String propertyName = String.valueOf(entry.getKey());
+            Object propertyValue = entry.getValue();
+            Optional<JsonNode> propertyOverride = propertyMapper.mapProperty(value, propertyName, propertyValue);
+
+            JsonNode node;
+
+            if (propertyOverride.isPresent()) {
+                node = propertyOverride.get();
+            } else {
+                node = toJson(propertyValue, factory.nullNode(), propertyMapper);
+            }
+
+            if (!node.isNull()) {
+                object.set(propertyName, node);
+            }
+        }
+
+        propertyMapper.mapObject(value, object);
+        return object;
     }
 
     @Override
@@ -285,6 +331,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T fromJson(JsonNode object, Class<T> desiredType) {
         if (desiredType == String.class) {
@@ -332,5 +379,10 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
         } catch (IOException e) {
             throw new OpenApiRuntimeException("Failed to read " + format + " stream", e);
         }
+    }
+
+    @Override
+    public JsonNode nullValue() {
+        return factory.nullNode();
     }
 }

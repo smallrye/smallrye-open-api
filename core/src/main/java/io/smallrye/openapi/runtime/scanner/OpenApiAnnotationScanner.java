@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Paths;
@@ -29,7 +30,6 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.Names;
@@ -190,7 +190,7 @@ public class OpenApiAnnotationScanner {
         this.annotationScannerContext = new AnnotationScannerContext(filteredIndexView, loader, extensions, addDefaultExtension,
                 config,
                 null,
-                new OpenAPIImpl());
+                OASFactory.createOpenAPI());
         this.scannerSupplier = scannerSupplier;
     }
 

@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
@@ -26,8 +27,10 @@ import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.model.BaseModel;
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
@@ -73,7 +76,7 @@ public class SchemaFactory {
             return null;
         }
 
-        return readSchema(context, new SchemaImpl(), schemaAnnotation, Collections.emptyMap());
+        return readSchema(context, OASFactory.createSchema(), schemaAnnotation, Collections.emptyMap());
     }
 
     /**
@@ -190,14 +193,14 @@ public class SchemaFactory {
         schema.setRequired(readAttr(context, annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
         schema.setDescription(readAttr(context, annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
         schema.setFormat(readAttr(context, annotation, SchemaConstant.PROP_FORMAT, defaults));
-        SchemaImpl.setNullable(schema, readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
+        SchemaSupport.setNullable(schema, readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
         schema.setExternalDocs(context.io().extDocIO().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
         schema.setDeprecated(readAttr(context, annotation, SchemaConstant.PROP_DEPRECATED, defaults));
 
         final SchemaType type = readSchemaType(context, annotation, schema, defaults);
-        SchemaImpl.setType(schema, type);
+        SchemaSupport.setType(schema, readSchemaType(context, annotation, schema, defaults));
 
         Object example = parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, type);
         List<Object> examples = SchemaFactory.<String[], List<Object>> readAttr(context, annotation,
@@ -233,7 +236,7 @@ public class SchemaFactory {
                     Map<String, Schema> propertySchemas = new LinkedHashMap<>(properties.length);
                     for (AnnotationInstance propAnnotation : properties) {
                         String key = context.annotations().value(propAnnotation, SchemaConstant.PROP_NAME);
-                        Schema value = readSchema(context, new SchemaImpl(), propAnnotation, Collections.emptyMap());
+                        Schema value = readSchema(context, OASFactory.createSchema(), propAnnotation, Collections.emptyMap());
                         propertySchemas.put(key, value);
                     }
 
@@ -289,7 +292,7 @@ public class SchemaFactory {
             schema.setEnumeration(enumeration);
         }
 
-        boolean namedComponent = SchemaImpl.isNamed(schema);
+        boolean namedComponent = Extensions.getName(schema) != null;
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
             Schema implSchema = readClassSchema(context,
@@ -464,14 +467,7 @@ public class SchemaFactory {
         if (type != null) {
             return type;
         }
-        List<SchemaType> types = schema.getType();
-        if (types != null) {
-            return types.stream()
-                    .filter(t -> t != SchemaType.NULL)
-                    .findFirst()
-                    .orElse(null);
-        }
-        return null;
+        return SchemaSupport.getNonNullType(schema);
     }
 
     /**
@@ -511,14 +507,14 @@ public class SchemaFactory {
         }
         Schema schema;
         if (type.name().equals(SchemaConstant.DOTNAME_TRUE_SCHEMA)) {
-            schema = new SchemaImpl().booleanSchema(true);
+            schema = OASFactory.createSchema().booleanSchema(true);
         } else if (type.name().equals(SchemaConstant.DOTNAME_FALSE_SCHEMA)) {
-            schema = new SchemaImpl().booleanSchema(false);
+            schema = OASFactory.createSchema().booleanSchema(false);
         } else if (type.kind() == Type.Kind.ARRAY) {
-            schema = new SchemaImpl().addType(SchemaType.ARRAY);
+            schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
             int dimensions = array.dimensions();
-            Type componentType = array.component();
+            Type componentType = array.constituent();
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
@@ -580,14 +576,14 @@ public class SchemaFactory {
             schema = typeToSchema(context, currentScanner.get().unwrapType(type), null,
                     extensions);
         } else if (TypeUtil.isTerminalType(type)) {
-            schema = new SchemaImpl();
+            schema = OASFactory.createSchema();
             TypeUtil.applyTypeAttributes(type, schema);
             schema = schemaRegistration(context, type, schema);
         } else if (type.kind() == Type.Kind.ARRAY) {
-            schema = new SchemaImpl().addType(SchemaType.ARRAY);
+            schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
             ArrayType array = type.asArrayType();
             int dimensions = array.dimensions();
-            Type componentType = array.component();
+            Type componentType = array.constituent();
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
@@ -638,7 +634,7 @@ public class SchemaFactory {
         List<Object> enumeration = EnumProcessor.enumConstants(context, enumType);
         ClassInfo enumKlazz = context.getIndex().getClassByName(TypeUtil.getName(enumType));
         AnnotationInstance schemaAnnotation = context.annotations().getAnnotation(enumKlazz, SchemaConstant.DOTNAME_SCHEMA);
-        Schema enumSchema = new SchemaImpl();
+        Schema enumSchema = OASFactory.createSchema();
         Type enumValueType = enumeration.isEmpty() ? Type.create(String.class) : Type.create(enumeration.get(0).getClass());
 
         if (schemaAnnotation != null) {
@@ -686,11 +682,12 @@ public class SchemaFactory {
                 return schemaRegistry.lookupRef(ctype, context.getJsonViews());
             } else {
                 // Clone the schema from the registry
-                return SchemaImpl.copyOf(schemaRegistry.lookupSchema(ctype, context.getJsonViews()));
+                Schema registered = schemaRegistry.lookupSchema(ctype, context.getJsonViews());
+                return BaseModel.deepCopy(registered, Schema.class);
             }
         } else if (context.getScanStack().contains(ctype)) {
             // Protect against stack overflow when the type is in the process of being scanned.
-            return schemaRegistry.registerReference(ctype, context.getJsonViews(), null, new SchemaImpl());
+            return schemaRegistry.registerReference(ctype, context.getJsonViews(), null, OASFactory.createSchema());
         } else {
             Schema schema = OpenApiDataObjectScanner.process(context, ctype);
 
@@ -771,7 +768,7 @@ public class SchemaFactory {
             List<AnnotationScannerExtension> extensions) {
         if (TypeUtil.isA(context, type, MutinyConstants.MULTI_TYPE)) {
             // Treat as an Array
-            Schema schema = new SchemaImpl().addType(SchemaType.ARRAY);
+            Schema schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements

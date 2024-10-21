@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
+import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -29,6 +30,8 @@ import io.smallrye.openapi.runtime.io.OpenApiSerializer;
  */
 class FilterUtilTest {
 
+    static final Logger LOG = Logger.getLogger(FilterUtilTest.class);
+
     /**
      * Compares two JSON strings.
      *
@@ -37,6 +40,7 @@ class FilterUtilTest {
      * @throws JSONException
      */
     private static void assertJsonEquals(String expected, String actual) throws JSONException {
+        LOG.debug(actual);
         JSONAssert.assertEquals(expected, actual, true);
     }
 

@@ -2,14 +2,14 @@ package io.smallrye.openapi.runtime.io.media;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Discriminator;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
@@ -19,9 +19,6 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Discriminator, V, A, O, AB, OB> {
-
-    private static final String PROP_MAPPING = "mapping";
-    private static final String PROP_PROPERTY_NAME = "propertyName";
 
     public DiscriminatorIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.DISCRIMINATOR_MAPPING, Names.create(Discriminator.class));
@@ -50,7 +47,7 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
             return null;
         }
 
-        Discriminator discriminator = new DiscriminatorImpl();
+        Discriminator discriminator = OASFactory.createDiscriminator();
 
         /*
          * The name is required by OAS, however MP OpenAPI allows for a default
@@ -64,6 +61,7 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
         if (mapping != null) {
             IoLogging.logger.annotationsList("@DiscriminatorMapping");
             Arrays.stream(mapping).map(this::readMapping)
+                    .filter(Objects::nonNull)
                     .forEach(e -> discriminator.addMapping(e.getKey(), e.getValue()));
         }
 
@@ -88,27 +86,10 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
             propertyValue = ModelUtil.nameFromRef(schemaRef);
         }
 
-        return entry(propertyValue, schemaRef);
-    }
+        if (propertyValue != null && schemaRef != null) {
+            return entry(propertyValue, schemaRef);
+        }
 
-    @Override
-    public Discriminator readObject(O node) {
-        Discriminator discriminator = new DiscriminatorImpl();
-        discriminator.setPropertyName(jsonIO().getString(node, PROP_PROPERTY_NAME));
-        discriminator.setMapping(jsonIO().getObject(node, PROP_MAPPING)
-                .map(jsonIO()::properties)
-                .map(properties -> properties.stream()
-                        .map(entry -> entry(entry.getKey(), jsonIO().asString(entry.getValue())))
-                        .collect(toLinkedMap()))
-                .orElse(null));
-        return discriminator;
-    }
-
-    public Optional<O> write(Discriminator model) {
-        return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_PROPERTY_NAME, jsonIO().toJson(model.getPropertyName()));
-            setIfPresent(node, PROP_MAPPING, jsonIO().toJson(model.getMapping()));
-            return node;
-        }).map(jsonIO()::buildObject);
+        return null;
     }
 }

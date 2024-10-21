@@ -1,67 +1,10 @@
 package io.smallrye.openapi.api.models.media;
 
-import java.util.Map;
-
-import org.eclipse.microprofile.openapi.models.media.Discriminator;
-
-import io.smallrye.openapi.api.models.ModelImpl;
-import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.internal.models.media.Discriminator;
 
 /**
- * An implementation of the {@link Discriminator} OpenAPI model interface.
+ * @deprecated use {@link org.eclipse.microprofile.openapi.OASFactory#createDiscriminator()} instead.
  */
-public class DiscriminatorImpl implements Discriminator, ModelImpl {
-
-    private String propertyName;
-    private Map<String, String> mapping;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#getPropertyName()
-     */
-    @Override
-    public String getPropertyName() {
-        return this.propertyName;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#setPropertyName(java.lang.String)
-     */
-    @Override
-    public void setPropertyName(String propertyName) {
-        this.propertyName = propertyName;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#addMapping(java.lang.String, java.lang.String)
-     */
-    @Override
-    public Discriminator addMapping(String name, String value) {
-        this.mapping = ModelUtil.add(name, value, this.mapping);
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#removeMapping(java.lang.String)
-     */
-    @Override
-    public void removeMapping(String name) {
-        ModelUtil.remove(this.mapping, name);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#getMapping()
-     */
-    @Override
-    public Map<String, String> getMapping() {
-        return ModelUtil.unmodifiableMap(this.mapping);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Discriminator#setMapping(java.util.Map)
-     */
-    @Override
-    public void setMapping(Map<String, String> mapping) {
-        this.mapping = ModelUtil.replace(mapping);
-    }
-
+@Deprecated(since = "4.0", forRemoval = true)
+public class DiscriminatorImpl extends Discriminator { // NOSONAR
 }

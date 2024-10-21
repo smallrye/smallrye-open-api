@@ -205,7 +205,7 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
     }
 
     @Override
-    public JsonValue toJson(Object value, JsonValue defaultValue) {
+    public JsonValue toJson(Object value, JsonValue defaultValue, PropertyMapper<JsonValue, JsonObjectBuilder> propertyMapper) {
         if (value instanceof String) {
             return json.createValue((String) value);
         } else if (value instanceof JsonValue) {
@@ -231,13 +231,15 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
         } else if (value instanceof List) {
             JsonArrayBuilder array = createArray();
             ((List<?>) value).stream()
-                    .map(v -> toJson(v, JsonValue.NULL))
+                    .map(v -> toJson(v, JsonValue.NULL, propertyMapper))
                     .forEach(array::add);
             return array.build();
         } else if (value instanceof Map) {
             JsonObjectBuilder object = createObject();
-            ((Map<?, ?>) value).forEach((key, obj) -> object.add(String.valueOf(key), toJson(obj, JsonValue.NULL)));
+            ((Map<?, ?>) value)
+                    .forEach((key, obj) -> object.add(String.valueOf(key), toJson(obj, JsonValue.NULL, propertyMapper)));
             return object.build();
+            // TODO: handler for BaseModels
         } else if (value instanceof Enum) {
             return json.createValue(value.toString());
         } else {
@@ -375,5 +377,10 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
     @Override
     public JsonObject buildObject(JsonObjectBuilder object) {
         return object.build();
+    }
+
+    @Override
+    public JsonValue nullValue() {
+        return JsonValue.NULL;
     }
 }

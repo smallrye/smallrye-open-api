@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,13 +48,5 @@ public class SecurityIO<V, A extends V, O extends V, AB, OB> {
 
     public Map<String, SecurityScheme> readSchemes(AnnotationTarget target) {
         return context.securitySchemeIO().readMap(target);
-    }
-
-    public List<SecurityRequirement> readRequirements(V node) {
-        return context.securityRequirementIO().readList(node);
-    }
-
-    public Optional<A> write(List<SecurityRequirement> models) {
-        return context.securityRequirementIO().write(models);
     }
 }

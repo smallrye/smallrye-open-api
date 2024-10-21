@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -15,7 +16,6 @@ import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -43,9 +43,9 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         FieldInfo n2 = cInfo.field("n2");
         FieldInfo n3 = cInfo.field("n3");
 
-        Schema s1 = registry.register(n1.type(), Collections.emptySet(), new SchemaImpl());
-        Schema s2 = registry.register(n2.type(), Collections.emptySet(), new SchemaImpl());
-        Schema s3 = registry.register(n3.type(), Collections.emptySet(), new SchemaImpl());
+        Schema s1 = registry.register(n1.type(), Collections.emptySet(), OASFactory.createSchema());
+        Schema s2 = registry.register(n2.type(), Collections.emptySet(), OASFactory.createSchema());
+        Schema s3 = registry.register(n3.type(), Collections.emptySet(), OASFactory.createSchema());
 
         assertEquals("#/components/schemas/NestableStringNestableStringString", s1.getRef());
         assertEquals("#/components/schemas/NestableStringNestableStringObject", s2.getRef());
@@ -67,7 +67,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         ClassInfo cInfo = index.getClassByName(cName);
 
         FieldInfo n4 = cInfo.field("n4");
-        Schema s4 = registry.register(n4.type(), Collections.emptySet(), new SchemaImpl());
+        Schema s4 = registry.register(n4.type(), Collections.emptySet(), OASFactory.createSchema());
         assertEquals("#/components/schemas/NestableStringSuperInteger", s4.getRef());
     }
 
@@ -86,7 +86,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         ClassInfo cInfo = index.getClassByName(cName);
 
         FieldInfo n5 = cInfo.field("n5");
-        Schema s5 = registry.register(n5.type(), Collections.emptySet(), new SchemaImpl());
+        Schema s5 = registry.register(n5.type(), Collections.emptySet(), OASFactory.createSchema());
         assertEquals("#/components/schemas/NestableExtendsCharSequenceExtendsNumber", s5.getRef());
     }
 
@@ -106,7 +106,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         ClassInfo cInfo = index.getClassByName(cName);
 
         FieldInfo n6 = cInfo.field("n6");
-        Schema s6 = registry.register(n6.type(), Collections.emptySet(), new SchemaImpl());
+        Schema s6 = registry.register(n6.type(), Collections.emptySet(), OASFactory.createSchema());
         assertEquals("#/components/schemas/n6", s6.getRef());
     }
 

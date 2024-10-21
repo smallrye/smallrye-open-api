@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -26,7 +27,7 @@ import org.jboss.jandex.TypeVariable;
 import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -234,7 +235,7 @@ public class SchemaRegistry {
                 return;
             }
 
-            this.register(new TypeKey(type, Collections.emptySet()), schema, ((SchemaImpl) schema).getName());
+            this.register(new TypeKey(type, Collections.emptySet()), schema, Extensions.getName(schema));
             ScannerLogging.logger.configSchemaRegistered(typeSignature);
         });
     }
@@ -265,11 +266,11 @@ public class SchemaRegistry {
 
     private Schema registerReference(TypeKey key) {
         String name = deriveName(key, null);
-        Schema schemaRef = new SchemaImpl().ref(name);
+        Schema schemaRef = OASFactory.createSchema().ref(name);
         registry.put(key, new GeneratedSchemaInfo(name, null, schemaRef));
         names.add(name);
 
-        return new SchemaImpl().ref(schemaRef.getRef());
+        return OASFactory.createSchema().ref(schemaRef.getRef());
     }
 
     /**
@@ -290,13 +291,13 @@ public class SchemaRegistry {
      */
     private Schema register(TypeKey key, Schema schema, String schemaName) {
         String name = deriveName(key, schemaName);
-        Schema schemaRef = new SchemaImpl().ref(name);
+        Schema schemaRef = OASFactory.createSchema().ref(name);
         registry.put(key, new GeneratedSchemaInfo(name, schema, schemaRef));
         names.add(name);
 
         ModelUtil.components(oai).addSchema(name, schema);
 
-        return new SchemaImpl().ref(schemaRef.getRef());
+        return OASFactory.createSchema().ref(schemaRef.getRef());
     }
 
     String deriveName(TypeKey key, String schemaName) {
@@ -357,7 +358,7 @@ public class SchemaRegistry {
             throw ScannerMessages.msg.notRegistered(key.type.name());
         }
 
-        return new SchemaImpl().ref(info.schemaRef.getRef());
+        return OASFactory.createSchema().ref(info.schemaRef.getRef());
     }
 
     private Schema lookupSchema(TypeKey key) {

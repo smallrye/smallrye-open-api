@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -16,10 +17,6 @@ import org.eclipse.microprofile.openapi.models.servers.Server;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
-import io.smallrye.openapi.api.models.info.ContactImpl;
-import io.smallrye.openapi.api.models.info.InfoImpl;
-import io.smallrye.openapi.api.models.info.LicenseImpl;
-import io.smallrye.openapi.api.models.servers.ServerImpl;
 
 /**
  * Used to configure server information and some more from config properties.
@@ -49,7 +46,7 @@ public class ConfigUtil {
     }
 
     protected static final void configureInfo(OpenApiConfig config, OpenAPI oai) {
-        if (!defaultIfNecessary(oai.getInfo(), InfoImpl::new, oai::setInfo,
+        if (!defaultIfNecessary(oai.getInfo(), OASFactory::createInfo, oai::setInfo,
                 config.getInfoTitle(),
                 config.getInfoVersion(),
                 config.getInfoDescription(),
@@ -70,7 +67,7 @@ public class ConfigUtil {
         setIfPresent(config.getInfoTermsOfService(), oai.getInfo()::setTermsOfService);
 
         // Contact
-        if (defaultIfNecessary(oai.getInfo().getContact(), ContactImpl::new, oai.getInfo()::setContact,
+        if (defaultIfNecessary(oai.getInfo().getContact(), OASFactory::createContact, oai.getInfo()::setContact,
                 config.getInfoContactName(),
                 config.getInfoContactEmail(),
                 config.getInfoContactUrl())) {
@@ -80,7 +77,7 @@ public class ConfigUtil {
         }
 
         // License
-        if (defaultIfNecessary(oai.getInfo().getLicense(), LicenseImpl::new, oai.getInfo()::setLicense,
+        if (defaultIfNecessary(oai.getInfo().getLicense(), OASFactory::createLicense, oai.getInfo()::setLicense,
                 config.getInfoLicenseName(),
                 config.getInfoLicenseUrl())) {
             setIfPresent(config.getInfoLicenseName(), oai.getInfo().getLicense()::setName);
@@ -111,7 +108,7 @@ public class ConfigUtil {
         if (servers != null && !servers.isEmpty()) {
             oai.servers(new ArrayList<>());
             for (String server : servers) {
-                Server s = new ServerImpl();
+                Server s = OASFactory.createServer();
                 s.setUrl(server);
                 oai.addServer(s);
             }
@@ -139,7 +136,7 @@ public class ConfigUtil {
         if (pathServers != null && !pathServers.isEmpty()) {
             pathItem.servers(new ArrayList<>());
             for (String pathServer : pathServers) {
-                Server server = new ServerImpl();
+                Server server = OASFactory.createServer();
                 server.setUrl(pathServer);
                 pathItem.addServer(server);
             }
@@ -173,7 +170,7 @@ public class ConfigUtil {
         if (operationServers != null && !operationServers.isEmpty()) {
             operation.servers(new ArrayList<>());
             for (String operationServer : operationServers) {
-                Server server = new ServerImpl();
+                Server server = OASFactory.createServer();
                 server.setUrl(operationServer);
                 operation.addServer(server);
             }

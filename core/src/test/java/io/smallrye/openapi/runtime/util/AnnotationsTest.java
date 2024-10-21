@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -118,7 +118,7 @@ class AnnotationsTest extends IndexScannerTestBase {
                 Index.of(Bean.class, AllKinds.class, Nested.class, AnnotationEnum.class), emptyConfig());
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
-                emptyConfig(), new OpenAPIImpl());
+                emptyConfig(), OASFactory.createOpenAPI());
         Object value = context.annotations().getAnnotationValue(index.getClassByName(Bean.class).field("target"),
                 DotName.createSimple(AllKinds.class), valueName);
         assertTrue(expectedType.isInstance(value));
@@ -149,7 +149,7 @@ class AnnotationsTest extends IndexScannerTestBase {
                 Index.of(Bean.class, AllKinds.class, Nested.class, AnnotationEnum.class), emptyConfig());
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
-                emptyConfig(), new OpenAPIImpl());
+                emptyConfig(), OASFactory.createOpenAPI());
         Object value = context.annotations().getAnnotationValue(index.getClassByName(Bean.class).field("target"),
                 DotName.createSimple(AllKinds.class), valueName);
         assertTrue(expectedType.isInstance(value));
@@ -172,7 +172,7 @@ class AnnotationsTest extends IndexScannerTestBase {
                 AnnotationEnum.class, AllKindsComposed.class, Retention.class, Repeatable.class), emptyConfig());
         AnnotationScannerContext context = new AnnotationScannerContext(index, Thread.currentThread().getContextClassLoader(),
                 Collections.emptyList(),
-                emptyConfig(), new OpenAPIImpl());
+                emptyConfig(), OASFactory.createOpenAPI());
 
         List<AnnotationInstance> annotations = context.annotations().getRepeatableAnnotation(
                 index.getClassByName(Bean.class).field("target"),

@@ -2,19 +2,17 @@ package io.smallrye.openapi.runtime.io.callbacks;
 
 import java.util.Optional;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.api.models.PathItemImpl;
-import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
+import io.smallrye.openapi.model.ReferenceType;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
-import io.smallrye.openapi.runtime.io.ReferenceType;
-import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
 
 public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Callback, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
@@ -30,14 +28,14 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
     @Override
     public Callback read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@Callback");
-        Callback callback = new CallbackImpl();
+        Callback callback = OASFactory.createCallback();
         callback.setRef(ReferenceType.CALLBACK.refValue(annotation));
 
         Optional.ofNullable(this.<String> value(annotation, PROP_PATH_ITEM_REF))
                 .map(ReferenceType.PATH_ITEM::referenceOf)
                 .ifPresent(ref -> callback.addPathItem(
                         value(annotation, PROP_CALLBACK_URL_EXPRESSION),
-                        new PathItemImpl().ref(ref)));
+                        OASFactory.createPathItem().ref(ref)));
 
         Optional.ofNullable(value(annotation, PROP_OPERATIONS))
                 .map(AnnotationInstance[].class::cast)
@@ -48,40 +46,5 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
 
         callback.setExtensions(extensionIO().readExtensible(annotation));
         return callback;
-    }
-
-    @Override
-    public Callback readObject(O node) {
-        IoLogging.logger.singleJsonNode("Callback");
-        Callback callback = new CallbackImpl();
-        callback.setRef(readReference(node));
-
-        jsonIO().properties(node)
-                .stream()
-                .filter(not(ExtensionIO::isExtension))
-                .filter(not(this::isReference))
-                .filter(property -> jsonIO().isObject(property.getValue()))
-                .map(property -> entry(property.getKey(), pathItemIO().readValue(property.getValue())))
-                .forEach(pathItem -> callback.addPathItem(pathItem.getKey(), pathItem.getValue()));
-
-        extensionIO().readMap(node).forEach(callback::addExtension);
-
-        return callback;
-    }
-
-    @Override
-    public Optional<O> write(Callback model) {
-        return optionalJsonObject(model).map(node -> {
-            if (isReference(model)) {
-                setReference(node, model);
-            } else {
-                Optional.ofNullable(model.getPathItems())
-                        .ifPresent(items -> items
-                                .forEach((key, value) -> setIfPresent(node, key, pathItemIO().write(value))));
-
-                setAllIfPresent(node, extensionIO().write(model));
-            }
-            return node;
-        }).map(jsonIO()::buildObject);
     }
 }

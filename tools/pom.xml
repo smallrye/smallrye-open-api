@@ -6,15 +6,16 @@
         <artifactId>smallrye-open-api-parent</artifactId>
         <version>4.0.0-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>smallrye-open-api-tools</artifactId>
     <packaging>pom</packaging>
-    
+
     <name>SmallRye: OpenAPI Tools</name>
-    
+
     <modules>
         <module>maven-plugin</module>
         <module>gradle-plugin</module>
+        <module>model-apt</module>
     </modules>
-    
+
 </project>

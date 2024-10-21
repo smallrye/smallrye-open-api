@@ -1,18 +1,19 @@
-package io.smallrye.openapi.runtime.io.schema;
+package io.smallrye.openapi.model;
 
 /**
  * Represents a desired data type that we might want to convert a JSON node to
  */
 public class DataType {
-    public static enum Type {
+
+    public enum Type {
         OBJECT,
         LIST,
         MAP
     }
 
-    public DataType.Type type;
-    public DataType content;
-    public Class<?> clazz;
+    public final DataType.Type type;
+    public final DataType content;
+    public final Class<?> clazz;
 
     private DataType(DataType.Type type, DataType content, Class<?> clazz) {
         super();

@@ -1,46 +1,10 @@
 package io.smallrye.openapi.api.models;
 
-import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
+import io.smallrye.openapi.internal.models.ExternalDocumentation;
 
 /**
- * An implementation of the {@link ExternalDocumentation} OpenAPI model interface.
+ * @deprecated use {@link org.eclipse.microprofile.openapi.OASFactory#createExternalDocumentation()} instead.
  */
-public class ExternalDocumentationImpl extends ExtensibleImpl<ExternalDocumentation>
-        implements ExternalDocumentation, ModelImpl {
-
-    private String description;
-    private String url;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#getDescription()
-     */
-    @Override
-    public String getDescription() {
-        return this.description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#setDescription(java.lang.String)
-     */
-    @Override
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#getUrl()
-     */
-    @Override
-    public String getUrl() {
-        return this.url;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.ExternalDocumentation#setUrl(java.lang.String)
-     */
-    @Override
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
+@Deprecated(since = "4.0", forRemoval = true)
+public class ExternalDocumentationImpl extends ExternalDocumentation { // NOSONAR
 }

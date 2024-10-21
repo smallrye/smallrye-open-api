@@ -15,6 +15,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.OASConfig;
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -32,7 +33,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 
@@ -403,7 +403,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         @Override
         public void registerCustomSchemas(SchemaRegistry schemaRegistry) {
             Type uuidType = Type.create(componentize(UUID.class.getName()), Kind.CLASS);
-            Schema schema = new SchemaImpl();
+            Schema schema = OASFactory.createSchema();
             schema.addType(Schema.SchemaType.STRING);
             schema.setFormat("uuid");
             schema.setPattern("^[a-f0-9]{8}-?[a-f0-9]{4}-?[1-5][a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}$");

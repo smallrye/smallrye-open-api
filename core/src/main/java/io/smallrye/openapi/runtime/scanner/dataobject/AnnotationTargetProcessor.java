@@ -4,16 +4,15 @@ import static io.smallrye.openapi.api.constants.JaxbConstants.PROP_NAME;
 import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ATTRIBUTE;
 import static io.smallrye.openapi.api.constants.JaxbConstants.XML_ELEMENT;
 import static io.smallrye.openapi.api.constants.JaxbConstants.XML_WRAPPERELEMENT;
-import static java.util.Collections.singletonList;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
@@ -22,9 +21,8 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.media.XMLImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
@@ -146,7 +144,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         } else {
             // Process the type of the field to derive the typeSchema
             typeProcessor = new TypeProcessor(context, objectStack, parentPathEntry, typeResolver, entityType,
-                    new SchemaImpl(), annotationTarget);
+                    OASFactory.createSchema(), annotationTarget);
 
             // Type could be replaced (e.g. generics)
             fieldType = typeProcessor.processType();
@@ -180,10 +178,10 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             fieldSchema = readSchemaAnnotatedField(propertyKey, schemaAnnotation, fieldType);
         } else if (registrationCandidate) {
             // The type schema was registered, start with empty schema for the field using the type from the field type's schema
-            fieldSchema = new SchemaImpl().type(typeSchema.getType());
+            fieldSchema = OASFactory.createSchema().type(typeSchema.getType());
         } else {
             // Use the type's schema for the field as a starting point (poor man's clone)
-            fieldSchema = MergeUtil.mergeObjects(new SchemaImpl(), typeSchema);
+            fieldSchema = MergeUtil.mergeObjects(OASFactory.createSchema(), typeSchema);
         }
 
         Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
@@ -195,8 +193,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             }
         }
 
-        if (SchemaImpl.getNullable(fieldSchema) == null && TypeUtil.isOptional(entityType)) {
-            SchemaImpl.setNullable(fieldSchema, Boolean.TRUE);
+        if (SchemaSupport.getNullable(fieldSchema) == null && TypeUtil.isOptional(entityType)) {
+            SchemaSupport.setNullable(fieldSchema, Boolean.TRUE);
         }
 
         if (fieldSchema.getReadOnly() == null && typeResolver.isReadOnly()) {
@@ -246,21 +244,21 @@ public class AnnotationTargetProcessor implements RequirementHandler {
                     // Field declaration overrides a schema annotation (non-validating), add referenced type to `allOf` if not user-provided
                     TypeUtil.clearMatchingDefaultAttributes(fieldSchema, typeSchema);
                     fieldSchema.setRef(registeredTypeSchema.getRef());
-                    SchemaImpl.addTypeObserver(typeSchema, fieldSchema);
+                    SchemaSupport.addTypeObserver(typeSchema, fieldSchema);
                 } else {
                     fieldSchema = registeredTypeSchema; // Reference to the type schema
                 }
 
                 // If the field should allow null but the type schema doesn't, use anyOf to allow null
                 if (fieldSchemaNullable && !isNullable(typeSchema)) {
-                    Schema nullSchema = new SchemaImpl().type(singletonList(Schema.SchemaType.NULL));
                     // Move reference to type into its own subschema
-                    Schema refSchema = new SchemaImpl().ref(fieldSchema.getRef());
+                    Schema refSchema = OASFactory.createSchema().ref(fieldSchema.getRef());
                     fieldSchema.setRef(null);
                     if (fieldSchema.getAnyOf() == null) {
-                        fieldSchema.addAnyOf(refSchema).addAnyOf(nullSchema);
+                        fieldSchema.addAnyOf(refSchema).addAnyOf(SchemaSupport.nullSchema());
                     } else {
-                        Schema anyOfSchema = new SchemaImpl().addAnyOf(refSchema).addAnyOf(nullSchema);
+                        Schema anyOfSchema = OASFactory.createSchema().addAnyOf(refSchema)
+                                .addAnyOf(SchemaSupport.nullSchema());
                         fieldSchema.addAllOf(anyOfSchema);
                     }
                 }
@@ -282,8 +280,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     private boolean isNullable(Schema schema) {
-        List<Schema.SchemaType> types = schema.getType();
-        return types != null && types.contains(Schema.SchemaType.NULL);
+        return Boolean.TRUE.equals(SchemaSupport.getNullable(schema));
     }
 
     private void processFieldAnnotations(Schema fieldSchema, TypeResolver typeResolver) {
@@ -334,7 +331,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             return;
         }
 
-        schema.setXml(new XMLImpl());
+        schema.setXml(OASFactory.createXML());
     }
 
     private void setXmlName(Schema fieldSchema, String realName, AnnotationInstance xmlAttr) {
@@ -361,7 +358,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         // Provide inferred type and format if relevant.
         Map<String, Object> defaults;
 
-        if (JandexUtil.isArraySchema(context, annotation)
+        if (JandexUtil.isBooleanSchema(annotation)
+                || JandexUtil.isArraySchema(context, annotation)
                 || TypeUtil.isTypeOverridden(context, postProcessedField, annotation)) {
             defaults = Collections.emptyMap();
         } else {
@@ -369,7 +367,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
         }
 
         // readSchema *may* replace the existing schema, so we must assign.
-        return SchemaFactory.readSchema(context, new SchemaImpl(), annotation, defaults);
+        return SchemaFactory.readSchema(context, OASFactory.createSchema(), annotation, defaults);
     }
 
     boolean fieldAssertionConflicts(Schema fieldSchema, Schema typeSchema) {
@@ -405,11 +403,12 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     }
 
     boolean fieldSpecifiesAnnotation(Schema fieldSchema) {
-        return null != SCHEMA_ANNOTATION_PROVIDERS.stream()
-                .map(provider -> provider.apply(fieldSchema))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+        for (Function<Schema, Object> provider : SCHEMA_ANNOTATION_PROVIDERS) {
+            if (provider.apply(fieldSchema) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -446,6 +445,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
     /**
      * @see https://json-schema.org/draft/2020-12/json-schema-core.html#annotations
      */
+    @SuppressWarnings("deprecation")
     private static final List<Function<Schema, Object>> SCHEMA_ANNOTATION_PROVIDERS = Arrays.asList(
             Schema::getDefaultValue,
             Schema::getDeprecated,

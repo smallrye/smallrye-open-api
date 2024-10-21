@@ -1,9 +1,9 @@
 package io.smallrye.openapi.runtime.io.callbacks;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.jboss.jandex.AnnotationInstance;
 
-import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.Names;
@@ -18,7 +18,7 @@ public class CallbackOperationIO<V, A extends V, O extends V, AB, OB> extends Op
     @Override
     public Operation read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@CallbackOperation");
-        Operation operation = new OperationImpl();
+        Operation operation = OASFactory.createOperation();
         operation.setSummary(value(annotation, PROP_SUMMARY));
         operation.setDescription(value(annotation, PROP_DESCRIPTION));
         operation.setExternalDocs(extDocIO().read(annotation.value(PROP_EXTERNAL_DOCS)));

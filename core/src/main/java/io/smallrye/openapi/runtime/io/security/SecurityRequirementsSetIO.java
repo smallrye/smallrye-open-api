@@ -7,12 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
@@ -44,13 +44,13 @@ public class SecurityRequirementsSetIO<V, A extends V, O extends V, AB, OB>
                 .map(set -> Optional.ofNullable(set.value())
                         .map(AnnotationValue::asNestedArray)
                         .map(this::readSet)
-                        .orElseGet(SecurityRequirementImpl::new))
+                        .orElseGet(OASFactory::createSecurityRequirement))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     SecurityRequirement readSet(AnnotationInstance[] annotations) {
-        SecurityRequirement requirement = new SecurityRequirementImpl();
+        SecurityRequirement requirement = OASFactory.createSecurityRequirement();
 
         Arrays.stream(annotations)
                 .map(securityRequirementIO()::readEntry)
@@ -63,15 +63,4 @@ public class SecurityRequirementsSetIO<V, A extends V, O extends V, AB, OB>
     public SecurityRequirement read(AnnotationInstance annotation) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public SecurityRequirement readObject(O node) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<O> write(SecurityRequirement model) {
-        throw new UnsupportedOperationException();
-    }
-
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
@@ -20,7 +21,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.media.EncodingImpl;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
@@ -152,7 +152,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         AnnotationInstance type = scannerContext.annotations().getAnnotation(paramTarget, RestEasyConstants.PART_TYPES);
 
         if (type != null) {
-            Encoding encoding = new EncodingImpl();
+            Encoding encoding = OASFactory.createEncoding();
             encoding.setContentType(type.value().asString());
             encodings.put(paramName, encoding);
         }

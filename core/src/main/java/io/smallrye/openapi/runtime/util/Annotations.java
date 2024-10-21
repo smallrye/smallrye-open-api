@@ -170,8 +170,7 @@ public final class Annotations {
 
         if (kind == AnnotationValue.Kind.UNKNOWN && annoClass != null) {
             MethodInfo valueMethod = annoClass.method(value.name());
-            @SuppressWarnings("deprecation")
-            Type valueType = valueMethod.returnType().asArrayType().component();
+            Type valueType = valueMethod.returnType().asArrayType().constituent();
 
             switch (valueType.kind()) {
                 case PRIMITIVE:
@@ -206,7 +205,6 @@ public final class Annotations {
      * @param name the name of the parameter
      * @return an unwrapped annotation parameter value
      */
-    @SuppressWarnings({ "unchecked" })
     public <T> T value(AnnotationInstance annotation, String name) {
         final AnnotationValue value = annotation.value(name);
 
@@ -214,9 +212,15 @@ public final class Annotations {
             return null;
         }
 
+        return value(annotation, value);
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    public <T> T value(AnnotationInstance annotation, AnnotationValue value) {
+        final AnnotationValue.Kind valueKind = valueKind(annotation, value);
         final boolean isArray = (AnnotationValue.Kind.ARRAY == value.kind());
 
-        switch (valueKind(annotation, value)) {
+        switch (valueKind) {
             case BOOLEAN:
                 return (T) (isArray ? value.asBooleanArray() : value.asBoolean());
             case BYTE:
@@ -273,8 +277,14 @@ public final class Annotations {
      * @return Value of property
      */
     public <T extends Enum<T>> T enumValue(AnnotationInstance annotation, String propertyName, Class<T> clazz) {
-        String value = annotation != null ? value(annotation, propertyName) : null;
+        return enumValue(clazz, annotation != null ? (String) value(annotation, propertyName) : null);
+    }
 
+    public <T extends Enum<T>> T enumValue(Class<T> clazz, AnnotationValue value) {
+        return enumValue(clazz, value != null ? value.asEnum() : null);
+    }
+
+    public <T extends Enum<T>> T enumValue(Class<T> clazz, String value) {
         if (value == null) {
             return null;
         }

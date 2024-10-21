@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
@@ -37,8 +38,7 @@ import io.smallrye.openapi.api.constants.JDKConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
-import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -416,7 +416,7 @@ public class TypeUtil {
     public static void applyTypeAttributes(Type classType, Schema schema) {
         Map<String, Object> properties = getTypeAttributes(classType);
 
-        SchemaImpl.setType(schema, (SchemaType) properties.get(SchemaConstant.PROP_TYPE));
+        SchemaSupport.setType(schema, (SchemaType) properties.get(SchemaConstant.PROP_TYPE));
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
         schema.setExamples(wrapInList(properties.get(SchemaConstant.PROP_EXAMPLE)));
@@ -439,6 +439,7 @@ public class TypeUtil {
      * @param fieldSchema the schema for a field of the type described by typeSchema
      * @param typeSchema the schema for a class type
      */
+    @SuppressWarnings("deprecation")
     public static void clearMatchingDefaultAttributes(Schema fieldSchema, Schema typeSchema) {
         clearIfEqual(fieldSchema.getFormat(), typeSchema.getFormat(), fieldSchema::setFormat);
         clearIfEqual(fieldSchema.getPattern(), typeSchema.getPattern(), fieldSchema::setPattern);
@@ -841,7 +842,7 @@ public class TypeUtil {
             }
 
             Builder externalDocumentation(String description, String url) {
-                ExternalDocumentation doc = new ExternalDocumentationImpl();
+                ExternalDocumentation doc = OASFactory.createExternalDocumentation();
                 doc.setDescription(description);
                 doc.setUrl(url);
                 properties.put(SchemaConstant.PROP_EXTERNAL_DOCS, doc);

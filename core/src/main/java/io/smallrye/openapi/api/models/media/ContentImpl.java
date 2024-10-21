@@ -2,64 +2,27 @@ package io.smallrye.openapi.api.models.media;
 
 import java.util.Map;
 
-import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 
 import io.smallrye.openapi.api.models.MapModel;
-import io.smallrye.openapi.api.models.ModelImpl;
-import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.internal.models.media.Content;
 
 /**
- * An implementation of the {@link Content} OpenAPI model interface.
+ * @deprecated use {@link org.eclipse.microprofile.openapi.OASFactory#createParameter()} instead.
  */
-public class ContentImpl implements Content, ModelImpl, MapModel<MediaType> {
-
-    private Map<String, MediaType> mediaTypes;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Content#addMediaType(java.lang.String,
-     *      org.eclipse.microprofile.openapi.models.media.MediaType)
-     */
-    @Override
-    public Content addMediaType(String name, MediaType mediaType) {
-        this.mediaTypes = ModelUtil.add(name, mediaType, this.mediaTypes);
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Content#removeMediaType(java.lang.String)
-     */
-    @Override
-    public void removeMediaType(String name) {
-        ModelUtil.remove(this.mediaTypes, name);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Content#getMediaTypes()
-     */
-    @Override
-    public Map<String, MediaType> getMediaTypes() {
-        return ModelUtil.unmodifiableMap(this.mediaTypes);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.media.Content#setMediaTypes(java.util.Map)
-     */
-    @Override
-    public void setMediaTypes(Map<String, MediaType> mediaTypes) {
-        this.mediaTypes = ModelUtil.replace(mediaTypes);
-    }
+@Deprecated(since = "4.0", forRemoval = true)
+public class ContentImpl extends Content implements MapModel<MediaType> { // NOSONAR
 
     // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1
 
     @Override
     public Map<String, MediaType> getMap() {
-        return this.mediaTypes;
+        return getMediaTypes();
     }
 
     @Override
     public void setMap(Map<String, MediaType> map) {
-        this.mediaTypes = map;
+        setMediaTypes(map);
     }
 
     @Override

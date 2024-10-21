@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
@@ -11,7 +12,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import test.io.smallrye.openapi.runtime.scanner.entities.Bar;
 import test.io.smallrye.openapi.runtime.scanner.entities.BuzzLinkedList;
 import test.io.smallrye.openapi.runtime.scanner.entities.EnumContainer;
@@ -23,12 +23,12 @@ import test.io.smallrye.openapi.runtime.scanner.entities.GenericTypeTestContaine
  */
 class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
 
-    OpenAPIImpl oai;
+    OpenAPI oai;
     SchemaRegistry registry;
 
     @BeforeEach
     void setupRegistry() {
-        oai = (OpenAPIImpl) context.getOpenApi();
+        oai = context.getOpenApi();
         registry = context.getSchemaRegistry();
     }
 

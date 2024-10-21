@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,12 +11,15 @@ import java.util.Set;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.CompositeIndex;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.ModuleInfo;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -35,7 +40,15 @@ public class AugmentedIndexView implements IndexView {
     }
 
     private AugmentedIndexView(IndexView index) {
-        this.index = Objects.requireNonNull(index);
+        IndexView indexedNames;
+
+        try {
+            indexedNames = Index.of(Names.getIndexable());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        this.index = CompositeIndex.create(Objects.requireNonNull(index), indexedNames);
     }
 
     public ClassInfo getClass(Type type) {

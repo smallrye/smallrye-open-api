@@ -9,6 +9,8 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.openapi.model.ReferenceType;
+
 class ReferenceTypeTests {
 
     @Test

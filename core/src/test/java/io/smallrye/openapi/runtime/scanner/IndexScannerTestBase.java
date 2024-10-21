@@ -37,8 +37,7 @@ import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.SmallRyeOpenAPI;
-import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.parameters.ParameterImpl;
+import io.smallrye.openapi.model.Extensions;
 
 public class IndexScannerTestBase {
 
@@ -142,7 +141,7 @@ public class IndexScannerTestBase {
                     for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : pathItem.getOperations().entrySet()) {
                         final Operation operation = operationEntry.getValue();
                         String opRef = operationEntry.getKey() + " " + pathItemEntry.getKey();
-                        Assertions.assertNotNull(OperationImpl.getMethodRef(operation), "methodRef: " + opRef);
+                        Assertions.assertNotNull(Extensions.getMethodRef(operation), "methodRef: " + opRef);
                         if (operation.getParameters() != null) {
                             for (Parameter parameter : operation.getParameters()) {
                                 /*
@@ -152,7 +151,7 @@ public class IndexScannerTestBase {
                                 if (!isPathMatrixObject(parameter)) {
                                     // in all other cases paramRef should be set
                                     String pRef = opRef + ", " + parameter.getIn() + ": " + parameter.getName();
-                                    Assertions.assertNotNull(ParameterImpl.getParamRef(parameter), "paramRef: " + pRef);
+                                    Assertions.assertNotNull(Extensions.getParamRef(parameter), "paramRef: " + pRef);
                                 }
                             }
                         }

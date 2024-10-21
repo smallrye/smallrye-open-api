@@ -28,6 +28,37 @@ import io.smallrye.openapi.api.OpenApiConfig;
  */
 public interface JsonIO<V, A extends V, O extends V, AB, OB> {
 
+    static PropertyMapper<?, ?> NOOP = new PropertyMapper<>() {
+    };
+
+    public interface PropertyMapper<V, OB> {
+        /**
+         * Optionally convert the entire object to a JSON value. If no value mapping
+         * should occur, implementations should return an empty Optional.
+         *
+         * @param object model object that may be mapped to a JSON value
+         * @return an optional JSON value that is mapped from the object
+         */
+        default Optional<V> mapObject(Object object) {
+            return Optional.empty();
+        }
+
+        /**
+         * Optionally convert the property with given name and value to a JSON value.
+         * If no value mapping should occur, implementations should return an empty Optional.
+         */
+        default Optional<V> mapProperty(Object object, String propertyName, Object propertyValue) {
+            return Optional.empty();
+        }
+
+        /**
+         * Map any additional properties from the given model object to the nodeBuilder that
+         * will be the resulting JSON value.
+         */
+        default void mapObject(Object object, OB nodeBuilder) {
+        }
+    }
+
     public static <V, A extends V, O extends V, AB, OB> JsonIO<V, A, O, AB, OB> newInstance(OpenApiConfig config) {
         @SuppressWarnings("unchecked")
         JsonIO<V, A, O, AB, OB> jackson = (JsonIO<V, A, O, AB, OB>) new JacksonJsonIO(config);
@@ -321,14 +352,19 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
     Optional<O> getObject(O object, String key);
 
     /**
-     * Convert a Java object to JSON. See {@link #toJson(Object, Object)} for the list of supported types
+     * Convert a Java object to JSON. See {@link #toJson(Object, Object, PropertyMapper)} for the list of supported types
      *
      * @param object the JSON object
      * @return an {@code Optional} containing the JSON value, or an empty {@code Optional} if {@code object} is not one of the
      *         supported types
      */
+    @SuppressWarnings("unchecked")
     default Optional<V> toJson(Object object) {
-        return Optional.ofNullable(toJson(object, null));
+        return Optional.ofNullable(toJson(object, null, (PropertyMapper<V, OB>) NOOP));
+    }
+
+    default Optional<V> toJson(Object object, PropertyMapper<V, OB> handler) {
+        return Optional.ofNullable(toJson(object, null, handler));
     }
 
     /**
@@ -383,9 +419,10 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
      *
      * @param object the JSON object
      * @param defaultValue the default value to return if {@code value} cannot be converted to JSON
+     * @param propertyMapper mapper object to alter the default mapping of the object and its properties to JSON
      * @return the JSON value, or {@code defaultValue} if {@code value} cannot be converted to JSON
      */
-    V toJson(Object object, V defaultValue);
+    V toJson(Object object, V defaultValue, PropertyMapper<V, OB> propertyMapper);
 
     /**
      * Read a JSON or YAML document from a {@code String}
@@ -523,4 +560,9 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
      * @see #createObject()
      */
     O buildObject(OB object);
+
+    /**
+     * Returns the JSON value representing {@code null}.
+     */
+    V nullValue();
 }

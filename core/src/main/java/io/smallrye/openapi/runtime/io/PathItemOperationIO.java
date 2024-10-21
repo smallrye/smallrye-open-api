@@ -7,11 +7,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
-import io.smallrye.openapi.api.models.OperationImpl;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 public class PathItemOperationIO<V, A extends V, O extends V, AB, OB> extends OperationIO<V, A, O, AB, OB> {
@@ -23,7 +23,7 @@ public class PathItemOperationIO<V, A extends V, O extends V, AB, OB> extends Op
     @Override
     public Operation read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@PathItemOperation");
-        Operation operation = new OperationImpl();
+        Operation operation = OASFactory.createOperation();
 
         operation.setTags(processTags(annotation.value(PROP_TAGS)));
         operation.setSummary(value(annotation, PROP_SUMMARY));

@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -37,7 +38,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
@@ -493,7 +493,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             locatorPathParameters = excludeOperationParameters(locatorPathParameters, operationParams);
         }
 
-        PathItem pathItem = new PathItemImpl();
+        PathItem pathItem = OASFactory.createPathItem();
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
 
         // Process any @RequestBody annotation (note: the @RequestBody annotation can be found on a method argument *or* on the method)

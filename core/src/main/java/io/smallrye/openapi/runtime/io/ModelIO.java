@@ -1,21 +1,36 @@
 package io.smallrye.openapi.runtime.io;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 
+import org.eclipse.microprofile.openapi.OASFactory;
+import org.eclipse.microprofile.openapi.models.Constructible;
+import org.eclipse.microprofile.openapi.models.Extensible;
+import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.Reference;
+import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
+import io.smallrye.openapi.internal.models.SmallRyeOASModels;
+import io.smallrye.openapi.model.BaseExtensibleModel;
+import io.smallrye.openapi.model.BaseModel;
+import io.smallrye.openapi.model.DataType;
 import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackOperationIO;
@@ -49,7 +64,7 @@ import io.smallrye.openapi.runtime.io.tags.TagIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 
-public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
+public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements JsonIO.PropertyMapper<V, OB> {
 
     private final IOContext<V, A, O, AB, OB> context;
     protected final DotName annotationName;
@@ -206,7 +221,167 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
                 .orElse(null);
     }
 
+    @SuppressWarnings("unchecked")
+    public <C extends Constructible> T read(Class<C> type, AnnotationInstance annotation) {
+        IoLogging.logger.singleAnnotation(annotation.name().toString());
+        BaseModel<C> model = (BaseModel<C>) OASFactory.createObject(type);
+
+        for (AnnotationValue annotationValue : annotation.values()) {
+            Object value = scannerContext().annotations().value(annotation, annotationValue);
+
+            if (value != null && !setProperty((T) model, annotationValue)) {
+                String name = annotationValue.name();
+
+                if ("ref".equals(name) && Reference.class.isAssignableFrom(type)) {
+                    model.setRef(annotationValue.asString());
+                } else if ("extensions".equals(name) && Extensible.class.isAssignableFrom(type)) {
+                    ((BaseExtensibleModel<?>) model).setExtensions(extensionIO().readExtensible(annotation));
+                } else {
+                    model.setProperty(name, value);
+                }
+            }
+        }
+
+        return (T) model;
+    }
+
+    protected boolean setProperty(T model, AnnotationValue value) {
+        return false;
+    }
+
     public abstract T read(AnnotationInstance annotation);
+
+    private SmallRyeOASModels modelTypes = new SmallRyeOASModels();
+
+    @SuppressWarnings("unchecked")
+    public <C extends Constructible> T readObject(Class<C> type, O node) {
+        var jsonIO = jsonIO();
+        BaseModel<C> model = (BaseModel<C>) OASFactory.createObject(type);
+        var modelType = modelTypes.getModel(type);
+
+        for (Map.Entry<String, V> property : jsonIO.properties(node)) {
+            String name = property.getKey();
+            V value = property.getValue();
+
+            if (value != null && !setProperty((T) model, name, value)) {
+                if (ReferenceIO.REF.equals(name) && Reference.class.isAssignableFrom(type)) {
+                    model.setRef(jsonIO.asString(value));
+                } else if (ExtensionIO.isExtension(name) && Extensible.class.isAssignableFrom(type)) {
+                    ((BaseExtensibleModel<?>) model).addExtension(name, jsonIO.fromJson(value));
+                } else {
+                    model.setProperty(name, readJson(value, modelType.getPropertyType(name)));
+                }
+            }
+        }
+
+        return (T) model;
+    }
+
+    protected Object readJson(V node, DataType desiredType) {
+        //        if (jsonIO().isObject(node) && desiredType.type == DataType.Type.MAP) {
+        //            Map<String, Object> result = new HashMap<>();
+        //            O object = jsonIO().asObject(node);
+        //            for (Entry<String, V> entry : jsonIO().properties(object)) {
+        //                result.put(entry.getKey(), readJson(entry.getValue(), desiredType.content));
+        //            }
+        //            return result;
+        //        } else if (jsonIO().isArray(node) && desiredType.type == DataType.Type.LIST) {
+        //            List<Object> result = new ArrayList<>();
+        //            A array = jsonIO().asArray(node);
+        //            for (V element : jsonIO().entries(array)) {
+        //                result.add(readJson(element, desiredType.content));
+        //            }
+        //            return result;
+        //        } else if (desiredType.type == DataType.Type.OBJECT) {
+        //            if (desiredType.clazz == Object.class) {
+        //                return jsonIO().fromJson(node);
+        //            } else {
+        //                return readValue(node, desiredType.clazz);
+        //            }
+        //        } else {
+        //            return jsonIO().fromJson(node);
+        //        }
+        if (jsonIO().isObject(node)) {
+            if (desiredType.type == DataType.Type.MAP) {
+                Map<String, Object> result = new HashMap<>();
+                O object = jsonIO().asObject(node);
+                for (Entry<String, V> entry : jsonIO().properties(object)) {
+                    result.put(entry.getKey(), readJson(entry.getValue(), desiredType.content));
+                }
+                return result;
+            } else if (desiredType.type == DataType.Type.OBJECT) {
+                if (desiredType.clazz == Object.class) {
+                    return jsonIO().fromJson(node);
+                } else {
+                    return readValue(node, desiredType.clazz);
+                }
+            } else {
+                // Log node dropped?
+                return null;
+            }
+        } else if (jsonIO().isArray(node)) {
+            if (desiredType.type == DataType.Type.LIST) {
+                List<Object> result = new ArrayList<>();
+                A array = jsonIO().asArray(node);
+                for (V element : jsonIO().entries(array)) {
+                    result.add(readJson(element, desiredType.content));
+                }
+                return result;
+            } else if (desiredType.clazz == Object.class) {
+                return jsonIO().fromJson(node);
+            } else {
+                // Log node dropped?
+                return null;
+            }
+        } else if (desiredType.type == DataType.Type.OBJECT) {
+            if (desiredType.clazz == Object.class) {
+                return jsonIO().fromJson(node);
+            } else {
+                return readValue(node, desiredType.clazz);
+            }
+        } else {
+            return jsonIO().fromJson(node);
+        }
+    }
+
+    /**
+     * Convert JSON value node to an object when we have a desired type
+     * <p>
+     * The JSON value will be converted to the desired type if possible or returned as its native type if not.
+     *
+     * @param node the JSON node
+     * @param desiredType the type that we want to be returned
+     * @return an object which represents the JSON node, which may or may not be of the desired type
+     */
+    @SuppressWarnings("unchecked")
+    protected Object readValue(V node, Class<?> desiredType) {
+        if (desiredType == Schema.class) {
+            return schemaIO().readValue(node);
+        }
+
+        // Handles string, number and boolean types
+        Object result = jsonIO().fromJson(node, desiredType);
+        if (result != null) {
+            return result;
+        }
+
+        if (Enum.class.isAssignableFrom(desiredType)) {
+            result = enumValue(node, desiredType.asSubclass(Enum.class));
+            if (result != null) {
+                return result;
+            }
+        }
+
+        if (Constructible.class.isAssignableFrom(desiredType)) {
+            return readObject((Class<? extends Constructible>) desiredType, (O) node);
+        }
+
+        return jsonIO().fromJson(node);
+    }
+
+    protected boolean setProperty(T model, String name, V value) {
+        return false;
+    }
 
     public T readValue(V node) {
         return Optional.ofNullable(node)
@@ -216,9 +391,52 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> {
                 .orElse(null);
     }
 
-    public abstract T readObject(O node);
+    public T readObject(O node) {
+        throw new UnsupportedOperationException(getClass() + "#readObject(O)");
+    }
 
-    public abstract Optional<? extends V> write(T model);
+    public Optional<? extends V> write(T model) {
+        throw new UnsupportedOperationException(getClass() + "#write(T)");
+    }
+
+    Set<String> REF_PROPERTIES = Set.of(ReferenceIO.REF, "summary", "description");
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<V> mapObject(Object object) {
+        if (object instanceof Schema) {
+            return (Optional<V>) schemaIO().write((Schema) object);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<V> mapProperty(Object object, String propertyName, Object propertyValue) {
+        if (object instanceof Reference) {
+            if (object instanceof PathItem) {
+                // PathItems may have elements in addition to $ref
+                return Optional.empty();
+            }
+
+            String ref = ((Reference<?>) object).getRef();
+
+            if (ref != null && !ref.isBlank() && !REF_PROPERTIES.contains(propertyName)) {
+                // Do not write additional properties to the output
+                return Optional.of(jsonIO().nullValue());
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public void mapObject(Object object, OB nodeBuilder) {
+        if (object instanceof RequestBody && ((Reference<?>) object).getRef() == null) {
+            Boolean required = ((RequestBody) object).getRequired();
+            setIfPresent(nodeBuilder, "required", jsonIO().toJson(required));
+        }
+    }
 
     public OpenApiVersion openApiVersion() {
         return context.openApiVersion();
