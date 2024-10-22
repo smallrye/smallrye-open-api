@@ -26,20 +26,6 @@
         <quarkus.package.add-runner-suffix>false</quarkus.package.add-runner-suffix>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>mp-openapi-4.0.2-staging-1727</id>
-            <name>MicroProfile OpenAPI 4.0.2 Staging</name>
-            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1727</url>
-            <releases>
-               <enabled>true</enabled>
-            </releases>
-            <snapshots>
-              <enabled>false</enabled>
-           </snapshots>
-        </repository>
-    </repositories>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
