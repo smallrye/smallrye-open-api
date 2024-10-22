@@ -34,7 +34,7 @@ class BaseModelSupport {
             stack.put(model, model);
 
             for (Map.Entry<String, Object> e : model.properties.entrySet()) {
-                result = 31 * result + (e == null ? 0 : hash(stack, e));
+                result = 31 * result + hash(stack, e);
             }
 
             stack.remove(model);
@@ -58,12 +58,12 @@ class BaseModelSupport {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) value;
             for (Map.Entry<String, Object> e : map.entrySet()) {
-                result = 31 * result + (e == null ? 0 : hash(stack, e));
+                result = 31 * result + hash(stack, e);
             }
         } else if (value instanceof List) {
             List<?> list = (List<?>) value;
             for (Object e : list) {
-                result = 31 * result + (e == null ? 0 : hash(stack, e));
+                result = 31 * result + hash(stack, e);
             }
         } else {
             result = Objects.hash(value);
