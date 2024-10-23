@@ -227,20 +227,24 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         }
     }
 
-    /**
-     * Convert JSON value node to an object when we have a desired type
-     * <p>
-     * The JSON value will be converted to the desired type if possible or returned as its native type if not.
-     *
-     * @param node the JSON node
-     * @param desiredType the type that we want to be returned
-     * @return an object which represents the JSON node, which may or may not be of the desired type
-     */
-    //    @SuppressWarnings("unchecked")
+    @Override
+    protected Object readJson(V node, DataType desiredType) {
+        Object value = super.readJson(node, desiredType);
+
+        if (value != null) {
+            return value;
+        }
+
+        return jsonIO().fromJson(node);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     protected Object readValue(V node, Class<?> desiredType) {
         if (desiredType == Schema.class) {
             return readValue(node);
         }
+
         return super.readValue(node, desiredType);
     }
 
