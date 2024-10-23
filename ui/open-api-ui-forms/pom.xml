@@ -17,6 +17,8 @@
     </properties>
 
     <build>
+        <sourceDirectory>src</sourceDirectory>
+
         <plugins>
             <plugin>
                 <groupId>com.github.eirslett</groupId>
@@ -75,6 +77,10 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
