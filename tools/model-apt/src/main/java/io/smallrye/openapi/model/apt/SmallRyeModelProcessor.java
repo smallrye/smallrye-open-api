@@ -508,8 +508,11 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
             }
 
             writeCodeLn(writer, 2, "return getProperties(", valueTypeParam, ");");
-        } else {
+        } else if (Map.class.getName().equals(property.rawType) || List.class.getName().equals(property.rawType)) {
             writeCodeLn(writer, 2, "return ", property.getPropertyMethod, "(\"", property.name, "\");");
+        } else {
+            writeCodeLn(writer, 2, "return ", property.getPropertyMethod, "(\"", property.name, "\", ", property.type, CLASS,
+                    ");");
         }
 
         writeCodeLn(writer, 1, "}");
