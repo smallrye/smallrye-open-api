@@ -339,7 +339,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     @SuppressWarnings("unchecked")
     @Override
     public <T> T fromJson(JsonNode object, Class<T> desiredType) {
-        if (desiredType == String.class) {
+        if (desiredType == String.class && object.isValueNode()) {
             return (T) object.asText();
         }
         if (desiredType == Integer.class && object.canConvertToInt()) {

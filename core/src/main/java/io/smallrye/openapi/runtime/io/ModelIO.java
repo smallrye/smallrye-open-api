@@ -293,7 +293,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
                     return readValue(node, desiredType.clazz);
                 }
             } else {
-                IoLogging.logger.invalidJsonType(desiredType.clazz.getName(), String.valueOf(node));
+                IoLogging.logger.invalidJsonType(desiredType.toString(), String.valueOf(node));
                 return null;
             }
         } else if (jsonIO().isArray(node)) {
@@ -307,7 +307,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
             } else if (desiredType.clazz == Object.class) {
                 return jsonIO().fromJson(node);
             } else {
-                IoLogging.logger.invalidJsonType(desiredType.clazz.getName(), String.valueOf(node));
+                IoLogging.logger.invalidJsonType(desiredType.toString(), String.valueOf(node));
                 return null;
             }
         } else if (desiredType.type == DataType.Type.OBJECT) {

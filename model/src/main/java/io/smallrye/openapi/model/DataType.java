@@ -33,4 +33,17 @@ public class DataType {
     public static DataType mapOf(DataType content) {
         return new DataType(Type.MAP, content, null);
     }
+
+    @Override
+    public String toString() {
+        switch (type) {
+            case LIST:
+                return "list of [" + content.toString() + "]";
+            case MAP:
+                return "map of [" + content.toString() + "]";
+            case OBJECT:
+            default:
+                return clazz.getName();
+        }
+    }
 }

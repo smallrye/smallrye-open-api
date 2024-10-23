@@ -108,6 +108,7 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
 
             try (Writer writer = fileObject.openWriter()) {
                 writeClassPrefix(writer, rootPackage);
+                writeGenerated(writer);
 
                 writeCodeLn(writer, 0, "public class SmallRyeOASModels {");
                 writeCodeLn(writer, 1, "public interface Properties {");
@@ -230,9 +231,8 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
 
     private void writeClassHeader(Writer writer, Class<? extends Constructible> constructible,
             Map<String, Object> modelAnnotation) throws IOException {
-        writeCodeLn(writer, 0, "@", Generated.class.getName(), "(value = \"", getClass().getName(), "\", date = \"",
-                OffsetDateTime.now().toString(), "\")");
 
+        writeGenerated(writer);
         writer.write(PUBLIC);
 
         if (get(modelAnnotation, "incomplete", Boolean.class).booleanValue()) {
@@ -733,6 +733,11 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
     private void writeOverride(Writer writer) throws IOException {
         writer.write(INDENT);
         writer.write("@Override\n");
+    }
+
+    private void writeGenerated(Writer writer) throws IOException {
+        writeCodeLn(writer, 0, "@", Generated.class.getName(), "(value = \"", getClass().getName(), "\", date = \"",
+                OffsetDateTime.now().toString(), "\")");
     }
 
     private void writeClassPrefix(Writer writer, String packageName) throws IOException {
