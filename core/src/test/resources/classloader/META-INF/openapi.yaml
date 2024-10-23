@@ -3,4 +3,8 @@ openapi: 3.1.0
 info:
   title: Loaded from the class path
   version: "1.0.0"
+  # additional invalid types to ensure no exceptions
+  contact: []
+  license: null
+  summary: {}
 paths: {}

@@ -129,6 +129,11 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     }
 
     @Override
+    public boolean isNull(JsonNode value) {
+        return value != null && value.isNull();
+    }
+
+    @Override
     public Integer getJsonInt(ObjectNode object, String key) {
         JsonNode value = object.get(key);
         return value != null && value.isInt() ? value.asInt() : null;
