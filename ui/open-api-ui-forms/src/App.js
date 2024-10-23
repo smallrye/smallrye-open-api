@@ -31,7 +31,7 @@ async function schemaOptions(openapiURL){
     }
   }
   const result = new SwaggerResult(endpoints, s);
-  return result;    
+  return result;
 }
 
 class OverrideRequestModal extends React.Component {
@@ -194,10 +194,10 @@ class MyOpenAPIForm extends React.Component {
       headers: {
         'Accept': 'application/json, text/plain',
         'Content-Type': 'application/json'
-    }, 
-      body: JSON.stringify(formData), 
+    },
+      body: JSON.stringify(formData),
       method: "POST",
-      mode: "cors" 
+      mode: "cors"
     };
     const destURL = this.state.selectedServer + this.state.selected.url;
     fetch(destURL, other_params)
