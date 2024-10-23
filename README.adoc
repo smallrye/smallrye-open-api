@@ -24,12 +24,16 @@ mvn clean install
 * link:extension-spring[extension-spring] - The Spring entry point. This module depends on Spring and core.
 * link:extension-vertx[extension-vertx] - The Vert.x entry point. This module depends on Vert.x and core.
 * link:implementation[implementation] - Implementation of the Eclipse MicroProfile OpenAPI specification. This just pulls in Core and the JAX-RS extension .
+* link:model[model] - Base model classes used by core and extensions to represent an OpenAPI document
 * link:testsuite[testsuite] - Test Suites and Data
-** link:testsuite/tck[tck] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
-** link:testsuite/extra[extra] - Extra integration tests not related to the TCK.
-** link:testsuite/data[data] - Quarkus application with tests to verify additional annotation scanning scenarios
 ** link:testsuite/coverage[coverage] - Test coverage report aggregator for other modules
-* link:tools/maven-plugin[maven-plugin] - Maven plugin that creates the OpenAPI Schema on build.
+** link:testsuite/data[data] - Quarkus application with tests to verify additional annotation scanning scenarios
+** link:testsuite/extra[extra] - Extra integration tests not related to the TCK.
+** link:testsuite/tck[tck] - Test suite to run the implementation against the Eclipse MicroProfile OpenAPI TCK.
+* link:tools[tools]
+** link:tools/gradle-plugin[gradle-plugin] - Gradle plugin that creates the OpenAPI Schema on build.
+** link:tools/maven-plugin[maven-plugin] - Maven plugin that creates the OpenAPI Schema on build.
+** link:tools/model-apt[model-apt] - APT processor to generate model classes (in core) based on annotations (not for general-purpose use)
 
 === Links
 

@@ -11,12 +11,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import io.smallrye.openapi.api.models.tags.TagImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
@@ -89,56 +89,12 @@ public class TagIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Tag, V, 
     public Tag read(AnnotationInstance annotation) {
         Objects.requireNonNull(annotation, "Tag annotation must not be null");
         IoLogging.logger.singleAnnotation("@Tag");
-        Tag tag = new TagImpl();
+        Tag tag = OASFactory.createTag();
         tag.setName(value(annotation, PROP_NAME));
         tag.setDescription(value(annotation, PROP_DESCRIPTION));
         tag.setExternalDocs(extDocIO().read(annotation.value(PROP_EXTERNAL_DOCS)));
         tag.setExtensions(extensionIO().readExtensible(annotation));
 
         return tag;
-    }
-
-    public List<Tag> readList(V node) {
-        return Optional.ofNullable(node)
-                .filter(jsonIO()::isArray)
-                .map(jsonIO()::asArray)
-                .map(jsonIO()::entries)
-                .map(Collection::stream)
-                .map(elements -> {
-                    IoLogging.logger.jsonArray("Tag");
-                    return elements.filter(jsonIO()::isObject)
-                            .map(jsonIO()::asObject)
-                            .map(this::readObject)
-                            .collect(Collectors.toCollection(ArrayList::new));
-                })
-                .orElse(null);
-    }
-
-    @Override
-    public Tag readObject(O node) {
-        IoLogging.logger.singleJsonNode("Tag");
-        Tag tag = new TagImpl();
-        tag.setName(jsonIO().getString(node, PROP_NAME));
-        tag.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        tag.setExternalDocs(extDocIO().readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
-        tag.setExtensions(extensionIO().readMap(node));
-        return tag;
-    }
-
-    public Optional<A> write(List<Tag> models) {
-        return optionalJsonArray(models).map(array -> {
-            models.forEach(model -> write(model).ifPresent(v -> jsonIO().add(array, v)));
-            return array;
-        }).map(jsonIO()::buildArray);
-    }
-
-    public Optional<O> write(Tag model) {
-        return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_NAME, jsonIO().toJson(model.getName()));
-            setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-            setIfPresent(node, PROP_EXTERNAL_DOCS, extDocIO().write(model.getExternalDocs()));
-            setAllIfPresent(node, extensionIO().write(model));
-            return node;
-        }).map(jsonIO()::buildObject);
     }
 }

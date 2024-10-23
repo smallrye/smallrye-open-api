@@ -38,37 +38,6 @@ import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.eclipse.microprofile.openapi.spi.OASFactoryResolver;
 
-import io.smallrye.openapi.api.models.ComponentsImpl;
-import io.smallrye.openapi.api.models.ExternalDocumentationImpl;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
-import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.PathItemImpl;
-import io.smallrye.openapi.api.models.PathsImpl;
-import io.smallrye.openapi.api.models.callbacks.CallbackImpl;
-import io.smallrye.openapi.api.models.examples.ExampleImpl;
-import io.smallrye.openapi.api.models.headers.HeaderImpl;
-import io.smallrye.openapi.api.models.info.ContactImpl;
-import io.smallrye.openapi.api.models.info.InfoImpl;
-import io.smallrye.openapi.api.models.info.LicenseImpl;
-import io.smallrye.openapi.api.models.links.LinkImpl;
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.DiscriminatorImpl;
-import io.smallrye.openapi.api.models.media.EncodingImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.media.XMLImpl;
-import io.smallrye.openapi.api.models.parameters.ParameterImpl;
-import io.smallrye.openapi.api.models.parameters.RequestBodyImpl;
-import io.smallrye.openapi.api.models.responses.APIResponseImpl;
-import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
-import io.smallrye.openapi.api.models.security.OAuthFlowImpl;
-import io.smallrye.openapi.api.models.security.OAuthFlowsImpl;
-import io.smallrye.openapi.api.models.security.SecurityRequirementImpl;
-import io.smallrye.openapi.api.models.security.SecuritySchemeImpl;
-import io.smallrye.openapi.api.models.servers.ServerImpl;
-import io.smallrye.openapi.api.models.servers.ServerVariableImpl;
-import io.smallrye.openapi.api.models.tags.TagImpl;
-
 /**
  * An implementation of the OpenAPI 1.0 spec's {@link OASFactoryResolver}. This class
  * is responsible for constructing vendor specific models given a {@link Constructible}
@@ -84,36 +53,37 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
 
         static {
             Map<Class<? extends Constructible>, Supplier<? extends Constructible>> registry = new HashMap<>(30);
-            registry.put(APIResponse.class, APIResponseImpl::new);
-            registry.put(APIResponses.class, APIResponsesImpl::new);
-            registry.put(Callback.class, CallbackImpl::new);
-            registry.put(Components.class, ComponentsImpl::new);
-            registry.put(Contact.class, ContactImpl::new);
-            registry.put(Content.class, ContentImpl::new);
-            registry.put(Discriminator.class, DiscriminatorImpl::new);
-            registry.put(Encoding.class, EncodingImpl::new);
-            registry.put(Example.class, ExampleImpl::new);
-            registry.put(ExternalDocumentation.class, ExternalDocumentationImpl::new);
-            registry.put(Header.class, HeaderImpl::new);
-            registry.put(Info.class, InfoImpl::new);
-            registry.put(License.class, LicenseImpl::new);
-            registry.put(Link.class, LinkImpl::new);
-            registry.put(MediaType.class, MediaTypeImpl::new);
-            registry.put(OAuthFlow.class, OAuthFlowImpl::new);
-            registry.put(OAuthFlows.class, OAuthFlowsImpl::new);
-            registry.put(OpenAPI.class, OpenAPIImpl::new);
-            registry.put(Operation.class, OperationImpl::new);
-            registry.put(Parameter.class, ParameterImpl::new);
-            registry.put(PathItem.class, PathItemImpl::new);
-            registry.put(Paths.class, PathsImpl::new);
-            registry.put(RequestBody.class, RequestBodyImpl::new);
-            registry.put(Schema.class, SchemaImpl::new);
-            registry.put(SecurityRequirement.class, SecurityRequirementImpl::new);
-            registry.put(SecurityScheme.class, SecuritySchemeImpl::new);
-            registry.put(Server.class, ServerImpl::new);
-            registry.put(ServerVariable.class, ServerVariableImpl::new);
-            registry.put(Tag.class, TagImpl::new);
-            registry.put(XML.class, XMLImpl::new);
+            registry.put(APIResponse.class, io.smallrye.openapi.internal.models.responses.APIResponse::new);
+            registry.put(APIResponses.class, io.smallrye.openapi.internal.models.responses.APIResponses::new);
+            registry.put(Callback.class, io.smallrye.openapi.internal.models.callbacks.Callback::new);
+            registry.put(Components.class, io.smallrye.openapi.internal.models.Components::new);
+            registry.put(Contact.class, io.smallrye.openapi.internal.models.info.Contact::new);
+            registry.put(Content.class, io.smallrye.openapi.internal.models.media.Content::new);
+            registry.put(Discriminator.class, io.smallrye.openapi.internal.models.media.Discriminator::new);
+            registry.put(Encoding.class, io.smallrye.openapi.internal.models.media.Encoding::new);
+            registry.put(Example.class, io.smallrye.openapi.internal.models.examples.Example::new);
+            registry.put(ExternalDocumentation.class, io.smallrye.openapi.internal.models.ExternalDocumentation::new);
+            registry.put(Header.class, io.smallrye.openapi.internal.models.headers.Header::new);
+            registry.put(Info.class, io.smallrye.openapi.internal.models.info.Info::new);
+            registry.put(License.class, io.smallrye.openapi.internal.models.info.License::new);
+            registry.put(Link.class, io.smallrye.openapi.internal.models.links.Link::new);
+            registry.put(MediaType.class, io.smallrye.openapi.internal.models.media.MediaType::new);
+            registry.put(OAuthFlow.class, io.smallrye.openapi.internal.models.security.OAuthFlow::new);
+            registry.put(OAuthFlows.class, io.smallrye.openapi.internal.models.security.OAuthFlows::new);
+            registry.put(OpenAPI.class, io.smallrye.openapi.internal.models.OpenAPI::new);
+            // Using deprecated model until Quarkus no longer references it directly
+            registry.put(Operation.class, io.smallrye.openapi.api.models.OperationImpl::new);
+            registry.put(Parameter.class, io.smallrye.openapi.internal.models.parameters.Parameter::new);
+            registry.put(PathItem.class, io.smallrye.openapi.internal.models.PathItem::new);
+            registry.put(Paths.class, io.smallrye.openapi.internal.models.Paths::new);
+            registry.put(RequestBody.class, io.smallrye.openapi.internal.models.parameters.RequestBody::new);
+            registry.put(Schema.class, io.smallrye.openapi.internal.models.media.Schema::new);
+            registry.put(SecurityRequirement.class, io.smallrye.openapi.internal.models.security.SecurityRequirement::new);
+            registry.put(SecurityScheme.class, io.smallrye.openapi.internal.models.security.SecurityScheme::new);
+            registry.put(Server.class, io.smallrye.openapi.internal.models.servers.Server::new);
+            registry.put(ServerVariable.class, io.smallrye.openapi.internal.models.servers.ServerVariable::new);
+            registry.put(Tag.class, io.smallrye.openapi.internal.models.tags.Tag::new);
+            registry.put(XML.class, io.smallrye.openapi.internal.models.media.XML::new);
             REGISTRY = registry;
         }
     }

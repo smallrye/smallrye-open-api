@@ -3,11 +3,13 @@ package io.smallrye.openapi.runtime.io.extensions;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
@@ -29,6 +31,12 @@ public class ExtensionIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
 
     public ExtensionIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.EXTENSION, Names.create(Object.class));
+    }
+
+    @Override
+    protected Optional<String> getName(AnnotationInstance annotation) {
+        return super.getName(annotation)
+                .map(name -> name.startsWith(EXTENSION_PROPERTY_PREFIX) ? name : EXTENSION_PROPERTY_PREFIX.concat(name));
     }
 
     @Override
@@ -77,20 +85,13 @@ public class ExtensionIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
         return jsonIO().fromJson(node);
     }
 
-    @Override
-    public Optional<O> write(Object model) {
-        return Optional.ofNullable(model)
-                .filter(Extensible.class::isInstance)
-                .map(Extensible.class::cast)
-                .flatMap(this::write);
-    }
-
     public Optional<O> write(Extensible<?> model) {
         return optionalJsonObject(model.getExtensions()).map(node -> {
             model.getExtensions()
                     .entrySet()
                     .stream()
                     .map(e -> isExtension(e) ? e : entry(EXTENSION_PROPERTY_PREFIX + e.getKey(), e.getValue()))
+                    .filter(Predicate.not(e -> Extensions.isPrivateExtension(e.getKey())))
                     .forEach(e -> setIfPresent(node, e.getKey(), jsonIO().toJson(e.getValue())));
             return node;
         }).map(jsonIO()::buildObject);

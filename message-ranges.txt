@@ -30,7 +30,9 @@
 
 09000-09999 = smallrye-open-api [io.smallrye.openapi.spi] (messages)
 
-10000-10999 = smallrye-open-api [io.smallrye.openapi.jaxrs] (logging)
+10000-10499 = smallrye-open-api [io.smallrye.openapi.jaxrs] (logging)
+
+10500-10999 = smallrye-open-api [io.smallrye.openapi.model] (logging)
 
 11000-11999 = smallrye-open-api [io.smallrye.openapi.spring] (logging)
 

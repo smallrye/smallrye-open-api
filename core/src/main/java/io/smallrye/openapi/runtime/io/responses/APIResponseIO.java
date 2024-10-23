@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
@@ -12,16 +13,13 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.responses.APIResponseImpl;
+import io.smallrye.openapi.model.Extensions;
+import io.smallrye.openapi.model.ReferenceType;
 import io.smallrye.openapi.runtime.io.IOContext;
-import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.MapModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.ReferenceIO;
-import io.smallrye.openapi.runtime.io.ReferenceType;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -45,14 +43,14 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
     @Override
     public APIResponse read(AnnotationInstance annotation) {
         IoLogging.logger.singleAnnotation("@APIResponse");
-        APIResponseImpl response = new APIResponseImpl();
+        APIResponse response = OASFactory.createAPIResponse();
         response.setDescription(value(annotation, PROP_DESCRIPTION));
         response.setHeaders(headerIO().readMap(annotation.value(PROP_HEADERS)));
         response.setLinks(linkIO().readMap(annotation.value(PROP_LINKS)));
         response.setContent(contentIO().read(annotation.value(PROP_CONTENT), ContentIO.Direction.OUTPUT));
         response.setExtensions(extensionIO().readExtensible(annotation));
         response.setRef(ReferenceType.RESPONSE.refValue(annotation));
-        response.setResponseCode(responseCode(annotation).orElse(null));
+        Extensions.setResponseCode(response, responseCode(annotation).orElse(null));
         return response;
     }
 
@@ -60,23 +58,23 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
         IoLogging.logger.singleAnnotation("@APIResponseSchema");
 
         String responseCode = value(annotation, PROP_RESPONSE_CODE);
-        APIResponseImpl response = new APIResponseImpl();
+        APIResponse response = OASFactory.createAPIResponse();
         response.setDescription(value(annotation, PROP_RESPONSE_DESCRIPTION));
-        response.setResponseCode(responseCode);
+        Extensions.setResponseCode(response, responseCode);
 
         Optional.ofNullable(scannerContext().getCurrentProduces()).ifPresent(mediaTypes -> {
             Type responseType = value(annotation, PROP_VALUE);
 
             if (!TypeUtil.isVoid(responseType)) {
                 // Only generate the content if the endpoint declares an @Produces media type
-                Content content = new ContentImpl();
+                Content content = OASFactory.createContent();
                 Schema responseSchema = SchemaFactory.typeToSchema(scannerContext(),
                         responseType,
                         null,
                         scannerContext().getExtensions());
 
                 for (String mediaType : mediaTypes) {
-                    content.addMediaType(mediaType, new MediaTypeImpl().schema(responseSchema));
+                    content.addMediaType(mediaType, OASFactory.createMediaType().schema(responseSchema));
                 }
 
                 response.setContent(content);
@@ -94,43 +92,11 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
             return Optional.of(responseCode);
         } else if (ref != null) {
             return Optional.ofNullable(ModelUtil.getComponent(scannerContext().getOpenApi(), ref))
-                    .filter(APIResponseImpl.class::isInstance)
-                    .map(APIResponseImpl.class::cast)
-                    .map(APIResponseImpl::getResponseCode);
+                    .filter(APIResponse.class::isInstance)
+                    .map(APIResponse.class::cast)
+                    .map(Extensions::getResponseCode);
         } else {
             return Optional.of(APIResponses.DEFAULT);
         }
-    }
-
-    @Override
-    public APIResponse readObject(O node) {
-        IoLogging.logger.singleJsonObject("Response");
-        APIResponse model = new APIResponseImpl();
-        model.setRef(readReference(node));
-        model.setDescription(jsonIO().getString(node, PROP_DESCRIPTION));
-        model.setHeaders(headerIO().readMap(jsonIO().getValue(node, PROP_HEADERS)));
-        model.setContent(contentIO().readValue(jsonIO().getValue(node, PROP_CONTENT)));
-        model.setLinks(linkIO().readMap(jsonIO().getValue(node, PROP_LINKS)));
-        model.setExtensions(extensionIO().readMap(node));
-        return model;
-    }
-
-    public Optional<O> write(APIResponse model) {
-        return optionalJsonObject(model).map(node -> {
-            if (isReference(model)) {
-                setReference(node, model);
-                if (openApiVersion() == OpenApiVersion.V3_1) {
-                    setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-                }
-            } else {
-                setIfPresent(node, PROP_DESCRIPTION, jsonIO().toJson(model.getDescription()));
-                setIfPresent(node, PROP_HEADERS, headerIO().write(model.getHeaders()));
-                setIfPresent(node, PROP_CONTENT, contentIO().write(model.getContent()));
-                setIfPresent(node, PROP_LINKS, linkIO().write(model.getLinks()));
-                setAllIfPresent(node, extensionIO().write(model));
-            }
-
-            return node;
-        }).map(jsonIO()::buildObject);
     }
 }

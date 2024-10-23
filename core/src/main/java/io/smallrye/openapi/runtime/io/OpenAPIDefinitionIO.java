@@ -2,11 +2,11 @@ package io.smallrye.openapi.runtime.io;
 
 import java.util.Optional;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.SmallRyeOASConfig;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
 
 public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OpenAPI, V, A, O, AB, OB> {
@@ -30,7 +30,7 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
     public OpenAPI read(AnnotationInstance annotation) {
         IoLogging.logger.annotation("@OpenAPIDefinition");
 
-        OpenAPI openApi = new OpenAPIImpl();
+        OpenAPI openApi = OASFactory.createOpenAPI();
         openApi.setOpenapi(SmallRyeOASConfig.Defaults.VERSION);
         openApi.setInfo(infoIO().read(annotation.value(PROP_INFO)));
         openApi.setTags(tagIO().readList(annotation.value(PROP_TAGS)));
@@ -53,46 +53,16 @@ public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends Mo
      */
     @Override
     public OpenAPI readObject(O node) {
-        IoLogging.logger.jsonNode("OpenAPIDefinition");
-
         String version = jsonIO().getString(node, PROP_OPENAPI);
         setOpenApiVersion(OpenApiVersion.fromString(version));
-
-        OpenAPI openApi = new OpenAPIImpl();
-        openApi.setOpenapi(version);
-        openApi.setInfo(infoIO().readValue(jsonIO().getValue(node, PROP_INFO)));
-        openApi.setTags(tagIO().readList(jsonIO().getValue(node, PROP_TAGS)));
-        openApi.setServers(serverIO().readList(jsonIO().getValue(node, PROP_SERVERS)));
-        openApi.setSecurity(securityIO().readRequirements(jsonIO().getValue(node, PROP_SECURITY)));
-        openApi.setExternalDocs(extDocIO().readValue(jsonIO().getValue(node, PROP_EXTERNAL_DOCS)));
-        openApi.setComponents(componentsIO().readValue(jsonIO().getValue(node, PROP_COMPONENTS)));
-        openApi.setPaths(pathsIO().readValue(jsonIO().getValue(node, PROP_PATHS)));
-        if (openApiVersion() == OpenApiVersion.V3_1) {
-            openApi.setWebhooks(pathItemIO().readMap(jsonIO().getValue(node, PROP_WEBHOOKS)));
-        }
-        openApi.setExtensions(extensionIO().readMap(node));
-        return openApi;
+        return readObject(OpenAPI.class, node);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<O> write(OpenAPI model) {
         String version = model.getOpenapi();
         setOpenApiVersion(OpenApiVersion.fromString(version));
-
-        return optionalJsonObject(model).map(node -> {
-            setIfPresent(node, PROP_OPENAPI, jsonIO().toJson(version));
-            setIfPresent(node, PROP_INFO, infoIO().write(model.getInfo()));
-            setIfPresent(node, PROP_EXTERNAL_DOCS, extDocIO().write(model.getExternalDocs()));
-            setIfPresent(node, PROP_SERVERS, serverIO().write(model.getServers()));
-            setIfPresent(node, PROP_SECURITY, securityIO().write(model.getSecurity()));
-            setIfPresent(node, PROP_TAGS, tagIO().write(model.getTags()));
-            setIfPresent(node, PROP_PATHS, pathsIO().write(model.getPaths()));
-            if (openApiVersion() == OpenApiVersion.V3_1) {
-                setIfPresent(node, PROP_WEBHOOKS, pathItemIO().write(model.getWebhooks()));
-            }
-            setIfPresent(node, PROP_COMPONENTS, componentsIO().write(model.getComponents()));
-            setAllIfPresent(node, extensionIO().write(model));
-            return node;
-        }).map(jsonIO()::buildObject);
+        return (Optional<O>) jsonIO().toJson(model, this);
     }
 }

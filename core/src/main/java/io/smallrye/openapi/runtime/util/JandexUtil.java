@@ -8,12 +8,13 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.runtime.io.ReferenceType;
+import io.smallrye.openapi.model.ReferenceType;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -30,33 +31,8 @@ public class JandexUtil {
     private JandexUtil() {
     }
 
-    public static String createUniqueAnnotationTargetRef(AnnotationTarget annotationTarget) {
-        switch (annotationTarget.kind()) {
-            case FIELD:
-                return JandexUtil.createUniqueFieldRef(annotationTarget.asField());
-            case METHOD:
-                ClassInfo classInfo = annotationTarget.asMethod().declaringClass();
-                return JandexUtil.createUniqueMethodReference(classInfo, annotationTarget.asMethod());
-            case METHOD_PARAMETER:
-                return JandexUtil.createUniqueMethodParameterRef(annotationTarget.asMethodParameter());
-            default:
-                return null;
-        }
-    }
-
-    public static String createUniqueFieldRef(FieldInfo fieldInfo) {
-        ClassInfo classInfo = fieldInfo.declaringClass();
-        return "f" + classInfo.hashCode() + "_" + fieldInfo.hashCode();
-    }
-
     public static String createUniqueMethodReference(ClassInfo classInfo, MethodInfo methodInfo) {
         return "m" + classInfo.hashCode() + "_" + methodInfo.hashCode();
-    }
-
-    public static String createUniqueMethodParameterRef(MethodParameterInfo methodParameter) {
-        final MethodInfo methodInfo = methodParameter.method();
-        final ClassInfo classInfo = methodInfo.declaringClass();
-        return "p" + classInfo.hashCode() + "_" + methodInfo.hashCode() + "_" + methodParameter.position();
     }
 
     /**
@@ -145,6 +121,30 @@ public class JandexUtil {
                 SchemaConstant.PROP_TYPE, org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.class);
 
         return (type == org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.ARRAY);
+    }
+
+    /**
+     * Returns true if the given {@link org.eclipse.microprofile.openapi.annotations.media.Schema @Schema}
+     * annotation is a "boolean schema". This is defined as a schema with an implementation that is equal
+     * to either {@link org.eclipse.microprofile.openapi.annotations.media.Schema.True Schema.True} or
+     * {@link org.eclipse.microprofile.openapi.annotations.media.Schema.False Schema.False}.
+     *
+     * @param annotation schema annotation instance
+     * @return true if it has a boolean schema implementation, otherwise false.
+     */
+    public static boolean isBooleanSchema(AnnotationInstance annotation) {
+        if (!hasImplementation(annotation)) {
+            return false;
+        }
+
+        AnnotationValue impl = annotation.value(SchemaConstant.PROP_IMPLEMENTATION);
+
+        if (impl == null) {
+            return false;
+        }
+
+        DotName name = impl.asClass().name();
+        return name.equals(SchemaConstant.DOTNAME_TRUE_SCHEMA) || name.equals(SchemaConstant.DOTNAME_FALSE_SCHEMA);
     }
 
     /**

@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.MethodInfo;
@@ -22,8 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.models.OperationImpl;
-import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.IndexScannerTestBase;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
@@ -108,7 +108,7 @@ class AbstractAnnotationScannerTest {
     void testNoConfiguredProfile() {
         OpenApiConfig config = new DummyOpenApiConfig();
 
-        OperationImpl operation = new OperationImpl();
+        Operation operation = OASFactory.createOperation();
         operation.setExtensions(Collections.singletonMap("x-smallrye-profile-external", ""));
 
         boolean result = AbstractAnnotationScanner.processProfiles(config, operation);
@@ -126,7 +126,7 @@ class AbstractAnnotationScannerTest {
             }
         };
 
-        OperationImpl operation = new OperationImpl();
+        Operation operation = OASFactory.createOperation();
 
         boolean result = AbstractAnnotationScanner.processProfiles(config, operation);
         assertFalse(result);
@@ -147,7 +147,7 @@ class AbstractAnnotationScannerTest {
             }
         };
 
-        OperationImpl operation = new OperationImpl();
+        Operation operation = OASFactory.createOperation();
 
         boolean result = AbstractAnnotationScanner.processProfiles(config, operation);
         assertTrue(result);
@@ -175,7 +175,7 @@ class AbstractAnnotationScannerTest {
         config.setAllowNakedPathParameter(allowNaked);
 
         ResourceParameters params = new ResourceParameters();
-        params.setOperationParameters(Arrays.asList(new ParameterImpl().name(paramName).in(paramIn)));
+        params.setOperationParameters(Arrays.asList(OASFactory.createParameter().name(paramName).in(paramIn)));
 
         AbstractAnnotationScanner scanner = new DummyAnnotationScanner();
         AnnotationScannerContext context = new AnnotationScannerContext(null, Thread.currentThread().getContextClassLoader(),

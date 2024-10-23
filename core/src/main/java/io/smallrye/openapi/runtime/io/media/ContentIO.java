@@ -2,12 +2,12 @@ package io.smallrye.openapi.runtime.io.media;
 
 import java.util.Optional;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
-import io.smallrye.openapi.api.models.media.ContentImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
@@ -47,7 +47,7 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
 
     private Content read(AnnotationInstance[] annotations, Direction direction) {
         IoLogging.logger.singleAnnotation("@Content");
-        Content content = new ContentImpl();
+        Content content = OASFactory.createContent();
 
         for (AnnotationInstance annotation : annotations) {
             String contentType = value(annotation, PROP_MEDIA_TYPE);
@@ -85,25 +85,5 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
     @Override
     public Content read(AnnotationInstance annotation) {
         throw new UnsupportedOperationException("Reading a single @Content annotation is not supported");
-    }
-
-    @Override
-    public Content readObject(O node) {
-        Content content = new ContentImpl();
-
-        jsonIO().properties(node)
-                .forEach(property -> content.addMediaType(property.getKey(), mediaTypeIO().readValue(property.getValue())));
-
-        return content;
-    }
-
-    @Override
-    public Optional<O> write(Content model) {
-        return optionalJsonObject(model).map(node -> {
-            if (model.getMediaTypes() != null) {
-                model.getMediaTypes().forEach((key, mediaType) -> setIfPresent(node, key, mediaTypeIO().write(mediaType)));
-            }
-            return node;
-        }).map(jsonIO()::buildObject);
     }
 }

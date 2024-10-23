@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
@@ -43,12 +44,9 @@ import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.media.ContentImpl;
-import io.smallrye.openapi.api.models.media.EncodingImpl;
-import io.smallrye.openapi.api.models.media.MediaTypeImpl;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.parameters.ParameterImpl;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
@@ -397,12 +395,14 @@ public abstract class AbstractParameterProcessor {
      * @return true if the parameter may have the patter applied, otherwise false
      */
     boolean templateParameterPatternEligible(Parameter param) {
+        Schema paramSchema = param.getSchema();
+        List<SchemaType> schemaTypes = paramSchema != null ? paramSchema.getType() : Collections.emptyList();
+
         return Parameter.In.PATH.equals(param.getIn())
                 && !Style.MATRIX.equals(param.getStyle())
-                && param.getSchema() != null
-                && param.getSchema().getType() != null
-                && param.getSchema().getType().contains(SchemaType.STRING)
-                && param.getSchema().getPattern() == null;
+                && paramSchema != null
+                && schemaTypes.contains(SchemaType.STRING)
+                && paramSchema.getPattern() == null;
     }
 
     /**
@@ -452,7 +452,7 @@ public abstract class AbstractParameterProcessor {
                         generated.frameworkParam = getMatrixParameter();
                         generated.target = null;
                         generated.targetType = null;
-                        generated.oaiParam = new ParameterImpl();
+                        generated.oaiParam = OASFactory.createParameter();
                         generated.oaiParam.setStyle(Style.MATRIX);
                         generated.oaiParam.setExplode(Boolean.TRUE);
                         params.put(new ParameterContextKey(generated), generated);
@@ -463,7 +463,7 @@ public abstract class AbstractParameterProcessor {
 
             if (schemas.isEmpty()) {
                 // ParameterContext was generated above or no @Schema was provided on the @Parameter style=matrix
-                Schema schema = new SchemaImpl();
+                Schema schema = OASFactory.createSchema();
                 schema.addType(SchemaType.OBJECT);
                 ModelUtil.setParameterSchema(context.oaiParam, schema);
                 schemas = Arrays.asList(schema);
@@ -488,7 +488,7 @@ public abstract class AbstractParameterProcessor {
     }
 
     private Parameter mapParameter(MethodInfo resourceMethod, ParameterContext context) {
-        ParameterImpl param = context.oaiParam != null ? (ParameterImpl) context.oaiParam : new ParameterImpl();
+        Parameter param = context.oaiParam != null ? context.oaiParam : OASFactory.createParameter();
 
         if (context.frameworkParam == null) {
             scannerContext.getCurrentScanner().ifPresent(scanner -> {
@@ -520,8 +520,8 @@ public abstract class AbstractParameterProcessor {
             param.setRequired(Boolean.FALSE);
         }
 
-        if (param.getParamRef() == null && context.target != null) {
-            param.setParamRef(JandexUtil.createUniqueAnnotationTargetRef(context.target));
+        if (context.target != null && Extensions.getParamRef(param) == null) {
+            Extensions.setParamRef(param, context.target);
         }
 
         return param;
@@ -569,7 +569,7 @@ public abstract class AbstractParameterProcessor {
             }
 
             // readSchema *may* replace the existing schema, so we must assign.
-            schema = SchemaFactory.readSchema(scannerContext, new SchemaImpl(), schemaAnnotation, defaults);
+            schema = SchemaFactory.readSchema(scannerContext, OASFactory.createSchema(), schemaAnnotation, defaults);
         } else {
             schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, schemaAnnotation, extensions);
         }
@@ -624,16 +624,16 @@ public abstract class AbstractParameterProcessor {
             Schema refSchema = ModelUtil.getComponent(scannerContext.getOpenApi(), ref);
 
             if (refSchema != null) {
-                localSchema = new SchemaImpl().type(refSchema.getType());
+                localSchema = OASFactory.createSchema().type(refSchema.getType());
             } else {
-                localSchema = new SchemaImpl().addType(SchemaType
+                localSchema = OASFactory.createSchema().addType(SchemaType
                         .valueOf(TypeUtil.getTypeAttributes(paramType).get(SchemaConstant.PROP_TYPE).toString().toUpperCase()));
             }
         } else {
             localSchema = paramSchema;
         }
 
-        int modCount = SchemaImpl.getModCount(localSchema);
+        int modCount = SchemaSupport.getModCount(localSchema);
 
         if (beanValidationScanner.isPresent()) {
             beanValidationScanner.get().applyConstraints(context.target, localSchema, param.getName(),
@@ -648,13 +648,14 @@ public abstract class AbstractParameterProcessor {
 
         if (localOnlySchemaModified(paramSchema, localSchema, modCount)) {
             // Add new `allOf` schema, erasing `type` derived above from the local schema
-            Schema allOf = new SchemaImpl().addAllOf(paramSchema).addAllOf(localSchema.type((List<SchemaType>) null));
+            Schema allOf = OASFactory.createSchema().addAllOf(paramSchema).addAllOf(localSchema.type((List<SchemaType>) null));
             param.setSchema(allOf);
         }
     }
 
     boolean localOnlySchemaModified(Schema paramSchema, Schema localSchema, int originalModCount) {
-        return localSchema != paramSchema && originalModCount != -1 && SchemaImpl.getModCount(localSchema) > originalModCount;
+        int currentModCount = SchemaSupport.getModCount(localSchema);
+        return localSchema != paramSchema && originalModCount != -1 && currentModCount > originalModCount;
     }
 
     /**
@@ -679,7 +680,8 @@ public abstract class AbstractParameterProcessor {
             if (schemaAnnotationSupported) {
                 schemaAnnotation = scannerContext.annotations().getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
             }
-            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, schemaAnnotation, extensions);
+            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType,
+                    schemaAnnotation, extensions);
 
             if (paramSchema == null) {
                 // hidden
@@ -697,8 +699,8 @@ public abstract class AbstractParameterProcessor {
                         (target, name) -> setRequired(name, schema));
             }
 
-            if (SchemaImpl.getNullable(paramSchema) == null && TypeUtil.isOptional(paramType)) {
-                SchemaImpl.setNullable(paramSchema, Boolean.TRUE);
+            if (SchemaSupport.getNullable(paramSchema) == null && TypeUtil.isOptional(paramType)) {
+                SchemaSupport.setNullable(paramSchema, Boolean.TRUE);
             }
 
             if (schema.getProperties() != null) {
@@ -747,12 +749,12 @@ public abstract class AbstractParameterProcessor {
             return null;
         }
 
-        Content content = new ContentImpl();
+        Content content = OASFactory.createContent();
 
         Arrays.stream(getFormMediaTypes(scannerContext::getCurrentConsumes, this::getFormMediaType))
                 .forEach(mediaTypeName -> {
-                    MediaType mediaType = new MediaTypeImpl();
-                    Schema schema = new SchemaImpl();
+                    MediaType mediaType = OASFactory.createMediaType();
+                    Schema schema = OASFactory.createSchema();
                     Map<String, Encoding> encodings = new HashMap<>();
                     schema.addType(SchemaType.OBJECT);
                     mediaType.setSchema(schema);
@@ -799,7 +801,7 @@ public abstract class AbstractParameterProcessor {
                     Encoding encoding = null;
 
                     if (context.oaiParam.getStyle() != null) {
-                        encoding = new EncodingImpl();
+                        encoding = OASFactory.createEncoding();
 
                         String styleString = context.oaiParam.getStyle().toString();
                         Arrays.stream(Encoding.Style.values())
@@ -809,7 +811,7 @@ public abstract class AbstractParameterProcessor {
                     }
 
                     if (context.oaiParam.getExplode() != null) {
-                        encoding = encoding != null ? encoding : new EncodingImpl();
+                        encoding = encoding != null ? encoding : OASFactory.createEncoding();
                         encoding.setExplode(context.oaiParam.getExplode());
                     }
 
@@ -865,7 +867,7 @@ public abstract class AbstractParameterProcessor {
             return true;
         }
 
-        if (ParameterImpl.isHidden(parameter)) {
+        if (Extensions.isHidden(parameter)) {
             return true;
         }
 
@@ -1270,6 +1272,9 @@ public abstract class AbstractParameterProcessor {
             Parameter commonParam = ModelUtil.dereference(scannerContext.getOpenApi(), oaiParam);
             oaiParam.setName(commonParam.getName());
             oaiParam.setIn(commonParam.getIn());
+            if (commonParam.getIn() == In.PATH) {
+                oaiParam.setRequired(true);
+            }
             oaiParam.setStyle(commonParam.getStyle());
         }
 

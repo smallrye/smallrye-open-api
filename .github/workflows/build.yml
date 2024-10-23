@@ -92,9 +92,10 @@ jobs:
         #- tck-version: "2.0.1"
         #- tck-version: "3.0"
         #- tck-version: "3.1.1"
-        - tck-version: "4.0.1"
+        - title: "4.0.x"
+          tck-version: "4.0.2"
 
-    name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
+    name: MicroProfile OpenAPI TCK ${{ matrix.title }}
     steps:
       - uses: actions/checkout@v4
         name: checkout

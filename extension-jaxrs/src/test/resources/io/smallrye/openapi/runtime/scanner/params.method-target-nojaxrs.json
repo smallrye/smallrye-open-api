@@ -138,7 +138,6 @@
             "headers": {
               "TotalCount": {
                 "description": "Total number of items found",
-                "style": "simple",
                 "schema": {
                   "type": "integer"
                 }

@@ -5,21 +5,19 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 
-import io.smallrye.openapi.api.models.responses.APIResponsesImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
 import io.smallrye.openapi.runtime.io.Names;
 
 public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO<APIResponses, V, A, O, AB, OB> {
-
-    private static final String PROP_DEFAULT = "default";
 
     public APIResponsesIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.API_RESPONSES, Names.create(APIResponses.class));
@@ -78,7 +76,7 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
      */
     public APIResponses read(AnnotationInstance[] annotations) {
         IoLogging.logger.annotationsListInto("@APIResponse", "APIResponses model");
-        APIResponses responses = new APIResponsesImpl();
+        APIResponses responses = OASFactory.createAPIResponses();
 
         for (AnnotationInstance nested : annotations) {
             apiResponseIO().responseCode(nested)
@@ -86,30 +84,5 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
         }
 
         return responses;
-    }
-
-    @Override
-    public APIResponses readObject(O node) {
-        IoLogging.logger.jsonList("APIResponse");
-
-        APIResponses model = new APIResponsesImpl();
-        model.setDefaultValue(apiResponseIO().readValue(jsonIO().getValue(node, PROP_DEFAULT)));
-        model.setExtensions(extensionIO().readMap(node));
-
-        jsonIO().properties(node)
-                .stream()
-                .filter(not(property -> PROP_DEFAULT.equals(property.getKey())))
-                .forEach(property -> model.addAPIResponse(property.getKey(), apiResponseIO().readValue(property.getValue())));
-
-        return model;
-    }
-
-    public Optional<O> write(APIResponses model) {
-        return optionalJsonObject(model).map(node -> {
-            setAllIfPresent(node, extensionIO().write(model));
-            setIfPresent(node, PROP_DEFAULT, apiResponseIO().write(model.getDefaultValue()));
-            setAllIfPresent(node, apiResponseIO().write(model.getAPIResponses()));
-            return node;
-        }).map(jsonIO()::buildObject);
     }
 }

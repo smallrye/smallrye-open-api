@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.BaseStream;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
@@ -27,8 +28,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.OpenApiConfig.AutoInheritance;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
-import io.smallrye.openapi.api.models.media.XMLImpl;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
@@ -152,7 +152,7 @@ public class OpenApiDataObjectScanner {
         this.index = context.getAugmentedIndex();
         this.objectStack = new DataObjectDeque(this.index);
         this.rootClassType = classType;
-        this.rootSchema = new SchemaImpl();
+        this.rootSchema = OASFactory.createSchema();
         this.rootClassInfo = initialType(classType);
         this.rootAnnotationTarget = annotationTarget;
     }
@@ -180,7 +180,7 @@ public class OpenApiDataObjectScanner {
      * @return the OAI schema
      */
     public static Schema process(PrimitiveType primitive) {
-        Schema primitiveSchema = new SchemaImpl();
+        Schema primitiveSchema = OASFactory.createSchema();
         TypeUtil.applyTypeAttributes(primitive, primitiveSchema);
         return primitiveSchema;
     }
@@ -195,7 +195,7 @@ public class OpenApiDataObjectScanner {
 
         // If top level item is simple
         if (TypeUtil.isTerminalType(rootClassType)) {
-            SchemaImpl simpleSchema = new SchemaImpl();
+            Schema simpleSchema = OASFactory.createSchema();
             TypeUtil.applyTypeAttributes(rootClassType, simpleSchema);
             return simpleSchema;
         }
@@ -208,7 +208,7 @@ public class OpenApiDataObjectScanner {
         if (rootClassInfo == null && objectStack.isEmpty()) {
             // If there's something on the objectStack stack then pre-scanning may have found something.
             ScannerLogging.logger.schemaTypeNotFound(rootClassType.name());
-            return new SchemaImpl().addType(SchemaType.OBJECT);
+            return OASFactory.createSchema().addType(SchemaType.OBJECT);
         }
 
         // Create root node.
@@ -254,7 +254,7 @@ public class OpenApiDataObjectScanner {
 
             if (!hasNonNullType(currentSchema)) {
                 // If not schema has yet been set, consider this an "object"
-                currentSchema.setType(Collections.singletonList(Schema.SchemaType.OBJECT));
+                SchemaSupport.setType(currentSchema, Schema.SchemaType.OBJECT);
             } else {
                 maybeRegisterSchema(currentType, currentSchema, entrySchema);
             }
@@ -301,23 +301,21 @@ public class OpenApiDataObjectScanner {
             Schema refTarget = context.getSchemaRegistry().lookupSchema(currentType, context.getJsonViews());
 
             if (refTarget != entrySchema) {
-                SchemaImpl.clear(entrySchema);
+                entrySchema.setAll(Collections.emptyMap());
                 entrySchema.setRef(ref.getRef());
             }
         }
     }
 
     private static boolean hasNonNullType(Schema schema) {
-        List<Schema.SchemaType> types = schema.getType();
-
-        return types != null && types.stream().anyMatch(t -> t != SchemaType.NULL);
+        return SchemaSupport.getNonNullType(schema) != null;
     }
 
     private void processClassAnnotations(Schema schema, ClassInfo classInfo) {
         String xmlElementName = context.annotations().getAnnotationValue(classInfo, XML_ROOTELEMENT, PROP_NAME);
 
         if (xmlElementName != null && !classInfo.simpleName().equals(xmlElementName)) {
-            schema.setXml(new XMLImpl().name(xmlElementName));
+            schema.setXml(OASFactory.createXML().name(xmlElementName));
         }
     }
 
@@ -335,7 +333,7 @@ public class OpenApiDataObjectScanner {
                 && context.annotations().getAnnotationValue(currentClass, SchemaConstant.DOTNAME_SCHEMA,
                         SchemaConstant.PROP_ALL_OF) == null) {
 
-            Schema parentSchema = new SchemaImpl();
+            Schema parentSchema = OASFactory.createSchema();
             objectStack.push(currentClass, currentPathEntry, superClassType, parentSchema);
             parentSchema = context.getSchemaRegistry().registerReference(superClassType, context.getJsonViews(), null,
                     parentSchema);
@@ -348,7 +346,7 @@ public class OpenApiDataObjectScanner {
     }
 
     private void encloseCurrentSchema(Schema currentSchema, Type currentType, DataObjectDeque.PathEntry currentPathEntry) {
-        Schema enclosingSchema = new SchemaImpl().allOf(currentSchema.getAllOf()).addAllOf(currentSchema);
+        Schema enclosingSchema = OASFactory.createSchema().allOf(currentSchema.getAllOf()).addAllOf(currentSchema);
         currentSchema.setAllOf(null);
 
         currentSchema = enclosingSchema;

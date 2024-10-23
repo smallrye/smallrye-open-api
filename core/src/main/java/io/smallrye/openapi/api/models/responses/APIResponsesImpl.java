@@ -3,78 +3,26 @@ package io.smallrye.openapi.api.models.responses;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
-import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 
-import io.smallrye.openapi.api.models.ExtensibleImpl;
 import io.smallrye.openapi.api.models.MapModel;
-import io.smallrye.openapi.api.models.ModelImpl;
-import io.smallrye.openapi.runtime.util.ModelUtil;
+import io.smallrye.openapi.internal.models.responses.APIResponses;
 
 /**
- * An implementation of the {@link APIResponses} OpenAPI model interface.
+ * @deprecated use {@link org.eclipse.microprofile.openapi.OASFactory#createAPIResponses()} instead.
  */
-public class APIResponsesImpl extends ExtensibleImpl<APIResponses> implements APIResponses, ModelImpl, MapModel<APIResponse> {
-
-    private Map<String, APIResponse> apiResponses;
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#addAPIResponse(java.lang.String,
-     *      org.eclipse.microprofile.openapi.models.responses.APIResponse)
-     */
-    @Override
-    public APIResponses addAPIResponse(String name, APIResponse apiResponse) {
-        this.apiResponses = ModelUtil.add(name, apiResponse, this.apiResponses);
-        return this;
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#removeAPIResponse(java.lang.String)
-     */
-    @Override
-    public void removeAPIResponse(String name) {
-        ModelUtil.remove(this.apiResponses, name);
-    }
-
-    @Override
-    public Map<String, APIResponse> getAPIResponses() {
-        return ModelUtil.unmodifiableMap(this.apiResponses);
-    }
-
-    @Override
-    public void setAPIResponses(Map<String, APIResponse> items) {
-        this.apiResponses = ModelUtil.replace(items);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#getDefaultValue()
-     */
-    @Override
-    public APIResponse getDefaultValue() {
-        return getAPIResponse(DEFAULT);
-    }
-
-    /**
-     * @see org.eclipse.microprofile.openapi.models.responses.APIResponses#setDefaultValue(org.eclipse.microprofile.openapi.models.responses.APIResponse)
-     */
-    @Override
-    public void setDefaultValue(APIResponse defaultValue) {
-        if (defaultValue == null) {
-            removeAPIResponse(DEFAULT);
-        } else {
-            addAPIResponse(DEFAULT, defaultValue);
-        }
-    }
+@Deprecated(since = "4.0", forRemoval = true)
+public class APIResponsesImpl extends APIResponses implements MapModel<APIResponse> { // NOSONAR
 
     // Begin Methods to support implementation of Map for MicroProfile OpenAPI 1.1
 
     @Override
     public Map<String, APIResponse> getMap() {
-        return this.apiResponses;
+        return getAPIResponses();
     }
 
     @Override
     public void setMap(Map<String, APIResponse> map) {
-        this.apiResponses = map;
+        setAPIResponses(map);
     }
 
     @Override

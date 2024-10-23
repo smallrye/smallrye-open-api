@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
@@ -20,7 +21,6 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OperationHandler;
-import io.smallrye.openapi.api.models.OpenAPIImpl;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.FilteredIndexView;
@@ -107,7 +107,8 @@ public class AnnotationScannerContext {
 
     public AnnotationScannerContext(IndexView index, ClassLoader classLoader,
             OpenApiConfig config) {
-        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), true, config, null, new OpenAPIImpl());
+        this(new FilteredIndexView(index, config), classLoader, Collections.emptyList(), true, config, null,
+                OASFactory.createOpenAPI());
     }
 
     public FilteredIndexView getIndex() {

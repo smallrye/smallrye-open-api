@@ -6,9 +6,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
@@ -17,6 +15,7 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -28,7 +27,6 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public abstract class AbstractAnnotationScanner implements AnnotationScanner {
     private static final String EMPTY = "";
-    private static final String EXTENSION_PROFILE_PREFIX = "x-smallrye-profile-";
 
     private static final Set<DotName> PRIMITIVE_OBJECTS = new HashSet<>();
     private static final Set<DotName> STREAM_OBJECTS = new HashSet<>();
@@ -107,23 +105,8 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
      * @return true, if the given extensible should be included in the final openapi document, otherwise false
      */
     protected static boolean processProfiles(OpenApiConfig config, Extensible<?> extensible) {
-
-        Set<String> profiles = new HashSet<>();
-        Map<String, Object> extensions = extensible.getExtensions();
-        if (extensions != null && !extensions.isEmpty()) {
-            extensions = new HashMap<>(extensions);
-
-            for (String name : extensions.keySet()) {
-                if (!name.startsWith(EXTENSION_PROFILE_PREFIX)) {
-                    continue;
-                }
-
-                String profile = name.substring(EXTENSION_PROFILE_PREFIX.length());
-                profiles.add(profile);
-                extensible.removeExtension(name);
-            }
-        }
-
+        Set<String> profiles = Extensions.getProfiles(extensible);
+        Extensions.removeProfiles(extensible);
         return profileIncluded(config, profiles);
     }
 

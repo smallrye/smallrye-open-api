@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Index;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import io.smallrye.openapi.api.OpenApiConfig;
-import io.smallrye.openapi.api.models.media.SchemaImpl;
 
 /**
  * Special tests using a custom {@link AnnotationScannerExtension#parseExtension(String, String)}
@@ -80,7 +80,7 @@ class CustomExtensionParsingTests {
 
                     @Override
                     public Schema parseSchema(String jsonSchema) {
-                        return new SchemaImpl();
+                        return OASFactory.createSchema();
                     }
                 }));
 

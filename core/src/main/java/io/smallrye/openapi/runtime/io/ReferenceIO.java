@@ -5,6 +5,8 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.models.Reference;
 import org.jboss.jandex.AnnotationInstance;
 
+import io.smallrye.openapi.model.ReferenceType;
+
 public interface ReferenceIO<V, A extends V, O extends V, AB, OB> {
 
     static final String REF = "$ref";

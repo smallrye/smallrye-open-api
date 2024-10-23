@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -22,7 +23,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.smallrye.openapi.api.models.PathItemImpl;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.io.media.ContentIO;
@@ -257,7 +257,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         processOperationTags(context, method, openApi, resourceTags, operation);
 
         // Process @Parameter annotations.
-        PathItem pathItem = new PathItemImpl();
+        PathItem pathItem = OASFactory.createPathItem();
         ResourceParameters params = getResourceParameters(resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
