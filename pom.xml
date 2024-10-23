@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>smallrye-open-api-parent</artifactId>
-    <version>4.0.0-beta2</version>
+    <version>4.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <name>SmallRye: OpenAPI Parent</name>
@@ -72,7 +72,7 @@
         <connection>scm:git:git@github.com:smallrye/smallrye-open-api.git</connection>
         <developerConnection>scm:git:git@github.com:smallrye/smallrye-open-api.git</developerConnection>
         <url>https://github.com/smallrye/smallrye-open-api/</url>
-        <tag>4.0.0-beta2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
