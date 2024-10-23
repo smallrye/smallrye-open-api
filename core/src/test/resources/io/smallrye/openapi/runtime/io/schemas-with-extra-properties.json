@@ -1,0 +1,11 @@
+{
+  "openapi": "3.1.0",
+  "components": {
+    "schemas": {
+      "Person": {
+        "type": "object",
+        "my-extra-property": [1, "two"]
+      }
+    }
+  }
+}
