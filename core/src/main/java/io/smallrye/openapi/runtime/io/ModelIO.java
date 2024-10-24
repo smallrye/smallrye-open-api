@@ -278,29 +278,6 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
     }
 
     protected Object readJson(V node, DataType desiredType) {
-        //        if (jsonIO().isObject(node) && desiredType.type == DataType.Type.MAP) {
-        //            Map<String, Object> result = new HashMap<>();
-        //            O object = jsonIO().asObject(node);
-        //            for (Entry<String, V> entry : jsonIO().properties(object)) {
-        //                result.put(entry.getKey(), readJson(entry.getValue(), desiredType.content));
-        //            }
-        //            return result;
-        //        } else if (jsonIO().isArray(node) && desiredType.type == DataType.Type.LIST) {
-        //            List<Object> result = new ArrayList<>();
-        //            A array = jsonIO().asArray(node);
-        //            for (V element : jsonIO().entries(array)) {
-        //                result.add(readJson(element, desiredType.content));
-        //            }
-        //            return result;
-        //        } else if (desiredType.type == DataType.Type.OBJECT) {
-        //            if (desiredType.clazz == Object.class) {
-        //                return jsonIO().fromJson(node);
-        //            } else {
-        //                return readValue(node, desiredType.clazz);
-        //            }
-        //        } else {
-        //            return jsonIO().fromJson(node);
-        //        }
         if (jsonIO().isObject(node)) {
             if (desiredType.type == DataType.Type.MAP) {
                 Map<String, Object> result = new HashMap<>();
@@ -316,7 +293,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
                     return readValue(node, desiredType.clazz);
                 }
             } else {
-                // Log node dropped?
+                IoLogging.logger.invalidJsonType(desiredType.toString(), String.valueOf(node));
                 return null;
             }
         } else if (jsonIO().isArray(node)) {
@@ -330,7 +307,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
             } else if (desiredType.clazz == Object.class) {
                 return jsonIO().fromJson(node);
             } else {
-                // Log node dropped?
+                IoLogging.logger.invalidJsonType(desiredType.toString(), String.valueOf(node));
                 return null;
             }
         } else if (desiredType.type == DataType.Type.OBJECT) {
@@ -373,7 +350,14 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
         }
 
         if (Constructible.class.isAssignableFrom(desiredType)) {
-            return readObject((Class<? extends Constructible>) desiredType, (O) node);
+            if (jsonIO().isObject(node)) {
+                return readObject((Class<? extends Constructible>) desiredType, (O) node);
+            } else if (jsonIO().isNull(node)) {
+                return null;
+            } else {
+                IoLogging.logger.invalidJsonType(desiredType.getName(), String.valueOf(node));
+                return null;
+            }
         }
 
         return jsonIO().fromJson(node);

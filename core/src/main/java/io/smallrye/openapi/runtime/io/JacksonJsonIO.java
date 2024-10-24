@@ -129,6 +129,11 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     }
 
     @Override
+    public boolean isNull(JsonNode value) {
+        return value != null && value.isNull();
+    }
+
+    @Override
     public Integer getJsonInt(ObjectNode object, String key) {
         JsonNode value = object.get(key);
         return value != null && value.isInt() ? value.asInt() : null;
@@ -334,7 +339,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     @SuppressWarnings("unchecked")
     @Override
     public <T> T fromJson(JsonNode object, Class<T> desiredType) {
-        if (desiredType == String.class) {
+        if (desiredType == String.class && object.isValueNode()) {
             return (T) object.asText();
         }
         if (desiredType == Integer.class && object.canConvertToInt()) {

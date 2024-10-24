@@ -75,4 +75,8 @@ public interface IoLogging extends BasicLogger {
     @Message(id = 2016, value = "JSON value could not be parsed: %s")
     void unparseableJson(String value);
 
+    @LogMessage(level = Logger.Level.INFO)
+    @Message(id = 2017, value = "JSON/YAML value could not be read as type %s: %s")
+    void invalidJsonType(String targetType, String nodeText);
+
 }

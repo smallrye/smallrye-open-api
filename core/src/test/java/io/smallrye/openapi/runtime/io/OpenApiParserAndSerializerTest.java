@@ -553,6 +553,18 @@ class OpenApiParserAndSerializerTest {
     }
 
     @Test
+    void testSchemas_ExtraProperties() throws IOException, JSONException {
+        doMultiVersionTest("schemas-with-extra-properties.json", "schemas-with-extra-properties30.json",
+                ConversionDirection.TO_30_ONLY);
+    }
+
+    @Test
+    void testSchemas_InvalidTypes() throws IOException, JSONException {
+        doMultiVersionTest("schemas-with-invalid-types.json", "schemas-with-invalid-types30.json",
+                ConversionDirection.TO_30_ONLY);
+    }
+
+    @Test
     void testSchemas_MinMax() throws IOException, JSONException {
         doMultiVersionTest("schemas-with-minmax.json", "schemas-with-minmax30.json", ConversionDirection.BOTH_WAYS);
 

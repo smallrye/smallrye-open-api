@@ -123,6 +123,11 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
     }
 
     @Override
+    public boolean isNull(JsonValue value) {
+        return value != null && value.getValueType() == ValueType.NULL;
+    }
+
+    @Override
     public boolean hasKey(JsonObject object, String key) {
         return object.containsKey(key);
     }

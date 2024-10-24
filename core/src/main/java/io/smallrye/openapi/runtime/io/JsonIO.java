@@ -211,6 +211,14 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
     Boolean asBoolean(V value);
 
     /**
+     * Check whether a JSON value is a JSON null.
+     *
+     * @param value the JSON value to check
+     * @return {@code true} if {@code value} is null, otherwise {@code false}
+     */
+    boolean isNull(V value);
+
+    /**
      * Get a property from a JSON object as a string. The same conversions are performed as {@link #asString(Object)}.
      *
      * @param object the JSON object

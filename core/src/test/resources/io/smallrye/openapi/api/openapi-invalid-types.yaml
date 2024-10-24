@@ -1,0 +1,14 @@
+---
+openapi: 3.1.0
+info:
+  title: Invalid fields herein!
+  version: "1.0.0"
+  # additional invalid types to ensure no exceptions
+  contact: "string but should be object"
+  license: null # should be an object
+  summary: {} # should be a string
+servers: "string but should be object"
+tags: {} # should be a list
+paths: {} # valid
+components: [] # should be object
+webhooks: []  # should be object
