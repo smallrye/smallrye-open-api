@@ -401,6 +401,7 @@ public abstract class AbstractParameterProcessor {
         return Parameter.In.PATH.equals(param.getIn())
                 && !Style.MATRIX.equals(param.getStyle())
                 && paramSchema != null
+                && schemaTypes != null
                 && schemaTypes.contains(SchemaType.STRING)
                 && paramSchema.getPattern() == null;
     }
