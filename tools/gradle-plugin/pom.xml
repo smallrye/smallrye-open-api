@@ -15,6 +15,7 @@
     <properties>
         <gradle.executable>./gradlew</gradle.executable>
         <gradle.task>build</gradle.task>
+        <gradle.opts>-Xms4096M -Xmx4096M</gradle.opts>
         <skip.gradle.build>false</skip.gradle.build>
         <artifactFilePrefix>${project.artifactId}</artifactFilePrefix>
     </properties>
@@ -44,6 +45,15 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.5.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <!-- copy all dependencies to target/dependencies -->
             <plugin>
@@ -115,7 +125,7 @@
                             </arguments>
                             <environmentVariables>
                                 <MAVEN_REPO_LOCAL>${settings.localRepository}</MAVEN_REPO_LOCAL>
-                                <GRADLE_OPTS>${env.MAVEN_OPTS}</GRADLE_OPTS>
+                                <GRADLE_OPTS>${gradle.opts}</GRADLE_OPTS>
                             </environmentVariables>
                             <skip>${skip.gradle.build}</skip>
                         </configuration>
@@ -234,7 +244,7 @@
                                     </arguments>
                                     <environmentVariables>
                                         <MAVEN_REPO_LOCAL>${settings.localRepository}</MAVEN_REPO_LOCAL>
-                                        <GRADLE_OPTS>${env.MAVEN_OPTS}</GRADLE_OPTS>
+                                        <GRADLE_OPTS>${gradle.opts}</GRADLE_OPTS>
                                     </environmentVariables>
                                     <skip>${skip.gradle.build}</skip>
                                 </configuration>
@@ -281,7 +291,7 @@
                                     </arguments>
                                     <environmentVariables>
                                         <MAVEN_REPO_LOCAL>${settings.localRepository}</MAVEN_REPO_LOCAL>
-                                        <GRADLE_OPTS>${env.MAVEN_OPTS}</GRADLE_OPTS>
+                                        <GRADLE_OPTS>${gradle.opts}</GRADLE_OPTS>
                                     </environmentVariables>
                                     <skip>${skip.gradle.build}</skip>
                                 </configuration>

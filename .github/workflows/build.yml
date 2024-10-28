@@ -29,11 +29,16 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 17, 21 ]
-    name: build with jdk ${{matrix.java}}
+        os:
+        - ubuntu-latest
+        - windows-latest
+        java:
+        - 17
+        - 21
+    runs-on: ${{ matrix.os }}
+    name: build with jdk ${{matrix.java}} (${{ matrix.os }}) 
 
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +73,7 @@ jobs:
 
       ## Attach target directories for safe Sonar scan in separate job
       - name: Attach Build Output
-        if: matrix.java == '17'
+        if: ${{ matrix.java == '17' && matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v4
         with:
           name: target
