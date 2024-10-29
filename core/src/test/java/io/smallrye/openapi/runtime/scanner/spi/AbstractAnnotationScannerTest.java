@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,12 @@ class AbstractAnnotationScannerTest {
     static class DummyOpenApiConfig implements OpenApiConfig {
         @Override
         public <R, T> T getConfigValue(String propertyName, Class<R> type, Function<R, T> converter, Supplier<T> defaultValue) {
+            return defaultValue.get();
+        }
+
+        @Override
+        public <R, T extends Collection<R>> T getConfigValues(String propertyName, Class<R> elementType,
+                Function<List<R>, T> converter, Supplier<T> defaultValue) {
             return defaultValue.get();
         }
 
