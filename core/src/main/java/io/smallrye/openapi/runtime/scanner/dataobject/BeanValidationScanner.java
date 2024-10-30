@@ -21,7 +21,6 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>}
@@ -560,7 +559,7 @@ public class BeanValidationScanner {
     AnnotationInstance getConstraint(AnnotationTarget target, List<DotName> annotationName) {
         AnnotationInstance constraint = context.annotations().getAnnotation(target, annotationName);
 
-        if (constraint != null && JandexUtil.equals(constraint.target(), target)) {
+        if (constraint != null) {
             AnnotationValue groupValue = constraint.value("groups");
 
             if (groupValue == null) {
