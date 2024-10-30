@@ -287,32 +287,35 @@ public class OpenApiProcessor {
         }
     }
 
-    public static List<OpenApiStaticFile> loadOpenApiStaticFiles(Function<String, URL> loadFunction) {
-        List<OpenApiStaticFile> apiStaticFiles = new ArrayList<>();
+    public static List<URL> locateStaticFiles(Function<String, URL> loadFunction) {
+        List<URL> apiStaticFiles = new ArrayList<>();
 
-        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.yaml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.yaml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.yml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.yml", Format.YAML);
-        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.json", Format.JSON);
-        loadOpenApiStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.json", Format.JSON);
+        locateStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.yaml");
+        locateStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.yaml");
+        locateStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.yml");
+        locateStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.yml");
+        locateStaticFile(apiStaticFiles, loadFunction, "/META-INF/openapi.json");
+        locateStaticFile(apiStaticFiles, loadFunction, "/WEB-INF/classes/META-INF/openapi.json");
 
         return apiStaticFiles;
     }
 
-    private static List<OpenApiStaticFile> loadOpenApiStaticFile(List<OpenApiStaticFile> apiStaticFiles,
-            Function<String, URL> loadFunction, String path, Format format) {
+    public static List<OpenApiStaticFile> loadOpenApiStaticFiles(Function<String, URL> loadFunction) {
+        List<OpenApiStaticFile> apiStaticFiles = new ArrayList<>();
 
-        Optional.ofNullable(loadFunction.apply(path))
-                .map(locator -> {
-                    try {
-                        return new OpenApiStaticFile(locator, locator.openStream(), format);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                })
-                .ifPresent(apiStaticFiles::add);
+        locateStaticFiles(loadFunction).forEach(locator -> {
+            try {
+                Format format = locator.toString().endsWith(".json") ? Format.JSON : Format.YAML;
+                apiStaticFiles.add(new OpenApiStaticFile(locator, locator.openStream(), format));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
 
         return apiStaticFiles;
+    }
+
+    private static void locateStaticFile(List<URL> apiStaticFiles, Function<String, URL> loadFunction, String path) {
+        Optional.ofNullable(loadFunction.apply(path)).ifPresent(apiStaticFiles::add);
     }
 }

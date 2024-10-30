@@ -31,6 +31,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.Type;
 
+import io.smallrye.common.classloader.ClassPathUtils;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
@@ -563,34 +564,34 @@ public class SmallRyeOpenAPI {
                             return ctx.appClassLoader.getResource(loadPath.toString());
                         });
 
-                ctx.staticModel = OpenApiProcessor.loadOpenApiStaticFiles(loadFn)
-                        .stream()
-                        .map(file -> {
-                            try (Reader reader = new InputStreamReader(file.getContent())) {
-                                V dom = ctx.modelIO.jsonIO().fromReader(reader, file.getFormat());
-                                OpenAPI fileModel = ctx.modelIO.readValue(dom);
-                                debugModel("static file", fileModel);
-                                return fileModel;
-                            } catch (IOException e) {
-                                throw new OpenApiRuntimeException("IOException reading " + file.getFormat() + " static file",
-                                        e);
-                            }
-                        })
-                        .reduce(MergeUtil::merge)
-                        .orElse(null);
+                for (URL staticFile : OpenApiProcessor.locateStaticFiles(loadFn)) {
+                    String source = "static file " + staticFile;
+                    try {
+                        ClassPathUtils.consumeStream(staticFile, stream -> addStaticModel(ctx, stream, source));
+                    } catch (IOException e) {
+                        String msg = "IOException reading " + source;
+                        throw new OpenApiRuntimeException(msg, e);
+                    }
+                }
             }
 
             InputStream customFile = customStaticFile.get();
 
             if (customFile != null) {
-                try (Reader reader = new InputStreamReader(customFile)) {
-                    V dom = ctx.modelIO.jsonIO().fromReader(reader);
-                    OpenAPI customStaticModel = ctx.modelIO.readValue(dom);
-                    debugModel("static file", customStaticModel);
-                    ctx.staticModel = MergeUtil.merge(customStaticModel, ctx.staticModel);
-                } catch (IOException e) {
-                    throw new OpenApiRuntimeException("IOException reading custom static file", e);
-                }
+                addStaticModel(ctx, customFile, "custom static file");
+            }
+        }
+
+        private <V, A extends V, O extends V, AB, OB> void addStaticModel(BuildContext<V, A, O, AB, OB> ctx, InputStream stream,
+                String source) {
+            try (Reader reader = new InputStreamReader(stream)) {
+                V dom = ctx.modelIO.jsonIO().fromReader(reader);
+                OpenAPI fileModel = ctx.modelIO.readValue(dom);
+                debugModel(source, fileModel);
+                ctx.staticModel = MergeUtil.merge(fileModel, ctx.staticModel);
+            } catch (IOException e) {
+                String msg = "IOException reading " + source;
+                throw new OpenApiRuntimeException(msg, e);
             }
         }
 
