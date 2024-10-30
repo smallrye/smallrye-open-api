@@ -1,0 +1,10 @@
+mp:
+  openapi:
+    scan:
+      exclude:
+        packages:
+          - java.lang
+          - java.util
+        classes:
+          - my.pkg.Test
+          - my.pkg.Another

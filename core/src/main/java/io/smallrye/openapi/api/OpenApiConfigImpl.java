@@ -2,6 +2,7 @@ package io.smallrye.openapi.api;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -103,6 +104,25 @@ public class OpenApiConfigImpl implements OpenApiConfig {
 
                     return true;
                 })
+                .map(converter)
+                .orElseGet(defaultValue);
+
+        cache.put(propertyName, value);
+
+        return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <R, T extends Collection<R>> T getConfigValues(String propertyName,
+            Class<R> elementType,
+            Function<List<R>, T> converter,
+            Supplier<T> defaultValue) {
+        if (cache.containsKey(propertyName)) {
+            return (T) cache.get(propertyName);
+        }
+
+        T value = getConfig().getOptionalValues(propertyName, elementType)
                 .map(converter)
                 .orElseGet(defaultValue);
 

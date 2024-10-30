@@ -2,6 +2,7 @@ package io.smallrye.openapi.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -85,6 +86,9 @@ public interface OpenApiConfig {
 
     <R, T> T getConfigValue(String propertyName, Class<R> type, Function<R, T> converter, Supplier<T> defaultValue);
 
+    <R, T extends Collection<R>> T getConfigValues(String propertyName, Class<R> elementType, Function<List<R>, T> converter,
+            Supplier<T> defaultValue);
+
     <R, T> Map<String, T> getConfigValueMap(String propertyNamePrefix, Class<R> type, Function<R, T> converter);
 
     default <T> T getConfigValue(String propertyName, Class<T> type, Supplier<T> defaultValue) {
@@ -104,15 +108,15 @@ public interface OpenApiConfig {
     }
 
     default Set<String> scanPackages() {
-        return getConfigValue(OASConfig.SCAN_PACKAGES, String[].class, this::toSet, Collections::emptySet);
+        return getConfigValues(OASConfig.SCAN_PACKAGES, String.class, this::toSet, Collections::emptySet);
     }
 
     default Set<String> scanClasses() {
-        return getConfigValue(OASConfig.SCAN_CLASSES, String[].class, this::toSet, Collections::emptySet);
+        return getConfigValues(OASConfig.SCAN_CLASSES, String.class, this::toSet, Collections::emptySet);
     }
 
     default Set<String> scanExcludePackages() {
-        return getConfigValue(OASConfig.SCAN_EXCLUDE_PACKAGES, String[].class, values -> {
+        return getConfigValues(OASConfig.SCAN_EXCLUDE_PACKAGES, String.class, values -> {
             Set<String> valueSet = toSet(values);
             valueSet.addAll(NEVER_SCAN_PACKAGES);
             return Collections.unmodifiableSet(valueSet);
@@ -120,7 +124,7 @@ public interface OpenApiConfig {
     }
 
     default Set<String> scanExcludeClasses() {
-        return getConfigValue(OASConfig.SCAN_EXCLUDE_CLASSES, String[].class, values -> {
+        return getConfigValues(OASConfig.SCAN_EXCLUDE_CLASSES, String.class, values -> {
             Set<String> valueSet = toSet(values);
             valueSet.addAll(NEVER_SCAN_CLASSES);
             return Collections.unmodifiableSet(valueSet);
@@ -132,15 +136,15 @@ public interface OpenApiConfig {
     }
 
     default List<String> servers() {
-        return getConfigValue(OASConfig.SERVERS, String[].class, this::toList, Collections::emptyList);
+        return getConfigValues(OASConfig.SERVERS, String.class, this::toList, Collections::emptyList);
     }
 
     default List<String> pathServers(String path) {
-        return getConfigValue(OASConfig.SERVERS_PATH_PREFIX + path, String[].class, this::toList, Collections::emptyList);
+        return getConfigValues(OASConfig.SERVERS_PATH_PREFIX + path, String.class, this::toList, Collections::emptyList);
     }
 
     default List<String> operationServers(String operationId) {
-        return getConfigValue(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String[].class, this::toList,
+        return getConfigValues(OASConfig.SERVERS_OPERATION_PREFIX + operationId, String.class, this::toList,
                 Collections::emptyList);
     }
 
@@ -151,8 +155,8 @@ public interface OpenApiConfig {
     }
 
     default Set<String> scanDependenciesJars() {
-        return getConfigValue(SmallRyeOASConfig.SMALLRYE_SCAN_DEPENDENCIES_JARS, String[].class, this::toSet,
-                () -> getConfigValue(SmallRyeOASConfig.SCAN_DEPENDENCIES_JARS, String[].class, this::toSet,
+        return getConfigValues(SmallRyeOASConfig.SMALLRYE_SCAN_DEPENDENCIES_JARS, String.class, this::toSet,
+                () -> getConfigValues(SmallRyeOASConfig.SCAN_DEPENDENCIES_JARS, String.class, this::toSet,
                         Collections::emptySet));
     }
 
@@ -283,11 +287,11 @@ public interface OpenApiConfig {
     }
 
     default Set<String> getScanProfiles() {
-        return getConfigValue(SmallRyeOASConfig.SCAN_PROFILES, String[].class, this::toSet, Collections::emptySet);
+        return getConfigValues(SmallRyeOASConfig.SCAN_PROFILES, String.class, this::toSet, Collections::emptySet);
     }
 
     default Set<String> getScanExcludeProfiles() {
-        return getConfigValue(SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, String[].class, this::toSet, Collections::emptySet);
+        return getConfigValues(SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, String.class, this::toSet, Collections::emptySet);
     }
 
     default Map<String, String> getScanResourceClasses() {
@@ -309,18 +313,18 @@ public interface OpenApiConfig {
     }
 
     default Set<String> getScanCompositionExcludePackages() {
-        return getConfigValue(SmallRyeOASConfig.SCAN_COMPOSITION_EXCLUDE_PACKAGES, String[].class, this::toSet,
+        return getConfigValues(SmallRyeOASConfig.SCAN_COMPOSITION_EXCLUDE_PACKAGES, String.class, this::toSet,
                 () -> DEFAULT_COMPOSITION_EXCLUDE_PACKAGES);
     }
 
-    default Set<String> toSet(String[] items) {
-        return Arrays.stream(items)
+    default Set<String> toSet(List<String> items) {
+        return items.stream()
                 .map(String::trim)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    default List<String> toList(String[] items) {
-        return Arrays.stream(items)
+    default List<String> toList(List<String> items) {
+        return items.stream()
                 .map(String::trim)
                 .collect(Collectors.toCollection(ArrayList::new));
     }

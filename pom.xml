@@ -129,6 +129,12 @@
                 <version>${version.io.smallrye.smallrye-config}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>io.smallrye.config</groupId>
+                <artifactId>smallrye-config-source-yaml</artifactId>
+                <version>${version.io.smallrye.smallrye-config}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!-- Jakarta EE -->
             <dependency>
