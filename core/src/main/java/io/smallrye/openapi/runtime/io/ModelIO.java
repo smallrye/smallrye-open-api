@@ -251,13 +251,13 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
 
     public abstract T read(AnnotationInstance annotation);
 
-    private SmallRyeOASModels modelTypes = new SmallRyeOASModels();
+    private static final SmallRyeOASModels MODEL_TYPES = new SmallRyeOASModels();
 
     @SuppressWarnings("unchecked")
     public <C extends Constructible> T readObject(Class<C> type, O node) {
         var jsonIO = jsonIO();
         BaseModel<C> model = (BaseModel<C>) OASFactory.createObject(type);
-        var modelType = modelTypes.getModel(type);
+        var modelType = MODEL_TYPES.getModel(type);
 
         for (Map.Entry<String, V> property : jsonIO.properties(node)) {
             String name = property.getKey();
@@ -383,7 +383,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
         throw new UnsupportedOperationException(getClass() + "#write(T)");
     }
 
-    Set<String> REF_PROPERTIES = Set.of(ReferenceIO.REF, "summary", "description");
+    private static final Set<String> REF_PROPERTIES = Set.of(ReferenceIO.REF, "summary", "description");
 
     @Override
     @SuppressWarnings("unchecked")
