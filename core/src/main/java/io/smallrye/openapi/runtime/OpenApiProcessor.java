@@ -1,9 +1,14 @@
 package io.smallrye.openapi.runtime;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -306,7 +311,7 @@ public class OpenApiProcessor {
         Optional.ofNullable(loadFunction.apply(path))
                 .map(locator -> {
                     try {
-                        return new OpenApiStaticFile(locator, locator.openStream(), format);
+                        return new OpenApiStaticFile(locator, openStream(locator), format);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -314,5 +319,22 @@ public class OpenApiProcessor {
                 .ifPresent(apiStaticFiles::add);
 
         return apiStaticFiles;
+    }
+
+    private static InputStream openStream(URL url) throws IOException {
+        if ("jar".equals(url.getProtocol())) {
+            URLConnection urlConnection = url.openConnection();
+            // prevent locking the jar after the inputstream is closed
+            urlConnection.setUseCaches(false);
+            return urlConnection.getInputStream();
+        }
+        if ("file".equals(url.getProtocol())) {
+            try {
+                return Files.newInputStream(Path.of(url.toURI()));
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Failed to translate " + url + " to local path", e);
+            }
+        }
+        return url.openStream();
     }
 }
