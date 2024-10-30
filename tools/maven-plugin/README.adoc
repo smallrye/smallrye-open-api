@@ -36,7 +36,7 @@ Add this to your pom.xml:
 </plugin>
 ----
 
-The schema will appear as `target/generated/openapi.yaml` and `target/generated/openapi.json` by default. 
+The schema will appear as `target/generated/openapi.yaml` and `target/generated/openapi.json` by default.
 
 == m2e integration
 
@@ -61,6 +61,7 @@ E.g. for includeDependenciesScopes could be configured as:
 - `scanDependenciesDisable` (boolean, default: false) - Disable scanning the project's dependencies for OpenAPI model classes too
 - `includeDependenciesScopes` (List<String>, default: compile, system) - If the above `scanDependenciesDisable` is true, you can control what scopes should be included.
 - `includeDependenciesTypes` (List<String>, default: jar) - If the above `scanDependenciesDisable` is true, you can control what types should be included.
+- `includeStandardJavaModules` (List<String>, default: empty list) - List of Java modules to be indexed and available for introspection by the annotation scanner. Use with caution as introspection of the core Java modules generally is not useful for generation of the OpenAPI definition.
 - `configProperties` (String) - Load any properties from a file. Example `${basedir}/src/main/resources/application.properties`.
 - `attachArtifacts` (boolean, default: false) - Attach the built OpenAPI schema as build artifact.
 - `skip` (boolean, default: false) - Skip execution of the plugin.

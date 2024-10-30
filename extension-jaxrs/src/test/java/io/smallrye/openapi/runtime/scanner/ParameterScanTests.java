@@ -6,6 +6,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -596,5 +601,40 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testPathParamValueType() throws IOException, JSONException {
         test("params.value-class-pathparam.json", Issue1466.CLASSES);
+    }
+
+    static class ParameterConstraintComposition {
+        static final Class<?>[] CLASSES = {
+                Resource.class,
+                CustomIntConstraint.class
+        };
+
+        @jakarta.validation.constraints.Min(0)
+        @jakarta.validation.constraints.Max(100000)
+        @jakarta.validation.Constraint(validatedBy = {})
+        @Target(ElementType.PARAMETER)
+        @Retention(RetentionPolicy.RUNTIME)
+        @Documented
+        public @interface CustomIntConstraint {
+            String message() default "";
+
+            Class<?>[] groups() default {};
+
+            Class<? extends jakarta.validation.Payload>[] payload() default {};
+        }
+
+        @jakarta.ws.rs.Path("/custom-resource")
+        static class Resource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("{id}")
+            public String get(@CustomIntConstraint @jakarta.ws.rs.QueryParam("id") int id) {
+                return null;
+            }
+        }
+    }
+
+    @Test
+    void testParameterConstraintComposition() throws IOException, JSONException {
+        test("params.constraint-composition.json", ParameterConstraintComposition.CLASSES);
     }
 }
