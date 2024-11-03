@@ -39,14 +39,15 @@ class JsonViewTests extends IndexScannerTestBase {
         }
 
         @Schema(name = "BeanName")
+        @com.fasterxml.jackson.annotation.JsonView(Views.Internal.class) // class default is internal
         class Bean {
-            @com.fasterxml.jackson.annotation.JsonView(Views.Internal.class)
             String id;
             @com.fasterxml.jackson.annotation.JsonView(Views.Public.class)
             String name;
             @com.fasterxml.jackson.annotation.JsonView(Views.WriteOnly.class)
             String secret;
             @Schema
+            @com.fasterxml.jackson.annotation.JsonView()
             InnerBean1 inner1;
         }
 
