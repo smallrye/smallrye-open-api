@@ -42,6 +42,7 @@ import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
@@ -586,13 +587,38 @@ public class TypeResolver {
             return true;
         }
 
-        Type[] applicableViews = context.annotations().getAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
+        Type[] applicableViews = getJsonViews(context, propertySource);
 
         if (applicableViews != null && applicableViews.length > 0) {
             return Arrays.stream(applicableViews).anyMatch(activeViews::contains);
         }
 
         return true;
+    }
+
+    /**
+     * Find {@literal @}JsonView annotations on the field/method, or on the
+     * declaring class when the field/method itself it not directly targeted by the
+     * annotation.
+     */
+    private static Type[] getJsonViews(AnnotationScannerContext context, AnnotationTarget propertySource) {
+        Annotations annotations = context.annotations();
+
+        Type[] directViews = annotations.getAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
+
+        if (directViews != null) {
+            return directViews;
+        }
+
+        ClassInfo declaringClass;
+
+        if (propertySource.kind() == Kind.FIELD) {
+            declaringClass = propertySource.asField().declaringClass();
+        } else {
+            declaringClass = propertySource.asMethod().declaringClass();
+        }
+
+        return annotations.getAnnotationValue(declaringClass, JacksonConstants.JSON_VIEW);
     }
 
     /**
