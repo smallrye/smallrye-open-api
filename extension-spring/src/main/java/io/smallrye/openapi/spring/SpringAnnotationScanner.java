@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -24,13 +26,16 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.api.constants.SecurityConstants;
 import io.smallrye.openapi.api.util.ListUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
+import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractAnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
@@ -211,6 +216,15 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         return openApi;
     }
 
+    @Override
+    public void processJavaSecurity(AnnotationScannerContext context, ClassInfo resourceClass, OpenAPI openApi) {
+        super.processJavaSecurity(context, resourceClass, openApi);
+        JavaSecurityProcessor securityProcessor = context.getJavaSecurityProcessor();
+        securityProcessor
+                .addRolesAllowedToScopes(
+                        context.annotations().getAnnotationValue(resourceClass, SpringConstants.SECURED));
+    }
+
     /**
      * Process the Spring controller Operation methods
      *
@@ -334,7 +348,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processExtensions(context, method, operation);
 
         // Process Security Roles
-        context.getJavaSecurityProcessor().processSecurityRoles(method, operation);
+        context.getJavaSecurityProcessor().processSecurityRoles(method, operation, () -> getDeclaredRoles(method));
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
         pathItem.setOperation(methodType, operation);
@@ -355,6 +369,21 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
+    }
+
+    private String[] getDeclaredRoles(MethodInfo method) {
+        Annotations annotations = context.annotations();
+        String[] rolesAllowed = annotations.getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
+        String[] securedRoles = annotations.getAnnotationValue(method, SpringConstants.SECURED);
+
+        if (rolesAllowed == null && securedRoles == null) {
+            return null; // NOSONAR
+        }
+
+        return Stream.of(rolesAllowed, securedRoles)
+                .filter(Objects::nonNull)
+                .flatMap(Arrays::stream)
+                .toArray(String[]::new);
     }
 
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
