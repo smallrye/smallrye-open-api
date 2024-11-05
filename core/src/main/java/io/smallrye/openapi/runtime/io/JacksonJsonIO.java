@@ -153,7 +153,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
     @Override
     public BigDecimal getJsonBigDecimal(ObjectNode object, String key) {
         JsonNode value = object.get(key);
-        return value != null ? new BigDecimal(value.asText()) : null;
+        return value != null && value.isNumber() ? value.decimalValue() : null;
     }
 
     @Override
@@ -300,10 +300,10 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
             return null;
         }
         if (value.isBigDecimal()) {
-            return new BigDecimal(value.asText());
+            return value.decimalValue();
         }
         if (value.isBigInteger()) {
-            return new BigInteger(value.asText());
+            return value.bigIntegerValue();
         }
         if (value.isBoolean()) {
             return value.asBoolean();
