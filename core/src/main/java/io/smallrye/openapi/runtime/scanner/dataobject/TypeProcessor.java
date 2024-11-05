@@ -297,6 +297,8 @@ public class TypeProcessor {
             valueSchema = resolveParameterizedType(valueType, valueSchema);
         }
 
+        BeanValidationScanner.applyConstraints(context, valueType, valueSchema);
+
         return valueSchema;
     }
 

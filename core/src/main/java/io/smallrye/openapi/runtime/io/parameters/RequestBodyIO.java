@@ -93,8 +93,7 @@ public class RequestBodyIO<V, A extends V, O extends V, AB, OB> extends MapModel
             MediaType type = OASFactory.createMediaType();
             type.setSchema(SchemaFactory.typeToSchema(scannerContext(),
                     value(annotation, PROP_VALUE),
-                    null,
-                    scannerContext().getExtensions()));
+                    null));
             content.addMediaType(mediaType, type);
         }
 

@@ -313,7 +313,7 @@ public class OpenApiAnnotationScanner {
                 .filter(this::annotatedClasses)
                 .map(annotation -> Type.create(annotation.target().asClass().name(), Type.Kind.CLASS))
                 .sorted(Comparator.comparing(Type::name)) // Process annotation classes in predictable order
-                .forEach(type -> SchemaFactory.typeToSchema(context, type, null, context.getExtensions()));
+                .forEach(type -> SchemaFactory.typeToSchema(context, type, null));
     }
 
     private boolean annotatedClasses(AnnotationInstance annotation) {

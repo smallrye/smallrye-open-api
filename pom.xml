@@ -39,10 +39,13 @@
 
         <!--
           Ignore the deprecated models, test data classes, and APT processor (runs at compile
-          time) in test coverage calculation.
+          time) in test coverage calculation. Also ignore SimpleTypeTarget which is a proxy to
+          allow calls to Type#annotations via AnnotationTarget#annotations. The remainder of
+          class has no use currently
         -->
         <sonar.coverage.exclusions>
           core/src/main/java/io/smallrye/openapi/api/models/**/*.java,
+          core/src/main/java/io/smallrye/openapi/internal/support/SimpleTypeTarget.java,
           testsuite/data/**/*.java,
           tools/model-apt/**/*.java
         </sonar.coverage.exclusions>

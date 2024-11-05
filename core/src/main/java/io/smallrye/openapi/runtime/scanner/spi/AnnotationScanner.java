@@ -465,7 +465,7 @@ public interface AnnotationScanner {
                 } else if (hasKotlinContinuation(method)) {
                     schema = kotlinContinuationToSchema(context, method);
                 } else {
-                    schema = SchemaFactory.typeToSchema(context, returnType, null, context.getExtensions());
+                    schema = SchemaFactory.typeToSchema(context, returnType, null);
                 }
 
                 Content content = OASFactory.createContent();
@@ -474,6 +474,8 @@ public interface AnnotationScanner {
                 if (produces == null || produces.length == 0) {
                     produces = getDefaultProduces(context, method);
                 }
+
+                BeanValidationScanner.applyConstraints(context, returnType, schema);
 
                 if (schema != null && SchemaSupport.getNullable(schema) == null
                         && TypeUtil.isOptional(returnType)) {
@@ -603,7 +605,7 @@ public interface AnnotationScanner {
         Type type = getKotlinContinuationArgument(context, method);
         AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method, type,
                 SchemaConstant.DOTNAME_SCHEMA);
-        return SchemaFactory.typeToSchema(context, type, schemaAnnotation, context.getExtensions());
+        return SchemaFactory.typeToSchema(context, type, schemaAnnotation);
     }
 
     /**
@@ -800,8 +802,7 @@ public interface AnnotationScanner {
                     AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method,
                             requestBodyType,
                             SchemaConstant.DOTNAME_SCHEMA);
-                    Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
-                            context.getExtensions());
+                    Schema schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation);
 
                     if (schema != null) {
                         ModelUtil.setRequestBodySchema(requestBody, schema, getConsumes(context));
@@ -848,8 +849,7 @@ public interface AnnotationScanner {
                         AnnotationInstance schemaAnnotation = context.annotations().getMethodParameterAnnotation(method,
                                 requestBodyType,
                                 SchemaConstant.DOTNAME_SCHEMA);
-                        schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation,
-                                context.getExtensions());
+                        schema = SchemaFactory.typeToSchema(context, requestBodyType, schemaAnnotation);
                     }
 
                     if (requestBody == null) {

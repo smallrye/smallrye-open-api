@@ -70,8 +70,7 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
                 Content content = OASFactory.createContent();
                 Schema responseSchema = SchemaFactory.typeToSchema(scannerContext(),
                         responseType,
-                        null,
-                        scannerContext().getExtensions());
+                        null);
 
                 for (String mediaType : mediaTypes) {
                     content.addMediaType(mediaType, OASFactory.createMediaType().schema(responseSchema));

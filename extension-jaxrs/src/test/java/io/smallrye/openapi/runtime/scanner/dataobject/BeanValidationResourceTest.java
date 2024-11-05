@@ -1,6 +1,9 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
@@ -63,5 +66,53 @@ class BeanValidationResourceTest extends IndexScannerTestBase {
         OpenAPI result = scanner.scan();
         printToConsole(result);
         assertJsonEquals("dataobject/schema.inherited-bv-constraints.json", result);
+    }
+
+    @Test
+    void testJaxRsResponseNestedTypeBVConstraints() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/")
+        @jakarta.ws.rs.Consumes(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+        @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+        class ValidationResource {
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.Path("single")
+            public void putSingle(@jakarta.validation.constraints.Size(min = 10) String body) {
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("single")
+            @jakarta.validation.constraints.Size(min = 10)
+            public String getSingle() {
+                return "a";
+            }
+
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.Path("many")
+            public void putMany(List<@jakarta.validation.constraints.Size(min = 10) String> body) {
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("many")
+            public List<@jakarta.validation.constraints.Size(min = 10) String> getMany() {
+                return Arrays.asList("a", "b", "c");
+            }
+
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.Path("nested")
+            public void putNested(
+                    Map<String, @jakarta.validation.constraints.NotEmpty Map<String, List<@jakarta.validation.constraints.Size(min = 10) String>>> body) {
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("nested")
+            public Map<String, @jakarta.validation.constraints.NotEmpty Map<String, List<@jakarta.validation.constraints.Size(min = 10) String>>> getNested() {
+                return null;
+            }
+        }
+
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), Index.of(ValidationResource.class));
+        OpenAPI result = scanner.scan();
+        printToConsole(result);
+        assertJsonEquals("dataobject/schema.type-target-constraints.json", result);
     }
 }
