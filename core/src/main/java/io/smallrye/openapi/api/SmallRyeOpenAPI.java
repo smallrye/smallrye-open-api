@@ -567,7 +567,8 @@ public class SmallRyeOpenAPI {
                 for (URL staticFile : OpenApiProcessor.locateStaticFiles(loadFn)) {
                     String source = "static file " + staticFile;
                     try {
-                        ClassPathUtils.consumeStream(staticFile, stream -> addStaticModel(ctx, stream, source));
+                        Format format = staticFile.toString().endsWith(".json") ? Format.JSON : Format.YAML;
+                        ClassPathUtils.consumeStream(staticFile, stream -> addStaticModel(ctx, stream, source, format));
                     } catch (IOException e) {
                         String msg = "IOException reading " + source;
                         throw new OpenApiRuntimeException(msg, e);
@@ -578,14 +579,14 @@ public class SmallRyeOpenAPI {
             InputStream customFile = customStaticFile.get();
 
             if (customFile != null) {
-                addStaticModel(ctx, customFile, "custom static file");
+                addStaticModel(ctx, customFile, "custom static file", Format.YAML);
             }
         }
 
         private <V, A extends V, O extends V, AB, OB> void addStaticModel(BuildContext<V, A, O, AB, OB> ctx, InputStream stream,
-                String source) {
+                String source, Format fileFormat) {
             try (Reader reader = new InputStreamReader(stream)) {
-                V dom = ctx.modelIO.jsonIO().fromReader(reader);
+                V dom = ctx.modelIO.jsonIO().fromReader(reader, fileFormat);
                 OpenAPI fileModel = ctx.modelIO.readValue(dom);
                 debugModel(source, fileModel);
                 ctx.staticModel = MergeUtil.merge(fileModel, ctx.staticModel);

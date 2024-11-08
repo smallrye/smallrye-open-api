@@ -40,6 +40,31 @@ class SmallRyeOpenAPIBuilderTest {
     }
 
     @Test
+    void testStaticJsonFileLoadedFromClasspath() throws Exception {
+        URL loaderRoot = getClass()
+                .getClassLoader()
+                .getResource("classloaderjson/META-INF/openapi.json")
+                .toURI()
+                .resolve("..")
+                .toURL();
+
+        ClassLoader custom = new URLClassLoader(
+                new URL[] { loaderRoot },
+                Thread.currentThread().getContextClassLoader());
+
+        SmallRyeOpenAPI result = SmallRyeOpenAPI.builder()
+                .withApplicationClassLoader(custom)
+                .enableModelReader(false)
+                .enableStandardFilter(false)
+                .enableAnnotationScan(false)
+                .enableStandardStaticFiles(true)
+                .build();
+
+        OpenAPI model = result.model();
+        assertEquals("Loaded as JSON from the class path", model.getInfo().getTitle());
+    }
+
+    @Test
     void testInvalidTypesInStaticFileDropped() {
         URL invalidResource = getClass()
                 .getClassLoader()

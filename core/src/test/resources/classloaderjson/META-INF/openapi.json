@@ -1,0 +1,9 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "Loaded as JSON from the class path",
+		"description": "This document uses tabs so that it doesn't parse as YAML",
+		"version": "1.0.0"
+	},
+	"paths": {}
+}
