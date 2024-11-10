@@ -410,7 +410,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
             schema.setTitle("UUID");
             schema.setDescription("Universally Unique Identifier");
             schema.setExample("de8681db-b4d6-4c47-a428-4b959c1c8e9a");
-            schemaRegistry.register(uuidType, Collections.emptySet(), schema);
+            schemaRegistry.register(uuidType, Collections.emptyMap(), schema);
         }
 
     }

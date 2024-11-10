@@ -44,6 +44,9 @@ public class ServerIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Serve
     }
 
     public List<Server> readList(Collection<AnnotationInstance> annotations) {
+        if (annotations.isEmpty()) {
+            return new ArrayList<>(0);
+        }
         IoLogging.logger.annotationsArray("@Server");
         return annotations.stream()
                 .map(this::read)

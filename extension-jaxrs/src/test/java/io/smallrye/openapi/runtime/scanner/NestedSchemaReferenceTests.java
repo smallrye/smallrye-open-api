@@ -30,7 +30,7 @@ class NestedSchemaReferenceTests extends JaxRsDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
-        registry.register(parentType, Collections.emptySet(), result);
+        registry.register(parentType, Collections.emptyMap(), result);
 
         printToConsole(oai);
         assertJsonEquals("refsEnabled.nested.schema.family.expected.json", oai);

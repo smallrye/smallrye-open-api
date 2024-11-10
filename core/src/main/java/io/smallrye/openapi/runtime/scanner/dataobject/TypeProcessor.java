@@ -81,7 +81,9 @@ public class TypeProcessor {
     public Type processType() {
         // If it's a terminal type.
         if (isTerminalType(type)) {
-            context.getSchemaRegistry().checkRegistration(type, context.getJsonViews(), typeResolver, schema);
+            if (allowRegistration()) {
+                context.getSchemaRegistry().checkRegistration(type, context.getJsonViews(), typeResolver, schema);
+            }
             return type;
         }
 
@@ -148,6 +150,34 @@ public class TypeProcessor {
         return type;
     }
 
+    /**
+     * Only allow registration of a type if the annotation target (field or method) that
+     * refers to the type's class is not annotated with an annotation that alters
+     * the visibility of fields in the class.
+     *
+     * <p>
+     * For example, in this scenario when we process `fieldB`, registration of class B's
+     * schema will not occur because it's definition is altered by and specific to its
+     * use in class A.
+     *
+     * <pre>
+     * <code>
+     * class A {
+     *   &#64;JsonIgnoreProperties({"field2"})
+     *   B fieldB;
+     * }
+     *
+     * class B {
+     *   int field1;
+     *   int field2;
+     * }
+     * </code>
+     * </pre>
+     */
+    public boolean allowRegistration() {
+        return !context.getIgnoreResolver().configuresVisibility(annotationTarget);
+    }
+
     private Type readArrayType(ArrayType arrayType, Schema arraySchema) {
         DataObjectLogging.logger.processingArray(arrayType);
 
@@ -168,9 +198,12 @@ public class TypeProcessor {
         if (!isTerminalType(componentType) && index.containsClass(componentType)) {
             // If it's not a terminal type, then push for later inspection.
             pushToStack(componentType, itemSchema);
-            itemSchema = context.getSchemaRegistry().registerReference(componentType, context.getJsonViews(), typeResolver,
-                    itemSchema);
-        } else {
+
+            if (allowRegistration()) {
+                itemSchema = context.getSchemaRegistry().registerReference(componentType, context.getJsonViews(), typeResolver,
+                        itemSchema);
+            }
+        } else if (allowRegistration()) {
             // Otherwise, allow registration since we may not encounter the array's element type again.
             itemSchema = context.getSchemaRegistry().checkRegistration(componentType, context.getJsonViews(), typeResolver,
                     itemSchema);
@@ -306,11 +339,15 @@ public class TypeProcessor {
             SchemaRegistry registry = context.getSchemaRegistry();
 
             if (registry.hasSchema(valueType, context.getJsonViews(), typeResolver)) {
-                propsSchema = registry.lookupRef(valueType, context.getJsonViews());
+                if (allowRegistration()) {
+                    propsSchema = registry.lookupRef(valueType, context.getJsonViews());
+                }
             } else {
                 pushToStack(valueType, propsSchema);
-                propsSchema = registry.registerReference(valueType, context.getJsonViews(), typeResolver,
-                        propsSchema);
+                if (allowRegistration()) {
+                    propsSchema = registry.registerReference(valueType, context.getJsonViews(), typeResolver,
+                            propsSchema);
+                }
             }
         }
 

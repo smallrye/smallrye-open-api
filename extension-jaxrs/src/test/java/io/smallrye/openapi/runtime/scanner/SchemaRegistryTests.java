@@ -43,9 +43,9 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         FieldInfo n2 = cInfo.field("n2");
         FieldInfo n3 = cInfo.field("n3");
 
-        Schema s1 = registry.register(n1.type(), Collections.emptySet(), OASFactory.createSchema());
-        Schema s2 = registry.register(n2.type(), Collections.emptySet(), OASFactory.createSchema());
-        Schema s3 = registry.register(n3.type(), Collections.emptySet(), OASFactory.createSchema());
+        Schema s1 = registry.register(n1.type(), Collections.emptyMap(), OASFactory.createSchema());
+        Schema s2 = registry.register(n2.type(), Collections.emptyMap(), OASFactory.createSchema());
+        Schema s3 = registry.register(n3.type(), Collections.emptyMap(), OASFactory.createSchema());
 
         assertEquals("#/components/schemas/NestableStringNestableStringString", s1.getRef());
         assertEquals("#/components/schemas/NestableStringNestableStringObject", s2.getRef());
@@ -67,7 +67,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         ClassInfo cInfo = index.getClassByName(cName);
 
         FieldInfo n4 = cInfo.field("n4");
-        Schema s4 = registry.register(n4.type(), Collections.emptySet(), OASFactory.createSchema());
+        Schema s4 = registry.register(n4.type(), Collections.emptyMap(), OASFactory.createSchema());
         assertEquals("#/components/schemas/NestableStringSuperInteger", s4.getRef());
     }
 
@@ -86,7 +86,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         ClassInfo cInfo = index.getClassByName(cName);
 
         FieldInfo n5 = cInfo.field("n5");
-        Schema s5 = registry.register(n5.type(), Collections.emptySet(), OASFactory.createSchema());
+        Schema s5 = registry.register(n5.type(), Collections.emptyMap(), OASFactory.createSchema());
         assertEquals("#/components/schemas/NestableExtendsCharSequenceExtendsNumber", s5.getRef());
     }
 
@@ -106,7 +106,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         ClassInfo cInfo = index.getClassByName(cName);
 
         FieldInfo n6 = cInfo.field("n6");
-        Schema s6 = registry.register(n6.type(), Collections.emptySet(), OASFactory.createSchema());
+        Schema s6 = registry.register(n6.type(), Collections.emptyMap(), OASFactory.createSchema());
         assertEquals("#/components/schemas/n6", s6.getRef());
     }
 
@@ -129,7 +129,7 @@ class SchemaRegistryTests extends IndexScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, n6Type);
 
         Schema result = scanner.process();
-        registry.register(n6Type, Collections.emptySet(), result);
+        registry.register(n6Type, Collections.emptyMap(), result);
         printToConsole(context.getOpenApi());
 
         String field3SchemaName = ModelUtil.nameFromRef(result.getProperties().get("field3").getRef());

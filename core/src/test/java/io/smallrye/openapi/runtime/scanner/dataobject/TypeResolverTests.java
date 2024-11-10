@@ -863,22 +863,22 @@ class TypeResolverTests extends IndexScannerTestBase {
         AnnotationScannerContext context = buildContext(emptyConfig(), Bean.class, Views.View0.class, Views.View1.class,
                 Views.View2.class, Views.View3.class);
 
-        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View0.class), Type.Kind.CLASS));
+        context.getJsonViews().put(Type.create(DotName.createSimple(Views.View0.class), Type.Kind.CLASS), true);
         Map<String, TypeResolver> p0 = getProperties(context, Bean.class);
         assertFalse(p0.get("field0").isIgnored());
         Stream.of("field1", "field2", "field3").forEach(f -> assertTrue(p0.get(f).isIgnored()));
 
-        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View1.class), Type.Kind.CLASS));
+        context.getJsonViews().put(Type.create(DotName.createSimple(Views.View1.class), Type.Kind.CLASS), true);
         Map<String, TypeResolver> p1 = getProperties(context, Bean.class);
         Stream.of("field0", "field1").forEach(f -> assertFalse(p1.get(f).isIgnored()));
         Stream.of("field2", "field3").forEach(f -> assertTrue(p1.get(f).isIgnored()));
 
-        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View2.class), Type.Kind.CLASS));
+        context.getJsonViews().put(Type.create(DotName.createSimple(Views.View2.class), Type.Kind.CLASS), true);
         Map<String, TypeResolver> p2 = getProperties(context, Bean.class);
         Stream.of("field0", "field1", "field2").forEach(f -> assertFalse(p2.get(f).isIgnored()));
         Stream.of("field3").forEach(f -> assertTrue(p2.get(f).isIgnored()));
 
-        context.getJsonViews().add(Type.create(DotName.createSimple(Views.View3.class), Type.Kind.CLASS));
+        context.getJsonViews().put(Type.create(DotName.createSimple(Views.View3.class), Type.Kind.CLASS), true);
         Map<String, TypeResolver> p3 = getProperties(context, Bean.class);
         Stream.of("field0", "field1", "field2", "field3").forEach(f -> assertFalse(p3.get(f).isIgnored()));
     }

@@ -41,6 +41,7 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
+import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver.Visibility;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -581,7 +582,7 @@ public class TypeResolver {
     }
 
     private static boolean isViewable(AnnotationScannerContext context, AnnotationTarget propertySource) {
-        Set<Type> activeViews = context.getJsonViews();
+        Map<Type, Boolean> activeViews = context.getJsonViews();
 
         if (activeViews.isEmpty()) {
             return true;
@@ -590,7 +591,7 @@ public class TypeResolver {
         Type[] applicableViews = getJsonViews(context, propertySource);
 
         if (applicableViews != null && applicableViews.length > 0) {
-            return Arrays.stream(applicableViews).anyMatch(activeViews::contains);
+            return Arrays.stream(applicableViews).anyMatch(activeViews::containsKey);
         }
 
         return true;
@@ -629,23 +630,21 @@ public class TypeResolver {
      * @param target the field or method to be checked for ignoring or exposure in the API
      * @param reference an annotated member (field or method) that referenced the type of target's declaring class
      * @param descendants list of classes that descend from the class containing target
-     * @param properties map of other known properties that are peers of the target
      */
     private void processVisibility(AnnotationScannerContext context, AnnotationTarget target, AnnotationTarget reference,
-            List<ClassInfo> descendants,
-            Map<String, TypeResolver> properties) {
+            List<ClassInfo> descendants) {
         if (this.exposed || this.ignored) {
             // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
             return;
         }
 
-        if (this.isUnhidden(target)) {
+        if (this.isUnhidden(target, reference)) {
             // @Schema with hidden = false and not already ignored by a member lower in the class hierarchy
             this.exposed = true;
             return;
         }
 
-        switch (getVisibility(context, target, reference, descendants, properties)) {
+        switch (getVisibility(context, target, reference, descendants, propertyName)) {
             case EXPOSED:
                 this.exposed = true;
                 break;
@@ -705,7 +704,7 @@ public class TypeResolver {
     private IgnoreResolver.Visibility getVisibility(AnnotationScannerContext context, AnnotationTarget target,
             AnnotationTarget reference,
             List<ClassInfo> descendants,
-            Map<String, TypeResolver> properties) {
+            String propertyName) {
 
         if (!isViewable(context, target)) {
             return IgnoreResolver.Visibility.IGNORED;
@@ -716,7 +715,7 @@ public class TypeResolver {
         IgnoreResolver.Visibility visibility = ignoreResolver.getDescendantVisibility(propertyName, descendants);
 
         if (visibility == IgnoreResolver.Visibility.UNSET) {
-            visibility = ignoreResolver.isIgnore(properties, target, reference);
+            visibility = ignoreResolver.isIgnore(propertyName, target, reference);
         }
 
         return visibility;
@@ -724,11 +723,12 @@ public class TypeResolver {
 
     /**
      * Determines whether the target is set to hidden = false via the <code>@Schema</code>
-     * annotation (explicit or default value).
+     * annotation (explicit or default value). A field is only considered un-hidden if its
+     * visibility is not set to ignored by the referencing annotation target.
      *
      * @return true if the field is un-hidden, false otherwise
      */
-    boolean isUnhidden(AnnotationTarget target) {
+    boolean isUnhidden(AnnotationTarget target, AnnotationTarget reference) {
         if (target != null) {
             AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(context, target);
 
@@ -736,7 +736,8 @@ public class TypeResolver {
                 Boolean hidden = context.annotations().value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
 
                 if (hidden == null || !hidden.booleanValue()) {
-                    return true;
+                    return context.getIgnoreResolver().referenceVisibility(propertyName, target,
+                            reference) != Visibility.IGNORED;
                 }
             }
         }
@@ -800,7 +801,7 @@ public class TypeResolver {
             // Ignored for getters/setters
             resolver.ignored = true;
         } else {
-            resolver.processVisibility(context, field, reference, descendants, properties);
+            resolver.processVisibility(context, field, reference, descendants);
             resolver.processAccess(field);
         }
     }
@@ -868,7 +869,7 @@ public class TypeResolver {
         if (propertyType != null) {
             TypeResolver resolver = updateTypeResolvers(context, properties, stack, method, propertyType);
             if (resolver != null) {
-                resolver.processVisibility(context, method, reference, descendants, properties);
+                resolver.processVisibility(context, method, reference, descendants);
                 resolver.processAccess(method);
             }
         }

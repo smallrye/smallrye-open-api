@@ -67,7 +67,7 @@ class KitchenSinkTest extends JaxRsDataObjectScannerTestBase {
         SchemaRegistry registry = context.getSchemaRegistry();
 
         Schema result = scanner.process();
-        registry.register(type, Collections.emptySet(), result);
+        registry.register(type, Collections.emptyMap(), result);
 
         printToConsole(oai);
         assertJsonEquals("refsEnabled.kitchenSink.expected.json", oai);

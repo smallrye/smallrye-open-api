@@ -65,6 +65,7 @@ public class SchemaRegistry {
      *
      * @param type
      *        the {@link Type} the {@link Schema} applies to
+     * @param views types applied to the currently-active JsonView (Jackson annotation)
      * @param resolver
      *        a {@link TypeResolver} that will be used to resolve
      *        parameterized and wildcard types
@@ -73,7 +74,7 @@ public class SchemaRegistry {
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the given Type
      */
-    public Schema checkRegistration(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
+    public Schema checkRegistration(Type type, Map<Type, Boolean> views, TypeResolver resolver, Schema schema) {
         return register(type, views, resolver, schema, (reg, key) -> reg.register(key, schema, null));
     }
 
@@ -99,6 +100,7 @@ public class SchemaRegistry {
      *
      * @param type
      *        the {@link Type} the {@link Schema} applies to
+     * @param views types applied to the currently-active JsonView (Jackson annotation)
      * @param resolver
      *        a {@link TypeResolver} that will be used to resolve
      *        parameterized and wildcard types
@@ -107,11 +109,11 @@ public class SchemaRegistry {
      * @return the same schema if not eligible for registration, or a reference
      *         to the schema registered for the given Type
      */
-    public Schema registerReference(Type type, Set<Type> views, TypeResolver resolver, Schema schema) {
+    public Schema registerReference(Type type, Map<Type, Boolean> views, TypeResolver resolver, Schema schema) {
         return register(type, views, resolver, schema, SchemaRegistry::registerReference);
     }
 
-    public Schema register(Type type, Set<Type> views, TypeResolver resolver, Schema schema,
+    public Schema register(Type type, Map<Type, Boolean> views, TypeResolver resolver, Schema schema,
             BiFunction<SchemaRegistry, TypeKey, Schema> registrationAction) {
 
         final Type resolvedType = TypeResolver.resolve(type, resolver);
@@ -130,7 +132,7 @@ public class SchemaRegistry {
             return schema;
         }
 
-        TypeKey key = new TypeKey(resolvedType, views);
+        TypeKey key = keyFor(resolvedType, views);
 
         if (hasRef(key)) {
             schema = lookupRef(key);
@@ -153,7 +155,7 @@ public class SchemaRegistry {
      * @param resolver resolver for type parameter
      * @return true when schema references are enabled and the type is present in the registry, otherwise false
      */
-    public boolean hasSchema(Type type, Set<Type> views, TypeResolver resolver) {
+    public boolean hasSchema(Type type, Map<Type, Boolean> views, TypeResolver resolver) {
         if (disabled) {
             return false;
         }
@@ -235,9 +237,18 @@ public class SchemaRegistry {
                 return;
             }
 
-            this.register(new TypeKey(type, Collections.emptySet()), schema, Extensions.getName(schema));
+            this.register(keyFor(type, Collections.emptyMap()), schema, Extensions.getName(schema));
             ScannerLogging.logger.configSchemaRegistered(typeSignature);
         });
+    }
+
+    private static TypeKey keyFor(Type type, Map<Type, Boolean> views) {
+        if (TypeUtil.knownJavaType(type.name())) {
+            // do not apply views for JDK types
+            return new TypeKey(type, Collections.emptyMap());
+        }
+
+        return new TypeKey(type, views);
     }
 
     /**
@@ -253,8 +264,8 @@ public class SchemaRegistry {
      *        {@link Schema} to add to the registry
      * @return a reference to the newly registered {@link Schema}
      */
-    public Schema register(Type entityType, Set<Type> views, Schema schema) {
-        TypeKey key = new TypeKey(entityType, views);
+    public Schema register(Type entityType, Map<Type, Boolean> views, Schema schema) {
+        TypeKey key = keyFor(entityType, views);
 
         if (hasRef(key)) {
             // This is a replacement registration
@@ -324,20 +335,20 @@ public class SchemaRegistry {
         return name;
     }
 
-    public Schema lookupRef(Type instanceType, Set<Type> views) {
-        return lookupRef(new TypeKey(instanceType, views));
+    public Schema lookupRef(Type instanceType, Map<Type, Boolean> views) {
+        return lookupRef(keyFor(instanceType, views));
     }
 
-    public boolean hasRef(Type instanceType, Set<Type> views) {
-        return hasRef(new TypeKey(instanceType, views));
+    public boolean hasRef(Type instanceType, Map<Type, Boolean> views) {
+        return hasRef(keyFor(instanceType, views));
     }
 
-    public Schema lookupSchema(Type instanceType, Set<Type> views) {
-        return lookupSchema(new TypeKey(instanceType, views));
+    public Schema lookupSchema(Type instanceType, Map<Type, Boolean> views) {
+        return lookupSchema(keyFor(instanceType, views));
     }
 
-    public boolean hasSchema(Type instanceType, Set<Type> views) {
-        return hasSchema(new TypeKey(instanceType, views));
+    public boolean hasSchema(Type instanceType, Map<Type, Boolean> views) {
+        return hasSchema(keyFor(instanceType, views));
     }
 
     public boolean isTypeRegistrationSupported(Type type, Schema schema) {
@@ -398,19 +409,13 @@ public class SchemaRegistry {
      */
     public static final class TypeKey {
         private final Type type;
-        private final Set<Type> views;
+        private final Map<Type, Boolean> views;
         private int hashCode = 0;
 
-        TypeKey(Type type, Set<Type> views) {
+        TypeKey(Type type, Map<Type, Boolean> views) {
             this.type = type;
-            this.views = new LinkedHashSet<>(views);
+            this.views = new LinkedHashMap<>(views);
         }
-
-        /*
-         * TypeKey(Type type) {
-         * this(type, Collections.emptySet());
-         * }
-         */
 
         public String defaultName() {
             StringBuilder name = new StringBuilder(type.name().local());
@@ -436,9 +441,12 @@ public class SchemaRegistry {
 
             StringBuilder suffix = new StringBuilder();
 
-            for (Type view : views) {
-                suffix.append('_');
-                suffix.append(view.name().local());
+            for (Map.Entry<Type, Boolean> view : views.entrySet()) {
+                if (Boolean.TRUE.equals(view.getValue())) {
+                    // Only views that are directly specified contribute to the schema's name
+                    suffix.append('_');
+                    suffix.append(view.getKey().name().local());
+                }
             }
 
             return suffix.toString();

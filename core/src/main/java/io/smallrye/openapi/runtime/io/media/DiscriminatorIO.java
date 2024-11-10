@@ -39,7 +39,6 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
      */
     @Override
     public Discriminator read(AnnotationInstance annotation) {
-        IoLogging.logger.singleAnnotationAs("@Schema", "Discriminator");
         String propertyName = value(annotation, SchemaConstant.PROP_DISCRIMINATOR_PROPERTY);
         AnnotationInstance[] mapping = value(annotation, SchemaConstant.PROP_DISCRIMINATOR_MAPPING);
 
@@ -47,6 +46,7 @@ public class DiscriminatorIO<V, A extends V, O extends V, AB, OB> extends ModelI
             return null;
         }
 
+        IoLogging.logger.singleAnnotationAs("@Schema", "Discriminator");
         Discriminator discriminator = OASFactory.createDiscriminator();
 
         /*
