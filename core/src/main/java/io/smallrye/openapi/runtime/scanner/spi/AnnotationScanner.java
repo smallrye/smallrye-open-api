@@ -333,14 +333,22 @@ public interface AnnotationScanner {
             AugmentedIndexView index = context.getAugmentedIndex();
 
             Arrays.stream(views)
-                    .map(viewType -> {
+                    .flatMap(viewType -> {
+                        /*
+                         * Find all view classes that apply, based on the type array passed to the method.
+                         * The views are placed in a map on the context with a boolean value indicating
+                         * whether the view was directly specified on the method, or whether it was discovered
+                         * as an inherited view from the view class hierarchy.
+                         */
                         if (index.containsClass(viewType)) {
-                            return index.inheritanceChain(index.getClass(viewType), viewType).values();
+                            return index.inheritanceChain(index.getClass(viewType), viewType)
+                                    .values()
+                                    .stream()
+                                    .map(v -> Map.entry(v, viewType.equals(v)));
                         }
-                        return Collections.singleton(viewType);
+                        return Stream.of(Map.entry(viewType, Boolean.TRUE));
                     })
-                    .flatMap(Collection::stream)
-                    .forEach(context.getJsonViews()::add);
+                    .forEach(view -> context.getJsonViews().put(view.getKey(), view.getValue()));
         }
     }
 

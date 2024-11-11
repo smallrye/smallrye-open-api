@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.microprofile.openapi.OASFactory;
@@ -53,7 +52,7 @@ public class AnnotationScannerContext {
     private final Deque<Type> scanStack = new ArrayDeque<>();
     private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
     private final Optional<BeanValidationScanner> beanValidationScanner;
-    private final Set<Type> jsonViews = new LinkedHashSet<>();
+    private final Map<Type, Boolean> jsonViews = new LinkedHashMap<>();
     private String[] currentConsumes;
     private String[] currentProduces;
     private String[] defaultConsumes;
@@ -163,7 +162,7 @@ public class AnnotationScannerContext {
         return beanValidationScanner;
     }
 
-    public Set<Type> getJsonViews() {
+    public Map<Type, Boolean> getJsonViews() {
         return jsonViews;
     }
 

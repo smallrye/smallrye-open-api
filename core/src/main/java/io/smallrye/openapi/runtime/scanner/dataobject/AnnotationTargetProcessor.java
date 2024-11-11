@@ -159,6 +159,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs
             registrationType = TypeUtil.isWrappedType(entityType) ? fieldType : entityType;
             registrationCandidate = !JandexUtil.isRef(schemaAnnotation) &&
+                    typeProcessor.allowRegistration() &&
                     schemaRegistry.register(registrationType, context.getJsonViews(), typeResolver,
                             initTypeSchema,
                             (reg, key) -> null) != initTypeSchema;

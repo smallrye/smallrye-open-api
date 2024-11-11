@@ -2,6 +2,7 @@ package io.smallrye.openapi.runtime.io;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -65,6 +66,9 @@ public abstract class MapModelIO<T, V, A extends V, O extends V, AB, OB> extends
 
     protected Map<String, T> readMap(Collection<AnnotationInstance> annotations,
             Function<AnnotationInstance, Optional<String>> nameFn, BiFunction<String, AnnotationInstance, T> reader) {
+        if (annotations.isEmpty()) {
+            return new LinkedHashMap<>(0);
+        }
         IoLogging.logger.annotationsMap('@' + annotationName.local());
         return annotations.stream()
                 .map(annotation -> nameFn.apply(annotation).map(name -> entry(name, reader.apply(name, annotation))))

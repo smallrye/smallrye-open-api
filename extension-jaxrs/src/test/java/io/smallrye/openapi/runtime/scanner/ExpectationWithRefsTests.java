@@ -38,7 +38,7 @@ class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, type);
 
         Schema result = scanner.process();
-        registry.register(type, Collections.emptySet(), result);
+        registry.register(type, Collections.emptyMap(), result);
 
         printToConsole(oai);
         assertJsonEquals(expectedResourceName, oai);
@@ -54,7 +54,7 @@ class ExpectationWithRefsTests extends JaxRsDataObjectScannerTestBase {
         OpenApiDataObjectScanner scanner = new OpenApiDataObjectScanner(context, parentType);
 
         Schema result = scanner.process();
-        registry.register(parentType, Collections.emptySet(), result);
+        registry.register(parentType, Collections.emptyMap(), result);
 
         printToConsole(oai);
         assertJsonEquals(expectedResourceName, oai);

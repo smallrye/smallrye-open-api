@@ -13,7 +13,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BeanName_Internal_Public"
+                  "$ref": "#/components/schemas/BeanName_Internal"
                 }
               }
             }
@@ -42,7 +42,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BeanName_WriteOnly_Public"
+                "$ref": "#/components/schemas/BeanName_WriteOnly"
               }
             }
           }
@@ -64,7 +64,7 @@
   },
   "components": {
     "schemas": {
-      "BeanName_Internal_Public": {
+      "BeanName_Internal": {
         "type": "object",
         "properties": {
           "id": {
@@ -74,7 +74,7 @@
             "type": "string"
           },
           "inner1": {
-            "$ref": "#/components/schemas/Inner1_Internal_Public"
+            "$ref": "#/components/schemas/Inner1_Internal"
           }
         }
       },
@@ -89,7 +89,7 @@
           }
         }
       },
-      "BeanName_WriteOnly_Public": {
+      "BeanName_WriteOnly": {
         "type": "object",
         "properties": {
           "name": {
@@ -99,11 +99,11 @@
             "type": "string"
           },
           "inner1": {
-            "$ref": "#/components/schemas/Inner1_WriteOnly_Public"
+            "$ref": "#/components/schemas/Inner1_WriteOnly"
           }
         }
       },
-      "Inner1_Internal_Public": {
+      "Inner1_Internal": {
         "type": "object",
         "properties": {
           "value": {
@@ -125,7 +125,7 @@
           }
         }
       },
-      "Inner1_WriteOnly_Public": {
+      "Inner1_WriteOnly": {
         "type": "object",
         "properties": {
           "value": {
