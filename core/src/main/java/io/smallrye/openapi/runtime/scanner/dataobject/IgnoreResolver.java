@@ -78,6 +78,40 @@ public class IgnoreResolver {
         return Visibility.UNSET;
     }
 
+    /**
+     * Check whether the given target contains annotations that configure the
+     * visibility of the properties of the type annotated.
+     *
+     * This is used to only allow registration of a type if the annotation
+     * target (field or method) that refers to the type's class is not annotated
+     * with an annotation that alters the visibility of fields in the class.
+     *
+     * <p>
+     * For example, in this scenario when we process `fieldB`, registration of
+     * class B's schema will not occur because it's definition is altered by and
+     * specific to its use in class A.
+     *
+     * <pre>
+     * <code>
+     * class A {
+     *   &#64;JsonIgnoreProperties({"field2"})
+     *   B fieldB;
+     * }
+     *
+     * class B {
+     *   int field1;
+     *   int field2;
+     * }
+     * </code>
+     * </pre>
+     */
+    public static boolean configuresVisibility(AnnotationScannerContext context, AnnotationTarget target) {
+        if (target != null) {
+            return context.getIgnoreResolver().configuresVisibility(target);
+        }
+        return false;
+    }
+
     public boolean configuresVisibility(AnnotationTarget reference) {
         for (IgnoreAnnotationHandler handler : ignoreHandlers) {
             if (handler.configuresVisibility(reference)) {

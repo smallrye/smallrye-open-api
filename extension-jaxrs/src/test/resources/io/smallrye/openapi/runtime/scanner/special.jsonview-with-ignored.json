@@ -13,9 +13,6 @@
           "name" : {
             "type" : "string"
           },
-          "createdAt" : {
-            "$ref" : "#/components/schemas/LocalDateTime"
-          },
           "description" : {
             "type" : "string"
           },
@@ -34,9 +31,6 @@
                 },
                 "name" : {
                   "type" : "string"
-                },
-                "createdAt" : {
-                  "$ref" : "#/components/schemas/LocalDateTime"
                 }
               }
             }
@@ -69,6 +63,31 @@
         "type" : "string",
         "format" : "date-time",
         "examples" : [ "2022-03-10T12:15:50" ]
+      },
+      "Role_Full" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "Title of description"
+          }
+        }
+      },
+      "Role_Ingest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        }
       },
       "User_Full" : {
         "type" : "object",
@@ -107,15 +126,78 @@
             "description" : "test date-time field",
             "type" : "string",
             "$ref" : "#/components/schemas/LocalDateTime"
-          },
-          "group" : {
-            "$ref" : "#/components/schemas/Group_Ingest"
           }
         }
       }
     }
   },
   "paths" : {
+    "/group" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Group_Ingest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Group_Full"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/role" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Role_Ingest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role_Full"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user" : {
       "post" : {
         "requestBody" : {

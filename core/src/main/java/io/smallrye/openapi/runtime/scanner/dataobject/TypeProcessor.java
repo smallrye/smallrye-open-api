@@ -155,27 +155,10 @@ public class TypeProcessor {
      * refers to the type's class is not annotated with an annotation that alters
      * the visibility of fields in the class.
      *
-     * <p>
-     * For example, in this scenario when we process `fieldB`, registration of class B's
-     * schema will not occur because it's definition is altered by and specific to its
-     * use in class A.
-     *
-     * <pre>
-     * <code>
-     * class A {
-     *   &#64;JsonIgnoreProperties({"field2"})
-     *   B fieldB;
-     * }
-     *
-     * class B {
-     *   int field1;
-     *   int field2;
-     * }
-     * </code>
-     * </pre>
+     * @see IgnoreResolver#configuresVisibility(AnnotationScannerContext, AnnotationTarget)
      */
     public boolean allowRegistration() {
-        return !context.getIgnoreResolver().configuresVisibility(annotationTarget);
+        return !IgnoreResolver.configuresVisibility(context, annotationTarget);
     }
 
     private Type readArrayType(ArrayType arrayType, Schema arraySchema) {
