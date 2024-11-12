@@ -136,10 +136,6 @@ class JsonViewTests extends IndexScannerTestBase {
             private UUID id;
             @JsonView(Views.Ingest.class)
             private String name;
-            @JsonView(Views.Full.class)
-            private LocalDateTime createdAt;
-            // Adding @Schema() here does fix the problem were  @JsonIgnoreProperties in Group was removing description gobally.
-            // but now the @JsonView is being ignored and description field is in all JsonViews.
             @Schema(title = "Title of description")
             @JsonView(Views.Full.class)
             private String description;
@@ -152,13 +148,10 @@ class JsonViewTests extends IndexScannerTestBase {
             @JsonView(Views.Abridged.class)
             private String name;
             @JsonView(Views.Full.class)
-            private LocalDateTime createdAt;
-            @JsonView(Views.Full.class)
             private String description;
             @JsonView(Views.Ingest.class)
             private String roleId;
             @JsonView(Views.Abridged.class)
-            //  @JsonIgnoreProperties should only apply to this the Group entity use case of Role.  Currently, it's global.
             @JsonIgnoreProperties("description")
             private List<Role> roles;
         }
@@ -199,8 +192,41 @@ class JsonViewTests extends IndexScannerTestBase {
             }
         }
 
+        @Path("/role")
+        class RoleResource {
+            @GET
+            @Produces(MediaType.APPLICATION_JSON)
+            @JsonView(Views.Full.class)
+            @APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Role.class)))
+            public Response getRole() {
+                return null;
+            }
+
+            @POST
+            public Response post(@RequestBody @JsonView(Views.Ingest.class) Role role) {
+                return null;
+            }
+        }
+
+        @Path("/group")
+        class GroupResource {
+            @GET
+            @Produces(MediaType.APPLICATION_JSON)
+            @JsonView(Views.Full.class)
+            @APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Group.class)))
+            public Response get() {
+                return null;
+            }
+
+            @POST
+            public Response post(@RequestBody @JsonView(Views.Ingest.class) Group group) {
+                return null;
+            }
+        }
+
         Index index = Index.of(Views.class, Views.Max.class, Views.Full.class, Views.Ingest.class, Views.Abridged.class,
-                User.class, Group.class, Role.class, UserResource.class, LocalDateTime.class);
+                User.class, Group.class, Role.class, UserResource.class, LocalDateTime.class, RoleResource.class,
+                GroupResource.class);
         OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.TRUE);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
 

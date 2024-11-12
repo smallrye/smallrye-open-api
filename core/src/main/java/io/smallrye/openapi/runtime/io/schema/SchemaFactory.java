@@ -93,8 +93,9 @@ public class SchemaFactory {
     public static Schema readSchema(final AnnotationScannerContext context,
             Schema schema,
             AnnotationInstance annotation,
-            ClassInfo clazz) {
-        return readSchema(context, schema, annotation, clazz, Collections.emptyMap());
+            ClassInfo clazz,
+            boolean registerSchema) {
+        return readSchema(context, schema, annotation, clazz, registerSchema, Collections.emptyMap());
     }
 
     /**
@@ -113,6 +114,7 @@ public class SchemaFactory {
             Schema schema,
             AnnotationInstance annotation,
             ClassInfo clazz,
+            boolean registerSchema,
             Map<String, Object> defaults) {
 
         if (isAnnotationMissingOrHidden(context, annotation, defaults)) {
@@ -129,7 +131,9 @@ public class SchemaFactory {
          *
          * Ignore the reference returned by register, the caller expects the full schema.
          */
-        schemaRegistration(context, clazzType, schema);
+        if (registerSchema) {
+            schemaRegistration(context, clazzType, schema);
+        }
 
         return schema;
     }
@@ -641,7 +645,7 @@ public class SchemaFactory {
             Map<String, Object> defaults = new LinkedHashMap<>(TypeUtil.getTypeAttributes(enumValueType));
             defaults.put(SchemaConstant.PROP_ENUMERATION, enumeration);
 
-            enumSchema = readSchema(context, enumSchema, schemaAnnotation, enumKlazz, defaults);
+            enumSchema = readSchema(context, enumSchema, schemaAnnotation, enumKlazz, true, defaults);
         } else {
             TypeUtil.applyTypeAttributes(enumValueType, enumSchema);
             enumSchema.setEnumeration(enumeration);

@@ -41,7 +41,6 @@ import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
-import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver.Visibility;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
 import io.smallrye.openapi.runtime.util.JandexUtil;
@@ -581,47 +580,6 @@ public class TypeResolver {
         return method == null || !Modifier.isPublic(method.flags());
     }
 
-    private static boolean isViewable(AnnotationScannerContext context, AnnotationTarget propertySource) {
-        Map<Type, Boolean> activeViews = context.getJsonViews();
-
-        if (activeViews.isEmpty()) {
-            return true;
-        }
-
-        Type[] applicableViews = getJsonViews(context, propertySource);
-
-        if (applicableViews != null && applicableViews.length > 0) {
-            return Arrays.stream(applicableViews).anyMatch(activeViews::containsKey);
-        }
-
-        return true;
-    }
-
-    /**
-     * Find {@literal @}JsonView annotations on the field/method, or on the
-     * declaring class when the field/method itself it not directly targeted by the
-     * annotation.
-     */
-    private static Type[] getJsonViews(AnnotationScannerContext context, AnnotationTarget propertySource) {
-        Annotations annotations = context.annotations();
-
-        Type[] directViews = annotations.getAnnotationValue(propertySource, JacksonConstants.JSON_VIEW);
-
-        if (directViews != null) {
-            return directViews;
-        }
-
-        ClassInfo declaringClass;
-
-        if (propertySource.kind() == Kind.FIELD) {
-            declaringClass = propertySource.asField().declaringClass();
-        } else {
-            declaringClass = propertySource.asMethod().declaringClass();
-        }
-
-        return annotations.getAnnotationValue(declaringClass, JacksonConstants.JSON_VIEW);
-    }
-
     /**
      * Determine if the target should be exposed in the API or ignored. Explicitly un-hiding a property
      * via the <code>@Schema</code> annotation overrides configuration to ignore the same property
@@ -635,12 +593,6 @@ public class TypeResolver {
             List<ClassInfo> descendants) {
         if (this.exposed || this.ignored) {
             // @Schema with hidden = false OR ignored somehow by a member lower in the class hierarchy
-            return;
-        }
-
-        if (this.isUnhidden(target, reference)) {
-            // @Schema with hidden = false and not already ignored by a member lower in the class hierarchy
-            this.exposed = true;
             return;
         }
 
@@ -706,19 +658,73 @@ public class TypeResolver {
             List<ClassInfo> descendants,
             String propertyName) {
 
+        IgnoreResolver.Visibility visibility;
+
         if (!isViewable(context, target)) {
             return IgnoreResolver.Visibility.IGNORED;
         }
 
         IgnoreResolver ignoreResolver = context.getIgnoreResolver();
+        visibility = ignoreResolver.referenceVisibility(propertyName, target, reference);
+
+        if (visibility != IgnoreResolver.Visibility.UNSET) {
+            return visibility;
+        }
+
+        if (isUnhidden(target)) {
+            // @Schema with hidden = false and not already ignored by a member lower in the class hierarchy
+            return IgnoreResolver.Visibility.EXPOSED;
+        }
+
         // First check if a descendant class has hidden/exposed the property
-        IgnoreResolver.Visibility visibility = ignoreResolver.getDescendantVisibility(propertyName, descendants);
+        visibility = ignoreResolver.getDescendantVisibility(propertyName, descendants);
 
         if (visibility == IgnoreResolver.Visibility.UNSET) {
             visibility = ignoreResolver.isIgnore(propertyName, target, reference);
         }
 
         return visibility;
+    }
+
+    private static boolean isViewable(AnnotationScannerContext context, AnnotationTarget propertySource) {
+        Map<Type, Boolean> activeViews = context.getJsonViews();
+
+        if (activeViews.isEmpty()) {
+            return true;
+        }
+
+        Type[] applicableViews = getJsonViews(context, propertySource);
+
+        if (applicableViews != null && applicableViews.length > 0) {
+            return Arrays.stream(applicableViews).anyMatch(activeViews::containsKey);
+        }
+
+        return true;
+    }
+
+    /**
+     * Find {@literal @}JsonView annotations on the field/method, or on the
+     * declaring class when the field/method itself it not directly targeted by the
+     * annotation.
+     */
+    private static Type[] getJsonViews(AnnotationScannerContext context, AnnotationTarget propertySource) {
+        Annotations annotations = context.annotations();
+
+        AnnotationInstance jsonView = annotations.getAnnotation(propertySource, JacksonConstants.JSON_VIEW);
+
+        if (jsonView != null) {
+            return annotations.value(jsonView);
+        }
+
+        ClassInfo declaringClass;
+
+        if (propertySource.kind() == Kind.FIELD) {
+            declaringClass = propertySource.asField().declaringClass();
+        } else {
+            declaringClass = propertySource.asMethod().declaringClass();
+        }
+
+        return annotations.getAnnotationValue(declaringClass, JacksonConstants.JSON_VIEW);
     }
 
     /**
@@ -728,16 +734,16 @@ public class TypeResolver {
      *
      * @return true if the field is un-hidden, false otherwise
      */
-    boolean isUnhidden(AnnotationTarget target, AnnotationTarget reference) {
+    boolean isUnhidden(AnnotationTarget target) {
         if (target != null) {
-            AnnotationInstance schemaAnnotation = TypeUtil.getSchemaAnnotation(context, target);
+            Annotations annotations = context.annotations();
+            AnnotationInstance schema = annotations.getAnnotation(target, SchemaConstant.DOTNAME_SCHEMA);
 
-            if (schemaAnnotation != null) {
-                Boolean hidden = context.annotations().value(schemaAnnotation, SchemaConstant.PROP_HIDDEN);
+            if (schema != null) {
+                Boolean hidden = annotations.value(schema, SchemaConstant.PROP_HIDDEN);
 
                 if (hidden == null || !hidden.booleanValue()) {
-                    return context.getIgnoreResolver().referenceVisibility(propertyName, target,
-                            reference) != Visibility.IGNORED;
+                    return true;
                 }
             }
         }

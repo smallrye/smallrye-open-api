@@ -34,6 +34,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
+import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -246,16 +247,19 @@ public class OpenApiDataObjectScanner {
 
             ClassInfo currentClass = currentPathEntry.getClazz();
             Schema currentSchema = currentPathEntry.getSchema();
+            AnnotationTarget currentTarget = currentPathEntry.getAnnotationTarget();
+            boolean allowRegistration = !IgnoreResolver.configuresVisibility(context, currentTarget);
 
             // First, handle class annotations (re-assign since readKlass may return new schema)
-            currentSchema = readKlass(currentClass, currentType, currentSchema);
+            currentSchema = readKlass(currentClass, currentType, currentSchema, allowRegistration);
+
             TypeUtil.mapDeprecated(context, currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
 
             if (!hasNonNullType(currentSchema)) {
                 // If not schema has yet been set, consider this an "object"
                 SchemaSupport.setType(currentSchema, Schema.SchemaType.OBJECT);
-            } else {
+            } else if (allowRegistration) {
                 maybeRegisterSchema(currentType, currentSchema, entrySchema);
             }
 
@@ -364,14 +368,15 @@ public class OpenApiDataObjectScanner {
 
     private Schema readKlass(ClassInfo currentClass,
             Type currentType,
-            Schema currentSchema) {
+            Schema currentSchema,
+            boolean registerSchema) {
 
         AnnotationInstance annotation = TypeUtil.getSchemaAnnotation(context, currentClass);
         Schema classSchema;
 
         if (annotation != null) {
             // Because of implementation= field, *may* return a new schema rather than modify.
-            classSchema = SchemaFactory.readSchema(context, currentSchema, annotation, currentClass);
+            classSchema = SchemaFactory.readSchema(context, currentSchema, annotation, currentClass, registerSchema);
         } else if (isA(currentType, ENUM_TYPE)) {
             classSchema = SchemaFactory.enumToSchema(context, currentType);
         } else {
