@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -20,6 +21,7 @@ import org.jboss.jandex.Type;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.internal.support.SimpleTypeTarget;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 /**
@@ -199,6 +201,49 @@ public class BeanValidationScanner {
                 default:
                     break;
             }
+        }
+    }
+
+    /**
+     * Like {@link #applyConstraints(AnnotationTarget, Schema, String, RequirementHandler)},
+     * but for constraints on {@link Type}s.
+     *
+     * @param target
+     *        the object from which to retrieve the constraint annotations
+     * @param schema
+     *        the schema to which the constraints will be applied
+     * @param propertyKey
+     *        the name of the property in parentSchema that refers to the
+     *        schema
+     * @param handler
+     *        the handler to be called when a
+     *        bean validation @NotNull constraint is encountered.
+     */
+    public void applyConstraints(Type target,
+            Schema schema,
+            String propertyKey,
+            RequirementHandler handler) {
+        applyConstraints(SimpleTypeTarget.create(target), schema, propertyKey, handler);
+    }
+
+    /**
+     * Apply validation constraints found on the type to the schema, if bean
+     * validation scanning is enabled on the given context.
+     *
+     * @param context
+     *        current scanning context
+     * @param type
+     *        the object from which to retrieve the constraint annotations
+     * @param schema
+     *        the schema to which the constraints will be applied
+     */
+    public static void applyConstraints(AnnotationScannerContext context, Type type, Schema schema) {
+        Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
+
+        if (schema != null && constraintScanner.isPresent()) {
+            constraintScanner.get().applyConstraints(type, schema, null,
+                    (target, name) -> {
+                        /* Nothing additional to do for @NotNull */ });
         }
     }
 

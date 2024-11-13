@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -93,9 +92,7 @@ public final class Annotations {
                 return filter(target, target.asRecordComponent().annotations());
 
             case TYPE:
-                return filter(target, Optional.ofNullable(target.asType().target())
-                        .map(Type::annotations)
-                        .orElseGet(Collections::emptyList));
+                return new ArrayList<>(target.annotations());
 
             default:
                 return Collections.emptyList();

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -31,7 +30,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
                 null);
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
-        Type result = SchemaFactory.resolveAsyncType(context, target, Collections.emptyList());
+        Type result = SchemaFactory.resolveAsyncType(context, target);
         assertEquals(STRING_TYPE, result);
     }
 
@@ -41,7 +40,7 @@ class SchemaFactoryTest extends IndexScannerTestBase {
         AnnotationScannerContext context = new AnnotationScannerContext(index, ClassLoaderUtil.getDefaultClassLoader(),
                 emptyConfig());
         Type type = WildcardType.create(null, false);
-        Schema result = SchemaFactory.typeToSchema(context, type, null, Collections.emptyList());
+        Schema result = SchemaFactory.typeToSchema(context, type, null);
         assertNull(result.getType());
     }
 

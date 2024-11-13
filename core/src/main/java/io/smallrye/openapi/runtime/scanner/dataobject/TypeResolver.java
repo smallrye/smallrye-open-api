@@ -414,7 +414,22 @@ public class TypeResolver {
      */
     private Type getResolvedType(ParameterizedType type) {
         if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
-            return ParameterizedType.create(type.name(), resolveArguments(type, this::resolve), null);
+            ParameterizedType.Builder builder = ParameterizedType.builder(type.name());
+
+            Type owner = type.owner();
+            if (owner != null) {
+                builder.setOwner(resolve(owner));
+            }
+
+            for (AnnotationInstance anno : type.annotations()) {
+                builder.addAnnotation(anno);
+            }
+
+            for (Type arg : resolveArguments(type, this::resolve)) {
+                builder.addArgument(arg);
+            }
+
+            return builder.build();
         }
 
         return getResolvedType((Type) type);

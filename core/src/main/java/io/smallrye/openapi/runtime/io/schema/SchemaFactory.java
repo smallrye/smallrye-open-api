@@ -35,6 +35,7 @@ import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.OpenApiDataObjectScanner;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
+import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.EnumProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -544,7 +545,7 @@ public class SchemaFactory {
      * @return Schema model
      */
     public static Schema typeToSchema(AnnotationScannerContext context, Type type) {
-        return typeToSchema(context, type, null, context.getExtensions());
+        return typeToSchema(context, type, null);
     }
 
     /**
@@ -552,12 +553,10 @@ public class SchemaFactory {
      *
      * @param context scanning context
      * @param type the implementation type of the item to scan
-     * @param extensions list of AnnotationScannerExtensions
      * @return Schema model
      */
     public static Schema typeToSchema(final AnnotationScannerContext context, Type type,
-            AnnotationInstance schemaAnnotation,
-            List<AnnotationScannerExtension> extensions) {
+            AnnotationInstance schemaAnnotation) {
         Schema schema = null;
         Schema fromAnnotation = null;
 
@@ -574,11 +573,10 @@ public class SchemaFactory {
 
         if (TypeUtil.isWrappedType(type)) {
             // Recurse using the optional's type
-            schema = typeToSchema(context, TypeUtil.unwrapType(type), null, extensions);
+            schema = typeToSchema(context, TypeUtil.unwrapType(type), null);
         } else if (currentScanner.isPresent() && currentScanner.get().isWrapperType(type)) {
             // Recurse using the wrapped type
-            schema = typeToSchema(context, currentScanner.get().unwrapType(type), null,
-                    extensions);
+            schema = typeToSchema(context, currentScanner.get().unwrapType(type), null);
         } else if (TypeUtil.isTerminalType(type)) {
             schema = OASFactory.createSchema();
             TypeUtil.applyTypeAttributes(type, schema);
@@ -592,18 +590,20 @@ public class SchemaFactory {
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
                 schema.setItems(
-                        typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null, extensions));
+                        typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null));
             } else {
                 // Recurse using the type of the array elements
-                schema.setItems(typeToSchema(context, componentType, null, extensions));
+                schema.setItems(typeToSchema(context, componentType, null));
             }
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(context, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
-            schema = otherTypeToSchema(context, type, extensions);
+            schema = otherTypeToSchema(context, type);
         }
+
+        BeanValidationScanner.applyConstraints(context, type, schema);
 
         if (fromAnnotation != null) {
             // Generate `allOf` ?
@@ -768,24 +768,22 @@ public class SchemaFactory {
                 .collect(Collectors.toList());
     }
 
-    private static Schema otherTypeToSchema(final AnnotationScannerContext context, Type type,
-            List<AnnotationScannerExtension> extensions) {
+    private static Schema otherTypeToSchema(final AnnotationScannerContext context, Type type) {
         if (TypeUtil.isA(context, type, MutinyConstants.MULTI_TYPE)) {
             // Treat as an Array
             Schema schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
             Type componentType = type.asParameterizedType().arguments().get(0);
 
             // Recurse using the type of the array elements
-            schema.setItems(typeToSchema(context, componentType, null, extensions));
+            schema.setItems(typeToSchema(context, componentType));
             return schema;
         } else {
-            Type asyncType = resolveAsyncType(context, type, extensions);
+            Type asyncType = resolveAsyncType(context, type);
             return schemaRegistration(context, asyncType, OpenApiDataObjectScanner.process(context, asyncType));
         }
     }
 
-    static Type resolveAsyncType(final AnnotationScannerContext context, Type type,
-            List<AnnotationScannerExtension> extensions) {
+    static Type resolveAsyncType(final AnnotationScannerContext context, Type type) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
             ParameterizedType pType = type.asParameterizedType();
             if (pType.arguments().size() == 1 &&
@@ -793,7 +791,7 @@ public class SchemaFactory {
                 return pType.arguments().get(0);
             }
         }
-        for (AnnotationScannerExtension extension : extensions) {
+        for (AnnotationScannerExtension extension : context.getExtensions()) {
             Type asyncType = extension.resolveAsyncType(type);
             if (asyncType != null)
                 return asyncType;

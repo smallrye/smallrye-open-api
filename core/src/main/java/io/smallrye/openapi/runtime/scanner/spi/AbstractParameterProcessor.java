@@ -572,7 +572,7 @@ public abstract class AbstractParameterProcessor {
             // readSchema *may* replace the existing schema, so we must assign.
             schema = SchemaFactory.readSchema(scannerContext, OASFactory.createSchema(), schemaAnnotation, defaults);
         } else {
-            schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, schemaAnnotation, extensions);
+            schema = SchemaFactory.typeToSchema(scannerContext, context.targetType, schemaAnnotation);
         }
 
         ModelUtil.setParameterSchema(param, schema);
@@ -681,8 +681,7 @@ public abstract class AbstractParameterProcessor {
             if (schemaAnnotationSupported) {
                 schemaAnnotation = scannerContext.annotations().getAnnotation(paramTarget, SchemaConstant.DOTNAME_SCHEMA);
             }
-            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType,
-                    schemaAnnotation, extensions);
+            Schema paramSchema = SchemaFactory.typeToSchema(scannerContext, paramType, schemaAnnotation);
 
             if (paramSchema == null) {
                 // hidden
