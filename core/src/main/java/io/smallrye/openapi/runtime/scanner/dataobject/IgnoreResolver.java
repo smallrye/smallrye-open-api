@@ -215,7 +215,7 @@ public class IgnoreResolver {
         private Visibility declaringClassIgnore(String propertyName, AnnotationTarget target) {
             AnnotationInstance declaringClassJIP = context.annotations().getAnnotation(TypeUtil.getDeclaringClass(target),
                     getNames());
-            return shouldIgnoreTarget(declaringClassJIP, propertyName);
+            return shouldIgnoreTarget(declaringClassJIP, propertyName, Visibility.EXPOSED);
         }
 
         /**
@@ -244,10 +244,11 @@ public class IgnoreResolver {
                 return Visibility.UNSET;
             }
             AnnotationInstance nestedTypeJIP = context.annotations().getAnnotation(nesting, getNames());
-            return shouldIgnoreTarget(nestedTypeJIP, propertyName);
+            return shouldIgnoreTarget(nestedTypeJIP, propertyName, Visibility.UNSET);
         }
 
-        private Visibility shouldIgnoreTarget(AnnotationInstance jipAnnotation, String targetName) {
+        private Visibility shouldIgnoreTarget(AnnotationInstance jipAnnotation, String targetName,
+                Visibility unlistedVisibility) {
             if (jipAnnotation == null || jipAnnotation.value() == null) {
                 return Visibility.UNSET;
             }
@@ -255,7 +256,7 @@ public class IgnoreResolver {
             if (Arrays.asList(jipAnnotation.value().asStringArray()).contains(targetName)) {
                 return Visibility.IGNORED;
             } else {
-                return Visibility.EXPOSED;
+                return unlistedVisibility;
             }
         }
 
@@ -268,7 +269,7 @@ public class IgnoreResolver {
         public Visibility getDescendantVisibility(String propertyName, List<ClassInfo> descendants) {
             for (ClassInfo descendant : descendants) {
                 AnnotationInstance declaringClassJIP = context.annotations().getAnnotation(descendant, getNames());
-                Visibility visibility = shouldIgnoreTarget(declaringClassJIP, propertyName);
+                Visibility visibility = shouldIgnoreTarget(declaringClassJIP, propertyName, Visibility.EXPOSED);
 
                 if (visibility != Visibility.UNSET) {
                     return visibility;
