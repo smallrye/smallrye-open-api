@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -132,6 +133,9 @@ class JsonViewTests extends IndexScannerTestBase {
 
         @Schema(name = "Role")
         class Role {
+            @JsonIgnore
+            protected java.util.logging.Logger logger;
+
             @JsonView(Views.Full.class)
             private UUID id;
             @JsonView(Views.Ingest.class)
