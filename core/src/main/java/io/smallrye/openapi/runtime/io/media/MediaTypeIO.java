@@ -25,7 +25,7 @@ public class MediaTypeIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Me
         IoLogging.logger.singleAnnotationAs("@Content", "MediaType");
         MediaType mediaType = OASFactory.createMediaType();
         mediaType.setExamples(exampleObjectIO().readMap(annotation.value(PROP_EXAMPLES)));
-        mediaType.setExample(exampleObjectIO().parseValue(value(annotation, PROP_EXAMPLE)));
+        mediaType.setExample(value(annotation, PROP_EXAMPLE));
         mediaType.setSchema(schemaIO().read(annotation.value(PROP_SCHEMA)));
         mediaType.setEncoding(encodingIO().readMap(annotation.value(PROP_ENCODING)));
         mediaType.setExtensions(extensionIO().readExtensible(annotation));

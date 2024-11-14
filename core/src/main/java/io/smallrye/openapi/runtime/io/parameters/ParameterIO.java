@@ -79,7 +79,7 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
                 model.setExamples(exampleObjectIO().readMap(value));
                 return true;
             case PROP_EXAMPLE:
-                model.setExample(exampleObjectIO().parseValue(value.asString()));
+                model.setExample(value.asString());
                 return true;
             default:
                 break;
@@ -94,6 +94,14 @@ public class ParameterIO<V, A extends V, O extends V, AB, OB> extends MapModelIO
 
         if (annotation.target() != null) {
             Extensions.setParamRef(parameter, annotation.target());
+        }
+
+        if (parameter.getExample() != null || parameter.getExamples() != null) {
+            /*
+             * Save the parameter for later parsing. The schema may not yet be set
+             * so we do not know if it should be parsed.
+             */
+            scannerContext().getUnparsedExamples().add(parameter);
         }
 
         return parameter;

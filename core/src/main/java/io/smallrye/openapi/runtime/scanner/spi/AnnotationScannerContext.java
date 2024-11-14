@@ -64,6 +64,7 @@ public class AnnotationScannerContext {
     private final IOContext<?, ?, ?, ?, ?> ioContext;
 
     private final Map<String, MethodInfo> operationIdMap = new HashMap<>();
+    private final List<Object> unparsedExamples = new ArrayList<>();
 
     public AnnotationScannerContext(FilteredIndexView index,
             ClassLoader classLoader,
@@ -225,5 +226,9 @@ public class AnnotationScannerContext {
     @SuppressWarnings("unchecked")
     public <V, A extends V, O extends V, AB, OB> IOContext<V, A, O, AB, OB> io() { // NOSONAR - ignore wildcards in return type
         return (IOContext<V, A, O, AB, OB>) ioContext;
+    }
+
+    public List<Object> getUnparsedExamples() {
+        return unparsedExamples;
     }
 }

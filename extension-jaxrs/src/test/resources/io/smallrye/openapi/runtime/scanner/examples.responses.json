@@ -1,0 +1,53 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/examples" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "examples" : {
+                  "identifiers" : {
+                    "value" : "1200635948\n1201860613\n1201901219"
+                  }
+                },
+                "example" : "1200635948\n1201860613\n1201901219"
+              },
+              "application/json" : {
+                "examples" : {
+                  "identifiers" : {
+                    "value" : [ "1200635948", "1201860613", "1201901219" ]
+                  }
+                },
+                "example" : [ "123", "456" ]
+              }
+            }
+          },
+          "206" : {
+            "description" : "Partial Content",
+            "content" : {
+              "text/plain" : {
+                "examples" : {
+                  "integer" : {
+                    "value" : "1"
+                  }
+                },
+                "example" : "1"
+              },
+              "application/json" : {
+                "examples" : {
+                  "integer" : {
+                    "value" : 1
+                  }
+                },
+                "example" : 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

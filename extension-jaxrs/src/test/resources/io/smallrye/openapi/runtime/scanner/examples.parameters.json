@@ -1,0 +1,72 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "LocalDateTime" : {
+        "type" : "string",
+        "format" : "date-time",
+        "examples" : [ "2022-03-10T12:15:50" ]
+      }
+    }
+  },
+  "paths" : {
+    "/examples" : {
+      "parameters" : [ {
+        "example" : "2019-05-02T09:51:25.265",
+        "examples" : {
+          "datetime" : {
+            "value" : "2099-12-31T23:59:59.999"
+          }
+        },
+        "name" : "createDateTimeMax",
+        "in" : "query",
+        "schema" : {
+          "$ref" : "#/components/schemas/LocalDateTime"
+        }
+      }, {
+        "example" : {
+          "key" : "value"
+        },
+        "examples" : {
+          "json" : {
+            "value" : {
+              "key" : "value"
+            }
+          }
+        },
+        "schema" : {
+          "type" : "object"
+        },
+        "name" : "encodedJson",
+        "in" : "query"
+      }, {
+        "example" : 3.1415,
+        "name" : "floatingpoint",
+        "in" : "query",
+        "schema" : {
+          "type" : "number",
+          "format" : "float"
+        }
+      }, {
+        "example" : "\"key\": \"value\"",
+        "examples" : {
+          "keyValuePair" : {
+            "value" : "\"key\": \"value\""
+          }
+        },
+        "schema" : {
+          "type" : "string"
+        },
+        "name" : "keyValuePair",
+        "in" : "query"
+      } ],
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    }
+  }
+}
