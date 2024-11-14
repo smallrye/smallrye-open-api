@@ -5,6 +5,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -22,6 +23,9 @@ import test.io.smallrye.openapi.runtime.scanner.resources.jakarta.SalutationSpan
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 class OperationIdTest extends JaxRsDataObjectScannerTestBase {
+
+    @RegisterExtension
+    public LogCapture logs = new LogCapture(ScannerLogging.class.getPackage().getName());
 
     @ParameterizedTest
     @CsvSource({
@@ -56,6 +60,7 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             OpenAPI result = OpenApiProcessor.bootstrap(config, index);
             printToConsole(result);
             assertJsonEquals("resource.testOperationIdWithInheritance.json", result);
+            logs.assertNoLogContaining("Duplicate operationId");
         } finally {
             System.clearProperty(SmallRyeOASConfig.OPERATION_ID_STRAGEGY);
         }
