@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -21,6 +22,10 @@ import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Paths;
+import org.eclipse.microprofile.openapi.models.examples.Example;
+import org.eclipse.microprofile.openapi.models.media.MediaType;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
+import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.tags.Tag;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -32,6 +37,7 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.util.ClassLoaderUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.OpenAPIDefinitionIO;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -39,6 +45,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
+import io.smallrye.openapi.runtime.util.ModelUtil;
 
 /**
  * Scans a deployment (using the archive and jandex annotation index) for OpenAPI annotations.
@@ -234,6 +241,7 @@ public class OpenApiAnnotationScanner {
 
         sortTags(annotationScannerContext, openApi);
         sortMaps(openApi);
+        parseExamples();
 
         return openApi;
     }
@@ -383,5 +391,56 @@ public class OpenApiAnnotationScanner {
                         LinkedHashMap::new));
 
         target.accept(parent, sorted);
+    }
+
+    private void parseExamples() {
+        for (Object model : annotationScannerContext.getUnparsedExamples()) {
+            Map<String, Example> examples = null;
+
+            if (model instanceof Parameter) {
+                Parameter param = (Parameter) model;
+
+                if (ModelUtil.getParameterSchemas(param).stream()
+                        .map(s -> ModelUtil.dereference(annotationScannerContext.getOpenApi(), s))
+                        .anyMatch(s -> SchemaSupport.getNonNullType(s) != SchemaType.STRING)) {
+                    parseExample(param.getExample(), param::setExample);
+                    examples = param.getExamples();
+                }
+            } else if (model instanceof MediaType) {
+                MediaType mediaType = (MediaType) model;
+                parseExample(mediaType.getExample(), mediaType::setExample);
+                examples = mediaType.getExamples();
+            }
+
+            if (examples != null) {
+                for (Example example : examples.values()) {
+                    parseExample(example.getValue(), example::setValue);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads an example value and decodes it, the parsing is delegated to the
+     * extensions currently set in the scanner. The default value will parse the
+     * string using Jackson.
+     *
+     * @param value
+     *        the value to decode
+     * @param setter
+     *        the consumer/setter lambda where the parsed value is to be
+     *        placed when non-null
+     */
+    private void parseExample(Object value, Consumer<Object> setter) {
+        if (value instanceof String) {
+            for (AnnotationScannerExtension e : annotationScannerContext.getExtensions()) {
+                value = e.parseValue((String) value);
+
+                if (value != null) {
+                    setter.accept(value);
+                    break;
+                }
+            }
+        }
     }
 }

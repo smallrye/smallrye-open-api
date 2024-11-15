@@ -5,9 +5,13 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
+import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
+import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.runtime.io.IOContext;
 import io.smallrye.openapi.runtime.io.IoLogging;
 import io.smallrye.openapi.runtime.io.ModelIO;
@@ -55,9 +59,10 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
 
             if (contentType == null) {
                 for (String mimeType : getDefaultMimeTypes(direction)) {
-                    content.addMediaType(mimeType, mediaTypeModel);
+                    content.addMediaType(mimeType, maybeParseExamples(mimeType, mediaTypeModel, true));
                 }
             } else {
+                maybeParseExamples(contentType, mediaTypeModel, false);
                 content.addMediaType(contentType, mediaTypeModel);
             }
         }
@@ -76,6 +81,27 @@ public class ContentIO<V, A extends V, O extends V, AB, OB> extends ModelIO<Cont
             default:
                 return EMPTY;
         }
+    }
+
+    private MediaType maybeParseExamples(String contentType, MediaType model, boolean copyOnWrite) {
+        boolean parseExamples;
+
+        if (contentType.toUpperCase().contains("JSON")) {
+            parseExamples = true;
+        } else {
+            Schema schema = model.getSchema();
+            parseExamples = schema != null && SchemaSupport.getNonNullType(schema) != SchemaType.STRING;
+        }
+
+        if (parseExamples && (model.getExample() != null || model.getExamples() != null)) {
+            if (copyOnWrite) {
+                model = BaseModel.deepCopy(model, MediaType.class);
+            }
+
+            scannerContext().getUnparsedExamples().add(model);
+        }
+
+        return model;
     }
 
     static <T> T nonNullOrElse(T value, T defaultValue) {
