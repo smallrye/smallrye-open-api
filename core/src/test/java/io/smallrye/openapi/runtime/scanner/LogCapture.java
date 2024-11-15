@@ -90,6 +90,25 @@ public class LogCapture implements BeforeEachCallback, AfterEachCallback {
         }
     }
 
+    public void assertNoLogContaining(String substring) {
+        synchronized (handler.records) {
+            for (LogRecord rec : handler.records) {
+                if (rec.getMessage().contains(substring)) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Log containing \"").append(substring).append("\" was found.");
+                    sb.append("\n");
+                    sb.append("Log records recorded:\n");
+                    for (LogRecord r : handler.records) {
+                        sb.append("[").append(r.getLevel()).append("] ");
+                        sb.append(r.getMessage()).append("\n");
+                    }
+
+                    throw new AssertionError(sb.toString());
+                }
+            }
+        }
+    }
+
     private static class TestHandler extends Handler {
 
         private List<LogRecord> records = Collections.synchronizedList(new ArrayList<>());

@@ -8,6 +8,8 @@ public interface Salutation {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String get();
+    default String get() {
+        return "hi";
+    }
 
 }

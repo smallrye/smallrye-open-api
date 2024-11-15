@@ -305,9 +305,23 @@ public interface AnnotationScanner {
 
         // validate operationId
         String operationId = operation.getOperationId();
+
         if (operationId != null) {
-            final MethodInfo conflictingMethod = context.getOperationIdMap().putIfAbsent(operationId, method);
-            if (conflictingMethod != null) {
+            saveOperationId(context, resourceClass, method, operationId);
+        }
+
+        return Optional.of(operation);
+    }
+
+    private void saveOperationId(AnnotationScannerContext context, ClassInfo resourceClass, MethodInfo method,
+            String operationId) {
+        final MethodInfo conflictingMethod = context.getOperationIdMap().putIfAbsent(operationId, method);
+
+        if (conflictingMethod != null) {
+            if (context.getAugmentedIndex().ancestry(method).values().contains(conflictingMethod)) {
+                // The conflict was a method from a parent class, replace it
+                context.getOperationIdMap().put(operationId, method);
+            } else {
                 final ClassInfo conflictingClass = conflictingMethod.declaringClass();
                 final String className = resourceClass.name().toString();
                 final String methodName = method.toString();
@@ -322,8 +336,6 @@ public interface AnnotationScanner {
                 }
             }
         }
-
-        return Optional.of(operation);
     }
 
     default void setJsonViewContext(AnnotationScannerContext context, Type[] views) {
