@@ -69,7 +69,7 @@ public class GreetingGetController {
     @SuppressWarnings("rawtypes")
     @GetMapping("/helloPathVariableWithResponse/{name}")
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
+    public ResponseEntity<Greeting> helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }
 

@@ -1467,7 +1467,7 @@ public abstract class AbstractParameterProcessor {
      * @param target annotated item. Only method and method parameter targets.
      * @return the MethodInfo associated with the target, or null if target is not a method or parameter.
      */
-    static MethodInfo targetMethod(AnnotationTarget target) {
+    protected static MethodInfo targetMethod(AnnotationTarget target) {
         if (target.kind() == Kind.METHOD) {
             return target.asMethod();
         }

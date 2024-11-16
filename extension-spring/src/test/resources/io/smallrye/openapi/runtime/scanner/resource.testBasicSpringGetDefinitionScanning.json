@@ -147,7 +147,7 @@
     "/greeting/helloParameterObject": {
       "get": {
         "parameters" : [ {
-          "name" : "nameQuery",
+          "name" : "name",
           "in" : "query",
           "schema" : {
             "type" : "string"

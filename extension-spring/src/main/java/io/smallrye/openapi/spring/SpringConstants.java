@@ -33,7 +33,6 @@ public class SpringConstants {
     static final DotName MUTIPART_FILE = DotName.createSimple("org.springframework.web.multipart.MultipartFile");
 
     static final DotName QUERY_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.RequestParam");
-    static final DotName JAKARTA_QUERY_PARAM = DotName.createSimple("jakarta.ws.rs.QueryParam");
     static final DotName COOKIE_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.CookieValue");
     static final DotName PATH_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.PathVariable");
     static final DotName HEADER_PARAM = DotName.createSimple("org.springframework.web.bind.annotation.RequestHeader");
@@ -48,7 +47,7 @@ public class SpringConstants {
             .collect(Collectors.toSet());
 
     static final DotName PARAMETER_OBJECT = DotName.createSimple("org.springdoc.api.annotations.ParameterObject");
-    
+
     public static final Set<DotName> MULTIPART_OUTPUTS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(MUTIPART_FILE)));
 
