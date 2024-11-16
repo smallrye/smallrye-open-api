@@ -34,7 +34,7 @@ public class GreetingPostControllerAlt {
     // 2) ResponseEntity without a type specified
     @RequestMapping(value = "/greetWithResponse", method = RequestMethod.POST)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public ResponseEntity greetWithResponse(@RequestBody Greeting greeting) {
+    public ResponseEntity<Greeting> greetWithResponse(@RequestBody Greeting greeting) {
         return ResponseEntity.ok(greeting);
     }
 

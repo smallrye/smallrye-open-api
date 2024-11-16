@@ -151,7 +151,7 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
         MethodInfo resourceMethod = targetMethod(target);
 
         if (resourceMethod != null) {
-            return SpringAnnotationScanner.getHttpMethods(resourceMethod).contains(PathItem.HttpMethod.GET);
+            return SpringSupport.getHttpMethods(resourceMethod).contains(PathItem.HttpMethod.GET);
         }
 
         return false;

@@ -15,10 +15,9 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt2;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingPostControllerWithServletContext;
-import test.io.smallrye.openapi.runtime.scanner.resources.javax.GreetingPutControllerWithServletContext;
 
 /**
  * Basic Spring annotation scanning
@@ -107,7 +106,7 @@ class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase {
      */
     @Test
     void testBasicPostSpringDefinitionScanningAlt() throws IOException, JSONException {
-        Index i = indexOf(GreetingPostController.class, Greeting.class, GreetingParam.class);
+        Index i = indexOf(GreetingPostControllerAlt.class, Greeting.class, GreetingParam.class);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
 
         OpenAPI result = scanner.scan();

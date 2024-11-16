@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -243,49 +242,12 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         for (MethodInfo methodInfo : getResourceMethods(context, resourceClass)) {
             if (!methodInfo.annotations().isEmpty()) {
-                for (PathItem.HttpMethod httpMethod : getHttpMethods(methodInfo)) {
+                for (PathItem.HttpMethod httpMethod : SpringSupport.getHttpMethods(methodInfo)) {
                     processControllerMethod(resourceClass, methodInfo, httpMethod, openApi, tagRefs,
                             locatorPathParameters);
                 }
             }
         }
-    }
-
-    static Set<PathItem.HttpMethod> getHttpMethods(MethodInfo methodInfo) {
-        Set<PathItem.HttpMethod> methods = new LinkedHashSet<>();
-
-        // Try @XXXMapping annotations
-        for (DotName validMethodAnnotations : SpringConstants.HTTP_METHODS) {
-            if (methodInfo.hasAnnotation(validMethodAnnotations)) {
-                String toHttpMethod = toHttpMethod(validMethodAnnotations);
-                methods.add(PathItem.HttpMethod.valueOf(toHttpMethod));
-            }
-        }
-
-        // Try @RequestMapping
-        if (methodInfo.hasAnnotation(SpringConstants.REQUEST_MAPPING)) {
-            AnnotationInstance requestMappingAnnotation = methodInfo.annotation(SpringConstants.REQUEST_MAPPING);
-            AnnotationValue methodValue = requestMappingAnnotation.value("method");
-
-            if (methodValue != null) {
-                String[] enumArray = methodValue.asEnumArray();
-                for (String enumValue : enumArray) {
-                    if (enumValue != null) {
-                        methods.add(PathItem.HttpMethod.valueOf(enumValue.toUpperCase()));
-                    }
-                }
-            } else {
-                // Default ?
-            }
-        }
-
-        return methods;
-    }
-
-    private static String toHttpMethod(DotName dotname) {
-        String className = dotname.withoutPackagePrefix();
-        className = className.replace("Mapping", "");
-        return className.toUpperCase();
     }
 
     /**
