@@ -2,7 +2,6 @@ package io.smallrye.openapi.runtime.io;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -280,7 +279,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
     protected Object readJson(V node, DataType desiredType) {
         if (jsonIO().isObject(node)) {
             if (desiredType.type == DataType.Type.MAP) {
-                Map<String, Object> result = new HashMap<>();
+                Map<String, Object> result = new LinkedHashMap<>();
                 O object = jsonIO().asObject(node);
                 for (Entry<String, V> entry : jsonIO().properties(object)) {
                     result.put(entry.getKey(), readJson(entry.getValue(), desiredType.content));
