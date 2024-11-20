@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
@@ -111,5 +112,40 @@ class SubresourceScanTests extends IndexScannerTestBase {
 
         test("resource.subresource-tag-placement-priority.json",
                 RootResource.class, SubresourceA.class, SubresourceB.class, ProducesText.class, RootA2Tag.class);
+    }
+
+    static class GenericInterfaceSubresourceTypes {
+        interface ScopedResource<R> {
+            @Path("park/{ident}")
+            public R park(@PathParam("ident") final String parkIdent);
+        }
+
+        @Path("/")
+        interface Resource extends ScopedResource<SubResource> {
+        }
+
+        static class ResourceImpl implements Resource {
+            @Override
+            public SubResource park(String parkIdent) {
+                return new SubResource();
+            }
+
+        }
+
+        static class SubResource {
+            @GET
+            @Path("/")
+            String yes() {
+                return "";
+            }
+        }
+    }
+
+    @Test
+    void testGenericInterfaceSubresource() throws IOException, JSONException {
+        test("resource.subresource-generic-type-variable.json", GenericInterfaceSubresourceTypes.ScopedResource.class,
+                GenericInterfaceSubresourceTypes.Resource.class,
+                GenericInterfaceSubresourceTypes.ResourceImpl.class,
+                GenericInterfaceSubresourceTypes.SubResource.class);
     }
 }
