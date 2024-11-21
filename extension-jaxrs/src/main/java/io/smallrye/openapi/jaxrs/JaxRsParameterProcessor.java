@@ -278,6 +278,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
         switch (method.returnType().kind()) {
             case CLASS:
             case PARAMETERIZED_TYPE:
+            case TYPE_VARIABLE:
                 return scannerContext.annotations().hasAnnotation(method, JaxRsConstants.PATH) &&
                         method.annotations()
                                 .stream()
