@@ -4,9 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.annotation.security.RolesAllowed;
+
+import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +32,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
  */
 @RestController
 @RequestMapping(value = "/greeting", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+@SecurityScheme(securitySchemeName = "oauth", type = SecuritySchemeType.OAUTH2)
 public class GreetingGetControllerAlt {
 
     // 1) Basic path var test
@@ -50,11 +55,13 @@ public class GreetingGetControllerAlt {
 
     // 4) Basic request param test
     @RequestMapping(value = "/helloRequestParam", method = RequestMethod.GET)
+    @RolesAllowed({ "roles:retrieval-by-query" })
     public Greeting helloRequestParam(@RequestParam(value = "name", required = false) String name) {
         return new Greeting("Hello " + name);
     }
 
     // 5) ResponseEntity without a type specified
+    @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/helloPathVariableWithResponse/{name}", method = RequestMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {

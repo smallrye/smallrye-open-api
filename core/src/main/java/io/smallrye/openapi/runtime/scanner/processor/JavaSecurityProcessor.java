@@ -3,8 +3,11 @@ package io.smallrye.openapi.runtime.scanner.processor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,7 +32,9 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 public class JavaSecurityProcessor {
 
     public void addRolesAllowedToScopes(String[] roles) {
-        resourceRolesAllowed = roles;
+        if (roles != null) {
+            resourceRolesAllowed.addAll(Arrays.asList(roles));
+        }
         addScopes(roles);
     }
 
@@ -38,13 +43,18 @@ public class JavaSecurityProcessor {
     }
 
     public void processSecurityRoles(MethodInfo method, Operation operation) {
-        processSecurityRolesForMethodOperation(method, operation);
+        processSecurityRolesForMethodOperation(method, operation,
+                () -> context.annotations().getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED));
+    }
+
+    public void processSecurityRoles(MethodInfo method, Operation operation, Supplier<String[]> roleSupplier) {
+        processSecurityRolesForMethodOperation(method, operation, roleSupplier);
     }
 
     private final AnnotationScannerContext context;
     private String currentSecurityScheme;
     private List<OAuthFlow> currentFlows;
-    private String[] resourceRolesAllowed;
+    private final Set<String> resourceRolesAllowed = new LinkedHashSet<>();
 
     public JavaSecurityProcessor(AnnotationScannerContext context) {
         this.context = context;
@@ -53,7 +63,7 @@ public class JavaSecurityProcessor {
     public void initialize(OpenAPI openApi) {
         currentSecurityScheme = null;
         currentFlows = null;
-        resourceRolesAllowed = null;
+        resourceRolesAllowed.clear();
         checkSecurityScheme(openApi);
     }
 
@@ -96,21 +106,22 @@ public class JavaSecurityProcessor {
      * @param method the current JAX-RS method
      * @param operation the OpenAPI Operation
      */
-    private void processSecurityRolesForMethodOperation(MethodInfo method, Operation operation) {
+    private void processSecurityRolesForMethodOperation(MethodInfo method, Operation operation,
+            Supplier<String[]> roleSupplier) {
         if (this.currentSecurityScheme != null) {
-            String[] rolesAllowed = context.annotations().getAnnotationValue(method, SecurityConstants.ROLES_ALLOWED);
+            String[] rolesAllowed = roleSupplier.get();
 
             if (rolesAllowed != null) {
                 addScopes(rolesAllowed);
                 addRolesAllowed(operation, rolesAllowed);
-            } else if (this.resourceRolesAllowed != null) {
+            } else if (!this.resourceRolesAllowed.isEmpty()) {
                 boolean denyAll = context.annotations().getAnnotation(method, SecurityConstants.DENY_ALL) != null;
                 boolean permitAll = context.annotations().getAnnotation(method, SecurityConstants.PERMIT_ALL) != null;
 
                 if (denyAll) {
                     addRolesAllowed(operation, new String[0]);
                 } else if (!permitAll) {
-                    addRolesAllowed(operation, this.resourceRolesAllowed);
+                    addRolesAllowed(operation, this.resourceRolesAllowed.toArray(String[]::new));
                 }
             }
         }

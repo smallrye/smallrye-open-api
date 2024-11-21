@@ -16,6 +16,8 @@ import org.jboss.jandex.DotName;
  */
 public class SpringConstants {
 
+    static final DotName SECURED = DotName.createSimple("org.springframework.security.access.annotation.Secured");
+
     static final DotName REST_CONTROLLER = DotName.createSimple("org.springframework.web.bind.annotation.RestController");
     static final DotName REQUEST_MAPPING = DotName.createSimple("org.springframework.web.bind.annotation.RequestMapping");
     static final DotName GET_MAPPING = DotName.createSimple("org.springframework.web.bind.annotation.GetMapping");

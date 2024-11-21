@@ -1,5 +1,12 @@
 {
   "openapi" : "3.1.0",
+  "components" : {
+    "securitySchemes" : {
+      "oauth" : {
+        "type" : "oauth2"
+      }
+    }
+  },
   "paths" : {
     "/greeting/greet/{id}" : {
       "delete" : {
@@ -15,7 +22,10 @@
           "204" : {
             "description" : "No Content"
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "roles:removal" ]
+        } ]
       }
     },
     "/greeting/greetWithResponse/{id}" : {
@@ -32,7 +42,10 @@
           "204" : {
             "description" : "No Content"
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "roles:removal" ]
+        } ]
       }
     },
     "/greeting/greetWithResponseTyped/{id}" : {
@@ -49,7 +62,10 @@
           "204" : {
             "description" : "No Content"
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "roles:removal" ]
+        } ]
       }
     }
   }
