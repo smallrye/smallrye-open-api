@@ -1,5 +1,22 @@
 {
   "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "oauth" : {
+        "type" : "oauth2"
+      }
+    }
+  },
   "paths" : {
     "/greeting/helloOptional/{name}" : {
       "get" : {
@@ -17,14 +34,11 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "anyOf": [
-                    {
-                      "$ref" : "#/components/schemas/Greeting"
-                    },
-                    {
-                      "type" : "null"
-                    }
-                  ]
+                  "anyOf" : [ {
+                    "$ref" : "#/components/schemas/Greeting"
+                  }, {
+                    "type" : "null"
+                  } ]
                 }
               }
             }
@@ -124,7 +138,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "oauth" : [ "roles:retrieval-by-query" ]
+        } ]
       }
     },
     "/greeting/hellosPathVariable/{name}" : {
@@ -174,19 +191,6 @@
                 }
               }
             }
-          }
-        }
-      }
-
-    }
-  },
-  "components" : {
-    "schemas" : {
-      "Greeting" : {
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "type" : "string"
           }
         }
       }
