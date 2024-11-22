@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -766,6 +767,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     @Test
     void testExceptionalExampleParsing() throws IOException, JSONException {
+        // All example properties convert to `examples` in the model by default
         @Schema(name = "Bean")
         class Bean {
             @Schema(example = "{ Looks like object, but invalid }")
@@ -819,5 +821,24 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         }
 
         assertJsonEquals("components.schemas.javabean-property-prefix.json", Bean.class, java.net.URL.class);
+    }
+
+    @Test
+    void testExampleNotMerged() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class DTO {
+
+            @Schema(example = "Hello World") // NOSONAR
+            String name;
+
+            @Schema(example = "14:45:30.987654321") // NOSONAR
+            LocalTime localTime;
+
+            @Schema(example = "14:45:30.999999999", nullable = true) // NOSONAR
+            LocalTime localTimeNullable;
+        }
+
+        assertJsonEquals("components.schemas.example-not-merged.json",
+                scan(config(SmallRyeOASConfig.SMALLRYE_MERGE_SCHEMA_EXAMPLES, "false"), null, new Class[] { DTO.class }));
     }
 }

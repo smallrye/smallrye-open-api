@@ -153,7 +153,7 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
             // Set any default values that apply to the type schema as a result of the TypeProcessor
             if (!TypeUtil.isTypeOverridden(context, fieldType, schemaAnnotation)) {
-                TypeUtil.applyTypeAttributes(fieldType, initTypeSchema);
+                TypeUtil.applyTypeAttributes(fieldType, initTypeSchema, schemaAnnotation);
             }
 
             // The registeredTypeSchema will be a reference to typeSchema if registration occurs

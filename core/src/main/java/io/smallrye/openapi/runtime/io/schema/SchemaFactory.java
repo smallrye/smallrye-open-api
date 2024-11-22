@@ -208,19 +208,30 @@ public class SchemaFactory {
         SchemaSupport.setType(schema, readSchemaType(context, annotation, schema, defaults));
 
         Object example = parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, type);
+
         List<Object> examples = SchemaFactory.<String[], List<Object>> readAttr(context, annotation,
                 SchemaConstant.PROP_EXAMPLES,
                 egs -> Arrays.stream(egs)
                         .map(e -> parseValue(context, e, type))
                         .collect(Collectors.toCollection(ArrayList::new)),
-                defaults);
-        if (examples != null) {
-            if (example != null) {
-                examples.add(example);
+                /*
+                 * Do not allow default examples to be added if the annotation has specified an example
+                 * with the deprecated property.
+                 */
+                example != null ? Collections.emptyMap() : defaults);
+
+        if (context.getConfig().mergeSchemaExamples()) {
+            if (examples != null) {
+                if (example != null) {
+                    examples.add(example);
+                }
+                schema.setExamples(examples);
+            } else {
+                schema.setExamples(wrapInList(example));
             }
-            schema.setExamples(examples);
         } else {
-            schema.setExamples(wrapInList(example));
+            schema.setExample(example);
+            schema.setExamples(examples);
         }
 
         schema.setDefaultValue(
@@ -579,7 +590,7 @@ public class SchemaFactory {
             schema = typeToSchema(context, currentScanner.get().unwrapType(type), null);
         } else if (TypeUtil.isTerminalType(type)) {
             schema = OASFactory.createSchema();
-            TypeUtil.applyTypeAttributes(type, schema);
+            TypeUtil.applyTypeAttributes(type, schema, schemaAnnotation);
             schema = schemaRegistration(context, type, schema);
         } else if (type.kind() == Type.Kind.ARRAY) {
             schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
@@ -647,7 +658,7 @@ public class SchemaFactory {
 
             enumSchema = readSchema(context, enumSchema, schemaAnnotation, enumKlazz, true, defaults);
         } else {
-            TypeUtil.applyTypeAttributes(enumValueType, enumSchema);
+            TypeUtil.applyTypeAttributes(enumValueType, enumSchema, null);
             enumSchema.setEnumeration(enumeration);
         }
 

@@ -23,6 +23,7 @@ public final class SmallRyeOASConfig {
     private static final String SUFFIX_PROPERTY_NAMING_STRATEGY = "property-naming-strategy";
     private static final String SUFFIX_SORTED_PROPERTIES_ENABLE = "sorted-properties.enable";
     private static final String SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE = "remove-unused-schemas.enable";
+    private static final String SUFFIX_MERGE_SCHEMA_EXAMPLES = "merge-schema-examples";
     private static final String SMALLRYE_PREFIX = OASConfig.EXTENSIONS_PREFIX + VENDOR_NAME;
 
     public static final String SMALLRYE_SCAN_DEPENDENCIES_DISABLE = SMALLRYE_PREFIX + SUFFIX_SCAN_DEPENDENCIES_DISABLE;
@@ -48,6 +49,8 @@ public final class SmallRyeOASConfig {
     public static final String SMALLRYE_SORTED_PROPERTIES_ENABLE = SMALLRYE_PREFIX + SUFFIX_SORTED_PROPERTIES_ENABLE;
 
     public static final String SMALLRYE_REMOVE_UNUSED_SCHEMAS = SMALLRYE_PREFIX + SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE;
+
+    public static final String SMALLRYE_MERGE_SCHEMA_EXAMPLES = SMALLRYE_PREFIX + SUFFIX_MERGE_SCHEMA_EXAMPLES;
 
     public static final String SCAN_PROFILES = SMALLRYE_PREFIX + "scan.profiles";
 
