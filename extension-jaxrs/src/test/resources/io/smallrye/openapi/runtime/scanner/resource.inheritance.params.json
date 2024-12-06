@@ -97,6 +97,32 @@
         }
       }
     },
+    "/hi/extension-alt" : {
+      "get" : {
+        "description" : "example1 alternate extension",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters" : [ {
+        "allowEmptyValue" : true,
+        "description" : "The local date when the greeting is sent",
+        "in" : "header",
+        "name" : "date",
+        "schema" : {
+          "$ref" : "#/components/schemas/LocalDate"
+        }
+      } ]
+    },
     "/hello/greet/{from}": {
       "parameters": [
         {

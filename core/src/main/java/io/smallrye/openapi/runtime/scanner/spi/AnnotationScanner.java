@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -229,6 +231,8 @@ public interface AnnotationScanner {
      * @return all methods from the provided class and its ancestors
      */
     default List<MethodInfo> getResourceMethods(final AnnotationScannerContext context, ClassInfo resource) {
+        Predicate<MethodInfo> hidden = context.io().operationIO()::isHidden;
+
         Type resourceType = Type.create(resource.name(), Type.Kind.CLASS);
         AugmentedIndexView index = context.getAugmentedIndex();
         Map<ClassInfo, Type> chain = index.inheritanceChain(resource, resourceType);
@@ -248,6 +252,19 @@ public interface AnnotationScanner {
                     .flatMap(iface -> iface.methods().stream())
                     .forEach(methods::add);
         }
+
+        Set<MethodInfo> hiddenMethods = new HashSet<>();
+
+        methods.stream().filter(hidden).forEach(method -> {
+            hiddenMethods.add(method);
+            index.ancestry(method)
+                    .values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .forEach(hiddenMethods::add);
+        });
+
+        methods.removeIf(hiddenMethods::contains);
 
         return methods;
     }
