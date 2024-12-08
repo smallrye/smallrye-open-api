@@ -5,6 +5,10 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 @Path(value = "/resources")
 public class TestResource {
@@ -19,4 +23,9 @@ public class TestResource {
         return "OK";
     }
 
+    @ServerExceptionMapper
+    @APIResponse(responseCode = "404", description = "Not Found")
+    public Response handleNotFound(NotFoundException exception) {
+        return exception.getResponse();
+    }
 }

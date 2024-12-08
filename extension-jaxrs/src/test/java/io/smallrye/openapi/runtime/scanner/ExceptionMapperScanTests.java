@@ -23,7 +23,6 @@ class ExceptionMapperScanTests extends IndexScannerTestBase {
         test("responses.exception-mapper-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.TestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.ExceptionHandler1.class,
-                test.io.smallrye.openapi.runtime.scanner.javax.ExceptionHandler2.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.ResteasyReactiveExceptionMapper.class);
     }
 
@@ -32,7 +31,6 @@ class ExceptionMapperScanTests extends IndexScannerTestBase {
         test("responses.exception-mapper-generation.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.TestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler1.class,
-                test.io.smallrye.openapi.runtime.scanner.jakarta.ExceptionHandler2.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ResteasyReactiveExceptionMapper.class);
     }
 
