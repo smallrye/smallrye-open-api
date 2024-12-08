@@ -27,7 +27,7 @@ public class GreetingDeleteController {
     // 1) Basic path var test
     @DeleteMapping("/greet/{id}")
     public void greet(@PathVariable(name = "id") String id) {
-
+        // No op
     }
 
     // 2) ResponseEntity without a type specified

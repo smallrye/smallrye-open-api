@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
+import test.io.smallrye.openapi.runtime.scanner.entities.GreetingParam;
 
 /**
  * Spring.
@@ -60,11 +62,17 @@ public class GreetingGetControllerAlt {
         return new Greeting("Hello " + name);
     }
 
+    // 4a) Basic request with parameter-object test
+    @RequestMapping(value = "/helloParameterObject", method = RequestMethod.GET)
+    public Greeting helloParameterObject(@ParameterObject() GreetingParam params) {
+        return new Greeting("Hello " + params.getName());
+    }
+
     // 5) ResponseEntity without a type specified
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/helloPathVariableWithResponse/{name}", method = RequestMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
+    public ResponseEntity<Greeting> helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }
 

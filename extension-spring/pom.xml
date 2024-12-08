@@ -15,6 +15,7 @@
     <properties>
         <version.spring>6.1.13</version.spring>
         <version.spring-security>6.4.1</version.spring-security>
+        <version.springdoc>1.8.0</version.springdoc>
     </properties>
 
     <dependencyManagement>
@@ -23,6 +24,12 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
                 <version>${version.spring}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-common</artifactId>
+                <version>${version.springdoc}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -80,6 +87,11 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
 		    <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-common</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Depend on core tests -->
