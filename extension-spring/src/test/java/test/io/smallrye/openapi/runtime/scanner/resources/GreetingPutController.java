@@ -33,7 +33,7 @@ public class GreetingPutController {
     // 2) ResponseEntity without a type specified
     @PutMapping("/greetWithResponse/{id}")
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public ResponseEntity greetWithResponse(@RequestBody Greeting greeting, @PathVariable(name = "id") String id) {
+    public ResponseEntity<Greeting> greetWithResponse(@RequestBody Greeting greeting, @PathVariable(name = "id") String id) {
         return ResponseEntity.ok(greeting);
     }
 

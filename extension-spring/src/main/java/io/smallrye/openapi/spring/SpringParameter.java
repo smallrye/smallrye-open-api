@@ -16,7 +16,9 @@ public enum SpringParameter {
     MATRIX_PARAM(SpringConstants.MATRIX_PARAM, Parameter.In.PATH, Parameter.Style.MATRIX, Parameter.Style.MATRIX),
     QUERY_PARAM(SpringConstants.QUERY_PARAM, Parameter.In.QUERY, null, Parameter.Style.FORM),
     HEADER_PARAM(SpringConstants.HEADER_PARAM, Parameter.In.HEADER, null, Parameter.Style.SIMPLE),
-    COOKIE_PARAM(SpringConstants.COOKIE_PARAM, Parameter.In.COOKIE, null, Parameter.Style.FORM);
+    COOKIE_PARAM(SpringConstants.COOKIE_PARAM, Parameter.In.COOKIE, null, Parameter.Style.FORM),
+    // SpringDoc annotation to indicate a bean with parameters (like Jakarta @BeanParam)
+    PARAMETER_OBJECT(SpringConstants.PARAMETER_OBJECT, null, null, null);
 
     //BEAN_PARAM(SpringConstants.BEAN_PARAM, null, null, null),
     //FORM_PARAM(SpringConstants.FORM_PARAM, null, Parameter.Style.FORM, Parameter.Style.FORM),
