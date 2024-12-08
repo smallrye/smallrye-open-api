@@ -182,7 +182,7 @@ public class OpenApiDataObjectScanner {
      */
     public static Schema process(PrimitiveType primitive) {
         Schema primitiveSchema = OASFactory.createSchema();
-        TypeUtil.applyTypeAttributes(primitive, primitiveSchema);
+        TypeUtil.applyTypeAttributes(primitive, primitiveSchema, null);
         return primitiveSchema;
     }
 
@@ -197,7 +197,7 @@ public class OpenApiDataObjectScanner {
         // If top level item is simple
         if (TypeUtil.isTerminalType(rootClassType)) {
             Schema simpleSchema = OASFactory.createSchema();
-            TypeUtil.applyTypeAttributes(rootClassType, simpleSchema);
+            TypeUtil.applyTypeAttributes(rootClassType, simpleSchema, null);
             return simpleSchema;
         }
 
