@@ -375,6 +375,17 @@ public class TypeResolver {
      * @return resolved type (if found)
      */
     private Type getResolvedType(Type fieldType) {
+        return getResolvedType(fieldType, resolutionStack);
+    }
+
+    /**
+     * Resolve a type against the given resolution stack
+     *
+     * @param fieldType type to resolve
+     * @param resolutionStack stack of types for resolution
+     * @return resolved type (if found)
+     */
+    private static Type getResolvedType(Type fieldType, Deque<Map<String, Type>> resolutionStack) {
         Type current = TypeUtil.resolveWildcard(fieldType);
 
         for (Map<String, Type> map : resolutionStack) {
@@ -571,7 +582,7 @@ public class TypeResolver {
         if (context.getConfig().sortedPropertiesEnable()) {
             return currentClass.methods();
         }
-        return currentClass.unsortedMethods();
+        return currentClass.methodsInDeclarationOrder();
     }
 
     private static boolean acceptMethod(MethodInfo method) {
@@ -785,7 +796,7 @@ public class TypeResolver {
             AnnotationTarget reference,
             List<ClassInfo> descendants) {
         final String propertyName = field.name();
-        final Type fieldType = field.type();
+        final Type fieldType = getResolvedType(field.type(), stack);
         final ClassInfo fieldClass = context.getAugmentedIndex().getClass(fieldType);
         final boolean unwrapped;
         final TypeResolver resolver;
@@ -878,7 +889,7 @@ public class TypeResolver {
             Deque<Map<String, Type>> stack,
             AnnotationTarget reference,
             List<ClassInfo> descendants) {
-        Type returnType = method.returnType();
+        Type returnType = getResolvedType(method.returnType(), stack);
         Type propertyType = null;
 
         if (isAccessor(context, method)) {

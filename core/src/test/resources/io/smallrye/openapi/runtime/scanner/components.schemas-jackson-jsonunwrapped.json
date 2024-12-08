@@ -9,8 +9,8 @@
             "type": "string"
           },
           "streetNumber": {
-            "format": "int32",
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "city": {
             "type": "string"
@@ -23,6 +23,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "greeting": {
+            "$ref": "#/components/schemas/TimestampedEntityGreetingLanguageAlternatives"
           }
         }
       },
@@ -42,8 +45,8 @@
             "type": "string"
           },
           "addr-streetNumber": {
-            "format": "int32",
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "name": {
             "type": "string"
@@ -63,8 +66,8 @@
             "type": "string"
           },
           "streetNumber-addr": {
-            "format": "int32",
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "state-addr": {
             "type": "string"
@@ -77,21 +80,60 @@
       "JacksonJsonAddress": {
         "type": "object",
         "properties": {
-          "city": {
+          "streetNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "streetName": {
             "type": "string"
           },
-          "postalCode": {
+          "city": {
             "type": "string"
           },
           "state": {
             "type": "string"
           },
-          "streetName": {
+          "postalCode": {
+            "type": "string"
+          }
+        }
+      },
+      "LanguageAlternatives": {
+        "type": "object",
+        "required": [
+          "spanish",
+          "german"
+        ],
+        "properties": {
+          "spanish": {
+            "type": "string",
+            "examples": [
+              "Hola"
+            ]
+          },
+          "german": {
+            "type": "string",
+            "examples": [
+              "Hallo"
+            ]
+          }
+        }
+      },
+      "TimestampedEntityGreetingLanguageAlternatives": {
+        "type": "object",
+        "properties": {
+          "alternatives": {
+            "$ref": "#/components/schemas/LanguageAlternatives"
+          },
+          "message": {
             "type": "string"
           },
-          "streetNumber": {
-            "format": "int32",
-            "type": "integer"
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "examples": [
+              "2022-03-10T16:15:50Z"
+            ]
           }
         }
       }
