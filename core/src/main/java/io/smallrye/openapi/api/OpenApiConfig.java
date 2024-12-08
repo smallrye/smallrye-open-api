@@ -302,6 +302,10 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.class, () -> Boolean.FALSE);
     }
 
+    default boolean mergeSchemaExamples() {
+        return getConfigValue(SmallRyeOASConfig.SMALLRYE_MERGE_SCHEMA_EXAMPLES, Boolean.class, () -> Boolean.TRUE);
+    }
+
     default Integer getMaximumStaticFileSize() {
         return getConfigValue(SmallRyeOASConfig.MAXIMUM_STATIC_FILE_SIZE, Integer.class,
                 () -> MAXIMUM_STATIC_FILE_SIZE_DEFAULT);

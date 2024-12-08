@@ -144,6 +144,29 @@
         } ]
       }
     },
+    "/greeting/helloParameterObject": {
+      "get": {
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Greeting"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/greeting/hellosPathVariable/{name}" : {
       "get" : {
         "parameters" : [ {

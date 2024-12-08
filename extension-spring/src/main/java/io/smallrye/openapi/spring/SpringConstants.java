@@ -46,6 +46,8 @@ public class SpringConstants {
                     .map(simpleName -> DotName.createComponentized(prefix, simpleName)))
             .collect(Collectors.toSet());
 
+    static final DotName PARAMETER_OBJECT = DotName.createSimple("org.springdoc.api.annotations.ParameterObject");
+
     public static final Set<DotName> MULTIPART_OUTPUTS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(MUTIPART_FILE)));
 
