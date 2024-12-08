@@ -1,7 +1,11 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
 
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
@@ -10,6 +14,10 @@ import org.jboss.jandex.Type;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreSchemaOnFieldExample;
 import test.io.smallrye.openapi.runtime.scanner.entities.IgnoreTestContainer;
 import test.io.smallrye.openapi.runtime.scanner.entities.JsonIgnoreOnFieldExample;
@@ -122,5 +130,88 @@ class IgnoreTests extends JaxRsDataObjectScannerTestBase {
 
         printToConsole(name.local(), result);
         assertJsonEquals(name.local(), "ignore.transientField.expected.json", result);
+    }
+
+    static class BidirectionalJsonIgnoreProperties {
+        static class Views {
+            public static class Max extends Full {
+            }
+
+            public static class Full extends Ingest {
+            }
+
+            public static class Ingest extends Abridged {
+            }
+
+            public static class Abridged {
+            }
+        }
+
+        @org.eclipse.microprofile.openapi.annotations.media.Schema
+        static class Station {
+            @JsonView(Views.Full.class)
+            private UUID id;
+
+            @JsonView(Views.Abridged.class)
+            private String name;
+
+            @JsonView(Views.Ingest.class)
+            @JsonIgnoreProperties("station")
+            @org.eclipse.microprofile.openapi.annotations.media.Schema(readOnly = true, description = "Read-only entity details (only returned/used on detail queries).")
+            private Set<Base> baseCollection;
+        }
+
+        @org.eclipse.microprofile.openapi.annotations.media.Schema
+        static class Base {
+            @JsonView(Views.Full.class)
+            private UUID id;
+
+            @JsonView(Views.Abridged.class)
+            private String name;
+
+            @JsonView(Views.Abridged.class)
+            @JsonIgnoreProperties("baseCollection")
+            private Station station;
+        }
+
+        @jakarta.ws.rs.Path("/base")
+        static class BaseResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            @JsonView(Views.Full.class)
+            @APIResponse(responseCode = "200", content = @Content(schema = @org.eclipse.microprofile.openapi.annotations.media.Schema(implementation = Base.class)))
+            public jakarta.ws.rs.core.Response getBase() {
+                return null;
+            }
+        }
+
+        @jakarta.ws.rs.Path("/station")
+        static class StationResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            @JsonView(Views.Full.class)
+            @APIResponse(responseCode = "200", content = @Content(schema = @org.eclipse.microprofile.openapi.annotations.media.Schema(implementation = Station.class)))
+            public jakarta.ws.rs.core.Response getStation() {
+                return null;
+            }
+        }
+    }
+
+    @Test
+    void testBidirectionalJsonIgnoreProperties() throws IOException, JSONException {
+        Class<?>[] classes = {
+                BidirectionalJsonIgnoreProperties.Views.Max.class,
+                BidirectionalJsonIgnoreProperties.Views.Full.class,
+                BidirectionalJsonIgnoreProperties.Views.Ingest.class,
+                BidirectionalJsonIgnoreProperties.Views.Abridged.class,
+                BidirectionalJsonIgnoreProperties.Views.class,
+                BidirectionalJsonIgnoreProperties.Base.class,
+                BidirectionalJsonIgnoreProperties.Station.class,
+                BidirectionalJsonIgnoreProperties.BaseResource.class,
+                BidirectionalJsonIgnoreProperties.StationResource.class
+        };
+
+        assertJsonEquals("ignore.bidirectionalIgnoreProperties.json",
+                scan(config(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_SCHEMAS, "true"), null, classes));
     }
 }
