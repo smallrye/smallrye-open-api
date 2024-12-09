@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -118,6 +119,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
 
@@ -314,19 +316,27 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
      *
      */
     private Map<DotName, Map<String, APIResponse>> processExceptionMappers() {
-        Collection<ClassInfo> exceptionMappers = new ArrayList<>();
+        Map<DotName, Map<String, APIResponse>> exceptionMappers = new HashMap<>();
 
-        for (DotName dn : JaxRsConstants.EXCEPTION_MAPPER) {
-            exceptionMappers.addAll(context.getIndex()
-                    .getKnownDirectImplementors(dn));
+        for (DotName mapperName : JaxRsConstants.EXCEPTION_MAPPER) {
+            for (var mapper : context.getIndex().getKnownDirectImplementors(mapperName)) {
+                exceptionMappers.putAll(exceptionResponseAnnotations(mapper));
+            }
         }
 
-        return exceptionMappers.stream()
-                .flatMap(this::exceptionResponseAnnotations)
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        for (var mapperAnnotation : context.getIndex().getAnnotations(RestEasyConstants.SERVER_EXCEPTION_MAPPER)) {
+            // @ServerExceptionMapper only targets methods
+            MethodInfo mapperMethod = mapperAnnotation.target().asMethod();
+            if (mapperMethod.parametersCount() == 1) {
+                DotName exceptionName = mapperMethod.parameterType(0).name();
+                exceptionMappers.put(exceptionName, context.io().apiResponsesIO().readAll(mapperMethod));
+            }
+        }
+
+        return exceptionMappers;
     }
 
-    private Stream<Entry<DotName, Map<String, APIResponse>>> exceptionResponseAnnotations(ClassInfo classInfo) {
+    private Map<DotName, Map<String, APIResponse>> exceptionResponseAnnotations(ClassInfo classInfo) {
 
         Type exceptionType = classInfo.interfaceTypes()
                 .stream()
@@ -338,7 +348,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .orElse(null);
 
         if (exceptionType == null) {
-            return Stream.empty();
+            return Collections.emptyMap();
         }
 
         Stream<Entry<String, APIResponse>> methodAnnotations = Stream
@@ -366,9 +376,9 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, latest, LinkedHashMap::new));
 
         if (annotations.isEmpty()) {
-            return Stream.empty();
+            return Collections.emptyMap();
         } else {
-            return Stream.of(entryOf(exceptionType.name(), annotations));
+            return Map.of(exceptionType.name(), annotations);
         }
     }
 

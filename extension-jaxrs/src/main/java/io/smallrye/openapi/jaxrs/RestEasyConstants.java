@@ -86,6 +86,9 @@ public class RestEasyConstants {
                     MULTIPART_FORM_DATA_OUTPUT,
                     MULTIPART_RELATED_OUTPUT)));
 
+    public static final DotName SERVER_EXCEPTION_MAPPER = DotName
+            .createSimple("org.jboss.resteasy.reactive.server.ServerExceptionMapper");
+
     private RestEasyConstants() {
     }
 }
