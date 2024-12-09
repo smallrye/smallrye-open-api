@@ -7,6 +7,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -41,4 +42,12 @@ public class ExampleResource2 extends GenericResource implements Greetable {
         return "hello " + bean.name + ", from: " + from + "; on date: " + date;
     }
 
+    @Override
+    @GET
+    @Path(value = "/extension-alt")
+    @Produces(value = MediaType.TEXT_PLAIN)
+    @Operation(hidden = true)
+    public String helloExtensionAlt() {
+        return "hello example2";
+    }
 }

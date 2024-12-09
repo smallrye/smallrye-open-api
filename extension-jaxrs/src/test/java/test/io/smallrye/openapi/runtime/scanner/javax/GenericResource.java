@@ -5,6 +5,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+
 public class GenericResource {
 
     @GET
@@ -12,6 +14,14 @@ public class GenericResource {
     @Produces(value = MediaType.TEXT_PLAIN)
     public String helloExtension() {
         return "hello extension";
+    }
+
+    @GET
+    @Path(value = "/extension-alt")
+    @Produces(value = MediaType.TEXT_PLAIN)
+    @Operation(description = "alternate extension")
+    public String helloExtensionAlt() {
+        return "hello extension alternate";
     }
 
 }
