@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.Style;
 import org.jboss.jandex.AnnotationInstance;
@@ -20,6 +21,7 @@ import org.jboss.jandex.Type;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
+import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.scanner.spi.FrameworkParameter;
@@ -122,18 +124,37 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
                     //   }
                 } else if (frameworkParam.location != null) {
                     readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
-                } else if (target != null) {
-                    // This is a @BeanParam or a RESTEasy @MultipartForm
+                } else if (target != null && annotatesHttpGET(target)) {
+                    // This is a SpringDoc @ParameterObject
                     setMediaType(frameworkParam);
                     targetType = TypeUtil.unwrapType(targetType);
 
                     if (targetType != null) {
                         ClassInfo beanParam = index.getClassByName(targetType.name());
-                        readParameters(beanParam, annotation, overriddenParametersOnly);
+
+                        /*
+                         * Since the properties of the bean are probably not annotated (supported in Spring),
+                         * here we process them with a generated Spring @RequestParam annotation attached.
+                         */
+                        for (var entry : TypeResolver.getAllFields(scannerContext, targetType, beanParam, null).entrySet()) {
+                            var syntheticQuery = AnnotationInstance.builder(SpringConstants.QUERY_PARAM)
+                                    .buildWithTarget(entry.getValue().getAnnotationTarget());
+                            readAnnotatedType(syntheticQuery, beanParamAnnotation, overriddenParametersOnly);
+                        }
                     }
                 }
             }
         }
+    }
+
+    static boolean annotatesHttpGET(AnnotationTarget target) {
+        MethodInfo resourceMethod = targetMethod(target);
+
+        if (resourceMethod != null) {
+            return SpringSupport.getHttpMethods(resourceMethod).contains(PathItem.HttpMethod.GET);
+        }
+
+        return false;
     }
 
     @Override

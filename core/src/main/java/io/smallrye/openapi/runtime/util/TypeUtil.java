@@ -413,22 +413,17 @@ public class TypeUtil {
      * @param classType the type
      * @param schema a writable schema to be updated with the type's default schema attributes
      */
-    public static void applyTypeAttributes(Type classType, Schema schema) {
+    @SuppressWarnings("unchecked")
+    public static void applyTypeAttributes(Type classType, Schema schema, AnnotationInstance schemaAnnotation) {
         Map<String, Object> properties = getTypeAttributes(classType);
 
         SchemaSupport.setType(schema, (SchemaType) properties.get(SchemaConstant.PROP_TYPE));
         schema.setFormat((String) properties.get(SchemaConstant.PROP_FORMAT));
         schema.setPattern((String) properties.get(SchemaConstant.PROP_PATTERN));
-        schema.setExamples(wrapInList(properties.get(SchemaConstant.PROP_EXAMPLE)));
-        schema.setExternalDocs((ExternalDocumentation) properties.get(SchemaConstant.PROP_EXTERNAL_DOCS));
-    }
-
-    private static <E> List<E> wrapInList(E item) {
-        if (item == null) {
-            return null;
-        } else {
-            return Collections.singletonList(item);
+        if (schemaAnnotation == null || schemaAnnotation.value(SchemaConstant.PROP_EXAMPLE) == null) {
+            schema.setExamples((List<Object>) properties.get(SchemaConstant.PROP_EXAMPLES));
         }
+        schema.setExternalDocs((ExternalDocumentation) properties.get(SchemaConstant.PROP_EXTERNAL_DOCS));
     }
 
     /**
@@ -837,7 +832,7 @@ public class TypeUtil {
             }
 
             Builder example(Object example) {
-                properties.put(SchemaConstant.PROP_EXAMPLE, example);
+                properties.put(SchemaConstant.PROP_EXAMPLES, Collections.singletonList(example));
                 return this;
             }
 

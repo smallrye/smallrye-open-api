@@ -176,7 +176,7 @@ public class TypeProcessor {
         }
 
         // Only use component (excludes the special name formatting for arrays).
-        TypeUtil.applyTypeAttributes(componentType, itemSchema);
+        TypeUtil.applyTypeAttributes(componentType, itemSchema, null);
 
         if (!isTerminalType(componentType) && index.containsClass(componentType)) {
             // If it's not a terminal type, then push for later inspection.
@@ -290,7 +290,7 @@ public class TypeProcessor {
         Schema valueSchema = OASFactory.createSchema();
 
         if (isTerminalType(valueType)) {
-            TypeUtil.applyTypeAttributes(valueType, valueSchema);
+            TypeUtil.applyTypeAttributes(valueType, valueSchema, null);
         } else if (valueType.kind() == Kind.PARAMETERIZED_TYPE) {
             readParameterizedType(valueType.asParameterizedType(), valueSchema);
         } else {
@@ -326,6 +326,8 @@ public class TypeProcessor {
             if (registry.hasSchema(valueType, context.getJsonViews(), typeResolver)) {
                 if (allowRegistration()) {
                     propsSchema = registry.lookupRef(valueType, context.getJsonViews());
+                } else {
+                    pushToStack(valueType, propsSchema);
                 }
             } else {
                 pushToStack(valueType, propsSchema);
@@ -346,7 +348,7 @@ public class TypeProcessor {
 
         if (isTerminalType(resolvedType) || !index.containsClass(resolvedType)) {
             DataObjectLogging.logger.terminalType(resolvedType);
-            TypeUtil.applyTypeAttributes(resolvedType, schema);
+            TypeUtil.applyTypeAttributes(resolvedType, schema, null);
         } else if (pushToStack) {
             // Add resolved type to stack.
             pushToStack(resolvedType, schema);

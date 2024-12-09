@@ -1,0 +1,99 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Base_Full" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "station" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "format" : "uuid",
+                "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+              },
+              "name" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      },
+      "Station_Full" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "baseCollection" : {
+            "type" : "array",
+            "uniqueItems" : true,
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "format" : "uuid",
+                  "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+                },
+                "name" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "Read-only entity details (only returned/used on detail queries).",
+            "readOnly" : true
+          }
+        }
+      }
+    }
+  },
+  "paths" : {
+    "/base" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Base_Full"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/station" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Station_Full"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

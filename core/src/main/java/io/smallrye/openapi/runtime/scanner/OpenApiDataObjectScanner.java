@@ -182,7 +182,7 @@ public class OpenApiDataObjectScanner {
      */
     public static Schema process(PrimitiveType primitive) {
         Schema primitiveSchema = OASFactory.createSchema();
-        TypeUtil.applyTypeAttributes(primitive, primitiveSchema);
+        TypeUtil.applyTypeAttributes(primitive, primitiveSchema, null);
         return primitiveSchema;
     }
 
@@ -197,7 +197,7 @@ public class OpenApiDataObjectScanner {
         // If top level item is simple
         if (TypeUtil.isTerminalType(rootClassType)) {
             Schema simpleSchema = OASFactory.createSchema();
-            TypeUtil.applyTypeAttributes(rootClassType, simpleSchema);
+            TypeUtil.applyTypeAttributes(rootClassType, simpleSchema, null);
             return simpleSchema;
         }
 
@@ -238,8 +238,10 @@ public class OpenApiDataObjectScanner {
              */
             Schema entrySchema = currentPathEntry.getSchema();
             SchemaRegistry registry = context.getSchemaRegistry();
+            AnnotationTarget currentTarget = currentPathEntry.getAnnotationTarget();
+            boolean allowRegistration = !IgnoreResolver.configuresVisibility(context, currentTarget);
 
-            if (registry.hasSchema(currentType, context.getJsonViews(), null)) {
+            if (allowRegistration && registry.hasSchema(currentType, context.getJsonViews(), null)) {
                 // This type has already been scanned and registered, don't do it again!
                 entrySchema.setRef(registry.lookupRef(currentType, context.getJsonViews()).getRef());
                 continue;
@@ -247,8 +249,6 @@ public class OpenApiDataObjectScanner {
 
             ClassInfo currentClass = currentPathEntry.getClazz();
             Schema currentSchema = currentPathEntry.getSchema();
-            AnnotationTarget currentTarget = currentPathEntry.getAnnotationTarget();
-            boolean allowRegistration = !IgnoreResolver.configuresVisibility(context, currentTarget);
 
             // First, handle class annotations (re-assign since readKlass may return new schema)
             currentSchema = readKlass(currentClass, currentType, currentSchema, allowRegistration);

@@ -87,3 +87,11 @@ Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log w
 mp.openapi.extensions.smallrye.maximumStaticFileSize
 ----
 Set this value in order to change the maximum threshold for processed static files, when generating model from them. If not set, it will default to 3 MB.
+
+* Merge Schema Examples
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.merge-schema-examples
+----
+Set this boolean value to disable the merging of the deprecated `@Schema` `example` property into the `examples` array introduced in OAS 3.1.0. If not set, it will default to `true` the deprecated `example` will be mapped to the `examples` array in the OpenAPI model.
