@@ -326,6 +326,8 @@ public class TypeProcessor {
             if (registry.hasSchema(valueType, context.getJsonViews(), typeResolver)) {
                 if (allowRegistration()) {
                     propsSchema = registry.lookupRef(valueType, context.getJsonViews());
+                } else {
+                    pushToStack(valueType, propsSchema);
                 }
             } else {
                 pushToStack(valueType, propsSchema);
