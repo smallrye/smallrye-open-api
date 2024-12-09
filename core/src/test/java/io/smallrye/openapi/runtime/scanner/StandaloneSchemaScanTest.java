@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -331,43 +332,73 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Test
     void testJacksonJsonUnwrapped() throws IOException, JSONException {
         assertJsonEquals("components.schemas-jackson-jsonunwrapped.json",
-                JacksonJsonPerson.class, JacksonJsonPersonWithPrefixedAddress.class,
-                JacksonJsonPersonWithSuffixedAddress.class, JacksonJsonAddress.class);
+                JacksonJsonUnwrapped.JacksonJsonPerson.class,
+                JacksonJsonUnwrapped.JacksonJsonPersonWithPrefixedAddress.class,
+                JacksonJsonUnwrapped.JacksonJsonPersonWithSuffixedAddress.class,
+                JacksonJsonUnwrapped.JacksonJsonAddress.class,
+                JacksonJsonUnwrapped.TimestampedEntity.class,
+                JacksonJsonUnwrapped.Alternative.class,
+                JacksonJsonUnwrapped.Greeting.class,
+                JacksonJsonUnwrapped.LanguageAlternatives.class);
     }
 
-    @Schema
-    static class JacksonJsonPerson {
-        protected String name;
-        @JsonUnwrapped
-        protected JacksonJsonAddress address;
+    static class JacksonJsonUnwrapped {
+        @Schema
+        static class JacksonJsonPerson {
+            protected String name;
+            @JsonUnwrapped
+            protected JacksonJsonAddress address;
+            protected TimestampedEntity<Greeting<LanguageAlternatives>> greeting;
 
-        @Schema(description = "Ignored since address is unwrapped")
-        public JacksonJsonAddress getAddress() {
-            return address;
+            @Schema(description = "Ignored since address is unwrapped")
+            public JacksonJsonAddress getAddress() {
+                return address;
+            }
         }
-    }
 
-    @Schema
-    static class JacksonJsonPersonWithPrefixedAddress {
-        protected String name;
-        @JsonUnwrapped(prefix = "addr-")
-        protected JacksonJsonAddress address;
-    }
+        @Schema
+        static class JacksonJsonPersonWithPrefixedAddress {
+            protected String name;
+            @JsonUnwrapped(prefix = "addr-")
+            protected JacksonJsonAddress address;
+        }
 
-    @Schema
-    static class JacksonJsonPersonWithSuffixedAddress {
-        protected String name;
-        @JsonUnwrapped(suffix = "-addr")
-        protected JacksonJsonAddress address;
-    }
+        @Schema
+        static class JacksonJsonPersonWithSuffixedAddress {
+            protected String name;
+            @JsonUnwrapped(suffix = "-addr")
+            protected JacksonJsonAddress address;
+        }
 
-    @Schema
-    static class JacksonJsonAddress {
-        protected int streetNumber;
-        protected String streetName;
-        protected String city;
-        protected String state;
-        protected String postalCode;
+        @Schema
+        static class JacksonJsonAddress {
+            protected int streetNumber;
+            protected String streetName;
+            protected String city;
+            protected String state;
+            protected String postalCode;
+        }
+
+        static class TimestampedEntity<T> {
+            @JsonUnwrapped
+            T entity;
+            Instant timestamp;
+        }
+
+        interface Alternative {
+        }
+
+        static class Greeting<T extends Alternative> {
+            String message;
+            T alternatives;
+        }
+
+        static class LanguageAlternatives implements Alternative {
+            @Schema(required = true, example = "Hola")
+            String spanish;
+            @Schema(required = true, example = "Hallo")
+            String german;
+        }
     }
 
     /****************************************************************/
