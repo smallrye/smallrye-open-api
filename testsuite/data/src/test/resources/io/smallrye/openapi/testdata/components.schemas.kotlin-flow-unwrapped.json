@@ -1,0 +1,21 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/kotlin/hello" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

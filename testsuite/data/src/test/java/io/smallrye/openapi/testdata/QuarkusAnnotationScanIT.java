@@ -109,6 +109,17 @@ class QuarkusAnnotationScanIT {
     }
 
     @Test
+    void testKotlinResourceWithUnwrappedFlowSSE() throws Exception {
+        Index index = Index.of(io.smallrye.openapi.testdata.kotlin.KotlinResource.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("components.schemas.kotlin-flow-unwrapped.json", result);
+    }
+
+    @Test
     void testSyntheticClassesAndInterfacesIgnoredByDefault() throws Exception {
         try (InputStream source = getClass().getResourceAsStream("/smallrye-open-api-testsuite-data.idx")) {
             IndexReader reader = new IndexReader(source);

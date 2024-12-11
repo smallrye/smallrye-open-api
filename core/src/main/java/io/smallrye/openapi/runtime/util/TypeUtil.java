@@ -310,6 +310,7 @@ public class TypeUtil {
         jdkIndex = indexer.complete();
 
         wrapperTypes.addAll(JaxbConstants.JAXB_ELEMENT);
+        wrapperTypes.add(KotlinConstants.FLOW);
         wrapperTypes.add(MutinyConstants.UNI_TYPE.name());
         wrapperTypes.add(JDKConstants.COMPLETION_STAGE_NAME);
         wrapperTypes.add(JDKConstants.COMPLETABLE_FUTURE_NAME);
