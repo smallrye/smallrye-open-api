@@ -21,6 +21,9 @@ public class KotlinConstants {
     public static final DotName JETBRAINS_NOT_NULL = DotName
             .createSimple("org.jetbrains.annotations.NotNull");
 
+    public static final DotName FLOW = DotName
+            .createSimple("kotlinx.coroutines.flow.Flow");
+
     private KotlinConstants() {
     }
 }
