@@ -24,6 +24,7 @@
         @OASModelProperty(name = "paths", type = org.eclipse.microprofile.openapi.models.Paths.class),
         @OASModelProperty(name = "webhooks", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.PathItem.class, minVersion = OpenApiVersion.V3_1),
         @OASModelProperty(name = "components", type = org.eclipse.microprofile.openapi.models.Components.class),
+        @OASModelProperty(name = "jsonSchemaDialect", type = String.class, minVersion = OpenApiVersion.V3_1),
 })
 @OASModelType(name = "Operation", constructible = org.eclipse.microprofile.openapi.models.Operation.class, properties = {
         @OASModelProperty(name = "tags", type = List.class, valueType = String.class),
