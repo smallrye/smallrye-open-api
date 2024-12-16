@@ -27,6 +27,7 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
@@ -40,6 +41,7 @@ import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import io.smallrye.openapi.model.BaseExtensibleModel;
 import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.model.OASModelType;
+import io.smallrye.openapi.model.OpenApiVersion;
 
 @SupportedAnnotationTypes({
         "io.smallrye.openapi.model.OASModelType",
@@ -71,6 +73,7 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
         String singularName;
         String singularMethodName;
         boolean unwrapped;
+        OpenApiVersion minVersion;
     }
 
     private Map<Class<?>, String> generatedClasses = new HashMap<>();
@@ -99,7 +102,7 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
                 PackageElement pkg = (PackageElement) element;
                 // Process each element
-                processPackage(annotation, pkg, rootPackage);
+                processPackage(annotation, pkg);
             }
         }
 
@@ -111,21 +114,18 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
                 writeGenerated(writer);
 
                 writeCodeLn(writer, 0, "public class SmallRyeOASModels {");
-                writeCodeLn(writer, 1, "public interface Properties {");
-                writeCodeLn(writer, 2, "DataType getPropertyType(String name);");
-                writeCodeLn(writer, 1, "}");
                 writeCodeLn(writer, 1,
-                        "private final java.util.Map<Class<?>, Properties> models = new java.util.HashMap<>(",
+                        "private final java.util.Map<Class<?>, PropertyMetadata> models = new java.util.HashMap<>(",
                         Integer.toString(generatedClasses.size()), ");");
                 writer.write("\n");
                 writeCodeLn(writer, 1, "public SmallRyeOASModels() {");
                 for (Map.Entry<Class<?>, String> entry : generatedClasses.entrySet()) {
-                    writeCodeLn(writer, 2, "models.put(", entry.getKey().getName(), CLASS, ", new ", entry.getValue(),
-                            ".Properties());");
+                    writeCodeLn(writer, 2, "models.put(", entry.getKey().getName(), CLASS, ", ",
+                            entry.getValue(), ".PROPERTIES);");
                 }
                 writeCodeLn(writer, 1, "}");
                 writer.write("\n");
-                writeCodeLn(writer, 1, "public Properties getModel(Class<?> modelType) {");
+                writeCodeLn(writer, 1, "public PropertyMetadata getModel(Class<?> modelType) {");
                 writeCodeLn(writer, 2, "return models.get(modelType);");
                 writeCodeLn(writer, 1, "}");
                 writeCodeLn(writer, 0, "}");
@@ -138,7 +138,7 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
         return true; // No further processing of this annotation type
     }
 
-    private void processPackage(TypeElement annotation, PackageElement pkg, String rootPackage) {
+    private void processPackage(TypeElement annotation, PackageElement pkg) {
         String annotationName = annotation.getQualifiedName().toString();
         String packageName = pkg.getQualifiedName().toString();
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Processing: " + packageName);
@@ -146,13 +146,13 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
 
         for (var mirror : pkg.getAnnotationMirrors()) {
             if (annotationName.equals(OASModelType.class.getName())) {
-                writeType(filer, rootPackage, packageName, toMap(mirror));
+                writeType(filer, packageName, toMap(mirror));
             } else if (annotationName.equals(OASModelType.List.class.getName().replace('$', '.'))) {
                 @SuppressWarnings("unchecked")
                 List<AnnotationValue> types = (List<AnnotationValue>) toMap(mirror).get("value");
 
                 for (var type : types) {
-                    writeType(filer, rootPackage, packageName, toMap((AnnotationMirror) type.getValue()));
+                    writeType(filer, packageName, toMap((AnnotationMirror) type.getValue()));
                 }
             }
         }
@@ -170,7 +170,7 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
                         LinkedHashMap::new));
     }
 
-    private void writeType(Filer filer, String rootPackage, String packageName, Map<String, Object> annotation) {
+    private void writeType(Filer filer, String packageName, Map<String, Object> annotation) {
         String className = (String) annotation.get("name");
         String fqcn = packageName + "." + className;
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Writing: " + fqcn);
@@ -206,7 +206,7 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
 
             generatedClasses.put(constructibleType, fqcn);
             boolean extensible = Extensible.class.isAssignableFrom(constructibleType);
-            writePropertyInfo(writer, rootPackage, extensible, propertyMap);
+            writePropertyInfo(writer, extensible, propertyMap);
 
             writeCodeLn(writer, 0, "}");
         } catch (IOException e) {
@@ -270,6 +270,17 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
 
         writer.write(" {\n");
 
+        writeCodeLn(writer, 1, "public static final PropertyMetadata PROPERTIES = new Properties();");
+
+        writer.write("\n");
+
+        writeCodeLn(writer, 1, "@Override");
+        writeCodeLn(writer, 1, "public PropertyMetadata getPropertyMetadata() {");
+        writeCodeLn(writer, 2, "return PROPERTIES;");
+        writeCodeLn(writer, 1, "}");
+
+        writer.write("\n");
+
         try {
             String simpleName = constructible.getSimpleName();
             Method filterMethod = OASFilter.class.getMethod("filter" + simpleName, constructible);
@@ -298,14 +309,17 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
         return CENTRALIZED_PROPERIES.getOrDefault(name, Void.class).getName().equals(type);
     }
 
-    private void writePropertyInfo(Writer writer, String rootPackage, boolean extensible, Map<String, PropertyInfo> propertyMap)
+    private void writePropertyInfo(Writer writer, boolean extensible, Map<String, PropertyInfo> propertyMap)
             throws IOException {
 
         writer.write("\n");
-        writeCodeLn(writer, 1, "public static class Properties implements ", rootPackage, ".SmallRyeOASModels.Properties {");
+        writeCodeLn(writer, 1, "public static class Properties implements io.smallrye.openapi.model.PropertyMetadata {");
         writer.write("\n");
         writeCodeLn(writer, 2,
                 "private final java.util.Map<String, DataType> types = new java.util.HashMap<>(",
+                Integer.toString(propertyMap.size()), ");");
+        writeCodeLn(writer, 2,
+                "private final java.util.Map<String, OpenApiVersion> minVersions = new java.util.HashMap<>(",
                 Integer.toString(propertyMap.size()), ");");
         writer.write("\n");
         writeCodeLn(writer, 2, "public Properties() {");
@@ -348,6 +362,11 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
             }
         }
         writeCodeLn(writer, 2, "}");
+        writer.write('\n');
+
+        writeCodeLn(writer, 2, "public OpenApiVersion getMinVersion(String name) {");
+        writeCodeLn(writer, 3, "return minVersions.getOrDefault(name, OpenApiVersion.V3_0);");
+        writeCodeLn(writer, 2, "}");
 
         writeCodeLn(writer, 1, "}");
     }
@@ -384,6 +403,8 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
         } else {
             writeCodeLn(writer, 3, putType, name, "\", DataType.type(", property.rawType, CLASS + "));");
         }
+
+        writeCodeLn(writer, 3, "minVersions.put(\"", name, "\", OpenApiVersion.", property.minVersion.name(), ");");
     }
 
     private PropertyInfo getPropertyInfo(Map<String, Object> values) {
@@ -392,6 +413,8 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
         property.name = (String) values.get("name");
         property.rawType = ((TypeMirror) values.get("type")).toString();
         property.unwrapped = get(values, "unwrapped", Boolean.class).booleanValue();
+        VariableElement minVersionElement = (VariableElement) values.get("minVersion");
+        property.minVersion = OpenApiVersion.valueOf(minVersionElement.getSimpleName().toString());
 
         if (Map.class.getName().equals(property.rawType)) {
             property.valueType = getValueType(values, property.rawType);
@@ -746,6 +769,8 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
         writer.write(";\n\n");
 
         writeCodeLn(writer, 0, "import io.smallrye.openapi.model.DataType;");
+        writeCodeLn(writer, 0, "import io.smallrye.openapi.model.OpenApiVersion;");
+        writeCodeLn(writer, 0, "import io.smallrye.openapi.model.PropertyMetadata;");
         writer.write('\n');
     }
 }

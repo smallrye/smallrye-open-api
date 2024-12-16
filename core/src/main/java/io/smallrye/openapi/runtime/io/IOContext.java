@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io;
 import java.util.Optional;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.model.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackOperationIO;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
@@ -35,22 +36,6 @@ import io.smallrye.openapi.runtime.io.tags.TagIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
 public class IOContext<V, A extends V, O extends V, AB, OB> {
-
-    /**
-     * The major.minor version of OpenAPI being used for (de-)serizalization
-     */
-    public enum OpenApiVersion {
-        V3_0,
-        V3_1;
-
-        public static OpenApiVersion fromString(String version) {
-            if (version != null && version.startsWith("3.0")) {
-                return V3_0;
-            } else {
-                return V3_1;
-            }
-        }
-    }
 
     private AnnotationScannerContext scannerContext;
     private JsonIO<V, A, O, AB, OB> jsonIO;

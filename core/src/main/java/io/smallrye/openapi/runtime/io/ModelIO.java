@@ -26,11 +26,10 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
-import io.smallrye.openapi.internal.models.SmallRyeOASModels;
 import io.smallrye.openapi.model.BaseExtensibleModel;
 import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.model.DataType;
-import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
+import io.smallrye.openapi.model.OpenApiVersion;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackIO;
 import io.smallrye.openapi.runtime.io.callbacks.CallbackOperationIO;
 import io.smallrye.openapi.runtime.io.extensions.ExtensionIO;
@@ -250,13 +249,11 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
 
     public abstract T read(AnnotationInstance annotation);
 
-    private static final SmallRyeOASModels MODEL_TYPES = new SmallRyeOASModels();
-
     @SuppressWarnings("unchecked")
-    public <C extends Constructible> T readObject(Class<C> type, O node) {
+    public <C extends Constructible> C readObject(Class<C> type, O node) {
         var jsonIO = jsonIO();
         BaseModel<C> model = (BaseModel<C>) OASFactory.createObject(type);
-        var modelType = MODEL_TYPES.getModel(type);
+        var modelProps = model.getPropertyMetadata();
 
         for (Map.Entry<String, V> property : jsonIO.properties(node)) {
             String name = property.getKey();
@@ -268,12 +265,15 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
                 } else if (ExtensionIO.isExtension(name) && Extensible.class.isAssignableFrom(type)) {
                     ((BaseExtensibleModel<?>) model).addExtension(name, jsonIO.fromJson(value));
                 } else {
-                    model.setProperty(name, readJson(value, modelType.getPropertyType(name)));
+                    OpenApiVersion minVersion = modelProps.getMinVersion(name);
+                    if (context.openApiVersion().compareTo(minVersion) >= 0) {
+                        model.setProperty(name, readJson(value, modelProps.getPropertyType(name)));
+                    }
                 }
             }
         }
 
-        return (T) model;
+        return model.constructible();
     }
 
     protected Object readJson(V node, DataType desiredType) {
@@ -386,7 +386,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<V> mapObject(Object object) {
+    public Optional<V> mapObject(BaseModel<?> object) {
         if (object instanceof Schema) {
             return (Optional<V>) schemaIO().write((Schema) object);
         }
@@ -395,7 +395,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
     }
 
     @Override
-    public Optional<V> mapProperty(Object object, String propertyName, Object propertyValue) {
+    public Optional<V> mapProperty(BaseModel<?> object, String propertyName, Object propertyValue) {
         if (object instanceof Reference) {
             if (object instanceof PathItem) {
                 // PathItems may have elements in addition to $ref
@@ -410,11 +410,17 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
             }
         }
 
+        OpenApiVersion minVersion = object.getPropertyMetadata().getMinVersion(propertyName);
+        if (context.openApiVersion().compareTo(minVersion) < 0) {
+            // Skip this property if it's only applicable to newer OpenAPI versions
+            return Optional.of(jsonIO().nullValue());
+        }
+
         return Optional.empty();
     }
 
     @Override
-    public void mapObject(Object object, OB nodeBuilder) {
+    public void mapObject(BaseModel<?> object, OB nodeBuilder) {
         if (object instanceof RequestBody && ((Reference<?>) object).getRef() == null) {
             Boolean required = ((RequestBody) object).getRequired();
             setIfPresent(nodeBuilder, "required", jsonIO().toJson(required));

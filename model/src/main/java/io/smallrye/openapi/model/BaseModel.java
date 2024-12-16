@@ -83,6 +83,8 @@ public abstract class BaseModel<C extends Constructible> {
         return (C) this;
     }
 
+    public abstract PropertyMetadata getPropertyMetadata();
+
     public C filter(OASFilter filter, Map<Object, Object> stack) {
         this.modCount += BaseModelSupport.filter(filter, stack, properties);
         return filter(filter);
