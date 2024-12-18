@@ -110,7 +110,7 @@ public abstract class AbstractParameterProcessor {
     protected Map<String, Map<String, AnnotationInstance>> matrixParams = new LinkedHashMap<>();
 
     private Set<String> processedMatrixSegments = new HashSet<>();
-    private List<Parameter> preferredOrder;
+    private List<Parameter> preferredOrder = new ArrayList<>();
 
     /**
      * Used for collecting and merging any scanned {@link Parameter} annotations
@@ -234,6 +234,7 @@ public abstract class AbstractParameterProcessor {
         params.clear();
         formParams.clear();
         matrixParams.clear();
+        preferredOrder.clear();
     }
 
     protected ResourceParameters process(ClassInfo resourceClass, MethodInfo resourceMethod) {
@@ -1373,6 +1374,10 @@ public abstract class AbstractParameterProcessor {
         }
 
         if (preferredOrder != null) {
+            if (context.oaiParam == null && context.name != null) {
+                context.oaiParam = new ParameterImpl();
+                context.oaiParam.setName(context.name);
+            }
             preferredOrder.add(context.oaiParam);
         }
     }
