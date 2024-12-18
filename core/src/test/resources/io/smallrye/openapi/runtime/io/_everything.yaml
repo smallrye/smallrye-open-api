@@ -295,6 +295,13 @@ components:
       in: query
   links: {}
   callbacks: {}
+  pathItems:
+    eventNotify:
+      post:
+        description: Event notification
+webhooks:
+  events:
+    $ref: "#/components/pathItems/eventNotify"
 x-root-extension-1: hello world
 x-root-extension-2:
 - true
