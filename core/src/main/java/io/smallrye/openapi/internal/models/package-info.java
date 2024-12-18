@@ -8,7 +8,7 @@
         @OASModelProperty(name = "securitySchemes", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.security.SecurityScheme.class),
         @OASModelProperty(name = "links", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.links.Link.class),
         @OASModelProperty(name = "callbacks", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.callbacks.Callback.class),
-        @OASModelProperty(name = "pathItems", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.PathItem.class),
+        @OASModelProperty(name = "pathItems", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.PathItem.class, minVersion = OpenApiVersion.V3_1),
 })
 @OASModelType(name = "ExternalDocumentation", constructible = org.eclipse.microprofile.openapi.models.ExternalDocumentation.class, properties = {
         @OASModelProperty(name = "description", type = String.class),
@@ -22,7 +22,7 @@
         @OASModelProperty(name = "security", singularName = "securityRequirement", type = List.class, valueType = org.eclipse.microprofile.openapi.models.security.SecurityRequirement.class),
         @OASModelProperty(name = "tags", type = List.class, valueType = org.eclipse.microprofile.openapi.models.tags.Tag.class),
         @OASModelProperty(name = "paths", type = org.eclipse.microprofile.openapi.models.Paths.class),
-        @OASModelProperty(name = "webhooks", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.PathItem.class),
+        @OASModelProperty(name = "webhooks", type = Map.class, valueType = org.eclipse.microprofile.openapi.models.PathItem.class, minVersion = OpenApiVersion.V3_1),
         @OASModelProperty(name = "components", type = org.eclipse.microprofile.openapi.models.Components.class),
 })
 @OASModelType(name = "Operation", constructible = org.eclipse.microprofile.openapi.models.Operation.class, properties = {
@@ -64,3 +64,4 @@ import java.util.Map;
 
 import io.smallrye.openapi.model.OASModelProperty;
 import io.smallrye.openapi.model.OASModelType;
+import io.smallrye.openapi.model.OpenApiVersion;
