@@ -15,6 +15,11 @@ import org.junit.jupiter.api.Test;
 class BaseModelTest {
 
     static class TestMapModel extends BaseModel<Constructible> {
+
+        @Override
+        public PropertyMetadata getPropertyMetadata() {
+            return null;
+        }
     }
 
     @Test

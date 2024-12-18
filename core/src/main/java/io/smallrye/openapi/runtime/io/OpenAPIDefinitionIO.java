@@ -7,7 +7,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.jboss.jandex.AnnotationInstance;
 
 import io.smallrye.openapi.api.SmallRyeOASConfig;
-import io.smallrye.openapi.runtime.io.IOContext.OpenApiVersion;
+import io.smallrye.openapi.model.OpenApiVersion;
 
 public class OpenAPIDefinitionIO<V, A extends V, O extends V, AB, OB> extends ModelIO<OpenAPI, V, A, O, AB, OB> {
 

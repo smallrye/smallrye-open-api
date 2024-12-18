@@ -224,6 +224,15 @@ class OpenApiParserAndSerializerTest {
     }
 
     /**
+     * Test 3.1 -> 3.0 conversion of info objects
+     */
+    @Test
+    void testParseInfo30() throws IOException, JSONException {
+        doMultiVersionTest("info31.json", "info30.json", ConversionDirection.TO_30_ONLY);
+        doMultiVersionTest("info.json", "info30.json", ConversionDirection.BOTH_WAYS);
+    }
+
+    /**
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
     @Test

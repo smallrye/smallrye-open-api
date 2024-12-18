@@ -19,4 +19,5 @@ public @interface OASModelProperty {
 
     boolean unwrapped() default false;
 
+    OpenApiVersion minVersion() default OpenApiVersion.V3_0;
 }

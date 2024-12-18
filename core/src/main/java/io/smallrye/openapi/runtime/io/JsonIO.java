@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.model.BaseModel;
 
 /**
  * Abstraction layer around a library for reading and writing JSON. (E.g. Jakarta JSON-P or Jackson).
@@ -39,7 +40,7 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
          * @param object model object that may be mapped to a JSON value
          * @return an optional JSON value that is mapped from the object
          */
-        default Optional<V> mapObject(Object object) {
+        default Optional<V> mapObject(BaseModel<?> object) {
             return Optional.empty();
         }
 
@@ -47,7 +48,7 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
          * Optionally convert the property with given name and value to a JSON value.
          * If no value mapping should occur, implementations should return an empty Optional.
          */
-        default Optional<V> mapProperty(Object object, String propertyName, Object propertyValue) {
+        default Optional<V> mapProperty(BaseModel<?> object, String propertyName, Object propertyValue) {
             return Optional.empty();
         }
 
@@ -55,7 +56,7 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
          * Map any additional properties from the given model object to the nodeBuilder that
          * will be the resulting JSON value.
          */
-        default void mapObject(Object object, OB nodeBuilder) {
+        default void mapObject(BaseModel<?> object, OB nodeBuilder) {
         }
     }
 
