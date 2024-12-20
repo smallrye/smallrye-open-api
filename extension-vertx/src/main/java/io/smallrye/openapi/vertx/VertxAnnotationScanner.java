@@ -2,6 +2,7 @@ package io.smallrye.openapi.vertx;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -150,14 +151,11 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         context.getResolverStack().push(resolver);
 
         // Get the @RouteBase info and save it for later
-        AnnotationInstance routeBaseAnnotation = context.annotations().getAnnotation(routeClass,
-                VertxConstants.ROUTE_BASE);
-
-        if (routeBaseAnnotation != null) {
-            this.currentAppPath = routeBaseAnnotation.value("path").asString(); // TODO: Check if there and check for :
-        } else {
-            this.currentAppPath = "/";
-        }
+        this.currentAppPath = context.annotations().getAnnotationValue(
+                routeClass,
+                Collections.singletonList(VertxConstants.ROUTE_BASE),
+                "path",
+                "/");
 
         // Process @OpenAPIDefinition annotation
         OpenAPI openApi = processDefinitionAnnotation(context, routeClass);

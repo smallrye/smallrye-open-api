@@ -5,6 +5,7 @@ import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -14,8 +15,6 @@ import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.Style;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.jboss.jandex.AnnotationTarget.Kind;
-import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
@@ -92,44 +91,27 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
 
         if (isReadableParameterAnnotation(name)) {
             readParameterAnnotation(annotation, overriddenParametersOnly);
-        } else if (VertxConstants.PARAM.equals(name) && annotation.value() != null) {
-            String parameterName = annotation.value().asString();
-            String path = getMethodRoutePath(annotation);
+        } else if (VertxConstants.PARAM.equals(name)) {
+            // @Param only targets method parameters
+            MethodInfo resourceMethod = annotation.target().asMethodParameter().method();
+            String parameterName = paramName(annotation);
+            String path = scannerContext.annotations().getAnnotationValue(
+                    resourceMethod,
+                    Collections.singletonList(VertxConstants.ROUTE),
+                    "path",
+                    resourceMethod.name());
 
-            if (path != null && path.contains(":" + parameterName)) {
+            if (path.contains(":" + parameterName)) {
                 FrameworkParameter vertxParameter = VertxParameter.PATH_PARAM.parameter;
                 readAnnotatedType(vertxParameter, annotation, beanParamAnnotation, overriddenParametersOnly);
             } else {
                 FrameworkParameter vertxParameter = VertxParameter.QUERY_PARAM.parameter;
                 readAnnotatedType(vertxParameter, annotation, beanParamAnnotation, overriddenParametersOnly);
             }
-        } else if (VertxConstants.HEADER_PARAM.equals(name) && annotation.value() != null) {
+        } else if (VertxConstants.HEADER_PARAM.equals(name)) {
             FrameworkParameter vertxParameter = VertxParameter.HEADER_PARAM.parameter;
             readAnnotatedType(vertxParameter, annotation, beanParamAnnotation, overriddenParametersOnly);
         }
-    }
-
-    private String getMethodRoutePath(AnnotationInstance annotation) {
-        String path = null;
-        MethodInfo resourceMethod = null;
-
-        if (annotation.target().kind() == METHOD) {
-            resourceMethod = annotation.target().asMethod();
-        } else if (annotation.target().kind() == Kind.METHOD_PARAMETER) {
-            resourceMethod = annotation.target().asMethodParameter().method();
-        }
-
-        if (resourceMethod != null) {
-            AnnotationInstance routeAnnotation = resourceMethod.annotation(VertxConstants.ROUTE);
-            AnnotationValue pathValue = routeAnnotation.value("path");
-            path = resourceMethod.name(); // default to methodName
-
-            if (pathValue != null) {
-                path = pathValue.asString();
-            }
-        }
-
-        return path;
     }
 
     private void readAnnotatedType(FrameworkParameter frameworkParam, AnnotationInstance annotation,
@@ -167,26 +149,20 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected String pathOf(AnnotationTarget target) {
-        AnnotationInstance path = null;
-        String defaultPathValue = null;
+        String pathValue = null;
 
         if (target.kind().equals(CLASS)) {
-            DotName possiblePath = VertxConstants.ROUTE_BASE;
-            AnnotationInstance classAnnotation = scannerContext.annotations().getAnnotation(target, possiblePath);
-            if (classAnnotation != null && classAnnotation.value("path") != null) {
-                path = classAnnotation;
-            }
+            pathValue = scannerContext.annotations().getAnnotationValue(
+                    target,
+                    Collections.singletonList(VertxConstants.ROUTE_BASE),
+                    "path");
         } else if (target.kind().equals(METHOD)) {
-            defaultPathValue = target.asMethod().name();
-            DotName possiblePath = VertxConstants.ROUTE;
-            path = target.asMethod().annotation(possiblePath);
+            pathValue = scannerContext.annotations().getAnnotationValue(
+                    target,
+                    Collections.singletonList(VertxConstants.ROUTE),
+                    "path",
+                    target.asMethod().name());
         }
-
-        if (path == null) {
-            return "";
-        }
-
-        String pathValue = routePathValuesToPath(path, defaultPathValue);
 
         if (pathValue == null) {
             return "";
@@ -214,20 +190,6 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
         }
 
         return pathValue;
-    }
-
-    /**
-     * Creates a String path from the Route path value
-     *
-     * @param routeAnnotation
-     * @return
-     */
-    static String routePathValuesToPath(AnnotationInstance routeAnnotation, String defaultValue) {
-        AnnotationValue value = routeAnnotation.value("path");
-        if (value != null) {
-            return value.asString();
-        }
-        return defaultValue;
     }
 
     @Override

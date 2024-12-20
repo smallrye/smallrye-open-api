@@ -21,17 +21,18 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @ApplicationScoped
-@RouteBase(path = "greeting", consumes = "application/json", produces = "application/json")
+// `path` not specified on @RouteBase
+@RouteBase(consumes = "application/json", produces = "application/json")
 public class GreetingPutRoute {
 
     // 1) Basic path var test
-    @Route(path = "/greet/:id", methods = HttpMethod.PUT)
+    @Route(path = "/greeting/greet/:id", methods = HttpMethod.PUT)
     public Greeting greet(@Body Greeting greeting, @Param("id") String id) {
         return greeting;
     }
 
     // 2) Void, so without a type specified
-    @Route(path = "/greetWithResponse/:id", methods = HttpMethod.PUT)
+    @Route(path = "/greeting/greetWithResponse/:id", methods = HttpMethod.PUT)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public void greetWithResponse(@Body Greeting greeting, @Param("id") String id) {
         //
