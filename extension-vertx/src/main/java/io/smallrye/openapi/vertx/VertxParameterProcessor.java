@@ -22,7 +22,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -45,9 +44,8 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
 
     private VertxParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
-            Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, contextPath, reader, extensions);
+            Function<AnnotationInstance, Parameter> reader) {
+        super(scannerContext, contextPath, reader, scannerContext.getExtensions());
     }
 
     /**
@@ -63,7 +61,6 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
      *        Vert.x HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
-     * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
@@ -71,10 +68,9 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
             String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
+            Function<AnnotationInstance, Parameter> reader) {
 
-        VertxParameterProcessor processor = new VertxParameterProcessor(context, contextPath, reader, extensions);
+        VertxParameterProcessor processor = new VertxParameterProcessor(context, contextPath, reader);
         return processor.process(resourceClass, resourceMethod);
     }
 
@@ -98,23 +94,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
             readParameterAnnotation(annotation, overriddenParametersOnly);
         } else if (VertxConstants.PARAM.equals(name) && annotation.value() != null) {
             String parameterName = annotation.value().asString();
-            String path = null;
-            MethodInfo resourceMethod = null;
-
-            if (annotation.target().kind() == METHOD) {
-                resourceMethod = annotation.target().asMethod();
-            } else if (annotation.target().kind() == Kind.METHOD_PARAMETER) {
-                resourceMethod = annotation.target().asMethodParameter().method();
-            }
-
-            if (resourceMethod != null) {
-                AnnotationInstance routeAnnotation = resourceMethod.annotation(VertxConstants.ROUTE);
-                AnnotationValue pathValue = routeAnnotation.value("path");
-                path = resourceMethod.name(); // default to methodName
-                if (pathValue != null) {
-                    path = pathValue.asString();
-                }
-            }
+            String path = getMethodRoutePath(annotation);
 
             if (path != null && path.contains(":" + parameterName)) {
                 FrameworkParameter vertxParameter = VertxParameter.PATH_PARAM.parameter;
@@ -123,12 +103,33 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
                 FrameworkParameter vertxParameter = VertxParameter.QUERY_PARAM.parameter;
                 readAnnotatedType(vertxParameter, annotation, beanParamAnnotation, overriddenParametersOnly);
             }
-
         } else if (VertxConstants.HEADER_PARAM.equals(name) && annotation.value() != null) {
             FrameworkParameter vertxParameter = VertxParameter.HEADER_PARAM.parameter;
             readAnnotatedType(vertxParameter, annotation, beanParamAnnotation, overriddenParametersOnly);
         }
+    }
 
+    private String getMethodRoutePath(AnnotationInstance annotation) {
+        String path = null;
+        MethodInfo resourceMethod = null;
+
+        if (annotation.target().kind() == METHOD) {
+            resourceMethod = annotation.target().asMethod();
+        } else if (annotation.target().kind() == Kind.METHOD_PARAMETER) {
+            resourceMethod = annotation.target().asMethodParameter().method();
+        }
+
+        if (resourceMethod != null) {
+            AnnotationInstance routeAnnotation = resourceMethod.annotation(VertxConstants.ROUTE);
+            AnnotationValue pathValue = routeAnnotation.value("path");
+            path = resourceMethod.name(); // default to methodName
+
+            if (pathValue != null) {
+                path = pathValue.asString();
+            }
+        }
+
+        return path;
     }
 
     private void readAnnotatedType(FrameworkParameter frameworkParam, AnnotationInstance annotation,
@@ -149,15 +150,6 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
 
                 matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
                         .put(paramName(annotation), annotation);
-
-                // Do this in Vert.x ?
-                //}else if (frameworkParam.location == In.PATH && targetType != null
-                //      && VertxConstants.REQUEST_MAPPING.equals(targetType.name())) {
-                //    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
-
-                //    if (!matrixParams.containsKey(pathSegment)) {
-                //        matrixParams.put(pathSegment, new HashMap<>());
-                //   }
             } else if (frameworkParam.location != null) {
                 readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
             } else if (target != null) {
@@ -177,6 +169,7 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
     protected String pathOf(AnnotationTarget target) {
         AnnotationInstance path = null;
         String defaultPathValue = null;
+
         if (target.kind().equals(CLASS)) {
             DotName possiblePath = VertxConstants.ROUTE_BASE;
             AnnotationInstance classAnnotation = scannerContext.annotations().getAnnotation(target, possiblePath);
@@ -186,40 +179,41 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
         } else if (target.kind().equals(METHOD)) {
             defaultPathValue = target.asMethod().name();
             DotName possiblePath = VertxConstants.ROUTE;
-            AnnotationInstance methodAnnotation = target.asMethod().annotation(possiblePath);
-            if (methodAnnotation != null) {
-                path = methodAnnotation;
-            }
+            path = target.asMethod().annotation(possiblePath);
         }
 
-        if (path != null) {
-            String pathValue = routePathValuesToPath(path, defaultPathValue);
-            if (pathValue != null) {
-                if (pathValue.startsWith("/")) {
-                    pathValue = pathValue.substring(1);
-                }
-
-                if (pathValue.endsWith("/")) {
-                    pathValue = pathValue.substring(0, pathValue.length() - 1);
-                }
-
-                // Replace :var with {var}
-                if (pathValue.contains(":")) {
-                    List<String> parts = Arrays.asList(pathValue.split("/"));
-                    List<String> partsConverted = new ArrayList<>();
-                    for (String part : parts) {
-                        if (part.startsWith(":")) {
-                            part = "{" + part.substring(1) + "}";
-                        }
-                        partsConverted.add(part);
-                    }
-                    pathValue = String.join("/", partsConverted.toArray(new String[] {}));
-                }
-                return pathValue;
-            }
+        if (path == null) {
+            return "";
         }
 
-        return "";
+        String pathValue = routePathValuesToPath(path, defaultPathValue);
+
+        if (pathValue == null) {
+            return "";
+        }
+
+        if (pathValue.startsWith("/")) {
+            pathValue = pathValue.substring(1);
+        }
+
+        if (pathValue.endsWith("/")) {
+            pathValue = pathValue.substring(0, pathValue.length() - 1);
+        }
+
+        // Replace :var with {var} - NOSONAR
+        if (pathValue.contains(":")) {
+            List<String> parts = Arrays.asList(pathValue.split("/"));
+            List<String> partsConverted = new ArrayList<>();
+            for (String part : parts) {
+                if (part.startsWith(":")) {
+                    part = "{" + part.substring(1) + "}";
+                }
+                partsConverted.add(part);
+            }
+            pathValue = String.join("/", partsConverted.toArray(new String[] {}));
+        }
+
+        return pathValue;
     }
 
     /**

@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static io.smallrye.openapi.api.constants.OpenApiConstants.DUPLICATE_OPERATION_ID_BEHAVIOR;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
@@ -11,7 +12,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -24,6 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.PathItem;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexReader;
 import org.jboss.jandex.IndexWriter;
@@ -32,6 +36,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.model.Extensions;
 import test.io.smallrye.openapi.runtime.scanner.Widget;
 import test.io.smallrye.openapi.runtime.scanner.jakarta.MultipleContentTypesWithFormParamsTestResource;
 
@@ -39,6 +44,42 @@ import test.io.smallrye.openapi.runtime.scanner.jakarta.MultipleContentTypesWith
  * @author Michael Edgar {@literal <michael@xlate.io>}
  */
 class ParameterScanTests extends IndexScannerTestBase {
+
+    public static void verifyMethodAndParamRefsPresent(OpenAPI oai) {
+        if (oai.getPaths() != null && oai.getPaths().getPathItems() != null) {
+            for (Map.Entry<String, PathItem> pathItemEntry : oai.getPaths().getPathItems().entrySet()) {
+                final PathItem pathItem = pathItemEntry.getValue();
+                if (pathItem.getOperations() != null) {
+                    for (var operationEntry : pathItem.getOperations().entrySet()) {
+                        var operation = operationEntry.getValue();
+                        String opRef = operationEntry.getKey() + " " + pathItemEntry.getKey();
+                        Assertions.assertNotNull(Extensions.getMethodRef(operation), "methodRef: " + opRef);
+                        if (operation.getParameters() != null) {
+                            for (var parameter : operation.getParameters()) {
+                                /*
+                                 * if @Parameter style=matrix was not specified at the same @Path segment
+                                 * a synthetic parameter is created which cannot be mapped to a field or method parameter
+                                 */
+                                if (!isPathMatrixObject(parameter)) {
+                                    // in all other cases paramRef should be set
+                                    String pRef = opRef + ", " + parameter.getIn() + ": " + parameter.getName();
+                                    Assertions.assertNotNull(Extensions.getParamRef(parameter), "paramRef: " + pRef);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isPathMatrixObject(org.eclipse.microprofile.openapi.models.parameters.Parameter parameter) {
+        return parameter.getIn() == org.eclipse.microprofile.openapi.models.parameters.Parameter.In.PATH
+                && parameter.getStyle() == org.eclipse.microprofile.openapi.models.parameters.Parameter.Style.MATRIX
+                && parameter.getSchema() != null && parameter.getSchema().getType() != null
+                && parameter.getSchema().getType().equals(
+                        Collections.singletonList(org.eclipse.microprofile.openapi.models.media.Schema.SchemaType.OBJECT));
+    }
 
     private static void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
         Index index = indexOf(classes);
@@ -163,10 +204,12 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testFailOnDuplicateOperationIds() {
-        final OpenApiConfig config = failOnDuplicateOperationIdsConfig();
         final IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> test(config, "params.multiple-content-types-with-form-params.json",
-                        MultipleContentTypesWithFormParamsTestResource.class, Widget.class));
+                () -> test(
+                        dynamicConfig(DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.name()),
+                        "params.multiple-content-types-with-form-params.json",
+                        MultipleContentTypesWithFormParamsTestResource.class,
+                        Widget.class));
         assertStartsWith(exception.getMessage(), "SROAP07950: Duplicate operationId:", "Exception message");
     }
 

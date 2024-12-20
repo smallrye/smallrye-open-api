@@ -63,6 +63,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
@@ -312,8 +313,7 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             final MethodInfo method) {
         Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
         return VertxParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader,
-                context.getExtensions());
+                method, reader);
     }
 
     /**
