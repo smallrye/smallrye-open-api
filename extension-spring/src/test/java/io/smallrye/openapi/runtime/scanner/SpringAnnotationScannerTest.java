@@ -16,8 +16,10 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerA
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt2;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerMultiplePaths;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
 import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerMultiplePaths;
 
 /**
  * Basic Spring annotation scanning
@@ -116,6 +118,23 @@ class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase {
     }
 
     /**
+     * This tests multiple paths
+     *
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    void testMultiplePathsPostSpringDefinitionScanningAlt() throws IOException, JSONException {
+        Index i = indexOf(GreetingPostControllerMultiplePaths.class, Greeting.class, GreetingParam.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testMultiplePathsSpringPostDefinitionScanning.json", result);
+    }
+
+    /**
      * This test a basic, no OpenApi annotations, hello world service
      *
      * @throws IOException
@@ -185,6 +204,23 @@ class SpringAnnotationScannerTest extends SpringDataObjectScannerTestBase {
 
         printToConsole(result);
         assertJsonEquals("resource.testBasicSpringPutDefinitionScanning.json", result);
+    }
+
+    /**
+     * This tests multiple paths
+     *
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    void testMultiplePathsPutSpringDefinitionScanningAlt() throws IOException, JSONException {
+        Index i = indexOf(GreetingPutControllerMultiplePaths.class, Greeting.class, GreetingParam.class);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), i);
+
+        OpenAPI result = scanner.scan();
+
+        printToConsole(result);
+        assertJsonEquals("resource.testMultiplePathsSpringPutDefinitionScanning.json", result);
     }
 
     /**

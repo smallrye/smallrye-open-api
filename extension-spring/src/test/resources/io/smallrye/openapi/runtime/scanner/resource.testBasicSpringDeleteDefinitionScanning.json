@@ -67,6 +67,46 @@
           "oauth" : [ "roles:removal" ]
         } ]
       }
+    },
+    "/greeting/multipleGreet1/{id}" : {
+      "delete" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ "roles:removal" ]
+        } ]
+      }
+    },
+    "/greeting/multipleGreet2/{id}" : {
+      "delete" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ "roles:removal" ]
+        } ]
+      }
     }
   }
 }
