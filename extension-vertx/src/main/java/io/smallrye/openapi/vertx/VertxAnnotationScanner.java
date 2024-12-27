@@ -294,7 +294,9 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = super.makePath(params.getOperationPath());
+        List<String> operationPaths = params.getOperationPaths();
+        boolean isOperationPathsEmpty = operationPaths == null || operationPaths.isEmpty();
+        String path = super.makePath(!isOperationPathsEmpty ? operationPaths.get(0) : null);
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);

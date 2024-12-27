@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -107,12 +108,15 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
                     readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
                 } else if (frameworkParam.style == Style.MATRIX) {
                     // Store the @MatrixParam for later processing
-                    String pathSegment = beanParamAnnotation != null
-                            ? lastPathSegmentOf(beanParamAnnotation.target())
-                            : lastPathSegmentOf(target);
+                    List<String> pathSegments = beanParamAnnotation != null
+                            ? lastPathSegmentsOf(beanParamAnnotation.target())
+                            : lastPathSegmentsOf(target);
 
-                    matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
-                            .put(paramName(annotation), annotation);
+                    for (String pathSegment : pathSegments) {
+                        matrixParams
+                                .computeIfAbsent(pathSegment, k -> new HashMap<>())
+                                .put(paramName(annotation), annotation);
+                    }
 
                     // Do this in Spring ?
                     //}else if (frameworkParam.location == In.PATH && targetType != null
@@ -168,7 +172,7 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
     }
 
     @Override
-    protected String pathOf(AnnotationTarget target) {
+    protected List<String> pathsOf(AnnotationTarget target) {
         AnnotationInstance path = null;
         Set<DotName> paths = SpringConstants.HTTP_METHODS;
 
@@ -190,19 +194,24 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
         }
 
         if (path != null) {
-            String pathValue = requestMappingValuesToPath(path);
-            if (pathValue.startsWith("/")) {
-                pathValue = pathValue.substring(1);
-            }
+            List<String> pathValues = requestMappingValuesToPath(path);
 
-            if (pathValue.endsWith("/")) {
-                pathValue = pathValue.substring(0, pathValue.length() - 1);
-            }
+            return pathValues.stream()
+                    .map(pathValue -> {
+                        if (pathValue.startsWith("/")) {
+                            pathValue = pathValue.substring(1);
+                        }
 
-            return pathValue;
+                        if (pathValue.endsWith("/")) {
+                            pathValue = pathValue.substring(0, pathValue.length() - 1);
+                        }
+
+                        return pathValue;
+                    })
+                    .collect(Collectors.toList());
         }
 
-        return "";
+        return List.of("");
     }
 
     static boolean mappingHasPath(AnnotationInstance mappingAnnotation) {
@@ -215,16 +224,12 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
      * @param requestMappingAnnotation
      * @return
      */
-    static String requestMappingValuesToPath(AnnotationInstance requestMappingAnnotation) {
-        StringBuilder sb = new StringBuilder();
+    static List<String> requestMappingValuesToPath(AnnotationInstance requestMappingAnnotation) {
         AnnotationValue value = getRequestMappingPathAnnotation(requestMappingAnnotation);
-        if (value != null) {
-            String[] parts = value.asStringArray();
-            for (String part : parts) {
-                sb.append(part);
-            }
+        if (value == null) {
+            return Collections.emptyList();
         }
-        return sb.toString();
+        return List.of(value.asStringArray());
     }
 
     static AnnotationValue getRequestMappingPathAnnotation(AnnotationInstance requestMappingAnnotation) {

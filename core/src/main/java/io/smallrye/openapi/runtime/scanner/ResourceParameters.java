@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.media.Content;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -50,10 +51,10 @@ public class ResourceParameters {
 
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern.compile("\\{(\\w[\\w\\.-]*)\\}");
 
-    private String pathItemPath;
+    private List<String> pathItemPaths;
     private List<Parameter> pathItemParameters;
 
-    private String operationPath;
+    private List<String> operationPaths;
     private List<Parameter> operationParameters;
 
     private Content formBodyContent;
@@ -62,12 +63,14 @@ public class ResourceParameters {
         return pathItemParameters;
     }
 
-    public String getOperationPath() {
-        return operationPath;
+    public List<String> getOperationPaths() {
+        return operationPaths;
     }
 
-    public String getFullOperationPath() {
-        return pathItemPath + operationPath;
+    public List<String> getFullOperationPaths() {
+        return pathItemPaths.stream()
+                .flatMap(pathItemPath -> operationPaths.stream().map(operationPath -> pathItemPath + operationPath))
+                .collect(Collectors.toList());
     }
 
     public List<Parameter> getOperationParameters() {
@@ -107,16 +110,16 @@ public class ResourceParameters {
         return all;
     }
 
-    public void setPathItemPath(String pathItemPath) {
-        this.pathItemPath = pathItemPath;
+    public void setPathItemPaths(List<String> pathItemPaths) {
+        this.pathItemPaths = pathItemPaths;
     }
 
     public void setPathItemParameters(List<Parameter> pathItemParameters) {
         this.pathItemParameters = pathItemParameters;
     }
 
-    public void setOperationPath(String operationPath) {
-        this.operationPath = operationPath;
+    public void setOperationPaths(List<String> operationPaths) {
+        this.operationPaths = operationPaths;
     }
 
     public void setOperationParameters(List<Parameter> operationParameters) {
@@ -139,7 +142,10 @@ public class ResourceParameters {
     }
 
     public List<String> getPathParameterTemplateNames() {
-        return getPathParameterTemplateName(this.pathItemPath, this.operationPath);
+        return pathItemPaths.stream()
+                .flatMap(pathItemPath -> operationPaths.stream()
+                        .flatMap(operationPath -> getPathParameterTemplateName(pathItemPath, operationPath).stream()))
+                .collect(Collectors.toList());
     }
 
     private static List<String> getPathParameterTemplateName(String... paths) {

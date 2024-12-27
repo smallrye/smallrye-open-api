@@ -188,10 +188,11 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
             readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
         } else if (frameworkParam.style == Style.MATRIX) {
             // Store the @MatrixParam for later processing
-            String pathSegment = beanParamAnnotation != null
-                    ? lastPathSegmentOf(beanParamAnnotation.target())
-                    : lastPathSegmentOf(target);
-
+            List<String> pathSegments = beanParamAnnotation != null
+                    ? lastPathSegmentsOf(beanParamAnnotation.target())
+                    : lastPathSegmentsOf(target);
+            boolean isPathSegmentsEmpty = pathSegments == null || pathSegments.isEmpty();
+            String pathSegment = !isPathSegmentsEmpty ? pathSegments.get(0) : null;
             matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
                     .put(paramName(annotation), annotation);
         } else if (frameworkParam.location == In.PATH && targetType != null
@@ -225,7 +226,7 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     @Override
-    protected String pathOf(AnnotationTarget target) {
+    protected List<String> pathsOf(AnnotationTarget target) {
 
         AnnotationInstance path = null;
         String pathValue = null;
@@ -255,10 +256,10 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
                 pathValue = pathValue.substring(0, pathValue.length() - 1);
             }
 
-            return pathValue;
+            return List.of(pathValue);
         }
 
-        return "";
+        return List.of("");
     }
 
     AnnotationInstance pathOf(MethodInfo method) {
