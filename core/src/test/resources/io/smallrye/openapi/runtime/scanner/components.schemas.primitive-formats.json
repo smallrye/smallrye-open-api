@@ -1,0 +1,36 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "bint8" : {
+            "type" : "integer",
+            "format" : "int8"
+          },
+          "sint16" : {
+            "type" : "integer",
+            "format" : "int16"
+          },
+          "iint32" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "lint64" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "cchar" : {
+            "type" : "string",
+            "format" : "char"
+          },
+          "babinary" : {
+            "type" : "string",
+            "format" : "binary"
+          }
+        }
+      }
+    }
+  }
+}

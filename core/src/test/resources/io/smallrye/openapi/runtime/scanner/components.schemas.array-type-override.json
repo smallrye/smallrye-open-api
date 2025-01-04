@@ -8,14 +8,14 @@
           "arrayFromSchema": {
             "type": "array",
             "items": {
-              "format": "byte",
+              "format": "char",
               "type": "string"
             }
           },
           "arrayFromType": {
             "type": "array",
             "items": {
-              "format": "byte",
+              "format": "char",
               "type": "string"
             }
           },

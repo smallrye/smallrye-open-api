@@ -872,4 +872,20 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertJsonEquals("components.schemas.example-not-merged.json",
                 scan(config(SmallRyeOASConfig.SMALLRYE_MERGE_SCHEMA_EXAMPLES, "false"), null, new Class[] { DTO.class }));
     }
+
+    @Test
+    void testPrimitiveFormats() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        @SuppressWarnings("unused")
+        class Bean {
+            byte bint8;
+            short sint16;
+            int iint32;
+            long lint64;
+            char cchar;
+            byte[] babinary;
+        }
+
+        assertJsonEquals("components.schemas.primitive-formats.json", Bean.class);
+    }
 }

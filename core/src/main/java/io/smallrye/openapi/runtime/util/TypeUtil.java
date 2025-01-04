@@ -56,8 +56,7 @@ public class TypeUtil {
     private static final TypeWithFormat ANY = TypeWithFormat.anyType().build();
     private static final TypeWithFormat STRING_FORMAT = TypeWithFormat.of(SchemaType.STRING).build();
     private static final TypeWithFormat BINARY_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BINARY).build();
-    private static final TypeWithFormat BYTE_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
-    private static final TypeWithFormat CHAR_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.BYTE).build();
+    private static final TypeWithFormat CHAR_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.CHAR).build();
     private static final TypeWithFormat UUID_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.UUID)
             .pattern(UUID_PATTERN).build();
     private static final TypeWithFormat URI_FORMAT = TypeWithFormat.of(SchemaType.STRING).format(DataFormat.URI).build();
@@ -68,7 +67,8 @@ public class TypeUtil {
     private static final TypeWithFormat BIGINTEGER_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).build();
     private static final TypeWithFormat INTEGER_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).format(DataFormat.INT32).build();
     private static final TypeWithFormat LONG_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).format(DataFormat.INT64).build();
-    private static final TypeWithFormat SHORT_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).build();
+    private static final TypeWithFormat SHORT_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).format(DataFormat.INT16).build();
+    private static final TypeWithFormat BYTE_FORMAT = TypeWithFormat.of(SchemaType.INTEGER).format(DataFormat.INT8).build();
     private static final TypeWithFormat BOOLEAN_FORMAT = TypeWithFormat.of(SchemaType.BOOLEAN).build();
     // SPECIAL FORMATS
     private static final TypeWithFormat ARRAY_FORMAT = TypeWithFormat.of(SchemaType.ARRAY).build();
@@ -122,10 +122,6 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(java.net.URI.class.getName()), URI_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.net.URL.class.getName()), STRING_FORMAT);
         TYPE_MAP.put(DotName.createSimple(java.util.UUID.class.getName()), UUID_FORMAT);
-
-        // B64 String
-        TYPE_MAP.put(DotName.createSimple(Byte.class.getName()), BYTE_FORMAT);
-        TYPE_MAP.put(DotName.createSimple(byte.class.getName()), BYTE_FORMAT);
         TYPE_MAP.put(DotName.createSimple(Character.class.getName()), CHAR_FORMAT);
         TYPE_MAP.put(DotName.createSimple(char.class.getName()), CHAR_FORMAT);
 
@@ -153,6 +149,8 @@ public class TypeUtil {
         TYPE_MAP.put(DotName.createSimple(long.class.getName()), LONG_FORMAT);
         TYPE_MAP.put(DotName.createSimple(Short.class.getName()), SHORT_FORMAT);
         TYPE_MAP.put(DotName.createSimple(short.class.getName()), SHORT_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(Byte.class.getName()), BYTE_FORMAT);
+        TYPE_MAP.put(DotName.createSimple(byte.class.getName()), BYTE_FORMAT);
 
         // Boolean
         TYPE_MAP.put(DotName.createSimple(Boolean.class.getName()), BOOLEAN_FORMAT);
@@ -882,12 +880,14 @@ public class TypeUtil {
     }
 
     private static class DataFormat {
+        static final String INT8 = "int8";
+        static final String INT16 = "int16";
         static final String INT32 = "int32";
         static final String INT64 = "int64";
         static final String FLOAT = "float";
         static final String DOUBLE = "double";
         static final String BINARY = "binary";
-        static final String BYTE = "byte";
+        static final String CHAR = "char";
         static final String DATE = "date";
         static final String DATE_TIME = "date-time";
         static final String DURATION = "duration";
