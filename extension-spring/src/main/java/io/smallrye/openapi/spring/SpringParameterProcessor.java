@@ -44,8 +44,10 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
 
     private SpringParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
-            Function<AnnotationInstance, Parameter> reader) {
-        super(scannerContext, contextPath, reader, scannerContext.getExtensions());
+            Function<AnnotationInstance, Parameter> reader,
+            ClassInfo resourceClass,
+            MethodInfo resourceMethod) {
+        super(scannerContext, contextPath, reader, resourceClass, resourceMethod);
     }
 
     /**
@@ -70,8 +72,9 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
             MethodInfo resourceMethod,
             Function<AnnotationInstance, Parameter> reader) {
 
-        SpringParameterProcessor processor = new SpringParameterProcessor(context, contextPath, reader);
-        return processor.process(resourceClass, resourceMethod);
+        SpringParameterProcessor processor = new SpringParameterProcessor(context, contextPath, reader, resourceClass,
+                resourceMethod);
+        return processor.process();
     }
 
     @Override
