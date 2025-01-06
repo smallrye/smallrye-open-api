@@ -185,6 +185,11 @@ public class TypeResolver {
         }
     }
 
+    private void replaceResolutionStack(Deque<Map<String, Type>> replacementStack) {
+        resolutionStack.clear();
+        resolutionStack.addAll(replacementStack);
+    }
+
     /**
      * Get the declaring class of the annotation target.
      *
@@ -525,10 +530,7 @@ public class TypeResolver {
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
             Type currentType = entry.getValue();
-
-            if (currentType.kind() == Type.Kind.PARAMETERIZED_TYPE) {
-                stack.push(buildParamTypeResolutionMap(currentClass, currentType));
-            }
+            maybeAddResolutionParams(stack, currentType, currentClass);
 
             if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isAllOf(context, leafKlazz, currentType))
                     || TypeUtil.knownJavaType(currentClass.name())) {
@@ -556,7 +558,11 @@ public class TypeResolver {
             index.interfaces(currentClass)
                     .stream()
                     .filter(type -> !TypeUtil.knownJavaType(type.name()))
-                    .map(index::getClass)
+                    .map(type -> {
+                        ClassInfo clazz = index.getClass(type);
+                        maybeAddResolutionParams(stack, type, clazz);
+                        return clazz;
+                    })
                     .filter(Objects::nonNull)
                     .flatMap(clazz -> methods(context, clazz).stream())
                     .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
@@ -576,6 +582,12 @@ public class TypeResolver {
         }
 
         return sorted(context, properties, chain.keySet());
+    }
+
+    private static void maybeAddResolutionParams(Deque<Map<String, Type>> stack, Type type, ClassInfo clazz) {
+        if (type.kind() == Type.Kind.PARAMETERIZED_TYPE && clazz != null) {
+            stack.push(buildParamTypeResolutionMap(clazz, type));
+        }
     }
 
     private static List<MethodInfo> methods(AnnotationScannerContext context, ClassInfo currentClass) {
@@ -935,9 +947,10 @@ public class TypeResolver {
 
         if (properties.containsKey(propertyName)) {
             resolver = properties.get(propertyName);
+            Type resolvedPropertyType = getResolvedType(propertyType, stack);
 
             // Only store the accessor/mutator methods if the type of property matches
-            if (!TypeUtil.equalTypes(resolver.getUnresolvedType(), propertyType)) {
+            if (!TypeUtil.equalTypes(resolver.resolveType(), resolvedPropertyType)) {
                 return resolver;
             }
         } else {
@@ -951,10 +964,12 @@ public class TypeResolver {
         if (isWriteMethod) {
             if (isHigherPriority(resolver.targetComparator, method, resolver.getWriteMethod())) {
                 resolver.setWriteMethod(method);
+                resolver.replaceResolutionStack(stack);
             }
         } else {
             if (isHigherPriority(resolver.targetComparator, method, resolver.getReadMethod())) {
                 resolver.setReadMethod(method);
+                resolver.replaceResolutionStack(stack);
             }
         }
 
