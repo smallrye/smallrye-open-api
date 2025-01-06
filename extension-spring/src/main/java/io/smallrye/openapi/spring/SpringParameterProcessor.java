@@ -20,7 +20,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
@@ -46,8 +45,9 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
     private SpringParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
             Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, contextPath, reader, extensions);
+            ClassInfo resourceClass,
+            MethodInfo resourceMethod) {
+        super(scannerContext, contextPath, reader, resourceClass, resourceMethod);
     }
 
     /**
@@ -63,7 +63,6 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
      *        Spring HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
-     * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
@@ -71,11 +70,11 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
             String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
+            Function<AnnotationInstance, Parameter> reader) {
 
-        SpringParameterProcessor processor = new SpringParameterProcessor(context, contextPath, reader, extensions);
-        return processor.process(resourceClass, resourceMethod);
+        SpringParameterProcessor processor = new SpringParameterProcessor(context, contextPath, reader, resourceClass,
+                resourceMethod);
+        return processor.process();
     }
 
     @Override
