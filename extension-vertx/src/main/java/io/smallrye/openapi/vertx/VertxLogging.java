@@ -1,5 +1,7 @@
 package io.smallrye.openapi.vertx;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
@@ -7,7 +9,7 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface VertxLogging {
-    VertxLogging log = Logger.getMessageLogger(VertxLogging.class, VertxLogging.class.getPackage().getName());
+    VertxLogging log = Logger.getMessageLogger(lookup(), VertxLogging.class, VertxLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.WARN)
     @Message(id = 14000, value = "Ignoring %s annotation that is not on a method")

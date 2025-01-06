@@ -21,7 +21,7 @@ public class GreetingDeleteRoute {
     // 1) Basic path var test
     @Route(path = "/greet/:id", methods = HttpMethod.DELETE)
     public void greet(@Param("id") String id) {
-
+        // No-op
     }
 
 }

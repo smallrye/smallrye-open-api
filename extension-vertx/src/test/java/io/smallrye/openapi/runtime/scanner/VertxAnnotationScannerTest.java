@@ -3,7 +3,6 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 
 import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.jboss.jandex.Index;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,13 @@ import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutRoute;
  *
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
-class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
+class VertxAnnotationScannerTest extends IndexScannerTestBase {
+
+    void test(String expectedResource, Class<?>... classes) throws IOException, JSONException {
+        OpenAPI result = scan(classes);
+        printToConsole(result);
+        assertJsonEquals(expectedResource, result);
+    }
 
     /**
      * This test a basic, no OpenApi annotations, hello world service
@@ -28,13 +33,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
      */
     @Test
     void testBasicGetRouteDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingGetRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicRouteGetDefinitionScanning.json", result);
+        test("resource.testBasicRouteGetDefinitionScanning.json", GreetingGetRoute.class, Greeting.class);
     }
 
     /**
@@ -45,13 +44,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
      */
     @Test
     void testBasicPostRouteDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingPostRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicRoutePostDefinitionScanning.json", result);
+        test("resource.testBasicRoutePostDefinitionScanning.json", GreetingPostRoute.class, Greeting.class);
     }
 
     /**
@@ -62,13 +55,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
      */
     @Test
     void testBasicPutRouteDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingPutRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicRoutePutDefinitionScanning.json", result);
+        test("resource.testBasicRoutePutDefinitionScanning.json", GreetingPutRoute.class, Greeting.class);
     }
 
     /**
@@ -79,13 +66,7 @@ class VertxAnnotationScannerTest extends VertxDataObjectScannerTestBase {
      */
     @Test
     void testBasicDeleteRouteDefinitionScanning() throws IOException, JSONException {
-        Index i = indexOf(GreetingDeleteRoute.class, Greeting.class);
-        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(failOnDuplicateOperationIdsConfig(), i);
-
-        OpenAPI result = scanner.scan();
-
-        printToConsole(result);
-        assertJsonEquals("resource.testBasicRouteDeleteDefinitionScanning.json", result);
+        test("resource.testBasicRouteDeleteDefinitionScanning.json", GreetingDeleteRoute.class, Greeting.class);
     }
 
 }
