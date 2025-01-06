@@ -452,7 +452,8 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
-          }
+          },
+          "description" : "The name"
         } ],
         "responses" : {
           "200" : {

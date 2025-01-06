@@ -7,6 +7,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import io.quarkus.vertx.web.Body;
+import io.quarkus.vertx.web.Header;
 import io.quarkus.vertx.web.Route;
 import io.quarkus.vertx.web.Route.HttpMethod;
 import io.quarkus.vertx.web.RouteBase;
@@ -20,7 +21,7 @@ import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 @ApplicationScoped
-@RouteBase(path = "greeting", consumes = "application/json", produces = "application/json")
+@RouteBase(path = "greeting/", consumes = "application/json", produces = "application/json")
 public class GreetingPostRoute {
 
     // 1) Basic path var test
@@ -36,4 +37,9 @@ public class GreetingPostRoute {
         //
     }
 
+    // 3) Header parameter
+    @Route(path = "/greetWithHeader", methods = HttpMethod.POST)
+    public Greeting greetWithResponse(@Body Greeting greeting, @Header String language) {
+        return greeting;
+    }
 }

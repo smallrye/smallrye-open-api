@@ -52,6 +52,39 @@
                     }
                 }
             }
+        },
+        "/greeting/greetWithHeader": {
+            "post": {
+                "parameters": [{
+                    "name": "language",
+                    "in": "header",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Greeting"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Greeting"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {

@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import io.quarkus.vertx.web.Param;
@@ -44,15 +45,16 @@ public class GreetingGetRoute {
         return Arrays.asList(new Greeting("Hello " + name));
     }
 
-    // 3) Basic path var with Optional test
+    // 3) Basic path var with Optional test, name of parameter taken from argument name
     @Route(path = "/helloOptional/:name", methods = HttpMethod.GET)
-    public Optional<Greeting> helloOptional(HttpServerRequest httpServerRequest, @Param("name") String name) {
+    public Optional<Greeting> helloOptional(HttpServerRequest httpServerRequest, @Param String name) {
         return Optional.of(new Greeting("Hello " + name));
     }
 
     // 4) Basic request param test
     @Route(path = "/helloRequestParam", methods = HttpMethod.GET)
-    public Greeting helloRequestParam(HttpServerResponse httpServerResponse, @Param("name") String name) {
+    public Greeting helloRequestParam(HttpServerResponse httpServerResponse,
+            @Parameter(description = "The name") @Param("name") String name) {
         return new Greeting("Hello " + name);
     }
 
