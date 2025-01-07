@@ -41,6 +41,8 @@ public class IndexHtmlCreator {
         addOAuthSection(options);
         // Add Preauth section
         addPreauthorizeSection(options);
+        // Add any custom scripts
+        addScripts(options);
 
         try (InputStream input = IndexHtmlCreator.class.getClassLoader()
                 .getResourceAsStream("META-INF/resources/template/index.html");
@@ -232,6 +234,22 @@ public class IndexHtmlCreator {
         }
     }
 
+    private static void addScripts(Map<Option, String> options) {
+        if (options.containsKey(Option.scripts)) {
+            String[] scripts = options.get(Option.scripts).split(COMMA);
+            try (StringWriter sw = new StringWriter()) {
+                for (String script : scripts) {
+                    sw.write("<script src=\"" + script.trim() + "\"></script>\n");
+                }
+                String scriptsSection = sw.toString();
+
+                options.put(Option.scriptsSection, scriptsSection);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
     private static void addUrlSection(Map<String, String> urls, String urlsPrimaryName, Map<Option, String> options) {
         // If you added a urlSection, we assume you know what you are doing
         if (!options.containsKey(Option.urlSection)) {
@@ -284,12 +302,12 @@ public class IndexHtmlCreator {
     private static final String VAR_END = "}";
 
     private static final Map<Option, String> DEFAULT_OPTIONS = new HashMap<>();
-    private static final String DEFAULT_URLS_PRIMARY_NAME = "Default";
+    private static final String COMMA = ",";
     private static final String URL_FORMAT = "url: '%s'";
     private static final String URLS_ENTRY_FORMAT = "{url: \"%s\", name: \"%s\"}";
 
     static {
-
+        DEFAULT_OPTIONS.put(Option.scriptsSection, null);
         DEFAULT_OPTIONS.put(Option.url, "/openapi");
         DEFAULT_OPTIONS.put(Option.title, "SmallRye OpenAPI UI");
         DEFAULT_OPTIONS.put(Option.selfHref, "/openapi-ui");
