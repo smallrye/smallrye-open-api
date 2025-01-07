@@ -69,11 +69,9 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public abstract class AbstractParameterProcessor {
 
+    protected static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
     private static Set<DotName> openApiParameterAnnotations = new HashSet<>(
             Arrays.asList(Names.PARAMETER, Names.PARAMETERS));
-
-    protected static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
-
     protected final AnnotationScannerContext scannerContext;
     protected final String contextPath;
     protected final IndexView index;
@@ -110,112 +108,6 @@ public abstract class AbstractParameterProcessor {
     private Set<String> processedMatrixSegments = new HashSet<>();
     private List<Parameter> preferredOrder;
 
-    /**
-     * Used for collecting and merging any scanned {@link Parameter} annotations
-     * with the framework-specific parameter annotations. After scanning, this object may
-     * contain either the MP-OAI annotation information, the framework's annotation
-     * information, or both.
-     *
-     * @author Michael Edgar {@literal <michael@xlate.io>}
-     */
-    protected static class ParameterContext {
-        protected String name;
-        protected In location;
-        protected Style style;
-        protected Parameter oaiParam;
-        protected FrameworkParameter frameworkParam;
-        protected Object defaultValue;
-        protected AnnotationTarget target;
-        protected Type targetType;
-
-        ParameterContext() {
-        }
-
-        public ParameterContext(String name, FrameworkParameter frameworkParam, AnnotationTarget target, Type targetType) {
-            this.name = name;
-            this.location = frameworkParam.location;
-            this.style = frameworkParam.style;
-            this.frameworkParam = frameworkParam;
-            this.target = target;
-            this.targetType = targetType;
-        }
-
-        @Override
-        public String toString() {
-            return "name: " + name + "; in: " + location + "; target: " + target;
-        }
-    }
-
-    /**
-     * Key used to store {@link ParameterContext} objects in a map sorted by {@link In},
-     * then by name, nulls first.
-     *
-     * @author Michael Edgar {@literal <michael@xlate.io>}
-     *
-     */
-    protected static class ParameterContextKey {
-        final String name;
-        final In location;
-        final Style style;
-        final String ref;
-
-        public ParameterContextKey(String name, In location, Style style) {
-            this.name = name;
-            this.location = location;
-            this.style = style;
-            this.ref = null;
-        }
-
-        public ParameterContextKey(Parameter oaiParam) {
-            this.name = oaiParam.getName();
-            this.location = oaiParam.getIn();
-            this.style = styleOf(oaiParam);
-            this.ref = oaiParam.getRef();
-        }
-
-        public ParameterContextKey(ParameterContext context) {
-            this.name = context.name;
-            this.location = context.location;
-            this.style = context.style;
-            this.ref = context.oaiParam != null ? context.oaiParam.getRef() : null;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof ParameterContextKey) {
-                ParameterContextKey other = (ParameterContextKey) obj;
-
-                if (isNull() && other.isNull()) {
-                    return this == other;
-                }
-
-                if (ref != null) {
-                    return ref.equals(other.ref);
-                }
-
-                return Objects.equals(this.name, other.name) &&
-                        Objects.equals(this.location, other.location) &&
-                        Objects.equals(this.style, other.style);
-            }
-
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return isNull() ? super.hashCode() : Objects.hash(name, location, style, ref);
-        }
-
-        @Override
-        public String toString() {
-            return "name: " + name + "; in: " + location + "; style: " + style + "; ref: " + ref;
-        }
-
-        public boolean isNull() {
-            return name == null && location == null && style == null && ref == null;
-        }
-    }
-
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
             Function<AnnotationInstance, Parameter> reader,
@@ -226,6 +118,170 @@ public abstract class AbstractParameterProcessor {
         this.readerFunction = reader;
         this.extensions = extensions;
         this.beanValidationScanner = scannerContext.getBeanValidationScanner();
+    }
+
+    /**
+     * Check if the given parameter name is present as a path segment in the resourcePath.
+     *
+     * @param paramName name of parameter
+     * @param paramStyle style of parameter, e.g. simple or matrix
+     * @param resourcePath resource path/URL
+     * @return true if the paramName is in the resourcePath, false otherwise.
+     */
+    static boolean parameterInPath(String paramName, Style paramStyle, String resourcePath) {
+        if (paramName == null || resourcePath == null) {
+            return true;
+        }
+
+        final String regex;
+
+        if (Style.MATRIX.equals(paramStyle)) {
+            regex = String.format("(?:\\{[ \\t]*|^|/?)\\Q%s\\E(?:[ \\t]*(?:}|:)|/?|$)", paramName);
+        } else {
+            regex = String.format("\\{[ \\t]*\\Q%s\\E[ \\t]*(?:}|:)", paramName);
+        }
+
+        return Pattern.compile(regex).matcher(resourcePath).find();
+    }
+
+    /**
+     * Check if the given parameter name is present as a path segment in the resourcePath.
+     *
+     * @param paramName name of parameter
+     * @param paramStyle style of parameter, e.g. simple or matrix
+     * @param resourcePath resource path/URL
+     * @return true if the paramName is in the resourcePath, false otherwise.
+     */
+    static boolean parameterInPaths(String paramName, Style paramStyle, List<String> resourcePaths) {
+        return resourcePaths.stream()
+                .anyMatch(resourcePath -> parameterInPath(paramName, paramStyle, resourcePath));
+    }
+
+    /**
+     * Retrieves either the provided parameter {@link Parameter.Style}, the default
+     * style of the parameter based on the <code>in</code> attribute, or null if <code>in</code> is not defined.
+     *
+     * @param param the {@link Parameter}
+     * @return the param's style, the default style defined based on <code>in</code>, or null if <code>in</code> is not defined.
+     */
+    protected static Style styleOf(Parameter param) {
+        if (param.getStyle() != null) {
+            return param.getStyle();
+        }
+
+        if (param.getIn() != null) {
+            switch (param.getIn()) {
+                case COOKIE:
+                case QUERY:
+                    return Style.FORM;
+                case HEADER:
+                case PATH:
+                    return Style.SIMPLE;
+                default:
+                    break;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the "value" parameter from annotation to be used as the name.
+     * If no value was specified or an empty value, return the name of the annotation
+     * target.
+     *
+     * @param annotation parameter annotation
+     * @return the name of the parameter
+     */
+    protected static String paramName(AnnotationInstance annotation) {
+        AnnotationValue value = annotation.value();
+        String valueString = null;
+
+        if (value != null) {
+            valueString = value.asString();
+            if (valueString.length() > 0) {
+                return valueString;
+            }
+        }
+
+        AnnotationTarget target = annotation.target();
+
+        switch (target.kind()) {
+            case FIELD:
+                valueString = target.asField().name();
+                break;
+            case METHOD_PARAMETER:
+                valueString = target.asMethodParameter().name();
+                break;
+            case METHOD:
+                // This is a bean property setter
+                MethodInfo method = target.asMethod();
+                if (method.parametersCount() == 1) {
+                    String methodName = method.name();
+
+                    if (methodName.startsWith("set")) {
+                        valueString = Introspector.decapitalize(methodName.substring(3));
+                    } else {
+                        valueString = methodName;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        return valueString;
+    }
+
+    /**
+     * Determines the type of the target. Method annotations will give
+     * the name of a single argument, assumed to be a "setter" method.
+     *
+     * @param target target object
+     * @return object type
+     */
+    protected static Type getType(AnnotationTarget target) {
+        if (target == null) {
+            return null;
+        }
+
+        Type type = null;
+
+        switch (target.kind()) {
+            case FIELD:
+                type = target.asField().type();
+                break;
+            case METHOD:
+                List<Type> methodParams = target.asMethod().parameterTypes();
+                if (methodParams.size() == 1) {
+                    // This is a bean property setter
+                    type = methodParams.get(0);
+                }
+                break;
+            case METHOD_PARAMETER:
+                type = target.asMethodParameter().method().parameterType(target.asMethodParameter().position());
+                break;
+            default:
+                break;
+        }
+
+        return type;
+    }
+
+    /**
+     * Obtain the MethodInfo associated with the annotation target.
+     *
+     * @param target annotated item. Only method and method parameter targets.
+     * @return the MethodInfo associated with the target, or null if target is not a method or parameter.
+     */
+    protected static MethodInfo targetMethod(AnnotationTarget target) {
+        if (target.kind() == Kind.METHOD) {
+            return target.asMethod();
+        }
+        if (target.kind() == Kind.METHOD_PARAMETER) {
+            return target.asMethodParameter().method();
+        }
+        return null;
     }
 
     protected void reset() {
@@ -293,8 +349,8 @@ public abstract class AbstractParameterProcessor {
          * Generate the path using the provided resource class, which may differ from the method's declaring
          * class - e.g. for inheritance.
          */
-        parameters.setPathItemPath(generatePath(resourceClass, allParameters));
-        parameters.setOperationPath(generatePath(resourceMethod, allParameters));
+        parameters.setPathItemPaths(generatePaths(resourceClass, allParameters));
+        parameters.setOperationPaths(generatePaths(resourceMethod, allParameters));
 
         parameters.getPathParameterTemplateNames()
                 .stream()
@@ -311,18 +367,24 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Generate the path for the provided annotation target, either a class or a method.
+     * Generate the paths for the provided annotation target, either a class or a method.
      * Add the name of any discovered matrix parameters.
      *
      * @param target the target (either class or method)
      * @param parameters list of all parameters processed
-     * @return the path for the target
+     * @return the paths for the target
      */
-    protected String generatePath(AnnotationTarget target, List<Parameter> parameters) {
-        final StringBuilder path = new StringBuilder(pathOf(target));
+    protected List<String> generatePaths(AnnotationTarget target, List<Parameter> parameters) {
+        return pathsOf(target).stream()
+                .map(path -> generatePath(path, parameters))
+                .collect(Collectors.toList());
+    }
 
-        if (path.length() > 0) {
-            path.insert(0, '/');
+    private String generatePath(String path, List<Parameter> parameters) {
+        final StringBuilder pathBuilder = new StringBuilder(path);
+
+        if (pathBuilder.length() > 0) {
+            pathBuilder.insert(0, '/');
         }
 
         /*
@@ -330,7 +392,7 @@ public abstract class AbstractParameterProcessor {
          * is specified, extract the pattern and apply to the parameter's schema
          * if no pattern is otherwise specified and the parameter is a string.
          */
-        Matcher templateMatcher = getTemplateParameterPattern().matcher(path);
+        Matcher templateMatcher = getTemplateParameterPattern().matcher(pathBuilder);
 
         while (templateMatcher.find()) {
             String variableName = templateMatcher.group(1).trim();
@@ -342,16 +404,16 @@ public abstract class AbstractParameterProcessor {
                     .forEach(p -> p.getSchema().setPattern(variablePattern));
 
             String replacement = templateMatcher.replaceFirst('{' + variableName + '}');
-            path.setLength(0);
-            path.append(replacement);
+            pathBuilder.setLength(0);
+            pathBuilder.append(replacement);
 
-            templateMatcher = getTemplateParameterPattern().matcher(path);
+            templateMatcher = getTemplateParameterPattern().matcher(pathBuilder);
         }
 
         parameters.stream()
                 .filter(p -> Style.MATRIX.equals(p.getStyle()))
                 .filter(p -> !processedMatrixSegments.contains(p.getName()))
-                .filter(p -> path.indexOf(p.getName()) > -1)
+                .filter(p -> pathBuilder.indexOf(p.getName()) > -1)
                 .forEach(matrix -> {
                     String segmentName = matrix.getName();
                     processedMatrixSegments.add(segmentName);
@@ -359,24 +421,24 @@ public abstract class AbstractParameterProcessor {
                     String matrixRef = '{' + segmentName + '}';
                     int insertIndex = -1;
 
-                    if ((insertIndex = path.lastIndexOf(matrixRef)) > -1) {
+                    if ((insertIndex = pathBuilder.lastIndexOf(matrixRef)) > -1) {
                         insertIndex += matrixRef.length();
                         // Path already contains a variable of same name, the matrix must be renamed
                         String generatedName = segmentName + "Matrix";
                         matrix.setName(generatedName);
                         matrixRef = '{' + generatedName + '}';
-                    } else if ((insertIndex = path.lastIndexOf(segmentName)) > -1) {
+                    } else if ((insertIndex = pathBuilder.lastIndexOf(segmentName)) > -1) {
                         insertIndex += segmentName.length();
                     }
 
                     if (insertIndex > -1) {
-                        path.insert(insertIndex, matrixRef);
+                        pathBuilder.insert(insertIndex, matrixRef);
                     } else {
                         ScannerSPILogging.log.missingPathSegment(segmentName);
                     }
                 });
 
-        return path.toString();
+        return pathBuilder.toString();
     }
 
     protected abstract Pattern getTemplateParameterPattern();
@@ -878,7 +940,7 @@ public abstract class AbstractParameterProcessor {
             return true;
         }
 
-        if (paramIn == In.PATH && !parameterInPath(paramName, parameter.getStyle(), fullPathOf(resourceMethod))) {
+        if (paramIn == In.PATH && !parameterInPaths(paramName, parameter.getStyle(), fullPathsOf(resourceMethod))) {
             return true;
         }
 
@@ -893,30 +955,6 @@ public abstract class AbstractParameterProcessor {
             }
         }
         return false;
-    }
-
-    /**
-     * Check if the given parameter name is present as a path segment in the resourcePath.
-     *
-     * @param paramName name of parameter
-     * @param paramStyle style of parameter, e.g. simple or matrix
-     * @param resourcePath resource path/URL
-     * @return true if the paramName is in the resourcePath, false otherwise.
-     */
-    static boolean parameterInPath(String paramName, Style paramStyle, String resourcePath) {
-        if (paramName == null || resourcePath == null) {
-            return true;
-        }
-
-        final String regex;
-
-        if (Style.MATRIX.equals(paramStyle)) {
-            regex = String.format("(?:\\{[ \\t]*|^|/?)\\Q%s\\E(?:[ \\t]*(?:}|:)|/?|$)", paramName);
-        } else {
-            regex = String.format("\\{[ \\t]*\\Q%s\\E[ \\t]*(?:}|:)", paramName);
-        }
-
-        return Pattern.compile(regex).matcher(resourcePath).find();
     }
 
     /**
@@ -982,34 +1020,6 @@ public abstract class AbstractParameterProcessor {
             boolean overriddenParametersOnly);
 
     /**
-     * Retrieves either the provided parameter {@link Parameter.Style}, the default
-     * style of the parameter based on the <code>in</code> attribute, or null if <code>in</code> is not defined.
-     *
-     * @param param the {@link Parameter}
-     * @return the param's style, the default style defined based on <code>in</code>, or null if <code>in</code> is not defined.
-     */
-    protected static Style styleOf(Parameter param) {
-        if (param.getStyle() != null) {
-            return param.getStyle();
-        }
-
-        if (param.getIn() != null) {
-            switch (param.getIn()) {
-                case COOKIE:
-                case QUERY:
-                    return Style.FORM;
-                case HEADER:
-                case PATH:
-                    return Style.SIMPLE;
-                default:
-                    break;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Set this {@link AbstractParameterProcessor}'s formMediaType if it has not already
      * been set and the value is explicitly known for the parameter type.
      *
@@ -1020,54 +1030,6 @@ public abstract class AbstractParameterProcessor {
         if (frameworkParam.mediaType != null && this.formMediaType == null) {
             formMediaType = frameworkParam.mediaType;
         }
-    }
-
-    /**
-     * Retrieves the "value" parameter from annotation to be used as the name.
-     * If no value was specified or an empty value, return the name of the annotation
-     * target.
-     *
-     * @param annotation parameter annotation
-     * @return the name of the parameter
-     */
-    protected static String paramName(AnnotationInstance annotation) {
-        AnnotationValue value = annotation.value();
-        String valueString = null;
-
-        if (value != null) {
-            valueString = value.asString();
-            if (valueString.length() > 0) {
-                return valueString;
-            }
-        }
-
-        AnnotationTarget target = annotation.target();
-
-        switch (target.kind()) {
-            case FIELD:
-                valueString = target.asField().name();
-                break;
-            case METHOD_PARAMETER:
-                valueString = target.asMethodParameter().name();
-                break;
-            case METHOD:
-                // This is a bean property setter
-                MethodInfo method = target.asMethod();
-                if (method.parametersCount() == 1) {
-                    String methodName = method.name();
-
-                    if (methodName.startsWith("set")) {
-                        valueString = Introspector.decapitalize(methodName.substring(3));
-                    } else {
-                        valueString = methodName;
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-
-        return valueString;
     }
 
     protected Set<DotName> getDefaultAnnotationNames() {
@@ -1151,52 +1113,62 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Retrieves the last path segment of the full path associated with the target. If
-     * the last path segment contains a path variable name, returns the variable name.
+     * Retrieves all last path segments of all full paths associated with the target. If
+     * a last path segment contains a path variable name, it returns the variable name.
      *
      * @param target
-     * @return the last path segment of the target, or null if no path is defined
+     * @return the last path segments of the target, or null if no path is defined
      */
-    protected String lastPathSegmentOf(AnnotationTarget target) {
-        String fullPath = fullPathOf(target);
-        String lastSegment = null;
+    protected List<String> lastPathSegmentsOf(AnnotationTarget target) {
+        List<String> fullPaths = fullPathsOf(target);
+        List<String> lastSegments = null;
 
-        if (fullPath != null) {
-            lastSegment = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+        if (fullPaths != null && !fullPaths.isEmpty()) {
+            lastSegments = fullPaths.stream()
+                    .map(fullPath -> {
+                        String lastSegment = fullPath.substring(fullPath.lastIndexOf('/') + 1);
 
-            if (lastSegment.startsWith("{") && lastSegment.endsWith("}")) {
-                lastSegment = lastSegment.substring(1, lastSegment.length() - 1);
-            }
+                        if (lastSegment.startsWith("{") && lastSegment.endsWith("}")) {
+                            lastSegment = lastSegment.substring(1, lastSegment.length() - 1);
+                        }
+
+                        return lastSegment;
+                    })
+                    .collect(Collectors.toList());
         }
 
-        return lastSegment;
+        return lastSegments;
     }
 
     /**
-     * Find the full path of the target, including parent resources if the annotation target is a member of a sub-resource
-     * class. Method-level targets will include both the path to the resource and the path to the method joined with a '/'.
+     * Find the full paths of the target, including parent resources if the annotation target is a member of a sub-resource
+     * class. Method-level targets will include both the paths to the resource and the paths to the method joined with a '/'.
      *
      * @param target target item for which the path is being generated
-     * @return full path (excluding application path) of the target
+     * @return full paths (excluding application path) of the target
      */
-    protected String fullPathOf(AnnotationTarget target) {
-        String pathSegment = null;
+    protected List<String> fullPathsOf(AnnotationTarget target) {
+        List<String> pathSegments = null;
 
         switch (target.kind()) {
             case FIELD:
-                pathSegment = pathOf(target.asField().declaringClass());
+                pathSegments = pathsOf(target.asField().declaringClass());
                 break;
             case METHOD:
-                pathSegment = methodPath(target.asMethod());
+                pathSegments = methodPaths(target.asMethod());
                 break;
             case METHOD_PARAMETER:
-                pathSegment = methodPath(target.asMethodParameter().method());
+                pathSegments = methodPaths(target.asMethodParameter().method());
                 break;
             default:
                 break;
         }
 
-        return contextPath + '/' + pathSegment;
+        return Optional.ofNullable(pathSegments)
+                .orElse(List.of("null"))
+                .stream()
+                .map(pathSegment -> contextPath + '/' + pathSegment)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -1205,61 +1177,29 @@ public abstract class AbstractParameterProcessor {
      *
      * @param method the method annotated with the framework's path annotation
      */
-    String methodPath(MethodInfo method) {
-        String methodPath = pathOf(method);
-        String classPath = pathOf(method.declaringClass());
+    List<String> methodPaths(MethodInfo method) {
+        List<String> methodPaths = pathsOf(method);
+        List<String> classPaths = pathsOf(method.declaringClass());
 
-        if (methodPath.isEmpty()) {
-            return classPath;
+        if (methodPaths.isEmpty()) {
+            return classPaths;
         }
 
-        return classPath + '/' + methodPath;
+        return classPaths.stream()
+                .flatMap(classPath -> methodPaths.stream()
+                        .map(methodPath -> methodPath.isEmpty() ? classPath : classPath + '/' + methodPath))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Reads the framework's path annotation present on the
+     * Reads the framework's path annotations present on the
      * target and strips leading and trailing slashes.
      *
      * @param target target object
-     * @return value of the framework's path annotation without
+     * @return value of the framework's path annotations without
      *         leading/trailing slashes.
      */
-    protected abstract String pathOf(AnnotationTarget target);
-
-    /**
-     * Determines the type of the target. Method annotations will give
-     * the name of a single argument, assumed to be a "setter" method.
-     *
-     * @param target target object
-     * @return object type
-     */
-    protected static Type getType(AnnotationTarget target) {
-        if (target == null) {
-            return null;
-        }
-
-        Type type = null;
-
-        switch (target.kind()) {
-            case FIELD:
-                type = target.asField().type();
-                break;
-            case METHOD:
-                List<Type> methodParams = target.asMethod().parameterTypes();
-                if (methodParams.size() == 1) {
-                    // This is a bean property setter
-                    type = methodParams.get(0);
-                }
-                break;
-            case METHOD_PARAMETER:
-                type = target.asMethodParameter().method().parameterType(target.asMethodParameter().position());
-                break;
-            default:
-                break;
-        }
-
-        return type;
-    }
+    protected abstract List<String> pathsOf(AnnotationTarget target);
 
     protected boolean isReadableParameterAnnotation(DotName name) {
         return Names.PARAMETER.equals(name) && readerFunction != null;
@@ -1462,22 +1402,6 @@ public abstract class AbstractParameterProcessor {
     }
 
     /**
-     * Obtain the MethodInfo associated with the annotation target.
-     *
-     * @param target annotated item. Only method and method parameter targets.
-     * @return the MethodInfo associated with the target, or null if target is not a method or parameter.
-     */
-    protected static MethodInfo targetMethod(AnnotationTarget target) {
-        if (target.kind() == Kind.METHOD) {
-            return target.asMethod();
-        }
-        if (target.kind() == Kind.METHOD_PARAMETER) {
-            return target.asMethodParameter().method();
-        }
-        return null;
-    }
-
-    /**
      * Scans for class level parameters on the given class argument and its ancestors.
      *
      * @param clazz the class to be scanned for parameters.
@@ -1605,4 +1529,110 @@ public abstract class AbstractParameterProcessor {
     }
 
     protected abstract boolean isParameter(DotName annotationName);
+
+    /**
+     * Used for collecting and merging any scanned {@link Parameter} annotations
+     * with the framework-specific parameter annotations. After scanning, this object may
+     * contain either the MP-OAI annotation information, the framework's annotation
+     * information, or both.
+     *
+     * @author Michael Edgar {@literal <michael@xlate.io>}
+     */
+    protected static class ParameterContext {
+        protected String name;
+        protected In location;
+        protected Style style;
+        protected Parameter oaiParam;
+        protected FrameworkParameter frameworkParam;
+        protected Object defaultValue;
+        protected AnnotationTarget target;
+        protected Type targetType;
+
+        ParameterContext() {
+        }
+
+        public ParameterContext(String name, FrameworkParameter frameworkParam, AnnotationTarget target, Type targetType) {
+            this.name = name;
+            this.location = frameworkParam.location;
+            this.style = frameworkParam.style;
+            this.frameworkParam = frameworkParam;
+            this.target = target;
+            this.targetType = targetType;
+        }
+
+        @Override
+        public String toString() {
+            return "name: " + name + "; in: " + location + "; target: " + target;
+        }
+    }
+
+    /**
+     * Key used to store {@link ParameterContext} objects in a map sorted by {@link In},
+     * then by name, nulls first.
+     *
+     * @author Michael Edgar {@literal <michael@xlate.io>}
+     *
+     */
+    protected static class ParameterContextKey {
+        final String name;
+        final In location;
+        final Style style;
+        final String ref;
+
+        public ParameterContextKey(String name, In location, Style style) {
+            this.name = name;
+            this.location = location;
+            this.style = style;
+            this.ref = null;
+        }
+
+        public ParameterContextKey(Parameter oaiParam) {
+            this.name = oaiParam.getName();
+            this.location = oaiParam.getIn();
+            this.style = styleOf(oaiParam);
+            this.ref = oaiParam.getRef();
+        }
+
+        public ParameterContextKey(ParameterContext context) {
+            this.name = context.name;
+            this.location = context.location;
+            this.style = context.style;
+            this.ref = context.oaiParam != null ? context.oaiParam.getRef() : null;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ParameterContextKey) {
+                ParameterContextKey other = (ParameterContextKey) obj;
+
+                if (isNull() && other.isNull()) {
+                    return this == other;
+                }
+
+                if (ref != null) {
+                    return ref.equals(other.ref);
+                }
+
+                return Objects.equals(this.name, other.name) &&
+                        Objects.equals(this.location, other.location) &&
+                        Objects.equals(this.style, other.style);
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return isNull() ? super.hashCode() : Objects.hash(name, location, style, ref);
+        }
+
+        @Override
+        public String toString() {
+            return "name: " + name + "; in: " + location + "; style: " + style + "; ref: " + ref;
+        }
+
+        public boolean isNull() {
+            return name == null && location == null && style == null && ref == null;
+        }
+    }
 }

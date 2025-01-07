@@ -85,4 +85,9 @@ public class GreetingGetController {
         return "Hello " + name;
     }
 
+    // 8) Multiple paths test
+    @GetMapping(value = { "/helloMultiplePathsVariable/{name}", "/helloMultiplePathsVariable2/{name}" })
+    public Greeting helloMultiplePathsVariable(@PathVariable(name = "name") String name) {
+        return new Greeting("Hello " + name);
+    }
 }

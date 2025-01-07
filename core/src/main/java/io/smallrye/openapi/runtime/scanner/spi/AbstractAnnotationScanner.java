@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.jboss.jandex.DotName;
@@ -61,6 +63,12 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
     @Override
     public void setContextRoot(String path) {
         this.contextRoot = path;
+    }
+
+    protected List<String> makePaths(List<String> operationPaths) {
+        return operationPaths.stream()
+                .map(operationPath -> createPathFromSegments(this.contextRoot, this.currentAppPath, operationPath))
+                .collect(Collectors.toList());
     }
 
     protected String makePath(String operationPath) {

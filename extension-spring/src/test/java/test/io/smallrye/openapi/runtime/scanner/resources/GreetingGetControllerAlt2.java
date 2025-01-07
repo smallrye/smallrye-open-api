@@ -87,4 +87,10 @@ public class GreetingGetControllerAlt2 {
         return "Hello " + name;
     }
 
+    // 8) Multiple paths test
+    @RequestMapping(path = { "/helloMultiplePathsVariable/{name}",
+            "/helloMultiplePathsVariable2/{name}" }, method = RequestMethod.GET)
+    public Greeting helloMultiplePathsVariable(@PathVariable(name = "name") String name) {
+        return new Greeting("Hello " + name);
+    }
 }

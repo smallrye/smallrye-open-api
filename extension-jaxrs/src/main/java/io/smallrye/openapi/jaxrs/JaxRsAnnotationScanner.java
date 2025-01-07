@@ -422,12 +422,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             final String originalAppPath = this.currentAppPath;
             final String subResourcePath;
 
-            if (this.subResourceStack.isEmpty()) {
-                subResourcePath = params.getFullOperationPath();
-            } else {
-                // If we are already processing a sub-resource, ignore any @Path information from the current class
-                subResourcePath = params.getOperationPath();
-            }
+            List<String> operationPaths = this.subResourceStack.isEmpty() ? params.getFullOperationPaths()
+                    : params.getOperationPaths();
+            boolean operationsPathIsEmpty = operationPaths == null || operationPaths.isEmpty();
+            subResourcePath = !operationsPathIsEmpty ? operationPaths.get(0) : null;
 
             this.currentAppPath = createPathFromSegments(this.currentAppPath, subResourcePath);
             this.subResourceStack.push(locator);
@@ -537,15 +535,12 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             return;
         }
 
+        // When processing a sub-resource tree, ignore any @Path information from the current class
+        List<String> operationPaths = this.subResourceStack.isEmpty() ? params.getFullOperationPaths()
+                : params.getOperationPaths();
+        boolean operationsPathIsEmpty = operationPaths == null || operationPaths.isEmpty();
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        final String path;
-
-        if (this.subResourceStack.isEmpty()) {
-            path = super.makePath(params.getFullOperationPath());
-        } else {
-            // When processing a sub-resource tree, ignore any @Path information from the current class
-            path = super.makePath(params.getOperationPath());
-        }
+        final String path = super.makePath(!operationsPathIsEmpty ? operationPaths.get(0) : null);
 
         // Get or create a PathItem to hold the operation
         PathItem existingPath = ModelUtil.paths(context.getOpenApi()).getPathItem(path);

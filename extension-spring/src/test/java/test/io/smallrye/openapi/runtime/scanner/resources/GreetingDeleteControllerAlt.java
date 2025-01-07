@@ -43,4 +43,10 @@ public class GreetingDeleteControllerAlt {
     public ResponseEntity<Void> greetWithResponseTyped(@PathVariable(name = "id") String id) {
         return ResponseEntity.noContent().build();
     }
+
+    // 4) Multiple paths var test
+    @RequestMapping(value = { "/multipleGreet1/{id}", "/multipleGreet2/{id}" }, method = RequestMethod.DELETE)
+    public void multipleGreet(@PathVariable(name = "id") String id) {
+        // No op
+    }
 }

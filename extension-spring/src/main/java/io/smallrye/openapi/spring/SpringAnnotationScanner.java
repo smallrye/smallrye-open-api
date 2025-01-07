@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.OASFactory;
@@ -166,8 +167,10 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         processScannerExtensions(context, applications);
 
         for (ClassInfo controller : applications) {
-            OpenAPI applicationOpenApi = processControllerClass(controller);
-            openApi = MergeUtil.merge(openApi, applicationOpenApi);
+            List<OpenAPI> applicationOpenApis = processControllerClass(controller);
+            for (OpenAPI applicationOpenApi : applicationOpenApis) {
+                openApi = MergeUtil.merge(openApi, applicationOpenApi);
+            }
         }
     }
 
@@ -179,41 +182,45 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
      * @param context the scanning context
      * @param controllerClass the Spring REST controller
      */
-    private OpenAPI processControllerClass(ClassInfo controllerClass) {
+    private List<OpenAPI> processControllerClass(ClassInfo controllerClass) {
 
         SpringLogging.log.processingController(controllerClass.simpleName());
-
-        TypeResolver resolver = TypeResolver.forClass(context, controllerClass, null);
-        context.getResolverStack().push(resolver);
 
         // Get the @RequestMapping info and save it for later
         AnnotationInstance requestMappingAnnotation = context.annotations().getAnnotation(controllerClass,
                 SpringConstants.REQUEST_MAPPING);
 
-        if (requestMappingAnnotation != null) {
-            this.currentAppPath = SpringParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation);
-        } else {
-            this.currentAppPath = "/";
-        }
+        List<String> appPaths = requestMappingAnnotation != null
+                ? SpringParameterProcessor.requestMappingValuesToPath(requestMappingAnnotation)
+                : List.of("/");
 
-        // Process @OpenAPIDefinition annotation
-        OpenAPI openApi = processDefinitionAnnotation(context, controllerClass);
+        return appPaths.stream()
+                .map(path -> {
+                    TypeResolver resolver = TypeResolver.forClass(context, controllerClass, null);
+                    context.getResolverStack().push(resolver);
 
-        // Process @SecurityScheme annotations
-        processSecuritySchemeAnnotation(context, controllerClass, openApi);
+                    this.currentAppPath = path;
 
-        // Process @Server annotations
-        processServerAnnotation(context, controllerClass, openApi);
+                    // Process @OpenAPIDefinition annotation
+                    OpenAPI openApi = processDefinitionAnnotation(context, controllerClass);
 
-        // Process Java security
-        processJavaSecurity(context, controllerClass, openApi);
+                    // Process @SecurityScheme annotations
+                    processSecuritySchemeAnnotation(context, controllerClass, openApi);
 
-        // Now find and process the operation methods
-        processControllerMethods(controllerClass, openApi, null);
+                    // Process @Server annotations
+                    processServerAnnotation(context, controllerClass, openApi);
 
-        context.getResolverStack().pop();
+                    // Process Java security
+                    processJavaSecurity(context, controllerClass, openApi);
 
-        return openApi;
+                    // Now find and process the operation methods
+                    processControllerMethods(controllerClass, openApi, null);
+
+                    context.getResolverStack().pop();
+
+                    return openApi;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -327,16 +334,18 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         }
 
         // Figure out the path for the operation.  This is a combination of the App, Resource, and Method @Path annotations
-        String path = super.makePath(params.getOperationPath());
+        List<String> paths = super.makePaths(params.getOperationPaths());
 
-        // Get or create a PathItem to hold the operation
-        PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
+        for (String path : paths) {
+            // Get or create a PathItem to hold the operation
+            PathItem existingPath = ModelUtil.paths(openApi).getPathItem(path);
 
-        if (existingPath == null) {
-            ModelUtil.paths(openApi).addPathItem(path, pathItem);
-        } else {
-            // Changes applied to 'existingPath', no need to re-assign or add to OAI.
-            MergeUtil.mergeObjects(existingPath, pathItem);
+            if (existingPath == null) {
+                ModelUtil.paths(openApi).addPathItem(path, pathItem);
+            } else {
+                // Changes applied to 'existingPath', no need to re-assign or add to OAI.
+                MergeUtil.mergeObjects(existingPath, pathItem);
+            }
         }
     }
 
