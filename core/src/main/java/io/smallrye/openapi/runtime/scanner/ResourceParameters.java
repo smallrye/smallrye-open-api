@@ -145,6 +145,7 @@ public class ResourceParameters {
         return pathItemPaths.stream()
                 .flatMap(pathItemPath -> operationPaths.stream()
                         .flatMap(operationPath -> getPathParameterTemplateName(pathItemPath, operationPath).stream()))
+                .distinct()
                 .collect(Collectors.toList());
     }
 
