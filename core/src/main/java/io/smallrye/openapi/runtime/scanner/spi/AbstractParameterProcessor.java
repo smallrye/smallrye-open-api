@@ -1148,7 +1148,7 @@ public abstract class AbstractParameterProcessor {
      * @return full paths (excluding application path) of the target
      */
     protected List<String> fullPathsOf(AnnotationTarget target) {
-        List<String> pathSegments = List.of("null");
+        List<String> pathSegments = null;
 
         switch (target.kind()) {
             case FIELD:
@@ -1164,7 +1164,9 @@ public abstract class AbstractParameterProcessor {
                 break;
         }
 
-        return pathSegments.stream()
+        return Optional.ofNullable(pathSegments)
+                .orElse(List.of("null"))
+                .stream()
                 .map(pathSegment -> contextPath + '/' + pathSegment)
                 .collect(Collectors.toList());
     }
