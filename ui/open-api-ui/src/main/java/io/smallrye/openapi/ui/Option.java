@@ -6,6 +6,8 @@ package io.smallrye.openapi.ui;
  * @author Phillip Kruger (phillip.kruger@redhat.com)
  */
 public enum Option {
+    scriptsSection,
+    scripts,
     url,
     urlSection,
     title,

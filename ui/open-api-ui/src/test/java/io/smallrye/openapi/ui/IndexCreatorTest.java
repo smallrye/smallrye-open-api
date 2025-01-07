@@ -153,6 +153,22 @@ class IndexCreatorTest {
     }
 
     @Test
+    void testCreateWithCustomeScript() throws IOException {
+        Map<Option, String> options = new HashMap<>();
+        options.put(Option.scripts, "https://unpkg.com/swagger-ui-plugin-hierarchical-tags");
+        options.put(Option.plugins, "[SwaggerUIBundle.plugins.DownloadUrl,HierarchicalTagsPlugin]");
+
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
+        assertNotNull(indexHtml);
+
+        String s = new String(indexHtml);
+
+        assertTrue(s.contains("<title>SmallRye OpenAPI UI</title>"));
+        assertTrue(s.contains("<script src=\"https://unpkg.com/swagger-ui-plugin-hierarchical-tags\"></script>"));
+        assertTrue(s.contains("plugins: [SwaggerUIBundle.plugins.DownloadUrl,HierarchicalTagsPlugin]"));
+    }
+
+    @Test
     void testCreateWithPreauthorizeBasic() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.preauthorizeBasicAuthDefinitionKey, "basicAuth");
