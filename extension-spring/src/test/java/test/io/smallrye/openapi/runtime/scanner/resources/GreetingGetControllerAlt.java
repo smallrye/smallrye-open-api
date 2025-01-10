@@ -72,7 +72,7 @@ public class GreetingGetControllerAlt {
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/helloPathVariableWithResponse/{name}", method = RequestMethod.GET)
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
-    public ResponseEntity<Greeting> helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
+    public ResponseEntity helloPathVariableWithResponse(@PathVariable(name = "name") String name) {
         return ResponseEntity.ok(new Greeting("Hello " + name));
     }
 
