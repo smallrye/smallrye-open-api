@@ -61,7 +61,6 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
      *        Spring HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
-     * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
