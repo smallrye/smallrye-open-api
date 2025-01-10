@@ -1,0 +1,47 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Bean" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              }
+            },
+            "description" : "Multi-dimensional Array.",
+            "examples" : [ [ [ [ 1.23, 1.0903 ] ] ] ]
+          },
+          "mapOfLists" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "number",
+                    "format" : "double"
+                  }
+                }
+              }
+            },
+            "description" : "Multi-dimensional Array.",
+            "examples" : [ {
+              "data" : [ [ [ 1.23, 1.0903 ] ] ]
+            } ]
+          }
+        }
+      }
+    }
+  }
+}
