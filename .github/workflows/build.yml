@@ -121,12 +121,6 @@ jobs:
       - name: build with maven
         run: mvn -B install -pl '!testsuite/coverage,!testsuite/data,!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' -DskipTests
 
-      - uses: actions/setup-java@v4
-        name: set up jdk
-        with:
-          distribution: 'temurin'
-          java-version: 11
-
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 

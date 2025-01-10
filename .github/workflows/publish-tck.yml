@@ -44,12 +44,6 @@ jobs:
       - name: build with maven
         run: mvn -B -pl 'testsuite/tck' -am install -DskipTests
 
-      - uses: actions/setup-java@v4
-        name: set up jdk
-        with:
-          distribution: 'temurin'
-          java-version: 11
-
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
