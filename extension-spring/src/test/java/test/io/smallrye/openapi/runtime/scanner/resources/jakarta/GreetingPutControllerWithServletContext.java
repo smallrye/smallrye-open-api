@@ -36,6 +36,7 @@ public class GreetingPutControllerWithServletContext {
     }
 
     // 2) ResponseEntity without a type specified
+    @SuppressWarnings("rawtypes")
     @PutMapping("/greetWithResponse/{id}")
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public ResponseEntity greetWithResponse(@RequestBody Greeting greeting, @PathVariable(name = "id") String id,

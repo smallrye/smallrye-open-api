@@ -59,7 +59,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isAsyncResponse(final MethodInfo method) {
-        // TODO: Implement this.
         return false;
     }
 
@@ -89,13 +88,13 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isMultipartOutput(Type returnType) {
-        // TODO: Check this
+        // XXX: Check this
         return SpringConstants.MULTIPART_OUTPUTS.contains(returnType.name());
     }
 
     @Override
     public boolean isMultipartInput(Type inputType) {
-        // TODO: Check this
+        // XXX: Check this
         return SpringConstants.MULTIPART_INPUTS.contains(inputType.name());
     }
 
@@ -105,6 +104,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
@@ -144,7 +144,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     /**
      * Find and process all Spring Controllers
-     * TODO: Also support org.springframework.stereotype.Controller annotations ?
+     * Future: Also support org.springframework.stereotype.Controller annotations ?
      *
      * @param context the scanning context
      * @param openApi the openAPI model
@@ -279,11 +279,11 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Figure out the current @Produces and @Consumes (if any)
         String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(resourceClass, method));
         context.setDefaultConsumes(defaultConsumes);
-        context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES, defaultConsumes).orElse(null));
+        context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES).orElse(null));
 
         String[] defaultProduces = getDefaultProduces(context, method);
         context.setDefaultProduces(defaultProduces);
-        context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES, defaultProduces).orElse(null));
+        context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES).orElse(null));
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -368,11 +368,10 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             final MethodInfo method) {
         Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
         return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader,
-                context.getExtensions());
+                method, reader);
     }
 
-    Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
+    Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property) {
         Set<DotName> annotationNames = new HashSet<>(SpringConstants.HTTP_METHODS);
         annotationNames.add(SpringConstants.REQUEST_MAPPING);
 
