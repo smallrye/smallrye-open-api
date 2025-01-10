@@ -1,0 +1,3 @@
+openapi: "3.0.3"
+info:
+  x-custom-extension: My Custom Extension

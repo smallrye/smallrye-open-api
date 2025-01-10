@@ -23,10 +23,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -190,7 +191,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
     /**
      * To specify a custom OpenAPI version.
      */
-    @Parameter(defaultValue = SmallRyeOASConfig.Defaults.VERSION, property = "openApiVersion")
+    @Parameter(property = "openApiVersion")
     private String openApiVersion;
 
     @Parameter(property = "infoTitle")
@@ -272,14 +273,17 @@ public class GenerateSchemaMojo extends AbstractMojo {
     @Parameter(property = "outputFileTypeFilter", defaultValue = "ALL")
     private String outputFileTypeFilter;
 
-    @Component
     private MavenDependencyIndexCreator mavenDependencyIndexCreator;
-
-    @Component
-    MavenProjectHelper mavenProjectHelper;
+    private MavenProjectHelper mavenProjectHelper;
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject mavenProject;
+
+    @Inject
+    public GenerateSchemaMojo(MavenProjectHelper helper, MavenDependencyIndexCreator indexCreator) {
+        mavenDependencyIndexCreator = indexCreator;
+        mavenProjectHelper = helper;
+    }
 
     @Override
     public void execute() throws MojoExecutionException {
