@@ -888,4 +888,17 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         assertJsonEquals("components.schemas.primitive-formats.json", Bean.class);
     }
+
+    @Test
+    void testMultidimensionalArrayGenericType() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+            @Schema(description = "Multi-dimensional Array.", examples = "[[[1.23, 1.0903]]]")
+            List<Double[][]> list;
+            @Schema(description = "Multi-dimensional Array.", examples = "{ \"data\": [[[1.23, 1.0903]]] }")
+            Map<String, List<Double[][]>> mapOfLists;
+        }
+
+        assertJsonEquals("components.schemas.multi-array-generic.json", Bean.class);
+    }
 }

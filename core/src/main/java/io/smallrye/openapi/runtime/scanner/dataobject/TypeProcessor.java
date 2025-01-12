@@ -87,20 +87,7 @@ public class TypeProcessor {
             return type;
         }
 
-        if (type.kind() == Type.Kind.WILDCARD_TYPE) {
-            type = TypeUtil.resolveWildcard(type.asWildcardType());
-        }
-
-        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
-                type.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE) {
-            // Resolve type variable to real variable.
-            type = resolveTypeVariable(schema, type, false);
-        }
-
-        if (TypeUtil.isWrappedType(type)) {
-            // Unwrap and proceed using the wrapped type
-            type = TypeUtil.unwrapType(type);
-        }
+        type = maybeResolveType(type);
 
         if (isArrayType(type, annotationTarget)) {
             return readArrayType(type.asArrayType(), this.schema);
@@ -145,6 +132,25 @@ public class TypeProcessor {
             // If the type is not in Jandex then we don't have easy access to it.
             // Future work could consider separate code to traverse classes reachable from this classloader.
             DataObjectLogging.logger.typeNotInJandexIndex(type);
+        }
+
+        return type;
+    }
+
+    private Type maybeResolveType(Type type) {
+        if (type.kind() == Type.Kind.WILDCARD_TYPE) {
+            type = TypeUtil.resolveWildcard(type.asWildcardType());
+        }
+
+        if (type.kind() == Type.Kind.TYPE_VARIABLE ||
+                type.kind() == Type.Kind.UNRESOLVED_TYPE_VARIABLE) {
+            // Resolve type variable to real variable.
+            type = resolveTypeVariable(schema, type, false);
+        }
+
+        if (TypeUtil.isWrappedType(type)) {
+            // Unwrap and proceed using the wrapped type
+            type = TypeUtil.unwrapType(type);
         }
 
         return type;
@@ -313,29 +319,10 @@ public class TypeProcessor {
                         typeResolver,
                         propsSchema);
             }
+        } else if (isArrayType(valueType, null)) {
+            readArrayType(valueType.asArrayType(), propsSchema);
         } else if (index.containsClass(valueType)) {
-            if (isA(valueType, ENUM_TYPE)) {
-                DataObjectLogging.logger.processingEnum(type);
-                propsSchema = SchemaFactory.enumToSchema(context, valueType);
-            } else {
-                SchemaSupport.setType(propsSchema, Schema.SchemaType.OBJECT);
-            }
-
-            SchemaRegistry registry = context.getSchemaRegistry();
-
-            if (registry.hasSchema(valueType, context.getJsonViews(), typeResolver)) {
-                if (allowRegistration()) {
-                    propsSchema = registry.lookupRef(valueType, context.getJsonViews());
-                } else {
-                    pushToStack(valueType, propsSchema);
-                }
-            } else {
-                pushToStack(valueType, propsSchema);
-                if (allowRegistration()) {
-                    propsSchema = registry.registerReference(valueType, context.getJsonViews(), typeResolver,
-                            propsSchema);
-                }
-            }
+            propsSchema = resolveIndexedParameterizedType(valueType, propsSchema);
         }
 
         return propsSchema;
@@ -355,6 +342,33 @@ public class TypeProcessor {
         }
 
         return resolvedType;
+    }
+
+    private Schema resolveIndexedParameterizedType(Type valueType, Schema propsSchema) {
+        if (isA(valueType, ENUM_TYPE)) {
+            DataObjectLogging.logger.processingEnum(type);
+            propsSchema = SchemaFactory.enumToSchema(context, valueType);
+        } else {
+            SchemaSupport.setType(propsSchema, Schema.SchemaType.OBJECT);
+        }
+
+        SchemaRegistry registry = context.getSchemaRegistry();
+
+        if (registry.hasSchema(valueType, context.getJsonViews(), typeResolver)) {
+            if (allowRegistration()) {
+                propsSchema = registry.lookupRef(valueType, context.getJsonViews());
+            } else {
+                pushToStack(valueType, propsSchema);
+            }
+        } else {
+            pushToStack(valueType, propsSchema);
+            if (allowRegistration()) {
+                propsSchema = registry.registerReference(valueType, context.getJsonViews(), typeResolver,
+                        propsSchema);
+            }
+        }
+
+        return propsSchema;
     }
 
     private void pushResolvedToStack(Type type, Schema schema) {
