@@ -716,9 +716,21 @@ public abstract class AbstractParameterProcessor {
         setDefaultValue(localSchema, context.defaultValue);
 
         if (localOnlySchemaModified(paramSchema, localSchema, modCount)) {
-            // Add new `allOf` schema, erasing `type` derived above from the local schema
-            Schema allOf = OASFactory.createSchema().addAllOf(paramSchema).addAllOf(localSchema.type((List<SchemaType>) null));
-            param.setSchema(allOf);
+            Boolean nullable = SchemaSupport.getNullable(localSchema);
+            localSchema.setType(null);
+
+            if (Boolean.FALSE.equals(SchemaSupport.isEmpty(localSchema))) {
+                // Add new `allOf` schema, erasing `type` derived above from the local schema
+                localSchema = OASFactory.createSchema()
+                        .addAllOf(paramSchema)
+                        .addAllOf(localSchema);
+                param.setSchema(localSchema);
+            } else if (Boolean.TRUE.equals(nullable)) {
+                localSchema = OASFactory.createSchema()
+                        .addAnyOf(paramSchema)
+                        .addAnyOf(SchemaSupport.nullSchema());
+                param.setSchema(localSchema);
+            }
         }
     }
 
