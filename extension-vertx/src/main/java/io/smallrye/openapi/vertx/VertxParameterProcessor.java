@@ -116,35 +116,34 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
 
     private void readAnnotatedType(FrameworkParameter frameworkParam, AnnotationInstance annotation,
             AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
-        if (frameworkParam != null) {
-            AnnotationTarget target = annotation.target();
-            Type targetType = getType(target);
 
-            if (frameworkParam.style == Style.FORM) {
-                // Store the @FormParam for later processing
-                formParams.put(paramName(annotation), annotation);
-                readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
-            } else if (frameworkParam.style == Style.MATRIX) {
-                // Store the @MatrixParam for later processing
-                List<String> pathSegments = beanParamAnnotation != null
-                        ? lastPathSegmentsOf(beanParamAnnotation.target())
-                        : lastPathSegmentsOf(target);
-                boolean isPathSegmentsEmpty = pathSegments == null || pathSegments.isEmpty();
-                String pathSegment = !isPathSegmentsEmpty ? pathSegments.get(0) : null;
+        AnnotationTarget target = annotation.target();
+        Type targetType = getType(target);
 
-                matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
-                        .put(paramName(annotation), annotation);
-            } else if (frameworkParam.location != null) {
-                readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
-            } else if (target != null) {
-                // This is a @BeanParam or a RESTEasy @MultipartForm
-                setMediaType(frameworkParam);
-                targetType = TypeUtil.unwrapType(targetType);
+        if (frameworkParam.style == Style.FORM) {
+            // Store the @FormParam for later processing
+            formParams.put(paramName(annotation), annotation);
+            readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
+        } else if (frameworkParam.style == Style.MATRIX) {
+            // Store the @MatrixParam for later processing
+            List<String> pathSegments = beanParamAnnotation != null
+                    ? lastPathSegmentsOf(beanParamAnnotation.target())
+                    : lastPathSegmentsOf(target);
+            boolean isPathSegmentsEmpty = pathSegments == null || pathSegments.isEmpty();
+            String pathSegment = !isPathSegmentsEmpty ? pathSegments.get(0) : null;
 
-                if (targetType != null) {
-                    ClassInfo beanParam = index.getClassByName(targetType.name());
-                    readParameters(beanParam, annotation, overriddenParametersOnly);
-                }
+            matrixParams.computeIfAbsent(pathSegment, k -> new HashMap<>())
+                    .put(paramName(annotation), annotation);
+        } else if (frameworkParam.location != null) {
+            readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
+        } else if (target != null) {
+            // This is a @BeanParam or a RESTEasy @MultipartForm
+            setMediaType(frameworkParam);
+            targetType = TypeUtil.unwrapType(targetType);
+
+            if (targetType != null) {
+                ClassInfo beanParam = index.getClassByName(targetType.name());
+                readParameters(beanParam, annotation, overriddenParametersOnly);
             }
         }
     }

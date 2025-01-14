@@ -34,6 +34,7 @@ public class GreetingPostControllerWithServletContext {
     }
 
     // 2) ResponseEntity without a type specified
+    @SuppressWarnings("rawtypes")
     @PostMapping("/greetWithResponse")
     @APIResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(ref = "#/components/schemas/Greeting")))
     public ResponseEntity greetWithResponse(@RequestBody Greeting greeting, HttpServletRequest request,

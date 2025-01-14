@@ -20,7 +20,6 @@ import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
@@ -45,9 +44,8 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
 
     private SpringParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
-            Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, contextPath, reader, extensions);
+            Function<AnnotationInstance, Parameter> reader) {
+        super(scannerContext, contextPath, reader, scannerContext.getExtensions());
     }
 
     /**
@@ -63,7 +61,6 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
      *        Spring HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
-     * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
@@ -71,10 +68,9 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
             String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
+            Function<AnnotationInstance, Parameter> reader) {
 
-        SpringParameterProcessor processor = new SpringParameterProcessor(context, contextPath, reader, extensions);
+        SpringParameterProcessor processor = new SpringParameterProcessor(context, contextPath, reader);
         return processor.process(resourceClass, resourceMethod);
     }
 
@@ -99,53 +95,51 @@ public class SpringParameterProcessor extends AbstractParameterProcessor {
             FrameworkParameter frameworkParam = SpringParameter.forName(name);
 
             if (frameworkParam != null) {
-                AnnotationTarget target = annotation.target();
-                Type targetType = getType(target);
+                readSpringParameter(frameworkParam, annotation, beanParamAnnotation, overriddenParametersOnly);
+            }
+        }
+    }
 
-                if (frameworkParam.style == Style.FORM) {
-                    // Store the @FormParam for later processing
-                    formParams.put(paramName(annotation), annotation);
-                    readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
-                } else if (frameworkParam.style == Style.MATRIX) {
-                    // Store the @MatrixParam for later processing
-                    List<String> pathSegments = beanParamAnnotation != null
-                            ? lastPathSegmentsOf(beanParamAnnotation.target())
-                            : lastPathSegmentsOf(target);
+    private void readSpringParameter(FrameworkParameter frameworkParam,
+            AnnotationInstance annotation,
+            AnnotationInstance beanParamAnnotation,
+            boolean overriddenParametersOnly) {
+        AnnotationTarget target = annotation.target();
+        Type targetType = getType(target);
 
-                    for (String pathSegment : pathSegments) {
-                        matrixParams
-                                .computeIfAbsent(pathSegment, k -> new HashMap<>())
-                                .put(paramName(annotation), annotation);
-                    }
+        if (frameworkParam.style == Style.FORM) {
+            // Store the @FormParam for later processing
+            formParams.put(paramName(annotation), annotation);
+            readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
+        } else if (frameworkParam.style == Style.MATRIX) {
+            // Store the @MatrixParam for later processing
+            List<String> pathSegments = beanParamAnnotation != null
+                    ? lastPathSegmentsOf(beanParamAnnotation.target())
+                    : lastPathSegmentsOf(target);
 
-                    // Do this in Spring ?
-                    //}else if (frameworkParam.location == In.PATH && targetType != null
-                    //      && SpringConstants.REQUEST_MAPPING.equals(targetType.name())) {
-                    //    String pathSegment = JandexUtil.value(annotation, ParameterConstant.PROP_VALUE);
+            for (String pathSegment : pathSegments) {
+                matrixParams
+                        .computeIfAbsent(pathSegment, k -> new HashMap<>())
+                        .put(paramName(annotation), annotation);
+            }
+        } else if (frameworkParam.location != null) {
+            readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
+        } else if (target != null && annotatesHttpGET(target)) {
+            // This is a SpringDoc @ParameterObject
+            setMediaType(frameworkParam);
+            targetType = TypeUtil.unwrapType(targetType);
 
-                    //    if (!matrixParams.containsKey(pathSegment)) {
-                    //        matrixParams.put(pathSegment, new HashMap<>());
-                    //   }
-                } else if (frameworkParam.location != null) {
-                    readFrameworkParameter(annotation, frameworkParam, overriddenParametersOnly);
-                } else if (target != null && annotatesHttpGET(target)) {
-                    // This is a SpringDoc @ParameterObject
-                    setMediaType(frameworkParam);
-                    targetType = TypeUtil.unwrapType(targetType);
+            if (targetType != null) {
+                ClassInfo beanParam = index.getClassByName(targetType.name());
 
-                    if (targetType != null) {
-                        ClassInfo beanParam = index.getClassByName(targetType.name());
-
-                        /*
-                         * Since the properties of the bean are probably not annotated (supported in Spring),
-                         * here we process them with a generated Spring @RequestParam annotation attached.
-                         */
-                        for (var entry : TypeResolver.getAllFields(scannerContext, targetType, beanParam, null).entrySet()) {
-                            var syntheticQuery = AnnotationInstance.builder(SpringConstants.QUERY_PARAM)
-                                    .buildWithTarget(entry.getValue().getAnnotationTarget());
-                            readAnnotatedType(syntheticQuery, beanParamAnnotation, overriddenParametersOnly);
-                        }
-                    }
+                /*
+                 * Since the properties of the bean are probably not annotated (supported in Spring),
+                 * here we process them with a generated Spring @RequestParam annotation attached.
+                 */
+                for (var entry : TypeResolver.getAllFields(scannerContext, targetType, beanParam, null).entrySet()) {
+                    var syntheticQuery = AnnotationInstance.builder(SpringConstants.QUERY_PARAM)
+                            .buildWithTarget(entry.getValue().getAnnotationTarget());
+                    readAnnotatedType(syntheticQuery, beanParamAnnotation, overriddenParametersOnly);
                 }
             }
         }
