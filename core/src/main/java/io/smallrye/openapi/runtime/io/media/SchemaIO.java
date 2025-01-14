@@ -191,7 +191,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         }
 
         // Detect {$ref=....,nullable=true} and convert to anyOf[{$ref=...}, {type=null}]
-        if (schema.getRef() != null && schema.getType() == null && SchemaSupport.getNullable(schema) == Boolean.TRUE) {
+        if (schema.getRef() != null && SchemaSupport.getNullable(schema) == Boolean.TRUE) {
             List<Schema> newAnyOfSchemas = new ArrayList<>();
             newAnyOfSchemas.add(OASFactory.createSchema().ref(schema.getRef()));
             newAnyOfSchemas.add(SchemaSupport.nullSchema());
@@ -201,7 +201,11 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
                 schema.addAllOf(OASFactory.createSchema().anyOf(newAnyOfSchemas));
             }
             schema.setRef(null);
-            SchemaSupport.setNullable(schema, null);
+            if (schema.getType() == null) {
+                SchemaSupport.setNullable(schema, null);
+            } else {
+                SchemaSupport.setNullable(schema, Boolean.TRUE);
+            }
         }
 
         // Detect {enum=[null]} and convert to {type=null}
@@ -389,7 +393,7 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
         }
 
         // If we have anyOf = [{type=null}, {$ref=...}], remove it and set nullable and allOf = [{$ref=...}]
-        if (result.anyOf != null && result.anyOf.size() == 2 && result.ref == null && result.type == null) {
+        if (result.anyOf != null && result.anyOf.size() == 2 && result.ref == null) {
             Optional<Schema> typeNullSchema = result.anyOf.stream().filter(s -> isSoloTypeNull(s)).findFirst();
             Optional<Schema> refSchema = result.anyOf.stream().filter(s -> isSoloRef(s)).findFirst();
             if (typeNullSchema.isPresent() && refSchema.isPresent()) {

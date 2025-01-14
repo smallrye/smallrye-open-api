@@ -93,4 +93,29 @@ class SchemaPropertyTest extends IndexScannerTestBase {
         String shellPattern;
         Speed speed;
     }
+
+    @Test
+    void testNullableFieldReference() throws Exception {
+        Index index = indexOf(FieldTarget.class, FieldReferrer.class);
+        SmallRyeOpenAPI result1 = SmallRyeOpenAPI.builder()
+                .withConfig(config(Collections.emptyMap()))
+                .withIndex(index)
+                .defaultRequiredProperties(false)
+                .build();
+        printToConsole(result1.model());
+        assertJsonEquals("components.schemas.schemaproperty-nullable.json", result1.model());
+    }
+
+    @org.eclipse.microprofile.openapi.annotations.media.Schema
+    public static class FieldTarget {
+    }
+
+    @org.eclipse.microprofile.openapi.annotations.media.Schema
+    public static class FieldReferrer {
+        @org.eclipse.microprofile.openapi.annotations.media.Schema(nullable = true)
+        private FieldTarget a;
+        @org.eclipse.microprofile.openapi.annotations.media.Schema(nullable = true, description = "b")
+        private FieldTarget b;
+    }
+
 }
