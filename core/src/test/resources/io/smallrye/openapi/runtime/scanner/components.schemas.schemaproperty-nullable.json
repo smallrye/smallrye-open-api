@@ -1,0 +1,31 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "FieldReferrer" : {
+        "type" : "object",
+        "properties" : {
+          "a" : {
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/FieldTarget"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "b" : {
+            "description" : "b",
+            "type" : "object",
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/FieldTarget"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        }
+      },
+      "FieldTarget" : {
+        "type" : "object"
+      }
+    }
+  }
+}
