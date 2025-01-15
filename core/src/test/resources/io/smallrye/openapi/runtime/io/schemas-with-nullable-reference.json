@@ -13,6 +13,18 @@
           }
         ]
       },
+      "NullRefWithAnnotations": {
+        "description": "Description is an annotation. Scanner generates type as well here.",
+        "type": ["object", "null"],
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/mySchema"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
       "NullRefWithAnyOf": {
         "allOf": [
           {
