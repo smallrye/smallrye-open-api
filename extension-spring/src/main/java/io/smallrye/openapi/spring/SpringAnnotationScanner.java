@@ -368,8 +368,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
             final MethodInfo method) {
         Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
         return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader,
-                context.getExtensions());
+                method, reader);
     }
 
     Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property, String[] defaultValue) {
