@@ -32,7 +32,7 @@ public class CallbackIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<
         callback.setRef(ReferenceType.CALLBACK.refValue(annotation));
 
         Optional.ofNullable(this.<String> value(annotation, PROP_PATH_ITEM_REF))
-                .map(ReferenceType.PATH_ITEM::referenceOf)
+                .map(ReferenceType.PATH_ITEM::parseRefValue)
                 .ifPresent(ref -> callback.addPathItem(
                         value(annotation, PROP_CALLBACK_URL_EXPRESSION),
                         OASFactory.createPathItem().ref(ref)));
