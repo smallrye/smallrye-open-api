@@ -1,0 +1,53 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Greetings",
+    "version" : "0.0.1"
+  },
+  "components" : {
+    "pathItems" : {
+      "myPathItem" : {
+        "post" : {
+          "responses" : {
+            "2XX" : {
+              "description" : "Ok"
+            },
+            "5XX" : {
+              "description" : "Failed"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths" : {
+    "/" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "callbacks" : {
+          "cb1" : {
+            "/test1" : {
+              "$ref" : "#/components/pathItems/myPathItem"
+            }
+          },
+          "cb2" : {
+            "/test2" : {
+              "$ref" : "#/components/pathItems/myPathItem"
+            }
+          }
+        }
+      }
+    }
+  }
+}

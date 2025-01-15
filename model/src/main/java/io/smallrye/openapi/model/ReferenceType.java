@@ -83,15 +83,13 @@ public enum ReferenceType {
     }
 
     /**
-     * Reads a string property named "ref" value from the given annotation and converts it
-     * to a value appropriate for setting on a model's "$ref" property.
+     * Takes the value from a ref property from an annotation, and converts it to a JSON Pointer, suitable for use as a
+     * reference in an OpenAPI model.
      *
-     * @param annotation AnnotationInstance
-     * @return String value
+     * @param ref the ref value read from an annotation
+     * @return a value suitable for use in an OpenAPI model.
      */
-    public String refValue(AnnotationInstance annotation) {
-        String ref = referenceValue(annotation);
-
+    public String parseRefValue(String ref) {
         if (ref == null) {
             return null;
         }
@@ -101,5 +99,17 @@ public enum ReferenceType {
         }
 
         return referenceOf(ref);
+    }
+
+    /**
+     * Reads a string property named "ref" value from the given annotation and converts it
+     * to a value appropriate for setting on a model's "$ref" property.
+     *
+     * @param annotation AnnotationInstance
+     * @return String value
+     */
+    public String refValue(AnnotationInstance annotation) {
+        String ref = referenceValue(annotation);
+        return parseRefValue(ref);
     }
 }
