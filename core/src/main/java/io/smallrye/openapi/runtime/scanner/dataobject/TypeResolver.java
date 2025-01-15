@@ -284,7 +284,15 @@ public class TypeResolver {
     }
 
     private void setField(FieldInfo field) {
+        if (this.field != null) {
+            targets.remove(this.field);
+        }
+
         this.field = field;
+
+        if (field != null) {
+            targets.add(field);
+        }
     }
 
     /**
@@ -824,7 +832,9 @@ public class TypeResolver {
         if (properties.containsKey(propertyName)) {
             resolver = properties.get(propertyName);
 
-            if (resolver.getField() == null && (Modifier.isPublic(field.flags()) || Modifier.isProtected(field.flags()))) {
+            if (resolver.getField() == null && (Modifier.isPublic(field.flags())
+                    || Modifier.isProtected(field.flags())
+                    || context.getConfig().privatePropertiesEnable())) {
                 /*
                  * Field is declared in parent class and the getter/setter was
                  * declared/overridden in child class
