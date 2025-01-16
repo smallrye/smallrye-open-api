@@ -284,15 +284,8 @@ public class TypeResolver {
     }
 
     private void setField(FieldInfo field) {
-        if (this.field != null) {
-            targets.remove(this.field);
-        }
-
         this.field = field;
-
-        if (field != null) {
-            targets.add(field);
-        }
+        targets.add(field);
     }
 
     /**
