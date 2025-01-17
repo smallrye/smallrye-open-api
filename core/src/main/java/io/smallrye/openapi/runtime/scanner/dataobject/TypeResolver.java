@@ -1027,7 +1027,8 @@ public class TypeResolver {
     /**
      * Returns whether a method follows the Java bean convention for an accessor
      * method (getter). The method name typically begins with "get", but may also
-     * begin with "is" when the return type is boolean.
+     * begin with "is" when the return type is boolean. Record component accessor
+     * methods are also accessors.
      *
      * @param method the method to check
      * @return true if the method is a Java bean getter, otherwise false
@@ -1035,6 +1036,11 @@ public class TypeResolver {
     private static boolean isAccessor(AnnotationScannerContext context, MethodInfo method) {
         if (!JandexUtil.isSupplier(method)) {
             return false;
+        }
+
+        ClassInfo clazz = method.declaringClass();
+        if (clazz.isRecord() && clazz.recordComponent(method.name()) != null) {
+            return true;
         }
 
         String namePrefix = methodNamePrefix(method);
