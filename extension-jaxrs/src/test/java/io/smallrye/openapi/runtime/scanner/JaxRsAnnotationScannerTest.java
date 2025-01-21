@@ -16,7 +16,17 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.OASFactory;
+import org.eclipse.microprofile.openapi.annotations.Components;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.jboss.jandex.Index;
@@ -30,6 +40,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import io.smallrye.mutiny.Uni;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.OpenApiDocument;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
@@ -476,4 +487,87 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.MultiProduceConsumeResource.class);
     }
 
+    @Test
+    void testUnboundParameterRefOnResourceMethod() throws IOException, JSONException {
+        class UserRequest {
+            String name;
+        }
+
+        class UserResponse {
+            String name;
+        }
+
+        // @formatter:off
+        @OpenAPIDefinition(
+            info = @Info(
+                title = "dummyTitle",
+                version = "dummyVersion"
+            ),
+            components = @Components(
+                parameters = {
+                    @Parameter(
+                        name = jakarta.ws.rs.core.HttpHeaders.ACCEPT_ENCODING,
+                        in = ParameterIn.HEADER,
+                        schema = @org.eclipse.microprofile.openapi.annotations.media.Schema(
+                            type = SchemaType.STRING,
+                            enumeration = {
+                                "gzip",
+                                "deflate",
+                            })),
+                },
+                schemas = {
+                    @org.eclipse.microprofile.openapi.annotations.media.Schema(
+                        name = OpenApiDefinition.SCHEMA_USER_REQUEST,
+                        implementation = UserRequest.class),
+                    @org.eclipse.microprofile.openapi.annotations.media.Schema(
+                        name = OpenApiDefinition.SCHEMA_USER_RESPONSE,
+                        implementation = UserResponse.class),
+                },
+                requestBodies = {
+                    @RequestBody(
+                        name = OpenApiDefinition.REQUEST_USER,
+                        content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @org.eclipse.microprofile.openapi.annotations.media.Schema(
+                                ref = OpenApiDefinition.SCHEMA_USER_REQUEST
+                            ))),
+                },
+                responses = {
+                    @APIResponse(
+                        name = OpenApiDefinition.RESPONSE_USER,
+                        content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @org.eclipse.microprofile.openapi.annotations.media.Schema(
+                                ref = OpenApiDefinition.SCHEMA_USER_RESPONSE
+                            ))),
+                }
+            )
+        )
+        // @formatter:on
+
+        class OpenApiDefinition extends jakarta.ws.rs.core.Application {
+            public static final String REQUEST_USER = "User Request";
+            public static final String RESPONSE_USER = "User Response";
+            public static final String SCHEMA_USER_REQUEST = "User Request";
+            public static final String SCHEMA_USER_RESPONSE = "User Response";
+        }
+
+        @Path("users")
+        @Tag(name = "Users")
+        class UserEndpoint {
+            @POST
+            @Parameter(ref = jakarta.ws.rs.core.HttpHeaders.ACCEPT_ENCODING)
+            @APIResponse(ref = OpenApiDefinition.RESPONSE_USER, responseCode = "200")
+            public Uni<jakarta.ws.rs.core.Response> post(
+                    @RequestBody(ref = OpenApiDefinition.REQUEST_USER) UserRequest request) {
+                return null;
+            }
+        }
+
+        assertJsonEquals("params.unbound-param-ref-resource-method.json",
+                OpenApiDefinition.class,
+                UserRequest.class,
+                UserResponse.class,
+                UserEndpoint.class);
+    }
 }
