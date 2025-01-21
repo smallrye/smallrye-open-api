@@ -1,0 +1,19 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "TestRecord" : {
+        "type" : "object",
+        "properties" : {
+          "a" : {
+            "type" : "string"
+          },
+          "b" : {
+            "type" : "string",
+            "description" : "b"
+          }
+        }
+      }
+    }
+  }
+}
