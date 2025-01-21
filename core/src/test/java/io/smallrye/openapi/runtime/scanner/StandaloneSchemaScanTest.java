@@ -901,4 +901,47 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         assertJsonEquals("components.schemas.multi-array-generic.json", Bean.class);
     }
+
+    static class ParentClassFieldSchemaAnnotationTestClasses {
+        static Class<?>[] CLASSES = {
+                FieldInterface.class,
+                ParentClass.class,
+                ChildClass.class
+        };
+
+        interface FieldInterface {
+            public String getRequiredField();
+
+            public void setRequiredField(String requiredField);
+        }
+
+        class ParentClass {
+            @jakarta.validation.constraints.Size(min = 1, max = 32)
+            @jakarta.validation.constraints.NotNull
+            @Schema(readOnly = true, description = "Required field", examples = "Required field data")
+            private String requiredField;
+
+            public void setRequiredField(String requiredField) {
+                this.requiredField = requiredField;
+            }
+
+            public String getRequiredField() {
+                return this.requiredField;
+            }
+        }
+
+        @Schema(description = "Child class description")
+        class ChildClass extends ParentClass implements FieldInterface {
+            @jakarta.validation.constraints.Size(min = 1, max = 32)
+            @jakarta.validation.constraints.NotNull
+            @Schema(readOnly = true, description = "Other field", examples = "other field data")
+            private String otherField;
+        }
+
+    }
+
+    @Test
+    void testParentClassFieldSchemaAnnotation() throws IOException, JSONException {
+        assertJsonEquals("components.schemas.annotated-parent-field.json", ParentClassFieldSchemaAnnotationTestClasses.CLASSES);
+    }
 }

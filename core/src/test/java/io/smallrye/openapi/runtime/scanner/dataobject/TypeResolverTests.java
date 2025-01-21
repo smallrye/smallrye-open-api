@@ -171,7 +171,7 @@ class TypeResolverTests extends IndexScannerTestBase {
         assertEquals("c_name", schema.value("name").asString());
         assertEquals(50, schema.value("maxLength").asInt());
         assertEquals("The name of the canine", schema.value("description").asString());
-        assertArrayEquals(new String[] { "age", "type", "c_name", "bark", "speciesName", "extinct" },
+        assertArrayEquals(new String[] { "age", "pet_type", "c_name", "bark", "speciesName", "extinct" },
                 properties.values().stream().map(TypeResolver::getPropertyName).toArray());
     }
 

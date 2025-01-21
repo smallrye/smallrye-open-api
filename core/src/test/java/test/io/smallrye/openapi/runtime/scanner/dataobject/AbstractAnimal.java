@@ -6,7 +6,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @com.fasterxml.jackson.annotation.JsonPropertyOrder(value = { "age", "type" })
 public abstract class AbstractAnimal implements Animal {
 
-    @Schema
     private String type;
     protected Integer age;
     private boolean extinct;
