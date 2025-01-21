@@ -49,7 +49,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     public boolean isAsyncResponse(final MethodInfo method) {
-        // TODO: Implement this.
         return false;
     }
 
