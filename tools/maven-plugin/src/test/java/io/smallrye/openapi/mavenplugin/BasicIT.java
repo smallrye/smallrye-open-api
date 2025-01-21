@@ -98,6 +98,16 @@ public class BasicIT extends SchemaTestBase {
         deleteDirectory(OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH);
     }
 
+    @MavenTest
+    void versionFromProperties(MavenExecutionResult result) throws IOException {
+
+        assertThat(result).isSuccessful();
+
+        testSchema(result, (schema) -> {
+            assertEquals("3.1.1", schema.getOpenapi());
+        });
+    }
+
     private static final Path OUTPUT_FILE_TYPE_FILTER_GENERATION_PATH = Paths.get(System.getProperty("java.io.tmpdir"),
             "smallrye-openapi", "maven-plugin", "it");
 
