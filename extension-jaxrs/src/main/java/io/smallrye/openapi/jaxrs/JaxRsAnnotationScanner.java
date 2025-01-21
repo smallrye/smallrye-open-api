@@ -414,10 +414,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         // Do not allow the same resource locator method to be used twice (sign of infinite recursion)
         if (subResourceClass != null && !this.subResourceStack.contains(locator)) {
-            Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
-
-            ResourceParameters params = JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
-                    reader, context.getExtensions());
+            ResourceParameters params = getResourceParameters(resourceClass, method);
 
             final String originalAppPath = this.currentAppPath;
             final String subResourcePath;
@@ -556,7 +553,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass, final MethodInfo method) {
         Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
         return JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
-                reader, context.getExtensions());
+                reader);
     }
 
     /**
