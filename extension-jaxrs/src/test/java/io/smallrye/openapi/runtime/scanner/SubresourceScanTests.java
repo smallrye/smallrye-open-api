@@ -33,6 +33,7 @@ class SubresourceScanTests extends IndexScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.javax.MainTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Sub1TestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.Sub2TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.javax.Sub3TestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.javax.RecursiveLocatorResource.class);
     }
 
@@ -42,6 +43,7 @@ class SubresourceScanTests extends IndexScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.MainTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Sub1TestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.Sub2TestResource.class,
+                test.io.smallrye.openapi.runtime.scanner.jakarta.Sub3TestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.RecursiveLocatorResource.class);
     }
 

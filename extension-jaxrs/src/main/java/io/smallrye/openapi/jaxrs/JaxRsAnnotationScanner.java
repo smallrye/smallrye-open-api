@@ -402,7 +402,13 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             OpenAPI openApi,
             List<Parameter> locatorPathParameters,
             Set<String> tagRefs) {
-        final Type methodReturnType = context.getResourceTypeResolver().resolve(method.returnType());
+
+        // Extract the method return type, if the method return type is Class<?> then extract the type parameter.
+        Type methodReturnType = context.getResourceTypeResolver().resolve(method.returnType());
+        if (methodReturnType.kind() == Type.Kind.PARAMETERIZED_TYPE
+                && methodReturnType.asParameterizedType().name().equals(DotName.createSimple(Class.class))) {
+            methodReturnType = methodReturnType.asParameterizedType().arguments().get(0);
+        }
 
         if (Type.Kind.VOID.equals(methodReturnType.kind())) {
             // Can sub-resource locators return a CompletionStage?
