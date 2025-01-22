@@ -404,14 +404,10 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             Set<String> tagRefs) {
 
         // Extract the method return type, if the method return type is Class<?> then extract the type parameter.
-        Type methodReturnType;
-        if (method.returnType().kind() == Type.Kind.PARAMETERIZED_TYPE
-                && method.returnType().asParameterizedType().name().equals(DotName.createSimple(Class.class))
-                && method.returnType().asParameterizedType().arguments().size() == 1) {
-            methodReturnType = context.getResourceTypeResolver()
-                    .resolve(method.returnType().asParameterizedType().arguments().get(0));
-        } else {
-            methodReturnType = context.getResourceTypeResolver().resolve(method.returnType());
+        Type methodReturnType = context.getResourceTypeResolver().resolve(method.returnType());
+        if (methodReturnType.kind() == Type.Kind.PARAMETERIZED_TYPE
+                && methodReturnType.asParameterizedType().name().equals(DotName.createSimple(Class.class))) {
+            methodReturnType = methodReturnType.asParameterizedType().arguments().get(0);
         }
 
         if (Type.Kind.VOID.equals(methodReturnType.kind())) {
