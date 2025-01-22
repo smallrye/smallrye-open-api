@@ -1,0 +1,39 @@
+{
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "StatusEnum" : {
+        "enum" : [ "VAL1", "VAL2" ],
+        "type" : "string"
+      }
+    }
+  },
+  "paths" : {
+    "/status" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "status",
+          "in" : "query",
+          "schema" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/StatusEnum"
+            } ],
+            "nullable" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -128,6 +128,13 @@ public final class SchemaSupport {
         setTypesRetainingNull(observer, getTypeList(observed));
     }
 
+    public static Boolean isEmpty(Schema schema) {
+        if (schema instanceof BaseModel) {
+            return ((BaseModel<?>) schema).getAllProperties().isEmpty();
+        }
+        return null;
+    }
+
     static void notifyTypeObservers(Schema observed, Consumer<Schema> observerAction) {
         List<Schema> typeObservers = Extensions.getTypeObservers(observed);
 
