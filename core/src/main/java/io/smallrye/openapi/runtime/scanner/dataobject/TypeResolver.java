@@ -1061,19 +1061,23 @@ public class TypeResolver {
 
     /**
      * Returns whether a method follows the Java bean convention for a mutator
-     * method (setter).
+     * method (setter) or the method takes a single argument and it also annotated
+     * as a property of this bean.
      *
      * @param method the method to check
-     * @return true if the method is a Java bean setter, otherwise false
+     * @return true if the method is a Java bean setter or annotated property, otherwise false
      */
     private static boolean isMutator(AnnotationScannerContext context, MethodInfo method) {
-        Type returnType = method.returnType();
-
-        if (method.parametersCount() != 1 || !Type.Kind.VOID.equals(returnType.kind())) {
+        if (method.parametersCount() != 1) {
             return false;
         }
 
-        return METHOD_PREFIX_SET.equals(methodNamePrefix(method)) || isAnnotatedProperty(context, method);
+        if (isAnnotatedProperty(context, method)) {
+            return true;
+        }
+
+        return Type.Kind.VOID.equals(method.returnType().kind())
+                && METHOD_PREFIX_SET.equals(methodNamePrefix(method));
     }
 
     static boolean isAnnotatedProperty(AnnotationScannerContext context, MethodInfo method) {

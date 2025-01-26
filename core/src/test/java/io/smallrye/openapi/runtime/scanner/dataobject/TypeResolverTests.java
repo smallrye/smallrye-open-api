@@ -882,4 +882,52 @@ class TypeResolverTests extends IndexScannerTestBase {
         Map<String, TypeResolver> p3 = getProperties(context, Bean.class);
         Stream.of("field0", "field1", "field2", "field3").forEach(f -> assertFalse(p3.get(f).isIgnored()));
     }
+
+    /*
+     * Issue: https://github.com/smallrye/smallrye-open-api/issues/1817
+     */
+    @Test
+    void testAnnotatedFluentMutator() {
+        @SuppressWarnings("unused")
+        class Bean {
+            private String field0;
+            private String field1;
+            private String field2;
+
+            public String getField0() {
+                return field0;
+            }
+
+            public void setField0(String field0) {
+                this.field0 = field0;
+            }
+
+            public String getField1() {
+                return field1;
+            }
+
+            @Schema(name = "field1", description = "Field 1, with fluent setter")
+            public Bean setField1(String field1) {
+                this.field1 = field1;
+                return this;
+            }
+
+            public String getField2() {
+                return field2;
+            }
+
+            public Bean setField2(String field2) {
+                this.field2 = field2;
+                return this;
+            }
+
+        }
+
+        AnnotationScannerContext context = buildContext(emptyConfig(), Bean.class);
+        Map<String, TypeResolver> properties = getProperties(context, Bean.class);
+        assertEquals(3, properties.size());
+        assertEquals(Type.create(Bean.class), properties.get("field1").getWriteMethod().returnType());
+        assertNull(properties.get("field2").getWriteMethod());
+    }
+
 }
