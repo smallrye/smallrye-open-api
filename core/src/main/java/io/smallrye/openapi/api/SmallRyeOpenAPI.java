@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -585,7 +586,7 @@ public class SmallRyeOpenAPI {
 
         private <V, A extends V, O extends V, AB, OB> void addStaticModel(BuildContext<V, A, O, AB, OB> ctx, InputStream stream,
                 String source, Format fileFormat) {
-            try (Reader reader = new InputStreamReader(stream)) {
+            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 V dom = ctx.modelIO.jsonIO().fromReader(reader, fileFormat);
                 OpenAPI fileModel = ctx.modelIO.readValue(dom);
                 debugModel(source, fileModel);
