@@ -474,6 +474,30 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
     /****************************************************************/
 
+    @Test
+    void testNonNestedCustomCollectionSchemas() throws IOException, JSONException {
+        assertJsonEquals("components.schemas.non-nested-custom-collections.json", MyMap.class, MyList.class,
+                MyDataObject.class);
+    }
+
+    @SuppressWarnings("serial")
+    @Schema
+    static class MyMap extends HashMap<String, MyDataObject> {
+    }
+
+    @SuppressWarnings("serial")
+    @Schema
+    static class MyList extends ArrayList<MyDataObject> {
+    }
+
+    @Schema
+    static class MyDataObject {
+        String name;
+        long value;
+    }
+
+    /****************************************************************/
+
     /*
      * https://github.com/smallrye/smallrye-open-api/issues/715
      */
