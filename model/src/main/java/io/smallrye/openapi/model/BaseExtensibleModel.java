@@ -237,6 +237,12 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
         }
     }
 
+    @Override
+    public boolean hasExtension(String name) {
+        return extensionNames.contains(name);
+    }
+
+    @Override
     public Object getExtension(String name) {
         if (extensionNames.contains(name)) {
             return super.getProperty(name);
