@@ -16,6 +16,7 @@
 })
 @OASModelType(name = "AbstractOpenAPI", incomplete = true, constructible = org.eclipse.microprofile.openapi.models.OpenAPI.class, properties = {
         @OASModelProperty(name = "openapi", type = String.class),
+        @OASModelProperty(name = "jsonSchemaDialect", type = String.class),
         @OASModelProperty(name = "info", type = org.eclipse.microprofile.openapi.models.info.Info.class),
         @OASModelProperty(name = "externalDocs", type = org.eclipse.microprofile.openapi.models.ExternalDocumentation.class),
         @OASModelProperty(name = "servers", type = List.class, valueType = org.eclipse.microprofile.openapi.models.servers.Server.class),
