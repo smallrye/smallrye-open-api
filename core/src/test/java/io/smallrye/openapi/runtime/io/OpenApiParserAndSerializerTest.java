@@ -611,6 +611,11 @@ class OpenApiParserAndSerializerTest {
         doMultiVersionTest("schemas-with-xml.json", "schemas-with-xml30.json", ConversionDirection.BOTH_WAYS);
     }
 
+    @Test
+    void testNonDefaultSchemaDialect() throws IOException, JSONException {
+        doTest("non-default-schema-dialect.json", Format.JSON);
+    }
+
     /**
      * Test method for {@link OpenApiParser#parse(java.net.URL)}.
      */
