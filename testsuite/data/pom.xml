@@ -4,16 +4,16 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-build-parent</artifactId>
-        <version>46</version>
+        <version>47</version>
         <relativePath />
     </parent>
 
     <artifactId>smallrye-open-api-testsuite-data</artifactId>
-    <version>4.0.7-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
-        <eclipse.microprofile.openapi.version>4.0.2</eclipse.microprofile.openapi.version>
+        <eclipse.microprofile.openapi.version>4.1-RC1</eclipse.microprofile.openapi.version>
         <kotlin.version>2.0.21</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -21,10 +21,18 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.17.7</quarkus.platform.version>
+        <quarkus.platform.version>3.19.3</quarkus.platform.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <quarkus.package.add-runner-suffix>false</quarkus.package.add-runner-suffix>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>orgeclipsemicroprofile-1732</id>
+            <name>microprofile-openapi-4.1-RC1</name>
+            <url>https://oss.sonatype.org/content/repositories/orgeclipsemicroprofile-1732</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>

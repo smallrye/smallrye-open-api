@@ -34,8 +34,11 @@ import org.jboss.jandex.IndexWriter;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.model.Extensions;
 import test.io.smallrye.openapi.runtime.scanner.Widget;
 import test.io.smallrye.openapi.runtime.scanner.jakarta.MultipleContentTypesWithFormParamsTestResource;
@@ -679,5 +682,35 @@ class ParameterScanTests extends IndexScannerTestBase {
     @Test
     void testParameterConstraintComposition() throws IOException, JSONException {
         test("params.constraint-composition.json", ParameterConstraintComposition.CLASSES);
+    }
+
+    static class NullableRefParamClasses {
+        static final Class<?>[] CLASSES = {
+                StatusEnum.class,
+                FruitResource.class
+        };
+
+        enum StatusEnum {
+            VAL1,
+            VAL2;
+        }
+
+        @jakarta.ws.rs.Path("/status")
+        static class FruitResource {
+            @jakarta.ws.rs.GET
+            public String get(@jakarta.ws.rs.QueryParam("status") @org.jetbrains.annotations.Nullable StatusEnum status) {
+                return null;
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "3.0.3, params.nullable-ref-param-3.0.json",
+            "3.1.0, params.nullable-ref-param-3.1.json",
+    })
+    void testNullableRefParam(String oasVersion, String expectedResource) throws IOException, JSONException {
+        OpenAPI result = scan(config(SmallRyeOASConfig.VERSION, oasVersion), NullableRefParamClasses.CLASSES);
+        assertJsonEquals(expectedResource, result);
     }
 }

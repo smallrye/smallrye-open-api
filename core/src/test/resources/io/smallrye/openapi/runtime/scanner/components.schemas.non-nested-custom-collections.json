@@ -1,0 +1,31 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "MyDataObject" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "MyList" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/MyDataObject"
+        }
+      },
+      "MyMap" : {
+        "type" : "object",
+        "additionalProperties" : {
+          "$ref" : "#/components/schemas/MyDataObject"
+        }
+      }
+    }
+  }
+}

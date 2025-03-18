@@ -39,4 +39,8 @@ public class Sub1TestResource<T> {
         return new Sub2TestResource<T>();
     }
 
+    @Path(value = "/sub3/{sub3-id}")
+    public Class<Sub3TestResource> getSub3(@PathParam("sub3-id") String sub3Id) {
+        return Sub3TestResource.class;
+    }
 }

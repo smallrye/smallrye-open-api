@@ -1,0 +1,30 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "ChildClass" : {
+        "description" : "Child class description",
+        "type" : "object",
+        "required" : [ "requiredField", "otherField" ],
+        "properties" : {
+          "requiredField" : {
+            "type" : "string",
+            "description" : "Required field",
+            "readOnly" : true,
+            "examples" : [ "Required field data" ],
+            "minLength" : 1,
+            "maxLength" : 32
+          },
+          "otherField" : {
+            "type" : "string",
+            "description" : "Other field",
+            "readOnly" : true,
+            "examples" : [ "other field data" ],
+            "minLength" : 1,
+            "maxLength" : 32
+          }
+        }
+      }
+    }
+  }
+}

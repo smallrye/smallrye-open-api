@@ -50,7 +50,6 @@ import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
@@ -76,8 +75,9 @@ public abstract class AbstractParameterProcessor {
     protected final String contextPath;
     protected final IndexView index;
     protected final Function<AnnotationInstance, Parameter> readerFunction;
-    protected final List<AnnotationScannerExtension> extensions;
     protected final Optional<BeanValidationScanner> beanValidationScanner;
+    protected final ClassInfo resourceClass;
+    protected final MethodInfo resourceMethod;
 
     /**
      * Collection of parameters scanned at the current level. This map contains
@@ -111,13 +111,15 @@ public abstract class AbstractParameterProcessor {
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
             Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
+            ClassInfo resourceClass,
+            MethodInfo resourceMethod) {
         this.scannerContext = scannerContext;
         this.contextPath = contextPath;
         this.index = scannerContext.getIndex();
         this.readerFunction = reader;
-        this.extensions = extensions;
         this.beanValidationScanner = scannerContext.getBeanValidationScanner();
+        this.resourceClass = resourceClass;
+        this.resourceMethod = resourceMethod;
     }
 
     /**
@@ -240,7 +242,7 @@ public abstract class AbstractParameterProcessor {
      * @param target target object
      * @return object type
      */
-    protected static Type getType(AnnotationTarget target) {
+    protected Type getType(AnnotationTarget target) {
         if (target == null) {
             return null;
         }
@@ -252,11 +254,15 @@ public abstract class AbstractParameterProcessor {
                 type = target.asField().type();
                 break;
             case METHOD:
-                List<Type> methodParams = target.asMethod().parameterTypes();
-                if (methodParams.size() == 1) {
-                    // This is a bean property setter
-                    type = methodParams.get(0);
+                MethodInfo method = target.asMethod();
+                if (!method.equals(this.resourceMethod)) {
+                    List<Type> methodParams = method.parameterTypes();
+                    if (methodParams.size() == 1) {
+                        // This is a bean property setter
+                        type = methodParams.get(0);
+                    }
                 }
+
                 break;
             case METHOD_PARAMETER:
                 type = target.asMethodParameter().method().parameterType(target.asMethodParameter().position());
@@ -290,7 +296,7 @@ public abstract class AbstractParameterProcessor {
         matrixParams.clear();
     }
 
-    protected ResourceParameters process(ClassInfo resourceClass, MethodInfo resourceMethod) {
+    protected ResourceParameters process() {
 
         ResourceParameters parameters = new ResourceParameters();
 
@@ -710,9 +716,21 @@ public abstract class AbstractParameterProcessor {
         setDefaultValue(localSchema, context.defaultValue);
 
         if (localOnlySchemaModified(paramSchema, localSchema, modCount)) {
-            // Add new `allOf` schema, erasing `type` derived above from the local schema
-            Schema allOf = OASFactory.createSchema().addAllOf(paramSchema).addAllOf(localSchema.type((List<SchemaType>) null));
-            param.setSchema(allOf);
+            Boolean nullable = SchemaSupport.getNullable(localSchema);
+            localSchema.setType(null);
+
+            if (Boolean.FALSE.equals(SchemaSupport.isEmpty(localSchema))) {
+                // Add new `allOf` schema, erasing `type` derived above from the local schema
+                localSchema = OASFactory.createSchema()
+                        .addAllOf(paramSchema)
+                        .addAllOf(localSchema);
+                param.setSchema(localSchema);
+            } else if (Boolean.TRUE.equals(nullable)) {
+                localSchema = OASFactory.createSchema()
+                        .addAnyOf(paramSchema)
+                        .addAnyOf(SchemaSupport.nullSchema());
+                param.setSchema(localSchema);
+            }
         }
     }
 

@@ -301,6 +301,93 @@
         }
       ]
     },
+    "/resource{resource}/sub/{id}{idMatrix}/sub3/{sub3-id}/{subsubid}" : {
+      "parameters" : [ {
+        "style" : "matrix",
+        "explode" : true,
+        "schema" : {
+          "type" : "object",
+          "properties" : {
+            "r0m0" : {
+              "$ref" : "#/components/schemas/LocalDateTime"
+            },
+            "r0m1" : {
+              "$ref" : "#/components/schemas/LocalDateTime"
+            }
+          }
+        },
+        "name" : "resource",
+        "in" : "path",
+        "required" : true
+      }, {
+        "description" : "Resource Identifier",
+        "name" : "id",
+        "in" : "path",
+        "required" : true,
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "style" : "matrix",
+        "explode" : true,
+        "schema" : {
+          "type" : "object",
+          "properties" : {
+            "m1" : {
+              "type" : "string"
+            },
+            "m2" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        },
+        "name" : "idMatrix",
+        "in" : "path",
+        "required" : true
+      }, {
+        "name" : "q1",
+        "in" : "query",
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "name" : "q2",
+        "in" : "query",
+        "schema" : {
+          "type" : "string"
+        }
+      } ],
+      "get" : {
+        "parameters" : [ {
+          "name" : "sub3-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "subsubid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/resource{resource}/sub0": {
       "get": {
         "parameters": [
