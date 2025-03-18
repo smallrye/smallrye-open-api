@@ -1,0 +1,82 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "dummyTitle",
+    "version" : "dummyVersion"
+  },
+  "components" : {
+    "parameters" : {
+      "Accept-Encoding" : {
+        "in" : "header",
+        "name" : "Accept-Encoding",
+        "schema" : {
+          "type" : "string",
+          "enum" : [ "gzip", "deflate" ]
+        }
+      }
+    },
+    "requestBodies" : {
+      "User Request" : {
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/User Request"
+            }
+          }
+        },
+        "required" : true
+      }
+    },
+    "responses" : {
+      "User Response" : {
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/User Response"
+            }
+          }
+        }
+      }
+    },
+    "schemas" : {
+      "User Request" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "User Response" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Users"
+  } ],
+  "paths" : {
+    "/users" : {
+      "post" : {
+        "tags" : [ "Users" ],
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/Accept-Encoding"
+        } ],
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/User Request"
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "$ref" : "#/components/responses/User Response"
+          }
+        }
+      }
+    }
+  }
+}

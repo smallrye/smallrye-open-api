@@ -99,6 +99,8 @@ jobs:
         #- tck-version: "3.1.1"
         - title: "4.0.x"
           tck-version: "4.0.2"
+        - title: "4.1.x"
+          tck-version: "4.1-RC1"
 
     name: MicroProfile OpenAPI TCK ${{ matrix.title }}
     steps:

@@ -22,7 +22,6 @@ import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.runtime.io.Names;
-import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AbstractParameterProcessor;
@@ -51,8 +50,9 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     private JaxRsParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
             Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
-        super(scannerContext, contextPath, reader, extensions);
+            ClassInfo resourceClass,
+            MethodInfo resourceMethod) {
+        super(scannerContext, contextPath, reader, resourceClass, resourceMethod);
     }
 
     /**
@@ -68,18 +68,17 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
      * @param resourceMethod the JAX-RS resource method, annotated with one of the JAX-RS HTTP annotations
      * @param reader callback method for a function producing {@link Parameter} from a
      *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
-     * @param extensions scanner extensions
      * @return scanned parameters and modified path contained in a {@link ResourceParameters} object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
             String contextPath,
             ClassInfo resourceClass,
             MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader,
-            List<AnnotationScannerExtension> extensions) {
+            Function<AnnotationInstance, Parameter> reader) {
 
-        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, contextPath, reader, extensions);
-        return processor.process(resourceClass, resourceMethod);
+        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, contextPath, reader, resourceClass,
+                resourceMethod);
+        return processor.process();
     }
 
     @Override

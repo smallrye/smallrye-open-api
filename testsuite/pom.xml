@@ -20,7 +20,7 @@
   <parent>
     <groupId>io.smallrye</groupId>
     <artifactId>smallrye-open-api-parent</artifactId>
-    <version>4.0.7-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>smallrye-open-api-testsuite</artifactId>
@@ -38,7 +38,7 @@
   <properties>
     <version.org.jboss.arquillian>1.9.3.Final</version.org.jboss.arquillian>
     <version.shrinkwrap_core>1.2.6</version.shrinkwrap_core>
-    <version.shrinkwrap_resolver>3.3.3</version.shrinkwrap_resolver>
+    <version.shrinkwrap_resolver>3.3.4</version.shrinkwrap_resolver>
   </properties>
 
   <dependencyManagement>

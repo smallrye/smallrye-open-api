@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -457,7 +458,7 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
      * @return the root JSON value from the document
      */
     default V fromStream(InputStream stream, Format format) {
-        try (Reader reader = new InputStreamReader(stream)) {
+        try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             return fromReader(reader, format);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
