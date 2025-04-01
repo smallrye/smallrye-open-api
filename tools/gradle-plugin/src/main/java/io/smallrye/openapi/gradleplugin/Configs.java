@@ -191,6 +191,7 @@ class Configs implements SmallryeOpenApiProperties {
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_NAME, infoLicenseName);
         addToPropertyMap(cp, SmallRyeOASConfig.INFO_LICENSE_URL, infoLicenseUrl);
         addToPropertyMap(cp, SmallRyeOASConfig.OPERATION_ID_STRAGEGY, operationIdStrategy);
+        addToPropertyMap(cp, SmallRyeOASConfig.DUPLICATE_OPERATION_ID_BEHAVIOR, duplicateOperationIdBehavior);
         addToPropertyMap(cp, SmallRyeOASConfig.SCAN_PROFILES, scanProfiles);
         addToPropertyMap(cp, SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, scanExcludeProfiles);
         addToPropertyMap(cp, SmallRyeOASConfig.SCAN_RESOURCE_CLASS_PREFIX, scanResourceClasses);
