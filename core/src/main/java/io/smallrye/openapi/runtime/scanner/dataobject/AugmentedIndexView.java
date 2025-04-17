@@ -174,11 +174,13 @@ public class AugmentedIndexView implements IndexView {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public Collection<ClassInfo> getKnownDirectImplementors(DotName className) {
         return index.getKnownDirectImplementors(Objects.requireNonNull(className));
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public Collection<ClassInfo> getAllKnownImplementors(DotName interfaceName) {
         return index.getAllKnownImplementors(Objects.requireNonNull(interfaceName));
     }
@@ -218,5 +220,15 @@ public class AugmentedIndexView implements IndexView {
     @Override
     public Set<DotName> getSubpackages(DotName packageName) {
         return index.getSubpackages(Objects.requireNonNull(packageName));
+    }
+
+    @Override
+    public Collection<ClassInfo> getAllKnownImplementations(DotName interfaceName) {
+        return index.getAllKnownImplementations(Objects.requireNonNull(interfaceName));
+    }
+
+    @Override
+    public Collection<ClassInfo> getKnownDirectImplementations(DotName interfaceName) {
+        return index.getKnownDirectImplementations(Objects.requireNonNull(interfaceName));
     }
 }
