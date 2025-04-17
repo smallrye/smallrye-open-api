@@ -305,6 +305,7 @@ public class FilteredIndexView implements IndexView {
      * @see org.jboss.jandex.IndexView#getKnownDirectImplementors(org.jboss.jandex.DotName)
      */
     @Override
+    @SuppressWarnings("deprecation")
     public Collection<ClassInfo> getKnownDirectImplementors(DotName className) {
         return filterClasses(this.delegate.getKnownDirectImplementors(className));
     }
@@ -313,6 +314,7 @@ public class FilteredIndexView implements IndexView {
      * @see org.jboss.jandex.IndexView#getAllKnownImplementors(org.jboss.jandex.DotName)
      */
     @Override
+    @SuppressWarnings("deprecation")
     public Collection<ClassInfo> getAllKnownImplementors(DotName interfaceName) {
         return filterClasses(this.delegate.getAllKnownImplementors(interfaceName));
     }
@@ -356,6 +358,16 @@ public class FilteredIndexView implements IndexView {
     @Override
     public Set<DotName> getSubpackages(DotName packageName) {
         return delegate.getSubpackages(packageName);
+    }
+
+    @Override
+    public Collection<ClassInfo> getAllKnownImplementations(DotName interfaceName) {
+        return delegate.getAllKnownImplementations(interfaceName);
+    }
+
+    @Override
+    public Collection<ClassInfo> getKnownDirectImplementations(DotName interfaceName) {
+        return delegate.getKnownDirectImplementations(interfaceName);
     }
 
     private Collection<AnnotationInstance> filterInstances(Collection<AnnotationInstance> annotations) {
