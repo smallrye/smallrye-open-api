@@ -713,4 +713,24 @@ class ParameterScanTests extends IndexScannerTestBase {
         OpenAPI result = scan(config(SmallRyeOASConfig.VERSION, oasVersion), NullableRefParamClasses.CLASSES);
         assertJsonEquals(expectedResource, result);
     }
+
+    @Test
+    void testUnsortedParameters() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("/status")
+        class Resource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/{resourceId}")
+            public String get(
+                    @jakarta.ws.rs.QueryParam("q7") int q7,
+                    @jakarta.ws.rs.QueryParam("q9") int q9,
+                    @jakarta.ws.rs.HeaderParam("h6") int h8,
+                    @jakarta.ws.rs.PathParam("resourceId") String resourceId,
+                    @jakarta.ws.rs.QueryParam("q8") int q8) {
+                return null;
+            }
+        }
+
+        test(dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.FALSE),
+                "params.unsorted-scan-order.json", Resource.class);
+    }
 }

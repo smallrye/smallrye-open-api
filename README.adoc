@@ -95,3 +95,11 @@ Set this value in order to change the maximum threshold for processed static fil
 mp.openapi.extensions.smallrye.merge-schema-examples
 ----
 Set this boolean value to disable the merging of the deprecated `@Schema` `example` property into the `examples` array introduced in OAS 3.1.0. If not set, it will default to `true` the deprecated `example` will be mapped to the `examples` array in the OpenAPI model.
+
+* Sorted Parameters
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.sorted-parameters.enable
+----
+Set this boolean value to enable or disable the sorting of parameter array entries during annotation scanning. When enabled (set to `true`), parameters will be order either by their order within a `@Parameters` annotation on an operation method or (in the absence of that annotation) by their `$ref`, `in`, and `name` attributes. When disabled (set to `false`), parameters will be in the order they are encountered in the Java code.

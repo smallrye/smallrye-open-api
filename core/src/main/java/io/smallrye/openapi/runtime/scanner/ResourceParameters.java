@@ -130,9 +130,7 @@ public class ResourceParameters {
         this.formBodyContent = formBodyContent;
     }
 
-    public void sort(List<Parameter> preferredOrder) {
-        Comparator<Parameter> comparator = parameterComparator(preferredOrder);
-
+    public void sort(Comparator<Parameter> comparator) {
         if (pathItemParameters != null) {
             pathItemParameters.sort(comparator);
         }
