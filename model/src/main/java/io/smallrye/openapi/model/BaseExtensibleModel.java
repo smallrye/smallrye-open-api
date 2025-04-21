@@ -38,6 +38,12 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
         return super.hashCode() * 31 + Objects.hash(extensionNames);
     }
 
+    @Override
+    void setUnmodifiable() {
+        super.setUnmodifiable();
+        extensionNames = Collections.unmodifiableSet(extensionNames);
+    }
+
     /**
      * Returns a read-only view of all properties, excluding private extensions.
      */
@@ -261,7 +267,7 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
      */
     @Override
     public <T extends BaseModel<C>> void merge(T other) {
-        for (Entry<String, Object> property : other.properties.entrySet()) {
+        for (Entry<String, Object> property : other.getProperties().entrySet()) {
             String name = property.getKey();
 
             if (other.isExtension(name) && !isExtension(name)) {

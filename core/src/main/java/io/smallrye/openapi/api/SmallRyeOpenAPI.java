@@ -34,6 +34,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.common.classloader.ClassPathUtils;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 import io.smallrye.openapi.runtime.io.Format;
@@ -55,8 +56,8 @@ public class SmallRyeOpenAPI {
     private final BiFunction<? super Object, Format, String> toString;
 
     @SuppressWarnings("unchecked")
-    protected SmallRyeOpenAPI(OpenAPI model, Object jsonModel, BiFunction<?, Format, String> toString) {
-        this.model = model;
+    protected SmallRyeOpenAPI(OpenAPI model, Object jsonModel, BiFunction<?, Format, String> toString, boolean unmodifiable) {
+        this.model = unmodifiable ? BaseModel.deepCopy(model, OpenAPI.class, true) : model;
         this.jsonModel = jsonModel;
         this.toString = (BiFunction<? super Object, Format, String>) toString;
     }
@@ -626,7 +627,7 @@ public class SmallRyeOpenAPI {
             ctx.doc.set(null);
         }
 
-        protected <V> SmallRyeOpenAPI buildFinalize(BuildContext<V, ?, ?, ?, ?> ctx) {
+        protected <V> SmallRyeOpenAPI buildFinalize(BuildContext<V, ?, ?, ?, ?> ctx, boolean unmodifiable) {
             ctx.doc.config(ctx.buildConfig);
             ctx.doc.defaultRequiredProperties(ctx.defaultRequiredProperties);
             ctx.doc.modelFromReader(MergeUtil.merge(ctx.initialModel, ctx.readerModel));
@@ -650,7 +651,7 @@ public class SmallRyeOpenAPI {
             ctx.doc.initialize();
             OpenAPI model = ctx.doc.get();
             BiFunction<V, Format, String> toString = ctx.modelIO.jsonIO()::toString;
-            return new SmallRyeOpenAPI(model, ctx.modelIO.write(model).orElse(null), toString);
+            return new SmallRyeOpenAPI(model, ctx.modelIO.write(model).orElse(null), toString, unmodifiable);
         }
 
         protected static class BuildContext<V, A extends V, O extends V, AB, OB> {
@@ -687,6 +688,7 @@ public class SmallRyeOpenAPI {
         /**
          * Build a new {@linkplain SmallRyeOpenAPI} instance based on the current state of this builder.
          *
+         * @param unmodifiable whether the result model available via {@linkplain SmallRyeOpenAPI#model()} is mutable or not.
          * @param <V> JSON value type
          * @param <A> JSON array type
          * @param <O> JSON object type
@@ -694,7 +696,7 @@ public class SmallRyeOpenAPI {
          * @param <OB> JSON object builder type
          * @return a new {@linkplain SmallRyeOpenAPI} instance
          */
-        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI build() {
+        protected <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI build(boolean unmodifiable) {
             BuildContext<V, A, O, AB, OB> ctx = getContext();
 
             buildPrepare(ctx);
@@ -703,7 +705,35 @@ public class SmallRyeOpenAPI {
             buildAnnotationModel(ctx);
             buildStandardFilter(ctx);
 
-            return buildFinalize(ctx);
+            return buildFinalize(ctx, unmodifiable);
+        }
+
+        /**
+         * Build a new {@linkplain SmallRyeOpenAPI} instance based on the current state of this builder.
+         *
+         * @param <V> JSON value type
+         * @param <A> JSON array type
+         * @param <O> JSON object type
+         * @param <AB> JSON array builder type
+         * @param <OB> JSON object builder type
+         * @return a new {@linkplain SmallRyeOpenAPI} instance
+         */
+        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI build() {
+            return build(false);
+        }
+
+        /**
+         * Build a new {@linkplain SmallRyeOpenAPI} unmodifiable instance based on the current state of this builder.
+         *
+         * @param <V> JSON value type
+         * @param <A> JSON array type
+         * @param <O> JSON object type
+         * @param <AB> JSON array builder type
+         * @param <OB> JSON object builder type
+         * @return a new {@linkplain SmallRyeOpenAPI} instance
+         */
+        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI buildUnmodifiable() {
+            return build(true);
         }
 
         private <V, A extends V, O extends V, AB, OB> AnnotationScannerExtension newExtension(

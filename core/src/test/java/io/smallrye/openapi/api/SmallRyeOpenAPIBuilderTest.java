@@ -2,6 +2,7 @@ package io.smallrye.openapi.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,6 +11,9 @@ import java.net.URLClassLoader;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.Paths;
+import org.eclipse.microprofile.openapi.models.servers.Server;
 import org.junit.jupiter.api.Test;
 
 class SmallRyeOpenAPIBuilderTest {
@@ -95,5 +99,38 @@ class SmallRyeOpenAPIBuilderTest {
         assertEquals(OASFactory.createPaths(), model.getPaths()); // empty
         assertNull(model.getComponents());
         assertNull(model.getWebhooks());
+    }
+
+    @Test
+    void testUnmodifiableModel() {
+        URL resource = getClass()
+                .getClassLoader()
+                .getResource("io/smallrye/openapi/runtime/io/_everything.yaml");
+
+        SmallRyeOpenAPI result = SmallRyeOpenAPI.builder()
+                .enableModelReader(false)
+                .enableStandardFilter(false)
+                .enableAnnotationScan(false)
+                .enableStandardStaticFiles(false)
+                .withCustomStaticFile(() -> {
+                    try {
+                        return resource.openStream();
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+                .buildUnmodifiable();
+
+        OpenAPI model = result.model();
+
+        Object newExtension = new Object();
+        assertThrows(UnsupportedOperationException.class, () -> model.addExtension("x-anything", newExtension));
+
+        Server newServer = OASFactory.createServer();
+        assertThrows(UnsupportedOperationException.class, () -> model.addServer(newServer));
+
+        Paths paths = model.getPaths();
+        PathItem newPathItem = OASFactory.createPathItem();
+        assertThrows(UnsupportedOperationException.class, () -> paths.addPathItem("/path", newPathItem));
     }
 }
