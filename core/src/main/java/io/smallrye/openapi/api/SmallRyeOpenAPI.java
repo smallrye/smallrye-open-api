@@ -711,28 +711,18 @@ public class SmallRyeOpenAPI {
         /**
          * Build a new {@linkplain SmallRyeOpenAPI} instance based on the current state of this builder.
          *
-         * @param <V> JSON value type
-         * @param <A> JSON array type
-         * @param <O> JSON object type
-         * @param <AB> JSON array builder type
-         * @param <OB> JSON object builder type
          * @return a new {@linkplain SmallRyeOpenAPI} instance
          */
-        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI build() {
+        public SmallRyeOpenAPI build() {
             return build(false);
         }
 
         /**
-         * Build a new {@linkplain SmallRyeOpenAPI} unmodifiable instance based on the current state of this builder.
+         * Build a new unmodifiable {@linkplain SmallRyeOpenAPI} instance based on the current state of this builder.
          *
-         * @param <V> JSON value type
-         * @param <A> JSON array type
-         * @param <O> JSON object type
-         * @param <AB> JSON array builder type
-         * @param <OB> JSON object builder type
-         * @return a new {@linkplain SmallRyeOpenAPI} instance
+         * @return a new unmodifiable {@linkplain SmallRyeOpenAPI} instance
          */
-        public <V, A extends V, O extends V, AB, OB> SmallRyeOpenAPI buildUnmodifiable() {
+        public SmallRyeOpenAPI buildUnmodifiable() {
             return build(true);
         }
 
