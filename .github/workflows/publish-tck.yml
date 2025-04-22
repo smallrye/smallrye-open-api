@@ -20,7 +20,7 @@ jobs:
         #- tck-version: "3.0"
         #- tck-version: "3.1.1"
         - tck-version: "4.0.2"
-        - tck-version: "4.1"
+        - tck-version: "4.1-RC1"
 
     name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
     steps:
