@@ -1,6 +1,7 @@
 package io.smallrye.openapi.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -33,7 +34,7 @@ class BaseModelSupport {
         if (!stack.containsKey(model)) {
             stack.put(model, model);
 
-            for (Map.Entry<String, Object> e : model.properties.entrySet()) {
+            for (Map.Entry<String, Object> e : model.getProperties().entrySet()) {
                 result = 31 * result + hash(stack, e);
             }
 
@@ -144,12 +145,15 @@ class BaseModelSupport {
     //// Support methods for BaseModel#deepCopy
 
     @SuppressWarnings("unchecked")
-    static <O extends Constructible> O deepCopy(O other, Class<O> type) {
+    static <O extends Constructible> O deepCopy(O other, Class<O> type, boolean unmodifiable) {
         BaseModel<O> result = (BaseModel<O>) OASFactory.createObject(type);
 
         if (other instanceof BaseModel) {
             BaseModel<O> otherImpl = (BaseModel<O>) other;
-            result.properties.putAll(BaseModelSupport.deepCopy(otherImpl.properties));
+            result.getProperties().putAll(BaseModelSupport.deepCopy(otherImpl.getProperties(), unmodifiable));
+            if (unmodifiable) {
+                result.setUnmodifiable();
+            }
         } else if (other != null) {
             // Maybe support non-BaseModel implementations in the future
             throw new UnsupportedOperationException("Only BaseModel types may be copied: " + other.getClass());
@@ -158,36 +162,36 @@ class BaseModelSupport {
         return (O) result;
     }
 
-    private static <K, V> Map<K, V> deepCopy(Map<K, V> map) {
+    private static <K, V> Map<K, V> deepCopy(Map<K, V> map, boolean unmodifiable) {
         Map<K, V> clone = new LinkedHashMap<>(map.size());
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            clone.put(entry.getKey(), deepCopy(entry.getValue()));
+            clone.put(entry.getKey(), deepCopy(entry.getValue(), unmodifiable));
         }
 
-        return clone;
+        return unmodifiable ? Collections.unmodifiableMap(clone) : clone;
     }
 
-    private static <T> List<T> deepCopy(List<T> list) {
+    private static <T> List<T> deepCopy(List<T> list, boolean unmodifiable) {
         List<T> clone = new ArrayList<>(list.size());
 
         for (T value : list) {
-            clone.add(deepCopy(value));
+            clone.add(deepCopy(value, unmodifiable));
         }
 
-        return clone;
+        return unmodifiable ? Collections.unmodifiableList(clone) : clone;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T, N extends Constructible> T deepCopy(T value) {
+    private static <T, N extends Constructible> T deepCopy(T value, boolean unmodifiable) {
         if (value instanceof Map) {
-            return (T) deepCopy((Map<?, ?>) value);
+            return (T) deepCopy((Map<?, ?>) value, unmodifiable);
         } else if (value instanceof List) {
-            return (T) deepCopy((List<?>) value);
+            return (T) deepCopy((List<?>) value, unmodifiable);
         } else if (value instanceof BaseModel) {
             N nested = (N) value;
             Class<N> nestedType = (Class<N>) nested.getClass();
-            return (T) deepCopy(nested, findConstructible(nestedType));
+            return (T) deepCopy(nested, findConstructible(nestedType), unmodifiable);
         } else if (value instanceof Constructible) {
             // Maybe support non-BaseModel implementations in the future
             return value;

@@ -21,12 +21,16 @@ public abstract class BaseModel<C extends Constructible> {
         MERGE_VALUES
     }
 
-    protected final Map<String, Object> properties = new LinkedHashMap<>(2);
+    private Map<String, Object> properties = new LinkedHashMap<>(2);
     private int modCount;
     private int hash = 0;
 
     public static <O extends Constructible> O deepCopy(O other, Class<O> type) {
-        return BaseModelSupport.deepCopy(other, type);
+        return deepCopy(other, type, false);
+    }
+
+    public static <O extends Constructible> O deepCopy(O other, Class<O> type, boolean unmodifiable) {
+        return BaseModelSupport.deepCopy(other, type, unmodifiable);
     }
 
     public static <C extends Constructible, T extends BaseModel<C>> T merge(T object1, T object2) {
@@ -42,6 +46,14 @@ public abstract class BaseModel<C extends Constructible> {
 
     public int getModCount() {
         return modCount;
+    }
+
+    Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    void setUnmodifiable() {
+        this.properties = Collections.unmodifiableMap(properties);
     }
 
     @Override
@@ -115,7 +127,7 @@ public abstract class BaseModel<C extends Constructible> {
      * @param other the other {@link BaseModel} object
      */
     public <T extends BaseModel<C>> void merge(T other) {
-        for (Entry<String, Object> entry : other.properties.entrySet()) {
+        for (Entry<String, Object> entry : other.getProperties().entrySet()) {
             String name = entry.getKey();
             MergeDirective mergeDirective = mergeDirective(name);
 
