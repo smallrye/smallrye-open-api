@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Content;
@@ -495,16 +494,11 @@ public abstract class AbstractParameterProcessor {
         mapMatrixParameters();
 
         // Convert ParameterContext entries to MP-OAI Parameters
-        Stream<Parameter> parameterStream = this.params.values()
+        List<Parameter> parameters = this.params.values()
                 .stream()
                 .map(context -> this.mapParameter(resourceMethod, context))
-                .filter(Objects::nonNull);
-
-        if (scannerContext.getConfig().sortedParametersEnable()) {
-            parameterStream = parameterStream.sorted(ResourceParameters.parameterComparator(preferredOrder));
-        }
-
-        List<Parameter> parameters = parameterStream.collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return parameters.isEmpty() ? null : parameters;
     }
