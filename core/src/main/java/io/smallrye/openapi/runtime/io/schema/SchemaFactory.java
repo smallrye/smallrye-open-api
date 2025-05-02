@@ -340,7 +340,7 @@ public class SchemaFactory {
         if (schema.getType() != null && schema.getType().contains(Schema.SchemaType.ARRAY) && implSchema != null) {
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
-            schema.setItems(implSchema);
+            schema.setItems(lookupRef(context, type, implSchema));
         } else if (implSchema != null) {
             // If there is an impl class - merge the @Schema properties *onto* the schema
             // generated from the Class so that the annotation properties override the class
@@ -727,7 +727,21 @@ public class SchemaFactory {
 
         if (allowRegistration(context, schemaRegistry, type, schema)) {
             schema = schemaRegistry.register(type, context.getJsonViews(), schema);
-        } else if (schemaRegistry != null && schemaRegistry.hasRef(type, context.getJsonViews())) {
+        } else {
+            schema = lookupRef(context, type, schema);
+        }
+
+        return schema;
+    }
+
+    /**
+     * If the given type is found in the registry and has a reference, replace the
+     * given schema with a schema reference. Otherwise, simply return the schema unaltered.
+     */
+    static Schema lookupRef(AnnotationScannerContext context, Type type, Schema schema) {
+        SchemaRegistry schemaRegistry = context.getSchemaRegistry();
+
+        if (schemaRegistry != null && schemaRegistry.hasRef(type, context.getJsonViews())) {
             schema = schemaRegistry.lookupRef(type, context.getJsonViews());
         }
 
