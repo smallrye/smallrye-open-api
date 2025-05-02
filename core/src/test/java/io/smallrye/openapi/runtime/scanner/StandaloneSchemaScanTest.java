@@ -992,4 +992,25 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     void testParentClassFieldSchemaAnnotation() throws IOException, JSONException {
         assertJsonEquals("components.schemas.annotated-parent-field.json", ParentClassFieldSchemaAnnotationTestClasses.CLASSES);
     }
+
+    @Test
+    void testArrayItemsUseAvailableReference() throws IOException, JSONException {
+        class ImmutableList<T> extends java.util.ArrayList<T> {
+            private static final long serialVersionUID = 1L;
+        }
+
+        @Schema(name = "Greeting", description = "A greeting message")
+        class Greeting {
+            @Schema(description = "The message to be displayed")
+            String message;
+        }
+
+        @Schema(name = "Response")
+        class Response {
+            @Schema(type = SchemaType.ARRAY, implementation = Greeting.class, description = "An array of greetings")
+            ImmutableList<Greeting> greetings;
+        }
+
+        assertJsonEquals("components.schemas.array-items-reference.json", ImmutableList.class, Greeting.class, Response.class);
+    }
 }
