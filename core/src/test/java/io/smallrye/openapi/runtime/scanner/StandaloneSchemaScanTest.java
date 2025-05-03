@@ -903,7 +903,7 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @Schema
         final class Bean {
-            @Schema(required = false, description = "Any description", nullable = false, example = "3072")
+            @Schema(required = false, description = "Any description", nullable = false, examples = "3072")
             @org.jetbrains.annotations.Nullable
             private final Long amount;
 
