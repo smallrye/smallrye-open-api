@@ -35,6 +35,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -895,6 +896,29 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         assertJsonEquals("components.schemas.example-not-merged.json",
                 scan(config(SmallRyeOASConfig.SMALLRYE_MERGE_SCHEMA_EXAMPLES, "false"), null, new Class[] { DTO.class }));
+    }
+
+    @Test
+    void testKotlinNullableSetNonNullable() throws IOException, JSONException {
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Schema
+        final class Bean {
+            @Schema(required = false, description = "Any description", nullable = false, example = "3072")
+            @org.jetbrains.annotations.Nullable
+            private final Long amount;
+
+            @SuppressWarnings("unused")
+            public Bean(@org.jetbrains.annotations.Nullable Long amount) {
+                this.amount = amount;
+            }
+
+            @org.jetbrains.annotations.Nullable
+            public final Long getAmount() {
+                return this.amount;
+            }
+        }
+
+        assertJsonEquals("components.schemas.nonnullable-kotlin-nullable.json", Bean.class);
     }
 
     @Test

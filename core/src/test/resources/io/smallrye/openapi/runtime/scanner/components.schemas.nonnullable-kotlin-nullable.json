@@ -1,0 +1,18 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "8Bean" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Any description",
+            "examples" : [ 3072 ]
+          }
+        }
+      }
+    }
+  }
+}
