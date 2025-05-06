@@ -4,7 +4,8 @@
     "schemas": {
       "KotlinBean": {
         "required": [
-          "description"
+          "description",
+          "nestedCollection"
         ],
         "type": "object",
         "properties": {
@@ -17,6 +18,17 @@
           },
           "description": {
             "type": "string"
+          },
+          "nestedCollection" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "uniqueItems" : true,
+              "items" : {
+                "type" : "number",
+                "format" : "double"
+              }
+            }
           }
         }
       }

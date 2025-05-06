@@ -9,6 +9,7 @@ data class KotlinBean (
     val id: KotlinLongValue? = null,
     val name: String? = null,
     val description: String = "",
+    val nestedCollection: Map<String, Set<Double>>,
 )
 
 @Deprecated("1.0.0")
