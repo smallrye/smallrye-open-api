@@ -198,6 +198,7 @@ public class SchemaFactory {
         schema.setRequired(readAttr(context, annotation, SchemaConstant.PROP_REQUIRED_PROPERTIES, defaults));
         schema.setDescription(readAttr(context, annotation, SchemaConstant.PROP_DESCRIPTION, defaults));
         schema.setFormat(readAttr(context, annotation, SchemaConstant.PROP_FORMAT, defaults));
+        SchemaSupport.setNullable(schema, readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
         schema.setReadOnly(readAttr(context, annotation, SchemaConstant.PROP_READ_ONLY, defaults));
         schema.setWriteOnly(readAttr(context, annotation, SchemaConstant.PROP_WRITE_ONLY, defaults));
         schema.setExternalDocs(context.io().extDocIO().read(annotation.value(SchemaConstant.PROP_EXTERNAL_DOCS)));
@@ -205,7 +206,6 @@ public class SchemaFactory {
 
         final SchemaType type = readSchemaType(context, annotation, schema, defaults);
         SchemaSupport.setType(schema, readSchemaType(context, annotation, schema, defaults));
-        SchemaSupport.setNullable(schema, readAttr(context, annotation, SchemaConstant.PROP_NULLABLE, defaults));
 
         Object example = parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, type);
 
