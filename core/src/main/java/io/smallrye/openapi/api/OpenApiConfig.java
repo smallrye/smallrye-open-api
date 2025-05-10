@@ -306,6 +306,10 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.SMALLRYE_MERGE_SCHEMA_EXAMPLES, Boolean.class, () -> Boolean.TRUE);
     }
 
+    default boolean sortedParametersEnable() {
+        return getConfigValue(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.class, () -> Boolean.TRUE);
+    }
+
     default Integer getMaximumStaticFileSize() {
         return getConfigValue(SmallRyeOASConfig.MAXIMUM_STATIC_FILE_SIZE, Integer.class,
                 () -> MAXIMUM_STATIC_FILE_SIZE_DEFAULT);
