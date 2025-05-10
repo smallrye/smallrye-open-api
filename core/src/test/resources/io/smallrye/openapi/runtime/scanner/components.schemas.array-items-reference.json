@@ -15,12 +15,19 @@
       "Response" : {
         "type" : "object",
         "properties" : {
-          "greetings" : {
+          "greetings1" : {
             "description" : "An array of greetings",
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/Greeting"
             }
+          },
+          "greetings2" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            },
+            "description" : "An array of greetings"
           }
         }
       }

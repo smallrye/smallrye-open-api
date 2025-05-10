@@ -1008,7 +1008,9 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         @Schema(name = "Response")
         class Response {
             @Schema(type = SchemaType.ARRAY, implementation = Greeting.class, description = "An array of greetings")
-            ImmutableList<Greeting> greetings;
+            ImmutableList<Greeting> greetings1;
+            @Schema(implementation = Greeting[].class, description = "An array of greetings")
+            ImmutableList<Greeting> greetings2;
         }
 
         assertJsonEquals("components.schemas.array-items-reference.json", ImmutableList.class, Greeting.class, Response.class);
