@@ -205,7 +205,7 @@ public class SchemaFactory {
         schema.setDeprecated(readAttr(context, annotation, SchemaConstant.PROP_DEPRECATED, defaults));
 
         final SchemaType type = readSchemaType(context, annotation, schema, defaults);
-        SchemaSupport.setType(schema, readSchemaType(context, annotation, schema, defaults));
+        SchemaSupport.setType(schema, type);
 
         Object example = parseSchemaAttr(context, annotation, SchemaConstant.PROP_EXAMPLE, defaults, type);
 
@@ -309,43 +309,46 @@ public class SchemaFactory {
         }
 
         boolean namedComponent = Extensions.getName(schema) != null;
+        Type implementation = context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION);
 
         if (JandexUtil.isSimpleClassSchema(annotation)) {
-            Schema implSchema = readClassSchema(context,
-                    context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
-                    !namedComponent);
+            Schema implSchema = readClassSchema(context, implementation, !namedComponent);
             schema = MergeUtil.mergeObjects(implSchema, schema);
         } else if (JandexUtil.isSimpleArraySchema(context, annotation)) {
-            Schema implSchema = readClassSchema(context,
-                    context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION),
-                    !namedComponent);
+            Schema implSchema = readClassSchema(context, implementation, !namedComponent);
             // If the @Schema annotation indicates an array type, then use the Schema
             // generated from the implementation Class as the "items" for the array.
             schema.setItems(implSchema);
         } else {
-            schema = includeTypeSchema(context, schema,
-                    context.annotations().value(annotation, SchemaConstant.PROP_IMPLEMENTATION));
+            List<SchemaType> declaredType = Optional
+                    .ofNullable(context.annotations().<String> value(annotation, SchemaConstant.PROP_TYPE))
+                    .map(SchemaFactory::parseSchemaType)
+                    .map(Collections::singletonList)
+                    .orElseGet(Collections::emptyList);
+
+            schema = includeTypeSchema(context, schema, implementation, declaredType);
         }
 
         return schema;
     }
 
-    public static Schema includeTypeSchema(AnnotationScannerContext context, Schema schema, Type type) {
-        Schema implSchema = null;
-
+    public static Schema includeTypeSchema(AnnotationScannerContext context, Schema schema, Type type,
+            List<SchemaType> declaredType) {
         if (type != null /* && type.kind() == Kind.CLASS */) {
-            implSchema = readClassSchema(context, type, false);
-        }
+            Schema implSchema = readClassSchema(context, type, false);
 
-        if (schema.getType() != null && schema.getType().contains(Schema.SchemaType.ARRAY) && implSchema != null) {
-            // If the @Schema annotation indicates an array type, then use the Schema
-            // generated from the implementation Class as the "items" for the array.
-            schema.setItems(lookupRef(context, type, implSchema));
-        } else if (implSchema != null) {
-            // If there is an impl class - merge the @Schema properties *onto* the schema
-            // generated from the Class so that the annotation properties override the class
-            // properties (as required by the MP+OAI spec).
-            schema = MergeUtil.mergeObjects(implSchema, schema);
+            if (implSchema != null) {
+                if (declaredType.contains(Schema.SchemaType.ARRAY)) {
+                    // If the @Schema annotation indicates an array type, then use the Schema
+                    // generated from the implementation Class as the "items" for the array.
+                    schema.setItems(lookupRef(context, type, implSchema));
+                } else {
+                    // If there is an impl class - merge the @Schema properties *onto* the schema
+                    // generated from the Class so that the annotation properties override the class
+                    // properties (as required by the MP+OAI spec).
+                    schema = MergeUtil.mergeObjects(implSchema, schema);
+                }
+            }
         }
 
         return schema;
@@ -531,15 +534,20 @@ public class SchemaFactory {
             ArrayType array = type.asArrayType();
             int dimensions = array.dimensions();
             Type componentType = array.constituent();
+            Schema itemSchema;
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.setItems(
-                        readClassSchema(context, ArrayType.create(componentType, dimensions - 1), schemaReferenceSupported));
+                itemSchema = readClassSchema(context, ArrayType.create(componentType, dimensions - 1),
+                        schemaReferenceSupported);
             } else {
                 // Recurse using the type of the array elements
-                schema.setItems(readClassSchema(context, componentType, schemaReferenceSupported));
+                itemSchema = readClassSchema(context, componentType, schemaReferenceSupported);
+                // Maybe dereference
+                itemSchema = lookupRef(context, componentType, itemSchema);
             }
+
+            schema.setItems(itemSchema);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
         } else {
@@ -597,15 +605,19 @@ public class SchemaFactory {
             ArrayType array = type.asArrayType();
             int dimensions = array.dimensions();
             Type componentType = array.constituent();
+            Schema itemSchema;
 
             if (dimensions > 1) {
                 // Recurse using a new array type with dimensions decremented
-                schema.setItems(
-                        typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null));
+                itemSchema = typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null);
             } else {
                 // Recurse using the type of the array elements
-                schema.setItems(typeToSchema(context, componentType, null));
+                itemSchema = typeToSchema(context, componentType, null);
+                // Maybe dereference
+                itemSchema = lookupRef(context, componentType, itemSchema);
             }
+
+            schema.setItems(itemSchema);
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(context, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
@@ -741,7 +753,7 @@ public class SchemaFactory {
     static Schema lookupRef(AnnotationScannerContext context, Type type, Schema schema) {
         SchemaRegistry schemaRegistry = context.getSchemaRegistry();
 
-        if (schemaRegistry != null && schemaRegistry.hasRef(type, context.getJsonViews())) {
+        if (schemaRegistry.hasRef(type, context.getJsonViews())) {
             schema = schemaRegistry.lookupRef(type, context.getJsonViews());
         }
 
