@@ -1019,4 +1019,29 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
 
         assertJsonEquals("components.schemas.array-items-reference.json", ImmutableList.class, Greeting.class, Response.class);
     }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testClassSchemaWithImplNotIntrospected() throws IOException, JSONException {
+        class UseSchemaImplementationImpl {
+            private java.math.BigDecimal amount;
+            private String currency;
+            // ... constructor and getter/setter methods ....
+        }
+
+        @Schema(implementation = UseSchemaImplementationImpl.class)
+        class UseSchemaImplementationType {
+            private String value;
+            private final String internalValue = "internalValue";
+            private final Boolean composite = true;
+
+            public final boolean isNull() {
+                return value == null;
+            }
+            // ... some other methods ...
+        }
+
+        assertJsonEquals("components.schemas.implementation-no-introspection.json", UseSchemaImplementationImpl.class,
+                UseSchemaImplementationType.class);
+    }
 }
