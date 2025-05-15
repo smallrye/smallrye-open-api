@@ -23,11 +23,23 @@
             }
           },
           "greetings2" : {
+            "description" : "An array of greetings",
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/Greeting"
-            },
-            "description" : "An array of greetings"
+            }
+          },
+          "greetings3" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            }
+          },
+          "greetings4" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            }
           }
         }
       }
