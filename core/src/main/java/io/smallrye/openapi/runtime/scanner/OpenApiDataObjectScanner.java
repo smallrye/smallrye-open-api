@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.BaseStream;
 
 import org.eclipse.microprofile.openapi.OASFactory;
@@ -37,6 +38,7 @@ import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
+import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -255,8 +257,11 @@ public class OpenApiDataObjectScanner {
 
             TypeUtil.mapDeprecated(context, currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
+            boolean hasImplementation = Optional.ofNullable(TypeUtil.getSchemaAnnotation(context, currentClass))
+                    .map(JandexUtil::hasImplementation)
+                    .orElse(false);
 
-            if (!hasNonNullType(currentSchema)) {
+            if (!hasImplementation && !hasNonNullType(currentSchema)) {
                 // If not schema has yet been set, consider this an "object"
                 SchemaSupport.setType(currentSchema, Schema.SchemaType.OBJECT);
             } else if (allowRegistration) {
@@ -264,7 +269,7 @@ public class OpenApiDataObjectScanner {
             }
 
             List<Schema.SchemaType> types = currentSchema.getType();
-            if (types != null && types.contains(Schema.SchemaType.OBJECT)) {
+            if (!hasImplementation && types != null && types.contains(Schema.SchemaType.OBJECT)) {
                 // Only 'object' type schemas should have properties of their own
                 ScannerLogging.logger.gettingFields(currentType, currentClass);
 
@@ -292,7 +297,7 @@ public class OpenApiDataObjectScanner {
 
     private void maybeRegisterSchema(Type currentType, Schema currentSchema, Schema entrySchema) {
         Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
-
+        Schema.SchemaType type = SchemaSupport.getNonNullType(currentSchema);
         /*
          * Ignore the returned ref when:
          *
@@ -301,7 +306,7 @@ public class OpenApiDataObjectScanner {
          * - the target of the ref is the schema currently being processed and using the ref would
          * result in a self-referencing schema.
          */
-        if (ref != currentSchema && !currentSchema.getType().contains(Schema.SchemaType.OBJECT) && ref.getRef() != null) {
+        if (ref != currentSchema && type != Schema.SchemaType.OBJECT && ref.getRef() != null) {
             Schema refTarget = context.getSchemaRegistry().lookupSchema(currentType, context.getJsonViews());
 
             if (refTarget != entrySchema) {
