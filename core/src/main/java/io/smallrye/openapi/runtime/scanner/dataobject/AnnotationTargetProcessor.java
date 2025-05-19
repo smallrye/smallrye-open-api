@@ -220,7 +220,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
         if (registrationCandidate) {
             if (fieldAssertionConflicts(fieldSchema, typeSchema)) {
-                fieldSchema = SchemaFactory.includeTypeSchema(context, fieldSchema, fieldType);
+                List<SchemaType> declaredType = Optional.ofNullable(fieldSchema.getType()).orElseGet(Collections::emptyList);
+                fieldSchema = SchemaFactory.includeTypeSchema(context, fieldSchema, fieldType, declaredType);
             } else {
                 typeProcessor.pushObjectStackInput();
                 Schema registeredTypeSchema;
