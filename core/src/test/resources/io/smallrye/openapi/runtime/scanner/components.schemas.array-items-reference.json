@@ -1,0 +1,48 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "description" : "A greeting message",
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "description" : "The message to be displayed"
+          }
+        }
+      },
+      "Response" : {
+        "type" : "object",
+        "properties" : {
+          "greetings1" : {
+            "description" : "An array of greetings",
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            }
+          },
+          "greetings2" : {
+            "description" : "An array of greetings",
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            }
+          },
+          "greetings3" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            }
+          },
+          "greetings4" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Greeting"
+            }
+          }
+        }
+      }
+    }
+  }
+}
