@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.BaseStream;
 
 import org.eclipse.microprofile.openapi.OASFactory;
@@ -38,7 +37,6 @@ import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
 
 /**
@@ -257,11 +255,12 @@ public class OpenApiDataObjectScanner {
 
             TypeUtil.mapDeprecated(context, currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
-            boolean hasImplementation = Optional.ofNullable(TypeUtil.getSchemaAnnotation(context, currentClass))
-                    .map(JandexUtil::hasImplementation)
-                    .orElse(false);
 
-            if (!hasImplementation && !hasNonNullType(currentSchema)) {
+            if (currentSchema.getRef() != null) {
+                continue;
+            }
+
+            if (!hasNonNullType(currentSchema)) {
                 // If not schema has yet been set, consider this an "object"
                 SchemaSupport.setType(currentSchema, Schema.SchemaType.OBJECT);
             } else if (allowRegistration) {
@@ -269,7 +268,7 @@ public class OpenApiDataObjectScanner {
             }
 
             List<Schema.SchemaType> types = currentSchema.getType();
-            if (!hasImplementation && types != null && types.contains(Schema.SchemaType.OBJECT)) {
+            if (types != null && types.contains(Schema.SchemaType.OBJECT)) {
                 // Only 'object' type schemas should have properties of their own
                 ScannerLogging.logger.gettingFields(currentType, currentClass);
 

@@ -1041,7 +1041,19 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
             // ... some other methods ...
         }
 
+        @Schema(ref = "#/components/schemas/1UseSchemaImplementationImpl")
+        class UseSchemaImplementationType2 {
+            private String value;
+            private final String internalValue = "internalValue";
+            private final Boolean composite = true;
+
+            public final boolean isNull() {
+                return value == null;
+            }
+            // ... some other methods ...
+        }
+
         assertJsonEquals("components.schemas.implementation-no-introspection.json", UseSchemaImplementationImpl.class,
-                UseSchemaImplementationType.class);
+                UseSchemaImplementationType.class, UseSchemaImplementationType2.class);
     }
 }

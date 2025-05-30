@@ -15,6 +15,9 @@
       },
       "1UseSchemaImplementationType" : {
         "$ref" : "#/components/schemas/1UseSchemaImplementationImpl"
+      },
+      "1UseSchemaImplementationType2" : {
+        "$ref" : "#/components/schemas/1UseSchemaImplementationImpl"
       }
     }
   }
