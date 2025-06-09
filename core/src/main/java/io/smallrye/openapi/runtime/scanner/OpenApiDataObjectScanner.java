@@ -256,6 +256,10 @@ public class OpenApiDataObjectScanner {
             TypeUtil.mapDeprecated(context, currentClass, currentSchema::getDeprecated, currentSchema::setDeprecated);
             currentPathEntry.setSchema(currentSchema);
 
+            if (currentSchema.getRef() != null) {
+                continue;
+            }
+
             if (!hasNonNullType(currentSchema)) {
                 // If not schema has yet been set, consider this an "object"
                 SchemaSupport.setType(currentSchema, Schema.SchemaType.OBJECT);
@@ -292,7 +296,7 @@ public class OpenApiDataObjectScanner {
 
     private void maybeRegisterSchema(Type currentType, Schema currentSchema, Schema entrySchema) {
         Schema ref = SchemaFactory.schemaRegistration(context, currentType, currentSchema);
-
+        Schema.SchemaType type = SchemaSupport.getNonNullType(currentSchema);
         /*
          * Ignore the returned ref when:
          *
@@ -301,7 +305,7 @@ public class OpenApiDataObjectScanner {
          * - the target of the ref is the schema currently being processed and using the ref would
          * result in a self-referencing schema.
          */
-        if (ref != currentSchema && !currentSchema.getType().contains(Schema.SchemaType.OBJECT) && ref.getRef() != null) {
+        if (ref != currentSchema && type != Schema.SchemaType.OBJECT && ref.getRef() != null) {
             Schema refTarget = context.getSchemaRegistry().lookupSchema(currentType, context.getJsonViews());
 
             if (refTarget != entrySchema) {
