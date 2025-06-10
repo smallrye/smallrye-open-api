@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -123,4 +124,26 @@ class RequestBodyScanTests extends IndexScannerTestBase {
 
         assertJsonEquals("params.request-body-annotation-on-arg.json", FooApi.class);
     }
+
+    @Test
+    void testRequestBodyArrayItemsUseAvailableReference() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+            String bar;
+        }
+
+        @jakarta.ws.rs.Path("foo")
+        class FooApi {
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.Consumes("text/plain")
+            @jakarta.ws.rs.Produces("application/json")
+            public jakarta.ws.rs.core.Response put(
+                    @RequestBody(description = "2D array of beans") Bean[][] foobar) {
+                return null;
+            }
+        }
+
+        assertJsonEquals("params.request-body-items-ref.json", Bean.class, FooApi.class);
+    }
+
 }

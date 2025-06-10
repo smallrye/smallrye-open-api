@@ -167,7 +167,8 @@ public final class SchemaSupport {
     private static void setTypeList(Schema schema, List<SchemaType> types) {
         if (schema instanceof io.smallrye.openapi.internal.models.media.Schema) {
             ((io.smallrye.openapi.internal.models.media.Schema) schema).setTypeList(types);
+        } else {
+            schema.setType(types);
         }
-        schema.setType(types);
     }
 }

@@ -35,6 +35,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -874,6 +875,29 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     }
 
     @Test
+    void testKotlinNullableSetNonNullable() throws IOException, JSONException {
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Schema
+        final class Bean {
+            @Schema(required = false, description = "Any description", nullable = false, examples = "3072")
+            @org.jetbrains.annotations.Nullable
+            private final Long amount;
+
+            @SuppressWarnings("unused")
+            public Bean(@org.jetbrains.annotations.Nullable Long amount) {
+                this.amount = amount;
+            }
+
+            @org.jetbrains.annotations.Nullable
+            public final Long getAmount() {
+                return this.amount;
+            }
+        }
+
+        assertJsonEquals("components.schemas.nonnullable-kotlin-nullable.json", Bean.class);
+    }
+
+    @Test
     void testPrimitiveFormats() throws IOException, JSONException {
         @Schema(name = "Bean")
         @SuppressWarnings("unused")
@@ -943,5 +967,69 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
     @Test
     void testParentClassFieldSchemaAnnotation() throws IOException, JSONException {
         assertJsonEquals("components.schemas.annotated-parent-field.json", ParentClassFieldSchemaAnnotationTestClasses.CLASSES);
+    }
+
+    @Test
+    void testArrayItemsUseAvailableReference() throws IOException, JSONException {
+        class ImmutableList<T> extends java.util.ArrayList<T> {
+            private static final long serialVersionUID = 1L;
+        }
+
+        @Schema(name = "Greeting", description = "A greeting message")
+        class Greeting {
+            @Schema(description = "The message to be displayed")
+            String message;
+        }
+
+        @Schema(name = "Response")
+        class Response {
+            @Schema(type = SchemaType.ARRAY, implementation = Greeting.class, description = "An array of greetings")
+            ImmutableList<Greeting> greetings1;
+            @Schema(implementation = Greeting[].class, description = "An array of greetings")
+            ImmutableList<Greeting> greetings2;
+            @Schema(type = SchemaType.ARRAY, implementation = Greeting.class)
+            ImmutableList<Greeting> greetings3;
+            @Schema(implementation = Greeting[].class)
+            ImmutableList<Greeting> greetings4;
+        }
+
+        assertJsonEquals("components.schemas.array-items-reference.json", ImmutableList.class, Greeting.class, Response.class);
+    }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testClassSchemaWithImplNotIntrospected() throws IOException, JSONException {
+        class UseSchemaImplementationImpl {
+            private java.math.BigDecimal amount;
+            private String currency;
+            // ... constructor and getter/setter methods ....
+        }
+
+        @Schema(implementation = UseSchemaImplementationImpl.class)
+        class UseSchemaImplementationType {
+            private String value;
+            private final String internalValue = "internalValue";
+            private final Boolean composite = true;
+
+            public final boolean isNull() {
+                return value == null;
+            }
+            // ... some other methods ...
+        }
+
+        @Schema(ref = "#/components/schemas/1UseSchemaImplementationImpl")
+        class UseSchemaImplementationType2 {
+            private String value;
+            private final String internalValue = "internalValue";
+            private final Boolean composite = true;
+
+            public final boolean isNull() {
+                return value == null;
+            }
+            // ... some other methods ...
+        }
+
+        assertJsonEquals("components.schemas.implementation-no-introspection.json", UseSchemaImplementationImpl.class,
+                UseSchemaImplementationType.class, UseSchemaImplementationType2.class);
     }
 }

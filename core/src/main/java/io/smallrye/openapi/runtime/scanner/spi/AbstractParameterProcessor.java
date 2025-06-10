@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -83,7 +84,7 @@ public abstract class AbstractParameterProcessor {
      * Collection of parameters scanned at the current level. This map contains
      * all parameter types except for form parameters and matrix parameters.
      */
-    protected Map<ParameterContextKey, ParameterContext> params = new HashMap<>();
+    protected Map<ParameterContextKey, ParameterContext> params = new LinkedHashMap<>();
 
     /**
      * Collection of form parameters found during scanning.
@@ -330,16 +331,21 @@ public abstract class AbstractParameterProcessor {
          * Read the resource method and any method super classes/interfaces that it may override
          */
         candidateMethods.stream()
-                .flatMap(m -> m.annotations().stream().filter(a -> !JandexUtil.equals(a.target(), m)))
+                .flatMap(m -> m.annotations().stream())
+                .filter(a -> Objects.nonNull(a.target()))
+                .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
+                .sorted(Comparator.comparing(a -> a.target().asMethodParameter().position()))
                 .forEach(this::readAnnotatedType);
 
         /*
-         * Phase III - Read @Parameter(s) annotations directly on the record method
+         * Phase III - Read @Parameter(s) annotations directly on the resource method
          *
          * Read the resource method and any method super classes/interfaces that it may override
          */
         candidateMethods.stream()
-                .flatMap(m -> m.annotations().stream().filter(a -> JandexUtil.equals(a.target(), m)))
+                .flatMap(m -> m.annotations().stream())
+                .filter(a -> Objects.nonNull(a.target()))
+                .filter(a -> a.target().kind() == Kind.METHOD)
                 .filter(a -> openApiParameterAnnotations.contains(a.name()))
                 .forEach(this::readParameterAnnotation);
 
@@ -367,7 +373,9 @@ public abstract class AbstractParameterProcessor {
                 .forEach(parameters::addOperationParameter);
 
         // Re-sort (names of matrix parameters may have changed)
-        parameters.sort(preferredOrder);
+        if (scannerContext.getConfig().sortedParametersEnable()) {
+            parameters.sort(ResourceParameters.parameterComparator(preferredOrder));
+        }
 
         parameters.setFormBodyContent(getFormBodyContent());
     }
@@ -482,17 +490,14 @@ public abstract class AbstractParameterProcessor {
      * @return list of {@link Parameter}s
      */
     protected List<Parameter> getParameters(MethodInfo resourceMethod) {
-        List<Parameter> parameters;
-
         // Process any Matrix Parameters found
         mapMatrixParameters();
 
         // Convert ParameterContext entries to MP-OAI Parameters
-        parameters = this.params.values()
+        List<Parameter> parameters = this.params.values()
                 .stream()
                 .map(context -> this.mapParameter(resourceMethod, context))
                 .filter(Objects::nonNull)
-                .sorted(ResourceParameters.parameterComparator(preferredOrder))
                 .collect(Collectors.toList());
 
         return parameters.isEmpty() ? null : parameters;

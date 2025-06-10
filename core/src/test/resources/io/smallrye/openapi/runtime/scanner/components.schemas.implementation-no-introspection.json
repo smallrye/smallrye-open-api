@@ -1,0 +1,24 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "1UseSchemaImplementationImpl" : {
+        "type" : "object",
+        "properties" : {
+          "amount" : {
+            "type" : "number"
+          },
+          "currency" : {
+            "type" : "string"
+          }
+        }
+      },
+      "1UseSchemaImplementationType" : {
+        "$ref" : "#/components/schemas/1UseSchemaImplementationImpl"
+      },
+      "1UseSchemaImplementationType2" : {
+        "$ref" : "#/components/schemas/1UseSchemaImplementationImpl"
+      }
+    }
+  }
+}
