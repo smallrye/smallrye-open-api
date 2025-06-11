@@ -3,7 +3,7 @@
   <parent>
     <groupId>io.smallrye</groupId>
     <artifactId>smallrye-open-api-tools</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.1</version>
   </parent>
   <artifactId>smallrye-open-api-model-apt</artifactId>
   <name>SmallRye: OpenAPI Model Generator</name>
