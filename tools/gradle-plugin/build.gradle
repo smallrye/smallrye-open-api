@@ -1,7 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id("com.gradle.plugin-publish") version "1.3.1"
-    id("com.github.vlsi.jandex") version "1.90"
+    id("com.github.vlsi.jandex") version "2.0.0"
 }
 
 group = "io.smallrye"
