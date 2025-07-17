@@ -1032,4 +1032,32 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertJsonEquals("components.schemas.implementation-no-introspection.json", UseSchemaImplementationImpl.class,
                 UseSchemaImplementationType.class, UseSchemaImplementationType2.class);
     }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testParameterizedGenericTypeResolution() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+            String name;
+            int age;
+        }
+
+        class GenericRoot<T> {
+            T data;
+        }
+
+        class GenericListRoot<T> extends GenericRoot<List<T>> {
+        }
+
+        @Schema(name = "Data")
+        class Data extends GenericRoot<Bean> {
+        }
+
+        @Schema(name = "DataList")
+        class DataList extends GenericListRoot<Bean> {
+        }
+
+        assertJsonEquals("components.schemas.resolved-mapped-generic-ptype.json",
+                Bean.class, GenericRoot.class, GenericListRoot.class, Data.class, DataList.class);
+    }
 }

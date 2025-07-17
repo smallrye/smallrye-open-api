@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -354,7 +355,7 @@ public class TypeResolver {
      * @return the resolved type (if found)
      */
     public Type resolveType() {
-        return getResolvedType(leaf);
+        return resolveType(leaf, resolutionStack);
     }
 
     public boolean isIgnored() {
@@ -375,45 +376,95 @@ public class TypeResolver {
     }
 
     /**
-     * Resolve a type against this {@link TypeResolver}'s resolution stack
+     * Resolve a type against the given resolution stack
      *
-     * @param fieldType type to resolve
+     * @param type type to resolve
+     * @param resolutionStack stack of types for resolution
      * @return resolved type (if found)
      */
-    private Type getResolvedType(Type fieldType) {
-        return getResolvedType(fieldType, resolutionStack);
+    private static Type resolveType(Type type, Deque<Map<String, Type>> resolutionStack) {
+        return resolveType(type, resolutionStack, true);
     }
 
     /**
      * Resolve a type against the given resolution stack
      *
-     * @param fieldType type to resolve
+     * @param type type to resolve
      * @param resolutionStack stack of types for resolution
+     * @param resolveWildcards whether wild card types should be resolved
      * @return resolved type (if found)
      */
-    private static Type getResolvedType(Type fieldType, Deque<Map<String, Type>> resolutionStack) {
-        Type current = TypeUtil.resolveWildcard(fieldType);
+    private static Type resolveType(Type type, Deque<Map<String, Type>> resolutionStack, boolean resolveWildcards) {
+        if (type == null) {
+            return null;
+        }
 
-        for (Map<String, Type> map : resolutionStack) {
+        if (resolveWildcards) {
+            type = TypeUtil.resolveWildcard(type);
+        }
+        Iterator<Map<String, Type>> iter = resolutionStack.iterator();
+
+        while (iter.hasNext()) {
             String varName = null;
 
-            switch (current.kind()) {
+            switch (type.kind()) {
                 case TYPE_VARIABLE:
-                    varName = current.asTypeVariable().identifier();
+                    varName = type.asTypeVariable().identifier();
                     break;
                 case UNRESOLVED_TYPE_VARIABLE:
-                    varName = current.asUnresolvedTypeVariable().identifier();
+                    varName = type.asUnresolvedTypeVariable().identifier();
                     break;
                 default:
                     break;
             }
 
             // Look in next entry map-set if the name is present.
-            if (varName != null && map.containsKey(varName)) {
-                current = map.get(varName);
+            if (varName != null) {
+                Map<String, Type> varTypes = iter.next();
+
+                if (varTypes.containsKey(varName)) {
+                    type = varTypes.get(varName);
+                }
+            } else if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
+                // Limit the resolvable types for resolution of the parameterized type to
+                // the current "scope" of the remaining iterator entries.
+                Deque<Map<String, Type>> resolvableTypes = new ArrayDeque<>();
+                iter.forEachRemaining(resolvableTypes::addLast);
+                type = resolveType(type.asParameterizedType(), resolvableTypes);
+            } else {
+                iter.next();
             }
         }
-        return current;
+
+        return type;
+    }
+
+    /**
+     * Resolve a {@link ParameterizedType} against the given resolution stack.
+     *
+     * A new {@link ParameterizedType} will be returned with its constituent types also
+     * having been resolved.
+     *
+     * @param type type to resolve
+     * @return a new {@link ParameterizedType} with resolve owner and arguments.
+     */
+    private static ParameterizedType resolveType(ParameterizedType type, Deque<Map<String, Type>> resolutionStack) {
+        ParameterizedType.Builder builder = ParameterizedType.builder(type.name());
+
+        Type owner = type.owner();
+        if (owner != null) {
+            builder.setOwner(resolveType(owner, resolutionStack));
+        }
+
+        for (AnnotationInstance anno : type.annotations()) {
+            builder.addAnnotation(anno);
+        }
+
+        for (Type arg : resolveArguments(type, argType -> resolveType(argType, resolutionStack, false))) {
+            builder.addArgument(arg);
+        }
+
+        return builder.build();
     }
 
     private static Type[] resolveArguments(ParameterizedType type, UnaryOperator<Type> resolver) {
@@ -422,57 +473,12 @@ public class TypeResolver {
 
     /**
      * Resolve a parameterized type against this {@link TypeResolver}'s resolution stack.
-     * If any of the type's arguments are wild card types, the resolution will fall back
-     * to the basic {@link #getResolvedType(Type)} method, resolving none of
-     * the arguments.
-     *
-     * @param type type to resolve
-     * @return resolved type (if found)
-     */
-    private Type getResolvedType(ParameterizedType type) {
-        if (type.arguments().stream().noneMatch(arg -> arg.kind() == Type.Kind.WILDCARD_TYPE)) {
-            ParameterizedType.Builder builder = ParameterizedType.builder(type.name());
-
-            Type owner = type.owner();
-            if (owner != null) {
-                builder.setOwner(resolve(owner));
-            }
-
-            for (AnnotationInstance anno : type.annotations()) {
-                builder.addAnnotation(anno);
-            }
-
-            for (Type arg : resolveArguments(type, this::resolve)) {
-                builder.addArgument(arg);
-            }
-
-            return builder.build();
-        }
-
-        return getResolvedType((Type) type);
-    }
-
-    /**
-     * Resolve a parameterized type against this {@link TypeResolver}'s resolution stack.
-     * If any of the type's arguments are wild card types, the resolution will fall back
-     * to the basic {@link #getResolvedType(Type)} method, resolving none of
-     * the arguments.
      *
      * @param type type to resolve
      * @return resolved type (if found)
      */
     public Type resolve(Type type) {
-        Type resolvedType;
-
-        if (type == null) {
-            resolvedType = null;
-        } else if (type.kind() == Type.Kind.PARAMETERIZED_TYPE) {
-            resolvedType = getResolvedType(type.asParameterizedType());
-        } else {
-            resolvedType = getResolvedType(type);
-        }
-
-        return resolvedType;
+        return resolveType(type, this.resolutionStack);
     }
 
     public List<AnnotationTarget> getConstraintTargets() {
@@ -809,7 +815,7 @@ public class TypeResolver {
             AnnotationTarget reference,
             List<ClassInfo> descendants) {
         final String propertyName = field.name();
-        final Type fieldType = getResolvedType(field.type(), stack);
+        final Type fieldType = resolveType(field.type(), stack);
         final ClassInfo fieldClass = context.getAugmentedIndex().getClass(fieldType);
         final boolean unwrapped;
         final TypeResolver resolver;
@@ -904,7 +910,7 @@ public class TypeResolver {
             Deque<Map<String, Type>> stack,
             AnnotationTarget reference,
             List<ClassInfo> descendants) {
-        Type returnType = getResolvedType(method.returnType(), stack);
+        Type returnType = resolveType(method.returnType(), stack);
         Type propertyType = null;
 
         if (isAccessor(context, method)) {
@@ -950,7 +956,7 @@ public class TypeResolver {
 
         if (properties.containsKey(propertyName)) {
             resolver = properties.get(propertyName);
-            Type resolvedPropertyType = getResolvedType(propertyType, stack);
+            Type resolvedPropertyType = resolveType(propertyType, stack);
 
             // Only store the accessor/mutator methods if the type of property matches
             if (!TypeUtil.equalTypes(resolver.resolveType(), resolvedPropertyType)) {
