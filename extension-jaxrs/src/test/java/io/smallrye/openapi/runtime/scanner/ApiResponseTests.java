@@ -13,6 +13,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 
 /**
  * @author Michael Edgar {@literal <michael@xlate.io>} and Scott Curtis {@literal <Scott.Curtis@ibm.com>}
@@ -414,5 +418,40 @@ class ApiResponseTests extends IndexScannerTestBase {
                 HttpTreeApi.class,
                 Reference.class,
                 ReferencesResponse.class);
+    }
+
+    /*
+     * Test case for Smallrye OpenAPI issue #2315.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/2315
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "true,  responses.multivariant-internal-with-default.json",
+            "false, responses.multivariant-internal-with-code.json"
+    })
+    void testMultiVariantDefaultResponseType(Boolean defaultResponse, String expectedResource)
+            throws IOException, JSONException {
+        @jakarta.ws.rs.Path("data")
+        class DataApi {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.PUT
+            @jakarta.ws.rs.POST
+            @jakarta.ws.rs.DELETE
+            @jakarta.ws.rs.Path("endpoint")
+            @jakarta.ws.rs.Produces({
+                    jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM,
+                    jakarta.ws.rs.core.MediaType.APPLICATION_JSON,
+                    jakarta.ws.rs.core.MediaType.APPLICATION_XML,
+            })
+            public jakarta.ws.rs.core.Response handle() {
+                return null;
+            }
+        }
+
+        assertJsonEquals(expectedResource, scan(
+                config(SmallRyeOASConfig.SMALLRYE_DEFAULT_WITH_INTERNAL_RESPONSE, defaultResponse),
+                (java.io.InputStream) null,
+                DataApi.class));
     }
 }

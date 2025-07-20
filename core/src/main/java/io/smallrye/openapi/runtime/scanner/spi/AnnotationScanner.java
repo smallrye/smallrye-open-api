@@ -466,87 +466,117 @@ public interface AnnotationScanner {
             final MethodInfo method,
             Operation operation) {
 
-        Type returnType = context.getResourceTypeResolver().resolve(method.returnType());
-        APIResponse response = null;
+        final Type returnType = context.getResourceTypeResolver().resolve(method.returnType());
+        final boolean internalResponse = isScannerInternalResponse(returnType, context, method);
         final int status = getDefaultStatus(method);
-        final String code = String.valueOf(status);
-        final String description = getReasonPhrase(status);
+        final String code;
+        final String description;
 
-        if (isVoidResponse(method)) {
-            if (generateResponse(code, operation)) {
-                response = OASFactory.createAPIResponse().description(description);
-            }
-        } else if (generateResponse(code, operation)) {
-            response = OASFactory.createAPIResponse().description(description);
-
-            /*
-             * Only generate content if not already supplied in annotations and the
-             * method does not return an opaque Scanner Response
-             */
-            if (!isScannerInternalResponse(returnType, context, method) &&
-                    (ModelUtil.responses(operation).getAPIResponse(code) == null ||
-                            ModelUtil.responses(operation).getAPIResponse(code).getContent() == null)) {
-
-                Schema schema;
-
-                if (isMultipartOutput(returnType)) {
-                    schema = OASFactory.createSchema().addType(Schema.SchemaType.OBJECT);
-                } else if (hasKotlinContinuation(method)) {
-                    schema = kotlinContinuationToSchema(context, method);
-                } else {
-                    schema = SchemaFactory.typeToSchema(context, returnType, null);
-                }
-
-                Content content = OASFactory.createContent();
-                String[] produces = context.getCurrentProduces();
-
-                if (produces == null || produces.length == 0) {
-                    produces = getDefaultProduces(context, method);
-                }
-
-                BeanValidationScanner.applyConstraints(context, returnType, schema);
-
-                if (schema != null && SchemaSupport.getNullable(schema) == null
-                        && TypeUtil.isOptional(returnType)) {
-                    if (schema.getType() != null) {
-                        SchemaSupport.setNullable(schema, Boolean.TRUE);
-                    }
-                    if (schema.getRef() != null) {
-                        // Move reference to type into its own subschema
-                        Schema refSchema = OASFactory.createSchema().ref(schema.getRef());
-                        schema.setRef(null);
-                        if (schema.getAnyOf() == null) {
-                            schema.addAnyOf(refSchema)
-                                    .addAnyOf(SchemaSupport.nullSchema());
-                        } else {
-                            Schema anyOfSchema = OASFactory.createSchema()
-                                    .addAnyOf(refSchema)
-                                    .addAnyOf(SchemaSupport.nullSchema());
-                            schema.addAllOf(anyOfSchema);
-                        }
-                    }
-                }
-
-                for (String producesType : produces) {
-                    MediaType mt = OASFactory.createMediaType();
-                    mt.setSchema(schema);
-                    content.addMediaType(producesType, mt);
-                }
-
-                response.setContent(content);
-            }
+        if (internalResponse && context.getConfig().defaultWithInternalResponse()) {
+            code = "default";
+            description = "Default Response";
+        } else {
+            code = String.valueOf(status);
+            description = getReasonPhrase(status);
         }
 
-        if (response != null) {
-            APIResponses responses = ModelUtil.responses(operation);
+        if (!generateResponse(code, operation)) {
+            return;
+        }
 
-            if (responses.hasAPIResponse(code)) {
-                APIResponse responseFromAnnotations = responses.getAPIResponse(code);
-                // Overlay the information from the annotations (2nd arg) onto the generated details (1st)
-                response = MergeUtil.mergeObjects(response, responseFromAnnotations);
+        APIResponse response = OASFactory.createAPIResponse().description(description);
+
+        if (!isVoidResponse(method) && !hasResponseContent(operation, code)) {
+            Content content;
+
+            if (internalResponse) {
+                content = createEmptyResponseContent(context, method);
+            } else {
+                /*
+                 * Only generate media type if not already supplied in annotations and the
+                 * method does not return an opaque Scanner Response
+                 */
+                content = createResponseContentFromRestMethod(context, method, returnType);
             }
 
-            responses.addAPIResponse(code, response);
+            response.setContent(content);
+        }
+
+        APIResponses responses = ModelUtil.responses(operation);
+
+        if (responses.hasAPIResponse(code)) {
+            APIResponse responseFromAnnotations = responses.getAPIResponse(code);
+            // Overlay the information from the annotations (2nd arg) onto the generated details (1st)
+            response = MergeUtil.mergeObjects(response, responseFromAnnotations);
+        }
+
+        responses.addAPIResponse(code, response);
+    }
+
+    default boolean hasResponseContent(Operation operation, String responseCode) {
+        APIResponse response = ModelUtil.responses(operation).getAPIResponse(responseCode);
+        return response != null && response.getContent() != null;
+    }
+
+    default Content createEmptyResponseContent(AnnotationScannerContext context, MethodInfo method) {
+        Content content = OASFactory.createContent();
+        String[] produces = getProduces(context, method);
+
+        for (String mediaType : produces) {
+            content.addMediaType(mediaType, OASFactory.createMediaType());
+        }
+
+        return content;
+    }
+
+    default Content createResponseContentFromRestMethod(final AnnotationScannerContext context,
+            final MethodInfo method,
+            Type returnType) {
+        final Schema schema;
+
+        if (isMultipartOutput(returnType)) {
+            schema = OASFactory.createSchema().addType(Schema.SchemaType.OBJECT);
+        } else if (hasKotlinContinuation(method)) {
+            schema = kotlinContinuationToSchema(context, method);
+        } else {
+            schema = SchemaFactory.typeToSchema(context, returnType, null);
+        }
+
+        Content content = OASFactory.createContent();
+        String[] produces = getProduces(context, method);
+
+        BeanValidationScanner.applyConstraints(context, returnType, schema);
+        maybeUpdateOptionalResponseSchema(returnType, schema);
+
+        for (String producesType : produces) {
+            MediaType mt = OASFactory.createMediaType();
+            mt.setSchema(schema);
+            content.addMediaType(producesType, mt);
+        }
+
+        return content;
+    }
+
+    default void maybeUpdateOptionalResponseSchema(Type returnType, Schema schema) {
+        if (schema != null && SchemaSupport.getNullable(schema) == null
+                && TypeUtil.isOptional(returnType)) {
+            if (schema.getType() != null) {
+                SchemaSupport.setNullable(schema, Boolean.TRUE);
+            }
+            if (schema.getRef() != null) {
+                // Move reference to type into its own subschema
+                Schema refSchema = OASFactory.createSchema().ref(schema.getRef());
+                schema.setRef(null);
+                if (schema.getAnyOf() == null) {
+                    schema.addAnyOf(refSchema)
+                            .addAnyOf(SchemaSupport.nullSchema());
+                } else {
+                    Schema anyOfSchema = OASFactory.createSchema()
+                            .addAnyOf(refSchema)
+                            .addAnyOf(SchemaSupport.nullSchema());
+                    schema.addAllOf(anyOfSchema);
+                }
+            }
         }
     }
 
@@ -918,6 +948,16 @@ public interface AnnotationScanner {
             currentConsumes = context.getDefaultConsumes();
         }
         return currentConsumes;
+    }
+
+    default String[] getProduces(AnnotationScannerContext context, MethodInfo method) {
+        String[] produces = context.getCurrentProduces();
+
+        if (produces == null || produces.length == 0) {
+            produces = getDefaultProduces(context, method);
+        }
+
+        return produces;
     }
 
     /**
