@@ -15,7 +15,10 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {}
+            }
           }
         }
       }
@@ -34,7 +37,10 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {}
+            }
           }
         }
       }
