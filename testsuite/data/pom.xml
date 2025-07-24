@@ -14,14 +14,14 @@
 
     <properties>
         <eclipse.microprofile.openapi.version>4.1</eclipse.microprofile.openapi.version>
-        <kotlin.version>2.0.21</kotlin.version>
+        <kotlin.version>2.2.0</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.24.4</quarkus.platform.version>
+        <quarkus.platform.version>3.25.0</quarkus.platform.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <quarkus.package.add-runner-suffix>false</quarkus.package.add-runner-suffix>
     </properties>
