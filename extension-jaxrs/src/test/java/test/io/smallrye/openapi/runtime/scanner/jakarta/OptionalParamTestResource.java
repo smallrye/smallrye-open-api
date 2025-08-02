@@ -36,13 +36,11 @@ public class OptionalParamTestResource {
     }
 
     @Schema(name = "multipurpose-bean")
-    public static class Bean {
+    public record Bean(
+            @Parameter(description = "Hi") @QueryParam(value = "name6") Optional<String> name,
+            @QueryParam(value = "age6") OptionalDouble age,
+            Optional<NestedBean> nested) {
 
-        @QueryParam(value = "name6")
-        Optional<String> name;
-        @QueryParam(value = "age6")
-        OptionalDouble age;
-        Optional<NestedBean> nested;
     }
 
     @GET

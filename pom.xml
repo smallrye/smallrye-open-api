@@ -452,13 +452,13 @@
         </profile>
 
         <profile>
-            <id>jdk11plus</id>
+            <id>jdk16plus</id>
             <activation>
-                <jdk>[11,)</jdk>
+                <jdk>[16,)</jdk>
             </activation>
             <properties>
                 <jboss.extra.opts>--add-modules java.se</jboss.extra.opts>
-                <maven.compiler.release>11</maven.compiler.release>
+                <maven.compiler.release>16</maven.compiler.release>
             </properties>
         </profile>
     </profiles>
