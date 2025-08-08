@@ -16,7 +16,9 @@
           "200" : {
             "description" : "OK",
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": { }
+              }
             }
           }
         }

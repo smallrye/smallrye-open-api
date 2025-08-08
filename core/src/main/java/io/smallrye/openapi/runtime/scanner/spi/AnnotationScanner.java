@@ -523,7 +523,16 @@ public interface AnnotationScanner {
         String[] produces = getProduces(context, method);
 
         for (String mediaType : produces) {
-            content.addMediaType(mediaType, OASFactory.createMediaType());
+            MediaType model = OASFactory.createMediaType();
+            if ("application/json".equals(mediaType)) {
+                /*
+                 * Set an empty schema for JSON only to satisfy TCK requirement.
+                 * Remove this depending on the resolution of
+                 * https://github.com/microprofile/microprofile-open-api/issues/701
+                 */
+                model.setSchema(OASFactory.createSchema());
+            }
+            content.addMediaType(mediaType, model);
         }
 
         return content;

@@ -8,7 +8,9 @@
             "description" : "Default Response",
             "content" : {
               "application/octet-stream" : { },
-              "application/json" : { },
+              "application/json" : {
+                "schema": { }
+              },
               "application/xml" : { }
             }
           }
@@ -20,7 +22,9 @@
             "description" : "Default Response",
             "content" : {
               "application/octet-stream" : { },
-              "application/json" : { },
+              "application/json" : {
+                "schema": { }
+               },
               "application/xml" : { }
             }
           }
@@ -32,7 +36,9 @@
             "description" : "Default Response",
             "content" : {
               "application/octet-stream" : { },
-              "application/json" : { },
+              "application/json" : {
+                "schema": { }
+              },
               "application/xml" : { }
             }
           }
@@ -44,7 +50,9 @@
             "description" : "Default Response",
             "content" : {
               "application/octet-stream" : { },
-              "application/json" : { },
+              "application/json" : {
+                "schema": { }
+               },
               "application/xml" : { }
             }
           }
