@@ -146,7 +146,10 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "OK",
+            "content": {
+              "*/*": {}
+            }
           }
         }
       },
@@ -179,7 +182,10 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "OK",
+            "content": {
+              "*/*": {}
+            }
           }
         }
       },
@@ -212,7 +218,10 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "OK",
+            "content": {
+              "*/*": {}
+            }
           }
         }
       },
