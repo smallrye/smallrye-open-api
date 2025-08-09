@@ -25,4 +25,9 @@ interface ScannerSPILogging { // NOSONAR (use of constants in an interface)
     @Message(id = 7903, value = "Duplicate operationId: %s produced by Class: %s, Method: %s and Class: %s, Method: %s")
     void duplicateOperationId(String operationId, String className, String method, String conflictingClassName,
             String conflictingMethod);
+
+    @LogMessage(level = Logger.Level.DEBUG)
+    @Message(id = 7904, value = "Ignoring duplicate parameter named '%s' in location '%s' with style '%s', specified on %s")
+    void duplicateParameter(String name, String location, String style, String target);
+
 }

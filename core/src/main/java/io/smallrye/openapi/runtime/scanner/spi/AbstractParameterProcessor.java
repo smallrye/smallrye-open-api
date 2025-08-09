@@ -17,7 +17,10 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -202,7 +205,7 @@ public abstract class AbstractParameterProcessor {
 
         if (value != null) {
             valueString = value.asString();
-            if (valueString.length() > 0) {
+            if (!valueString.isEmpty()) {
                 return valueString;
             }
         }
@@ -330,26 +333,40 @@ public abstract class AbstractParameterProcessor {
          *
          * Read the resource method and any method super classes/interfaces that it may override
          */
-        candidateMethods.stream()
-                .flatMap(m -> m.annotations().stream())
-                .filter(a -> Objects.nonNull(a.target()))
-                .filter(a -> a.target().kind() == Kind.METHOD_PARAMETER)
-                .sorted(Comparator.comparing(a -> a.target().asMethodParameter().position()))
-                .forEach(this::readAnnotatedType);
+        scanMethods(
+                candidateMethods,
+                a -> a.target().kind() == Kind.METHOD_PARAMETER,
+                Comparator.comparing(a -> a.target().asMethodParameter().position()),
+                this::readAnnotatedType);
 
         /*
          * Phase III - Read @Parameter(s) annotations directly on the resource method
          *
          * Read the resource method and any method super classes/interfaces that it may override
          */
-        candidateMethods.stream()
-                .flatMap(m -> m.annotations().stream())
-                .filter(a -> Objects.nonNull(a.target()))
-                .filter(a -> a.target().kind() == Kind.METHOD)
-                .filter(a -> openApiParameterAnnotations.contains(a.name()))
-                .forEach(this::readParameterAnnotation);
+        scanMethods(
+                candidateMethods,
+                a -> a.target().kind() == Kind.METHOD && openApiParameterAnnotations.contains(a.name()),
+                null,
+                this::readParameterAnnotation);
 
         parameters.setOperationParameters(getParameters(resourceMethod));
+    }
+
+    private void scanMethods(List<MethodInfo> candidateMethods, Predicate<AnnotationInstance> filter,
+            Comparator<AnnotationInstance> order, Consumer<AnnotationInstance> handler) {
+        for (MethodInfo method : candidateMethods) {
+            List<AnnotationInstance> annotations = new ArrayList<>(method.annotations());
+            annotations.removeIf(a -> a.target() == null || !filter.test(a));
+
+            if (order != null) {
+                Collections.sort(annotations, order);
+            }
+
+            for (AnnotationInstance annotation : annotations) {
+                handler.accept(annotation);
+            }
+        }
     }
 
     protected void processFinalize(ClassInfo resourceClass, MethodInfo resourceMethod, ResourceParameters parameters) {
@@ -493,12 +510,35 @@ public abstract class AbstractParameterProcessor {
         // Process any Matrix Parameters found
         mapMatrixParameters();
 
+        Collection<ParameterContext> paramContexts = params.values();
+        List<Parameter> parameters = new ArrayList<>(paramContexts.size());
+        Set<List<?>> paramKeys = ConcurrentHashMap.newKeySet();
+
         // Convert ParameterContext entries to MP-OAI Parameters
-        List<Parameter> parameters = this.params.values()
-                .stream()
-                .map(context -> this.mapParameter(resourceMethod, context))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        for (ParameterContext context : paramContexts) {
+            Parameter param = mapParameter(resourceMethod, context);
+
+            if (param != null) {
+                if (paramKeys.add(Arrays.asList(param.getName(), param.getIn(), param.getStyle()))) {
+                    parameters.add(param);
+                } else {
+                    /*
+                     * Parameters are unique by name and location - filter out any
+                     * duplicates seen earlier in the stream. We also consider the parameter's
+                     * style to account for matrix parameters having the same name as an
+                     * associated path parameter. The matrix parameter name will be
+                     * post-processed later and renamed with a "Matrix" suffix, if needed.
+                     *
+                     * https://spec.openapis.org/oas/v3.1.0.html#parameter-object
+                     */
+                    ScannerSPILogging.log.duplicateParameter(
+                            param.getName(),
+                            String.valueOf(param.getIn()),
+                            String.valueOf(param.getStyle()),
+                            String.valueOf(context.target));
+                }
+            }
+        }
 
         return parameters.isEmpty() ? null : parameters;
     }
@@ -1440,15 +1480,16 @@ public abstract class AbstractParameterProcessor {
          */
         Collections.reverse(ancestors);
 
-        ancestors.forEach(c -> {
-            c.interfaceTypes()
-                    .stream()
-                    .map(augmentedIndex::getClass)
-                    .filter(Objects::nonNull)
-                    .forEach(iface -> readParameters(iface, beanParamAnnotation, overriddenParametersOnly));
+        for (ClassInfo ancestor : ancestors) {
+            for (Type implementedType : ancestor.interfaceTypes()) {
+                ClassInfo implementedClass = augmentedIndex.getClass(implementedType);
+                if (implementedClass != null) {
+                    readParameters(implementedClass, beanParamAnnotation, overriddenParametersOnly);
+                }
+            }
 
-            readParameters(c, beanParamAnnotation, overriddenParametersOnly);
-        });
+            readParameters(ancestor, beanParamAnnotation, overriddenParametersOnly);
+        }
     }
 
     /**
@@ -1460,13 +1501,17 @@ public abstract class AbstractParameterProcessor {
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     protected void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
-        clazz.annotationsMap()
-                .entrySet()
-                .stream()
-                .filter(e -> Names.PARAMETER.equals(e.getKey()) || isParameter(e.getKey()))
-                .flatMap(a -> a.getValue().stream())
-                .filter(this::isBeanPropertyParam)
-                .forEach(annotation -> readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly));
+        for (Map.Entry<DotName, List<AnnotationInstance>> entry : clazz.annotationsMap().entrySet()) {
+            DotName name = entry.getKey();
+
+            if (Names.PARAMETER.equals(name) || isParameter(name)) {
+                for (AnnotationInstance annotation : entry.getValue()) {
+                    if (isBeanPropertyParam(annotation)) {
+                        readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
+                    }
+                }
+            }
+        }
     }
 
     /**
