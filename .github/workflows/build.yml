@@ -41,7 +41,7 @@ jobs:
     name: build with jdk ${{matrix.java}} (${{ matrix.os }}) 
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
 
       - uses: actions/setup-java@v4
@@ -104,7 +104,7 @@ jobs:
 
     name: MicroProfile OpenAPI TCK ${{ matrix.title }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
 
       - name: maven cache
