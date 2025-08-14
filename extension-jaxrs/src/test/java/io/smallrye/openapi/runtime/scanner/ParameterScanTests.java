@@ -733,4 +733,45 @@ class ParameterScanTests extends IndexScannerTestBase {
         test(dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.FALSE),
                 "params.unsorted-scan-order.json", Resource.class);
     }
+
+    @Test
+    void testDuplicatedParametersIgnored() throws IOException, JSONException {
+        /**
+         * This class is the equivalent of record:
+         *
+         * <code>
+         * record Parameters(@QueryParam("qparam") @Parameter(description = "Hi") String qparam) { }
+         * </code>
+         */
+        class Parameters {
+            @jakarta.ws.rs.QueryParam("qparam")
+            @Parameter(description = "Hi")
+            String qparam;
+
+            @SuppressWarnings("unused")
+            public Parameters(
+                    @jakarta.ws.rs.QueryParam("qparam") @Parameter(description = "Hi") String qparam) {
+                this.qparam = qparam;
+            }
+
+            @jakarta.ws.rs.QueryParam("qparam")
+            @Parameter(description = "Hi")
+            public String qparam() {
+                return qparam;
+            }
+        }
+
+        @jakarta.ws.rs.Path("/resource")
+        class BeanParamResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.TEXT_PLAIN)
+            @APIResponse(responseCode = "200", description = "Get a message")
+            public String get(@jakarta.ws.rs.BeanParam Parameters params) {
+                return "Hi";
+            }
+        }
+
+        test(dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.FALSE),
+                "params.ignored-name-type-duplicates.json", Parameters.class, BeanParamResource.class);
+    }
 }
