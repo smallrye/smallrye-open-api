@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish Gradle Plugin
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout ${{inputs.version}}
         with:
           ref: ${{ inputs.version }}
