@@ -1,0 +1,29 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/resource" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "Hi",
+          "name" : "qparam",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Get a message",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
