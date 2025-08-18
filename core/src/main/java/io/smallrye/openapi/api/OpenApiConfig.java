@@ -310,8 +310,8 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.class, () -> Boolean.TRUE);
     }
 
-    default boolean defaultWithInternalResponse() {
-        return getConfigValue(SmallRyeOASConfig.SMALLRYE_DEFAULT_WITH_INTERNAL_RESPONSE, Boolean.class, () -> Boolean.FALSE);
+    default boolean genericResponseUseDefault() {
+        return getConfigValue(SmallRyeOASConfig.SMALLRYE_GENERIC_RESPONSE_USE_DEFAULT, Boolean.class, () -> Boolean.FALSE);
     }
 
     default Integer getMaximumStaticFileSize() {

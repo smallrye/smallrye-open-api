@@ -472,7 +472,7 @@ public interface AnnotationScanner {
         final String code;
         final String description;
 
-        if (internalResponse && context.getConfig().defaultWithInternalResponse()) {
+        if (internalResponse && context.getConfig().genericResponseUseDefault()) {
             code = "default";
             description = "Default Response";
         } else {

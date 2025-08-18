@@ -450,7 +450,7 @@ class ApiResponseTests extends IndexScannerTestBase {
         }
 
         assertJsonEquals(expectedResource, scan(
-                config(SmallRyeOASConfig.SMALLRYE_DEFAULT_WITH_INTERNAL_RESPONSE, defaultResponse),
+                config(SmallRyeOASConfig.SMALLRYE_GENERIC_RESPONSE_USE_DEFAULT, defaultResponse),
                 (java.io.InputStream) null,
                 DataApi.class));
     }
