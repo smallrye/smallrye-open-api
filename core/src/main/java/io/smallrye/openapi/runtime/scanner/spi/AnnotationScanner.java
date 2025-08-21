@@ -555,7 +555,11 @@ public interface AnnotationScanner {
         String[] produces = getProduces(context, method);
 
         BeanValidationScanner.applyConstraints(context, returnType, schema);
-        maybeUpdateOptionalResponseSchema(returnType, schema);
+
+        if (schema != null && SchemaSupport.getNullable(schema) == null
+                && TypeUtil.isOptional(returnType)) {
+            makeSchemaOptional(schema);
+        }
 
         for (String producesType : produces) {
             MediaType mt = OASFactory.createMediaType();
@@ -566,25 +570,24 @@ public interface AnnotationScanner {
         return content;
     }
 
-    default void maybeUpdateOptionalResponseSchema(Type returnType, Schema schema) {
-        if (schema != null && SchemaSupport.getNullable(schema) == null
-                && TypeUtil.isOptional(returnType)) {
-            if (schema.getType() != null) {
-                SchemaSupport.setNullable(schema, Boolean.TRUE);
-            }
-            if (schema.getRef() != null) {
-                // Move reference to type into its own subschema
-                Schema refSchema = OASFactory.createSchema().ref(schema.getRef());
-                schema.setRef(null);
-                if (schema.getAnyOf() == null) {
-                    schema.addAnyOf(refSchema)
-                            .addAnyOf(SchemaSupport.nullSchema());
-                } else {
-                    Schema anyOfSchema = OASFactory.createSchema()
-                            .addAnyOf(refSchema)
-                            .addAnyOf(SchemaSupport.nullSchema());
-                    schema.addAllOf(anyOfSchema);
-                }
+    default void makeSchemaOptional(Schema schema) {
+        if (schema.getType() != null) {
+            SchemaSupport.setNullable(schema, Boolean.TRUE);
+        }
+
+        if (schema.getRef() != null) {
+            // Move reference to type into its own subschema
+            Schema refSchema = OASFactory.createSchema().ref(schema.getRef());
+            schema.setRef(null);
+
+            if (schema.getAnyOf() == null) {
+                schema.addAnyOf(refSchema)
+                        .addAnyOf(SchemaSupport.nullSchema());
+            } else {
+                Schema anyOfSchema = OASFactory.createSchema()
+                        .addAnyOf(refSchema)
+                        .addAnyOf(SchemaSupport.nullSchema());
+                schema.addAllOf(anyOfSchema);
             }
         }
     }
