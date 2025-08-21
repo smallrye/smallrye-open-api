@@ -103,3 +103,11 @@ Set this boolean value to disable the merging of the deprecated `@Schema` `examp
 mp.openapi.extensions.smallrye.sorted-parameters.enable
 ----
 Set this boolean value to enable or disable the sorting of parameter array entries during annotation scanning. When enabled (set to `true`), parameters will be order either by their order within a `@Parameters` annotation on an operation method or (in the absence of that annotation) by their `$ref`, `in`, and `name` attributes. When disabled (set to `false`), parameters will be in the order they are encountered in the Java code. If not set, it will default to `true`.
+
+* Generic Responses use `default` code
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.generic-response-use-default
+----
+Set this boolean value to enable the automatic use of the https://spec.openapis.org/oas/v3.1.0.html#responses-object[`default` response code] for framework response types (e.g. Jakarta REST's `Response` type) when no `@APIResponse` annotations have been used and the HTTP response code for an operation cannot be determined. When unset or `false`, the response code will be set to `200`.
