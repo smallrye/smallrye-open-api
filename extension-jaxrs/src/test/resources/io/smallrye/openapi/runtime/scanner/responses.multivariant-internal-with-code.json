@@ -1,0 +1,63 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/data/endpoint" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/octet-stream" : { },
+              "application/json" : {
+                "schema": { }
+              },
+              "application/xml" : { }
+            }
+          }
+        }
+      },
+      "put" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/octet-stream" : { },
+              "application/json" : {
+                "schema": { }
+              },
+              "application/xml" : { }
+            }
+          }
+        }
+      },
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/octet-stream" : { },
+              "application/json" : {
+                "schema": { }
+              },
+              "application/xml" : { }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/octet-stream" : { },
+              "application/json" : {
+                "schema": { }
+              },
+              "application/xml" : { }
+            }
+          }
+        }
+      }
+    }
+  }
+}
