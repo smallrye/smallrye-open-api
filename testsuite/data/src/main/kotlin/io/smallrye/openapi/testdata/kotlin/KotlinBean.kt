@@ -1,5 +1,6 @@
 package io.smallrye.openapi.testdata.kotlin
 
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -12,7 +13,9 @@ data class KotlinBean (
     val description: String = "",
     val nestedCollection: Map<String, Set<Double>>,
     @SerialName("actualCustomName")
-    val customName: String = ""
+    val customName: String = "",
+    @Required
+    val requiredValue: String = ""
 )
 
 @Deprecated("1.0.0")
