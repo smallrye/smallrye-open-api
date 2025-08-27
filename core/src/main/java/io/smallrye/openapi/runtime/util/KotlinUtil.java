@@ -34,7 +34,7 @@ class KotlinUtil {
         var methodName = getSyntheticPropertyAnnotationsMethodName(field);
         var clazz = field.declaringClass();
         return clazz.methods().stream()
-                .filter(m -> Modifiers.isSynthetic(m.flags()) && methodName.equals(m.name()))
+                .filter(m -> m.isSynthetic() && methodName.equals(m.name()))
                 .findFirst();
     }
 
