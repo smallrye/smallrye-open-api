@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
 
@@ -21,7 +22,8 @@ class KotlinUtil {
     }
 
     private static String getGetterName(FieldInfo field) {
-        return "get" + field.name().substring(0, 1).toUpperCase() + field.name().substring(1);
+        String fieldName = field.name();
+        return "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
     }
 
     private static String getSyntheticPropertyAnnotationsMethodName(FieldInfo field) {
@@ -31,8 +33,8 @@ class KotlinUtil {
     }
 
     private static Optional<MethodInfo> getSyntheticPropertyAnnotationsMethod(FieldInfo field) {
-        var methodName = getSyntheticPropertyAnnotationsMethodName(field);
-        var clazz = field.declaringClass();
+        String methodName = getSyntheticPropertyAnnotationsMethodName(field);
+        ClassInfo clazz = field.declaringClass();
         return clazz.methods().stream()
                 .filter(m -> m.isSynthetic() && methodName.equals(m.name()))
                 .findFirst();
@@ -40,6 +42,7 @@ class KotlinUtil {
 
     /**
      * Returns the annotations declared on a Kotlin property associated with the field.
+     *
      * @param field the field of the associated Kotlin property
      * @return List of annotations declared on the Kotlin property, retargeted at the field
      */
