@@ -81,7 +81,7 @@ public final class Annotations {
                 return declaredAnnotations(target.asClass());
 
             case FIELD:
-                return getDeclaredKotlinFieldAnnotations(target.asField());
+                return declaredFieldAnnotations(target.asField());
 
             case METHOD:
                 return filter(target, target.asMethod().annotations());
@@ -100,7 +100,7 @@ public final class Annotations {
         }
     }
 
-    private static List<AnnotationInstance> getDeclaredKotlinFieldAnnotations(FieldInfo field) {
+    private static List<AnnotationInstance> declaredFieldAnnotations(FieldInfo field) {
         List<AnnotationInstance> fieldAnnotations = filter(field, field.annotations());
         List<AnnotationInstance> propertyAnnotations = KotlinUtil.getPropertyAnnotations(field);
         return Stream.concat(fieldAnnotations.stream(), propertyAnnotations.stream())
