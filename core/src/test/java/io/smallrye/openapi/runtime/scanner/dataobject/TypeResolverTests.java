@@ -269,6 +269,24 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
+    void testKotlinSerializationPropertyCustomName() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.KotlinSerializationCustomName.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.KotlinSerializationCustomName.class);
+        assertEquals("theName", properties.get("name").getPropertyName());
+        assertEquals("name2", properties.get("name2").getPropertyName());
+    }
+
+    @Test
+    void testKotlinSerializationDataClassCustomName() {
+        Map<String, TypeResolver> properties = getProperties(
+                test.io.smallrye.openapi.runtime.scanner.dataobject.KotlinSerializationDataClassCustomName.class,
+                test.io.smallrye.openapi.runtime.scanner.dataobject.KotlinSerializationDataClassCustomName.class);
+        assertEquals("theName", properties.get("name").getPropertyName());
+        assertEquals("name2", properties.get("name2").getPropertyName());
+    }
+
+    @Test
     void testJavaxJaxbCustomPropertyOrder() {
         Map<String, TypeResolver> properties = getProperties(
                 test.io.smallrye.openapi.runtime.scanner.dataobject.javax.JaxbCustomPropertyOrder.class,

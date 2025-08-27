@@ -20,6 +20,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
+import io.smallrye.openapi.api.constants.KotlinSerializationConstants;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.internal.support.SimpleTypeTarget;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -104,6 +105,9 @@ public class BeanValidationScanner {
     // Kotlin Constraints
     static final DotName KOTLIN_NULLABLE = createConstraintName(KotlinConstants.JETBRAINS_NULLABLE);
     static final DotName KOTLIN_NOT_NULL = createConstraintName(KotlinConstants.JETBRAINS_NOT_NULL);
+
+    // Kotlinx Serialization Constraints
+    static final DotName KOTLIN_SERIALIZATION_REQUIRED = createConstraintName(KotlinSerializationConstants.REQUIRED);
 
     static DotName createConstraintName(DotName packageName, String className) {
         return createConstraintName(createComponentized(packageName, className));
@@ -260,6 +264,7 @@ public class BeanValidationScanner {
         notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
+        requiredKotlinSerialization(target, propertyKey, handler);
         sizeString(target, schema);
         notEmptyString(target, schema, propertyKey, handler);
     }
@@ -272,6 +277,7 @@ public class BeanValidationScanner {
         notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
+        requiredKotlinSerialization(target, propertyKey, handler);
         sizeObject(target, schema);
         notEmptyObject(target, schema, propertyKey, handler);
     }
@@ -284,6 +290,7 @@ public class BeanValidationScanner {
         notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
+        requiredKotlinSerialization(target, propertyKey, handler);
         sizeArray(target, schema);
         notEmptyArray(target, schema, propertyKey, handler);
     }
@@ -303,6 +310,7 @@ public class BeanValidationScanner {
         notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
+        requiredKotlinSerialization(target, propertyKey, handler);
         positive(target, schema);
         positiveOrZero(target, schema);
     }
@@ -315,6 +323,7 @@ public class BeanValidationScanner {
         notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
+        requiredKotlinSerialization(target, propertyKey, handler);
     }
 
     void decimalMax(AnnotationTarget target, Schema schema) {
@@ -526,6 +535,14 @@ public class BeanValidationScanner {
         Boolean required = context.annotations().getAnnotationValue(target, JACKSON_JSONPROPERTY, "required");
 
         if (Boolean.TRUE.equals(required)) {
+            handler.setRequired(target, propertyKey);
+        }
+    }
+
+    void requiredKotlinSerialization(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
+        boolean required = context.annotations().hasAnnotation(target, KOTLIN_SERIALIZATION_REQUIRED);
+
+        if (required) {
             handler.setRequired(target, propertyKey);
         }
     }

@@ -18,6 +18,7 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType;
@@ -80,7 +81,7 @@ public final class Annotations {
                 return declaredAnnotations(target.asClass());
 
             case FIELD:
-                return filter(target, target.asField().annotations());
+                return getDeclaredKotlinFieldAnnotations(target.asField());
 
             case METHOD:
                 return filter(target, target.asMethod().annotations());
@@ -97,6 +98,13 @@ public final class Annotations {
             default:
                 return Collections.emptyList();
         }
+    }
+
+    private static List<AnnotationInstance> getDeclaredKotlinFieldAnnotations(FieldInfo field) {
+        List<AnnotationInstance> fieldAnnotations = filter(field, field.annotations());
+        List<AnnotationInstance> propertyAnnotations = KotlinUtil.getPropertyAnnotations(field);
+        return Stream.concat(fieldAnnotations.stream(), propertyAnnotations.stream())
+                .collect(Collectors.toList());
     }
 
     private boolean composable(DotName annotation) {
