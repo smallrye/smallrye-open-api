@@ -41,6 +41,7 @@ import org.jboss.jandex.TypeVariable;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.JaxbConstants;
 import io.smallrye.openapi.api.constants.JsonbConstants;
+import io.smallrye.openapi.api.constants.KotlinSerializationConstants;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.Annotations;
@@ -224,6 +225,7 @@ public class TypeResolver {
      * <li>Jackson <code>@JsonProperty</code>
      * <li>JAXB <code>@XmlElement</code>
      * <li>JAXB <code>@XmlAttribute</code>
+     * <li>kotlinx.serialization <code>@SerialName</code>
      * </ol>
      *
      * If no elements have been selected, the default Java bean property name will
@@ -250,6 +252,12 @@ public class TypeResolver {
         if ((name = context.annotations().getAnnotationValue(target,
                 JacksonConstants.JSON_PROPERTY,
                 JacksonConstants.PROP_VALUE)) != null) {
+            return wrap(name);
+        }
+
+        if ((name = context.annotations().getAnnotationValue(target,
+                KotlinSerializationConstants.SERIAL_NAME,
+                KotlinSerializationConstants.PROP_VALUE)) != null) {
             return wrap(name);
         }
 

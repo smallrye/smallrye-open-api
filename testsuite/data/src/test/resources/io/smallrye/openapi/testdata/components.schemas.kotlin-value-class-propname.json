@@ -5,7 +5,9 @@
       "KotlinBean": {
         "required": [
           "description",
-          "nestedCollection"
+          "nestedCollection",
+          "actualCustomName",
+          "requiredNullableValue"
         ],
         "type": "object",
         "properties": {
@@ -29,6 +31,12 @@
                 "format" : "double"
               }
             }
+          },
+          "actualCustomName": {
+            "type": "string"
+          },
+          "requiredNullableValue": {
+            "type": ["string", "null"]
           }
         }
       }
