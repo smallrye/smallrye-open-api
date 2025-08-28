@@ -7,7 +7,7 @@
           "description",
           "nestedCollection",
           "actualCustomName",
-          "requiredValue"
+          "requiredNullableValue"
         ],
         "type": "object",
         "properties": {
@@ -35,8 +35,8 @@
           "actualCustomName": {
             "type": "string"
           },
-          "requiredValue": {
-            "type": "string"
+          "requiredNullableValue": {
+            "type": ["string", "null"]
           }
         }
       }

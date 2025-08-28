@@ -15,7 +15,7 @@ data class KotlinBean (
     @SerialName("actualCustomName")
     val customName: String = "",
     @Required
-    val requiredValue: String = ""
+    val requiredNullableValue: String? = null,
 )
 
 @Deprecated("1.0.0")
