@@ -586,11 +586,12 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
 
     @ParameterizedTest
     @CsvSource({
-        OpenApiConfig.OperationIdStrategy.METHOD + ", get",
-        OpenApiConfig.OperationIdStrategy.CLASS_METHOD + ", JaxRsAnnotationScannerTest$1StrategyResource_get",
-        OpenApiConfig.OperationIdStrategy.PACKAGE_CLASS_METHOD + ", io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$1StrategyResource_get",
-        "io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$CustomStrategy, Strategy:get",
-        "'', ",
+            OpenApiConfig.OperationIdStrategy.METHOD + ", get",
+            OpenApiConfig.OperationIdStrategy.CLASS_METHOD + ", JaxRsAnnotationScannerTest$1StrategyResource_get",
+            OpenApiConfig.OperationIdStrategy.PACKAGE_CLASS_METHOD
+                    + ", io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$1StrategyResource_get",
+            "io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$CustomStrategy, Strategy:get",
+            "'', ",
     })
     void testOperationIdStrategies(String strategyName, String expectedOperationId) {
         @Path("/resource")
