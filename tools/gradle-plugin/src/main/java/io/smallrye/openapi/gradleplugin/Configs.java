@@ -57,7 +57,7 @@ class Configs implements SmallryeOpenApiProperties {
     final Property<String> infoContactUrl;
     final Property<String> infoLicenseName;
     final Property<String> infoLicenseUrl;
-    final Property<OpenApiConfig.OperationIdStrategy> operationIdStrategy;
+    final Property<String> operationIdStrategy;
     final Property<OpenApiConfig.DuplicateOperationIdBehavior> duplicateOperationIdBehavior;
     final ListProperty<String> scanProfiles;
     final ListProperty<String> scanExcludeProfiles;
@@ -93,7 +93,7 @@ class Configs implements SmallryeOpenApiProperties {
         infoContactUrl = objects.property(String.class);
         infoLicenseName = objects.property(String.class);
         infoLicenseUrl = objects.property(String.class);
-        operationIdStrategy = objects.property(OpenApiConfig.OperationIdStrategy.class);
+        operationIdStrategy = objects.property(String.class);
         duplicateOperationIdBehavior = objects.property(OpenApiConfig.DuplicateOperationIdBehavior.class);
         scanProfiles = objects.listProperty(String.class);
         scanExcludeProfiles = objects.listProperty(String.class);
@@ -130,7 +130,7 @@ class Configs implements SmallryeOpenApiProperties {
         infoContactUrl = objects.property(String.class).convention(ext.getInfoContactUrl());
         infoLicenseName = objects.property(String.class).convention(ext.getInfoLicenseName());
         infoLicenseUrl = objects.property(String.class).convention(ext.getInfoLicenseUrl());
-        operationIdStrategy = objects.property(OpenApiConfig.OperationIdStrategy.class)
+        operationIdStrategy = objects.property(String.class)
                 .convention(ext.getOperationIdStrategy());
         duplicateOperationIdBehavior = objects.property(OpenApiConfig.DuplicateOperationIdBehavior.class)
                 .convention(ext.getDuplicateOperationIdBehavior());
@@ -325,7 +325,7 @@ class Configs implements SmallryeOpenApiProperties {
         return infoLicenseUrl;
     }
 
-    public Property<OpenApiConfig.OperationIdStrategy> getOperationIdStrategy() {
+    public Property<String> getOperationIdStrategy() {
         return operationIdStrategy;
     }
 

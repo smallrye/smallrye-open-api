@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.OASConfig;
+import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.MethodInfo;
 
 import io.smallrye.openapi.api.constants.JsonbConstants;
 
@@ -60,10 +62,107 @@ public interface OpenApiConfig {
                     "org.eclipse.microprofile.openapi",
                     "org.jetbrains.annotations")));
 
-    enum OperationIdStrategy {
-        METHOD,
-        CLASS_METHOD,
-        PACKAGE_CLASS_METHOD
+    /**
+     * Interface that may be implemented to generate custom operationId values.
+     *
+     * Three built-in strategies may be used by specifying an
+     * operationIdStrategy configuration property value of METHOD, CLASS_METHOD,
+     * or PACKAGE_CLASS_METHOD. Otherwise, an fully-qualified implementation name
+     * may be given for a custom strategy.
+     *
+     */
+    @FunctionalInterface
+    interface OperationIdStrategy {
+
+        /**
+         * Strategy name to generate an operationId with the resource method's
+         * name
+         */
+        public static final String METHOD = "METHOD";
+        /**
+         * Strategy name to generate an operationId with the resource class's
+         * simple name and the resource method's name
+         */
+        public static final String CLASS_METHOD = "CLASS_METHOD";
+        /**
+         * Strategy name to generate an operationId with the resource class's
+         * fully-qualified name and the resource method's name
+         */
+        public static final String PACKAGE_CLASS_METHOD = "PACKAGE_CLASS_METHOD";
+
+        /**
+         * Derive an operationId given the Jandex resource ClassInfo and MethodInfo.
+         *
+         * @param resourceClass
+         *        the resource class. E.g. a Jakarta REST end-point class
+         * @param method
+         *        the resource method. E.g. a Jakarta REST end-point method.
+         *        This may be declared in a class other than the resourceClass
+         *        such as a parent class or interface.
+         * @return value to be used for the OpenAPI operationId
+         */
+        String deriveOperationId(ClassInfo resourceClass, MethodInfo method);
+
+        /**
+         * Loads an OperationIdStrategy instance by name. If providing a
+         * fully-qualified implementation class name, the class must be loadable
+         * using the provided ClassLoader. The loader is not required or used
+         * when one of the built-in strategy names is provided.
+         *
+         * @param strategyName
+         *        name of the OperationIdStrategy to load
+         * @param loader
+         *        ClassLoader to load a custom implementation, if necessary
+         * @return the requested OperationIdStrategy
+         */
+        public static OperationIdStrategy load(String strategyName, ClassLoader loader) {
+            final OperationIdStrategy strategy;
+
+            switch (strategyName) {
+                case METHOD:
+                    strategy = (c, m) -> m.name();
+                    break;
+                case CLASS_METHOD:
+                    strategy = (c, m) -> c.name().withoutPackagePrefix() + "_" + m.name();
+                    break;
+                case PACKAGE_CLASS_METHOD:
+                    strategy = (c, m) -> c.name() + "_" + m.name();
+                    break;
+                default:
+                    final Class<?> strategyType;
+
+                    try {
+                        strategyType = loader.loadClass(strategyName);
+                        strategy = (OperationIdStrategy) strategyType.getConstructor().newInstance();
+                    } catch (Exception e) {
+                        throw ApiMessages.msg.invalidOperationIdStrategyWithCause(strategyName, e);
+                    }
+                    break;
+            }
+
+            return strategy;
+        }
+
+        /**
+         * Support compatibility with Quarkus configuration mapping. To be removed once
+         * Quarkus is updated to no longer treat the operation-id-strategy as an enum.
+         *
+         * @deprecated not for general purpose use. Use {@link #load(String, ClassLoader)} instead
+         */
+        @Deprecated(since = "4.1.2")
+        public static OperationIdStrategy valueOf(String value) { // NOSONAR
+            return new OperationIdStrategy() {
+                @Override
+                public String toString() {
+                    return value;
+                }
+
+                @Override
+                public String deriveOperationId(ClassInfo resourceClass, MethodInfo method) {
+                    throw new UnsupportedOperationException("");
+                }
+            };
+        }
     }
 
     enum DuplicateOperationIdBehavior {
@@ -241,8 +340,11 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.INFO_LICENSE_URL, String.class, () -> null);
     }
 
-    default OperationIdStrategy getOperationIdStrategy() {
-        return getConfigValue(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, String.class, OperationIdStrategy::valueOf, () -> null);
+    default String getOperationIdStrategy() {
+        return getConfigValue(
+                SmallRyeOASConfig.OPERATION_ID_STRAGEGY,
+                String.class,
+                () -> null);
     }
 
     default DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {

@@ -29,8 +29,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 import org.json.JSONException;
@@ -569,5 +571,41 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 UserRequest.class,
                 UserResponse.class,
                 UserEndpoint.class);
+    }
+
+    @SuppressWarnings("unused")
+    public static class CustomStrategy implements OpenApiConfig.OperationIdStrategy {
+        public CustomStrategy() {
+        }
+
+        @Override
+        public String deriveOperationId(ClassInfo resourceClass, MethodInfo method) {
+            return "Strategy:" + method.name().toString();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        OpenApiConfig.OperationIdStrategy.METHOD + ", get",
+        OpenApiConfig.OperationIdStrategy.CLASS_METHOD + ", JaxRsAnnotationScannerTest$1StrategyResource_get",
+        OpenApiConfig.OperationIdStrategy.PACKAGE_CLASS_METHOD + ", io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$1StrategyResource_get",
+        "io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$CustomStrategy, Strategy:get",
+        "'', ",
+    })
+    void testOperationIdStrategies(String strategyName, String expectedOperationId) {
+        @Path("/resource")
+        class StrategyResource {
+            @GET
+            @Produces(MediaType.APPLICATION_JSON)
+            public String get() {
+                return "";
+            }
+        }
+
+        Index index = indexOf(StrategyResource.class);
+        OpenApiConfig config = dynamicConfig(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, strategyName);
+        OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(config, index);
+        OpenAPI result = scanner.scan("JAX-RS");
+        Assertions.assertEquals(expectedOperationId, result.getPaths().getPathItem("/resource").getGET().getOperationId());
     }
 }

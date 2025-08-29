@@ -296,26 +296,11 @@ public interface AnnotationScanner {
         TypeUtil.mapDeprecated(context, method, operation::getDeprecated, operation::setDeprecated);
         TypeUtil.mapDeprecated(context, resourceClass, operation::getDeprecated, operation::setDeprecated);
 
-        OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
+        String operationIdStrategy = context.getConfig().getOperationIdStrategy();
 
         if (operationIdStrategy != null && operation.getOperationId() == null) {
-            String operationId = null;
-
-            switch (operationIdStrategy) {
-                case METHOD:
-                    operationId = method.name();
-                    break;
-                case CLASS_METHOD:
-                    operationId = resourceClass.name().withoutPackagePrefix() + "_" + method.name();
-                    break;
-                case PACKAGE_CLASS_METHOD:
-                    operationId = resourceClass.name() + "_" + method.name();
-                    break;
-                default:
-                    break;
-            }
-
-            operation.setOperationId(operationId);
+            OperationIdStrategy instance = OperationIdStrategy.load(operationIdStrategy, context.getClassLoader());
+            operation.setOperationId(instance.deriveOperationId(resourceClass, method));
         }
 
         context.getOperationHandler().handleOperation(operation, resourceClass, method);
