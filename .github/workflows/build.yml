@@ -57,6 +57,11 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
       - name: build with maven
         run: mvn -B formatter:validate impsort:check install javadoc:javadoc -Pcoverage -Pgradle-smoke-test
 
