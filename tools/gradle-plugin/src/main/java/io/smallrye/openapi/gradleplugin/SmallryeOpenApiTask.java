@@ -418,7 +418,7 @@ public class SmallryeOpenApiTask extends DefaultTask implements SmallryeOpenApiP
     @Input
     @Optional
     @Override
-    public Property<OpenApiConfig.OperationIdStrategy> getOperationIdStrategy() {
+    public Property<String> getOperationIdStrategy() {
         return properties.operationIdStrategy;
     }
 
