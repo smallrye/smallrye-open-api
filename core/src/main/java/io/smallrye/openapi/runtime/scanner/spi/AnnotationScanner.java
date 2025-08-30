@@ -40,7 +40,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
-import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
+import io.smallrye.openapi.api.OperationIdGenerator;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
@@ -299,8 +299,8 @@ public interface AnnotationScanner {
         String operationIdStrategy = context.getConfig().getOperationIdStrategy();
 
         if (operationIdStrategy != null && operation.getOperationId() == null) {
-            OperationIdStrategy instance = OperationIdStrategy.load(operationIdStrategy, context.getClassLoader());
-            operation.setOperationId(instance.deriveOperationId(resourceClass, method));
+            OperationIdGenerator instance = OperationIdGenerator.load(operationIdStrategy, context.getClassLoader());
+            operation.setOperationId(instance.generateOperationId(resourceClass, method));
         }
 
         context.getOperationHandler().handleOperation(operation, resourceClass, method);

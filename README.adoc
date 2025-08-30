@@ -118,8 +118,8 @@ Set this boolean value to enable the automatic use of the https://spec.openapis.
 ----
 mp.openapi.extensions.smallrye.operationIdStrategy
 ----
-Specify a strategy to be used globally for deriving operation IDs when not specified via an annotation or static OpenAPI input. Set to one of the following:
+Specify a strategy to be used globally for generating operation IDs when not specified via an annotation or static OpenAPI input. Set to one of the following:
 ** `METHOD`
 ** `CLASS_METHOD`
 ** `PACKAGE_CLASS_METHOD`
-** A fully-qualified class name of an implementation of `io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy` (as of 4.1.2, https://javadoc.io/doc/io.smallrye/smallrye-open-api-core/latest/io/smallrye/openapi/api/OpenApiConfig.OperationIdStrategy.html[see JavaDoc])
+** A fully-qualified class name of an implementation of `io.smallrye.openapi.api.OperationIdGenerator` (as of 4.1.2, https://javadoc.io/doc/io.smallrye/smallrye-open-api-core/latest/io/smallrye/openapi/api/OperationIdGenerator.html[see JavaDoc])
