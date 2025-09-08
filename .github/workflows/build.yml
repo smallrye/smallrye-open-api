@@ -87,6 +87,15 @@ jobs:
             !**/target/surefire-reports/**/*
             !**/target/maven-it/**/*
 
+      - name: Archive Failed Tests Results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: artifacts-${{ matrix.os }}-java${{matrix.java}} 
+          path: |
+            **/target/failsafe-reports/
+            **/target/surefire-reports/
+            
   tck-reporting:
     runs-on: ubuntu-latest
     strategy:
