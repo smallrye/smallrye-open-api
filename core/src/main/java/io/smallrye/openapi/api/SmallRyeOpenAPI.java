@@ -654,6 +654,10 @@ public class SmallRyeOpenAPI {
             return new SmallRyeOpenAPI(model, ctx.modelIO.write(model).orElse(null), toString, unmodifiable);
         }
 
+        protected <V> SmallRyeOpenAPI buildFinalize(BuildContext<V, ?, ?, ?, ?> ctx) {
+            return buildFinalize(ctx, false);
+        }
+
         protected static class BuildContext<V, A extends V, O extends V, AB, OB> {
             ClassLoader appClassLoader;
             OpenApiConfig buildConfig;
