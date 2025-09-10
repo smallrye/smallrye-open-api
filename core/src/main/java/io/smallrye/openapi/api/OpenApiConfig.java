@@ -60,10 +60,44 @@ public interface OpenApiConfig {
                     "org.eclipse.microprofile.openapi",
                     "org.jetbrains.annotations")));
 
-    enum OperationIdStrategy {
-        METHOD,
-        CLASS_METHOD,
-        PACKAGE_CLASS_METHOD
+    class OperationIdStrategy {
+        private OperationIdStrategy() {
+        }
+
+        /**
+         * Strategy name to generate an operationId with the resource method's
+         * name
+         */
+        public static final String METHOD = "METHOD";
+        /**
+         * Strategy name to generate an operationId with the resource class's
+         * simple name and the resource method's name
+         */
+        public static final String CLASS_METHOD = "CLASS_METHOD";
+        /**
+         * Strategy name to generate an operationId with the resource class's
+         * fully-qualified name and the resource method's name
+         */
+        public static final String PACKAGE_CLASS_METHOD = "PACKAGE_CLASS_METHOD";
+
+        /**
+         * Support compatibility with Quarkus configuration mapping. May be
+         * removed once Quarkus is updated to no longer treat the
+         * operation-id-strategy as an enum.
+         *
+         * @deprecated not for general purpose use. See
+         *             {@link OperationIdGenerator#load(String, ClassLoader)}
+         *             instead
+         */
+        @Deprecated(since = "4.1.2")
+        public static OperationIdStrategy valueOf(String value) { // NOSONAR
+            return new OperationIdStrategy() {
+                @Override
+                public String toString() {
+                    return value;
+                }
+            };
+        }
     }
 
     enum DuplicateOperationIdBehavior {
@@ -241,8 +275,8 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.INFO_LICENSE_URL, String.class, () -> null);
     }
 
-    default OperationIdStrategy getOperationIdStrategy() {
-        return getConfigValue(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, String.class, OperationIdStrategy::valueOf, () -> null);
+    default String getOperationIdStrategy() {
+        return getConfigValue(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, String.class, () -> null);
     }
 
     default DuplicateOperationIdBehavior getDuplicateOperationIdBehavior() {

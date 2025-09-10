@@ -1,5 +1,10 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -14,6 +19,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.annotations.Components;
@@ -29,8 +35,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
+import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
+import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 import org.json.JSONException;
@@ -42,8 +50,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
 import io.smallrye.openapi.api.OpenApiDocument;
+import io.smallrye.openapi.api.OperationIdGenerator;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
+import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiParser;
 
@@ -91,7 +102,7 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
         // fail hard to trigger the failure in this test
         cfg.put(SmallRyeOASConfig.DUPLICATE_OPERATION_ID_BEHAVIOR, OpenApiConfig.DuplicateOperationIdBehavior.FAIL.toString());
         // method-strategy needed for this test
-        cfg.put(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, OpenApiConfig.OperationIdStrategy.METHOD.toString());
+        cfg.put(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, OpenApiConfig.OperationIdStrategy.METHOD);
         OpenApiConfig config = dynamicConfig(cfg);
 
         OpenApiAnnotationScanner s = new OpenApiAnnotationScanner(config, index);
@@ -569,5 +580,59 @@ class JaxRsAnnotationScannerTest extends JaxRsDataObjectScannerTestBase {
                 UserRequest.class,
                 UserResponse.class,
                 UserEndpoint.class);
+    }
+
+    public static class CustomStrategy implements OperationIdGenerator {
+        public CustomStrategy() {
+            // Create by OperationIdGenerator#load
+        }
+
+        @Override
+        public String generateOperationId(ClassInfo resourceClass, MethodInfo method) {
+            return "Custom:" + method.name();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            OperationIdStrategy.METHOD + ", get",
+            OperationIdStrategy.CLASS_METHOD + ", JaxRsAnnotationScannerTest$1StrategyResource_get",
+            OperationIdStrategy.PACKAGE_CLASS_METHOD
+                    + ", io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$1StrategyResource_get",
+            "io.smallrye.openapi.runtime.scanner.JaxRsAnnotationScannerTest$CustomStrategy, Custom:get",
+            "'', ",
+    })
+    void testOperationIdStrategies(String strategyName, String expectedOperationId) {
+        @Path("/resource")
+        class StrategyResource {
+            @GET
+            @Produces(MediaType.APPLICATION_JSON)
+            public String get() {
+                return "";
+            }
+        }
+
+        OpenAPI result = scan(config(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, strategyName), StrategyResource.class);
+        assertEquals(expectedOperationId, result.getPaths().getPathItem("/resource").getGET().getOperationId());
+    }
+
+    @Test
+    void testOperationIdStrategyInvalid() {
+        @Path("/resource")
+        class StrategyResource {
+            @GET
+            @Produces(MediaType.APPLICATION_JSON)
+            public String get() {
+                return "";
+            }
+        }
+
+        String strategyName = "com.example.MissingStrategy";
+        Config config = config(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, strategyName);
+        OpenApiRuntimeException thrown = assertThrows(OpenApiRuntimeException.class,
+                () -> scan(config, StrategyResource.class));
+        String message = thrown.getMessage();
+        assertThat(message, containsString("SROAP00003"));
+        assertThat(message, containsString(strategyName));
     }
 }
