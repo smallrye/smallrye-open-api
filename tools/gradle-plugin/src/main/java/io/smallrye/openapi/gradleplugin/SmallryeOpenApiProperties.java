@@ -121,7 +121,7 @@ public interface SmallryeOpenApiProperties {
      * Configuration property to specify how the operationid is generated. Can be used to minimize
      * risk of collisions between operations.
      */
-    Property<OpenApiConfig.OperationIdStrategy> getOperationIdStrategy();
+    Property<String> getOperationIdStrategy();
 
     /**
      * Configuration property to specify what should happen if duplicate operationIds occur.

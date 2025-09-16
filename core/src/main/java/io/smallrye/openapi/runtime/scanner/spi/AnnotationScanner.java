@@ -40,7 +40,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.OpenApiConfig.DuplicateOperationIdBehavior;
-import io.smallrye.openapi.api.OpenApiConfig.OperationIdStrategy;
+import io.smallrye.openapi.api.OperationIdGenerator;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
 import io.smallrye.openapi.api.constants.JacksonConstants;
 import io.smallrye.openapi.api.constants.KotlinConstants;
@@ -296,26 +296,11 @@ public interface AnnotationScanner {
         TypeUtil.mapDeprecated(context, method, operation::getDeprecated, operation::setDeprecated);
         TypeUtil.mapDeprecated(context, resourceClass, operation::getDeprecated, operation::setDeprecated);
 
-        OperationIdStrategy operationIdStrategy = context.getConfig().getOperationIdStrategy();
+        String operationIdStrategy = context.getConfig().getOperationIdStrategy();
 
         if (operationIdStrategy != null && operation.getOperationId() == null) {
-            String operationId = null;
-
-            switch (operationIdStrategy) {
-                case METHOD:
-                    operationId = method.name();
-                    break;
-                case CLASS_METHOD:
-                    operationId = resourceClass.name().withoutPackagePrefix() + "_" + method.name();
-                    break;
-                case PACKAGE_CLASS_METHOD:
-                    operationId = resourceClass.name() + "_" + method.name();
-                    break;
-                default:
-                    break;
-            }
-
-            operation.setOperationId(operationId);
+            OperationIdGenerator instance = OperationIdGenerator.load(operationIdStrategy, context.getClassLoader());
+            operation.setOperationId(instance.generateOperationId(resourceClass, method));
         }
 
         context.getOperationHandler().handleOperation(operation, resourceClass, method);

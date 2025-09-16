@@ -111,3 +111,15 @@ Set this boolean value to enable or disable the sorting of parameter array entri
 mp.openapi.extensions.smallrye.generic-response-use-default
 ----
 Set this boolean value to enable the automatic use of the https://spec.openapis.org/oas/v3.1.0.html#responses-object[`default` response code] for framework response types (e.g. Jakarta REST's `Response` type) when no `@APIResponse` annotations have been used and the HTTP response code for an operation cannot be determined. When unset or `false`, the response code will be set to `200`.
+
+* Operation ID Strategy
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.operationIdStrategy
+----
+Specify a strategy to be used globally for generating operation IDs when not specified via an annotation or static OpenAPI input. If not set, operation IDs will not be generated. Set to one of the following:
+** `METHOD` (may result in duplicate operation IDs in an application where REST endpoint method names are not unique)
+** `CLASS_METHOD` (may result in duplicate operation IDs in an application where REST endpoint simple class name + method names are not unique)
+** `PACKAGE_CLASS_METHOD`
+** A fully-qualified class name of an implementation of `io.smallrye.openapi.api.OperationIdGenerator` (as of 4.1.2, https://javadoc.io/doc/io.smallrye/smallrye-open-api-core/latest/io/smallrye/openapi/api/OperationIdGenerator.html[see JavaDoc])
