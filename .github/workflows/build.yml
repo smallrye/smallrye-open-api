@@ -138,7 +138,7 @@ jobs:
           java-version: 17
 
       - name: build with maven
-        run: mvn -B install -pl '!testsuite/coverage,!testsuite/data,!testsuite/extra,!tools,!tools/gradle-plugin,!tools/maven-plugin,!ui,!ui/open-api-ui,!ui/open-api-ui-forms' -DskipTests
+        run: mvn -B install -pl 'testsuite/tck' -am -DskipTests
 
       - uses: actions/setup-java@v5
         name: set up jdk
