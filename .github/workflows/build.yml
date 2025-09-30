@@ -37,6 +37,7 @@ jobs:
         java:
         - 17
         - 21
+        - 25
     runs-on: ${{ matrix.os }}
     name: build with jdk ${{matrix.java}} (${{ matrix.os }}) 
 
@@ -101,6 +102,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        java:
+        - 11
+        - 17
+        - 21
+        - 25
+
         include:
         # Disable older TCK jobs prior to 4.0 GA release 
         #- tck-version: "2.0.1"
@@ -111,7 +118,7 @@ jobs:
         - title: "4.1.x"
           tck-version: "4.1"
 
-    name: MicroProfile OpenAPI TCK ${{ matrix.title }}
+    name: MicroProfile OpenAPI TCK ${{ matrix.title }} with jdk ${{ matrix.java }}
     steps:
       - uses: actions/checkout@v5
         name: checkout
@@ -136,7 +143,7 @@ jobs:
         name: set up jdk
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: ${{ matrix.java }}
 
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
