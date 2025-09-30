@@ -42,4 +42,8 @@ interface ScannerLogging extends BasicLogger {
     @Message(id = 4006, value = "Configured schema type %s is not a valid type signature")
     void configSchemaTypeInvalid(String typeSignature, @Cause Throwable cause);
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 4007, value = "No AnnotationScanner implementations found, check class-path")
+    void noAnnotationScannersFound();
+
 }
