@@ -247,9 +247,16 @@ public class OpenApiAnnotationScanner {
     }
 
     private Iterable<AnnotationScanner> getScanners(Predicate<String> filter) {
-        return StreamSupport.stream(scannerSupplier.get().spliterator(), false)
+        List<AnnotationScanner> scanners = StreamSupport
+                .stream(scannerSupplier.get().spliterator(), false)
                 .filter(scanner -> filter.test(scanner.getName()))
                 .collect(Collectors.toList());
+
+        if (scanners.isEmpty()) {
+            ScannerLogging.logger.noAnnotationScannersFound();
+        }
+
+        return scanners;
     }
 
     private OpenAPI scanMicroProfileOpenApiAnnotations() {
