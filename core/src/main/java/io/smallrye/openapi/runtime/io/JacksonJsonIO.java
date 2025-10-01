@@ -15,13 +15,13 @@ import java.util.Set;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.yaml.snakeyaml.LoaderOptions;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLAnchorReplayingFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -48,12 +48,19 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
         LoaderOptions loaderOptions = new LoaderOptions();
         Optional.ofNullable(this.config.getMaximumStaticFileSize()).ifPresent(loaderOptions::setCodePointLimit);
 
-        JsonFactory yamlFactory = new YAMLFactoryBuilder(new YAMLFactory())
+        YAMLFactory yamlFactory = new YAMLFactoryBuilder(new YAMLFactory())
                 .loaderOptions(loaderOptions)
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
                 .enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS)
                 .build();
+
+        /*
+         * The anchor replaying factory allows aliases of anchors values in the
+         * YAML to be in-lined as if the elements were repeated throughout a
+         * source document.
+         */
+        yamlFactory = new YAMLAnchorReplayingFactory(yamlFactory, null);
 
         this.yamlMapper = jsonMapper.copyWith(yamlFactory);
         this.yamlWriter = yamlMapper.writer().with(yamlFactory);
