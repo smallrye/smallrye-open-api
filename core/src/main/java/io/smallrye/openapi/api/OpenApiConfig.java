@@ -348,6 +348,10 @@ public interface OpenApiConfig {
         return getConfigValue(SmallRyeOASConfig.SMALLRYE_GENERIC_RESPONSE_USE_DEFAULT, Boolean.class, () -> Boolean.FALSE);
     }
 
+    default boolean yamlAliasExpansionEnable() {
+        return getConfigValue(SmallRyeOASConfig.SMALLRYE_YAML_ALIAS_EXPANSION_ENABLE, Boolean.class, () -> Boolean.TRUE);
+    }
+
     default Integer getMaximumStaticFileSize() {
         return getConfigValue(SmallRyeOASConfig.MAXIMUM_STATIC_FILE_SIZE, Integer.class,
                 () -> MAXIMUM_STATIC_FILE_SIZE_DEFAULT);

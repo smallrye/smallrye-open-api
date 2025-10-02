@@ -60,7 +60,9 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
          * YAML to be in-lined as if the elements were repeated throughout a
          * source document.
          */
-        yamlFactory = new YAMLAnchorReplayingFactory(yamlFactory, null);
+        if (this.config.yamlAliasExpansionEnable()) {
+            yamlFactory = new YAMLAnchorReplayingFactory(yamlFactory, null);
+        }
 
         this.yamlMapper = jsonMapper.copyWith(yamlFactory);
         this.yamlWriter = yamlMapper.writer().with(yamlFactory);

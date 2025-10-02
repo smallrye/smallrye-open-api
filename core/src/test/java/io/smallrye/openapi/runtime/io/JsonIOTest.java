@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.io;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,9 +11,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import io.smallrye.openapi.api.SmallRyeOASConfig;
 
 abstract class JsonIOTest<V, A extends V, O extends V, AB, OB> {
 
@@ -62,6 +66,31 @@ abstract class JsonIOTest<V, A extends V, O extends V, AB, OB> {
 
         assertEquals("Cool API Title", title);
         assertEquals(title, description);
+    }
+
+    @Test
+    @Tag("property:" + SmallRyeOASConfig.SMALLRYE_YAML_ALIAS_EXPANSION_ENABLE + "=false")
+    void testSimpleAliasExpansionDisabled() {
+        assumeTrue(getClass().equals(JacksonJsonIOTest.class), "Disabling alias expansion only supported for JacksonJsonIO");
+
+        String input = ""
+                + "---\n"
+                + "openapi: 3.1.0\n"
+                + "info:\n"
+                + "  title: &info_title Cool API Title\n"
+                + "  description: *info_title"; // description points to title's value
+
+        @SuppressWarnings("unchecked")
+        O value = (O) target.fromString(input, Format.YAML);
+        String title = target.getObject(value, "info")
+                .map(info -> target.getString(info, "title"))
+                .orElseThrow();
+        String description = target.getObject(value, "info")
+                .map(info -> target.getString(info, "description"))
+                .orElseThrow();
+
+        assertEquals("Cool API Title", title);
+        assertEquals("info_title", description);
     }
 
     @Test
