@@ -123,3 +123,11 @@ Specify a strategy to be used globally for generating operation IDs when not spe
 ** `CLASS_METHOD` (may result in duplicate operation IDs in an application where REST endpoint simple class name + method names are not unique)
 ** `PACKAGE_CLASS_METHOD`
 ** A fully-qualified class name of an implementation of `io.smallrye.openapi.api.OperationIdGenerator` (as of 4.1.2, https://javadoc.io/doc/io.smallrye/smallrye-open-api-core/latest/io/smallrye/openapi/api/OperationIdGenerator.html[see JavaDoc])
+
+* YAML Alias Expansion (as of 4.1.2)
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.yaml-alias-expansion.enable
+----
+Set this boolean value to enable or disable the expansion of YAML aliases when loading a static OpenAPI file. When enabled (set to `true`), aliases encountered in the YAML will expand to the value of the YAML node having an anchor of the same name (see more about YAML https://yaml.org/spec/1.1/#id863390[anchors and aliases in the YAML 1.1 specification]). When disabled (set to `false`), aliases will not be expanded. If not set, it will default to `true`.
