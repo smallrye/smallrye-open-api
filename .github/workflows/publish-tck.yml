@@ -14,15 +14,15 @@ jobs:
 
     strategy:
       matrix:
-        include:
-        # Disable older TCK jobs prior to 4.0 GA release
-        #- tck-version: "2.0.1"
-        #- tck-version: "3.0"
-        #- tck-version: "3.1.1"
-        - tck-version: "4.0.2"
-        - tck-version: "4.1"
+        java:
+        - 11
+        - 17
+        - 21
+        tck-version:
+        - "4.0.2"
+        - "4.1"
 
-    name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }}
+    name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }} with jdk ${{ matrix.java }}
     steps:
       - uses: actions/checkout@v5
         name: checkout ${{inputs.version}}
@@ -49,16 +49,16 @@ jobs:
         name: set up jdk
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: ${{ matrix.java }}
 
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
       - name: stage tck report
-        run: mv testsuite/tck/target/surefire-reports/microprofile-openapi-tck-report.html ./microprofile-openapi-tck-report-${{ matrix.tck-version }}.html
+        run: mv testsuite/tck/target/surefire-reports/microprofile-openapi-tck-report.html ./microprofile-openapi-tck-report-${{ matrix.tck-version }}-jdk${{ matrix.java }}.html
 
       - name: upload tck report to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ inputs.version }} microprofile-openapi-tck-report-${{ matrix.tck-version }}.html
+          gh release upload ${{ inputs.version }} microprofile-openapi-tck-report-${{ matrix.tck-version }}-jdk${{ matrix.java }}.html
