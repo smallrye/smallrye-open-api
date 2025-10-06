@@ -34,7 +34,7 @@
         <version.jetty>11.0.24</version.jetty>
 
         <!-- Use Jakarta EE 10 versions -->
-        <version.resteasy>6.2.3.Final</version.resteasy>
+        <version.resteasy>7.0.0.Final</version.resteasy>
         <version.weld.core>5.1.2.Final</version.weld.core>
 
         <!--
