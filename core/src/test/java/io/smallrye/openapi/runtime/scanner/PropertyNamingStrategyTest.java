@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -71,20 +72,24 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
 
     @ParameterizedTest(name = "testJsonbConstantStrategy-{0}")
     @CsvSource({
-            JsonbConstants.IDENTITY + ", simpleStringOne|anotherField|Y|z",
-            JsonbConstants.LOWER_CASE_WITH_DASHES + ", simple-string-one|another-field|y|z",
-            JsonbConstants.LOWER_CASE_WITH_UNDERSCORES + ", simple_string_one|another_field|y|z",
-            JsonbConstants.UPPER_CAMEL_CASE + ", SimpleStringOne|AnotherField|Y|Z",
-            JsonbConstants.UPPER_CAMEL_CASE_WITH_SPACES + ", Simple String One|Another Field|Y|Z",
-            JsonbConstants.CASE_INSENSITIVE + ", simpleStringOne|anotherField|Y|z"
+            JsonbConstants.IDENTITY + ", simpleStringOne|anotherField|Y|z|SOMEValue",
+            JsonbConstants.LOWER_CASE_WITH_DASHES + ", simple-string-one|another-field|y|z|some-value",
+            JsonbConstants.LOWER_CASE_WITH_UNDERSCORES + ", simple_string_one|another_field|y|z|some_value",
+            JsonbConstants.UPPER_CAMEL_CASE + ", SimpleStringOne|AnotherField|Y|Z|SOMEValue",
+            JsonbConstants.UPPER_CAMEL_CASE_WITH_SPACES + ", Simple String One|Another Field|Y|Z|SOME Value",
+            JsonbConstants.CASE_INSENSITIVE + ", simpleStringOne|anotherField|Y|z|SOMEValue"
     })
     void testJsonbConstantStrategy(String strategy, String expectedNames) throws Exception {
         OpenAPI result = scan(config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY, strategy), NameStrategyBean3.class);
-        Set<String> expectedNameSet = new TreeSet<>(Arrays.asList(expectedNames.split("\\|")));
+        List<String> expectedNameList = Arrays.asList(expectedNames.split("\\|"));
+        Collections.sort(expectedNameList, String::compareToIgnoreCase);
+
         Map<String, org.eclipse.microprofile.openapi.models.media.Schema> schemas = result.getComponents().getSchemas();
         org.eclipse.microprofile.openapi.models.media.Schema schema = schemas.get(NameStrategyBean3.class.getSimpleName());
-        assertEquals(expectedNameSet.size(), schema.getProperties().size());
-        assertEquals(expectedNameSet, schema.getProperties().keySet());
+        List<String> actualNameList = new ArrayList<>(schema.getProperties().keySet());
+        Collections.sort(actualNameList, String::compareToIgnoreCase);
+
+        assertEquals(expectedNameList, actualNameList);
     }
 
     @Schema
@@ -116,6 +121,27 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
         Integer anotherField;
         BigDecimal Y;
         double z;
+        String SOMEValue;
+
+        public String getSimpleStringOne() {
+            return simpleStringOne;
+        }
+
+        public Integer getAnotherField() {
+            return anotherField;
+        }
+
+        public BigDecimal getY() {
+            return Y;
+        }
+
+        public double getZ() {
+            return z;
+        }
+
+        public String getSOMEValue() {
+            return SOMEValue;
+        }
     }
 
     public static class NoValidTranslationMethods {
