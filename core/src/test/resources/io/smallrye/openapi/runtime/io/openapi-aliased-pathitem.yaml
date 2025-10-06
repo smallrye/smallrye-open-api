@@ -1,0 +1,33 @@
+---
+openapi: 3.1.0
+info:
+  title: Simple API with Anchors and Aliases
+  description: An API definition that demonstrates the use of YAML anchors and aliases for data reuse
+  termsOfService: http://example.com/terms/
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+paths:
+  /api/resource1: &resource1
+    get:
+      content:
+        application/json:
+          schema:
+            property:
+              id:
+                type: integer
+                format: int64
+              name:
+                type: string
+              description:
+                type: string
+  # resource2 has the same layout as resource1
+  /api/resource2:
+    <<: *resource1
+    post:
+      operationId: putResource2
