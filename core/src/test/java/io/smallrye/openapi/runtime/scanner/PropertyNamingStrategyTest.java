@@ -50,21 +50,21 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
     }
 
     @Test
-    void testInvalidNamingStrategyClass() throws Exception {
+    void testInvalidNamingStrategyClass() {
         Config config = config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 "com.fasterxml.jackson.databind.PropertyNamingStrategies$InvalidStrategy");
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 
     @Test
-    void testNoValidTranslationMethods() throws Exception {
+    void testNoValidTranslationMethods() {
         Config config = config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 NoValidTranslationMethods.class.getName());
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyKebab.class));
     }
 
     @Test
-    void testInvalidPropertyNameTranslationAttempt() throws Exception {
+    void testInvalidPropertyNameTranslationAttempt() {
         Config config = config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY,
                 TranslationThrowsException.class.getName());
         assertThrows(OpenApiRuntimeException.class, () -> scan(config, NameStrategyBean3.class));
@@ -79,7 +79,7 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
             JsonbConstants.UPPER_CAMEL_CASE_WITH_SPACES + ", Simple String One|Another Field|Y|Z|SOME Value",
             JsonbConstants.CASE_INSENSITIVE + ", simpleStringOne|anotherField|Y|z|SOMEValue"
     })
-    void testJsonbConstantStrategy(String strategy, String expectedNames) throws Exception {
+    void testJsonbConstantStrategy(String strategy, String expectedNames) {
         OpenAPI result = scan(config(SmallRyeOASConfig.SMALLRYE_PROPERTY_NAMING_STRATEGY, strategy), NameStrategyBean3.class);
         List<String> expectedNameList = Arrays.asList(expectedNames.split("\\|"));
         Collections.sort(expectedNameList, String::compareToIgnoreCase);
@@ -90,6 +90,12 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
         Collections.sort(actualNameList, String::compareToIgnoreCase);
 
         assertEquals(expectedNameList, actualNameList);
+    }
+
+    @Test
+    void testMethodNamePreserved() throws Exception {
+        OpenAPI result = scan(NameStrategyBean4.class);
+        assertJsonEquals("components.schemas.method-name-preserved.json", result);
     }
 
     @Schema
@@ -119,9 +125,9 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
     static class NameStrategyBean3 {
         String simpleStringOne;
         Integer anotherField;
-        BigDecimal Y;
+        BigDecimal Y; // NOSONAR - naming intentional
         double z;
-        String SOMEValue;
+        String SOMEValue; // NOSONAR - naming intentional
 
         public String getSimpleStringOne() {
             return simpleStringOne;
@@ -144,14 +150,35 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
         }
     }
 
-    public static class NoValidTranslationMethods {
-        public NoValidTranslationMethods() {
+    @Schema
+    static class NameStrategyBean4 {
+        @Schema(name = "TESTValue", title = "Test Value")
+        Integer TestValue; // NOSONAR - naming intentional
+
+        @Schema(name = "eValue", title = "e-Value")
+        String EValue; // NOSONAR - naming intentional
+
+        @Schema(description = "Property for TestValue")
+        public Integer getTESTValue() {
+            return TestValue;
         }
 
+        @Schema(description = "Property for e-Value")
+        public String geteValue() {
+            return EValue;
+        }
+
+    }
+
+    public static class NoValidTranslationMethods {
         public String translate() {
             return null;
         }
 
+        /**
+         * @param v1 unused, demonstrated unsuitable translate method signature
+         * @param v2 unused, demonstrated unsuitable translate method signature
+         */
         public String translate(String v1, String v2) {
             return null;
         }
