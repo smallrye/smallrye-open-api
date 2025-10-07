@@ -1,0 +1,23 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "NameStrategyBean4" : {
+        "type" : "object",
+        "properties" : {
+          "TESTValue" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Property for TestValue",
+            "title" : "Test Value"
+          },
+          "eValue" : {
+            "type" : "string",
+            "description" : "Property for e-Value",
+            "title" : "e-Value"
+          }
+        }
+      }
+    }
+  }
+}

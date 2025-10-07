@@ -100,19 +100,15 @@ public class PropertyNamingStrategyFactory {
 
             for (int i = 0; i < propertyName.length(); i++) {
                 final char c = propertyName.charAt(i);
+                final char next = propertyName.length() > i + 1 ? propertyName.charAt(i + 1) : '\0';
+                final char transformed = converter.apply(c);
 
-                if (Character.isUpperCase(c)) {
-                    final char transformed = converter.apply(c);
-
-                    if (current.length() > 0) {
-                        global.append(current).append(separator);
-                        current.setLength(0);
-                    }
-
-                    current.append(transformed);
-                } else {
-                    current.append(c);
+                if (current.length() > 0 && Character.isUpperCase(c) && !Character.isUpperCase(next)) {
+                    global.append(current).append(separator);
+                    current.setLength(0);
                 }
+
+                current.append(transformed);
             }
 
             if (current.length() > 0) {

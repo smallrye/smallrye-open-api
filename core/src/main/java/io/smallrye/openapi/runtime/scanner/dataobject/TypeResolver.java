@@ -1029,11 +1029,28 @@ public class TypeResolver {
         }
 
         if (nameStart > 0) {
-            StringBuilder nameBuffer = new StringBuilder(methodName.length());
-            nameBuffer.append(methodName);
-            nameBuffer.setCharAt(nameStart, Character.toLowerCase(methodName.charAt(nameStart)));
+            String rawPropertyName = methodName.substring(nameStart);
+            if (Optional.ofNullable(properties.get(rawPropertyName)).map(p -> p.field).isPresent()) {
+                /*
+                 * The raw property name name matches the field name. Do not modify further.
+                 * E.g. field is URL and method is getURL.
+                 */
+                return rawPropertyName;
+            }
 
-            propertyName = nameBuffer.substring(nameStart);
+            /*
+             * If first two chars are upper-case, do nothing
+             * (following java.beans.Introspector.decapitalize(String))
+             */
+            if (rawPropertyName.length() > 1
+                    && Character.isUpperCase(rawPropertyName.charAt(1))
+                    && Character.isUpperCase(rawPropertyName.charAt(0))) {
+                propertyName = rawPropertyName;
+            } else {
+                StringBuilder nameBuffer = new StringBuilder(rawPropertyName);
+                nameBuffer.setCharAt(0, Character.toLowerCase(rawPropertyName.charAt(0)));
+                propertyName = nameBuffer.toString();
+            }
         } else {
             propertyName = methodName;
         }
