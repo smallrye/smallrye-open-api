@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.eclipse.microprofile.openapi.OASFactory;
+import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Paths;
@@ -132,5 +133,30 @@ class SmallRyeOpenAPIBuilderTest {
         Paths paths = model.getPaths();
         PathItem newPathItem = OASFactory.createPathItem();
         assertThrows(UnsupportedOperationException.class, () -> paths.addPathItem("/path", newPathItem));
+    }
+
+    @Test
+    void testInitialModelUnmodified() {
+        OpenAPI initialModel = OASFactory.createOpenAPI()
+                .info(OASFactory.createInfo().description("The initial description"));
+
+        class UpdateInfoDescriptionFilter implements OASFilter {
+            @Override
+            public void filterOpenAPI(OpenAPI openAPI) {
+                openAPI.getInfo().setDescription("Description modified by filter");
+            }
+        }
+
+        SmallRyeOpenAPI result = SmallRyeOpenAPI.builder()
+                .enableModelReader(false)
+                .enableStandardFilter(false)
+                .enableAnnotationScan(false)
+                .enableStandardStaticFiles(false)
+                .withInitialModel(initialModel)
+                .addFilter(new UpdateInfoDescriptionFilter())
+                .build();
+
+        assertEquals("The initial description", initialModel.getInfo().getDescription());
+        assertEquals("Description modified by filter", result.model().getInfo().getDescription());
     }
 }

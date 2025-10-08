@@ -630,7 +630,16 @@ public class SmallRyeOpenAPI {
         protected <V> SmallRyeOpenAPI buildFinalize(BuildContext<V, ?, ?, ?, ?> ctx, boolean unmodifiable) {
             ctx.doc.config(ctx.buildConfig);
             ctx.doc.defaultRequiredProperties(ctx.defaultRequiredProperties);
-            ctx.doc.modelFromReader(MergeUtil.merge(ctx.initialModel, ctx.readerModel));
+
+            OpenAPI readerModel = ctx.readerModel;
+
+            if (ctx.initialModel != null) {
+                // Copy the initial model so the original is not modified by the build process
+                OpenAPI initialModelCopy = BaseModel.deepCopy(ctx.initialModel, OpenAPI.class);
+                readerModel = MergeUtil.merge(initialModelCopy, ctx.readerModel);
+            }
+
+            ctx.doc.modelFromReader(readerModel);
             ctx.doc.modelFromStaticFile(ctx.staticModel);
             ctx.doc.modelFromAnnotations(ctx.annotationModel);
 
