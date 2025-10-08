@@ -151,6 +151,17 @@ class BaseModelSupport {
         if (other instanceof BaseModel) {
             BaseModel<O> otherImpl = (BaseModel<O>) other;
             result.getProperties().putAll(BaseModelSupport.deepCopy(otherImpl.getProperties(), unmodifiable));
+
+            if (other instanceof BaseExtensibleModel) {
+                BaseExtensibleModel<?> otherExt = (BaseExtensibleModel<?>) other;
+                Map<String, Object> extensions = otherExt.getAllExtensions();
+
+                if (extensions != null) {
+                    BaseExtensibleModel<?> resultExt = (BaseExtensibleModel<?>) result;
+                    resultExt.setExtensions(BaseModelSupport.deepCopy(extensions, unmodifiable));
+                }
+            }
+
             if (unmodifiable) {
                 result.setUnmodifiable();
             }
