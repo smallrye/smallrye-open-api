@@ -14,7 +14,7 @@
 
     <properties>
         <version.spring>6.1.14</version.spring>
-        <version.spring-security>6.5.5</version.spring-security>
+        <version.spring-security>6.5.6</version.spring-security>
         <version.springdoc>1.8.0</version.springdoc>
     </properties>
 
