@@ -17,7 +17,7 @@
 
         <itf-maven.version>0.13.1</itf-maven.version>
         <maven-plugin-api.version>3.9.11</maven-plugin-api.version>
-        <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
+        <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
         <maven-core.version>3.9.11</maven-core.version>
     </properties>
 
@@ -89,7 +89,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.15.1</version>
+                <version>3.15.2</version>
                 <configuration>
                     <goalPrefix>smallrye-open-api</goalPrefix>
                 </configuration>
