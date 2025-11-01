@@ -13,7 +13,7 @@
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
-        <eclipse.microprofile.openapi.version>4.1</eclipse.microprofile.openapi.version>
+        <eclipse.microprofile.openapi.version>4.1.1</eclipse.microprofile.openapi.version>
         <kotlin.version>2.2.0</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
