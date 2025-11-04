@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-parent</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
+        <version>4.2.1</version>
     </parent>
     
     <artifactId>smallrye-open-api-ui-parent</artifactId>
