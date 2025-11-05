@@ -111,36 +111,33 @@ public class AugmentedIndexView implements IndexView {
         Map<ClassInfo, MethodInfo> ancestry = new LinkedHashMap<>();
 
         for (ClassInfo classInfo : chain.keySet()) {
-            ancestry.put(classInfo, null);
+            if (!saveOverride(method, classInfo, ancestry)) {
+                ancestry.put(classInfo, null);
+            }
 
-            classInfo.methods()
-                    .stream()
-                    .filter(m -> !m.isSynthetic())
-                    .filter(m -> isSameSignature(method, m))
-                    .findFirst()
-                    .ifPresent(m -> ancestry.put(classInfo, m));
+            for (Type ifaceType : interfaces(classInfo)) {
+                if (!TypeUtil.knownJavaType(ifaceType.name())) {
+                    ClassInfo iface = getClass(ifaceType);
 
-            interfaces(classInfo)
-                    .stream()
-                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
-                    .map(this::getClass)
-                    .filter(Objects::nonNull)
-                    .map(iface -> {
+                    if (!saveOverride(method, iface, ancestry)) {
                         ancestry.put(iface, null);
-                        return iface;
-                    })
-                    .flatMap(iface -> iface.methods().stream())
-                    .filter(m -> isSameSignature(method, m))
-                    .forEach(m -> ancestry.put(m.declaringClass(), m));
+                    }
+                }
+            }
         }
 
         return ancestry;
     }
 
-    private static boolean isSameSignature(MethodInfo m1, MethodInfo m2) {
-        return Objects.equals(m1.name(), m2.name())
-                && m1.parametersCount() == m2.parametersCount()
-                && Objects.equals(m1.parameterTypes(), m2.parameterTypes());
+    private static boolean saveOverride(MethodInfo searchMethod, ClassInfo clazz, Map<ClassInfo, MethodInfo> results) {
+        MethodInfo classMethod = clazz.method(searchMethod.name(), searchMethod.parameterTypes());
+
+        if (classMethod != null && !classMethod.isSynthetic()) {
+            results.put(clazz, classMethod);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
