@@ -2,7 +2,7 @@ package io.smallrye.openapi.jaxrs;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +12,8 @@ import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.PathItem.HttpMethod;
+import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
 /**
@@ -120,9 +122,18 @@ public class JaxRsConstants {
         methods.addAll(PATCH);
     }
 
+    public static final Set<DotName> HTTP_METHODS = Collections
+            .unmodifiableSet(methods);
+
+    private static final AnnotationValue[] EMPTY_VALUES = new AnnotationValue[0];
+    public static final Set<AnnotationInstance> HTTP_METHOD_INSTANCES = methods
+            .stream()
+            .map(name -> AnnotationInstance.create(name, null, EMPTY_VALUES))
+            .collect(Collectors.toUnmodifiableSet());
+
     public static final Map<PathItem.HttpMethod, Set<DotName>> HTTP_METHOD_ANNOTATIONS;
     static {
-        Map<PathItem.HttpMethod, Set<DotName>> annotations = new HashMap<>();
+        Map<PathItem.HttpMethod, Set<DotName>> annotations = new EnumMap<>(PathItem.HttpMethod.class);
         annotations.put(HttpMethod.DELETE, DELETE);
         annotations.put(HttpMethod.GET, GET);
         annotations.put(HttpMethod.HEAD, HEAD);
@@ -132,9 +143,6 @@ public class JaxRsConstants {
         annotations.put(HttpMethod.PUT, PUT);
         HTTP_METHOD_ANNOTATIONS = Collections.unmodifiableMap(annotations);
     }
-
-    public static final Set<DotName> HTTP_METHODS = Collections
-            .unmodifiableSet(methods);
 
     private JaxRsConstants() {
     }

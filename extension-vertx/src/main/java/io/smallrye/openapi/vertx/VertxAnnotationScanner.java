@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -234,8 +233,11 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
         VertxLogging.log.processingMethod(method.toString());
 
+        VertxParameterProcessor paramProc = new VertxParameterProcessor(context, currentAppPath, resourceClass, method);
+        ResourceParameters params = paramProc.process();
+
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(resourceClass, method));
+        String[] defaultConsumes = getDefaultConsumes(context, method, params);
         context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, VertxConstants.ROUTE_CONSUMES,
                 defaultConsumes).orElse(null));
@@ -243,6 +245,9 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
         context.setDefaultProduces(defaultProduces);
         context.setCurrentProduces(getMediaTypes(method, VertxConstants.ROUTE_PRODUCES,
                 defaultProduces).orElse(null));
+
+        // Form body content requires context#currentConsumes, which itself requires a first pass of parameter processing
+        paramProc.updateFormBodyContent(params);
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -256,7 +261,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process @Parameter annotations.
         PathItem pathItem = OASFactory.createPathItem();
-        ResourceParameters params = getResourceParameters(resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -306,13 +310,6 @@ public class VertxAnnotationScanner extends AbstractAnnotationScanner {
             // Changes applied to 'existingPath', no need to re-assign or add to OAI.
             MergeUtil.mergeObjects(existingPath, pathItem);
         }
-    }
-
-    private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
-            final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
-        return VertxParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader);
     }
 
     /**

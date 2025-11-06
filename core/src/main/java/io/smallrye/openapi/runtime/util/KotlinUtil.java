@@ -10,6 +10,8 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
 
+import io.smallrye.openapi.api.constants.KotlinConstants;
+
 /**
  * Some utility methods for working with Kotlin types.
  *
@@ -53,6 +55,10 @@ class KotlinUtil {
      * @return List of annotations declared on the Kotlin property, retargeted at the field
      */
     static List<AnnotationInstance> getPropertyAnnotations(FieldInfo field) {
+        if (!field.declaringClass().hasAnnotation(KotlinConstants.METADATA)) {
+            return Collections.emptyList();
+        }
+
         return getSyntheticPropertyAnnotationsMethod(field)
                 .map(methodInfo -> methodInfo.annotations().stream()
                         .filter(a -> methodInfo.equals(a.target()))
