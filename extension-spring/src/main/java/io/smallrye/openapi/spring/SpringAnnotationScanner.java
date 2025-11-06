@@ -105,7 +105,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+    public boolean containsScannerAnnotations(Collection<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
             if (SpringParameter.isParameter(instance.name())) {

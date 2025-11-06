@@ -2,12 +2,16 @@ package io.smallrye.openapi.jaxrs;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.PathItem.HttpMethod;
 import org.jboss.jandex.DotName;
 
 /**
@@ -114,6 +118,19 @@ public class JaxRsConstants {
         methods.addAll(HEAD);
         methods.addAll(OPTIONS);
         methods.addAll(PATCH);
+    }
+
+    public static final Map<PathItem.HttpMethod, Set<DotName>> HTTP_METHOD_ANNOTATIONS;
+    static {
+        Map<PathItem.HttpMethod, Set<DotName>> annotations = new HashMap<>();
+        annotations.put(HttpMethod.DELETE, DELETE);
+        annotations.put(HttpMethod.GET, GET);
+        annotations.put(HttpMethod.HEAD, HEAD);
+        annotations.put(HttpMethod.OPTIONS, OPTIONS);
+        annotations.put(HttpMethod.PATCH, PATCH);
+        annotations.put(HttpMethod.POST, POST);
+        annotations.put(HttpMethod.PUT, PUT);
+        HTTP_METHOD_ANNOTATIONS = Collections.unmodifiableMap(annotations);
     }
 
     public static final Set<DotName> HTTP_METHODS = Collections

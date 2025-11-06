@@ -1,5 +1,6 @@
 package io.smallrye.openapi.jaxrs;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,14 +121,14 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
         for (int i = 0, m = methodParameters.size(); i < m; i++) {
             if (name.equals(resourceMethod.parameterName(i))) {
-                List<AnnotationInstance> annotations = scannerContext.annotations()
+                Collection<AnnotationInstance> annotations = scannerContext.annotations()
                         .getMethodParameterAnnotations(resourceMethod, (short) i);
 
                 if (!JaxRsAnnotationScanner.containsJaxrsAnnotations(annotations)) {
                     // If the parameter has annotations, use the first entry's target for use later when searching for BV constraints and extensions
                     // else if the parameter has no annotations, create the target so that it can be matched by filters
                     AnnotationTarget target = annotations.isEmpty() ? MethodParameterInfo.create(resourceMethod, (short) i)
-                            : annotations.get(0).target();
+                            : annotations.iterator().next().target();
                     Type arg = methodParameters.get(i);
                     return new ParameterContext(name, JaxRsParameter.RESTEASY_REACTIVE_PATH_PARAM.parameter, target, arg);
                 }
@@ -291,14 +292,16 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
-        return scannerContext.getAugmentedIndex().ancestry(method)
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
-                .filter(Objects::nonNull)
-                .flatMap(m -> m.annotations().stream())
-                .map(AnnotationInstance::name)
-                .anyMatch(JaxRsConstants.HTTP_METHODS::contains);
+        for (MethodInfo overriddenMethod : scannerContext.getAugmentedIndex().ancestry(method).values()) {
+            if (overriddenMethod != null) {
+                for (DotName httpMethod : JaxRsConstants.HTTP_METHODS) {
+                    if (overriddenMethod.hasAnnotation(httpMethod)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override

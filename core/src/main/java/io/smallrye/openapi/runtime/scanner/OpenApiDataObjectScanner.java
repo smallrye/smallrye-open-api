@@ -283,11 +283,12 @@ public class OpenApiDataObjectScanner {
                 processClassAnnotations(currentSchema, currentClass);
 
                 // Handle fields
-                properties.values()
-                        .stream()
-                        .filter(resolver -> !resolver.isIgnored())
-                        .forEach(resolver -> AnnotationTargetProcessor.process(context, objectStack, resolver,
-                                currentPathEntry));
+                for (TypeResolver resolver : properties.values()) {
+                    if (!resolver.isIgnored()) {
+                        AnnotationTargetProcessor.process(context, objectStack, resolver,
+                                currentPathEntry);
+                    }
+                }
 
                 processInheritance(currentPathEntry);
             }

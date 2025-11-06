@@ -1,9 +1,7 @@
 package io.smallrye.openapi.runtime.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +13,7 @@ import java.util.stream.Stream;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -64,44 +63,16 @@ public final class Annotations {
                 .collect(Collectors.toSet());
     }
 
-    @SuppressWarnings("deprecation")
-    private static List<AnnotationInstance> declaredAnnotations(ClassInfo target) {
-        return new ArrayList<>(target.classAnnotations());
-    }
-
-    private static List<AnnotationInstance> filter(AnnotationTarget target, List<AnnotationInstance> annotations) {
-        return annotations.stream()
-                .filter(a -> target.equals(a.target()))
-                .collect(Collectors.toList());
-    }
-
-    private static List<AnnotationInstance> getDeclaredAnnotations(AnnotationTarget target) {
-        switch (target.kind()) {
-            case CLASS:
-                return declaredAnnotations(target.asClass());
-
-            case FIELD:
-                return declaredFieldAnnotations(target.asField());
-
-            case METHOD:
-                return filter(target, target.asMethod().annotations());
-
-            case METHOD_PARAMETER:
-                return filter(target, target.asMethodParameter().method().annotations());
-
-            case RECORD_COMPONENT:
-                return filter(target, target.asRecordComponent().annotations());
-
-            case TYPE:
-                return new ArrayList<>(target.annotations());
-
-            default:
-                return Collections.emptyList();
+    private static Collection<AnnotationInstance> getDeclaredAnnotations(AnnotationTarget target) {
+        if (target.kind() == Kind.FIELD) {
+            return declaredFieldAnnotations(target.asField());
         }
+
+        return target.declaredAnnotations();
     }
 
     private static List<AnnotationInstance> declaredFieldAnnotations(FieldInfo field) {
-        List<AnnotationInstance> fieldAnnotations = filter(field, field.annotations());
+        List<AnnotationInstance> fieldAnnotations = field.declaredAnnotations();
         List<AnnotationInstance> propertyAnnotations = KotlinUtil.getPropertyAnnotations(field);
         return Stream.concat(fieldAnnotations.stream(), propertyAnnotations.stream())
                 .collect(Collectors.toList());
@@ -147,7 +118,7 @@ public final class Annotations {
             return Stream.empty();
         }
 
-        List<AnnotationInstance> declaredAnnotations = getDeclaredAnnotations(target);
+        Collection<AnnotationInstance> declaredAnnotations = getDeclaredAnnotations(target);
 
         if (declaredAnnotations.isEmpty()) {
             return Stream.empty();
@@ -363,7 +334,7 @@ public final class Annotations {
      * @param parameterIndex parameter position
      * @return List of AnnotationInstance's
      */
-    public List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, int parameterIndex) {
+    public Collection<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, int parameterIndex) {
         return getDeclaredAnnotations(MethodParameterInfo.create(method, (short) parameterIndex));
     }
 
@@ -374,7 +345,7 @@ public final class Annotations {
      * @param parameterType the parameter type
      * @return the list of annotations, never null
      */
-    public List<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, Type parameterType) {
+    public Collection<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, Type parameterType) {
         // parameterType must be the same object as in the method's parameter type array
         int parameterIndex = method.parameterTypes().indexOf(parameterType);
         return getMethodParameterAnnotations(method, parameterIndex);

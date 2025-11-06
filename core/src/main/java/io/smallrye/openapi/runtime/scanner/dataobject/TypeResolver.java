@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -558,30 +557,32 @@ public class TypeResolver {
             }
 
             // Store all field properties
-            JandexUtil.fields(context, currentClass)
-                    .stream()
-                    .filter(TypeResolver::acceptField)
-                    .filter(field -> field.name().chars().allMatch(Character::isJavaIdentifierPart))
-                    .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
+            for (FieldInfo field : JandexUtil.fields(context, currentClass)) {
+                if (acceptField(field) && field.name().chars().allMatch(Character::isJavaIdentifierPart)) {
+                    scanField(context, properties, field, stack, reference, descendants);
+                }
+            }
 
-            methods(context, currentClass)
-                    .stream()
-                    .filter(TypeResolver::acceptMethod)
-                    .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
-                    .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
+            for (MethodInfo method : methods(context, currentClass)) {
+                if (acceptMethod(method) && method.name().chars().allMatch(Character::isJavaIdentifierPart)) {
+                    scanMethod(context, properties, method, stack, reference, descendants);
+                }
+            }
 
-            index.interfaces(currentClass)
-                    .stream()
-                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
-                    .map(type -> {
-                        ClassInfo clazz = index.getClass(type);
-                        maybeAddResolutionParams(stack, type, clazz);
-                        return clazz;
-                    })
-                    .filter(Objects::nonNull)
-                    .flatMap(clazz -> methods(context, clazz).stream())
-                    .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
-                    .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
+            for (Type type : index.interfaces(currentClass)) {
+                if (!TypeUtil.knownJavaType(type.name())) {
+                    ClassInfo clazz = index.getClass(type);
+                    maybeAddResolutionParams(stack, type, clazz);
+
+                    if (clazz != null) {
+                        for (MethodInfo method : methods(context, clazz)) {
+                            if (method.name().chars().allMatch(Character::isJavaIdentifierPart)) {
+                                scanMethod(context, properties, method, stack, reference, descendants);
+                            }
+                        }
+                    }
+                }
+            }
 
             descendants.add(currentClass);
         }
