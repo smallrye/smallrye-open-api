@@ -22,14 +22,14 @@
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.5.1</version.io.smallrye.jandex>
         <version.io.smallrye.smallrye-config>3.14.1</version.io.smallrye.smallrye-config>
-        <version.io.smallrye.smallrye-common-classloader>2.13.9</version.io.smallrye.smallrye-common-classloader>
+        <version.io.smallrye.smallrye-common-classloader>2.14.0</version.io.smallrye.smallrye-common-classloader>
         <version.eclipse.microprofile.openapi>4.1.1</version.eclipse.microprofile.openapi>
         <version.org.hamcrest>1.3</version.org.hamcrest>
         <version.org.hamcrest.java-hamcrest>2.0.0.0</version.org.hamcrest.java-hamcrest>
         <version.org.skyscreamer>1.5.3</version.org.skyscreamer>
         <version.maven-resources-plugin>3.3.1</version.maven-resources-plugin>
         <version.com.github.eirslett.frontend-maven-plugin>1.15.4</version.com.github.eirslett.frontend-maven-plugin>
-        <version.quarkus>3.29.1</version.quarkus>
+        <version.quarkus>3.29.2</version.quarkus>
         <version.testng>7.11.0</version.testng>
         <version.arquillian.jetty>2.0.0.Final</version.arquillian.jetty>
         <version.jetty>11.0.24</version.jetty>
