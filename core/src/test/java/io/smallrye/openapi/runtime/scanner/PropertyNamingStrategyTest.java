@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.openapi.annotations.media.DiscriminatorMapping;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.junit.jupiter.api.Test;
@@ -193,5 +194,27 @@ class PropertyNamingStrategyTest extends IndexScannerTestBase {
         public String translate(String value) {
             throw new IllegalArgumentException("dummy");
         }
+    }
+
+    @JsonNaming(com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @Schema(discriminatorProperty = "type", discriminatorMapping = {
+            @DiscriminatorMapping(value = "bird", schema = Bird.class),
+            @DiscriminatorMapping(value = "dog", schema = Dog.class),
+    })
+    interface Animal {
+    }
+
+    static class Bird implements Animal {
+        String favoriteSong;
+    }
+
+    static class Dog implements Animal {
+        String favoriteBall;
+    }
+
+    @Test
+    void testJacksonNamingInherited() throws Exception {
+        OpenAPI result = scan(Animal.class, Bird.class, Dog.class);
+        assertJsonEquals("components.schemas.name-strategy-inherited.json", result);
     }
 }

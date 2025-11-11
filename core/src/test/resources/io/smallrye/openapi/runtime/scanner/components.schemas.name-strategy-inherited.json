@@ -1,0 +1,33 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Animal" : {
+        "discriminator" : {
+          "propertyName" : "type",
+          "mapping" : {
+            "bird" : "#/components/schemas/Bird",
+            "dog" : "#/components/schemas/Dog"
+          }
+        },
+        "type" : "object"
+      },
+      "Bird" : {
+        "type" : "object",
+        "properties" : {
+          "favorite_song" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Dog" : {
+        "type" : "object",
+        "properties" : {
+          "favorite_ball" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

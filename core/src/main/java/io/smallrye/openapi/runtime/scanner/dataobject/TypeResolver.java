@@ -1148,11 +1148,30 @@ public class TypeResolver {
 
     private static UnaryOperator<String> getPropertyNameTranslator(AnnotationScannerContext context, AnnotationTarget target) {
         ClassInfo clazz = target.kind() == Kind.CLASS ? target.asClass() : TypeUtil.getDeclaringClass(target);
-        AnnotationInstance jacksonNaming = context.annotations().getAnnotation(clazz, JacksonConstants.JSON_NAMING);
+        AugmentedIndexView index = context.getAugmentedIndex();
+        Map<ClassInfo, Type> chain = index.inheritanceChain(clazz, Type.create(clazz.name(), Type.Kind.CLASS));
+        Annotations annotations = context.annotations();
+        AnnotationInstance jacksonNaming = null;
+
+        for (ClassInfo entry : chain.keySet()) {
+            jacksonNaming = annotations.getAnnotation(entry, JacksonConstants.JSON_NAMING);
+
+            if (jacksonNaming == null) {
+                jacksonNaming = index.interfaces(entry)
+                        .stream()
+                        .map(index::getClass)
+                        .filter(Objects::nonNull)
+                        .map(interfaceClass -> annotations.getAnnotation(interfaceClass, JacksonConstants.JSON_NAMING))
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
+
         UnaryOperator<String> translator;
 
         if (jacksonNaming != null) {
-            Type namingClass = context.annotations().value(jacksonNaming, JacksonConstants.PROP_VALUE);
+            Type namingClass = annotations.value(jacksonNaming, JacksonConstants.PROP_VALUE);
 
             if (namingClass != null) {
                 translator = PropertyNamingStrategyFactory.getStrategy(namingClass.name().toString(), context.getClassLoader());
