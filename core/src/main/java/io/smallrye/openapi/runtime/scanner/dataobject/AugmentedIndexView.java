@@ -130,7 +130,7 @@ public class AugmentedIndexView implements IndexView {
     }
 
     private static boolean saveOverride(MethodInfo searchMethod, ClassInfo clazz, Map<ClassInfo, MethodInfo> results) {
-        MethodInfo classMethod = clazz.method(searchMethod.name(), searchMethod.parameterTypes());
+        MethodInfo classMethod = clazz.method(searchMethod);
 
         if (classMethod != null && !classMethod.isSynthetic()) {
             results.put(clazz, classMethod);

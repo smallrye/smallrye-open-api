@@ -26,6 +26,7 @@ import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 
@@ -54,15 +55,12 @@ public final class Annotations {
     }
 
     private final AnnotationScannerContext context;
-    private final Set<String> excludedPackages;
+    private final Collection<DotName> excludedPackages;
 
     public Annotations(AnnotationScannerContext context) {
         this.context = context;
-        this.excludedPackages = context.getConfig()
-                .getScanCompositionExcludePackages()
-                .stream()
-                .map(pkg -> pkg.concat("."))
-                .collect(Collectors.toSet());
+        this.excludedPackages = Names.componentize(context.getConfig().getScanCompositionExcludePackages())
+                .values();
     }
 
     private static Collection<AnnotationInstance> getDeclaredAnnotations(AnnotationTarget target) {
@@ -90,10 +88,8 @@ public final class Annotations {
     }
 
     private boolean composable(DotName annotation) {
-        String name = annotation.toString();
-
-        for (String pkg : this.excludedPackages) {
-            if (name.startsWith(pkg)) {
+        for (DotName pkg : this.excludedPackages) {
+            if (annotation.startsWith(pkg)) {
                 return false;
             }
         }
