@@ -34,6 +34,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.AnnotationTargetProcessor;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque;
+import io.smallrye.openapi.runtime.scanner.dataobject.DataObjectDeque.PathEntry;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
@@ -281,15 +282,7 @@ public class OpenApiDataObjectScanner {
                         reference);
 
                 processClassAnnotations(currentSchema, currentClass);
-
-                // Handle fields
-                for (TypeResolver resolver : properties.values()) {
-                    if (!resolver.isIgnored()) {
-                        AnnotationTargetProcessor.process(context, objectStack, resolver,
-                                currentPathEntry);
-                    }
-                }
-
+                processProperties(currentPathEntry, properties);
                 processInheritance(currentPathEntry);
             }
         }
@@ -325,6 +318,14 @@ public class OpenApiDataObjectScanner {
 
         if (xmlElementName != null && !classInfo.simpleName().equals(xmlElementName)) {
             schema.setXml(OASFactory.createXML().name(xmlElementName));
+        }
+    }
+
+    private void processProperties(PathEntry currentPathEntry, Map<String, TypeResolver> properties) {
+        for (TypeResolver resolver : properties.values()) {
+            if (!resolver.isIgnored()) {
+                AnnotationTargetProcessor.process(context, objectStack, resolver, currentPathEntry);
+            }
         }
     }
 
