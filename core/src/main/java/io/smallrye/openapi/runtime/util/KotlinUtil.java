@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.util;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +9,8 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.MethodInfo;
+
+import io.smallrye.openapi.api.constants.KotlinConstants;
 
 /**
  * Some utility methods for working with Kotlin types.
@@ -35,9 +38,14 @@ class KotlinUtil {
     private static Optional<MethodInfo> getSyntheticPropertyAnnotationsMethod(FieldInfo field) {
         String methodName = getSyntheticPropertyAnnotationsMethodName(field);
         ClassInfo clazz = field.declaringClass();
-        return clazz.methods().stream()
-                .filter(m -> m.isSynthetic() && methodName.equals(m.name()))
-                .findFirst();
+
+        for (MethodInfo m : clazz.methods()) {
+            if (m.isSynthetic() && methodName.equals(m.name())) {
+                return Optional.of(m);
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -47,10 +55,15 @@ class KotlinUtil {
      * @return List of annotations declared on the Kotlin property, retargeted at the field
      */
     static List<AnnotationInstance> getPropertyAnnotations(FieldInfo field) {
-        return getSyntheticPropertyAnnotationsMethod(field).stream()
-                .flatMap(methodInfo -> methodInfo.annotations().stream()
+        if (!field.declaringClass().hasAnnotation(KotlinConstants.METADATA)) {
+            return Collections.emptyList();
+        }
+
+        return getSyntheticPropertyAnnotationsMethod(field)
+                .map(methodInfo -> methodInfo.annotations().stream()
                         .filter(a -> methodInfo.equals(a.target()))
-                        .map(a -> AnnotationInstance.create(a.name(), a.runtimeVisible(), field, a.values())))
-                .collect(Collectors.toList());
+                        .map(a -> AnnotationInstance.create(a.name(), a.runtimeVisible(), field, a.values()))
+                        .collect(Collectors.toList()))
+                .orElseGet(Collections::emptyList);
     }
 }

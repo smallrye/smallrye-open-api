@@ -1,16 +1,15 @@
 package io.smallrye.openapi.jaxrs;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.media.Encoding;
-import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.In;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.Style;
 import org.jboss.jandex.AnnotationInstance;
@@ -47,12 +46,11 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
             .compile("\\{[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)\\}"); //NOSONAR
 
-    private JaxRsParameterProcessor(AnnotationScannerContext scannerContext,
+    JaxRsParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
-            Function<AnnotationInstance, Parameter> reader,
             ClassInfo resourceClass,
             MethodInfo resourceMethod) {
-        super(scannerContext, contextPath, reader, resourceClass, resourceMethod);
+        super(scannerContext, contextPath, resourceClass, resourceMethod);
     }
 
     /**
@@ -66,17 +64,14 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
      * @param contextPath context path for the resource class and method
      * @param resourceClass the class info
      * @param resourceMethod the JAX-RS resource method, annotated with one of the JAX-RS HTTP annotations
-     * @param reader callback method for a function producing {@link Parameter} from a
-     *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
      * @return scanned parameters and modified path contained in a {@link ResourceParameters} object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
             String contextPath,
             ClassInfo resourceClass,
-            MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader) {
+            MethodInfo resourceMethod) {
 
-        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, contextPath, reader, resourceClass,
+        JaxRsParameterProcessor processor = new JaxRsParameterProcessor(context, contextPath, resourceClass,
                 resourceMethod);
         return processor.process();
     }
@@ -120,14 +115,14 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
         for (int i = 0, m = methodParameters.size(); i < m; i++) {
             if (name.equals(resourceMethod.parameterName(i))) {
-                List<AnnotationInstance> annotations = scannerContext.annotations()
+                Collection<AnnotationInstance> annotations = scannerContext.annotations()
                         .getMethodParameterAnnotations(resourceMethod, (short) i);
 
                 if (!JaxRsAnnotationScanner.containsJaxrsAnnotations(annotations)) {
                     // If the parameter has annotations, use the first entry's target for use later when searching for BV constraints and extensions
                     // else if the parameter has no annotations, create the target so that it can be matched by filters
                     AnnotationTarget target = annotations.isEmpty() ? MethodParameterInfo.create(resourceMethod, (short) i)
-                            : annotations.get(0).target();
+                            : annotations.iterator().next().target();
                     Type arg = methodParameters.get(i);
                     return new ParameterContext(name, JaxRsParameter.RESTEASY_REACTIVE_PATH_PARAM.parameter, target, arg);
                 }
@@ -291,14 +286,19 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
-        return scannerContext.getAugmentedIndex().ancestry(method)
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
-                .filter(Objects::nonNull)
-                .flatMap(m -> m.annotations().stream())
-                .map(AnnotationInstance::name)
-                .anyMatch(JaxRsConstants.HTTP_METHODS::contains);
+        for (MethodInfo overriddenMethod : scannerContext.getAugmentedIndex().ancestry(method).values()) {
+            if (overriddenMethod != null) {
+                for (AnnotationInstance a : overriddenMethod.declaredAnnotations()) {
+                    for (AnnotationInstance httpMethod : JaxRsConstants.HTTP_METHOD_INSTANCES) {
+                        if (a.equivalentTo(httpMethod)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

@@ -58,7 +58,7 @@ class AbstractAnnotationScannerTest {
         }
 
         @Override
-        public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+        public boolean containsScannerAnnotations(Collection<AnnotationInstance> instances,
                 List<AnnotationScannerExtension> extensions) {
             return false;
         }

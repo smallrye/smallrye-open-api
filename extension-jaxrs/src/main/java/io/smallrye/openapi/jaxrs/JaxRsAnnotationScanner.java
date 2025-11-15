@@ -17,9 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -120,7 +118,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+    public boolean containsScannerAnnotations(Collection<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
 
         if (containsJaxrsAnnotations(instances)) {
@@ -136,7 +134,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         return false;
     }
 
-    static boolean containsJaxrsAnnotations(List<AnnotationInstance> instances) {
+    static boolean containsJaxrsAnnotations(Collection<AnnotationInstance> instances) {
         return instances.stream()
                 .map(AnnotationInstance::name)
                 .anyMatch(isParameter.or(inJaxRsPackage));
@@ -291,21 +289,17 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         Collections.reverse(methods);
 
         for (MethodInfo methodInfo : methods) {
-            final AtomicInteger resourceCount = new AtomicInteger(0);
+            int resourceCount = 0;
 
-            JaxRsConstants.HTTP_METHODS
-                    .stream()
-                    .filter(methodInfo::hasAnnotation)
-                    .map(DotName::withoutPackagePrefix)
-                    .map(PathItem.HttpMethod::valueOf)
-                    .distinct() // needed when both javax+jakarta annotations are present
-                    .forEach(httpMethod -> {
-                        resourceCount.incrementAndGet();
-                        processResourceMethod(resourceClass, methodInfo, httpMethod, tagRefs,
-                                locatorPathParameters, exceptionResponseMap);
-                    });
+            for (Map.Entry<PathItem.HttpMethod, Set<DotName>> entry : JaxRsConstants.HTTP_METHOD_ANNOTATIONS.entrySet()) {
+                if (context.annotations().hasAnnotation(methodInfo, entry.getValue())) {
+                    resourceCount++;
+                    processResourceMethod(resourceClass, methodInfo, entry.getKey(), tagRefs,
+                            locatorPathParameters, exceptionResponseMap);
+                }
+            }
 
-            if (resourceCount.get() == 0 && context.annotations().hasAnnotation(methodInfo, JaxRsConstants.PATH)) {
+            if (resourceCount == 0 && context.annotations().hasAnnotation(methodInfo, JaxRsConstants.PATH)) {
                 processSubResource(resourceClass, methodInfo, openApi, locatorPathParameters, tagRefs);
             }
         }
@@ -477,14 +471,20 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
 
         JaxRsLogging.log.processingMethod(method.toString());
 
+        JaxRsParameterProcessor paramProc = new JaxRsParameterProcessor(context, currentAppPath, resourceClass, method);
+        ResourceParameters params = paramProc.process();
+
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(resourceClass, method));
+        String[] defaultConsumes = getDefaultConsumes(context, method, params);
         context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, JaxRsConstants.CONSUMES, defaultConsumes).orElse(null));
 
         String[] defaultProduces = getDefaultProduces(context, method);
         context.setDefaultProduces(defaultProduces);
         context.setCurrentProduces(getMediaTypes(method, JaxRsConstants.PRODUCES, defaultProduces).orElse(null));
+
+        // Form body content requires context#currentConsumes, which itself requires a first pass of parameter processing
+        paramProc.updateFormBodyContent(params);
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -497,7 +497,6 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         processOperationTags(context, method, context.getOpenApi(), resourceTags, operation);
 
         // Process @Parameter annotations.
-        ResourceParameters params = getResourceParameters(resourceClass, method);
         List<Parameter> operationParams = params.getOperationParameters();
         operation.setParameters(operationParams);
         if (locatorPathParameters != null && operationParams != null) {
@@ -557,9 +556,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
     }
 
     private ResourceParameters getResourceParameters(final ClassInfo resourceClass, final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
-        return JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method,
-                reader);
+        return JaxRsParameterProcessor.process(context, currentAppPath, resourceClass, method);
     }
 
     /**

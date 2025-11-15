@@ -74,6 +74,35 @@ public final class Names {
         return repeatContainers.get(repeatable);
     }
 
+    /**
+     * Create componentized {@link DotName} instances for the given collection of
+     * names. The results will be returned in a map, keyed by the input element from
+     * which each entry was derived.
+     */
+    public static Map<String, DotName> componentize(Collection<String> names) {
+        Map<DotName, DotName> workingSet = new HashMap<>();
+        Map<String, DotName> results = new HashMap<>();
+
+        for (String name : names) {
+            String[] elements = name.split("\\.");
+            DotName current = null;
+
+            for (String element : elements) {
+                current = DotName.createComponentized(current, element);
+
+                if (workingSet.containsKey(current)) {
+                    current = workingSet.get(current);
+                } else {
+                    workingSet.put(current, current);
+                }
+            }
+
+            results.put(name, current);
+        }
+
+        return results;
+    }
+
     public static final DotName OPENAPI_DEFINITION = createIndexable(OpenAPIDefinition.class);
     public static final DotName API_RESPONSE = createIndexable(APIResponse.class);
     public static final DotName API_RESPONSES = createIndexable(APIResponses.class);

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,7 +104,7 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+    public boolean containsScannerAnnotations(Collection<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions) {
         for (AnnotationInstance instance : instances) {
             if (SpringParameter.isParameter(instance.name())) {
@@ -276,14 +275,20 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         SpringLogging.log.processingMethod(method.toString());
 
+        SpringParameterProcessor paramProc = new SpringParameterProcessor(context, currentAppPath, resourceClass, method);
+        ResourceParameters params = paramProc.process();
+
         // Figure out the current @Produces and @Consumes (if any)
-        String[] defaultConsumes = getDefaultConsumes(context, method, getResourceParameters(resourceClass, method));
+        String[] defaultConsumes = getDefaultConsumes(context, method, params);
         context.setDefaultConsumes(defaultConsumes);
         context.setCurrentConsumes(getMediaTypes(method, SpringConstants.MAPPING_CONSUMES).orElse(null));
 
         String[] defaultProduces = getDefaultProduces(context, method);
         context.setDefaultProduces(defaultProduces);
         context.setCurrentProduces(getMediaTypes(method, SpringConstants.MAPPING_PRODUCES).orElse(null));
+
+        // Form body content requires context#currentConsumes, which itself requires a first pass of parameter processing
+        paramProc.updateFormBodyContent(params);
 
         // Process any @Operation annotation
         Optional<Operation> maybeOperation = processOperation(context, resourceClass, method);
@@ -297,7 +302,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
 
         // Process @Parameter annotations.
         PathItem pathItem = OASFactory.createPathItem();
-        ResourceParameters params = getResourceParameters(resourceClass, method);
         operation.setParameters(params.getOperationParameters());
 
         pathItem.setParameters(ListUtil.mergeNullableLists(locatorPathParameters, params.getPathItemParameters()));
@@ -362,13 +366,6 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
                 .filter(Objects::nonNull)
                 .flatMap(Arrays::stream)
                 .toArray(String[]::new);
-    }
-
-    private ResourceParameters getResourceParameters(final ClassInfo resourceClass,
-            final MethodInfo method) {
-        Function<AnnotationInstance, Parameter> reader = t -> context.io().parameterIO().read(t);
-        return SpringParameterProcessor.process(context, currentAppPath, resourceClass,
-                method, reader);
     }
 
     Optional<String[]> getMediaTypes(MethodInfo resourceMethod, String property) {

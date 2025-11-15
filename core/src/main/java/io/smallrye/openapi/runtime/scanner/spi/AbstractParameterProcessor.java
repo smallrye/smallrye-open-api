@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -78,7 +77,6 @@ public abstract class AbstractParameterProcessor {
     protected final AnnotationScannerContext scannerContext;
     protected final String contextPath;
     protected final IndexView index;
-    protected final Function<AnnotationInstance, Parameter> readerFunction;
     protected final Optional<BeanValidationScanner> beanValidationScanner;
     protected final ClassInfo resourceClass;
     protected final MethodInfo resourceMethod;
@@ -114,13 +112,11 @@ public abstract class AbstractParameterProcessor {
 
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
-            Function<AnnotationInstance, Parameter> reader,
             ClassInfo resourceClass,
             MethodInfo resourceMethod) {
         this.scannerContext = scannerContext;
         this.contextPath = contextPath;
         this.index = scannerContext.getIndex();
-        this.readerFunction = reader;
         this.beanValidationScanner = scannerContext.getBeanValidationScanner();
         this.resourceClass = resourceClass;
         this.resourceMethod = resourceMethod;
@@ -300,7 +296,7 @@ public abstract class AbstractParameterProcessor {
         matrixParams.clear();
     }
 
-    protected ResourceParameters process() {
+    public ResourceParameters process() {
 
         ResourceParameters parameters = new ResourceParameters();
 
@@ -394,6 +390,10 @@ public abstract class AbstractParameterProcessor {
             parameters.sort(ResourceParameters.parameterComparator(preferredOrder));
         }
 
+        parameters.setFormBodyContent(getFormBodyContent());
+    }
+
+    public void updateFormBodyContent(ResourceParameters parameters) {
         parameters.setFormBodyContent(getFormBodyContent());
     }
 
@@ -1265,11 +1265,11 @@ public abstract class AbstractParameterProcessor {
     protected abstract List<String> pathsOf(AnnotationTarget target);
 
     protected boolean isReadableParameterAnnotation(DotName name) {
-        return Names.PARAMETER.equals(name) && readerFunction != null;
+        return Names.PARAMETER.equals(name);
     }
 
     protected void readParameterAnnotation(AnnotationInstance annotation, boolean overriddenParametersOnly) {
-        Parameter oaiParam = readerFunction.apply(annotation);
+        Parameter oaiParam = scannerContext.io().parameterIO().read(annotation);
 
         if (oaiParam.getRef() != null) {
             Parameter commonParam = ModelUtil.dereference(scannerContext.getOpenApi(), oaiParam);
