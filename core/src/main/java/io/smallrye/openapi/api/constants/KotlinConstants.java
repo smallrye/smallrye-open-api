@@ -9,6 +9,9 @@ import org.jboss.jandex.DotName;
  */
 public class KotlinConstants {
 
+    public static final DotName METADATA = DotName
+            .createSimple("kotlin.Metadata");
+
     public static final DotName CONTINUATION = DotName
             .createSimple("kotlin.coroutines.Continuation");
 

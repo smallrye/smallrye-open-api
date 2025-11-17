@@ -78,7 +78,7 @@ public interface AnnotationScanner {
 
     public boolean isDeleteMethod(final MethodInfo method);
 
-    public boolean containsScannerAnnotations(List<AnnotationInstance> instances,
+    public boolean containsScannerAnnotations(Collection<AnnotationInstance> instances,
             List<AnnotationScannerExtension> extensions);
 
     // Allow runtimes to set the context root path
@@ -977,7 +977,7 @@ public interface AnnotationScanner {
                 .filter(position -> !isFrameworkContextType(methodParams.get(position)))
                 .filter(position -> !isPathParameter(context, method.parameterName(position), params))
                 .filter(position -> {
-                    List<AnnotationInstance> annotations = context.annotations().getMethodParameterAnnotations(method,
+                    Collection<AnnotationInstance> annotations = context.annotations().getMethodParameterAnnotations(method,
                             position);
                     return annotations.isEmpty() || !containsScannerAnnotations(annotations, context.getExtensions());
                 })
@@ -988,7 +988,7 @@ public interface AnnotationScanner {
 
     default void setRequestBodyConstraints(AnnotationScannerContext context, RequestBody requestBody, MethodInfo method,
             Type requestBodyType) {
-        List<AnnotationInstance> paramAnnotations = context.annotations().getMethodParameterAnnotations(method,
+        Collection<AnnotationInstance> paramAnnotations = context.annotations().getMethodParameterAnnotations(method,
                 requestBodyType);
         Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
 

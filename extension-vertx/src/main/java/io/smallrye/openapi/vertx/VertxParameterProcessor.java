@@ -8,10 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter.Style;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -41,12 +39,11 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern
             .compile(":[ \\t]*(\\w[\\w\\.-]*)[ \\t]*:[ \\t]*((?:[^{}]|\\{[^{}]+\\})+)"); //NOSONAR
 
-    private VertxParameterProcessor(AnnotationScannerContext scannerContext,
+    VertxParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
-            Function<AnnotationInstance, Parameter> reader,
             ClassInfo resourceClass,
             MethodInfo resourceMethod) {
-        super(scannerContext, contextPath, reader, resourceClass, resourceMethod);
+        super(scannerContext, contextPath, resourceClass, resourceMethod);
     }
 
     /**
@@ -60,18 +57,15 @@ public class VertxParameterProcessor extends AbstractParameterProcessor {
      * @param resourceClass the class info
      * @param resourceMethod the Vert.x resource method, annotated with one of the
      *        Vert.x HTTP annotations
-     * @param reader callback method for a function producing {@link Parameter} from a
-     *        {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter}
      * @return scanned parameters and modified path contained in a {@link ResourceParameters}
      *         object
      */
     public static ResourceParameters process(AnnotationScannerContext context,
             String contextPath,
             ClassInfo resourceClass,
-            MethodInfo resourceMethod,
-            Function<AnnotationInstance, Parameter> reader) {
+            MethodInfo resourceMethod) {
 
-        VertxParameterProcessor processor = new VertxParameterProcessor(context, contextPath, reader, resourceClass,
+        VertxParameterProcessor processor = new VertxParameterProcessor(context, contextPath, resourceClass,
                 resourceMethod);
         return processor.process();
     }

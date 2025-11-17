@@ -539,49 +539,23 @@ public class TypeResolver {
         Map<ClassInfo, Type> chain = index.inheritanceChain(leafKlazz, leaf);
         Map<String, TypeResolver> properties = new LinkedHashMap<>();
         Deque<Map<String, Type>> stack = new ArrayDeque<>();
-        boolean skipPropertyScan = false;
+        boolean skipScan = false;
         List<ClassInfo> descendants = new ArrayList<>(chain.size());
 
         for (Map.Entry<ClassInfo, Type> entry : chain.entrySet()) {
             ClassInfo currentClass = entry.getKey();
             Type currentType = entry.getValue();
-            maybeAddResolutionParams(stack, currentType, currentClass);
 
-            if (skipPropertyScan || (!currentType.equals(leaf) && TypeUtil.isAllOf(context, leafKlazz, currentType))
-                    || TypeUtil.knownJavaType(currentClass.name())) {
-                /*
-                 * Do not attempt to introspect fields of Java/JDK types or if the @Schema
-                 * annotation indicates the use of a `ref` for superclass fields.
-                 */
-                skipPropertyScan = true;
+            skipScan = skipCheck(skipScan, context, leaf, leafKlazz, currentType, currentClass);
+
+            if (skipScan) {
                 continue;
             }
 
-            // Store all field properties
-            JandexUtil.fields(context, currentClass)
-                    .stream()
-                    .filter(TypeResolver::acceptField)
-                    .filter(field -> field.name().chars().allMatch(Character::isJavaIdentifierPart))
-                    .forEach(field -> scanField(context, properties, field, stack, reference, descendants));
-
-            methods(context, currentClass)
-                    .stream()
-                    .filter(TypeResolver::acceptMethod)
-                    .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
-                    .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
-
-            index.interfaces(currentClass)
-                    .stream()
-                    .filter(type -> !TypeUtil.knownJavaType(type.name()))
-                    .map(type -> {
-                        ClassInfo clazz = index.getClass(type);
-                        maybeAddResolutionParams(stack, type, clazz);
-                        return clazz;
-                    })
-                    .filter(Objects::nonNull)
-                    .flatMap(clazz -> methods(context, clazz).stream())
-                    .filter(method -> method.name().chars().allMatch(Character::isJavaIdentifierPart))
-                    .forEach(method -> scanMethod(context, properties, method, stack, reference, descendants));
+            maybeAddResolutionParams(stack, currentType, currentClass);
+            scanFields(context, currentClass, properties, stack, reference, descendants);
+            scanMethods(context, currentClass, properties, stack, reference, descendants);
+            scanInterfaces(context, currentClass, properties, stack, reference, descendants);
 
             descendants.add(currentClass);
         }
@@ -602,6 +576,63 @@ public class TypeResolver {
     private static void maybeAddResolutionParams(Deque<Map<String, Type>> stack, Type type, ClassInfo clazz) {
         if (type.kind() == Type.Kind.PARAMETERIZED_TYPE && clazz != null) {
             stack.push(buildParamTypeResolutionMap(clazz, type));
+        }
+    }
+
+    private static boolean skipCheck(boolean skip, AnnotationScannerContext context, Type leafType,
+            ClassInfo leafKlazz,
+            Type currentType,
+            ClassInfo currentClass) {
+        if (skip || (!currentType.equals(leafType) && TypeUtil.isAllOf(context, leafKlazz, currentType))
+                || TypeUtil.knownJavaType(currentClass.name())) {
+            /*
+             * Do not attempt to introspect fields of Java/JDK types or if the @Schema
+             * annotation indicates the use of a `ref` for superclass fields.
+             */
+            skip = true;
+        }
+
+        return skip;
+    }
+
+    private static void scanFields(AnnotationScannerContext context, ClassInfo currentClass,
+            Map<String, TypeResolver> properties, Deque<Map<String, Type>> stack, AnnotationTarget reference,
+            List<ClassInfo> descendants) {
+        for (FieldInfo field : JandexUtil.fields(context, currentClass)) {
+            if (acceptField(field) && field.name().chars().allMatch(Character::isJavaIdentifierPart)) {
+                scanField(context, properties, field, stack, reference, descendants);
+            }
+        }
+    }
+
+    private static void scanMethods(AnnotationScannerContext context, ClassInfo currentClass,
+            Map<String, TypeResolver> properties, Deque<Map<String, Type>> stack, AnnotationTarget reference,
+            List<ClassInfo> descendants) {
+        for (MethodInfo method : methods(context, currentClass)) {
+            if (acceptMethod(method) && method.name().chars().allMatch(Character::isJavaIdentifierPart)) {
+                scanMethod(context, properties, method, stack, reference, descendants);
+            }
+        }
+    }
+
+    private static void scanInterfaces(AnnotationScannerContext context, ClassInfo currentClass,
+            Map<String, TypeResolver> properties, Deque<Map<String, Type>> stack, AnnotationTarget reference,
+            List<ClassInfo> descendants) {
+        AugmentedIndexView index = context.getAugmentedIndex();
+
+        for (Type type : index.interfaces(currentClass)) {
+            if (!TypeUtil.knownJavaType(type.name())) {
+                ClassInfo clazz = index.getClass(type);
+                maybeAddResolutionParams(stack, type, clazz);
+
+                if (clazz != null) {
+                    for (MethodInfo method : methods(context, clazz)) {
+                        if (method.name().chars().allMatch(Character::isJavaIdentifierPart)) {
+                            scanMethod(context, properties, method, stack, reference, descendants);
+                        }
+                    }
+                }
+            }
         }
     }
 
