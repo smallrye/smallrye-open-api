@@ -1,6 +1,10 @@
 package io.smallrye.openapi.runtime.scanner;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,6 +15,7 @@ import java.util.NavigableMap;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -453,5 +458,49 @@ class ApiResponseTests extends IndexScannerTestBase {
                 config(SmallRyeOASConfig.SMALLRYE_GENERIC_RESPONSE_USE_DEFAULT, defaultResponse),
                 (java.io.InputStream) null,
                 DataApi.class));
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @APIResponses({ // NOSONAR - both @APIResponses + @APIResponse wanted directly
+            @APIResponse(responseCode = "400", description = "Really Bad Request"),
+            @APIResponse(responseCode = "406", description = "Not Acceptable")
+    })
+    @APIResponse(responseCode = "404", description = "Not found")
+    @interface WithClientErrors {
+    }
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @APIResponse(responseCode = "500", description = "Internal server error")
+    @APIResponses({ // NOSONAR - both @APIResponses + @APIResponse wanted directly
+            @APIResponse(responseCode = "502", description = "Bad Gateway"),
+            @APIResponse(responseCode = "504", description = "Gateway Timeout")
+    })
+    @interface WithServerErrors {
+    }
+
+    @Test
+    void testAnnotationComposition() throws IOException, JSONException {
+
+        @jakarta.ws.rs.Path("hello")
+        class HelloApi {
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.TEXT_PLAIN)
+            @APIResponses({ // NOSONAR - both @APIResponses + @APIResponse wanted directly on method
+                    @APIResponse(responseCode = "200", description = "OK"),
+                    @APIResponse(responseCode = "301", description = "See Other")
+            })
+            @WithClientErrors
+            @WithServerErrors
+            @APIResponse(responseCode = "403", description = "Not Authorized")
+            public String sayHello() {
+                return "Goodbye";
+            }
+        }
+
+        assertJsonEquals("responses.multi-location-composition.json", HelloApi.class, WithClientErrors.class,
+                WithServerErrors.class);
     }
 }

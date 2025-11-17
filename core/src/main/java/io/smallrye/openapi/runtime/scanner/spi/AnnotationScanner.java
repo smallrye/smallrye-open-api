@@ -376,25 +376,22 @@ public interface AnnotationScanner {
 
         setJsonViewContext(context, context.annotations().getAnnotationValue(method, JacksonConstants.JSON_VIEW));
 
-        Optional<APIResponses> classResponses = Optional.ofNullable(context.io().apiResponsesIO().read(resourceClass));
-        Map<String, APIResponse> classResponse = context.io().apiResponsesIO().readSingle(resourceClass);
-        addResponses(operation, classResponses, classResponse, false);
+        // Add responses from the class
+        addResponses(operation, context.io().apiResponsesIO().read(resourceClass), false);
 
         // Method annotations override class annotations
-        Optional<APIResponses> methodResponses = Optional.ofNullable(context.io().apiResponsesIO().read(method));
-        Map<String, APIResponse> methodResponse = context.io().apiResponsesIO().readSingle(method);
-        addResponses(operation, methodResponses, methodResponse, true);
+        addResponses(operation, context.io().apiResponsesIO().read(method), true);
 
         context.io().apiResponsesIO().readResponseSchema(method)
                 .ifPresent(responseSchema -> addApiReponseSchemaFromAnnotation(responseSchema, method, operation));
 
         /*
          * If there is no response from annotations, try to create one from the method return value.
-         * Do not generate a response if the app has used an empty @ApiResponses annotation. This
+         * Do not generate a response if the app has used an empty @APIResponses annotation. This
          * provides a way for the application to indicate that responses will be supplied some other
          * way (i.e. static file).
          */
-        if (methodResponses.isPresent() || context.io().apiResponsesIO().getAnnotation(method) == null) {
+        if (!hasEmptyAPIResponsesAnnotation(context, method)) {
             createResponseFromRestMethod(context, method, operation);
         }
 
@@ -418,16 +415,25 @@ public interface AnnotationScanner {
         clearJsonViewContext(context);
     }
 
-    default void addResponses(Operation operation, Optional<APIResponses> responses, Map<String, APIResponse> singleResponse,
-            boolean includeExtensions) {
-        responses.ifPresent(resp -> {
-            resp.getAPIResponses().forEach(ModelUtil.responses(operation)::addAPIResponse);
-            if (includeExtensions && resp.getExtensions() != null) {
-                resp.getExtensions().forEach(ModelUtil.responses(operation)::addExtension);
+    private boolean hasEmptyAPIResponsesAnnotation(AnnotationScannerContext context, MethodInfo method) {
+        AnnotationInstance responsesAnno = context.io().apiResponsesIO().getAnnotation(method);
+
+        if (responsesAnno == null) {
+            return false;
+        }
+
+        AnnotationInstance[] responsesAnnoValue = context.annotations().value(responsesAnno);
+        return (responsesAnnoValue == null || responsesAnnoValue.length == 0);
+    }
+
+    private void addResponses(Operation operation, APIResponses responses, boolean includeExtensions) {
+        if (responses != null) {
+            APIResponses operationResponses = ModelUtil.responses(operation);
+            responses.getAPIResponses().forEach(operationResponses::addAPIResponse);
+
+            if (includeExtensions) {
+                operationResponses.setExtensions(responses.getExtensions());
             }
-        });
-        if (singleResponse != null) {
-            singleResponse.forEach(ModelUtil.responses(operation)::addAPIResponse);
         }
     }
 
