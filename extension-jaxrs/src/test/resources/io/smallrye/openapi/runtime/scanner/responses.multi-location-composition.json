@@ -1,0 +1,45 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/hello" : {
+      "get" : {
+        "responses" : {
+          "403" : {
+            "description" : "Not Authorized"
+          },
+          "404" : {
+            "description" : "Not found"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "301" : {
+            "description" : "See Other"
+          },
+          "400" : {
+            "description" : "Really Bad Request"
+          },
+          "406" : {
+            "description" : "Not Acceptable"
+          },
+          "502" : {
+            "description" : "Bad Gateway"
+          },
+          "504" : {
+            "description" : "Gateway Timeout"
+          }
+        }
+      }
+    }
+  }
+}
