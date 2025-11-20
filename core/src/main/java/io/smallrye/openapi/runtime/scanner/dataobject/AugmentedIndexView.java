@@ -119,7 +119,7 @@ public class AugmentedIndexView implements IndexView {
                 if (!TypeUtil.knownJavaType(ifaceType.name())) {
                     ClassInfo iface = getClass(ifaceType);
 
-                    if (!saveOverride(method, iface, ancestry)) {
+                    if (iface != null && !saveOverride(method, iface, ancestry)) {
                         ancestry.put(iface, null);
                     }
                 }
