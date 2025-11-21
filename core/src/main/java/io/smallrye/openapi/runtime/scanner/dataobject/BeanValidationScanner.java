@@ -3,6 +3,7 @@ package io.smallrye.openapi.runtime.scanner.dataobject;
 import static org.jboss.jandex.DotName.createComponentized;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -258,7 +259,7 @@ public class BeanValidationScanner {
         decimalMax(target, schema);
         decimalMin(target, schema);
         pattern(target, schema);
-        digits(target, schema);
+        digitsString(target, schema);
         notBlank(target, schema, propertyKey, handler);
         notNull(target, propertyKey, handler);
         notNullKotlin(target, propertyKey, handler);
@@ -301,7 +302,7 @@ public class BeanValidationScanner {
             RequirementHandler handler) {
         decimalMax(target, schema);
         decimalMin(target, schema);
-        digits(target, schema);
+        digitsNumber(target, schema);
         max(target, schema);
         min(target, schema);
         negative(target, schema);
@@ -340,8 +341,8 @@ public class BeanValidationScanner {
                 } else {
                     schema.setMaximum(decimal);
                 }
-            } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                DataObjectLogging.logger.invalidAnnotationFormat(decimalValue);
+            } catch (NumberFormatException e) {
+                DataObjectLogging.logger.invalidAnnotationFormat(decimalValue, e.getMessage());
             }
         }
     }
@@ -360,14 +361,14 @@ public class BeanValidationScanner {
                 } else {
                     schema.setMinimum(decimal);
                 }
-            } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                DataObjectLogging.logger.invalidAnnotationFormat(decimalValue);
+            } catch (NumberFormatException e) {
+                DataObjectLogging.logger.invalidAnnotationFormat(decimalValue, e.getMessage());
             }
         }
 
     }
 
-    void digits(AnnotationTarget target, Schema schema) {
+    void digitsString(AnnotationTarget target, Schema schema) {
         AnnotationInstance constraint = getConstraint(target, BV_DIGITS);
 
         if (constraint != null && schema.getPattern() == null) {
@@ -398,6 +399,24 @@ public class BeanValidationScanner {
 
             pattern.append('$');
             schema.setPattern(pattern.toString());
+        }
+    }
+
+    void digitsNumber(AnnotationTarget target, Schema schema) {
+        AnnotationInstance constraint = getConstraint(target, BV_DIGITS);
+
+        if (constraint != null && schema.getMultipleOf() == null) {
+            // `fraction` attribute is required - safe to use primitive.
+            final int fractionPart = context.annotations().value(constraint, "fraction");
+            BigDecimal multipleOf;
+
+            if (fractionPart > 0) {
+                multipleOf = new BigDecimal(BigInteger.ONE, fractionPart);
+            } else {
+                multipleOf = BigDecimal.ONE;
+            }
+
+            schema.setMultipleOf(multipleOf);
         }
     }
 
