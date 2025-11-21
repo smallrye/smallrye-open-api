@@ -15,7 +15,8 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface DataObjectLogging extends BasicLogger {
-    DataObjectLogging logger = Logger.getMessageLogger(lookup(), DataObjectLogging.class, DataObjectLogging.class.getPackage().getName());
+    DataObjectLogging logger = Logger.getMessageLogger(lookup(), DataObjectLogging.class,
+            DataObjectLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 6000, value = "Processing @Schema annotation %s on a field %s")
