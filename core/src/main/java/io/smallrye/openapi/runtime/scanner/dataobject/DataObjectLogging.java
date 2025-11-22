@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -13,15 +15,16 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface DataObjectLogging extends BasicLogger {
-    DataObjectLogging logger = Logger.getMessageLogger(DataObjectLogging.class, DataObjectLogging.class.getPackage().getName());
+    DataObjectLogging logger = Logger.getMessageLogger(lookup(), DataObjectLogging.class,
+            DataObjectLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 6000, value = "Processing @Schema annotation %s on a field %s")
     void processingFieldAnnotation(AnnotationInstance annotation, String propertyKey);
 
     @LogMessage(level = Logger.Level.DEBUG)
-    @Message(id = 6001, value = "Annotation value has invalid format: %s")
-    void invalidAnnotationFormat(String decimalValue);
+    @Message(id = 6001, value = "Annotation value has invalid format: %s. Exception: %s")
+    void invalidAnnotationFormat(String decimalValue, String exceptionMessage);
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 6002, value = "Possible cycle was detected at: %s. Will not search further.")

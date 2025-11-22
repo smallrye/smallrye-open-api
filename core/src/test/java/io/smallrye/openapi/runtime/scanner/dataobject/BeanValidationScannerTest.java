@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -295,11 +297,11 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
     void testDecimalMaxPrimaryDigits(FieldInfo targetField) {
         testTarget.decimalMax(targetField, schema);
-        testTarget.digits(targetField, schema);
+        testTarget.digitsNumber(targetField, schema);
 
         assertEquals(new BigDecimal("200.00"), schema.getMaximum());
+        assertEquals(new BigDecimal("0.01"), schema.getMultipleOf());
         assertEquals(null, schema.getExclusiveMaximum());
-        assertEquals("^\\d{1,3}([.]\\d{1,2})?$", schema.getPattern());
     }
 
     @Test
@@ -344,9 +346,9 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
     void testDecimalMaxExclusiveDigits(FieldInfo targetField) {
         testTarget.decimalMax(targetField, schema);
-        testTarget.digits(targetField, schema);
+        testTarget.digitsNumber(targetField, schema);
         assertEquals(new BigDecimal("201.0"), schema.getExclusiveMaximum());
-        assertEquals("^\\d{1,3}([.]\\d)?$", schema.getPattern());
+        assertEquals(new BigDecimal("0.1"), schema.getMultipleOf());
     }
 
     @Test
@@ -421,10 +423,10 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
 
     void testDecimalMinExclusiveDigits(FieldInfo targetField) {
         testTarget.decimalMin(targetField, schema);
-        testTarget.digits(targetField, schema);
+        testTarget.digitsNumber(targetField, schema);
 
         assertEquals(new BigDecimal("9.00"), schema.getExclusiveMinimum());
-        assertEquals("^\\d([.]\\d{1,2})?$", schema.getPattern());
+        assertEquals(new BigDecimal("0.01"), schema.getMultipleOf());
     }
 
     @Test
@@ -571,7 +573,7 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         Schema parentSchema = OASFactory.createSchema();
         String propertyKey = targetField.name();
 
-        testTarget.digits(targetField, schema);
+        testTarget.digitsString(targetField, schema);
         testTarget.notBlank(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
         assertEquals("^\\d{1,8}([.]\\d{1,10})?$", schema.getPattern());
@@ -693,5 +695,58 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
     void testPatternFields(FieldInfo targetField, String expectedPattern) {
         testTarget.pattern(targetField, schema);
         assertEquals(expectedPattern, schema.getPattern());
+    }
+
+    @Test
+    void testNumberDigits() throws IOException {
+        class Numbers {
+            @jakarta.validation.constraints.Digits(integer = 9, fraction = 0)
+            int int32;
+            @jakarta.validation.constraints.Digits(integer = 18, fraction = 0)
+            int int64;
+            @jakarta.validation.constraints.Digits(integer = 5, fraction = 3)
+            float float32;
+            @jakarta.validation.constraints.Digits(integer = 10, fraction = 6)
+            double float64;
+            @jakarta.validation.constraints.Digits(integer = 20, fraction = 10)
+            BigDecimal decimal;
+            @jakarta.validation.constraints.Digits(integer = 20, fraction = 0)
+            BigInteger integer;
+            @jakarta.validation.constraints.Digits(integer = 20, fraction = 0)
+            @org.eclipse.microprofile.openapi.annotations.media.Schema(multipleOf = 1000)
+            BigInteger customInteger;
+        }
+
+        Index index = Index.of(Numbers.class);
+        ClassInfo numbers = index.getClassByName(Numbers.class);
+
+        schema.setMultipleOf(null);
+        testTarget.digitsNumber(numbers.field("int32"), schema);
+        assertEquals(BigDecimal.ONE, schema.getMultipleOf());
+
+        schema.setMultipleOf(null);
+        testTarget.digitsNumber(numbers.field("int64"), schema);
+        assertEquals(BigDecimal.ONE, schema.getMultipleOf());
+
+        schema.setMultipleOf(null);
+        testTarget.digitsNumber(numbers.field("float32"), schema);
+        assertEquals(new BigDecimal("0.001"), schema.getMultipleOf());
+
+        schema.setMultipleOf(null);
+        testTarget.digitsNumber(numbers.field("float64"), schema);
+        assertEquals(new BigDecimal("0.000001"), schema.getMultipleOf());
+
+        schema.setMultipleOf(null);
+        testTarget.digitsNumber(numbers.field("decimal"), schema);
+        assertEquals(new BigDecimal("0.0000000001"), schema.getMultipleOf());
+
+        schema.setMultipleOf(null);
+        testTarget.digitsNumber(numbers.field("integer"), schema);
+        assertEquals(BigDecimal.ONE, schema.getMultipleOf());
+
+        // Normally set by AnnotationTargetProcessor + SchemaFactory
+        schema.setMultipleOf(new BigDecimal("1000"));
+        testTarget.digitsNumber(numbers.field("customInteger"), schema);
+        assertEquals(new BigDecimal("1000"), schema.getMultipleOf());
     }
 }
