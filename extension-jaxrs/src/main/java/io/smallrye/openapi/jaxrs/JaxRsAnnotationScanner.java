@@ -323,7 +323,7 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
             MethodInfo mapperMethod = mapperAnnotation.target().asMethod();
             if (mapperMethod.parametersCount() == 1) {
                 DotName exceptionName = mapperMethod.parameterType(0).name();
-                exceptionMappers.put(exceptionName, context.io().apiResponsesIO().readAll(mapperMethod));
+                exceptionMappers.put(exceptionName, context.io().apiResponseIO().readMap(mapperMethod));
             }
         }
 
@@ -349,14 +349,14 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
                 .of(classInfo.method(JaxRsConstants.TO_RESPONSE_METHOD_NAME, exceptionType))
                 .filter(Objects::nonNull)
                 .flatMap(m -> context.io()
-                        .apiResponsesIO()
-                        .readAll(m)
+                        .apiResponseIO()
+                        .readMap(m)
                         .entrySet()
                         .stream());
 
         Stream<Entry<String, APIResponse>> classAnnotations = context.io()
-                .apiResponsesIO()
-                .readAll(classInfo)
+                .apiResponseIO()
+                .readMap(classInfo)
                 .entrySet()
                 .stream();
 

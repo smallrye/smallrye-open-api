@@ -1,7 +1,6 @@
 package io.smallrye.openapi.runtime.io.responses;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,15 +22,21 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
         super(context, Names.API_RESPONSES, Names.create(APIResponses.class));
     }
 
-    public Map<String, APIResponse> readSingle(AnnotationTarget target) {
-        return Optional.ofNullable(apiResponseIO().getAnnotation(target))
-                .map(Collections::singleton)
-                .map(annotations -> apiResponseIO().readMap(annotations, apiResponseIO()::responseCode))
+    @Override
+    public APIResponses read(AnnotationTarget target) {
+        Map<String, APIResponse> responseMap = apiResponseIO().readMap(target);
+        Map<String, Object> extensions = Optional.ofNullable(getAnnotation(target))
+                .map(extensionIO()::readExtensible)
                 .orElse(null);
-    }
 
-    public Map<String, APIResponse> readAll(AnnotationTarget target) {
-        return apiResponseIO().readMap(target, apiResponseIO()::responseCode);
+        if (!responseMap.isEmpty() || extensions != null) {
+            APIResponses responses = OASFactory.createAPIResponses();
+            responseMap.forEach(responses::addAPIResponse);
+            responses.setExtensions(extensions);
+            return responses;
+        }
+
+        return null;
     }
 
     @Override
