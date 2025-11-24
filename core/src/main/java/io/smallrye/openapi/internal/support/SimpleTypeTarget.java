@@ -34,7 +34,7 @@ public final class SimpleTypeTarget implements AnnotationTarget {
 
     @Override
     public Kind kind() {
-        return Kind.TYPE;
+        return null;
     }
 
     @Override
