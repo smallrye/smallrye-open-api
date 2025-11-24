@@ -27,6 +27,7 @@ import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.IgnoreResolver;
+import io.smallrye.openapi.runtime.scanner.dataobject.KotlinMetadataScanner;
 import io.smallrye.openapi.runtime.scanner.dataobject.PropertyNamingStrategyFactory;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
@@ -52,6 +53,7 @@ public class AnnotationScannerContext {
     private final Deque<Type> scanStack = new ArrayDeque<>();
     private Deque<TypeResolver> resolverStack = new ArrayDeque<>();
     private final Optional<BeanValidationScanner> beanValidationScanner;
+    private final KotlinMetadataScanner kotlinMetadataScanner;
     private final Map<Type, Boolean> jsonViews = new LinkedHashMap<>();
     private String[] currentConsumes;
     private String[] currentProduces;
@@ -83,6 +85,7 @@ public class AnnotationScannerContext {
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
         this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(new BeanValidationScanner(this))
                 : Optional.empty();
+        this.kotlinMetadataScanner = new KotlinMetadataScanner(this);
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
         this.ioContext = IOContext.forScanning(this);
@@ -161,6 +164,10 @@ public class AnnotationScannerContext {
 
     public Optional<BeanValidationScanner> getBeanValidationScanner() {
         return beanValidationScanner;
+    }
+
+    public KotlinMetadataScanner getKotlinMetadataScanner() {
+        return kotlinMetadataScanner;
     }
 
     public Map<Type, Boolean> getJsonViews() {

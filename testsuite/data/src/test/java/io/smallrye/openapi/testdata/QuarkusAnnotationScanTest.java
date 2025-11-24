@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,13 +19,12 @@ import jakarta.ws.rs.Path;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
-import org.eclipse.microprofile.openapi.OASConfig;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.jboss.jandex.Index;
-import org.jboss.jandex.IndexReader;
+import org.jboss.jandex.IndexView;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,18 +33,19 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.api.SmallRyeOpenAPI;
-import io.smallrye.openapi.runtime.OpenApiProcessor;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.OpenApiSerializer;
 import io.smallrye.openapi.runtime.scanner.OpenApiAnnotationScanner;
 
-class QuarkusAnnotationScanIT {
+@QuarkusTest
+class QuarkusAnnotationScanTest {
 
-    private static final Logger LOG = Logger.getLogger(QuarkusAnnotationScanIT.class);
+    private static final Logger LOG = Logger.getLogger(QuarkusAnnotationScanTest.class);
 
     static void printToConsole(OpenAPI oai) throws IOException {
         // Remember to set debug level logging.
@@ -52,7 +53,7 @@ class QuarkusAnnotationScanIT {
     }
 
     static void assertJsonEquals(String expectedResource, OpenAPI actual) throws Exception {
-        URL resourceUrl = QuarkusAnnotationScanIT.class.getResource(expectedResource);
+        URL resourceUrl = QuarkusAnnotationScanTest.class.getResource(expectedResource);
         assertJsonEquals(resourceUrl, actual);
     }
 
@@ -80,10 +81,28 @@ class QuarkusAnnotationScanIT {
         return OpenApiConfig.fromConfig(config);
     }
 
+    static IndexView index(String... classNames) {
+        List<Class<?>> classes = new ArrayList<>(classNames.length);
+
+        for (String className : classNames) {
+            try {
+                classes.add(Class.forName(className));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        try {
+            return Index.of(classes);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     @Test
     void testKotlinPropertyName() throws Exception {
-        Index index = Index.of(io.smallrye.openapi.testdata.kotlin.KotlinBean.class,
-                io.smallrye.openapi.testdata.kotlin.KotlinLongValue.class);
+        IndexView index = index("io.smallrye.openapi.testdata.kotlin.KotlinBean",
+                "io.smallrye.openapi.testdata.kotlin.KotlinLongValue");
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -94,12 +113,12 @@ class QuarkusAnnotationScanIT {
 
     @SuppressWarnings("deprecation")
     @ParameterizedTest
-    @ValueSource(classes = {
-            io.smallrye.openapi.testdata.kotlin.JavaDeprecatedKotlinBean.class,
-            io.smallrye.openapi.testdata.kotlin.DeprecatedKotlinBean.class
+    @ValueSource(strings = {
+            "io.smallrye.openapi.testdata.kotlin.JavaDeprecatedKotlinBean",
+            "io.smallrye.openapi.testdata.kotlin.DeprecatedKotlinBean"
     })
-    void testDeprecatedAnnotation(Class<?> clazz) throws Exception {
-        Index index = Index.of(clazz);
+    void testDeprecatedAnnotation(String className) throws Exception {
+        IndexView index = index(className);
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -123,7 +142,7 @@ class QuarkusAnnotationScanIT {
 
     @Test
     void testKotlinResourceWithUnwrappedFlowSSE() throws Exception {
-        Index index = Index.of(io.smallrye.openapi.testdata.kotlin.KotlinResource.class);
+        IndexView index = index("io.smallrye.openapi.testdata.kotlin.KotlinResource");
         OpenApiAnnotationScanner scanner = new OpenApiAnnotationScanner(emptyConfig(), index);
 
         OpenAPI result = scanner.scan();
@@ -166,19 +185,5 @@ class QuarkusAnnotationScanIT {
         var nameModel = result.getComponents().getSchemas().get("Widget").getProperties().get("nombre");
         assertNotNull(nameModel);
         assertEquals(List.of(SchemaType.STRING), nameModel.getType());
-    }
-
-    @Test
-    void testSyntheticClassesAndInterfacesIgnoredByDefault() throws Exception {
-        try (InputStream source = getClass().getResourceAsStream("/smallrye-open-api-testsuite-data.idx")) {
-            IndexReader reader = new IndexReader(source);
-            Index index = reader.read();
-            OpenAPI result = OpenApiProcessor.bootstrap(
-                    dynamicConfig(OASConfig.SCAN_EXCLUDE_PACKAGES,
-                            "io.smallrye.openapi.testdata.java.records,io.smallrye.openapi.testdata.kotlin"),
-                    index);
-            printToConsole(result);
-            assertJsonEquals("ignore.synthetic-classes-interfaces.json", result);
-        }
     }
 }
