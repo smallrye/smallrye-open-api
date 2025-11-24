@@ -56,6 +56,7 @@ import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
+import io.smallrye.openapi.runtime.scanner.dataobject.RequirementHandler;
 import io.smallrye.openapi.runtime.scanner.dataobject.TypeResolver;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -749,13 +750,18 @@ public abstract class AbstractParameterProcessor {
 
         int modCount = SchemaSupport.getModCount(localSchema);
 
+        RequirementHandler requirementHandler = (target, name) -> {
+            if (param.getRequired() == null) {
+                param.setRequired(Boolean.TRUE);
+            }
+        };
+
+        scannerContext.getKotlinMetadataScanner().applyMetadata(context.target, localSchema, param.getName(),
+                requirementHandler);
+
         if (beanValidationScanner.isPresent()) {
             beanValidationScanner.get().applyConstraints(context.target, localSchema, param.getName(),
-                    (target, name) -> {
-                        if (param.getRequired() == null) {
-                            param.setRequired(Boolean.TRUE);
-                        }
-                    });
+                    requirementHandler);
         }
 
         setDefaultValue(localSchema, context.defaultValue);
@@ -816,6 +822,11 @@ public abstract class AbstractParameterProcessor {
             addEncoding(encodings, paramName, paramTarget);
             setDefaultValue(paramSchema, getDefaultValue(paramTarget));
             TypeUtil.mapDeprecated(scannerContext, paramTarget, paramSchema::getDeprecated, paramSchema::setDeprecated);
+
+            scannerContext.getKotlinMetadataScanner().applyMetadata(paramTarget,
+                    paramSchema,
+                    paramName,
+                    (target, name) -> setRequired(name, schema));
 
             if (beanValidationScanner.isPresent()) {
                 beanValidationScanner.get().applyConstraints(paramTarget,

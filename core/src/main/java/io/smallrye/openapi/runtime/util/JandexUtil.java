@@ -194,7 +194,7 @@ public class JandexUtil {
         if (context.getConfig().sortedPropertiesEnable()) {
             return currentClass.fields();
         }
-        return currentClass.unsortedFields();
+        return currentClass.fieldsInDeclarationOrder();
     }
 
     public static boolean isSupplier(AnnotationTarget target) {
@@ -207,4 +207,29 @@ public class JandexUtil {
         return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
     }
 
+    public static ClassInfo declaringClass(AnnotationScannerContext context, AnnotationTarget target) {
+        final AnnotationTarget.Kind targetKind;
+
+        if (target == null || (targetKind = target.kind()) == null) {
+            // kind is unavailable for SimpleTypeTarget objects
+            return null;
+        }
+
+        switch (targetKind) {
+            case FIELD:
+                return target.asField().declaringClass();
+            case METHOD:
+                return target.asMethod().declaringClass();
+            case METHOD_PARAMETER:
+                return target.asMethodParameter().method().declaringClass();
+            case RECORD_COMPONENT:
+                return target.asRecordComponent().declaringClass();
+            case TYPE:
+                return declaringClass(context, target.asType().enclosingTarget());
+            case CLASS:
+                return target.asClass();
+            default:
+                return null;
+        }
+    }
 }
