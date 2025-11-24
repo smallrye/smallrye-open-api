@@ -31,10 +31,6 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
  */
 public class BeanValidationScanner {
 
-    public interface RequirementHandler {
-        void setRequired(AnnotationTarget target, String propertyKey);
-    }
-
     static final Set<DotName> CONSTRAINTS = new HashSet<>();
     private static final String VALUE = "value";
     private static final String INCLUSIVE = "inclusive";
@@ -105,7 +101,6 @@ public class BeanValidationScanner {
 
     // Kotlin Constraints
     static final DotName KOTLIN_NULLABLE = createConstraintName(KotlinConstants.JETBRAINS_NULLABLE);
-    static final DotName KOTLIN_NOT_NULL = createConstraintName(KotlinConstants.JETBRAINS_NOT_NULL);
 
     // Kotlinx Serialization Constraints
     static final DotName KOTLIN_SERIALIZATION_REQUIRED = createConstraintName(KotlinSerializationConstants.REQUIRED);
@@ -262,7 +257,6 @@ public class BeanValidationScanner {
         digitsString(target, schema);
         notBlank(target, schema, propertyKey, handler);
         notNull(target, propertyKey, handler);
-        notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         requiredKotlinSerialization(target, propertyKey, handler);
@@ -275,7 +269,6 @@ public class BeanValidationScanner {
             String propertyKey,
             RequirementHandler handler) {
         notNull(target, propertyKey, handler);
-        notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         requiredKotlinSerialization(target, propertyKey, handler);
@@ -288,7 +281,6 @@ public class BeanValidationScanner {
             String propertyKey,
             RequirementHandler handler) {
         notNull(target, propertyKey, handler);
-        notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         requiredKotlinSerialization(target, propertyKey, handler);
@@ -308,7 +300,6 @@ public class BeanValidationScanner {
         negative(target, schema);
         negativeOrZero(target, schema);
         notNull(target, propertyKey, handler);
-        notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         requiredKotlinSerialization(target, propertyKey, handler);
@@ -321,7 +312,6 @@ public class BeanValidationScanner {
             String propertyKey,
             RequirementHandler handler) {
         notNull(target, propertyKey, handler);
-        notNullKotlin(target, propertyKey, handler);
         nullableKotlin(target, schema);
         requiredJackson(target, propertyKey, handler);
         requiredKotlinSerialization(target, propertyKey, handler);
@@ -510,12 +500,6 @@ public class BeanValidationScanner {
         AnnotationInstance constraint = getConstraint(target, BV_NOT_NULL);
 
         if (constraint != null) {
-            handler.setRequired(target, propertyKey);
-        }
-    }
-
-    void notNullKotlin(AnnotationTarget target, String propertyKey, RequirementHandler handler) {
-        if (context.annotations().hasAnnotation(target, KOTLIN_NOT_NULL)) {
             handler.setRequired(target, propertyKey);
         }
     }

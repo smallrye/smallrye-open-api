@@ -55,6 +55,7 @@ import io.smallrye.openapi.runtime.scanner.AnnotationScannerExtension;
 import io.smallrye.openapi.runtime.scanner.ResourceParameters;
 import io.smallrye.openapi.runtime.scanner.dataobject.AugmentedIndexView;
 import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner;
+import io.smallrye.openapi.runtime.scanner.dataobject.RequirementHandler;
 import io.smallrye.openapi.runtime.scanner.processor.JavaSecurityProcessor;
 import io.smallrye.openapi.runtime.util.ModelUtil;
 import io.smallrye.openapi.runtime.util.TypeUtil;
@@ -1006,25 +1007,30 @@ public interface AnnotationScanner {
             Type requestBodyType) {
         Collection<AnnotationInstance> paramAnnotations = context.annotations().getMethodParameterAnnotations(method,
                 requestBodyType);
+        Content content = requestBody.getContent();
         Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
 
-        if (!paramAnnotations.isEmpty() && constraintScanner.isPresent()) {
+        if (!paramAnnotations.isEmpty() && content != null) {
             AnnotationTarget paramTarget = paramAnnotations.iterator().next().target();
+            RequirementHandler requirementHandler = (target, name) -> {
+                if (!Extensions.getIsRequiredSet(requestBody)) {
+                    requestBody.setRequired(Boolean.TRUE);
+                }
+            };
 
-            Optional.ofNullable(requestBody.getContent())
-                    .map(Content::getMediaTypes)
-                    .map(Map::entrySet)
-                    .orElseGet(Collections::emptySet)
-                    .stream()
-                    .map(Map.Entry::getValue)
-                    .map(MediaType::getSchema)
-                    .filter(Objects::nonNull)
-                    .forEach(schema -> constraintScanner.get().applyConstraints(paramTarget, schema, null,
-                            (target, name) -> {
-                                if (!Extensions.getIsRequiredSet(requestBody)) {
-                                    requestBody.setRequired(Boolean.TRUE);
-                                }
-                            }));
+            for (MediaType mediaType : content.getMediaTypes().values()) {
+                Schema schema = mediaType.getSchema();
+
+                if (schema != null) {
+                    context.getKotlinMetadataScanner().applyMetadata(paramTarget, schema, null,
+                            requirementHandler);
+
+                    if (constraintScanner.isPresent()) {
+                        constraintScanner.get().applyConstraints(paramTarget, schema, null,
+                                requirementHandler);
+                    }
+                }
+            }
         }
     }
 

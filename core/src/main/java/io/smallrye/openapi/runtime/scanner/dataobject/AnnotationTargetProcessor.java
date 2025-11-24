@@ -26,7 +26,6 @@ import io.smallrye.openapi.internal.models.media.SchemaSupport;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 import io.smallrye.openapi.runtime.io.schema.SchemaFactory;
 import io.smallrye.openapi.runtime.scanner.SchemaRegistry;
-import io.smallrye.openapi.runtime.scanner.dataobject.BeanValidationScanner.RequirementHandler;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
 import io.smallrye.openapi.runtime.util.JandexUtil;
 import io.smallrye.openapi.runtime.util.ModelUtil;
@@ -184,6 +183,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
             // Use the type's schema for the field as a starting point (poor man's clone)
             fieldSchema = MergeUtil.mergeObjects(OASFactory.createSchema(), typeSchema);
         }
+
+        context.getKotlinMetadataScanner().applyMetadata(annotationTarget, fieldSchema, propertyKey, this);
 
         Optional<BeanValidationScanner> constraintScanner = context.getBeanValidationScanner();
 

@@ -3,6 +3,33 @@
   "paths" : {
     "/kotlin/hello" : {
       "get" : {
+        "parameters" : [ {
+          "name" : "p1",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          },
+          "required" : true
+        }, {
+          "name" : "p2",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "p3",
+          "in" : "query",
+          "schema" : {
+            "type" : [ "string", "null" ]
+          },
+          "required" : true
+        }, {
+          "name" : "p4",
+          "in" : "query",
+          "schema" : {
+            "type" : [ "string", "null" ]
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
