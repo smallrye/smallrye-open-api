@@ -19,13 +19,12 @@ import org.jboss.jandex.MethodParameterInfo;
 
 import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
-import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerContext;
-import io.smallrye.openapi.runtime.util.JandexUtil;
 import kotlinx.metadata.Attributes;
 import kotlinx.metadata.KmClass;
 import kotlinx.metadata.KmConstructor;
 import kotlinx.metadata.KmFunction;
 import kotlinx.metadata.KmProperty;
+import kotlinx.metadata.KmType;
 import kotlinx.metadata.KmValueParameter;
 import kotlinx.metadata.jvm.JvmExtensionsKt;
 import kotlinx.metadata.jvm.JvmMethodSignature;
@@ -33,14 +32,12 @@ import kotlinx.metadata.jvm.KotlinClassMetadata;
 
 public class KotlinMetadataScanner {
 
-    private final AnnotationScannerContext context;
     private final Exception initException;
     private final AtomicBoolean exceptionLogged = new AtomicBoolean(false);
     private final Map<ClassInfo, KmClass> cache;
     private final IndexView metaIndex;
 
-    public KotlinMetadataScanner(AnnotationScannerContext context) {
-        this.context = context;
+    public KotlinMetadataScanner() {
         IndexView singletonIndex = null;
         Exception iniException = null;
 
@@ -67,9 +64,19 @@ public class KotlinMetadataScanner {
             String propertyKey,
             RequirementHandler handler) {
 
-        ClassInfo declaringClass = JandexUtil.declaringClass(context, target);
+        ClassInfo declaringClass;
 
-        if (declaringClass == null || !declaringClass.hasAnnotation(KotlinConstants.METADATA)) {
+        if (target == null) {
+            declaringClass = null;
+        } else if (target.kind() == Kind.FIELD) {
+            declaringClass = target.asField().declaringClass();
+        } else if (target.kind() == Kind.METHOD_PARAMETER) {
+            declaringClass = target.asMethodParameter().method().declaringClass();
+        } else {
+            declaringClass = null;
+        }
+
+        if (declaringClass == null || !declaringClass.hasDeclaredAnnotation(KotlinConstants.METADATA)) {
             return;
         }
 
@@ -117,8 +124,7 @@ public class KotlinMetadataScanner {
 
         for (KmProperty property : kmClass.getProperties()) {
             if (property.getName().equals(field.name())) {
-                KmValueParameter param = property.getSetterParameter();
-                applyMetadata(field, param, schema, propertyKey, handler);
+                maybeSetNullable(property.getReturnType(), schema);
                 return;
             }
         }
@@ -151,11 +157,21 @@ public class KotlinMetadataScanner {
             Schema schema,
             String propertyKey,
             RequirementHandler handler) {
+        maybeSetRequired(target, param, propertyKey, handler);
+        maybeSetNullable(param.getType(), schema);
+    }
+
+    private static void maybeSetRequired(AnnotationTarget target,
+            KmValueParameter param,
+            String propertyKey,
+            RequirementHandler handler) {
         if (!Attributes.getDeclaresDefaultValue(param)) {
             handler.setRequired(target, propertyKey);
         }
+    }
 
-        if (Attributes.isNullable(param.getType()) && SchemaSupport.getNullable(schema) == null) {
+    private static void maybeSetNullable(KmType type, Schema schema) {
+        if (Attributes.isNullable(type) && SchemaSupport.getNullable(schema) == null) {
             SchemaSupport.setNullable(schema, Boolean.TRUE);
         }
     }
