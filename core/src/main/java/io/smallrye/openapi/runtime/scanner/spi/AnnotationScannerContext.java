@@ -85,7 +85,7 @@ public class AnnotationScannerContext {
         this.propertyNameTranslator = PropertyNamingStrategyFactory.getStrategy(config.propertyNamingStrategy(), classLoader);
         this.beanValidationScanner = config.scanBeanValidation() ? Optional.of(new BeanValidationScanner(this))
                 : Optional.empty();
-        this.kotlinMetadataScanner = new KotlinMetadataScanner(this);
+        this.kotlinMetadataScanner = new KotlinMetadataScanner();
         this.javaSecurityProcessor = new JavaSecurityProcessor(this);
         this.annotations = new Annotations(this);
         this.ioContext = IOContext.forScanning(this);
