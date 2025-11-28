@@ -84,6 +84,7 @@ class QuarkusSyntheticTypeIngoreTest {
 
                     @Override
                     public void describeTo(Description description) {
+                        description.appendText("matches JSON");
                     }
                 });
     }
