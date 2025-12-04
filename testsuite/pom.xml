@@ -56,22 +56,6 @@
           <type>pom</type>
           <scope>import</scope>
         </dependency>
-        <!-- ShrinkWrap -->
-        <dependency>
-          <groupId>org.jboss.shrinkwrap</groupId>
-          <artifactId>shrinkwrap-bom</artifactId>
-          <version>${version.shrinkwrap_core}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
-        <!-- ShrinkWrap Resolver -->
-        <dependency>
-          <groupId>org.jboss.shrinkwrap.resolver</groupId>
-          <artifactId>shrinkwrap-resolver-bom</artifactId>
-          <version>${version.shrinkwrap_resolver}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
       </dependencies>
   </dependencyManagement>
 

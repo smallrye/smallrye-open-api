@@ -8,8 +8,8 @@ group = "io.smallrye"
 
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '11'
-    targetCompatibility = '11'
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 compileTestJava {
@@ -20,7 +20,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = uri("file:./target/dependencies")
+        url = uri("./target/dependencies")
     }
 }
 
@@ -31,7 +31,8 @@ dependencies {
     implementation("io.smallrye:smallrye-open-api-vertx:${version}")
     implementation("io.smallrye.config:smallrye-config:${versionConfig}")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit5}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:${versionJunit}")
+    testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit}")
     testImplementation(gradleTestKit())
     testImplementation("org.assertj:assertj-core:3.27.6")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${versionJackson}")
@@ -41,10 +42,13 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+
     useJUnitPlatform()
+
     // multiple Gradle invocations executed from the same testing JVM cause problems, so fork
     // for each test, and make sure we only run one Gradle execution in each test
-    forkEvery 1
+    forkEvery = 1
+
     // For Gradle testing :(
     jvmArgs("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
             "--add-opens=java.base/java.util=ALL-UNNAMED")

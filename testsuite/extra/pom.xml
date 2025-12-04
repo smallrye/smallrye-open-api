@@ -52,6 +52,7 @@
         <dependency>
             <groupId>org.jboss.shrinkwrap</groupId>
             <artifactId>shrinkwrap-api</artifactId>
+            <version>${version.shrinkwrap_core}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -103,17 +104,9 @@
 
     <build>
         <plugins>
-            <!-- Export the reserved port from above as a system property (code will use a default port if port unset) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit-platform</artifactId>
-                        <version>${version.surefire.plugin}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
