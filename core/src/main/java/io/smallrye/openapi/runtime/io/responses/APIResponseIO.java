@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.responses.APIResponses;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
 
@@ -38,6 +39,11 @@ public class APIResponseIO<V, A extends V, O extends V, AB, OB> extends MapModel
 
     public APIResponseIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.API_RESPONSE, DotName.createSimple(APIResponse.class));
+    }
+
+    @Override
+    public Map<String, APIResponse> readMap(AnnotationTarget target) {
+        return readMap(target, this::responseCode);
     }
 
     @Override
