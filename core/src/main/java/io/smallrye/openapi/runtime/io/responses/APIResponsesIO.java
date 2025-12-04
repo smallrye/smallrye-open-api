@@ -1,6 +1,5 @@
 package io.smallrye.openapi.runtime.io.responses;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,23 +40,7 @@ public class APIResponsesIO<V, A extends V, O extends V, AB, OB> extends ModelIO
 
     @Override
     public APIResponses read(AnnotationInstance annotation) {
-        AnnotationTarget target = annotation.target();
-
-        return Optional.ofNullable(annotation)
-                .map(AnnotationInstance::value)
-                /*
-                 * Begin - copy target to clones of nested annotations to support @Extension on
-                 * method being applied to @APIReponse. Remove when no longer supporting TCK
-                 * 3.1.1 and earlier.
-                 */
-                .map(AnnotationValue::asNestedArray)
-                .map(annotations -> Arrays.stream(annotations)
-                        .map(a -> AnnotationInstance.create(a.name(), target, a.values()))
-                        .toArray(AnnotationInstance[]::new))
-                // End
-                .map(this::read)
-                .map(responses -> responses.extensions(extensionIO().readExtensible(annotation)))
-                .orElse(null);
+        throw new UnsupportedOperationException();
     }
 
     @Override

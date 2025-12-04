@@ -386,9 +386,12 @@ public interface AnnotationScanner {
                 .ifPresent(responseSchema -> addApiReponseSchemaFromAnnotation(responseSchema, method, operation));
 
         /*
-         * If there is no response from annotations, try to create one from the method return value.
-         * Do not generate a response if the app has used an empty @APIResponses annotation. This
-         * provides a way for the application to indicate that responses will be supplied some other
+         * If an empty @APIResponses annotation is not present on the method,
+         * attempt to generate additional response information based on the
+         * HTTP method and the method's return type.
+         *
+         * The presence of an empty @APIResponses provides a way for the
+         * application to indicate that responses will be supplied some other
          * way (i.e. static file).
          */
         if (!hasEmptyAPIResponsesAnnotation(context, method)) {
@@ -438,20 +441,27 @@ public interface AnnotationScanner {
     }
 
     /**
-     * Called when a scanner (jax-rs, spring) method's APIResponse annotations have all been processed but
-     * no response was actually created for the operation.This method will create a response
-     * from the method information and add it to the given operation. It will try to do this
-     * by examining the method's return value and the type of operation (GET, PUT, POST, DELETE).
+     * Called when a scanner (jax-rs, spring) method's APIResponse annotations
+     * have all been processed but no response content was created for the
+     * operation.
      *
-     * If there is a return value of some kind (a non-void return type) then the response code
-     * is assumed to be 200.
+     * This method will create a response from the method information
+     * and add it to the given operation. It will try to do this by examining
+     * the method's return value and the type of operation (GET, PUT, POST,
+     * DELETE).
      *
-     * If there not a return value (void return type) then either a 201 or 204 is returned,
-     * depending on the type of request.
+     * If there is a return value of some kind (a non-void return type) then the
+     * response code is assumed to be 200.
      *
-     * @param context the scanning context
-     * @param method the current method
-     * @param operation the current operation
+     * If there not a return value (void return type) then either a 201 or 204
+     * is returned, depending on the type of request.
+     *
+     * @param context
+     *        the scanning context
+     * @param method
+     *        the current method
+     * @param operation
+     *        the current operation
      */
     default void createResponseFromRestMethod(final AnnotationScannerContext context,
             final MethodInfo method,
