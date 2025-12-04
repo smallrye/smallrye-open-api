@@ -185,7 +185,7 @@ class SmallryeOpenApiPluginTest {
                         "plugins {",
                         "    id 'java-library'",
                         "    id 'io.smallrye.openapi'",
-                        withQuarkus ? "    id 'io.quarkus' version '2.15.2.Final'" : "",
+                        withQuarkus ? "    id 'io.quarkus' version '3.27.1'" : "",
                         "}",
                         "",
                         "repositories {",
@@ -294,7 +294,7 @@ class SmallryeOpenApiPluginTest {
             assertThat(targetOpenapiDir.resolve("my-openapi-schema-file.json")).isRegularFile();
 
             JsonNode root = new ObjectMapper().readValue(
-                    targetOpenapiDir.resolve("my-openapi-schema-file.json").toUri().toURL(),
+                    targetOpenapiDir.resolve("my-openapi-schema-file.json").toFile(),
                     JsonNode.class);
             assertThat(root.get("openapi").asText()).isEqualTo("999.999.999");
             assertThat(root.get("x-smallrye-gradle-generated").booleanValue()).isTrue();
