@@ -10,6 +10,10 @@
     <artifactId>smallrye-open-api-testsuite-extra</artifactId>
     <name>SmallRye: OpenAPI Extra Test Cases</name>
 
+    <properties>
+      <maven.compiler.release>17</maven.compiler.release>
+    </properties>
+
     <dependencies>
         <!-- Project Dependencies -->
         <dependency>
@@ -104,17 +108,9 @@
 
     <build>
         <plugins>
-            <!-- Export the reserved port from above as a system property (code will use a default port if port unset) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit-platform</artifactId>
-                        <version>${version.surefire.plugin}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
