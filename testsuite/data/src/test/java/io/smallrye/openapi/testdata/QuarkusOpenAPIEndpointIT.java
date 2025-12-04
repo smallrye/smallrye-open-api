@@ -22,6 +22,7 @@ class QuarkusOpenAPIEndpointIT {
         given()
                 .when().get("/q/openapi.json")
                 .then()
+                .log().ifValidationFails()
                 .body("paths", aMapWithSize(greaterThan(0)));
     }
 }
