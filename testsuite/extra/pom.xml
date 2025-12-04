@@ -10,10 +10,6 @@
     <artifactId>smallrye-open-api-testsuite-extra</artifactId>
     <name>SmallRye: OpenAPI Extra Test Cases</name>
 
-    <properties>
-      <maven.compiler.release>17</maven.compiler.release>
-    </properties>
-
     <dependencies>
         <!-- Project Dependencies -->
         <dependency>
