@@ -113,6 +113,7 @@ public class TypeUtil {
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypeFormat
     static {
         TYPE_MAP.put(DOTNAME_OBJECT, ANY);
+        TYPE_MAP.put(DOTNAME_VOID, ANY);
 
         // String
         TYPE_MAP.put(DotName.createSimple(String.class.getName()), STRING_FORMAT);

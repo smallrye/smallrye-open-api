@@ -1084,4 +1084,31 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertJsonEquals("components.schemas.resolved-mapped-generic-ptype.json",
                 Bean.class, GenericRoot.class, GenericListRoot.class, Data.class, DataList.class);
     }
+
+    static final class TestVoidImplementationNoType {
+        @Schema(oneOf = { Implementation.class, String.class }, implementation = Void.class)
+        interface IFace1 {
+        }
+
+        interface IFace2 {
+        }
+
+        @Schema(additionalProperties = Schema.False.class)
+        static class Implementation implements IFace1 {
+            @Schema(required = true, description = "Identifier")
+            String id;
+            @Schema(defaultValue = "1", minimum = "1", description = "Sequence of this implemenatation instance")
+            long sequence;
+            @Schema(oneOf = { Implementation.class, String.class }, implementation = Void.class)
+            IFace2 oneOfIface2;
+            @Schema(implementation = String.class)
+            IFace2 stringIface2;
+        }
+    }
+
+    @Test
+    void testVoidImplementationNoType() throws IOException, JSONException {
+        assertJsonEquals("components.schemas.void-implementation-no-type.json",
+                TestVoidImplementationNoType.IFace1.class, TestVoidImplementationNoType.Implementation.class);
+    }
 }
