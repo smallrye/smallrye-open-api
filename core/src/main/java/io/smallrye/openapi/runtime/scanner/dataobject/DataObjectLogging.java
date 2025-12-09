@@ -91,4 +91,11 @@ interface DataObjectLogging extends BasicLogger {
     @Message(id = 31017, value = "Failed to read enumeration values from enum %s method %s with `@JsonValue`: %s")
     void exceptionReadingEnumJsonValue(String enumName, String methodName, Exception exception);
 
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 31018, value = "Kotlin classes were found but metadata processing not available. %s")
+    void exceptionInitializingKotlinMetadataScanner(Exception exception);
+
+    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 31019, value = "Failed to process Kotlin metadata. %s")
+    void exceptionScanningKotlinMetadata(Exception exception);
 }

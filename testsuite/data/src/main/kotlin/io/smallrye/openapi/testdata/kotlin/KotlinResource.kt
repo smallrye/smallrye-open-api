@@ -15,7 +15,16 @@ class KotlinResource {
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
-    fun hello(): Flow<String> {
+    fun hello(
+      @org.jboss.resteasy.reactive.RestQuery
+      p1: String,             // required = true; nullable = false
+      @org.jboss.resteasy.reactive.RestQuery
+      p2: String = "default", // required = false; nullable = false
+      @org.jboss.resteasy.reactive.RestQuery
+      p3: String?,            // required = true; nullable = true
+      @org.jboss.resteasy.reactive.RestQuery
+      p4: String? = null,     // required = false; nullable = true
+    ): Flow<String> {
         return flow {
             Foobar("Hello")
         }
