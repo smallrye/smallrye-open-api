@@ -261,7 +261,8 @@ public class OpenApiDataObjectScanner {
                 continue;
             }
 
-            if (!hasNonNullType(currentSchema)) {
+            if (!hasNonNullType(currentSchema)
+                    && !isImplementationVoid(currentTarget, currentClass)) {
                 // If not schema has yet been set, consider this an "object"
                 SchemaSupport.setType(currentSchema, Schema.SchemaType.OBJECT);
             } else if (allowRegistration) {
@@ -286,6 +287,31 @@ public class OpenApiDataObjectScanner {
                 processInheritance(currentPathEntry);
             }
         }
+    }
+
+    /**
+     * Determine if the {@code implementation} for the schema has been voided via an annotation,
+     * either on the target being scanned or the class itself
+     *
+     * @param target annotated target, possible null
+     * @param clazz target class that may be hosting a {@literal @}Schema annotation
+     */
+    private boolean isImplementationVoid(AnnotationTarget target, ClassInfo clazz) {
+        for (AnnotationTarget t : Arrays.asList(target, clazz)) {
+            Type type = context.annotations()
+                    .getAnnotationValue(t, SchemaConstant.DOTNAME_SCHEMA,
+                            SchemaConstant.PROP_IMPLEMENTATION);
+
+            if (TypeUtil.isVoid(type)) {
+                return true;
+            }
+
+            if (type != null) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     private void maybeRegisterSchema(Type currentType, Schema currentSchema, Schema entrySchema) {

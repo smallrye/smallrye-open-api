@@ -502,7 +502,6 @@
             }
           },
           "voidField": {
-            "type": "object"
           },
           "writeOnlyInteger": {
             "format": "int32",

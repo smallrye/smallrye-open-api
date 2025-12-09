@@ -1,0 +1,42 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "IFace1" : {
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/Implementation"
+        }, {
+          "type" : "string"
+        } ]
+      },
+      "Implementation" : {
+        "additionalProperties" : false,
+        "type" : "object",
+        "required" : [ "id" ],
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Identifier"
+          },
+          "sequence" : {
+            "type" : "integer",
+            "format" : "int64",
+            "minimum" : 1,
+            "description" : "Sequence of this implemenatation instance",
+            "default" : 1
+          },
+          "oneOfIface2" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/Implementation"
+            }, {
+              "type" : "string"
+            } ]
+          },
+          "stringIface2" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

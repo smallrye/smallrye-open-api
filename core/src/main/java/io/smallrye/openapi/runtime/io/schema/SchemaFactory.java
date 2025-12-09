@@ -521,7 +521,7 @@ public class SchemaFactory {
      * @param schemaReferenceSupported
      */
     static Schema readClassSchema(final AnnotationScannerContext context, Type type, boolean schemaReferenceSupported) {
-        if (type == null) {
+        if (type == null || TypeUtil.isVoid(type)) {
             return null;
         }
         Schema schema;
