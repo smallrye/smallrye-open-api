@@ -33,7 +33,7 @@
         <version.testng>7.11.0</version.testng>
         <version.arquillian.jetty>2.0.0.Final</version.arquillian.jetty>
         <version.jetty>11.0.24</version.jetty>
-        <version.resteasy>7.0.0.Final</version.resteasy>
+        <version.resteasy>7.0.1.Final</version.resteasy>
         <version.weld.core>5.1.2.Final</version.weld.core>
 
         <!--
