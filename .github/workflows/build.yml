@@ -74,7 +74,7 @@ jobs:
       ## Attach target directories for safe Sonar scan in separate job
       - name: Attach Build Output
         if: ${{ matrix.java == '17' && matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: target
           path: |
@@ -88,7 +88,7 @@ jobs:
             !**/target/maven-it/**/*
 
       - name: Archive Failed Tests Results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: artifacts-${{ matrix.os }}-java${{matrix.java}} 
@@ -149,7 +149,7 @@ jobs:
       - name: execute tck ${{ matrix.tck-version }}
         run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         name: tck-report
         with:
           name: "tck-report-${{ matrix.tck-version }}-jdk${{ matrix.java }}"
