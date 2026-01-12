@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -25,7 +24,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 @Path(value = "/policies")
 @Produces(value = "application/json")
 @Consumes(value = "application/json")
-@RequestScoped
 public class MethodTargetParametersResource {
 
     public static class PagedResponse<T> {
