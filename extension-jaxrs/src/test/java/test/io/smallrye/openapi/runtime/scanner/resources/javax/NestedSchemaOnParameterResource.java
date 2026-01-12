@@ -3,7 +3,6 @@ package test.io.smallrye.openapi.runtime.scanner.resources.javax;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.Dependent;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -46,7 +45,6 @@ public class NestedSchemaOnParameterResource {
         String name;
     }
 
-    @Dependent
     @Schema(name = "another_nested", description = "The name of this child is not 'AnotherNestedChildWithSchemaName'")
     public static class AnotherNestedChildWithSchemaName {
         @Schema(required = true)

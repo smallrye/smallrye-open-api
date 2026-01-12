@@ -3,7 +3,6 @@ package test.io.smallrye.openapi.runtime.scanner.resources.jakarta;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.enterprise.context.Dependent;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -46,7 +45,6 @@ public class NestedSchemaOnParameterResource {
         String name;
     }
 
-    @Dependent
     @Schema(name = "another_nested", description = "The name of this child is not 'AnotherNestedChildWithSchemaName'")
     public static class AnotherNestedChildWithSchemaName {
         @Schema(required = true)
