@@ -194,7 +194,7 @@ public class JandexUtil {
         if (context.getConfig().sortedPropertiesEnable()) {
             return currentClass.fields();
         }
-        return currentClass.unsortedFields();
+        return currentClass.fieldsInDeclarationOrder();
     }
 
     public static boolean isSupplier(AnnotationTarget target) {
@@ -206,5 +206,4 @@ public class JandexUtil {
 
         return method.returnType().kind() != Type.Kind.VOID && method.parameterTypes().isEmpty();
     }
-
 }

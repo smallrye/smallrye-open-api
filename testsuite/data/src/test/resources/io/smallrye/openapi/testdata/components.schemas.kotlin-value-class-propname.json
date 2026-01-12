@@ -4,9 +4,7 @@
     "schemas": {
       "KotlinBean": {
         "required": [
-          "description",
           "nestedCollection",
-          "actualCustomName",
           "requiredNullableValue"
         ],
         "type": "object",

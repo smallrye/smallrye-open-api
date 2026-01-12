@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.SmallRyeOASConfig;
@@ -28,7 +29,8 @@ import io.smallrye.openapi.api.SmallRyeOpenAPI;
 /**
  * These tests can be moved to StandaloneSchemaScanTest once those tests are changed to compile with Java 17
  */
-public class RecordSchemaTest {
+@QuarkusTest
+class RecordSchemaTest {
 
     private static final Logger LOG = Logger.getLogger(RecordSchemaTest.class);
 
@@ -92,7 +94,6 @@ public class RecordSchemaTest {
 
     private static Config config(Map<String, String> properties) {
         return new SmallRyeConfigBuilder()
-                .addDefaultSources()
                 .withSources(new PropertiesConfigSource(properties, "unit-test", ConfigSource.DEFAULT_ORDINAL))
                 .build();
     }
