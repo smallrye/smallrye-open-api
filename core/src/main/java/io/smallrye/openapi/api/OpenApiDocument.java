@@ -2,6 +2,7 @@ package io.smallrye.openapi.api;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.OASFilter;
@@ -10,7 +11,9 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import io.smallrye.openapi.api.util.ConfigUtil;
 import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
+import io.smallrye.openapi.api.util.UnusedComponentFilter;
 import io.smallrye.openapi.api.util.UnusedSchemaFilter;
+import io.smallrye.openapi.model.ReferenceType;
 
 /**
  * Holds the final OpenAPI document produced during the startup of the app.
@@ -175,16 +178,26 @@ public class OpenApiDocument {
      *
      * @param model
      */
+    @SuppressWarnings("removal")
     private OpenAPI filterModel(OpenAPI model) {
         if (model == null) {
             return model;
         }
+
         if (config.removeUnusedSchemas()) {
             model = FilterUtil.applyFilter(new UnusedSchemaFilter(), model);
         }
+
         for (OASFilter filter : filters.values()) {
             model = FilterUtil.applyFilter(filter, model);
         }
+
+        Set<ReferenceType> removeUnusedComponents = config.removeUnusedComponents();
+
+        if (!removeUnusedComponents.isEmpty()) {
+            model = FilterUtil.applyFilter(new UnusedComponentFilter(removeUnusedComponents), model);
+        }
+
         return model;
     }
 

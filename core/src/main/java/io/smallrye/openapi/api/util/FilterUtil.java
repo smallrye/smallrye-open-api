@@ -26,6 +26,7 @@ public class FilterUtil {
      *        OpenAPI model
      * @return Filtered OpenAPI model
      */
+    @Deprecated
     public static final OpenAPI applyFilter(OASFilter filter, OpenAPI model) {
         ((BaseModel<?>) model).filter(filter, new IdentityHashMap<>());
         return model;
