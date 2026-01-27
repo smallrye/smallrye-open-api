@@ -53,12 +53,22 @@ Define a naming strategy to be used globally for all schema properties. Set to o
 ** A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
 ** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
 
-* Removal of unused schemas
+* Remove unused components
++
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.remove-unused-components
+----
+Set to a comma-separated list of components types to enable automatic removal of unused components from `/components` in the OpenAPI model. Unused components will be removed following annotation scanning and after running all other `OASFilter` instances that may be configured. Disabled by default. Allowed values are the same as the keys for the https://spec.openapis.org/oas/v3.1.0.html#components-object[components object]. Specify `*` to enable removal of all unused components.
+
+* Removal of unused schemas (DEPRECATED)
 +
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.remove-unused-schemas.enable
 ----
+Deprecated - use `mp.openapi.extensions.smallrye.remove-unused-components=schemas` instead.
+
 Set to `true` enable automatic removal of unused schemas from `components/schemas` in the OpenAPI model. Unused schemas will be removed following annotation scanning but prior to running any `OASFilter` that may be configured. Default value is `false`.
 
 * Automatic Schema Inheritance

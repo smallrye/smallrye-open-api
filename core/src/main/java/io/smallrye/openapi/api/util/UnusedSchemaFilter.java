@@ -10,6 +10,14 @@ import org.eclipse.microprofile.openapi.models.media.Schema;
 
 import io.smallrye.openapi.runtime.util.ModelUtil;
 
+/**
+ * An implementation of OASFilter that scans the OpenAPI model and removes
+ * any entries in `components.schemas` that are not referenced by other schemas
+ * in the same model.
+ *
+ * @deprecated use {@link UnusedComponentFilter} instead.
+ */
+@Deprecated(since = "4.3.0")
 public class UnusedSchemaFilter implements OASFilter {
 
     /**
