@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.OASFactory;
+import org.eclipse.microprofile.openapi.models.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
@@ -311,6 +312,11 @@ public interface AnnotationScanner {
 
         if (operationId != null) {
             saveOperationId(context, resourceClass, method, operationId);
+        }
+
+        ExternalDocumentation externalDocs = context.io().extDocIO().read(method);
+        if (externalDocs != null) {
+            operation.setExternalDocs(externalDocs);
         }
 
         return Optional.of(operation);

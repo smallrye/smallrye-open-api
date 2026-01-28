@@ -219,10 +219,15 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
                 .orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
     public <C extends Constructible> T read(Class<C> type, AnnotationInstance annotation) {
+        return read(type, annotation, new String[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends Constructible> T read(Class<C> type, AnnotationInstance annotation, String... ignoredProperties) {
         IoLogging.logger.singleAnnotation(annotation.name().toString());
         BaseModel<C> model = (BaseModel<C>) OASFactory.createObject(type);
+        Set<String> ignoredNames = Set.of(ignoredProperties);
 
         for (AnnotationValue annotationValue : annotation.values()) {
             Object value = scannerContext().annotations().value(annotation, annotationValue);
@@ -234,7 +239,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
                     model.setRef(annotationValue.asString());
                 } else if ("extensions".equals(name) && Extensible.class.isAssignableFrom(type)) {
                     ((BaseExtensibleModel<?>) model).setExtensions(extensionIO().readExtensible(annotation));
-                } else {
+                } else if (!ignoredNames.contains(name)) {
                     model.setProperty(name, value);
                 }
             }
