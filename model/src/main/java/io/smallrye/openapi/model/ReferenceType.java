@@ -1,8 +1,12 @@
 package io.smallrye.openapi.model;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.Reference;
 import org.eclipse.microprofile.openapi.models.callbacks.Callback;
@@ -23,16 +27,16 @@ import org.jboss.jandex.AnnotationValue;
  * @author eric.wittmann@gmail.com
  */
 public enum ReferenceType {
-    HEADER(Header.class, "headers"),
-    SCHEMA(Schema.class, "schemas"),
-    SECURITY_SCHEME(SecurityScheme.class, "securitySchemes"),
-    CALLBACK(Callback.class, "callbacks"),
-    LINK(Link.class, "links"),
-    RESPONSE(APIResponse.class, "responses"),
-    PARAMETER(Parameter.class, "parameters"),
-    EXAMPLE(Example.class, "examples"),
-    REQUEST_BODY(RequestBody.class, "requestBodies"),
-    PATH_ITEM(PathItem.class, "pathItems");
+    HEADER(Header.class, "headers", Components::getHeaders, Components::removeHeader),
+    SCHEMA(Schema.class, "schemas", Components::getSchemas, Components::removeSchema),
+    SECURITY_SCHEME(SecurityScheme.class, "securitySchemes", Components::getSecuritySchemes, Components::removeSecurityScheme),
+    CALLBACK(Callback.class, "callbacks", Components::getCallbacks, Components::removeCallback),
+    LINK(Link.class, "links", Components::getLinks, Components::removeLink),
+    RESPONSE(APIResponse.class, "responses", Components::getResponses, Components::removeResponse),
+    PARAMETER(Parameter.class, "parameters", Components::getParameters, Components::removeParameter),
+    EXAMPLE(Example.class, "examples", Components::getExamples, Components::removeExample),
+    REQUEST_BODY(RequestBody.class, "requestBodies", Components::getRequestBodies, Components::removeRequestBody),
+    PATH_ITEM(PathItem.class, "pathItems", Components::getPathItems, Components::removePathItem);
 
     private static final Pattern COMPONENT_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9\\.\\-_]+$");
     public static final String PROP_ANNOTATION = "ref";
@@ -40,10 +44,18 @@ public enum ReferenceType {
 
     Class<? extends Reference<?>> modelType;
     String componentPath;
+    Function<Components, Map<String, ? extends Reference<?>>> extractor;
+    BiConsumer<Components, String> remover;
 
-    ReferenceType(Class<? extends Reference<?>> modelType, String componentPath) {
+    ReferenceType(
+            Class<? extends Reference<?>> modelType,
+            String componentPath,
+            Function<Components, Map<String, ? extends Reference<?>>> extractor,
+            BiConsumer<Components, String> remover) {
         this.modelType = modelType;
         this.componentPath = componentPath;
+        this.extractor = extractor;
+        this.remover = remover;
     }
 
     public static ReferenceType fromModel(Reference<?> model) {
@@ -111,5 +123,14 @@ public enum ReferenceType {
     public String refValue(AnnotationInstance annotation) {
         String ref = referenceValue(annotation);
         return parseRefValue(ref);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Reference<T>> Map<String, T> get(Components components) {
+        return (Map<String, T>) extractor.apply(components);
+    }
+
+    public void remove(Components components, String name) {
+        remover.accept(components, name);
     }
 }

@@ -17,13 +17,17 @@ import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Deprecated
 class UnusedSchemaFilterTest {
 
+    @Deprecated
     UnusedSchemaFilter target;
+    @Deprecated
     OpenAPI openAPI;
 
+    @Deprecated
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         target = new UnusedSchemaFilter();
 
         openAPI = createOpenAPI();
@@ -44,6 +48,8 @@ class UnusedSchemaFilterTest {
                                 .description("The data returned by the API")));
     }
 
+    @Deprecated
+    @SuppressWarnings("removal")
     @Test
     void testUnusedSchemaPropertyRemoved() {
         openAPI.getComponents()
@@ -72,6 +78,8 @@ class UnusedSchemaFilterTest {
         assertEquals("Data", openAPI.getComponents().getSchemas().keySet().iterator().next());
     }
 
+    @Deprecated
+    @SuppressWarnings("removal")
     @Test
     void testUnusedOneOfSchemasRemoved() {
         openAPI.getComponents()
