@@ -21,7 +21,7 @@
         <jackson-bom.version>2.21.0</jackson-bom.version>
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.5.3</version.io.smallrye.jandex>
-        <version.io.smallrye.smallrye-config>3.15.1</version.io.smallrye.smallrye-config>
+        <version.io.smallrye.smallrye-config>3.16.0</version.io.smallrye.smallrye-config>
         <version.io.smallrye.smallrye-common-classloader>2.15.0</version.io.smallrye.smallrye-common-classloader>
         <version.eclipse.microprofile.openapi>4.1.1</version.eclipse.microprofile.openapi>
         <version.kotlinx-metadata-jvm>0.9.0</version.kotlinx-metadata-jvm>
@@ -30,7 +30,7 @@
         <version.org.skyscreamer>1.5.3</version.org.skyscreamer>
         <version.maven-resources-plugin>3.3.1</version.maven-resources-plugin>
         <version.com.github.eirslett.frontend-maven-plugin>2.0.0</version.com.github.eirslett.frontend-maven-plugin>
-        <version.quarkus>3.31.0</version.quarkus>
+        <version.quarkus>3.31.1</version.quarkus>
         <version.testng>7.12.0</version.testng>
         <version.arquillian.jetty>2.0.0.Final</version.arquillian.jetty>
         <version.jetty>11.0.24</version.jetty>
