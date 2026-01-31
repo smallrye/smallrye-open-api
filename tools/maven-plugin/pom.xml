@@ -63,6 +63,10 @@
             <artifactId>smallrye-config</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-metadata-jvm</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.soebes.itf.jupiter.extension</groupId>

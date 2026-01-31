@@ -30,6 +30,7 @@ dependencies {
     implementation("io.smallrye:smallrye-open-api-spring:${version}")
     implementation("io.smallrye:smallrye-open-api-vertx:${version}")
     implementation("io.smallrye.config:smallrye-config:${versionConfig}")
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:${versionKotlinxMetadata}")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:${versionJunit}")
     testImplementation("org.junit.jupiter:junit-jupiter:${versionJunit}")
