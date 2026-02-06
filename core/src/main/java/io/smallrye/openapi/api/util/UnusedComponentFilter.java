@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.microprofile.openapi.OASFilter;
@@ -21,11 +22,13 @@ import org.eclipse.microprofile.openapi.models.examples.Example;
 import org.eclipse.microprofile.openapi.models.headers.Header;
 import org.eclipse.microprofile.openapi.models.links.Link;
 import org.eclipse.microprofile.openapi.models.media.Content;
+import org.eclipse.microprofile.openapi.models.media.Encoding;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.eclipse.microprofile.openapi.models.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.models.responses.APIResponse;
+import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 
 import io.smallrye.openapi.model.ReferenceType;
@@ -99,6 +102,12 @@ public class UnusedComponentFilter implements OASFilter {
     }
 
     @Override
+    public Operation filterOperation(Operation operation) {
+        filterSecurity(operation.getSecurity());
+        return operation;
+    }
+
+    @Override
     public RequestBody filterRequestBody(RequestBody requestBody) {
         filterReference(ReferenceType.REQUEST_BODY, requestBody);
         filterContent(requestBody.getContent());
@@ -142,8 +151,61 @@ public class UnusedComponentFilter implements OASFilter {
         }
     }
 
+    private static class SecuritySchemeReference implements Reference<SecurityScheme> {
+        private final SecurityRequirement requirement;
+        private final String schemeName;
+
+        private SecuritySchemeReference(SecurityRequirement requirement, String schemeName) {
+            this.requirement = requirement;
+            this.schemeName = schemeName;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof SecuritySchemeReference) {
+                SecuritySchemeReference other = (SecuritySchemeReference) obj;
+                return requirement.equals(other.requirement)
+                        && schemeName.equals(other.schemeName);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(requirement, schemeName);
+        }
+
+        @Override
+        public String getRef() {
+            return ReferenceType.SECURITY_SCHEME.referenceOf(schemeName);
+        }
+
+        @Override
+        public void setRef(String ref) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private void filterSecurity(List<SecurityRequirement> securityRequirements) {
+        if (securityRequirements == null) {
+            return;
+        }
+
+        for (SecurityRequirement requirement : securityRequirements) {
+            var schemes = requirement.getSchemes();
+
+            if (schemes != null) {
+                for (String schemeName : schemes.keySet()) {
+                    filterReference(ReferenceType.SECURITY_SCHEME, new SecuritySchemeReference(requirement, schemeName));
+                }
+            }
+        }
+    }
+
     @Override
     public void filterOpenAPI(OpenAPI openAPI) {
+        filterSecurity(openAPI.getSecurity());
+
         final Components components = openAPI.getComponents();
 
         if (components != null) {
@@ -304,8 +366,25 @@ public class UnusedComponentFilter implements OASFilter {
     private void removeMediaTypeReferences(Map<String, MediaType> mediaTypes) {
         if (mediaTypes != null) {
             for (MediaType mediaType : mediaTypes.values()) {
+                removeEncodingReferences(mediaType.getEncoding());
                 removeReferences(ReferenceType.EXAMPLE, mediaType.getExamples());
                 removeReference(ReferenceType.SCHEMA, mediaType.getSchema());
+            }
+        }
+    }
+
+    private void removeEncodingReferences(Map<String, Encoding> encodings) {
+        if (encodings != null) {
+            for (Encoding encoding : encodings.values()) {
+                removeHeaderReferences(encoding.getHeaders());
+            }
+        }
+    }
+
+    private void removeHeaderReferences(Map<String, Header> headers) {
+        if (headers != null) {
+            for (Header header : headers.values()) {
+                removeReference(ReferenceType.HEADER, header);
             }
         }
     }
@@ -338,6 +417,26 @@ public class UnusedComponentFilter implements OASFilter {
                 if (responses != null) {
                     removeReferences(ReferenceType.RESPONSE, responses.getAPIResponses());
                 }
+
+                removeSecuritySchemeReferences(operation.getSecurity());
+            }
+        }
+    }
+
+    private void removeSecuritySchemeReferences(List<SecurityRequirement> securityRequirements) {
+        if (securityRequirements == null) {
+            return;
+        }
+
+        for (SecurityRequirement requirement : securityRequirements) {
+            var schemes = requirement.getSchemes();
+
+            if (schemes != null) {
+                for (String schemeName : schemes.keySet()) {
+                    removeReference(
+                            ReferenceType.SECURITY_SCHEME,
+                            new SecuritySchemeReference(requirement, schemeName));
+                }
             }
         }
     }
@@ -354,5 +453,17 @@ public class UnusedComponentFilter implements OASFilter {
         removeReference(ReferenceType.SCHEMA, schema.getItems());
         removeReference(ReferenceType.SCHEMA, schema.getNot());
         removeReferences(ReferenceType.SCHEMA, schema.getProperties());
+        // New for OAS 3.1
+        removeReference(ReferenceType.SCHEMA, schema.getContains());
+        removeReference(ReferenceType.SCHEMA, schema.getContentSchema());
+        removeReferences(ReferenceType.SCHEMA, schema.getDependentSchemas());
+        removeReference(ReferenceType.SCHEMA, schema.getElseSchema());
+        removeReference(ReferenceType.SCHEMA, schema.getIfSchema());
+        removeReferences(ReferenceType.SCHEMA, schema.getPatternProperties());
+        removeReferences(ReferenceType.SCHEMA, schema.getPrefixItems());
+        removeReference(ReferenceType.SCHEMA, schema.getPropertyNames());
+        removeReference(ReferenceType.SCHEMA, schema.getThenSchema());
+        removeReference(ReferenceType.SCHEMA, schema.getUnevaluatedItems());
+        removeReference(ReferenceType.SCHEMA, schema.getUnevaluatedProperties());
     }
 }

@@ -4,16 +4,19 @@ import static org.eclipse.microprofile.openapi.OASFactory.createComponents;
 import static org.eclipse.microprofile.openapi.OASFactory.createOpenAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.openapi.OASFactory;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
@@ -82,42 +85,15 @@ class UnusedComponentFilterTest {
     }
 
     @Test
-    void testUnusedComponentsRemoved() {
-        OpenAPI initialModel = createOpenAPI()
-                .components(createComponents()
-                        .addExample("unused-example", OASFactory.createExample())
-                        .addExample("transitive-unused-example", OASFactory.createExample())
-                        //
-                        .addExample("used-example", OASFactory.createExample())
-                        //
-                        .addRequestBody("unused-request", OASFactory.createRequestBody()
-                                .content(OASFactory.createContent()
-                                        .addMediaType("text/plain", OASFactory.createMediaType()
-                                                .addExample("request-content-example",
-                                                        OASFactory.createExample().ref("transitive-unused-example")))))
-                        //
-                        .addRequestBody("used-request", OASFactory.createRequestBody()
-                                .content(OASFactory.createContent()
-                                        .addMediaType("text/plain", OASFactory.createMediaType()
-                                                .addExample("request-content-example",
-                                                        OASFactory.createExample().ref("used-example"))))))
-                //
-                .paths(OASFactory.createPaths()
-                        .addPathItem("/resource", OASFactory.createPathItem()
-                                .GET(OASFactory.createOperation()
-                                        .requestBody(OASFactory.createRequestBody().ref("used-request")))));
-
-        OpenAPI filteredModel = SmallRyeOpenAPI.builder()
-                .withInitialModel(initialModel)
+    void testUnusedComponentsRemoved() throws JSONException, IOException {
+        SmallRyeOpenAPI result = SmallRyeOpenAPI.builder()
+                .withCustomStaticFile(() -> getClass().getResourceAsStream("UnusedComponentFilter-before.json"))
                 .withConfig(REMOVE_UNUSED_COMPONENTS_CONFIG)
-                .build()
-                .model();
+                .build();
 
-        assertEquals(1, filteredModel.getComponents().getExamples().size());
-        assertEquals(Set.of("used-example"), filteredModel.getComponents().getExamples().keySet());
-
-        assertEquals(1, filteredModel.getComponents().getRequestBodies().size());
-        assertEquals(Set.of("used-request"), filteredModel.getComponents().getRequestBodies().keySet());
-
+        JSONAssert.assertEquals(
+                new String(getClass().getResourceAsStream("UnusedComponentFilter-after.json").readAllBytes()),
+                result.toJSON(),
+                JSONCompareMode.STRICT);
     }
 }

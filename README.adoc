@@ -61,6 +61,8 @@ mp.openapi.extensions.smallrye.remove-unused-components
 ----
 Set to a comma-separated list of components types to enable automatic removal of unused components from `/components` in the OpenAPI model. Unused components will be removed following annotation scanning and after running all other `OASFilter` instances that may be configured. Disabled by default. Allowed values are the same as the keys for the https://spec.openapis.org/oas/v3.1.0.html#components-object[components object]. Specify `*` to enable removal of all unused components.
 
+Note, this feature only supports simple component references with a format like `#/components/<type>/<name>`. More complex references or links to sub-objects within a component (e.g. `#/components/parameters/MyParam/examples/MyExample`) are not supported.
+
 * Removal of unused schemas (DEPRECATED)
 +
 [source%nowrap]

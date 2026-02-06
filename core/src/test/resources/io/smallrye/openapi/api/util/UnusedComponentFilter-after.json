@@ -1,0 +1,79 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Test Sample for UnusedComponentFilter",
+    "version": "1.0"
+  },
+  "components": {
+    "examples": {
+      "used-example": {}
+    },
+    "headers": {},
+    "pathItems": {},
+    "requestBodies": {
+      "used-request": {
+        "content": {
+          "text/plain": {
+            "examples": {
+              "request-content-example": {
+                "$ref": "#/components/examples/used-example"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "used-scheme1": {
+        "type": "oauth2"
+      },
+      "used-scheme2": {
+        "type": "http"
+      }
+    }
+  },
+  "paths": {
+    "/resource-a": {
+      "get": {
+        "security": [
+          {}
+        ]
+      }
+    },
+    "/resource-b": {
+      "get": {
+        "requestBody": {
+          "$ref": "#/components/requestBodies/used-request"
+        },
+        "security": [
+          {
+            "used-scheme1": [
+              "admins",
+              "developers"
+            ]
+          }
+        ]
+      }
+    },
+    "/resource-c": {
+      "get": {
+        "security": [
+          {
+            "used-scheme2": []
+          }
+        ]
+      }
+    },
+    "/resource-d": {
+      "get": {
+        "security": [
+          {
+            "used-scheme1": [
+              "public"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
