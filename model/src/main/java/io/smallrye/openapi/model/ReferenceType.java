@@ -86,6 +86,10 @@ public enum ReferenceType {
                 .orElse(null);
     }
 
+    public String componentPath() {
+        return componentPath;
+    }
+
     public String referencePrefix() {
         return "#/components/" + componentPath;
     }

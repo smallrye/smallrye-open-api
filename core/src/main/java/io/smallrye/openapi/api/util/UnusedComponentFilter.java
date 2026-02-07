@@ -65,6 +65,9 @@ public class UnusedComponentFilter implements OASFilter {
     public UnusedComponentFilter(Set<ReferenceType> filterTypes) {
         this.filterTypes = filterTypes;
         this.references = new EnumMap<>(ReferenceType.class);
+        for (ReferenceType type : ReferenceType.values()) {
+            references.put(type, new HashMap<>());
+        }
     }
 
     @Override
@@ -240,8 +243,7 @@ public class UnusedComponentFilter implements OASFilter {
         String name = referencedName(type, object);
 
         if (name != null) {
-            references
-                    .computeIfAbsent(type, k -> new HashMap<>())
+            references.get(type)
                     .computeIfAbsent(name, k -> new ArrayList<>())
                     .add(object);
         }
@@ -275,7 +277,7 @@ public class UnusedComponentFilter implements OASFilter {
 
     private Set<String> unusedNames(ReferenceType type, Set<String> allNames) {
         Set<String> unused = new HashSet<>(allNames);
-        unused.removeIf(references.getOrDefault(type, Collections.emptyMap())::containsKey);
+        unused.removeIf(references.get(type)::containsKey);
         return unused;
     }
 
@@ -324,8 +326,7 @@ public class UnusedComponentFilter implements OASFilter {
         String name = referencedName(type, object);
 
         if (name != null) {
-            references
-                    .getOrDefault(type, Collections.emptyMap())
+            references.get(type)
                     .computeIfPresent(name, (k, v) -> {
                         v.remove(object);
                         return v.isEmpty() ? null : v;

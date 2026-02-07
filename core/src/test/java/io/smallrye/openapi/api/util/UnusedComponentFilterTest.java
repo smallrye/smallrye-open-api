@@ -5,7 +5,10 @@ import static org.eclipse.microprofile.openapi.OASFactory.createOpenAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -93,6 +96,29 @@ class UnusedComponentFilterTest {
 
         JSONAssert.assertEquals(
                 new String(getClass().getResourceAsStream("UnusedComponentFilter-after.json").readAllBytes()),
+                result.toJSON(),
+                JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void testUnusedComponentsExSecuritySchemesRemoved() throws JSONException, IOException {
+        Config removeAllExSecuritySchems = new SmallRyeConfigBuilder()
+                .withSources(new PropertiesConfigSource(
+                        Map.of(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_COMPONENTS, Arrays.stream(ReferenceType.values())
+                                .filter(Predicate.not(ReferenceType.SECURITY_SCHEME::equals))
+                                .map(ReferenceType::componentPath)
+                                .collect(Collectors.joining(","))),
+                        "unit-test",
+                        ConfigSource.DEFAULT_ORDINAL))
+                .build();
+
+        SmallRyeOpenAPI result = SmallRyeOpenAPI.builder()
+                .withCustomStaticFile(() -> getClass().getResourceAsStream("UnusedComponentFilter-before.json"))
+                .withConfig(removeAllExSecuritySchems)
+                .build();
+
+        JSONAssert.assertEquals(
+                new String(getClass().getResourceAsStream("UnusedComponentFilter-after-exSecuritySchemes.json").readAllBytes()),
                 result.toJSON(),
                 JSONCompareMode.STRICT);
     }
