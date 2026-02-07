@@ -1,0 +1,158 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Test Sample for UnusedComponentFilter",
+    "version": "1.0"
+  },
+  "components": {
+    "examples": {
+      "unused-example": {},
+      "transitive-unused-example": {},
+      "used-example": {}
+    },
+    "headers": {
+      "transitive-unused-header": {},
+      "unused-header": {
+        "content": {
+          "text/plain": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "field1": {
+                  "type": "string"
+                },
+                "field2": {
+                  "type": "string"
+                }
+              }
+            },
+            "encoding": {
+              "field1": {
+                "contentType": "application/json",
+                "headers": {
+                  "X-JSON-Header": {
+                    "$ref": "#/components/headers/transitive-unused-header"
+                  }
+                }
+              },
+              "field2": {
+                "contentType": "text/plain"
+              }
+            }
+          }
+        }
+      }
+    },
+    "pathItems": {
+      "unused-pathItem1": {
+        "get": {
+          "security": [
+            {
+              "used-scheme1": [],
+              "used-scheme2": [],
+              "unused-scheme": [],
+              "transitive-unused-scheme": []
+            }
+          ]
+        },
+        "post": {
+          "security": [
+            {
+              "used-scheme1": [],
+              "used-scheme2": [],
+              "unused-scheme": []
+            }
+          ]
+        },
+        "head": {
+          "responses": {
+            "204": {
+              "description": "No Content"
+            }
+          }
+        }
+      },
+      "unused-pathItem2": {
+        "summary": "An unused pathItem without any operations"
+      }
+    },
+    "requestBodies": {
+      "unused-request": {
+        "content": {
+          "text/plain": {
+            "examples": {
+              "request-content-example": {
+                "$ref": "#/components/examples/transitive-unused-example"
+              }
+            }
+          }
+        }
+      },
+      "used-request": {
+        "content": {
+          "text/plain": {
+            "examples": {
+              "request-content-example": {
+                "$ref": "#/components/examples/used-example"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "unused-scheme": {},
+      "transitive-unused-scheme": {},
+      "used-scheme1": {
+        "type": "oauth2"
+      },
+      "used-scheme2": {
+        "type": "http"
+      }
+    }
+  },
+  "paths": {
+    "/resource-a": {
+      "get": {
+        "security": [
+          {}
+        ]
+      }
+    },
+    "/resource-b": {
+      "get": {
+        "requestBody": {
+          "$ref": "#/components/requestBodies/used-request"
+        },
+        "security": [
+          {
+            "used-scheme1": [
+              "admins",
+              "developers"
+            ]
+          }
+        ]
+      }
+    },
+    "/resource-c": {
+      "get": {
+        "security": [
+          {
+            "used-scheme2": []
+          }
+        ]
+      }
+    },
+    "/resource-d": {
+      "get": {
+        "security": [
+          {
+            "used-scheme1": [
+              "public"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

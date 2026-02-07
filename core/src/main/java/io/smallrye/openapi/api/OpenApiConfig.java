@@ -13,11 +13,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.openapi.OASConfig;
 
 import io.smallrye.openapi.api.constants.JsonbConstants;
+import io.smallrye.openapi.model.ReferenceType;
 
 /**
  * Accessor to OpenAPI configuration options.
@@ -334,6 +336,20 @@ public interface OpenApiConfig {
 
     default boolean removeUnusedSchemas() {
         return getConfigValue(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_SCHEMAS, Boolean.class, () -> Boolean.FALSE);
+    }
+
+    default Set<ReferenceType> removeUnusedComponents() {
+        return getConfigValues(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_COMPONENTS, String.class, this::toSet,
+                Collections::emptySet)
+                .stream()
+                .flatMap(entry -> {
+                    if ("*".equals(entry)) {
+                        return Arrays.stream(ReferenceType.values());
+                    } else {
+                        return Stream.of(ReferenceType.fromComponentPath(entry));
+                    }
+                })
+                .collect(Collectors.toSet());
     }
 
     default boolean mergeSchemaExamples() {

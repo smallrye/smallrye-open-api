@@ -8,6 +8,7 @@ import org.eclipse.microprofile.openapi.models.Extensible;
  *
  * @author eric.wittmann@gmail.com
  */
+@SuppressWarnings("removal")
 @Deprecated(since = "4.0", forRemoval = true)
 public abstract class ExtensibleImpl<T extends Extensible<T>> implements Extensible<T>, ModelImpl { // NOSONAR
 }
