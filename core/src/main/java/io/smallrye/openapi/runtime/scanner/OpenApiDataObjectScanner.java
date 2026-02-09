@@ -444,7 +444,7 @@ public class OpenApiDataObjectScanner {
             return true;
         }
 
-        return standin.typeParameters().size() < type.asParameterizedType().arguments().size();
+        return standin.typeParameters().size() != type.asParameterizedType().arguments().size();
     }
 
     private Schema preProcessSpecial(Type type, TypeResolver typeResolver, DataObjectDeque.PathEntry currentPathEntry) {
