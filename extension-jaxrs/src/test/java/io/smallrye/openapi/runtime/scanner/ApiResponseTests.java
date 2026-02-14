@@ -503,4 +503,26 @@ class ApiResponseTests extends IndexScannerTestBase {
         assertJsonEquals("responses.multi-location-composition.json", HelloApi.class, WithClientErrors.class,
                 WithServerErrors.class);
     }
+
+    @Test
+    /*
+     * Test case for Smallrye OpenAPI issue #2474.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/2474
+     */
+    void testStreamReturnType() throws IOException, JSONException {
+        @Schema(name = "Bean")
+        class Bean {
+        }
+
+        @jakarta.ws.rs.Path("stream")
+        class StreamAPI {
+            @jakarta.ws.rs.GET
+            public java.util.stream.Stream<Bean> get() {
+                return null;
+            }
+        }
+
+        assertJsonEquals("responses.stream-return-type.json", Bean.class, StreamAPI.class);
+    }
 }
