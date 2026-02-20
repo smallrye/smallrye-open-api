@@ -6,12 +6,13 @@
   },
   "components": {
     "examples": {
+      "unused-retained-example": {},
       "used-example": {}
     },
     "headers": {
+      "unused-retained-header": {}
     },
-    "pathItems": {
-    },
+    "pathItems": {},
     "requestBodies": {
       "used-request": {
         "content": {
@@ -24,6 +25,9 @@
           }
         }
       }
+    },
+    "schemas": {
+      "unused-retained-schema": {}
     },
     "securitySchemes": {
       "unused-scheme": {},

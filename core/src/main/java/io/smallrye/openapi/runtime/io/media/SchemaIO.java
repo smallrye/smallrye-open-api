@@ -2,7 +2,6 @@ package io.smallrye.openapi.runtime.io.media;
 
 import static io.smallrye.openapi.model.DataType.listOf;
 import static io.smallrye.openapi.model.DataType.type;
-import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROPERTIES_DATA_TYPES;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIVE_MAXIMUM;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIVE_MINIMUM;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MAXIMUM;
@@ -101,35 +100,26 @@ public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Sc
     }
 
     private void populateSchemaObject(Schema schema, O node) {
-        // Special handling for type since it can be an array or a string and we want to convert
-        V typeNode = jsonIO().getValue(node, PROP_TYPE);
-        if (typeNode != null) {
-            if (jsonIO().isString(typeNode)) {
-                List<Object> typeList = new ArrayList<>(2);
-                typeList.add(readJson(typeNode, type(Schema.SchemaType.class)));
-                schema.set(PROP_TYPE, typeList);
-            } else {
-                schema.set(PROP_TYPE, readJson(typeNode, listOf(type(Schema.SchemaType.class))));
-            }
-        }
-
-        // Read known fields
-        for (Map.Entry<String, DataType> entry : SchemaConstant.PROPERTIES_DATA_TYPES.entrySet()) {
-            String key = entry.getKey();
-            DataType type = entry.getValue();
-            V fieldNode = jsonIO().getValue(node, key);
-            if (fieldNode != null) {
-                schema.set(key, readJson(fieldNode, type));
-            }
-        }
-
-        // Read unknown fields
         for (Entry<String, V> entry : jsonIO().properties(node)) {
             String name = entry.getKey();
             V fieldNode = entry.getValue();
-            if (!PROPERTIES_DATA_TYPES.containsKey(name) && !name.equals(PROP_TYPE) && !name.equals(PROP_NAME)
-                    && !name.equals(PROP_REF)) {
-                schema.set(name, jsonIO().fromJson(fieldNode));
+            DataType dataType = SchemaConstant.PROPERTIES_DATA_TYPES.get(name);
+
+            if (dataType != null) {
+                // Known field
+                schema.set(name, readJson(fieldNode, dataType));
+            } else if (name.equals(PROP_TYPE)) {
+                // Special handling for type since it can be an array or a string and we want to convert
+                if (jsonIO().isString(fieldNode)) {
+                    List<Object> typeList = new ArrayList<>(2);
+                    typeList.add(readJson(fieldNode, type(Schema.SchemaType.class)));
+                    schema.set(PROP_TYPE, typeList);
+                } else {
+                    schema.set(PROP_TYPE, readJson(fieldNode, listOf(type(Schema.SchemaType.class))));
+                }
+            } else if (!name.equals(PROP_NAME) && !name.equals(PROP_REF)) {
+                // Unknown field - add as an extension
+                schema.addExtension(name, jsonIO().fromJson(fieldNode));
             }
         }
     }
