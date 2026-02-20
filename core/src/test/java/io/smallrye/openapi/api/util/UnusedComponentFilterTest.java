@@ -101,6 +101,20 @@ class UnusedComponentFilterTest {
     }
 
     @Test
+    void testUnusedComponentsRemovedIntermediate() throws JSONException, IOException {
+        SmallRyeOpenAPI result = SmallRyeOpenAPI.builder()
+                .withCustomStaticFile(() -> getClass().getResourceAsStream("UnusedComponentFilter-before.json"))
+                .withConfig(REMOVE_UNUSED_COMPONENTS_CONFIG)
+                .withIntermediateModel(true)
+                .build();
+
+        JSONAssert.assertEquals(
+                new String(getClass().getResourceAsStream("UnusedComponentFilter-after-intermediate.json").readAllBytes()),
+                result.toJSON(),
+                JSONCompareMode.STRICT);
+    }
+
+    @Test
     void testUnusedComponentsExSecuritySchemesRemoved() throws JSONException, IOException {
         Config removeAllExSecuritySchems = new SmallRyeConfigBuilder()
                 .withSources(new PropertiesConfigSource(

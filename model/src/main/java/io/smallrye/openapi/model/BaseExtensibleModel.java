@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.Constructible;
 import org.eclipse.microprofile.openapi.models.Extensible;
 
@@ -42,6 +43,15 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
     void setUnmodifiable() {
         super.setUnmodifiable();
         extensionNames = Collections.unmodifiableSet(extensionNames);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public C filter(OASFilter filter, Map<Object, Object> stack) {
+        if (filter instanceof Extensions.ExtensionRemovalFilter) {
+            ((Extensions.ExtensionRemovalFilter) filter).filterExtensible((C) this);
+        }
+        return super.filter(filter, stack);
     }
 
     /**
