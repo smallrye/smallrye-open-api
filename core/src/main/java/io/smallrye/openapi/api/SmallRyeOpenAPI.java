@@ -109,6 +109,7 @@ public class SmallRyeOpenAPI {
         private Supplier<InputStream> customStaticFile = () -> null;
 
         private boolean defaultRequiredProperties = true;
+        private boolean intermediateModel = false;
 
         private IndexView index = EMPTY_INDEX;
         private boolean enableAnnotationScan = true;
@@ -252,6 +253,25 @@ public class SmallRyeOpenAPI {
         public Builder defaultRequiredProperties(boolean defaultRequiredProperties) {
             removeContext();
             this.defaultRequiredProperties = defaultRequiredProperties;
+            return this;
+        }
+
+        /**
+         * Sets whether the result is an "intermediate" model that may be used
+         * as the input to create a subsequent downstream SmallRyeOpenAPI model.
+         * This has the effect of retaining all {@code x-smallrye-directives}
+         * extensions in the model. Default is false, meaning that this builder
+         * will remove the directive extensions from the result.
+         *
+         * @param intermediateModel
+         *        true if the result of this builder is an intermediate
+         *        model that still requires the presence of
+         *        {@code x-smallrye-directives} extensions, otherwise false.
+         * @return this builder
+         */
+        public Builder withIntermediateModel(boolean intermediateModel) {
+            removeContext();
+            this.intermediateModel = intermediateModel;
             return this;
         }
 
@@ -630,6 +650,7 @@ public class SmallRyeOpenAPI {
         protected <V> SmallRyeOpenAPI buildFinalize(BuildContext<V, ?, ?, ?, ?> ctx, boolean unmodifiable) {
             ctx.doc.config(ctx.buildConfig);
             ctx.doc.defaultRequiredProperties(ctx.defaultRequiredProperties);
+            ctx.doc.intermediateModel(ctx.intermediateModel);
 
             OpenAPI readerModel = ctx.readerModel;
 
@@ -678,6 +699,7 @@ public class SmallRyeOpenAPI {
             OpenAPI annotationModel;
             OASFilter standardFilter;
             boolean defaultRequiredProperties;
+            boolean intermediateModel;
 
             OpenApiDocument doc;
 
@@ -693,6 +715,7 @@ public class SmallRyeOpenAPI {
                 this.filteredIndex = new FilteredIndexView(builder.index, this.buildConfig);
                 this.initialModel = builder.initialModel;
                 this.defaultRequiredProperties = builder.defaultRequiredProperties;
+                this.intermediateModel = builder.intermediateModel;
 
                 this.doc = OpenApiDocument.newInstance();
             }
