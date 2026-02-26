@@ -23,6 +23,7 @@ import org.eclipse.microprofile.openapi.models.Components;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Paths;
 import org.eclipse.microprofile.openapi.models.examples.Example;
+import org.eclipse.microprofile.openapi.models.headers.Header;
 import org.eclipse.microprofile.openapi.models.media.MediaType;
 import org.eclipse.microprofile.openapi.models.media.Schema.SchemaType;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
@@ -417,6 +418,10 @@ public class OpenApiAnnotationScanner {
                 MediaType mediaType = (MediaType) model;
                 parseExample(mediaType.getExample(), mediaType::setExample);
                 examples = mediaType.getExamples();
+            } else if (model instanceof Header) {
+                Header header = (Header) model;
+                parseExample(header.getExample(), header::setExample);
+                examples = header.getExamples();
             }
 
             if (examples != null) {
