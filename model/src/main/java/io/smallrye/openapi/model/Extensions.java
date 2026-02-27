@@ -1,11 +1,13 @@
 package io.smallrye.openapi.model;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.Extensible;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.media.Schema;
@@ -22,6 +24,19 @@ public final class Extensions {
 
     public static final String PRIVATE_EXT_PREFIX = "x-smallrye-private-";
     private static final String EXT_PROFILE_PREFIX = "x-smallrye-profile-";
+    private static final String EXT_DIRECTIVES = "x-smallrye-directives";
+
+    static final class ExtensionRemovalFilter implements OASFilter {
+        public <T extends Extensible<T>> T filterExtensible(T extensible) {
+            extensible.removeExtension(EXT_DIRECTIVES);
+            removeProfiles(extensible);
+            return extensible;
+        }
+    }
+
+    public static OASFilter newRemovalFilter() {
+        return new ExtensionRemovalFilter();
+    }
 
     private Extensions() {
         // No instances
@@ -207,6 +222,21 @@ public final class Extensions {
 
     public static void setPrivateExtension(Extensible<?> extensible, String name, Object value) {
         extensible.addExtension(PRIVATE_EXT_PREFIX + name, value);
+    }
+
+    ///////
+
+    @SuppressWarnings("unchecked")
+    public static Collection<String> getDirectives(Extensible<?> extensible) {
+        Object directives = get(extensible, EXT_DIRECTIVES, Object.class);
+
+        if (directives instanceof Collection) {
+            return (Collection<String>) directives;
+        } else if (directives instanceof String) {
+            return List.of(((String) directives).split(","));
+        }
+
+        return Collections.emptySet();
     }
 
     ///////

@@ -5,6 +5,7 @@ image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye
 image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
 = SmallRye OpenAPI
+:source-highlighter: rouge
 
 SmallRye OpenAPI is an implementation of {microprofile-open-api}[Eclipse MicroProfile OpenAPI].
 
@@ -42,19 +43,22 @@ mvn clean install
 
 === Configuration Extensions
 
-* Property Naming Strategy
-+
+[#property-naming-strategy]
+==== Property Naming Strategy
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.property-naming-strategy
 ----
 Define a naming strategy to be used globally for all schema properties. Set to one of the following:
-** A standard JSON-B naming strategy (listed in `jakarta.json.bind.config.PropertyNamingStrategy`/`javax.json.bind.config.PropertyNamingStrategy`)
-** A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
-** A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
 
-* Remove unused components
-+
+* A standard JSON-B naming strategy (listed in `jakarta.json.bind.config.PropertyNamingStrategy`/`javax.json.bind.config.PropertyNamingStrategy`)
+* A fully-qualified class name of an implementation of a JSON-B property naming strategy (`jakarta.json.bind.config.PropertyNamingStrategy` or `javax.json.bind.config.PropertyNamingStrategy`)
+* A fully-qualified class name of an implementation of a Jackson property naming strategy base class (`com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase`). Only the `translate` method is utilized.
+
+[#remove-unused-components]
+==== Remove Unused Components (4.3.0)
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.remove-unused-components
@@ -63,8 +67,11 @@ Set to a comma-separated list of components types to enable automatic removal of
 
 Note, this feature only supports simple component references with a format like `#/components/<type>/<name>`. More complex references or links to sub-objects within a component (e.g. `#/components/parameters/MyParam/examples/MyExample`) are not supported.
 
-* Removal of unused schemas (DEPRECATED)
-+
+Specific components that are not referenced but should be retained in the final output should be identified using the <<retain,retain>> directive with the <<x-smallrye-directives,x-smallrye-directives>> extension.
+
+[#remove-unused-schemas]
+==== Removal of Unused Schemas (DEPRECATED)
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.remove-unused-schemas.enable
@@ -73,73 +80,159 @@ Deprecated - use `mp.openapi.extensions.smallrye.remove-unused-components=schema
 
 Set to `true` enable automatic removal of unused schemas from `components/schemas` in the OpenAPI model. Unused schemas will be removed following annotation scanning but prior to running any `OASFilter` that may be configured. Default value is `false`.
 
-* Automatic Schema Inheritance
-+
+[#auto-inheritance]
+==== Automatic Schema Inheritance
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.auto-inheritance
 ----
 Configures handling of schema inheritance. Allowed values include `NONE` (default), `BOTH`, and `PARENT_ONLY`.
-** `NONE` disables automatic schema inheritance. Parent class properties will be includes in the properties map of each child class unless `@Schema(allOf = { ... })` has been specified on the child class.
-** `BOTH` enables automatic schema inheritance by placing both the child and parent class within the child schema's `allOf` property _unless_ `@Schema(allOf = { ... })`  has already been specified on the child class. `BOTH` processing can be selectively disabled on individual classes by setting `@Schema(allOf = void.class)` on the child class and no `allOf` will be set on the resulting schema - parent and child properties will be present in the child schema as if `NONE` were used.
-** `PARENT_ONLY` enables automatic schema inheritance by placing only the parent class within the child schema's `allOf` property _unless_ `@Schema(allOf = { ... })`  has already been specified on the child class. `PARENT_ONLY` processing can be selectively disabled on individual classes by setting `@Schema(allOf = void.class)` on the child class and no `allOf` will be set on the resulting schema - parent and child properties will be present in the child schema as if `NONE` were used.
 
-* Duplicate Operation ID Behavior
-+
+* `NONE` disables automatic schema inheritance. Parent class properties will be includes in the properties map of each child class unless `@Schema(allOf = { ... })` has been specified on the child class.
+* `BOTH` enables automatic schema inheritance by placing both the child and parent class within the child schema's `allOf` property _unless_ `@Schema(allOf = { ... })`  has already been specified on the child class. `BOTH` processing can be selectively disabled on individual classes by setting `@Schema(allOf = void.class)` on the child class and no `allOf` will be set on the resulting schema - parent and child properties will be present in the child schema as if `NONE` were used.
+* `PARENT_ONLY` enables automatic schema inheritance by placing only the parent class within the child schema's `allOf` property _unless_ `@Schema(allOf = { ... })`  has already been specified on the child class. `PARENT_ONLY` processing can be selectively disabled on individual classes by setting `@Schema(allOf = void.class)` on the child class and no `allOf` will be set on the resulting schema - parent and child properties will be present in the child schema as if `NONE` were used.
+
+[#duplicateOperationIdBehavior]
+==== Duplicate Operation ID Behavior
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.duplicateOperationIdBehavior
 ----
 Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log warnings when the build encounters duplicate operationIds. Default value is `WARN`.
 
-* Maximum Static File Size
-+
+[#maximumStaticFileSize]
+==== Maximum Static File Size
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.maximumStaticFileSize
 ----
 Set this value in order to change the maximum threshold for processed static files, when generating model from them. If not set, it will default to 3 MB.
 
-* Merge Schema Examples
-+
+[#merge-schema-examples]
+==== Merge Schema Examples
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.merge-schema-examples
 ----
 Set this boolean value to disable the merging of the deprecated `@Schema` `example` property into the `examples` array introduced in OAS 3.1.0. If not set, it will default to `true` the deprecated `example` will be mapped to the `examples` array in the OpenAPI model.
 
-* Sorted Parameters
-+
+[#sorted-parameters]
+==== Sorted Parameters
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.sorted-parameters.enable
 ----
 Set this boolean value to enable or disable the sorting of parameter array entries during annotation scanning. When enabled (set to `true`), parameters will be order either by their order within a `@Parameters` annotation on an operation method or (in the absence of that annotation) by their `$ref`, `in`, and `name` attributes. When disabled (set to `false`), parameters will be in the order they are encountered in the Java code. If not set, it will default to `true`.
 
-* Generic Responses use `default` code
-+
+[#generic-response-use-default]
+==== Generic Responses use `default` code
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.generic-response-use-default
 ----
 Set this boolean value to enable the automatic use of the https://spec.openapis.org/oas/v3.1.0.html#responses-object[`default` response code] for framework response types (e.g. Jakarta REST's `Response` type) when no `@APIResponse` annotations have been used and the HTTP response code for an operation cannot be determined. When unset or `false`, the response code will be set to `200`.
 
-* Operation ID Strategy
-+
+[#operationIdStrategy]
+==== Operation ID Strategy
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.operationIdStrategy
 ----
 Specify a strategy to be used globally for generating operation IDs when not specified via an annotation or static OpenAPI input. If not set, operation IDs will not be generated. Set to one of the following:
-** `METHOD` (may result in duplicate operation IDs in an application where REST endpoint method names are not unique)
-** `CLASS_METHOD` (may result in duplicate operation IDs in an application where REST endpoint simple class name + method names are not unique)
-** `PACKAGE_CLASS_METHOD`
-** A fully-qualified class name of an implementation of `io.smallrye.openapi.api.OperationIdGenerator` (as of 4.1.2, https://javadoc.io/doc/io.smallrye/smallrye-open-api-core/latest/io/smallrye/openapi/api/OperationIdGenerator.html[see JavaDoc])
 
-* YAML Alias Expansion (as of 4.1.2)
-+
+* `METHOD` (may result in duplicate operation IDs in an application where REST endpoint method names are not unique)
+* `CLASS_METHOD` (may result in duplicate operation IDs in an application where REST endpoint simple class name + method names are not unique)
+* `PACKAGE_CLASS_METHOD`
+* A fully-qualified class name of an implementation of `io.smallrye.openapi.api.OperationIdGenerator` (as of 4.1.2, https://javadoc.io/doc/io.smallrye/smallrye-open-api-core/latest/io/smallrye/openapi/api/OperationIdGenerator.html[see JavaDoc])
+
+[#yaml-alias-expansion]
+==== YAML Alias Expansion (4.1.2)
+
 [source%nowrap]
 ----
 mp.openapi.extensions.smallrye.yaml-alias-expansion.enable
 ----
 Set this boolean value to enable or disable the expansion of YAML aliases when loading a static OpenAPI file. When enabled (set to `true`), aliases encountered in the YAML will expand to the value of the YAML node having an anchor of the same name (see more about YAML https://yaml.org/spec/1.1/#id863390[anchors and aliases in the YAML 1.1 specification]). When disabled (set to `false`), aliases will not be expanded. If not set, it will default to `true`.
+
+[#scan-profiles]
+==== Scan Profiles
+
+[source%nowrap]
+----
+mp.openapi.extensions.smallrye.scan.profiles
+mp.openapi.extensions.smallrye.scan.exclude.profiles
+----
+These properties are used together with the <<x-smallrye-profile,x-smallrye-profile> extension to provide a way to limit which REST endpoints and associated resources are included in the OpenAPI model.
+
+=== Extensions
+
+[#x-smallrye-directives]
+==== x-smallrye-directives
+
+The `x-smallrye-directives` extension is a string list/array that contains one or more directives used by smallrye-open-api to take or avoid various actions. The supported directives are listed below. All `x-smallrye-directives` extensions will be removed from the model before it is finalized.
+
+[#x-smallrye-directives-retain]
+===== retain
+
+The `retain` directive is used together with the `mp.openapi.extensions.smallrye.remove-unused-components` property to indicate that a component should not be removed from the OpenAPI model even when it has no references from within the same model.
+
+[source%nowrap, java]
+----
+@Schema(
+    extensions = @Extension(name = "x-smallrye-directives", value = "retain,other-directive"),
+    comment = "This class uses the `retain` directive to avoid removal")
+class MyUnusedBean {
+    String name;
+    Integer age;
+}
+----
+
+The same may also be done if using a static OpenAPI YAML or JSON to bootstrap the model.
+
+[source%nowrap, yaml]
+----
+openapi: 3.1.0
+components:
+  schemas:
+    MyUnusedBean:
+      comment: This class uses the `retain` directive to avoid removal
+      x-smallrye-directives:
+        - retain
+        - other-directive
+----
+
+[#x-smallrye-profile]
+==== x-smallrye-profile-{profileName}
+
+The `x-smallrye-profile-{profileName}` extension provides a way to include or exclude an application's resources in the OpenAPI model. When placed on a REST endpoint method, the extension `name` specifies a profile name that is used together with one of the <<scan-profiles,scan profile>> configuration properties.
+
+For example, given the following REST resource class and `@Extension` annotations, an OpenAPI document that excludes the `/orders` endpoint would be generated by specifying either `mp.openapi.extensions.smallrye.scan.profiles=user` or `mp.openapi.extensions.smallrye.scan.exclude.profiles=order`. Depending on your usage, either property maybe specified. All `x-smallrye-profile-*` extensions will be removed from the model before it is finalized.
+
+[source%nowrap, java]
+----
+import org.eclipse.microprofile.openapi.annotations.extensions.Extension;
+
+@Path("/api")
+public class MyResource {
+    @Path("/users")
+    @GET
+    @Extension(name = "x-smallrye-profile-user", value = "")
+    public List<UserDTO> listUsers() {
+        // ...
+    }
+
+    @Path("/orders")
+    @GET
+    @Extension(name = "x-smallrye-profile-order", value = "")
+    public List<OrderDTO> listOrders() {
+        // ...
+    }
+}
+----

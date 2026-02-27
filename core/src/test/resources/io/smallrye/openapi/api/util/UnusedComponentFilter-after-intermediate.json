@@ -6,11 +6,17 @@
   },
   "components": {
     "examples": {
-      "unused-retained-example": {},
+      "unused-retained-example": {
+        "x-smallrye-directives": [
+          "retain"
+        ]
+      },
       "used-example": {}
     },
     "headers": {
-      "unused-retained-header": {}
+      "unused-retained-header": {
+        "x-smallrye-directives": "retain"
+      }
     },
     "pathItems": {},
     "requestBodies": {
@@ -27,7 +33,9 @@
       }
     },
     "schemas": {
-      "unused-retained-schema": {}
+      "unused-retained-schema": {
+        "x-smallrye-directives": "retain"
+      }
     },
     "securitySchemes": {
       "used-scheme1": {

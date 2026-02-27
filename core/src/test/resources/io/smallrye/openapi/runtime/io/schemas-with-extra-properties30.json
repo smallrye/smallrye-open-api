@@ -3,7 +3,8 @@
   "components": {
     "schemas": {
       "Person": {
-        "type": "object"
+        "type": "object",
+        "x-my-extra-property": [1, "two"]
       }
     }
   }

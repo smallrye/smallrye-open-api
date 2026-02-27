@@ -13,6 +13,7 @@ import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.api.util.UnusedComponentFilter;
 import io.smallrye.openapi.api.util.UnusedSchemaFilter;
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.model.ReferenceType;
 
 /**
@@ -40,6 +41,7 @@ public class OpenApiDocument {
     private transient OpenAPI staticFileModel;
     private transient Map<String, OASFilter> filters = new LinkedHashMap<>();
     private transient boolean defaultRequiredProperties = true;
+    private transient boolean intermediateModel = false;
     private transient String archiveName;
     private transient String version;
 
@@ -112,6 +114,10 @@ public class OpenApiDocument {
 
     public void defaultRequiredProperties(boolean defaultRequiredProperties) {
         set(() -> this.defaultRequiredProperties = defaultRequiredProperties);
+    }
+
+    public void intermediateModel(boolean intermediateModel) {
+        set(() -> this.intermediateModel = intermediateModel);
     }
 
     public void archiveName(String archiveName) {
@@ -198,6 +204,11 @@ public class OpenApiDocument {
             model = FilterUtil.applyFilter(new UnusedComponentFilter(removeUnusedComponents), model);
         }
 
+        if (!intermediateModel) {
+            // Remove any `x-smallrye-*` extensions that should not be in the result
+            model = FilterUtil.applyFilter(Extensions.newRemovalFilter(), model);
+        }
+
         return model;
     }
 
@@ -220,6 +231,7 @@ public class OpenApiDocument {
         filters.clear();
         archiveName = null;
         defaultRequiredProperties = true;
+        intermediateModel = false;
     }
 
 }
