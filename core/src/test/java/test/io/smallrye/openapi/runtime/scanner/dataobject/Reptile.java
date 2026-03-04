@@ -10,4 +10,6 @@ public interface Reptile {
     @Schema(name = "scaleColor", description = "This is how the color is set, but the description comes from getScaleColor")
     public void setScaleColor(String color);
 
+    @Schema(description = "Age in string form")
+    void setAge(String age);
 }

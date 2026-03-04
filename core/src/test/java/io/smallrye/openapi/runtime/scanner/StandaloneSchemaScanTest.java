@@ -1111,4 +1111,38 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertJsonEquals("components.schemas.void-implementation-no-type.json",
                 TestVoidImplementationNoType.IFace1.class, TestVoidImplementationNoType.Implementation.class);
     }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testConstraintOnPrivateFieldWithTypeUseTarget() throws IOException, JSONException {
+        @Schema(name = "Example")
+        class Example {
+            @Schema(description = "Public field with @Size on type param")
+            public List<@jakarta.validation.constraints.Size(max = 32) String> publicList;
+
+            @Schema(description = "Private field with @Size on type param")
+            private List<@jakarta.validation.constraints.Size(max = 32) String> privateList;
+
+            public List<String> getPrivateList() {
+                return privateList;
+            }
+
+            public void setPrivateList(List<String> privateList) {
+                this.privateList = privateList;
+            }
+
+            @Schema(description = "Private field with @Size on setter param that is ignored")
+            private List<@jakarta.validation.constraints.Size(max = 32) String> workaroundList;
+
+            public List<String> getWorkaroundList() {
+                return workaroundList;
+            }
+
+            public void setWorkaroundList(List<@jakarta.validation.constraints.Size(max = 64) String> workaroundList) {
+                this.workaroundList = workaroundList;
+            }
+        }
+
+        assertJsonEquals("components.schemas.type-use-field-constraint.json", Example.class);
+    }
 }
