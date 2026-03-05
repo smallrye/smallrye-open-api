@@ -18,6 +18,7 @@ public class Lizard extends AbstractAnimal implements Reptile {
         Lizard.scaleColor = scaleColor;
     }
 
+    @Override
     public void setAge(String age) {
         super.setAge(Integer.parseInt(age));
     }

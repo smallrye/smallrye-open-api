@@ -1,0 +1,36 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Example" : {
+        "type" : "object",
+        "properties" : {
+          "publicList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 32
+            },
+            "description" : "Public field with @Size on type param"
+          },
+          "privateList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 32
+            },
+            "description" : "Private field with @Size on type param"
+          },
+          "workaroundList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 32
+            },
+            "description" : "Private field with @Size on setter param that is ignored"
+          }
+        }
+      }
+    }
+  }
+}

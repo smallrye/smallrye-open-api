@@ -176,7 +176,7 @@ class TypeResolverTests extends IndexScannerTestBase {
     }
 
     @Test
-    void testAnnotatedInterfaceMethodOverridesStaticField() {
+    void testAnnotatedInterfaceMethodOverridesFields() {
         AnnotationScannerContext context = buildContext(emptyConfig(),
                 test.io.smallrye.openapi.runtime.scanner.dataobject.Animal.class,
                 test.io.smallrye.openapi.runtime.scanner.dataobject.AbstractAnimal.class,

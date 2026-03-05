@@ -76,7 +76,6 @@ public class TypeResolver {
     private boolean exposed = false;
     private boolean readOnly = false;
     private boolean writeOnly = false;
-    private Type leaf;
     private final List<AnnotationTarget> constraintTargets = new ArrayList<>();
     private String propertyNamePrefix;
     private String propertyNameSuffix;
@@ -180,10 +179,7 @@ public class TypeResolver {
         targets = new PriorityQueue<>(targetComparator);
 
         if (field != null) {
-            this.leaf = field.type();
             targets.add(field);
-        } else {
-            this.leaf = null;
         }
     }
 
@@ -212,7 +208,17 @@ public class TypeResolver {
     }
 
     public Type getUnresolvedType() {
-        return this.leaf;
+        AnnotationTarget target = getAnnotationTarget();
+
+        if (target.kind() == Kind.FIELD) {
+            return target.asField().type();
+        } else if (target == writeMethod) {
+            return writeMethod.parameterType(0);
+        } else if (target == readMethod) {
+            return readMethod.returnType();
+        }
+
+        return null;
     }
 
     /**
@@ -322,7 +328,6 @@ public class TypeResolver {
         this.readMethod = readMethod;
 
         if (readMethod != null) {
-            this.leaf = readMethod.returnType();
             targets.add(readMethod);
         }
     }
@@ -352,7 +357,6 @@ public class TypeResolver {
         this.writeMethod = writeMethod;
 
         if (writeMethod != null) {
-            this.leaf = writeMethod.parameterType(0);
             targets.add(writeMethod);
         }
     }
@@ -363,7 +367,7 @@ public class TypeResolver {
      * @return the resolved type (if found)
      */
     public Type resolveType() {
-        return resolveType(leaf, resolutionStack);
+        return resolveType(getUnresolvedType(), resolutionStack);
     }
 
     public boolean isIgnored() {
