@@ -1,5 +1,7 @@
 package io.smallrye.openapi.jaxrs;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
@@ -7,7 +9,7 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface JaxRsLogging {
-    JaxRsLogging log = Logger.getMessageLogger(JaxRsLogging.class, JaxRsLogging.class.getPackage().getName());
+    JaxRsLogging log = Logger.getMessageLogger(lookup(), JaxRsLogging.class, JaxRsLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 10000, value = "Processing a JAX-RS resource class: %s")

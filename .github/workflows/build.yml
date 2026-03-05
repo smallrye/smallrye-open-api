@@ -37,6 +37,7 @@ jobs:
         java:
         - 17
         - 21
+        - 25
     runs-on: ${{ matrix.os }}
     name: build with jdk ${{matrix.java}} (${{ matrix.os }}) 
 
@@ -95,7 +96,7 @@ jobs:
           path: |
             **/target/failsafe-reports/
             **/target/surefire-reports/
-            
+
   tck-reporting:
     runs-on: ubuntu-latest
     strategy:
@@ -105,6 +106,7 @@ jobs:
         - 11
         - 17
         - 21
+        - 25
         tck-version:
         - "4.0.2"
         - "4.1.1"
