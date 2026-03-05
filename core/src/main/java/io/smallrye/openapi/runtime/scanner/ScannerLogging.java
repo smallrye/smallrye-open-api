@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Type;
@@ -12,7 +14,8 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface ScannerLogging extends BasicLogger {
-    ScannerLogging logger = Logger.getMessageLogger(ScannerLogging.class, ScannerLogging.class.getPackage().getName());
+    ScannerLogging logger = Logger.getMessageLogger(lookup(), ScannerLogging.class,
+            ScannerLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 4000, value = "Scanning deployment for %s Annotations.")
