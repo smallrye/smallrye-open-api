@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.scanner.dataobject;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
@@ -9,7 +11,7 @@ import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 @MessageBundle(projectCode = "SROAP", length = 5)
 interface DataObjectMessages {
-    DataObjectMessages msg = Messages.getBundle(DataObjectMessages.class);
+    DataObjectMessages msg = Messages.getBundle(lookup(), DataObjectMessages.class);
 
     @Message(id = 7000, value = "Input parameter can not be null")
     RuntimeException notNull();

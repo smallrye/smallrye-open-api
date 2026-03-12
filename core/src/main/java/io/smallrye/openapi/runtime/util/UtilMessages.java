@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.util;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Message;
@@ -7,7 +9,7 @@ import org.jboss.logging.annotations.MessageBundle;
 
 @MessageBundle(projectCode = "SROAP", length = 5)
 interface UtilMessages {
-    UtilMessages msg = Messages.getBundle(UtilMessages.class);
+    UtilMessages msg = Messages.getBundle(lookup(), UtilMessages.class);
 
     @Message(id = 8000, value = "ReferenceType must not be null")
     NullPointerException refTypeNotNull();
