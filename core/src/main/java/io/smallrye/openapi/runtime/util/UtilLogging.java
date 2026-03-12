@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.util;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.jandex.DotName;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -9,7 +11,7 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 interface UtilLogging extends BasicLogger {
-    UtilLogging logger = Logger.getMessageLogger(UtilLogging.class, UtilLogging.class.getPackage().getName());
+    UtilLogging logger = Logger.getMessageLogger(lookup(), UtilLogging.class, UtilLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 8500, value = "Fall back to reflection: %s instanceof %s")

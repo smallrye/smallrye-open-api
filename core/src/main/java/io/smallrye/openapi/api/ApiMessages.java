@@ -1,5 +1,7 @@
 package io.smallrye.openapi.api;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
@@ -9,7 +11,7 @@ import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 @MessageBundle(projectCode = "SROAP", length = 5)
 interface ApiMessages {
-    ApiMessages msg = Messages.getBundle(ApiMessages.class);
+    ApiMessages msg = Messages.getBundle(lookup(), ApiMessages.class);
 
     @Message(id = 0, value = "Model not initialized yet")
     IllegalStateException modelNotInitialized();

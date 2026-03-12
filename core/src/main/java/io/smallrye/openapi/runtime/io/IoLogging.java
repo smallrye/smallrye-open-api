@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.jandex.Type;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -9,7 +11,7 @@ import org.jboss.logging.annotations.MessageLogger;
 
 @MessageLogger(projectCode = "SROAP", length = 5)
 public interface IoLogging extends BasicLogger {
-    IoLogging logger = Logger.getMessageLogger(IoLogging.class, IoLogging.class.getPackage().getName());
+    IoLogging logger = Logger.getMessageLogger(lookup(), IoLogging.class, IoLogging.class.getPackage().getName());
 
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 2000, value = "Processing a map of %s annotations.")

@@ -1,5 +1,7 @@
 package io.smallrye.openapi.runtime.io;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import java.io.IOException;
 
 import org.jboss.logging.Messages;
@@ -8,7 +10,7 @@ import org.jboss.logging.annotations.MessageBundle;
 
 @MessageBundle(projectCode = "SROAP", length = 5)
 interface IoMessages {
-    IoMessages msg = Messages.getBundle(IoMessages.class);
+    IoMessages msg = Messages.getBundle(lookup(), IoMessages.class);
 
     @Message(id = 3000, value = "No file name for URL: %s")
     IOException noFileName(String url);

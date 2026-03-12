@@ -71,10 +71,6 @@
             <artifactId>jboss-logging-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging-processor</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-metadata-jvm</artifactId>
             <optional>true</optional>
