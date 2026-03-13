@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.Components;
+import org.eclipse.microprofile.openapi.models.Extensible;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.PathItem;
@@ -31,6 +32,7 @@ import org.eclipse.microprofile.openapi.models.responses.APIResponse;
 import org.eclipse.microprofile.openapi.models.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 
+import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.model.ReferenceType;
 
 /**
@@ -218,13 +220,8 @@ public class UnusedComponentFilter implements OASFilter {
                 componentsRemoved = false;
 
                 for (ReferenceType type : ReferenceType.values()) {
-                    Set<String> names = componentNames(components, type);
-                    Set<String> unusedNames = unusedNames(type, names);
-
-                    while (!unusedNames.isEmpty()) {
-                        unusedNames.forEach(name -> remove(type, components, name));
+                    if (removeUnusedComponents(components, type)) {
                         componentsRemoved = true;
-                        unusedNames = unusedNames(type, names);
                     }
                 }
                 /*
@@ -247,6 +244,32 @@ public class UnusedComponentFilter implements OASFilter {
                     .computeIfAbsent(name, k -> new ArrayList<>())
                     .add(object);
         }
+    }
+
+    private boolean removeUnusedComponents(Components components, ReferenceType type) {
+        boolean componentsRemoved = false;
+        Set<String> names = componentNames(components, type);
+        Set<String> unusedNames = unusedNames(type, names);
+
+        while (!unusedNames.isEmpty()) {
+            boolean namesMaybeRemoved = false;
+
+            for (String name : unusedNames) {
+                if (remove(type, components, name)) {
+                    componentsRemoved = true;
+                    namesMaybeRemoved = true;
+                }
+            }
+
+            if (namesMaybeRemoved) {
+                unusedNames = unusedNames(type, names);
+            } else {
+                // Nothing was modified so no need to reload and process again.
+                break;
+            }
+        }
+
+        return componentsRemoved;
     }
 
     private Set<String> componentNames(Components components, ReferenceType type) {
@@ -281,11 +304,18 @@ public class UnusedComponentFilter implements OASFilter {
         return unused;
     }
 
-    private void remove(ReferenceType type, Components components, String name) {
+    private boolean remove(ReferenceType type, Components components, String name) {
         Reference<?> unused = type.get(components).get(name);
+
+        // All components are Extensible so we can safely cast
+        if (Extensions.getDirectives((Extensible<?>) unused).contains("retain")) {
+            return false;
+        }
+
         removeReference(type, unused);
         type.remove(components, name);
         UtilLogging.logger.unusedComponentRemoved(unused.getClass().getSimpleName(), type.referencePrefix(), name);
+        return true;
     }
 
     private void removeReference(ReferenceType type, Reference<?> unused) {
