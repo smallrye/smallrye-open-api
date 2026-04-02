@@ -20,7 +20,7 @@
   <parent>
     <groupId>io.smallrye</groupId>
     <artifactId>smallrye-open-api-testsuite</artifactId>
-    <version>4.3.0</version>
+    <version>4.3.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>smallrye-open-api-testsuite-tck</artifactId>
@@ -171,8 +171,4 @@
       </build>
     </profile>
   </profiles>
-
-  <scm>
-    <tag>4.3.0</tag>
-  </scm>
 </project>
