@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-tools</artifactId>
-        <version>4.2.5-SNAPSHOT</version>
+        <version>4.3.0</version>
     </parent>
     <artifactId>smallrye-open-api-gradle-plugin</artifactId>
     <packaging>pom</packaging>
@@ -306,4 +306,8 @@
             </build>
         </profile>
     </profiles>
+
+  <scm>
+    <tag>4.3.0</tag>
+  </scm>
 </project>
