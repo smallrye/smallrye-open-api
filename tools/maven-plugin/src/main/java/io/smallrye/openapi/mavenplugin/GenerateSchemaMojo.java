@@ -96,6 +96,13 @@ public class GenerateSchemaMojo extends AbstractMojo {
     private boolean scanDependenciesDisable;
 
     /**
+     * Enable or disable loading of standard static OpenAPI files from the classpath
+     * (e.g. META-INF/openapi.yaml, META-INF/openapi.json).
+     */
+    @Parameter(defaultValue = "true", property = "enableStandardStaticFiles")
+    private boolean enableStandardStaticFiles;
+
+    /**
      * Attach the built OpenAPI schema as build artifact.
      */
     @Parameter(defaultValue = "false", property = "attachArtifacts")
@@ -315,6 +322,7 @@ public class GenerateSchemaMojo extends AbstractMojo {
                 .withConfig(config)
                 .withApplicationClassLoader(getClassLoader())
                 .withIndex(index)
+                .enableStandardStaticFiles(enableStandardStaticFiles)
                 .withScannerFilter(scanners != null && !scanners.isEmpty() ? x -> scanners.contains(x) : x -> true)
                 .build();
     }
