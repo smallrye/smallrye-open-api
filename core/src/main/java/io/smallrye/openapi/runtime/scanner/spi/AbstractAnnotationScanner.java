@@ -104,30 +104,15 @@ public abstract class AbstractAnnotationScanner implements AnnotationScanner {
     }
 
     /**
-     * Checks if the given extensible contains profiles, and if the extensible should be included in the final openapi document.
-     * Any extension containing a profile is removed from the extensible.
-     * inclusion is then calculated based on all collected profiles.
+     * Checks if the given extensible contains profiles, and if the extensible should be included in the final OpenAPI document.
+     * Inclusion is calculated based on all collected profiles.
      *
      * @param config current config
      * @param extensible the extensible to check for profiles
-     * @return true, if the given extensible should be included in the final openapi document, otherwise false
+     * @return true, if the given extensible should be included in the final OpenAPI document, otherwise false
      */
     protected static boolean processProfiles(OpenApiConfig config, Extensible<?> extensible) {
-        Set<String> profiles = Extensions.getProfiles(extensible);
-        Extensions.removeProfiles(extensible);
-        return profileIncluded(config, profiles);
-    }
-
-    private static boolean profileIncluded(OpenApiConfig config, Set<String> profiles) {
-        if (!config.getScanExcludeProfiles().isEmpty()) {
-            return config.getScanExcludeProfiles().stream().noneMatch(profiles::contains);
-        }
-
-        if (config.getScanProfiles().isEmpty()) {
-            return true;
-        }
-
-        return config.getScanProfiles().stream().anyMatch(profiles::contains);
+        return Extensions.includedProfile(extensible, config.getScanProfiles(), config.getScanExcludeProfiles());
     }
 
     @Override

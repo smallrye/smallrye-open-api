@@ -121,7 +121,6 @@ class AbstractAnnotationScannerTest {
         boolean result = AbstractAnnotationScanner.processProfiles(config, operation);
 
         assertTrue(result);
-        assertEquals(0, operation.getExtensions().size());
     }
 
     @Test
@@ -142,7 +141,6 @@ class AbstractAnnotationScannerTest {
         result = AbstractAnnotationScanner.processProfiles(config, operation);
 
         assertTrue(result);
-        assertEquals(0, operation.getExtensions().size());
     }
 
     @Test
@@ -163,7 +161,6 @@ class AbstractAnnotationScannerTest {
         result = AbstractAnnotationScanner.processProfiles(config, operation);
 
         assertFalse(result);
-        assertEquals(0, operation.getExtensions().size());
     }
 
     @ParameterizedTest

@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  title: echo
+  version: '1.0.0'
+  description: ""
+paths:
+  /api/public/echo:
+    get:
+      summary: Echo GET
+      operationId: get-echo
+      x-smallrye-profile-public: ""
+      parameters:
+        - name: Message
+          in: query
+          schema:
+            type: string
+    options:
+      summary: Echo OPTIONS
+      operationId: options-echo
+      description: Echo OPTIONS not for public use!
+
+  /api/private/echo:
+    post:
+      summary: Echo POST
+      operationId: post-echo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Message"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Echo'
+components:
+  schemas:
+    Echo:
+      type: object
+      properties:
+        echo:
+          type: string
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
