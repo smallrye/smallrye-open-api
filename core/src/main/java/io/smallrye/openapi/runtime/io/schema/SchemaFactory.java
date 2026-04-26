@@ -602,23 +602,7 @@ public class SchemaFactory {
             TypeUtil.applyTypeAttributes(type, schema, schemaAnnotation);
             schema = schemaRegistration(context, type, schema);
         } else if (type.kind() == Type.Kind.ARRAY) {
-            schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
-            ArrayType array = type.asArrayType();
-            int dimensions = array.dimensions();
-            Type componentType = array.constituent();
-            Schema itemSchema;
-
-            if (dimensions > 1) {
-                // Recurse using a new array type with dimensions decremented
-                itemSchema = typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null);
-            } else {
-                // Recurse using the type of the array elements
-                itemSchema = typeToSchema(context, componentType, null);
-                // Maybe dereference
-                itemSchema = lookupRef(context, componentType, itemSchema);
-            }
-
-            schema.setItems(itemSchema);
+            schema = arrayTypeToSchema(context, type.asArrayType());
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(context, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
@@ -636,6 +620,26 @@ public class SchemaFactory {
             schema = MergeUtil.mergeObjects(schema, fromAnnotation);
         }
 
+        return schema;
+    }
+
+    private static Schema arrayTypeToSchema(final AnnotationScannerContext context, ArrayType array) {
+        Schema schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
+        int dimensions = array.dimensions();
+        Type componentType = array.constituent();
+        Schema itemSchema;
+
+        if (dimensions > 1) {
+            // Recurse using a new array type with dimensions decremented
+            itemSchema = typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null);
+        } else {
+            // Recurse using the type of the array elements
+            itemSchema = typeToSchema(context, componentType, null);
+            // Maybe dereference
+            itemSchema = lookupRef(context, componentType, itemSchema);
+        }
+
+        schema.setItems(itemSchema);
         return schema;
     }
 
