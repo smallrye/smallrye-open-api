@@ -1,6 +1,7 @@
 package io.smallrye.openapi.api.constants;
 
 import org.jboss.jandex.DotName;
+import org.jboss.jandex.Type;
 
 /**
  * Constants related to the Kotlin language
@@ -23,6 +24,9 @@ public class KotlinConstants {
 
     public static final DotName FLOW = DotName
             .createSimple("kotlinx.coroutines.flow.Flow");
+
+    public static final Type FLOW_TYPE = Type
+            .create(FLOW, Type.Kind.CLASS);
 
     private KotlinConstants() {
     }
