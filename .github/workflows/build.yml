@@ -149,7 +149,12 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: execute tck ${{ matrix.tck-version }}
-        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
+        run: |
+          mvn -B test -f testsuite/tck/pom.xml \
+            -Dformatter.skip=true \
+            -Dimpsort.skip=true \
+            -Dsmallrye.commit=$(git rev-parse HEAD) \
+            -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
       - uses: actions/upload-artifact@v7
         name: tck-report

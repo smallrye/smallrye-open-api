@@ -53,7 +53,12 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: execute tck ${{ matrix.tck-version }}
-        run: mvn -B test -f testsuite/tck/pom.xml -Dsmallrye.commit=$(git rev-parse HEAD) -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
+        run: |
+          mvn -B test -f testsuite/tck/pom.xml \
+            -Dformatter.skip=true \
+            -Dimpsort.skip=true \
+            -Dsmallrye.commit=$(git rev-parse HEAD) \
+            -Dversion.eclipse.microprofile.openapi=${{ matrix.tck-version }}
 
       - name: stage tck report
         run: mv testsuite/tck/target/surefire-reports/microprofile-openapi-tck-report.html ./microprofile-openapi-tck-report-${{ matrix.tck-version }}-jdk${{ matrix.java }}.html
