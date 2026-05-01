@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>48</version>
+        <version>49</version>
     </parent>
 
     <artifactId>smallrye-open-api-parent</artifactId>
@@ -431,7 +431,40 @@
                 <version.io.smallrye.smallrye-common-classloader>2.8.0</version.io.smallrye.smallrye-common-classloader>
                 <version.io.smallrye.smallrye-config>3.10.2</version.io.smallrye.smallrye-config>
                 <version.resteasy>6.2.3.Final</version.resteasy>
+                <version.rest-assured>5.5.7</version.rest-assured>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.revelc.code.formatter</groupId>
+                        <artifactId>formatter-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <!--
+                                  Plugin must be disabled on Java 11, still used
+                                  to execute the TCK in CI.
+                                -->
+                                <id>format-sources</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>net.revelc.code</groupId>
+                        <artifactId>impsort-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <!--
+                                  Plugin must be disabled on Java 11, still used
+                                  to execute the TCK in CI.
+                                -->
+                                <id>sort-imports</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <profile>
