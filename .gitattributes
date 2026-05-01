@@ -1,0 +1,37 @@
+# ---- Default behavior ----
+* text=auto
+
+# ---- Windows scripts ----
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# ---- Shell scripts (CI/Linux) ----
+*.sh text eol=lf
+
+# ---- Gradle wrapper scripts ----
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+
+# ---- Java/Gradle sources ----
+*.java text
+*.kt text
+*.gradle text
+*.groovy text
+
+# ---- JSON/YAML/configs ----
+*.json text
+*.yml text
+*.yaml text
+*.xml text
+*.properties text
+
+# ---- Docs ----
+*.md text
+*.txt text
+
+# ---- Binary files (never normalize) ----
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
+*.jar binary
