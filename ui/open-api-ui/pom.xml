@@ -103,7 +103,8 @@
                                                 **/swagger-ui-bundle.js.map,
                                                 **/swagger-ui-standalone-preset.js,
                                                 **/swagger-ui-standalone-preset.js.map,
-                                                **/oauth2-redirect.html</includes>
+                                                **/oauth2-redirect.html,
+                                                **/oauth2-redirect.js</includes>
                                     <fileMappers>
                                         <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
                                     </fileMappers>

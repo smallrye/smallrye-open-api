@@ -1,6 +1,6 @@
 = SmallRye OpenAPI UI
 
-This allows you you add Swagger UI with your project. 
+This allows you to add a Swagger UI to your project.
 
 The UI will be available under `/openapi-ui`.
 
