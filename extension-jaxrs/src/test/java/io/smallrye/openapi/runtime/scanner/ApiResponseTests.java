@@ -525,4 +525,46 @@ class ApiResponseTests extends IndexScannerTestBase {
 
         assertJsonEquals("responses.stream-return-type.json", Bean.class, StreamAPI.class);
     }
+
+    @Test
+    /*
+     * Test case for Smallrye OpenAPI issue 2535 and Quarkus issue 51109.
+     *
+     * https://github.com/smallrye/smallrye-open-api/issues/2535
+     * https://github.com/quarkusio/quarkus/issues/51109
+     */
+    void testServerSentEvents() throws IOException, JSONException {
+        @jakarta.ws.rs.Path("streams")
+        class ServerSentEventAPI {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("sse-flow")
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.SERVER_SENT_EVENTS)
+            public kotlinx.coroutines.flow.Flow<String> getSseFlow() {
+                return null;
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("json-flow")
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            public kotlinx.coroutines.flow.Flow<String> getJsonFlow() {
+                return null;
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("sse-multi")
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.SERVER_SENT_EVENTS)
+            public io.smallrye.mutiny.Multi<String> getSseMulti() {
+                return null;
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("json-multi")
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            public io.smallrye.mutiny.Multi<String> getJsonMulti() {
+                return null;
+            }
+        }
+
+        assertJsonEquals("responses.server-sent-events.json", ServerSentEventAPI.class);
+    }
 }

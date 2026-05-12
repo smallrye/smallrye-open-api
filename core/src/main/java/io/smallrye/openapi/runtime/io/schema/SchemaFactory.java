@@ -26,6 +26,7 @@ import org.jboss.jandex.Type;
 import org.jboss.jandex.Type.Kind;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
+import io.smallrye.openapi.api.constants.KotlinConstants;
 import io.smallrye.openapi.api.constants.MutinyConstants;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
@@ -601,27 +602,13 @@ public class SchemaFactory {
             TypeUtil.applyTypeAttributes(type, schema, schemaAnnotation);
             schema = schemaRegistration(context, type, schema);
         } else if (type.kind() == Type.Kind.ARRAY) {
-            schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
-            ArrayType array = type.asArrayType();
-            int dimensions = array.dimensions();
-            Type componentType = array.constituent();
-            Schema itemSchema;
-
-            if (dimensions > 1) {
-                // Recurse using a new array type with dimensions decremented
-                itemSchema = typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null);
-            } else {
-                // Recurse using the type of the array elements
-                itemSchema = typeToSchema(context, componentType, null);
-                // Maybe dereference
-                itemSchema = lookupRef(context, componentType, itemSchema);
-            }
-
-            schema.setItems(itemSchema);
+            schema = arrayTypeToSchema(context, type.asArrayType());
         } else if (type.kind() == Type.Kind.CLASS) {
             schema = introspectClassToSchema(context, type.asClassType(), true);
         } else if (type.kind() == Type.Kind.PRIMITIVE) {
             schema = OpenApiDataObjectScanner.process(type.asPrimitiveType());
+        } else if (isMultiValuedType(context, type)) {
+            schema = multiValuedTypeToSchema(context, type);
         } else {
             schema = otherTypeToSchema(context, type);
         }
@@ -633,6 +620,26 @@ public class SchemaFactory {
             schema = MergeUtil.mergeObjects(schema, fromAnnotation);
         }
 
+        return schema;
+    }
+
+    private static Schema arrayTypeToSchema(final AnnotationScannerContext context, ArrayType array) {
+        Schema schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
+        int dimensions = array.dimensions();
+        Type componentType = array.constituent();
+        Schema itemSchema;
+
+        if (dimensions > 1) {
+            // Recurse using a new array type with dimensions decremented
+            itemSchema = typeToSchema(context, ArrayType.create(componentType, dimensions - 1), null);
+        } else {
+            // Recurse using the type of the array elements
+            itemSchema = typeToSchema(context, componentType, null);
+            // Maybe dereference
+            itemSchema = lookupRef(context, componentType, itemSchema);
+        }
+
+        schema.setItems(itemSchema);
         return schema;
     }
 
@@ -805,19 +812,36 @@ public class SchemaFactory {
                 .collect(Collectors.toList());
     }
 
-    private static Schema otherTypeToSchema(final AnnotationScannerContext context, Type type) {
-        if (TypeUtil.isA(context, type, MutinyConstants.MULTI_TYPE)) {
-            // Treat as an Array
-            Schema schema = OASFactory.createSchema().addType(SchemaType.ARRAY);
-            Type componentType = type.asParameterizedType().arguments().get(0);
+    private static boolean isMultiValuedType(final AnnotationScannerContext context, Type type) {
+        return TypeUtil.isA(context, type, MutinyConstants.MULTI_TYPE)
+                || TypeUtil.isA(context, type, KotlinConstants.FLOW_TYPE);
+    }
 
-            // Recurse using the type of the array elements
-            schema.setItems(typeToSchema(context, componentType));
-            return schema;
+    private static Schema multiValuedTypeToSchema(final AnnotationScannerContext context, Type type) {
+        Type componentType = type.asParameterizedType().arguments().get(0);
+        // Recurse using the type of the parameterize type
+        Schema componentSchema = typeToSchema(context, componentType);
+        Schema typeSchema;
+
+        var mediaTypes = Optional.ofNullable(context.getCurrentProduces())
+                .map(Arrays::asList)
+                .orElseGet(Collections::emptyList);
+
+        if (mediaTypes.contains("text/event-stream")) {
+            // Treat as a single item for SSE
+            typeSchema = componentSchema;
         } else {
-            Type asyncType = resolveAsyncType(context, type);
-            return schemaRegistration(context, asyncType, OpenApiDataObjectScanner.process(context, asyncType));
+            // Treat as an array
+            typeSchema = OASFactory.createSchema().addType(SchemaType.ARRAY);
+            typeSchema.setItems(componentSchema);
         }
+
+        return typeSchema;
+    }
+
+    private static Schema otherTypeToSchema(final AnnotationScannerContext context, Type type) {
+        Type asyncType = resolveAsyncType(context, type);
+        return schemaRegistration(context, asyncType, OpenApiDataObjectScanner.process(context, asyncType));
     }
 
     static Type resolveAsyncType(final AnnotationScannerContext context, Type type) {
