@@ -100,15 +100,24 @@ public final class Extensions {
     public static boolean includedProfile(Extensible<?> extensible, Set<String> included, Set<String> excluded) {
         Set<String> profiles = getProfiles(extensible);
 
-        if (!excluded.isEmpty()) {
-            return excluded.stream().noneMatch(profiles::contains);
+        if (profiles.isEmpty()) {
+            // Include an extensible without any profiles attached when none
+            // are explicitly included via configuration.
+            return included.isEmpty();
         }
 
-        if (included.isEmpty()) {
+        if (included.stream().anyMatch(profiles::contains)) {
             return true;
         }
 
-        return included.stream().anyMatch(profiles::contains);
+        if (excluded.stream().anyMatch(profiles::contains)) {
+            // Exclude the extensible if it has configured exclusions and also
+            // does not have any configured inclusions. This also means that
+            // inclusion overrides exclusion if a profile is configured for both.
+            return false;
+        }
+
+        return included.isEmpty();
     }
 
     public static void removeProfiles(Extensible<?> extensible) {
