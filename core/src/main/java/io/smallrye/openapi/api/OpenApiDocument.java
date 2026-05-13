@@ -15,6 +15,7 @@ import io.smallrye.openapi.api.util.UnusedComponentFilter;
 import io.smallrye.openapi.api.util.UnusedSchemaFilter;
 import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.model.ReferenceType;
+import io.smallrye.openapi.runtime.util.ProfileFilter;
 
 /**
  * Holds the final OpenAPI document produced during the startup of the app.
@@ -188,6 +189,10 @@ public class OpenApiDocument {
     private OpenAPI filterModel(OpenAPI model) {
         if (model == null) {
             return model;
+        }
+
+        if (!config.getScanProfiles().isEmpty() || !config.getScanExcludeProfiles().isEmpty()) {
+            model = FilterUtil.applyFilter(new ProfileFilter(model, config), model);
         }
 
         if (config.removeUnusedSchemas()) {

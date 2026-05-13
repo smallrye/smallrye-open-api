@@ -169,7 +169,9 @@ Set this boolean value to enable or disable the expansion of YAML aliases when l
 mp.openapi.extensions.smallrye.scan.profiles
 mp.openapi.extensions.smallrye.scan.exclude.profiles
 ----
-These properties are used together with the <<user-content-x-smallrye-profile,x-smallrye-profile>> extension to provide a way to limit which REST endpoints and associated resources are included in the OpenAPI model.
+These properties are used together with the <<user-content-x-smallrye-profile,x-smallrye-profile>> extension to provide a way to limit which REST endpoints and associated resources are included in the OpenAPI model. Path items where all operations have been excluded will also be removed from the model unless the path item is in the model's components section.
+
+Note: Profiles will be processed after the OpenAPI model is fully merged from the static YAML/JSON file, the `OASModelReader` output, and annotation scanning but prior to any user-provided filters. This means that user filters will receive the model after non-included profiles have been removed.
 
 === Extensions
 

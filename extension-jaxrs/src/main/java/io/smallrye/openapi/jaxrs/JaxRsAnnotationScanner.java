@@ -496,6 +496,19 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Process tags - @Tag and @Tags annotations combines with the resource tags we've already found (passed in)
         processOperationTags(context, method, context.getOpenApi(), resourceTags, operation);
 
+        // Process @Extension annotations
+        processExtensions(context, method, operation);
+
+        if (!processProfiles(context.getConfig(), operation)) {
+            // Any operations not included by a profile (if configured) will also be filtered out
+            // later during the filter stage so that profile included/exclusion takes into account
+            // the static file and the OASReader models. This short-circuit is left in as an
+            // optimization to avoid additional scanning when the operation would have been
+            // excluded anyway. As a result, profile configurations are built-time only for Quarkus
+            // applications.
+            return;
+        }
+
         // Process @Parameter annotations.
         List<Parameter> operationParams = params.getOperationParameters();
         operation.setParameters(operationParams);
@@ -524,18 +537,11 @@ public class JaxRsAnnotationScanner extends AbstractAnnotationScanner {
         // Process @Server annotations
         processServerAnnotation(context, method, operation);
 
-        // Process @Extension annotations
-        processExtensions(context, method, operation);
-
         // Process Security Roles
         context.getJavaSecurityProcessor().processSecurityRoles(method, operation);
 
         // Now set the operation on the PathItem as appropriate based on the Http method type
         pathItem.setOperation(methodType, operation);
-
-        if (!processProfiles(context.getConfig(), operation)) {
-            return;
-        }
 
         // When processing a sub-resource tree, ignore any @Path information from the current class
         List<String> operationPaths = this.subResourceStack.isEmpty() ? params.getFullOperationPaths()

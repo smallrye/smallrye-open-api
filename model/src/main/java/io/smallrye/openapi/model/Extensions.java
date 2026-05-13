@@ -83,6 +83,8 @@ public final class Extensions {
         }
     }
 
+    // Profiles
+
     public static Set<String> getProfiles(Extensible<?> extensible) {
         Set<String> profiles = new HashSet<>(2);
 
@@ -95,6 +97,29 @@ public final class Extensions {
         return profiles;
     }
 
+    public static boolean includedProfile(Extensible<?> extensible, Set<String> included, Set<String> excluded) {
+        Set<String> profiles = getProfiles(extensible);
+
+        if (profiles.isEmpty()) {
+            // Include an extensible without any profiles attached when none
+            // are explicitly included via configuration.
+            return included.isEmpty();
+        }
+
+        if (included.stream().anyMatch(profiles::contains)) {
+            return true;
+        }
+
+        if (excluded.stream().anyMatch(profiles::contains)) {
+            // Exclude the extensible if it has configured exclusions and also
+            // does not have any configured inclusions. This also means that
+            // inclusion overrides exclusion if a profile is configured for both.
+            return false;
+        }
+
+        return included.isEmpty();
+    }
+
     public static void removeProfiles(Extensible<?> extensible) {
         for (String name : extensionNames(extensible)) {
             if (name.startsWith(EXT_PROFILE_PREFIX)) {
@@ -103,7 +128,7 @@ public final class Extensions {
         }
     }
 
-    //////
+    // Name
 
     public static String getName(Extensible<?> extensible) {
         return get(extensible, PRIVATE_EXT_PREFIX + "name", String.class);
@@ -113,7 +138,7 @@ public final class Extensions {
         set(extensible, PRIVATE_EXT_PREFIX + "name", name);
     }
 
-    //////
+    // Hidden
 
     public static boolean isHidden(Extensible<?> extensible) {
         return Boolean.TRUE.equals(get(extensible, PRIVATE_EXT_PREFIX + "hidden", Boolean.class));
@@ -123,7 +148,7 @@ public final class Extensions {
         set(extensible, PRIVATE_EXT_PREFIX + "hidden", hidden);
     }
 
-    //////
+    // Response-Code
 
     public static String getResponseCode(APIResponse response) {
         return get(response, PRIVATE_EXT_PREFIX + "response-code", String.class);
@@ -133,7 +158,7 @@ public final class Extensions {
         set(response, PRIVATE_EXT_PREFIX + "response-code", responseCode);
     }
 
-    //////
+    // Required-Default
 
     public static Boolean getRequiredDefault(RequestBody requestBody) {
         return get(requestBody, PRIVATE_EXT_PREFIX + "required-default", Boolean.class);
@@ -151,7 +176,7 @@ public final class Extensions {
         set(requestBody, PRIVATE_EXT_PREFIX + "required-default", requiredDefault);
     }
 
-    //////
+    // Is-Required-Set
 
     /**
      * Returns whether {@link RequestBody#setRequired(Boolean)} has been called on a request body.
@@ -167,7 +192,7 @@ public final class Extensions {
         set(requestBody, PRIVATE_EXT_PREFIX + "is-required-set", requiredDefault);
     }
 
-    //////
+    // Param-Ref
 
     /**
      * Implementation specific, set a reference to the Java method parameter, so that we can bind back to it later if needed
@@ -183,7 +208,7 @@ public final class Extensions {
         set(parameter, PRIVATE_EXT_PREFIX + "param-ref", ref);
     }
 
-    //////
+    // Method-Ref
 
     /**
      * Implementation specific, set a reference to the Java method, so that we can bind back to it later if needed
@@ -199,7 +224,7 @@ public final class Extensions {
         set(operation, PRIVATE_EXT_PREFIX + "method-ref", ref);
     }
 
-    //////
+    // Schema-Type-Observers
 
     @SuppressWarnings("unchecked")
     public static List<Schema> getTypeObservers(Schema schema) {
@@ -210,7 +235,7 @@ public final class Extensions {
         set(schema, PRIVATE_EXT_PREFIX + "schema-type-observers", observers);
     }
 
-    //////
+    // Private extension accessors/mutator
 
     public static boolean isPrivateExtension(String name) {
         return name.startsWith(PRIVATE_EXT_PREFIX);
@@ -224,7 +249,7 @@ public final class Extensions {
         extensible.addExtension(PRIVATE_EXT_PREFIX + name, value);
     }
 
-    ///////
+    // Directives
 
     @SuppressWarnings("unchecked")
     public static Collection<String> getDirectives(Extensible<?> extensible) {
@@ -239,7 +264,7 @@ public final class Extensions {
         return Collections.emptySet();
     }
 
-    ///////
+    // Reference helpers
 
     private static String createUniqueAnnotationTargetRef(AnnotationTarget annotationTarget) {
         switch (annotationTarget.kind()) {
