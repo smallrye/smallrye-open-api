@@ -49,20 +49,12 @@ class ProfileSelectionWithStaticModelTest {
             public List<String> listUsers() {
                 return Collections.emptyList();
             }
-
-            @Path("/other-users")
-            @GET
-            @Extension(name = "x-smallrye-profile-other", value = "")
-            public List<String> listOtherUsers() {
-                return Collections.emptyList();
-            }
         }
 
         SmallRyeOpenAPI result;
 
         try {
             System.setProperty(SmallRyeOASConfig.SCAN_PROFILES, "public");
-            System.setProperty(SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES, "public"); // ignored if the same profile is also included
             System.setProperty(OASConfig.MODEL_READER, MyReader.class.getName());
 
             result = SmallRyeOpenAPI.builder()
@@ -78,7 +70,6 @@ class ProfileSelectionWithStaticModelTest {
                     .withIndex(Index.of(MyResource.class))
                     .build();
         } finally {
-            System.clearProperty(SmallRyeOASConfig.SCAN_EXCLUDE_PROFILES);
             System.clearProperty(SmallRyeOASConfig.SCAN_PROFILES);
             System.clearProperty(OASConfig.MODEL_READER);
         }
