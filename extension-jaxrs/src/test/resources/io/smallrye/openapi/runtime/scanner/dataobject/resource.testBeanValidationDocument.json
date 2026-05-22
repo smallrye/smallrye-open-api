@@ -107,7 +107,7 @@
           },
           "stringNotBlankDigits" : {
             "type" : "string",
-            "pattern" : "^\\d{1,8}([.]\\d{1,10})?$"
+            "pattern" : "^[+-]?(?=.*\\d)\\d{0,8}(?:\\.\\d{0,10})?$"
           },
           "stringNotEmptyMaxSize" : {
             "type" : "string",
