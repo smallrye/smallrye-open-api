@@ -336,6 +336,12 @@ public class FilteredIndexView implements IndexView {
     }
 
     @Override
+    public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName,
+            DotName containerAnnotationName) {
+        return filterInstances(this.delegate.getAnnotationsWithRepeatable(annotationName, containerAnnotationName));
+    }
+
+    @Override
     public Collection<ModuleInfo> getKnownModules() {
         return delegate.getKnownModules();
     }
