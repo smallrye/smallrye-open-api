@@ -98,6 +98,11 @@ public final class SimpleTypeTarget implements AnnotationTarget {
     }
 
     @Override
+    public Collection<AnnotationInstance> annotationsWithRepeatable(DotName name, DotName containerName) {
+        return type.annotationsWithRepeatable(name, containerName);
+    }
+
+    @Override
     public Collection<AnnotationInstance> annotations() {
         return type.annotations();
     }
@@ -115,6 +120,11 @@ public final class SimpleTypeTarget implements AnnotationTarget {
     @Override
     public Collection<AnnotationInstance> declaredAnnotationsWithRepeatable(DotName name, IndexView index) {
         return type.annotationsWithRepeatable(name, index);
+    }
+
+    @Override
+    public Collection<AnnotationInstance> declaredAnnotationsWithRepeatable(DotName name, DotName containerName) {
+        return type.annotationsWithRepeatable(name, containerName);
     }
 
     @Override

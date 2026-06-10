@@ -195,6 +195,14 @@ public class AugmentedIndexView implements IndexView {
     }
 
     @Override
+    public Collection<AnnotationInstance> getAnnotationsWithRepeatable(DotName annotationName,
+            DotName containerAnnotationName) {
+        Objects.requireNonNull(annotationName);
+        Objects.requireNonNull(containerAnnotationName);
+        return index.getAnnotationsWithRepeatable(annotationName, containerAnnotationName);
+    }
+
+    @Override
     public Collection<ModuleInfo> getKnownModules() {
         return index.getKnownModules();
     }

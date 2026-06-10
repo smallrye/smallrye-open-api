@@ -272,4 +272,31 @@ class FilteredIndexViewTest {
                 .getAnnotationsWithRepeatable(DotName.createSimple(Parameter.class.getName()), index);
         assertEquals(4, params.size());
     }
+
+    @Test
+    void testGetAnnotationsWithRepeatableByContainerName() {
+        class Target {
+            @APIResponses({
+                    @APIResponse(),
+                    @APIResponse() })
+            void test1(@Parameter() String value1, @Parameter() String value2) {
+            }
+
+            @APIResponse
+            void test2(@Parameter() String value1, @Parameter() String value2) {
+            }
+        }
+
+        IndexView index = AugmentedIndexView.augment(IndexScannerTestBase.indexOf(APIResponse.class,
+                APIResponses.class,
+                Parameter.class,
+                Target.class));
+
+        OpenApiConfig config = IndexScannerTestBase.emptyConfig();
+        FilteredIndexView view = new FilteredIndexView(index, config);
+
+        Collection<AnnotationInstance> responses = view
+                .getAnnotationsWithRepeatable(APIResponse.class, APIResponses.class);
+        assertEquals(3, responses.size());
+    }
 }
