@@ -1,0 +1,46 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/resources" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "Projection fields",
+          "name" : "fields",
+          "in" : "query",
+          "style" : "form",
+          "explode" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "description" : "Sort field",
+          "name" : "sortBy",
+          "in" : "query",
+          "style" : "form",
+          "explode" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

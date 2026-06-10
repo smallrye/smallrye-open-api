@@ -1692,6 +1692,10 @@ public abstract class AbstractParameterProcessor {
                     return ref.equals(other.ref);
                 }
 
+                if (this.name == null && other.name == null) {
+                    return this == other;
+                }
+
                 return Objects.equals(this.name, other.name) &&
                         Objects.equals(this.location, other.location) &&
                         Objects.equals(this.style, other.style);
