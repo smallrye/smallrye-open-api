@@ -1,13 +1,6 @@
 package io.smallrye.openapi.spring;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -152,13 +145,25 @@ public class SpringAnnotationScanner extends AbstractAnnotationScanner {
         // Get all Spring controllers and convert them to OpenAPI models (and merge them into a single one)
         Collection<AnnotationInstance> controllerAnnotations = context.getIndex()
                 .getAnnotations(SpringConstants.REST_CONTROLLER);
-        List<ClassInfo> applications = new ArrayList<>();
+        Collection<AnnotationInstance> requestMappingAnnotations = context.getIndex()
+                .getAnnotations(SpringConstants.REQUEST_MAPPING);
+
+        Set<ClassInfo> applications = new LinkedHashSet<>();
         for (AnnotationInstance annotationInstance : controllerAnnotations) {
             if (annotationInstance.target().kind().equals(AnnotationTarget.Kind.CLASS)) {
                 ClassInfo classInfo = annotationInstance.target().asClass();
                 applications.add(classInfo);
             } else {
                 SpringLogging.log.ignoringAnnotation(SpringConstants.REST_CONTROLLER.withoutPackagePrefix());
+            }
+        }
+
+        for (AnnotationInstance annotationInstance : requestMappingAnnotations) {
+            if (annotationInstance.target().kind().equals(AnnotationTarget.Kind.CLASS)) {
+                ClassInfo classInfo = annotationInstance.target().asClass();
+                applications.add(classInfo);
+            } else {
+                SpringLogging.log.ignoringAnnotation(SpringConstants.REQUEST_MAPPING.withoutPackagePrefix());
             }
         }
 

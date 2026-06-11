@@ -8,17 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.entities.GreetingParam;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteController;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetController;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt2;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerMultiplePaths;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerAlt;
-import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerMultiplePaths;
+import test.io.smallrye.openapi.runtime.scanner.resources.*;
 
 /**
  * Basic Spring annotation scanning
@@ -65,6 +55,20 @@ class SpringAnnotationScannerTest extends IndexScannerTestBase {
     void testBasicSpringDefinitionScanningAlt2() throws IOException, JSONException {
         OpenAPI result = scan(GreetingGetControllerAlt2.class, Greeting.class, GreetingParam.class);
         assertJsonEquals("resource.testBasicSpringGetDefinitionScanning.json", result);
+    }
+
+    /**
+     * This test a basic, no OpenApi annotations, hello world service
+     *
+     * Here we don't use @RestController
+     *
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    void testNoRestControllerSpringDefinitionScanning() throws IOException, JSONException {
+        OpenAPI result = scan(GreetingGetControllerNoRestController.class, Greeting.class, GreetingParam.class);
+        assertJsonEquals("resource.testNoRestControllerSpringGetDefinitionScanning.json", result);
     }
 
     /**
