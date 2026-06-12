@@ -62,6 +62,7 @@ E.g. for includeDependenciesScopes could be configured as:
 - `includeDependenciesScopes` (List<String>, default: compile, system) - If the above `scanDependenciesDisable` is true, you can control what scopes should be included.
 - `includeDependenciesTypes` (List<String>, default: jar) - If the above `scanDependenciesDisable` is true, you can control what types should be included.
 - `includeStandardJavaModules` (List<String>, default: empty list) - List of Java modules to be indexed and available for introspection by the annotation scanner. Use with caution as introspection of the core Java modules generally is not useful for generation of the OpenAPI definition.
+- `systemPropertyVariables` (Map<String, String>) - Map of system properties that will be set before generating the schema. Can be used to pass configuration properties that are not directly supported as plugin parameters, such as those starting with `mp.openapi.extensions.smallrye`
 - `configProperties` (String) - Load any properties from a file. Example `${basedir}/src/main/resources/application.properties`.
 - `attachArtifacts` (boolean, default: false) - Attach the built OpenAPI schema as build artifact.
 - `skip` (boolean, default: false) - Skip execution of the plugin.
@@ -106,3 +107,4 @@ All properties from the SmallRye OpenAPI Implementation is supported. Properties
   - `PACKAGE_CLASS_METHOD` - The fully qualified class name and method name is used as operationId.
 - `scanProfiles` (List<String>) - Profiles which explicitly include operations. Any operation without a matching profile is excluded.
 - `scanExcludeProfiles` (List<String>) - Profiles which explicitly exclude operations. Any operation without a matching profile is included.
+

@@ -25,4 +25,8 @@ interface UtilLogging extends BasicLogger {
     @Message(id = 1002, value = "%s with zero references removed from %s: %s")
     void unusedComponentRemoved(String type, String prefix, String name);
 
+    @LogMessage(level = Logger.Level.DEBUG)
+    @Message(id = 1003, value = "Tag with zero references removed: %s")
+    void unusedTagRemoved(String name);
+
 }

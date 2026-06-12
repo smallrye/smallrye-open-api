@@ -24,6 +24,7 @@ public final class SmallRyeOASConfig {
     private static final String SUFFIX_SORTED_PROPERTIES_ENABLE = "sorted-properties.enable";
     private static final String SUFFIX_REMOVE_UNUSED_COMPONENTS = "remove-unused-components";
     private static final String SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE = "remove-unused-schemas.enable";
+    private static final String SUFFIX_REMOVE_UNUSED_TAGS_ENABLE = "remove-unused-tags.enable";
     private static final String SUFFIX_MERGE_SCHEMA_EXAMPLES = "merge-schema-examples";
     private static final String SUFFIX_SORTED_PARAMETERS_ENABLE = "sorted-parameters.enable";
     private static final String SUFFIX_GENERIC_RESPONSE_USE_DEFAULT = "generic-response-use-default";
@@ -55,6 +56,8 @@ public final class SmallRyeOASConfig {
     public static final String SMALLRYE_REMOVE_UNUSED_SCHEMAS = SMALLRYE_PREFIX + SUFFIX_REMOVE_UNUSED_SCHEMAS_ENABLE;
 
     public static final String SMALLRYE_REMOVE_UNUSED_COMPONENTS = SMALLRYE_PREFIX + SUFFIX_REMOVE_UNUSED_COMPONENTS;
+
+    public static final String SMALLRYE_REMOVE_UNUSED_TAGS = SMALLRYE_PREFIX + SUFFIX_REMOVE_UNUSED_TAGS_ENABLE;
 
     public static final String SMALLRYE_MERGE_SCHEMA_EXAMPLES = SMALLRYE_PREFIX + SUFFIX_MERGE_SCHEMA_EXAMPLES;
 

@@ -1,0 +1,86 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Test Sample for UnusedTagFilter",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "used-tag-1",
+      "description": "This tag is used by operations"
+    },
+    {
+      "name": "unused-tag",
+      "description": "This tag is not referenced anywhere"
+    },
+    {
+      "name": "used-tag-2",
+      "description": "This tag is also used",
+      "externalDocs": {
+        "url": "https://example.com",
+        "description": "Find more info here"
+      }
+    },
+    {
+      "name": "unused-retained-tag",
+      "description": "This tag is unused but marked to retain",
+      "x-smallrye-directives": [
+        "retain"
+      ]
+    },
+    {
+      "name": "another-unused-tag",
+      "description": "Another unused tag"
+    }
+  ],
+  "paths": {
+    "/resource-a": {
+      "get": {
+        "tags": [
+          "used-tag-1"
+        ],
+        "summary": "Get resource A",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/resource-b": {
+      "get": {
+        "tags": [
+          "used-tag-1",
+          "used-tag-2"
+        ],
+        "summary": "Get resource B",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "used-tag-2"
+        ],
+        "summary": "Create resource B",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/resource-c": {
+      "get": {
+        "summary": "Get resource C without tags",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}
