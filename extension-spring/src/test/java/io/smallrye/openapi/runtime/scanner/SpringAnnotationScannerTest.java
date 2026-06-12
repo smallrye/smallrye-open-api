@@ -8,7 +8,18 @@ import org.junit.jupiter.api.Test;
 
 import test.io.smallrye.openapi.runtime.scanner.entities.Greeting;
 import test.io.smallrye.openapi.runtime.scanner.entities.GreetingParam;
-import test.io.smallrye.openapi.runtime.scanner.resources.*;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingDeleteControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerAlt2;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingGetControllerNoRestController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPostControllerMultiplePaths;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutController;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerAlt;
+import test.io.smallrye.openapi.runtime.scanner.resources.GreetingPutControllerMultiplePaths;
 
 /**
  * Basic Spring annotation scanning
