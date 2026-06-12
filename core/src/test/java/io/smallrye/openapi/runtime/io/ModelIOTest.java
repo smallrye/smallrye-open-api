@@ -1,5 +1,6 @@
 package io.smallrye.openapi.runtime.io;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -17,9 +18,17 @@ class ModelIOTest {
     @Test
     @SuppressWarnings({ "unchecked", "rawtypes" })
     void testToLinkedMapDuplicateKeyThrowsException() {
-        Stream<Map.Entry<String, String>> stream = Stream.of("k1", "k1").map(k -> new SimpleEntry(k, ""));
+        Stream<Map.Entry<String, String>> stream = Stream.of(new SimpleEntry("k1", "v1"), new SimpleEntry("k1", "v2"));
         Collector<Map.Entry<String, String>, ?, Map<String, String>> collector = ModelIO.toLinkedMap();
         assertThrows(IllegalStateException.class, () -> stream.collect(collector));
+    }
+
+    @Test
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void testToLinkedMapDuplicateKeyWithSameValueDoesntThrowException() {
+        Stream<Map.Entry<String, String>> stream = Stream.of(new SimpleEntry("k1", "v1"), new SimpleEntry("k1", "v1"));
+        Collector<Map.Entry<String, String>, ?, Map<String, String>> collector = ModelIO.toLinkedMap();
+        assertDoesNotThrow(() -> stream.collect(collector));
     }
 
     @Test
