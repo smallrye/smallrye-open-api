@@ -31,7 +31,6 @@ interface SpringLogging {
     @Message(id = 11004, value = "Value '%s' is not a valid %s default")
     void invalidDefault(String segment, String primitive);
 
-
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(id = 11005, value = "Ignoring %s annotation (multi-target) that is not on a class")
     void ignoringMultiTargetAnnotation(String className);
