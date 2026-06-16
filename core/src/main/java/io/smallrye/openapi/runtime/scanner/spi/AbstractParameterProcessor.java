@@ -688,7 +688,32 @@ public abstract class AbstractParameterProcessor {
     }
 
     void mapParameterSchema(Parameter param, ParameterContext context) {
-        if (ModelUtil.parameterHasSchema(param) || context.targetType == null) {
+        if (context.targetType == null) {
+            return;
+        }
+
+        if (ModelUtil.parameterHasSchema(param)) {
+            Schema existingSchema = param.getSchema();
+            if (existingSchema != null && existingSchema.getRef() == null && existingSchema.getType() == null) {
+                Schema typeSchema = SchemaFactory.typeToSchema(scannerContext, context.targetType, null);
+                if (typeSchema != null) {
+                    if (typeSchema.getRef() != null) {
+                        Schema resolved = ModelUtil.getComponent(scannerContext.getOpenApi(), typeSchema.getRef());
+                        if (resolved != null) {
+                            typeSchema = resolved;
+                        }
+                    }
+                    if (typeSchema.getType() != null) {
+                        existingSchema.setType(typeSchema.getType());
+                    }
+                    if (existingSchema.getEnumeration() == null && typeSchema.getEnumeration() != null) {
+                        existingSchema.setEnumeration(typeSchema.getEnumeration());
+                    }
+                    if (existingSchema.getFormat() == null && typeSchema.getFormat() != null) {
+                        existingSchema.setFormat(typeSchema.getFormat());
+                    }
+                }
+            }
             return;
         }
 
