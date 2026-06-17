@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -160,7 +161,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
     /**
      * Creates a Collector for a stream of Map.Entry where the entry keys are Strings.
      *
-     * Null map entry values are allowed, but duplicate keys will result in an
+     * Null map entry values are allowed, but duplicate keys with different values will result in an
      * IllegalStateException being thrown.
      *
      * This method is the equivalent of
@@ -176,7 +177,7 @@ public abstract class ModelIO<T, V, A extends V, O extends V, AB, OB> implements
             String k = entry.getKey();
             T v = entry.getValue();
 
-            if (map.containsKey(k)) {
+            if (map.containsKey(k) && !Objects.equals(map.get(k), v)) {
                 throw new IllegalStateException(String.format(
                         "Duplicate key %s (attempted merging values %s and %s)",
                         k, map.get(k), v));
