@@ -20,6 +20,8 @@ import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.Explode;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -773,5 +775,29 @@ class ParameterScanTests extends IndexScannerTestBase {
 
         test(dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.FALSE),
                 "params.ignored-name-type-duplicates.json", Parameters.class, BeanParamResource.class);
+    }
+
+    @Test
+    void testBeanParamFieldsWithSameStyleNotConflated() throws IOException, JSONException {
+        class ListOptions {
+            @jakarta.ws.rs.QueryParam("sortBy")
+            @Parameter(description = "Sort field", style = ParameterStyle.FORM, explode = Explode.FALSE, schema = @Schema(type = SchemaType.ARRAY, implementation = String.class))
+            String sortBy;
+
+            @jakarta.ws.rs.QueryParam("fields")
+            @Parameter(description = "Projection fields", style = ParameterStyle.FORM, explode = Explode.FALSE, schema = @Schema(type = SchemaType.ARRAY, implementation = String.class))
+            String fields;
+        }
+
+        @jakarta.ws.rs.Path("/resources")
+        class ListResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            public String list(@jakarta.ws.rs.BeanParam ListOptions options) {
+                return "ok";
+            }
+        }
+
+        test("params.beanparam-same-style-not-conflated.json", ListOptions.class, ListResource.class);
     }
 }
