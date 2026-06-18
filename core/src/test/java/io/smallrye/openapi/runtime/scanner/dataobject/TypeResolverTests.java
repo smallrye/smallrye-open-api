@@ -883,6 +883,46 @@ class TypeResolverTests extends IndexScannerTestBase {
         Stream.of("field0", "field1", "field2", "field3").forEach(f -> assertFalse(p3.get(f).isIgnored()));
     }
 
+    @Test
+    /*
+     * Issue: https://github.com/smallrye/smallrye-open-api/issues/2412
+     */
+    void testJsonViewExcludesGetterOnlyProperty() {
+        class Views {
+            class Public {
+            }
+
+            class Private {
+            }
+        }
+
+        @SuppressWarnings("unused")
+        class Bean {
+            private String field0;
+            private String field1;
+
+            public String getField0() {
+                return field0;
+            }
+
+            public void setField0(String field0) {
+                this.field0 = field0;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField1() {
+                return field1;
+            }
+        }
+
+        AnnotationScannerContext context = buildContext(emptyConfig(), Bean.class, Views.Private.class, Views.Public.class);
+        context.getJsonViews().put(Type.create(DotName.createSimple(Views.Public.class), Type.Kind.CLASS), true);
+
+        Map<String, TypeResolver> properties = getProperties(context, Bean.class);
+        assertFalse(properties.get("field0").isIgnored());
+        assertTrue(properties.get("field1").isIgnored());
+    }
+
     /*
      * Issue: https://github.com/smallrye/smallrye-open-api/issues/1817
      */
