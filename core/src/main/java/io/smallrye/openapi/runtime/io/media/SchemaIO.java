@@ -6,6 +6,7 @@ import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIV
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_EXCLUSIVE_MINIMUM;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MAXIMUM;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_MINIMUM;
+import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_NAME;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_NULLABLE;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_REF;
 import static io.smallrye.openapi.runtime.io.schema.SchemaConstant.PROP_TYPE;
@@ -39,8 +40,6 @@ import io.smallrye.openapi.runtime.util.ModelUtil;
 
 public class SchemaIO<V, A extends V, O extends V, AB, OB> extends MapModelIO<Schema, V, A, O, AB, OB>
         implements ReferenceIO<V, A, O, AB, OB> {
-
-    private static final String PROP_NAME = "name";
 
     public SchemaIO(IOContext<V, A, O, AB, OB> context) {
         super(context, Names.SCHEMA, Names.create(Schema.class));
