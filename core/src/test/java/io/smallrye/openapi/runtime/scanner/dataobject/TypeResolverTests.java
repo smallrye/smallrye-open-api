@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -900,6 +901,13 @@ class TypeResolverTests extends IndexScannerTestBase {
         class Bean {
             private String field0;
             private String field1;
+            private String field2;
+            @JsonView(Views.Public.class)
+            private String field3;
+            @Schema
+            private String field4;
+            @JsonProperty
+            private String field5;
 
             public String getField0() {
                 return field0;
@@ -913,6 +921,26 @@ class TypeResolverTests extends IndexScannerTestBase {
             public String getField1() {
                 return field1;
             }
+
+            @JsonView(Views.Private.class)
+            public void setField2(String field2) {
+                this.field2 = field2;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField3() {
+                return field3;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField4() {
+                return field4;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField5() {
+                return field5;
+            }
         }
 
         AnnotationScannerContext context = buildContext(emptyConfig(), Bean.class, Views.Private.class, Views.Public.class);
@@ -921,6 +949,10 @@ class TypeResolverTests extends IndexScannerTestBase {
         Map<String, TypeResolver> properties = getProperties(context, Bean.class);
         assertFalse(properties.get("field0").isIgnored());
         assertTrue(properties.get("field1").isIgnored());
+        assertTrue(properties.get("field2").isIgnored());
+        assertFalse(properties.get("field3").isIgnored());
+        assertFalse(properties.get("field4").isIgnored());
+        assertFalse(properties.get("field5").isIgnored());
     }
 
     /*
