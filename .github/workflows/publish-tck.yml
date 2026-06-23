@@ -25,7 +25,7 @@ jobs:
 
     name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }} with jdk ${{ matrix.java }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         name: checkout ${{inputs.version}}
         with:
           ref: ${{ inputs.version }}
