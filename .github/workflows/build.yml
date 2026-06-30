@@ -110,7 +110,7 @@ jobs:
         tck-version:
         - "4.0.2"
         - "4.1.1"
-        - "4.2-RC1"
+        - "4.2-RC2"
 
         include:
         # Disable older TCK jobs prior to 4.0 GA release 
@@ -122,7 +122,7 @@ jobs:
         - title: "4.1.x"
           tck-version: "4.1.1"
         - title: "4.2.x"
-          tck-version: "4.2-RC1"
+          tck-version: "4.2-RC2"
 
     name: MicroProfile OpenAPI TCK ${{ matrix.title }} with jdk ${{ matrix.java }}
     steps:

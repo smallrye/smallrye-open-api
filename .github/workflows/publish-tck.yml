@@ -22,7 +22,7 @@ jobs:
         tck-version:
         - "4.0.2"
         - "4.1.1"
-        - "4.2-RC1"
+        - "4.2-RC2"
 
     name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }} with jdk ${{ matrix.java }}
     steps:
