@@ -13,6 +13,7 @@ import io.smallrye.openapi.api.util.FilterUtil;
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.api.util.UnusedComponentFilter;
 import io.smallrye.openapi.api.util.UnusedSchemaFilter;
+import io.smallrye.openapi.api.util.UnusedTagFilter;
 import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.model.ReferenceType;
 import io.smallrye.openapi.runtime.util.ProfileFilter;
@@ -207,6 +208,10 @@ public class OpenApiDocument {
 
         if (!removeUnusedComponents.isEmpty()) {
             model = FilterUtil.applyFilter(new UnusedComponentFilter(removeUnusedComponents), model);
+        }
+
+        if (config.removeUnusedTags()) {
+            model = FilterUtil.applyFilter(new UnusedTagFilter(), model);
         }
 
         if (!intermediateModel) {
