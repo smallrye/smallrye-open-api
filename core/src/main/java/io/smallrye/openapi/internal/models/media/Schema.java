@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.model.Extensions;
+import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
 
 public class Schema extends AbstractSchema {
 
@@ -117,6 +118,23 @@ public class Schema extends AbstractSchema {
             return null;
         }
         return super.getProperty(propertyName, clazz);
+    }
+
+    @Override
+    protected boolean isExtension(String name) {
+        String dialect = getSchemaDialect();
+
+        if (dialect != null
+                && !SchemaConstant.DIALECT_OAS31.equals(dialect)
+                && !SchemaConstant.DIALECT_JSON_2020_12.equals(dialect)) {
+            // Do not consider any properties from unknown dialects as extensions
+            return false;
+        }
+
+        return !SchemaConstant.PROP_NAME.equals(name)
+                && !SchemaConstant.PROP_TYPE.equals(name)
+                && !SchemaConstant.PROP_REF.equals(name)
+                && !SchemaConstant.PROPERTIES_DATA_TYPES.containsKey(name);
     }
 
     private boolean isBooleanSchema() {
