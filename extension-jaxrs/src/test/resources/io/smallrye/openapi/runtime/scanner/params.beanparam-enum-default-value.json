@@ -10,11 +10,7 @@
             "description": "Sort direction",
             "schema": {
               "default": "ASC",
-              "enum": [
-                "ASC",
-                "DESC"
-              ],
-              "type": "string"
+              "$ref": "#/components/schemas/SortOrder"
             }
           }
         ],

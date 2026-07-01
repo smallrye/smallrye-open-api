@@ -698,19 +698,9 @@ public abstract class AbstractParameterProcessor {
                 Schema typeSchema = SchemaFactory.typeToSchema(scannerContext, context.targetType, null);
                 if (typeSchema != null) {
                     if (typeSchema.getRef() != null) {
-                        Schema resolved = ModelUtil.getComponent(scannerContext.getOpenApi(), typeSchema.getRef());
-                        if (resolved != null) {
-                            typeSchema = resolved;
-                        }
-                    }
-                    if (typeSchema.getType() != null) {
-                        existingSchema.setType(typeSchema.getType());
-                    }
-                    if (existingSchema.getEnumeration() == null && typeSchema.getEnumeration() != null) {
-                        existingSchema.setEnumeration(typeSchema.getEnumeration());
-                    }
-                    if (existingSchema.getFormat() == null && typeSchema.getFormat() != null) {
-                        existingSchema.setFormat(typeSchema.getFormat());
+                        existingSchema.setRef(typeSchema.getRef());
+                    } else {
+                        mergeObjects(existingSchema, typeSchema);
                     }
                 }
             }
