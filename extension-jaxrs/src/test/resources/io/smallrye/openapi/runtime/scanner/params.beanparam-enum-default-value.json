@@ -1,0 +1,43 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/beanparam-enum-default": {
+      "get": {
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort direction",
+            "schema": {
+              "default": "ASC",
+              "$ref": "#/components/schemas/SortOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SortOrder": {
+        "enum": [
+          "ASC",
+          "DESC"
+        ],
+        "type": "string"
+      }
+    }
+  }
+}

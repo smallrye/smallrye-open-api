@@ -164,6 +164,31 @@ class ParameterScanTests extends IndexScannerTestBase {
     }
 
     @Test
+    void testBeanParamEnumDefaultValue() throws IOException, JSONException {
+        class QueryOptions {
+            @jakarta.ws.rs.QueryParam("sortOrder")
+            @Parameter(description = "Sort direction", schema = @Schema(defaultValue = "ASC"))
+            SortOrder sortOrder;
+        }
+
+        @jakarta.ws.rs.Path("/beanparam-enum-default")
+        class ListResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            public String list(@jakarta.ws.rs.BeanParam QueryOptions options) {
+                return "ok";
+            }
+        }
+
+        test("params.beanparam-enum-default-value.json", SortOrder.class, QueryOptions.class, ListResource.class);
+    }
+
+    enum SortOrder {
+        ASC,
+        DESC
+    }
+
+    @Test
     void testJavaxParameterInBeanFromSetter() throws IOException, JSONException {
         test("params.parameter-in-bean-from-setter.json",
                 test.io.smallrye.openapi.runtime.scanner.javax.ParameterInBeanFromSetterTestResource.class,
