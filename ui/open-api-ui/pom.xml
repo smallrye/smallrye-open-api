@@ -50,7 +50,7 @@
             <!-- Make sure the template is available for external usage -->
             <resource>
                 <directory>${basedir}/src/main/resources/template</directory>
-                <targetPath>${project.build.directory}/classes/META-INF/resources/template</targetPath>
+                <targetPath>META-INF/resources/template</targetPath>
                 <filtering>false</filtering>
                 <includes>
                     <include>*.html</include>
@@ -59,7 +59,7 @@
             <!-- Also included index.html in case a template is not used -->
             <resource>
                 <directory>${basedir}/src/main/webapp</directory>
-                <targetPath>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</targetPath>
+                <targetPath>META-INF/resources/${path.swagger-ui}</targetPath>
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.html</include>
@@ -67,7 +67,7 @@
             </resource>
             <resource>
                 <directory>${basedir}/src/main/webapp</directory>
-                <targetPath>${project.build.directory}/classes/META-INF/resources/${path.swagger-ui}</targetPath>
+                <targetPath>META-INF/resources/${path.swagger-ui}</targetPath>
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>**/*.html</exclude>
