@@ -33,6 +33,8 @@ jobs:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
+          # External PRs must first be approved by a maintainer before workflows are run.
+          allow-unsafe-pr-checkout: true
 
       ## Retrieve the `target` directory from the build job
       - name: Fetch Build Result
@@ -77,11 +79,12 @@ jobs:
         if: github.event.workflow_run.event == 'pull_request'
         env:
           BASE_BRANCH: ${{ fromJson(steps.build_context.outputs.content).base_ref }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           git remote add upstream ${{ github.event.repository.clone_url }}
           git fetch upstream --prune --tags --force
-          git checkout -B $BASE_BRANCH upstream/$BASE_BRANCH
-          git checkout ${{ github.event.workflow_run.head_sha }}
+          git checkout -B ${BASE_BRANCH} upstream/${BASE_BRANCH}
+          git checkout ${HEAD_SHA}
           git clean -ffdx --exclude=target/ && git reset --hard HEAD
 
       - name: Setup JDK
@@ -110,15 +113,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT_NUMBER: ${{ fromJson(steps.build_context.outputs.content).event.number }}
+          HEAD_REF: ${{ fromJson(steps.build_context.outputs.content).head_ref }}
+          BASE_REF: ${{ fromJson(steps.build_context.outputs.content).base_ref }}
         run: |
           mvn -B --no-transfer-progress org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=smallrye_smallrye-open-api  \
             -Dsonar.token=${SONAR_TOKEN} \
             -Dsonar.coverage.jacoco.xmlReportPaths=$(pwd)/testsuite/coverage/target/site/jacoco-aggregate/jacoco.xml \
-            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
-            -Dsonar.pullrequest.key=${{ fromJson(steps.build_context.outputs.content).event.number }} \
-            -Dsonar.pullrequest.branch=${{ fromJson(steps.build_context.outputs.content).head_ref }} \
-            -Dsonar.pullrequest.base=${{ fromJson(steps.build_context.outputs.content).base_ref }}
+            -Dsonar.scm.revision=${HEAD_SHA} \
+            -Dsonar.pullrequest.key=${EVENT_NUMBER} \
+            -Dsonar.pullrequest.branch=${HEAD_REF} \
+            -Dsonar.pullrequest.base=${BASE_REF}
 
       ## (Push Only) Run Sonar analysis against the results of the build job
       - name: SonarCloud Analysis (Push Only)
@@ -126,10 +133,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           mvn -B --no-transfer-progress org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=smallrye_smallrye-open-api \
             -Dsonar.token=${SONAR_TOKEN} \
             -Dsonar.coverage.jacoco.xmlReportPaths=$(pwd)/testsuite/coverage/target/site/jacoco-aggregate/jacoco.xml \
-            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
-            -Dsonar.branch.name=${{ github.event.workflow_run.head_branch }}
+            -Dsonar.scm.revision=${HEAD_SHA} \
+            -Dsonar.branch.name=${HEAD_BRANCH}
