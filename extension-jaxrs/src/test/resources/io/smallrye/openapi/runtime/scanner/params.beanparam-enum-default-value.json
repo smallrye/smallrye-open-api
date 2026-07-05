@@ -1,42 +1,121 @@
 {
-  "openapi": "3.1.0",
-  "paths": {
-    "/beanparam-enum-default": {
-      "get": {
-        "parameters": [
-          {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "Sort direction",
-            "schema": {
-              "default": "ASC",
-              "$ref": "#/components/schemas/SortOrder"
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "SortOrder" : {
+        "type" : "string",
+        "enum" : [ "ASC", "DESC" ]
+      },
+      "filter-option-a" : {
+        "$ref" : "http://example.com/schemas/filter-schema-a.json"
+      }
+    }
+  },
+  "paths" : {
+    "/beanparam-enum-default" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "Alternate Sort direction",
+          "schema" : {
+            "type" : "string",
+            "default" : "desc",
+            "enum" : [ "asc", "desc" ]
+          },
+          "name" : "altSortOrder",
+          "in" : "query"
+        }, {
+          "description" : "Filter 1",
+          "schema" : {
+            "description" : "Standard filter schema",
+            "$ref" : "#/components/schemas/filter-option-a"
+          },
+          "name" : "filter1",
+          "in" : "query"
+        }, {
+          "description" : "Filter 2",
+          "schema" : {
+            "$ref" : "http://example.com/schemas/filter-schema-b.json",
+            "description" : "Another filter"
+          },
+          "name" : "filter2",
+          "in" : "query"
+        }, {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "description" : "Third filter in plain text format",
+                "$ref" : "#/components/schemas/filter-option-a"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "description" : "Third filter in JSON format",
+                "$ref" : "#/components/schemas/filter-option-a"
+              }
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
+          },
+          "description" : "Filter 3 with multiple variants",
+          "name" : "filter3",
+          "in" : "query"
+        }, {
+          "description" : "Identifier for the request",
+          "schema" : {
+            "type" : "integer",
+            "format" : "custom-id"
+          },
+          "name" : "request-id",
+          "in" : "query"
+        }, {
+          "description" : "Secret identifier for the request",
+          "schema" : {
+            "description" : "The schema for this parameter is not disclosed",
+            "format" : "secret-id"
+          },
+          "name" : "secret-id",
+          "in" : "query"
+        }, {
+          "description" : "Sort direction",
+          "schema" : {
+            "default" : "ASC",
+            "$ref" : "#/components/schemas/SortOrder"
+          },
+          "name" : "sortOrder",
+          "in" : "query"
+        }, {
+          "content" : {
+            "text/x-custom-type1" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int64",
+                "maximum" : 50,
+                "minimum" : 1
+              }
+            },
+            "text/x-custom-type2" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int64",
+                "maximum" : 99,
+                "minimum" : 51
+              }
+            }
+          },
+          "description" : "Identifier with multiple variants",
+          "name" : "variable-id",
+          "in" : "query"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "SortOrder": {
-        "enum": [
-          "ASC",
-          "DESC"
-        ],
-        "type": "string"
       }
     }
   }

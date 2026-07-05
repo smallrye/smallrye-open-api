@@ -49,6 +49,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -693,17 +694,7 @@ public abstract class AbstractParameterProcessor {
         }
 
         if (ModelUtil.parameterHasSchema(param)) {
-            Schema existingSchema = param.getSchema();
-            if (existingSchema != null && existingSchema.getRef() == null && existingSchema.getType() == null) {
-                Schema typeSchema = SchemaFactory.typeToSchema(scannerContext, context.targetType, null);
-                if (typeSchema != null) {
-                    if (typeSchema.getRef() != null) {
-                        existingSchema.setRef(typeSchema.getRef());
-                    } else {
-                        mergeObjects(existingSchema, typeSchema);
-                    }
-                }
-            }
+            mergeParameterTypeSchema(param, context);
             return;
         }
 
@@ -733,6 +724,43 @@ public abstract class AbstractParameterProcessor {
         }
 
         ModelUtil.setParameterSchema(param, schema);
+    }
+
+    private void mergeParameterTypeSchema(Parameter param, ParameterContext context) {
+        Map<String, Schema> paramSchemas = ModelUtil.getParameterMediaTypeSchemas(param);
+        Map<String, Schema> scannableParamSchemas = new HashMap<>(paramSchemas.size());
+
+        for (var entry : paramSchemas.entrySet()) {
+            if (entry.getValue().getRef() == null && entry.getValue().getType() == null) {
+                scannableParamSchemas.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (!scannableParamSchemas.isEmpty()) {
+            Schema typeSchema = SchemaFactory.typeToSchema(scannerContext, context.targetType, null);
+
+            if (typeSchema == null) {
+                // Hidden schema
+                return;
+            }
+
+            for (var entry : scannableParamSchemas.entrySet()) {
+                var paramSchema = entry.getValue();
+
+                if (typeSchema.getRef() != null) {
+                    paramSchema.setRef(typeSchema.getRef());
+                } else {
+                    /*
+                     * The type schema must be cloned before using it as the target of an object merge.
+                     * Merging here will overlay the parameter schema's attributes over the type schema's
+                     * attributes before replacing the schema in the parameter model.
+                     */
+                    typeSchema = BaseModel.deepCopy(typeSchema, Schema.class);
+                    paramSchema = mergeObjects(typeSchema, paramSchema);
+                    ModelUtil.setParameterMediaTypeSchema(param, entry.getKey(), paramSchema);
+                }
+            }
+        }
     }
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
