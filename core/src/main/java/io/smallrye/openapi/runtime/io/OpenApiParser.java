@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 /**
@@ -54,7 +55,9 @@ public class OpenApiParser {
             }
 
             try (InputStream stream = url.openStream()) {
-                return parse(stream, isJson ? Format.JSON : Format.YAML, OpenApiConfig.fromConfig(ConfigProvider.getConfig()));
+                return parse(stream, isJson ? Format.JSON : Format.YAML,
+                        JsonIO.newInstance(SmallRyeOpenAPI.JsonProvider.AUTO,
+                                OpenApiConfig.fromConfig(ConfigProvider.getConfig())));
             }
         } catch (URISyntaxException e) {
             throw new IOException(e);
@@ -70,7 +73,8 @@ public class OpenApiParser {
      * @return OpenAPIImpl parsed from the stream
      */
     public static OpenAPI parse(InputStream stream, Format format, OpenApiConfig config) {
-        return parse(stream, format, JsonIO.newInstance(config));
+        config = config != null ? config : OpenApiConfig.fromConfig(ConfigProvider.getConfig());
+        return parse(stream, format, JsonIO.newInstance(SmallRyeOpenAPI.JsonProvider.AUTO, config));
     }
 
     private static <V, A extends V, O extends V, AB, OB> OpenAPI parse(InputStream stream, Format format,
@@ -89,7 +93,8 @@ public class OpenApiParser {
      * @throws OpenApiRuntimeException Errors in reading the String
      */
     public static Schema parseSchema(String schemaJson) {
-        return parseSchema(schemaJson, JsonIO.newInstance(null));
+        return parseSchema(schemaJson, JsonIO.newInstance(SmallRyeOpenAPI.JsonProvider.AUTO,
+                OpenApiConfig.fromConfig(ConfigProvider.getConfig())));
     }
 
     /**

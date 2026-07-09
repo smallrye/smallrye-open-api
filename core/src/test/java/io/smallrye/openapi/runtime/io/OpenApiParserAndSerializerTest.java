@@ -20,6 +20,7 @@ import org.jboss.logging.Logger;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -661,7 +662,8 @@ class OpenApiParserAndSerializerTest {
         Exception thrown = assertThrows(OpenApiRuntimeException.class, () -> doTest(tempFileLoc, Format.YAML));
         assertNotNull(thrown.getCause());
         Throwable rootCause = thrown.getCause().getCause();
-        assertTrue(rootCause instanceof YAMLException);
+        assertTrue(rootCause instanceof YAMLException // Jackson 2
+                || rootCause instanceof YamlEngineException); // Jackson 3
 
         // now let's set a higher limit
         final Integer maximumFileSize = 8 * 1024 * 1024;

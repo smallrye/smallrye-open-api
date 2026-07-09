@@ -18,7 +18,8 @@
 
     <properties>
         <version.buildhelper.plugin>3.6.1</version.buildhelper.plugin>
-        <jackson-bom.version>2.22.2</jackson-bom.version>
+        <version.jackson2>2.22.2</version.jackson2>
+        <version.jackson3>3.2.0</version.jackson3>
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.6.0</version.io.smallrye.jandex>
         <version.io.smallrye.smallrye-config>3.18.2</version.io.smallrye.smallrye-config>
@@ -49,6 +50,10 @@
           testsuite/data/**/*.java,
           tools/model-apt/**/*.java
         </sonar.coverage.exclusions>
+        <!-- Ignore duplication in Jackson IO classes. Nearly identical besides packages. -->
+        <sonar.cpd.exclusions>
+          core/src/main/java/io/smallrye/openapi/runtime/io/Jackson*JsonIO.java
+        </sonar.cpd.exclusions>
         <!--
           Ignore rule java:S119 the checks type parameter names. The generic types in the
           io.smallrye.openapi.runtime.io package use two-character type parameter names for the
@@ -112,13 +117,35 @@
             </dependency>
 
             <!-- Third Party Libraries -->
+
+            <!-- Jackson 2 -->
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>${jackson-bom.version}</version>
+                <version>${version.jackson2}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+            <!-- Jackson 3 Libraries -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${version.jackson3}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.jackson3}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${version.jackson3}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-metadata-jvm</artifactId>
@@ -476,6 +503,33 @@
                 <jboss.extra.opts>--add-modules java.se</jboss.extra.opts>
                 <maven.compiler.release>11</maven.compiler.release>
             </properties>
+        </profile>
+
+        <profile>
+            <id>jackson3</id>
+            <dependencyManagement>
+                <dependencies>
+                    <!-- Jackson 3 Libraries -->
+                    <dependency>
+                        <groupId>tools.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                        <version>${version.jackson3}</version>
+                        <scope>compile</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>tools.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                        <version>${version.jackson3}</version>
+                        <scope>compile</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>tools.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                        <version>${version.jackson3}</version>
+                        <scope>compile</scope>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
         </profile>
     </profiles>
 </project>
