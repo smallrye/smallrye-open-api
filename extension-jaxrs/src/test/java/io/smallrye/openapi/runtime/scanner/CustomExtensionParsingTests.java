@@ -43,8 +43,9 @@ class CustomExtensionParsingTests {
 
     void testDefaultExtensionParseThrowsJacksonNotFound(Index index) {
         OpenApiConfig config = IndexScannerTestBase.emptyConfig();
-        NoClassDefFoundError err = assertThrows(NoClassDefFoundError.class, () -> new OpenApiAnnotationScanner(config, index));
-        assertTrue(err.getMessage().contains("jackson"));
+        var err = assertThrows(io.smallrye.openapi.runtime.OpenApiRuntimeException.class,
+                () -> new OpenApiAnnotationScanner(config, index));
+        assertTrue(err.getMessage().contains("No JSON provider found"));
     }
 
     @Test

@@ -2,9 +2,13 @@ package io.smallrye.openapi.runtime.io;
 
 import java.io.IOException;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
 /**
  * Class used to serialize an OpenAPI
@@ -30,7 +34,8 @@ public class OpenApiSerializer {
      * @throws IOException Errors in processing the JSON
      */
     public static String serialize(OpenAPI openApi, Format format) throws IOException {
-        return serialize(openApi, format, JsonIO.newInstance(null));
+        return serialize(openApi, format, JsonIO.newInstance(SmallRyeOpenAPI.JsonProvider.AUTO,
+                OpenApiConfig.fromConfig(ConfigProvider.getConfig())));
     }
 
     /**
@@ -43,7 +48,8 @@ public class OpenApiSerializer {
      * @throws IOException Errors in processing the JSON
      */
     public static String serialize(OpenAPI openApi, ObjectMapper objectMapper, Format format) throws IOException {
-        return serialize(openApi, format, JsonIO.newInstance(null));
+        return serialize(openApi, format, JsonIO.newInstance(SmallRyeOpenAPI.JsonProvider.AUTO,
+                OpenApiConfig.fromConfig(ConfigProvider.getConfig())));
     }
 
     private static <V, A extends V, O extends V, AB, OB> String serialize(OpenAPI openApi, Format format,

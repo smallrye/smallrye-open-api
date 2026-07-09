@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.smallrye.openapi.api.OpenApiConfig;
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 import io.smallrye.openapi.model.BaseModel;
 
 /**
@@ -61,10 +62,32 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
         }
     }
 
-    public static <V, A extends V, O extends V, AB, OB> JsonIO<V, A, O, AB, OB> newInstance(OpenApiConfig config) {
-        @SuppressWarnings("unchecked")
-        JsonIO<V, A, O, AB, OB> jackson = (JsonIO<V, A, O, AB, OB>) new JacksonJsonIO(config);
-        return jackson;
+    @SuppressWarnings("unchecked")
+    public static <V, A extends V, O extends V, AB, OB> JsonIO<V, A, O, AB, OB> newInstance(
+            SmallRyeOpenAPI.JsonProvider jsonProvider, OpenApiConfig config) {
+        return (JsonIO<V, A, O, AB, OB>) newInstanceRaw(jsonProvider, config);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static JsonIO newInstanceRaw(SmallRyeOpenAPI.JsonProvider jsonProvider, OpenApiConfig config) {
+        switch (jsonProvider) {
+            case JACKSON2:
+                return new Jackson2JsonIO(config);
+            case JACKSON3:
+                return new Jackson3JsonIO(config);
+            case JAKARTA_JSON:
+                return new JakartaJsonIO(config);
+            case AUTO:
+            default:
+                for (var provider : SmallRyeOpenAPI.JsonProvider.providers()) {
+                    try {
+                        return newInstanceRaw(provider, config);
+                    } catch (Exception | LinkageError e) {
+                        IoLogging.logger.jsonProviderAutoLoadFailure(provider.name(), e.getMessage());
+                    }
+                }
+                throw IoMessages.msg.noJsonProviderFound(SmallRyeOpenAPI.JsonProvider.providerNames());
+        }
     }
 
     private boolean wrapped(String value, String prefix, String suffix) {

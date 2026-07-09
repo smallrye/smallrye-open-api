@@ -18,7 +18,8 @@
 
     <properties>
         <version.buildhelper.plugin>3.6.1</version.buildhelper.plugin>
-        <jackson-bom.version>2.22.1</jackson-bom.version>
+        <version.jackson2-bom>2.22.1</version.jackson2-bom>
+        <version.jackson3-bom>3.2.0</version.jackson3-bom>
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.6.0</version.io.smallrye.jandex>
         <version.io.smallrye.smallrye-config>3.18.1</version.io.smallrye.smallrye-config>
@@ -115,7 +116,14 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>${jackson-bom.version}</version>
+                <version>${version.jackson2-bom}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${version.jackson3-bom}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -476,6 +484,45 @@
                 <jboss.extra.opts>--add-modules java.se</jboss.extra.opts>
                 <maven.compiler.release>11</maven.compiler.release>
             </properties>
+        </profile>
+
+        <profile>
+            <id>jackson3</id>
+            <dependencies>
+                <!-- Jackson 2 Libraries -->
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-yaml</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+
+                <!-- Jackson 3 Libraries -->
+                <dependency>
+                    <groupId>tools.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                    <optional>false</optional>
+                </dependency>
+                <dependency>
+                    <groupId>tools.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <optional>false</optional>
+                </dependency>
+                <dependency>
+                    <groupId>tools.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-yaml</artifactId>
+                    <optional>false</optional>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>

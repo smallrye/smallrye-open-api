@@ -6,13 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-class JacksonJsonIOTest extends JsonIOTest<JsonNode, ArrayNode, ObjectNode, ArrayNode, ObjectNode> {
+abstract class JacksonJsonIOTest<V, A extends V, O extends V, AB, OB> extends JsonIOTest<V, A, O, AB, OB> {
 
     private Properties originalSystemProperties;
 
@@ -28,9 +22,6 @@ class JacksonJsonIOTest extends JsonIOTest<JsonNode, ArrayNode, ObjectNode, Arra
                 .map(tag -> tag.substring("property:".length()))
                 .map(tag -> tag.split("="))
                 .forEach(tag -> System.setProperty(tag[0], tag[1]));
-
-        super.target = new JacksonJsonIO(new ObjectMapper()
-                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS));
     }
 
     @AfterEach
