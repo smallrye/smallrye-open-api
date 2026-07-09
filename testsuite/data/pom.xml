@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-build-parent</artifactId>
-        <version>50</version>
+        <version>51</version>
         <relativePath />
     </parent>
 
@@ -21,7 +21,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.37.0</quarkus.platform.version>
+        <quarkus.platform.version>3.37.2</quarkus.platform.version>
     </properties>
 
     <dependencyManagement>
