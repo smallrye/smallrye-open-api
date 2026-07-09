@@ -74,3 +74,4 @@ wrapper {
 }
 
 tasks.pluginUnderTestMetadata.dependsOn(processJandexIndex)
+tasks.validatePlugins.dependsOn(processJandexIndex)
