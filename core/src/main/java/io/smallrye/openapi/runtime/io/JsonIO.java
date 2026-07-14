@@ -65,7 +65,7 @@ public interface JsonIO<V, A extends V, O extends V, AB, OB> {
     @SuppressWarnings("unchecked")
     public static <V, A extends V, O extends V, AB, OB> JsonIO<V, A, O, AB, OB> newInstance(
             SmallRyeOpenAPI.JsonProvider jsonProvider, OpenApiConfig config) {
-        return (JsonIO<V, A, O, AB, OB>) newInstanceRaw(jsonProvider, config);
+        return newInstanceRaw(jsonProvider, config);
     }
 
     @SuppressWarnings("rawtypes")

@@ -23,6 +23,7 @@ class Jackson3JsonIOTest extends JacksonJsonIOTest<JsonNode, ArrayNode, ObjectNo
         }
     }
 
+    @Override
     @BeforeEach
     void setup(TestInfo testInfo) {
         super.setup(testInfo);
