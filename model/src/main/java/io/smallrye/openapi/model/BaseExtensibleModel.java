@@ -24,7 +24,7 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
     }
 
     private void assertNotExtension(String name, String messageTemplate) {
-        if (extensionNames.contains(name)) {
+        if (isExtension(name) || extensionNames.contains(name)) {
             throw new IllegalArgumentException(String.format(messageTemplate, name));
         }
     }
@@ -102,13 +102,13 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
 
     @Override
     protected <V> void addListPropertyEntry(String name, V value) {
-        assertNotExtension(name, "Property %s has already been set as an extension and cannot be modified as a List");
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a List");
         super.addListPropertyEntry(name, value);
     }
 
     @Override
     protected <V> void removeListPropertyEntry(String name, V value) {
-        assertNotExtension(name, "Property %s has already been set as an extension and cannot be modified as a List");
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a List");
         super.removeListPropertyEntry(name, value);
     }
 
@@ -121,13 +121,13 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
 
     @Override
     protected <V> void putMapPropertyEntry(String name, String key, V value) {
-        assertNotExtension(name, "Property %s has already been set as an extension and cannot be modified as a Map");
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a Map");
         super.putMapPropertyEntry(name, key, value);
     }
 
     @Override
     protected void removeMapPropertyEntry(String name, String key) {
-        assertNotExtension(name, "Property %s has already been set as an extension and cannot be modified as a Map");
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a Map");
         super.removeMapPropertyEntry(name, key);
     }
 
