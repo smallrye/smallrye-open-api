@@ -375,10 +375,12 @@ public class BeanValidationScanner {
 
             pattern.append('^');
             pattern.append("[+-]?"); // optional sign
-            pattern.append("(?=.*\\d)"); // look-ahead to ensure some digits present
+            pattern.append("(?=.*?\\d)"); // look-ahead to ensure some digits present
 
             if (integerPart > 0) {
                 pattern.append("\\d{0,").append(integerPart).append('}');
+            } else {
+                pattern.append("0?");
             }
 
             pattern.append("(?:\\.");
