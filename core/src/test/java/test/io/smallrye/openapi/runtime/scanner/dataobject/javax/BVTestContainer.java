@@ -83,6 +83,9 @@ public class BVTestContainer {
     @Digits(integer = 8, fraction = 10)
     @NotBlank
     private String stringNotBlankDigits;
+    @Digits(integer = 0, fraction = 10)
+    @NotBlank
+    private String stringNotBlankDigitsZeroInteger;
     @NotEmpty
     @Size(max = 2000)
     private String stringNotEmptyMaxSize;

@@ -4,7 +4,7 @@
     "schemas" : {
       "BVTestContainer" : {
         "type" : "object",
-        "required" : [ "arrayListNotNullAndNotEmptyAndMaxItems", "arrayListNullableAndMinItemsAndMaxItems", "mapObjectNotNullAndNotEmptyAndMaxProperties", "mapObjectNullableAndMinPropertiesAndMaxProperties", "stringNotBlankNotNull", "stringNotBlankDigits", "stringNotEmptyMaxSize", "stringNotEmptySizeRange", "booleanNotNull", "jacksonRequiredTrueString" ],
+        "required" : [ "arrayListNotNullAndNotEmptyAndMaxItems", "arrayListNullableAndMinItemsAndMaxItems", "mapObjectNotNullAndNotEmptyAndMaxProperties", "mapObjectNullableAndMinPropertiesAndMaxProperties", "stringNotBlankNotNull", "stringNotBlankDigits", "stringNotBlankDigitsZeroInteger", "stringNotEmptyMaxSize", "stringNotEmptySizeRange", "booleanNotNull", "jacksonRequiredTrueString" ],
         "properties" : {
           "arrayListNotNullAndNotEmptyAndMaxItems" : {
             "type" : "array",
@@ -108,6 +108,10 @@
           "stringNotBlankDigits" : {
             "type" : "string",
             "pattern" : "^[+-]?(?=.*?\\d)\\d{0,8}(?:\\.\\d{0,10})?$"
+          },
+          "stringNotBlankDigitsZeroInteger" : {
+            "type" : "string",
+            "pattern" : "^[+-]?(?=.*?\\d)0?(?:\\.\\d{0,10})?$"
           },
           "stringNotEmptyMaxSize" : {
             "type" : "string",
