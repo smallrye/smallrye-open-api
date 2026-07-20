@@ -76,6 +76,8 @@ public class TypeResolver {
     private boolean exposed = false;
     private boolean readOnly = false;
     private boolean writeOnly = false;
+    private MethodInfo ignoredReadMethod;
+    private MethodInfo ignoredWriteMethod;
     private final List<AnnotationTarget> constraintTargets = new ArrayList<>();
     private String propertyNamePrefix;
     private String propertyNameSuffix;
@@ -372,7 +374,17 @@ public class TypeResolver {
 
     public boolean isIgnored() {
         return ignored || (readOnly && readMethod == null && field == null)
-                || (writeOnly && writeMethod == null && field == null);
+                || (writeOnly && writeMethod == null && field == null)
+                || (ignoredReadMethod != null && readMethod == ignoredReadMethod && writeMethod == null
+                        && !isFieldExplicitlyVisible())
+                || (ignoredWriteMethod != null && writeMethod == ignoredWriteMethod && readMethod == null
+                        && !isFieldExplicitlyVisible());
+    }
+
+    private boolean isFieldExplicitlyVisible() {
+        return field != null && (context.annotations().getAnnotation(field, JacksonConstants.JSON_VIEW) != null
+                || isUnhidden(field)
+                || context.annotations().getAnnotation(field, JacksonConstants.JSON_PROPERTY) != null);
     }
 
     public boolean isReadOnly() {
@@ -692,8 +704,10 @@ public class TypeResolver {
                 if (target.kind() == Kind.METHOD) {
                     if (isAccessor(context, target.asMethod())) {
                         this.writeOnly = true;
+                        this.ignoredReadMethod = target.asMethod();
                     } else {
                         this.readOnly = true;
+                        this.ignoredWriteMethod = target.asMethod();
                     }
 
                     if (this.readOnly && this.writeOnly) {

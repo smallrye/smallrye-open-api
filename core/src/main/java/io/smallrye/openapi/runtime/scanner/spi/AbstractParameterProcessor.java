@@ -49,6 +49,7 @@ import org.jboss.jandex.Type;
 
 import io.smallrye.openapi.api.util.MergeUtil;
 import io.smallrye.openapi.internal.models.media.SchemaSupport;
+import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.model.Extensions;
 import io.smallrye.openapi.runtime.io.Names;
 import io.smallrye.openapi.runtime.io.schema.SchemaConstant;
@@ -110,6 +111,33 @@ public abstract class AbstractParameterProcessor {
 
     private Set<String> processedMatrixSegments = new HashSet<>();
     private List<Parameter> preferredOrder;
+
+    /**
+     * Comparator to order framework parameter annotations before MP OpenAPI Parameter annotations.
+     *
+     * Processing the framework annotations first is preferred because they generally allow for
+     * parameter `name`, `location`, and `style` to be derived whereas those values may be null
+     * in the MP OpenAPI Parameter annotation.
+     */
+    private final class FrameworkParamsFirstComparator implements Comparator<AnnotationInstance> {
+        @Override
+        public int compare(AnnotationInstance o1, AnnotationInstance o2) {
+            boolean frameworkParam1 = !Names.PARAMETER.equals(o1.name()) && isParameter(o1.name());
+            boolean frameworkParam2 = !Names.PARAMETER.equals(o2.name()) && isParameter(o2.name());
+
+            if (frameworkParam1) {
+                if (!frameworkParam2) {
+                    return -1;
+                }
+            } else if (frameworkParam2) {
+                return 1;
+            }
+
+            return 0;
+        }
+    }
+
+    private final Comparator<AnnotationInstance> frameworkParametersFirst = new FrameworkParamsFirstComparator();
 
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
@@ -333,7 +361,8 @@ public abstract class AbstractParameterProcessor {
         scanMethods(
                 candidateMethods,
                 a -> a.target().kind() == Kind.METHOD_PARAMETER,
-                Comparator.comparing(a -> a.target().asMethodParameter().position()),
+                Comparator.<AnnotationInstance> comparingInt(a -> a.target().asMethodParameter().position())
+                        .thenComparing(frameworkParametersFirst),
                 this::readAnnotatedType);
 
         /*
@@ -660,7 +689,12 @@ public abstract class AbstractParameterProcessor {
     }
 
     void mapParameterSchema(Parameter param, ParameterContext context) {
-        if (ModelUtil.parameterHasSchema(param) || context.targetType == null) {
+        if (context.targetType == null) {
+            return;
+        }
+
+        if (ModelUtil.parameterHasSchema(param)) {
+            mergeParameterTypeSchema(param, context);
             return;
         }
 
@@ -690,6 +724,43 @@ public abstract class AbstractParameterProcessor {
         }
 
         ModelUtil.setParameterSchema(param, schema);
+    }
+
+    private void mergeParameterTypeSchema(Parameter param, ParameterContext context) {
+        Map<String, Schema> paramSchemas = ModelUtil.getParameterMediaTypeSchemas(param);
+        Map<String, Schema> scannableParamSchemas = new HashMap<>(paramSchemas.size());
+
+        for (var entry : paramSchemas.entrySet()) {
+            if (entry.getValue().getRef() == null && entry.getValue().getType() == null) {
+                scannableParamSchemas.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (!scannableParamSchemas.isEmpty()) {
+            Schema typeSchema = SchemaFactory.typeToSchema(scannerContext, context.targetType, null);
+
+            if (typeSchema == null) {
+                // Hidden schema
+                return;
+            }
+
+            for (var entry : scannableParamSchemas.entrySet()) {
+                var paramSchema = entry.getValue();
+
+                if (typeSchema.getRef() != null) {
+                    paramSchema.setRef(typeSchema.getRef());
+                } else {
+                    /*
+                     * The type schema must be cloned before using it as the target of an object merge.
+                     * Merging here will overlay the parameter schema's attributes over the type schema's
+                     * attributes before replacing the schema in the parameter model.
+                     */
+                    typeSchema = BaseModel.deepCopy(typeSchema, Schema.class);
+                    paramSchema = mergeObjects(typeSchema, paramSchema);
+                    ModelUtil.setParameterMediaTypeSchema(param, entry.getKey(), paramSchema);
+                }
+            }
+        }
     }
 
     void mapParameterExtensions(Parameter param, ParameterContext context) {
@@ -1512,16 +1583,24 @@ public abstract class AbstractParameterProcessor {
      * @param overriddenParametersOnly true if only parameters already known to the scanner are considered, false otherwise
      */
     protected void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
+        List<AnnotationInstance> paramAnnotations = new ArrayList<>();
+
         for (Map.Entry<DotName, List<AnnotationInstance>> entry : clazz.annotationsMap().entrySet()) {
             DotName name = entry.getKey();
 
             if (Names.PARAMETER.equals(name) || isParameter(name)) {
                 for (AnnotationInstance annotation : entry.getValue()) {
                     if (isBeanPropertyParam(annotation)) {
-                        readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
+                        paramAnnotations.add(annotation);
                     }
                 }
             }
+        }
+
+        Collections.sort(paramAnnotations, frameworkParametersFirst);
+
+        for (AnnotationInstance annotation : paramAnnotations) {
+            readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
         }
     }
 

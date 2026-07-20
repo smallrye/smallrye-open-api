@@ -4,24 +4,24 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-build-parent</artifactId>
-        <version>49</version>
+        <version>51</version>
         <relativePath />
     </parent>
 
     <artifactId>smallrye-open-api-testsuite-data</artifactId>
-    <version>4.3.5-SNAPSHOT</version>
+    <version>4.3.6-SNAPSHOT</version>
     <name>SmallRye: OpenAPI Test Data</name>
 
     <properties>
-        <eclipse.microprofile.openapi.version>4.1.1</eclipse.microprofile.openapi.version>
-        <kotlin.version>2.2.0</kotlin.version>
+        <eclipse.microprofile.openapi.version>4.2-RC2</eclipse.microprofile.openapi.version>
+        <kotlin.version>2.4.0</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.36.2</quarkus.platform.version>
+        <quarkus.platform.version>3.37.3</quarkus.platform.version>
     </properties>
 
     <dependencyManagement>
@@ -106,12 +106,11 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-metadata-jvm</artifactId>
-            <version>0.9.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

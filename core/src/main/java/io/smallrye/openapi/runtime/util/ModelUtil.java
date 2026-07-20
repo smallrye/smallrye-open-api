@@ -1,8 +1,9 @@
 package io.smallrye.openapi.runtime.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -220,6 +221,59 @@ public class ModelUtil {
     }
 
     /**
+     * Returns the map of {@link Schema}s defined for the given
+     * {@link Parameter} with the schema's content type as the key (possibly
+     * null for the {@linkplain Parameter#getSchema() schema defined directly on
+     * the parameter}.
+     *
+     * A schema can be defined either via the parameter's "schema" property, or
+     * any "content.*.schema" property.
+     *
+     * @param parameter
+     *        Parameter
+     * @return map of schemas by content type, never null
+     */
+    public static Map<String, Schema> getParameterMediaTypeSchemas(Parameter parameter) {
+        Map<String, Schema> mediaTypeSchemas;
+
+        if (parameter.getSchema() != null) {
+            mediaTypeSchemas = new HashMap<>(1);
+            mediaTypeSchemas.put(null, parameter.getSchema());
+        } else {
+            Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(parameter.getContent());
+            mediaTypeSchemas = new LinkedHashMap<>(mediaTypes.size());
+
+            for (var entry : mediaTypes.entrySet()) {
+                mediaTypeSchemas.put(entry.getKey(), entry.getValue().getSchema());
+            }
+        }
+
+        return mediaTypeSchemas;
+    }
+
+    /**
+     * Set a schema to the parameter for the given content type. When the
+     * content type is null, the schema is set
+     * {@linkplain Parameter#setSchema(Schema) directly on the schema}.
+     * Otherwise, the schema will be set in the parameter's content on a new or
+     * existing {@link MediaType} using content type as its key.
+     *
+     * @param parameter
+     *        The parameter
+     * @param contentType
+     *        The content type to which the schema applies (null allowed)
+     * @param schema
+     *        The schema
+     */
+    public static void setParameterMediaTypeSchema(Parameter parameter, String contentType, Schema schema) {
+        if (contentType == null) {
+            parameter.setSchema(schema);
+        } else {
+            parameter.setContent(putMediaTypeSchema(parameter.getContent(), contentType, schema));
+        }
+    }
+
+    /**
      * Returns the list of {@link Schema}s defined for the given {@link Parameter}.
      * A schema can be defined either via the parameter's "schema" property, or any
      * "content.*.schema" property.
@@ -228,20 +282,7 @@ public class ModelUtil {
      * @return list of schemas, never null
      */
     public static List<Schema> getParameterSchemas(Parameter parameter) {
-        if (parameter.getSchema() != null) {
-            return Arrays.asList(parameter.getSchema());
-        }
-        Map<String, MediaType> mediaTypes = getMediaTypesOrEmpty(parameter.getContent());
-        if (!mediaTypes.isEmpty()) {
-            List<Schema> schemas = new ArrayList<>(mediaTypes.size());
-
-            for (MediaType mediaType : mediaTypes.values()) {
-                if (mediaType.getSchema() != null) {
-                    schemas.add(mediaType.getSchema());
-                }
-            }
-        }
-        return Collections.emptyList();
+        return new ArrayList<>(getParameterMediaTypeSchemas(parameter).values());
     }
 
     /**
@@ -339,6 +380,23 @@ public class ModelUtil {
             return content.getMediaTypes();
         }
         return Collections.emptyMap();
+    }
+
+    static Content putMediaTypeSchema(Content content, String contentType, Schema schema) {
+        if (content == null) {
+            content = OASFactory.createContent();
+        }
+
+        MediaType mediaType = content.getMediaType(contentType);
+
+        if (mediaType == null) {
+            mediaType = OASFactory.createMediaType();
+            content.addMediaType(contentType, mediaType);
+        }
+
+        mediaType.setSchema(schema);
+
+        return content;
     }
 
     /**

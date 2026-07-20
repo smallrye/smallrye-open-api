@@ -23,6 +23,22 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
     protected BaseExtensibleModel() {
     }
 
+    private void assertNotExtension(String name, String messageTemplate) {
+        if (isExtension(name) || extensionNames.contains(name)) {
+            throw new IllegalArgumentException(String.format(messageTemplate, name));
+        }
+    }
+
+    private <P> boolean maybeSetExtension(String name, P value) {
+        if (isExtension(name)) {
+            addExtension(name, value);
+            return true;
+        } else {
+            extensionNames.remove(name);
+            return false;
+        }
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!super.equals(obj)) {
@@ -71,101 +87,47 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
     }
 
     @Override
-    protected <P> P getProperty(String name) {
-        if (extensionNames.contains(name)) {
-            // Do not return extension when accessed as a property
-            return null;
-        }
-        return super.getProperty(name);
-    }
-
-    @Override
-    protected <P> P getProperty(String name, Class<P> type) {
-        if (extensionNames.contains(name)) {
-            // Do not return extension when accessed as a property
-            return null;
-        }
-        return super.getProperty(name, type);
-    }
-
-    @Override
     public <P> void setProperty(String name, P value) {
-        if (extensionNames.contains(name)) {
-            // Property replaces the extension entry.
-            extensionNames.remove(name);
+        if (!maybeSetExtension(name, value)) {
+            super.setProperty(name, value);
         }
-        super.setProperty(name, value);
-    }
-
-    @Override
-    protected <V> List<V> getListProperty(String name) {
-        if (extensionNames.contains(name)) {
-            // Do not return extension when accessed as a property
-            return null; // NOSONAR
-        }
-        return super.getListProperty(name);
     }
 
     @Override
     protected <V> void setListProperty(String name, List<V> value) {
-        if (extensionNames.contains(name)) {
-            // Property replaces the extension entry.
-            extensionNames.remove(name);
+        if (!maybeSetExtension(name, value)) {
+            super.setListProperty(name, value);
         }
-        super.setListProperty(name, value);
     }
 
     @Override
     protected <V> void addListPropertyEntry(String name, V value) {
-        if (extensionNames.contains(name)) {
-            // Property replaces the extension entry.
-            extensionNames.remove(name);
-        }
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a List");
         super.addListPropertyEntry(name, value);
     }
 
     @Override
     protected <V> void removeListPropertyEntry(String name, V value) {
-        if (extensionNames.contains(name)) {
-            // Do not remove extension when removed as a property
-            return;
-        }
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a List");
         super.removeListPropertyEntry(name, value);
     }
 
     @Override
-    protected <V> Map<String, V> getMapProperty(String name) {
-        if (extensionNames.contains(name)) {
-            // Do not return extension when accessed as a property
-            return null; // NOSONAR
-        }
-        return super.getMapProperty(name);
-    }
-
-    @Override
     protected <V> void setMapProperty(String name, Map<String, V> value) {
-        if (extensionNames.contains(name)) {
-            // Property replaces the extension entry.
-            extensionNames.remove(name);
+        if (!maybeSetExtension(name, value)) {
+            super.setMapProperty(name, value);
         }
-        super.setMapProperty(name, value);
     }
 
     @Override
     protected <V> void putMapPropertyEntry(String name, String key, V value) {
-        if (extensionNames.contains(name)) {
-            // Property replaces the extension entry.
-            extensionNames.remove(name);
-        }
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a Map");
         super.putMapPropertyEntry(name, key, value);
     }
 
     @Override
     protected void removeMapPropertyEntry(String name, String key) {
-        if (extensionNames.contains(name)) {
-            // Do not remove extension when removed as a property
-            return;
-        }
+        assertNotExtension(name, "Property %s is an extension and cannot be modified as a Map");
         super.removeMapPropertyEntry(name, key);
     }
 
@@ -260,7 +222,7 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
 
     @Override
     public Object getExtension(String name) {
-        if (extensionNames.contains(name)) {
+        if (hasExtension(name)) {
             return super.getProperty(name);
         }
 
@@ -269,7 +231,7 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
 
     @Override
     protected boolean isExtension(String name) {
-        return extensionNames.contains(name);
+        return name.startsWith("x-");
     }
 
     /**
@@ -277,7 +239,7 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
      */
     @Override
     public <T extends BaseModel<C>> void merge(T other) {
-        for (Entry<String, Object> property : other.getProperties().entrySet()) {
+        for (Entry<String, Object> property : other.getModelProperties().entrySet()) {
             String name = property.getKey();
 
             if (other.isExtension(name) && !isExtension(name)) {

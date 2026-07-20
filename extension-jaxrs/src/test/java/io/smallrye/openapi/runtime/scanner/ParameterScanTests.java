@@ -20,6 +20,8 @@ import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.Explode;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -159,6 +161,59 @@ class ParameterScanTests extends IndexScannerTestBase {
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterInBeanFromFieldTestResource.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterInBeanFromFieldTestResource.Bean.class,
                 test.io.smallrye.openapi.runtime.scanner.Widget.class);
+    }
+
+    @Test
+    void testBeanParamEnumDefaultValue() throws IOException, JSONException {
+        class QueryOptions {
+            @jakarta.ws.rs.QueryParam("sortOrder")
+            @Parameter(description = "Sort direction", schema = @Schema(defaultValue = "ASC"))
+            SortOrder sortOrder;
+        }
+
+        @Schema(name = "filter-option-a", ref = "http://example.com/schemas/filter-schema-a.json")
+        class FilterOptionA {
+        }
+
+        class FilterOptionB {
+        }
+
+        @Schema(hidden = true)
+        class SecretIdentifier {
+        }
+
+        @jakarta.ws.rs.Path("/beanparam-enum-default")
+        class ListResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            public String list(
+                    @jakarta.ws.rs.BeanParam QueryOptions options,
+                    @jakarta.ws.rs.QueryParam("altSortOrder") @Parameter(description = "Alternate Sort direction", schema = @Schema(implementation = String.class, enumeration = {
+                            "asc", "desc" }, defaultValue = "desc")) SortOrder sortOrder,
+                    @jakarta.ws.rs.QueryParam("filter1") @Parameter(description = "Filter 1", schema = @Schema(description = "Standard filter schema")) FilterOptionA filter1,
+                    @jakarta.ws.rs.QueryParam("filter2") @Parameter(description = "Filter 2", schema = @Schema(ref = "http://example.com/schemas/filter-schema-b.json", description = "Another filter")) FilterOptionA filter2,
+                    @jakarta.ws.rs.QueryParam("filter3") @Parameter(description = "Filter 3 with multiple variants", content = {
+                            @Content(mediaType = "text/plain", schema = @Schema(description = "Third filter in plain text format")),
+                            @Content(mediaType = "application/json", schema = @Schema(description = "Third filter in JSON format")),
+                    }) FilterOptionA multivariantFilter3,
+                    @jakarta.ws.rs.QueryParam("request-id") @Parameter(description = "Identifier for the request", schema = @Schema(format = "custom-id")) Integer requestId,
+                    @jakarta.ws.rs.QueryParam("secret-id") @Parameter(description = "Secret identifier for the request", schema = @Schema(format = "secret-id", description = "The schema for this parameter is not disclosed")) SecretIdentifier secretId,
+                    @jakarta.ws.rs.QueryParam("variable-id") @Parameter(description = "Identifier with multiple variants", content = {
+                            @Content(mediaType = "text/x-custom-type1", schema = @Schema(minimum = "1", maximum = "50")),
+                            @Content(mediaType = "text/x-custom-type2", schema = @Schema(minimum = "51", maximum = "99")),
+                    }) Long multivariantIdentifier) {
+                return "ok";
+            }
+        }
+
+        test("params.beanparam-enum-default-value.json", SortOrder.class, FilterOptionA.class, FilterOptionB.class,
+                SecretIdentifier.class,
+                QueryOptions.class, ListResource.class);
+    }
+
+    enum SortOrder {
+        ASC,
+        DESC
     }
 
     @Test
@@ -773,5 +828,29 @@ class ParameterScanTests extends IndexScannerTestBase {
 
         test(dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.FALSE),
                 "params.ignored-name-type-duplicates.json", Parameters.class, BeanParamResource.class);
+    }
+
+    @Test
+    void testBeanParamFieldsWithSameStyleNotConflated() throws IOException, JSONException {
+        class ListOptions {
+            @jakarta.ws.rs.QueryParam("sortBy")
+            @Parameter(description = "Sort field", style = ParameterStyle.FORM, explode = Explode.FALSE, schema = @Schema(type = SchemaType.ARRAY, implementation = String.class))
+            String sortBy;
+
+            @jakarta.ws.rs.QueryParam("fields")
+            @Parameter(description = "Projection fields", style = ParameterStyle.FORM, explode = Explode.FALSE, schema = @Schema(type = SchemaType.ARRAY, implementation = String.class))
+            String fields;
+        }
+
+        @jakarta.ws.rs.Path("/resources")
+        class ListResource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Produces(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
+            public String list(@jakarta.ws.rs.BeanParam ListOptions options) {
+                return "ok";
+            }
+        }
+
+        test("params.beanparam-same-style-not-conflated.json", ListOptions.class, ListResource.class);
     }
 }

@@ -22,16 +22,17 @@ jobs:
         tck-version:
         - "4.0.2"
         - "4.1.1"
+        - "4.2-RC2"
 
     name: MicroProfile OpenAPI TCK ${{ matrix.tck-version }} with jdk ${{ matrix.java }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         name: checkout ${{inputs.version}}
         with:
           ref: ${{ inputs.version }}
 
       - name: maven cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-tck-${{ matrix.tck-version }}-${{ hashFiles('**/pom.xml') }}

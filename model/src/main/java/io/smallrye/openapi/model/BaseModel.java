@@ -48,7 +48,7 @@ public abstract class BaseModel<C extends Constructible> {
         return modCount;
     }
 
-    Map<String, Object> getProperties() {
+    Map<String, Object> getModelProperties() {
         return properties;
     }
 
@@ -127,7 +127,7 @@ public abstract class BaseModel<C extends Constructible> {
      * @param other the other {@link BaseModel} object
      */
     public <T extends BaseModel<C>> void merge(T other) {
-        for (Entry<String, Object> entry : other.getProperties().entrySet()) {
+        for (Entry<String, Object> entry : other.getModelProperties().entrySet()) {
             String name = entry.getKey();
             MergeDirective mergeDirective = mergeDirective(name);
 

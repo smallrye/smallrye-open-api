@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import io.smallrye.openapi.api.OpenApiConfig;
@@ -881,6 +882,77 @@ class TypeResolverTests extends IndexScannerTestBase {
         context.getJsonViews().put(Type.create(DotName.createSimple(Views.View3.class), Type.Kind.CLASS), true);
         Map<String, TypeResolver> p3 = getProperties(context, Bean.class);
         Stream.of("field0", "field1", "field2", "field3").forEach(f -> assertFalse(p3.get(f).isIgnored()));
+    }
+
+    @Test
+    /*
+     * Issue: https://github.com/smallrye/smallrye-open-api/issues/2412
+     */
+    void testJsonViewExcludesGetterOnlyProperty() {
+        class Views {
+            class Public {
+            }
+
+            class Private {
+            }
+        }
+
+        @SuppressWarnings("unused")
+        class Bean {
+            private String field0;
+            private String field1;
+            private String field2;
+            @JsonView(Views.Public.class)
+            private String field3;
+            @Schema
+            private String field4;
+            @JsonProperty
+            private String field5;
+
+            public String getField0() {
+                return field0;
+            }
+
+            public void setField0(String field0) {
+                this.field0 = field0;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField1() {
+                return field1;
+            }
+
+            @JsonView(Views.Private.class)
+            public void setField2(String field2) {
+                this.field2 = field2;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField3() {
+                return field3;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField4() {
+                return field4;
+            }
+
+            @JsonView(Views.Private.class)
+            public String getField5() {
+                return field5;
+            }
+        }
+
+        AnnotationScannerContext context = buildContext(emptyConfig(), Bean.class, Views.Private.class, Views.Public.class);
+        context.getJsonViews().put(Type.create(DotName.createSimple(Views.Public.class), Type.Kind.CLASS), true);
+
+        Map<String, TypeResolver> properties = getProperties(context, Bean.class);
+        assertFalse(properties.get("field0").isIgnored());
+        assertTrue(properties.get("field1").isIgnored());
+        assertTrue(properties.get("field2").isIgnored());
+        assertFalse(properties.get("field3").isIgnored());
+        assertFalse(properties.get("field4").isIgnored());
+        assertFalse(properties.get("field5").isIgnored());
     }
 
     /*
