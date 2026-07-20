@@ -21,7 +21,7 @@
         <jackson-bom.version>2.22.1</jackson-bom.version>
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.6.0</version.io.smallrye.jandex>
-        <version.io.smallrye.smallrye-config>3.18.0</version.io.smallrye.smallrye-config>
+        <version.io.smallrye.smallrye-config>3.18.1</version.io.smallrye.smallrye-config>
         <version.io.smallrye.smallrye-common-classloader>2.20.0</version.io.smallrye.smallrye-common-classloader>
         <version.eclipse.microprofile.openapi>4.2-RC2</version.eclipse.microprofile.openapi>
         <version.kotlinx-coroutines-core>1.11.0</version.kotlinx-coroutines-core>
