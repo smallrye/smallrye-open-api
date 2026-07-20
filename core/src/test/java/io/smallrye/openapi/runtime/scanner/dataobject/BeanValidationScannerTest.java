@@ -575,7 +575,31 @@ class BeanValidationScannerTest extends IndexScannerTestBase {
         testTarget.digitsString(targetField, schema);
         testTarget.notBlank(targetField, schema, propertyKey, requirementHandler(parentSchema));
 
-        assertEquals("^\\d{1,8}([.]\\d{1,10})?$", schema.getPattern());
+        assertEquals("^[+-]?(?=.*?\\d)\\d{0,8}(?:\\.\\d{0,10})?$", schema.getPattern());
+        assertNull(SchemaSupport.getNullable(schema));
+        assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
+    }
+
+    @Test
+    void testJavaxStringNotBlankDigitsZeroInteger() {
+        FieldInfo targetField = javaxTargetClass.field("stringNotBlankDigitsZeroInteger");
+        testStringNotBlankDigitsZeroInteger(targetField);
+    }
+
+    @Test
+    void testJakartaStringNotBlankDigitsZeroInteger() {
+        FieldInfo targetField = jakartaTargetClass.field("stringNotBlankDigitsZeroInteger");
+        testStringNotBlankDigitsZeroInteger(targetField);
+    }
+
+    void testStringNotBlankDigitsZeroInteger(FieldInfo targetField) {
+        Schema parentSchema = OASFactory.createSchema();
+        String propertyKey = targetField.name();
+
+        testTarget.digitsString(targetField, schema);
+        testTarget.notBlank(targetField, schema, propertyKey, requirementHandler(parentSchema));
+
+        assertEquals("^[+-]?(?=.*?\\d)0?(?:\\.\\d{0,10})?$", schema.getPattern());
         assertNull(SchemaSupport.getNullable(schema));
         assertEquals(Arrays.asList(propertyKey), parentSchema.getRequired());
     }

@@ -34,7 +34,7 @@ class BaseModelSupport {
         if (!stack.containsKey(model)) {
             stack.put(model, model);
 
-            for (Map.Entry<String, Object> e : model.getProperties().entrySet()) {
+            for (Map.Entry<String, Object> e : model.getModelProperties().entrySet()) {
                 result = 31 * result + hash(stack, e);
             }
 
@@ -150,7 +150,7 @@ class BaseModelSupport {
 
         if (other instanceof BaseModel) {
             BaseModel<O> otherImpl = (BaseModel<O>) other;
-            result.getProperties().putAll(BaseModelSupport.deepCopy(otherImpl.getProperties(), unmodifiable));
+            result.getModelProperties().putAll(BaseModelSupport.deepCopy(otherImpl.getModelProperties(), unmodifiable));
 
             if (other instanceof BaseExtensibleModel) {
                 BaseExtensibleModel<?> otherExt = (BaseExtensibleModel<?>) other;

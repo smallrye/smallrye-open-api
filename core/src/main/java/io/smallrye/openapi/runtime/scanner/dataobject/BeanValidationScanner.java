@@ -365,29 +365,31 @@ public class BeanValidationScanner {
             // Both attributes are required - safe to use primitives.
             final int integerPart = context.annotations().value(constraint, "integer");
             final int fractionPart = context.annotations().value(constraint, "fraction");
+
+            if (integerPart < 1 && fractionPart < 1) {
+                // Bogus constraint does not allow any digits, bail out
+                return;
+            }
+
             final StringBuilder pattern = new StringBuilder(50);
 
             pattern.append('^');
+            pattern.append("[+-]?"); // optional sign
+            pattern.append("(?=.*?\\d)"); // look-ahead to ensure some digits present
 
             if (integerPart > 0) {
-                pattern.append("\\d");
-
-                if (integerPart > 1) {
-                    pattern.append("{1,").append(integerPart).append('}');
-                }
+                pattern.append("\\d{0,").append(integerPart).append('}');
+            } else {
+                pattern.append("0?");
             }
+
+            pattern.append("(?:\\.");
 
             if (fractionPart > 0) {
-                pattern.append("([.]\\d");
-
-                if (fractionPart > 1) {
-                    pattern.append("{1,").append(fractionPart).append("}");
-                }
-
-                pattern.append(")?");
+                pattern.append("\\d{0,").append(fractionPart).append('}');
             }
 
-            pattern.append('$');
+            pattern.append(")?$");
             schema.setPattern(pattern.toString());
         }
     }
@@ -398,11 +400,12 @@ public class BeanValidationScanner {
         if (constraint != null && schema.getMultipleOf() == null) {
             // `fraction` attribute is required - safe to use primitive.
             final int fractionPart = context.annotations().value(constraint, "fraction");
-            BigDecimal multipleOf;
+            BigDecimal multipleOf = null;
 
             if (fractionPart > 0) {
                 multipleOf = new BigDecimal(BigInteger.ONE, fractionPart);
-            } else {
+            } else if (SchemaSupport.getNonNullType(schema) != Schema.SchemaType.INTEGER) {
+                // multipleOf=1 is redundant for integers, apply only for generic numbers
                 multipleOf = BigDecimal.ONE;
             }
 
