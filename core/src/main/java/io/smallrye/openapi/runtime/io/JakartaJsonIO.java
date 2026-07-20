@@ -30,7 +30,6 @@ import jakarta.json.JsonWriter;
 import jakarta.json.JsonWriterFactory;
 import jakarta.json.spi.JsonProvider;
 
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 
@@ -40,7 +39,6 @@ import io.xlate.yamljson.Yaml;
 
 class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArrayBuilder, JsonObjectBuilder> {
 
-    private final OpenApiConfig config;
     private final JsonProvider json;
     private final JsonReaderFactory jsonReaderFactory;
     private final JsonWriterFactory jsonWriterFactory;
@@ -49,13 +47,12 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
     private final JsonWriterFactory yamlWriterFactory;
 
     public JakartaJsonIO(OpenApiConfig config, JsonProvider jsonProvider, JsonProvider yamlProvider) {
-        this.config = config;
         this.json = jsonProvider;
         this.jsonReaderFactory = jsonProvider.createReaderFactory(Collections.emptyMap());
         this.jsonWriterFactory = jsonProvider.createWriterFactory(Collections.emptyMap());
 
         LoaderOptions loaderOptions = new LoaderOptions();
-        Optional.ofNullable(this.config.getMaximumStaticFileSize()).ifPresent(loaderOptions::setCodePointLimit);
+        Optional.ofNullable(config.getMaximumStaticFileSize()).ifPresent(loaderOptions::setCodePointLimit);
         Map<String, Object> yamlReaderConfig = new HashMap<>();
         yamlReaderConfig.put(Yaml.Settings.LOAD_CONFIG, loaderOptions);
         this.yamlReaderFactory = yamlProvider.createReaderFactory(yamlReaderConfig);
@@ -70,10 +67,6 @@ class JakartaJsonIO implements JsonIO<JsonValue, JsonArray, JsonObject, JsonArra
 
     public JakartaJsonIO(OpenApiConfig config) {
         this(config, JsonProvider.provider(), Yaml.provider());
-    }
-
-    public JakartaJsonIO() {
-        this(OpenApiConfig.fromConfig(ConfigProvider.getConfig()), JsonProvider.provider(), Yaml.provider());
     }
 
     @Override

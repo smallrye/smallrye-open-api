@@ -9,6 +9,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Type;
 
+import io.smallrye.openapi.api.SmallRyeOpenAPI;
 import io.smallrye.openapi.runtime.io.Format;
 import io.smallrye.openapi.runtime.io.JsonIO;
 import io.smallrye.openapi.runtime.scanner.spi.AnnotationScanner;
@@ -37,7 +38,7 @@ public interface AnnotationScannerExtension {
             this.scannerContext = scannerContext;
 
             if (scannerContext.io().jsonIO() == null) {
-                scannerContext.io().jsonIO(JsonIO.newInstance(scannerContext.getConfig()));
+                scannerContext.io().jsonIO(JsonIO.newInstance(SmallRyeOpenAPI.JsonProvider.AUTO, scannerContext.getConfig()));
             }
 
             jsonIO = scannerContext.io().jsonIO();

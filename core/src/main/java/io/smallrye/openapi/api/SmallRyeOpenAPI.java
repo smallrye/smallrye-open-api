@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +51,31 @@ import io.smallrye.openapi.runtime.scanner.spi.AnnotationScannerFactory;
 
 @SuppressWarnings("deprecation")
 public class SmallRyeOpenAPI {
+
+    public enum JsonProvider {
+        JACKSON2("Jackson 2.x"),
+        JACKSON3("Jackson 3.x"),
+        JAKARTA_JSON("Jakarta JSON"),
+        AUTO(null);
+
+        private final String title;
+
+        private JsonProvider(String title) {
+            this.title = title;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public static List<JsonProvider> providers() {
+            return List.of(JACKSON2, JACKSON3, JAKARTA_JSON);
+        }
+
+        public static List<String> providerNames() {
+            return List.of(JACKSON2.title, JACKSON3.title, JAKARTA_JSON.title);
+        }
+    }
 
     private final OpenAPI model;
     private final Object jsonModel;
@@ -101,6 +127,8 @@ public class SmallRyeOpenAPI {
         private Config config;
         private ClassLoader applicationClassLoader;
         private OpenAPI initialModel;
+
+        private JsonProvider jsonProvider = JsonProvider.AUTO;
 
         private boolean enableModelReader = true;
 
@@ -155,6 +183,20 @@ public class SmallRyeOpenAPI {
         public Builder withConfig(Config config) {
             removeContext();
             this.config = Objects.requireNonNull(config);
+            return this;
+        }
+
+        /**
+         * Set the JSON provider to use when building the OpenAPI model. If not
+         * set, the provider will be auto-detected from the classpath.
+         *
+         * @param jsonProvider
+         *        the JSON provider to use, nulls not allowed
+         * @return this builder
+         */
+        public Builder withJsonProvider(JsonProvider jsonProvider) {
+            removeContext();
+            this.jsonProvider = Objects.requireNonNull(jsonProvider);
             return this;
         }
 
@@ -710,7 +752,7 @@ public class SmallRyeOpenAPI {
 
                 this.buildConfig = OpenApiConfig.fromConfig(Optional.ofNullable(builder.config)
                         .orElseGet(() -> ConfigProvider.getConfig(this.appClassLoader)));
-                IOContext<V, A, O, AB, OB> io = IOContext.forJson(JsonIO.newInstance(this.buildConfig));
+                IOContext<V, A, O, AB, OB> io = IOContext.forJson(JsonIO.newInstance(builder.jsonProvider, this.buildConfig));
                 this.modelIO = new OpenAPIDefinitionIO<>(io);
                 this.filteredIndex = new FilteredIndexView(builder.index, this.buildConfig);
                 this.initialModel = builder.initialModel;

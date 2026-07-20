@@ -3,10 +3,13 @@ package io.smallrye.openapi.runtime.io;
 import static java.lang.invoke.MethodHandles.lookup;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
+
+import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
 @MessageBundle(projectCode = "SROAP", length = 5)
 interface IoMessages {
@@ -20,4 +23,7 @@ interface IoMessages {
 
     @Message(id = 3002, value = "Invalid file extension for URL (expected json, yaml, or yml): %s")
     IOException invalidFileExtension(String url);
+
+    @Message(id = 3003, value = "No JSON provider found. Supported providers: %s")
+    OpenApiRuntimeException noJsonProviderFound(List<String> providers);
 }
