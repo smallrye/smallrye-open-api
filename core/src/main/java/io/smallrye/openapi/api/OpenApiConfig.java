@@ -352,6 +352,10 @@ public interface OpenApiConfig {
                 .collect(Collectors.toSet());
     }
 
+    default boolean removeUnusedTags() {
+        return getConfigValue(SmallRyeOASConfig.SMALLRYE_REMOVE_UNUSED_TAGS, Boolean.class, () -> Boolean.FALSE);
+    }
+
     default boolean mergeSchemaExamples() {
         return getConfigValue(SmallRyeOASConfig.SMALLRYE_MERGE_SCHEMA_EXAMPLES, Boolean.class, () -> Boolean.TRUE);
     }
