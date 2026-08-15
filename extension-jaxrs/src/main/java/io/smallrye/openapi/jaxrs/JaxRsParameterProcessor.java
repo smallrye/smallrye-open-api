@@ -286,14 +286,26 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
 
     @Override
     protected boolean isResourceMethod(MethodInfo method) {
+        // avoid the expensive ancestry call if possible by first checking the method itself
+        if (hasMethodHTTPMethodAnnotation(method)) {
+            return true;
+        }
+
+        // check if any of the parent methods has a http method annotation
         for (MethodInfo overriddenMethod : scannerContext.getAugmentedIndex().ancestry(method).values()) {
-            if (overriddenMethod != null) {
-                for (AnnotationInstance a : overriddenMethod.declaredAnnotations()) {
-                    for (AnnotationInstance httpMethod : JaxRsConstants.HTTP_METHOD_INSTANCES) {
-                        if (a.equivalentTo(httpMethod)) {
-                            return true;
-                        }
-                    }
+            if (overriddenMethod != null && hasMethodHTTPMethodAnnotation(overriddenMethod)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasMethodHTTPMethodAnnotation(MethodInfo method) {
+        for (AnnotationInstance a : method.declaredAnnotations()) {
+            for (AnnotationInstance httpMethod : JaxRsConstants.HTTP_METHOD_INSTANCES) {
+                if (a.equivalentTo(httpMethod)) {
+                    return true;
                 }
             }
         }
