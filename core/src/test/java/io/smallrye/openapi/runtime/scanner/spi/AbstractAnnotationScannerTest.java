@@ -18,6 +18,7 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -182,7 +183,8 @@ class AbstractAnnotationScannerTest {
         params.setOperationParameters(Arrays.asList(OASFactory.createParameter().name(paramName).in(paramIn)));
 
         AbstractAnnotationScanner scanner = new DummyAnnotationScanner();
-        AnnotationScannerContext context = new AnnotationScannerContext(null, Thread.currentThread().getContextClassLoader(),
+        AnnotationScannerContext context = new AnnotationScannerContext(IndexView.empty(),
+                Thread.currentThread().getContextClassLoader(),
                 config);
         assertEquals(expectedResult, scanner.isPathParameter(context, searchParamName, params));
     }
