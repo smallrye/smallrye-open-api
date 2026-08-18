@@ -57,13 +57,52 @@ public final class Annotations {
     private final AnnotationScannerContext context;
     private final Collection<DotName> excludedPackages;
 
+    /**
+     * Names of annotations which are part of a composable annotation; composed annotations need not be searched for when the
+     * initially searched for annotation name is not present in this set.
+     */
+    private final Set<DotName> composedSearchCandidates;
+
     public Annotations(AnnotationScannerContext context) {
         this.context = context;
         this.excludedPackages = Names.componentize(context.getConfig().getScanCompositionExcludePackages())
                 .values();
+
+        composedSearchCandidates = new HashSet<>();
+
+        for (AnnotationInstance retention : context.getAugmentedIndex().getAnnotations(DotName.RETENTION_NAME)) {
+            ClassInfo annotatedType = retention.target().asClass();
+            AnnotationValue policy = retention.value();
+
+            if (policy == null
+                    || !"RUNTIME".equals(policy.asEnum())
+                    || !composable(annotatedType.name())) {
+                continue;
+            }
+
+            for (AnnotationInstance annotation : annotatedType.declaredAnnotations()) {
+                composedSearchCandidates.add(annotation.name());
+            }
+        }
+
     }
 
-    private static Collection<AnnotationInstance> getDeclaredAnnotations(AnnotationTarget target) {
+    private static AnnotationInstance declaredAnnotation(AnnotationTarget target, DotName name) {
+        AnnotationInstance direct = target.declaredAnnotation(name);
+        if (direct != null) {
+            return direct;
+        }
+
+        if (target.kind() == Kind.FIELD) {
+            FieldInfo field = target.asField();
+            List<AnnotationInstance> propertyAnnotations = KotlinUtil.getPropertyAnnotations(field);
+            return propertyAnnotations.stream().filter(ann -> ann.name().equals(name)).findFirst().orElse(null);
+        }
+
+        return null;
+    }
+
+    private static Collection<AnnotationInstance> declaredAnnotations(AnnotationTarget target) {
         if (target.kind() == Kind.FIELD) {
             return declaredFieldAnnotations(target.asField());
         }
@@ -127,14 +166,20 @@ public final class Annotations {
             return Collections.emptyList();
         }
 
-        Collection<AnnotationInstance> declaredAnnotations = getDeclaredAnnotations(target);
+        AnnotationInstance direct = declaredAnnotation(target, name);
 
-        if (declaredAnnotations.isEmpty()) {
-            return Collections.emptyList();
+        Collection<AnnotationInstance> composed = Collections.emptyList();
+        if (composedSearchCandidates.contains(name)) {
+            composed = getComposedAnnotation(declaredAnnotations(target), name, scanned);
         }
 
-        AnnotationInstance direct = declaredAnnotations.stream().filter(a -> name.equals(a.name())).findFirst().orElse(null);
-        Collection<AnnotationInstance> composed = getComposedAnnotation(declaredAnnotations, name, scanned);
+        if (composed.isEmpty()) {
+            if (direct != null) {
+                return List.of(direct);
+            }
+
+            return Collections.emptyList();
+        }
 
         List<AnnotationInstance> results = new ArrayList<>((direct != null ? 1 : 0) + composed.size());
 
@@ -353,7 +398,7 @@ public final class Annotations {
      * @return List of AnnotationInstance's
      */
     public Collection<AnnotationInstance> getMethodParameterAnnotations(MethodInfo method, int parameterIndex) {
-        return getDeclaredAnnotations(MethodParameterInfo.create(method, (short) parameterIndex));
+        return declaredAnnotations(MethodParameterInfo.create(method, (short) parameterIndex));
     }
 
     /**
