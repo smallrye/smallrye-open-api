@@ -373,8 +373,9 @@ public interface AnnotationScanner {
                          * whether the view was directly specified on the method, or whether it was discovered
                          * as an inherited view from the view class hierarchy.
                          */
-                        if (index.containsClass(viewType)) {
-                            return index.inheritanceChain(index.getClass(viewType), viewType)
+                        ClassInfo classInfo = index.getClass(viewType);
+                        if (classInfo != null) {
+                            return index.inheritanceChain(classInfo, viewType)
                                     .values()
                                     .stream()
                                     .map(v -> Map.entry(v, viewType.equals(v)));

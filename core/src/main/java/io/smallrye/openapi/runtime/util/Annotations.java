@@ -203,9 +203,13 @@ public final class Annotations {
         final boolean isArray = (AnnotationValue.Kind.ARRAY == value.kind());
         AnnotationValue.Kind kind = (isArray ? value.componentKind() : value.kind());
         AugmentedIndexView index = context.getAugmentedIndex();
-        ClassInfo annoClass = index.getClassByName(annotation.name());
 
-        if (kind == AnnotationValue.Kind.UNKNOWN && annoClass != null) {
+        if (kind != AnnotationValue.Kind.UNKNOWN) {
+            return kind;
+        }
+
+        ClassInfo annoClass = index.getClassByName(annotation.name());
+        if (annoClass != null) {
             MethodInfo valueMethod = annoClass.method(value.name());
             Type valueType = valueMethod.returnType().asArrayType().constituent();
 
