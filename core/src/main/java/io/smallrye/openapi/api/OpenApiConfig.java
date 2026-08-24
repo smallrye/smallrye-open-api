@@ -104,7 +104,8 @@ public interface OpenApiConfig {
 
     enum DuplicateOperationIdBehavior {
         FAIL,
-        WARN
+        WARN,
+        APPEND_NUMBER
     }
 
     enum AutoInheritance {

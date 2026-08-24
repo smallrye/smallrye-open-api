@@ -311,7 +311,10 @@ public interface AnnotationScanner {
         String operationId = operation.getOperationId();
 
         if (operationId != null) {
-            saveOperationId(context, resourceClass, method, operationId);
+            String resolvedId = saveOperationId(context, resourceClass, method, operationId);
+            if (!resolvedId.equals(operationId)) {
+                operation.setOperationId(resolvedId);
+            }
         }
 
         ExternalDocumentation externalDocs = context.io().extDocIO().read(method);
@@ -322,7 +325,7 @@ public interface AnnotationScanner {
         return Optional.of(operation);
     }
 
-    private void saveOperationId(AnnotationScannerContext context, ClassInfo resourceClass, MethodInfo method,
+    private String saveOperationId(AnnotationScannerContext context, ClassInfo resourceClass, MethodInfo method,
             String operationId) {
         final MethodInfo conflictingMethod = context.getOperationIdMap().putIfAbsent(operationId, method);
 
@@ -330,6 +333,13 @@ public interface AnnotationScanner {
             if (context.getAugmentedIndex().ancestry(method).values().contains(conflictingMethod)) {
                 // The conflict was a method from a parent class, replace it
                 context.getOperationIdMap().put(operationId, method);
+            } else if (context.getConfig().getDuplicateOperationIdBehavior() == DuplicateOperationIdBehavior.APPEND_NUMBER) {
+                int counter = 1;
+                String numberedId;
+                do {
+                    numberedId = operationId + "_" + counter++;
+                } while (context.getOperationIdMap().putIfAbsent(numberedId, method) != null);
+                return numberedId;
             } else {
                 final ClassInfo conflictingClass = conflictingMethod.declaringClass();
                 final String className = resourceClass.name().toString();
@@ -345,6 +355,8 @@ public interface AnnotationScanner {
                 }
             }
         }
+
+        return operationId;
     }
 
     default void setJsonViewContext(AnnotationScannerContext context, Type[] views) {
