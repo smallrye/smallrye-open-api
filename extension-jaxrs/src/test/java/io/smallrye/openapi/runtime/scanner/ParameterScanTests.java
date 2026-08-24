@@ -18,9 +18,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
+import java.util.UUID;
+
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -808,22 +813,95 @@ class ParameterScanTests extends IndexScannerTestBase {
 
     @Test
     void testUnsortedParameters() throws IOException, JSONException {
-        @jakarta.ws.rs.Path("/status")
+        class ListOptions {
+            @jakarta.ws.rs.QueryParam("beanparam-field-1")
+            UUID field1;
+
+            @jakarta.ws.rs.HeaderParam("beanparam-field-2")
+            UUID field2;
+
+            @jakarta.ws.rs.PathParam("beanparam-field-3")
+            UUID field3;
+
+            @jakarta.ws.rs.QueryParam("beanparam-method-4")
+            public void field4(String field4) {
+            }
+
+            @jakarta.ws.rs.HeaderParam("beanparam-method-5")
+            public void field5(String field5) {
+            }
+
+            @jakarta.ws.rs.PathParam("beanparam-method-6")
+            public void field6(String field6) {
+            }
+
+            public void field7(@jakarta.ws.rs.QueryParam("beanparam-method-param-7") String field7) {
+            }
+
+            public void field8(@jakarta.ws.rs.HeaderParam("beanparam-method-param-8") String field8) {
+            }
+
+            public void field9(@jakarta.ws.rs.PathParam("beanparam-method-param-9") String field9) {
+            }
+
+            @jakarta.ws.rs.QueryParam("beanparam-field-10")
+            UUID field10;
+
+            @jakarta.ws.rs.HeaderParam("beanparam-field-11")
+            UUID field11;
+
+            @jakarta.ws.rs.PathParam("beanparam-field-12")
+            UUID field12;
+        }
+
+        @jakarta.ws.rs.Path("/status/{method-1-p1}/{field-3}/{method-6}/{field-9}/{beanparam-field-3}/{beanparam-field-6}/{beanparam-field-9}/{beanparam-field-12}")
         class Resource {
+            @jakarta.ws.rs.QueryParam("field-1")
+            UUID field1;
+
+            @jakarta.ws.rs.HeaderParam("field-2")
+            UUID field2;
+
+            @jakarta.ws.rs.PathParam("field-3")
+            UUID field3;
+
+            @Parameter(name = "method-additional-1", in = ParameterIn.QUERY)
+            @Parameter(name = "method-additional-2", in = ParameterIn.HEADER)
             @jakarta.ws.rs.GET
-            @jakarta.ws.rs.Path("/{resourceId}")
             public String get(
-                    @jakarta.ws.rs.QueryParam("q7") int q7,
-                    @jakarta.ws.rs.QueryParam("q9") int q9,
-                    @jakarta.ws.rs.HeaderParam("h6") int h8,
-                    @jakarta.ws.rs.PathParam("resourceId") String resourceId,
-                    @jakarta.ws.rs.QueryParam("q8") int q8) {
+                    @jakarta.ws.rs.QueryParam("method-1-q1") int q1,
+                    @jakarta.ws.rs.QueryParam("method-1-q2") int q2,
+                    @jakarta.ws.rs.HeaderParam("method-1-h1") int h3,
+                    @BeanParam ListOptions listOptions,
+                    @jakarta.ws.rs.PathParam("method-1-p1") String resourceId,
+                    @jakarta.ws.rs.QueryParam("method-1-q4") int q4) {
                 return null;
             }
+
+            @jakarta.ws.rs.QueryParam("method-4")
+            public void field4(String field4) {
+            }
+
+            @jakarta.ws.rs.HeaderParam("method-5")
+            public void field5(String field5) {
+            }
+
+            @jakarta.ws.rs.PathParam("method-6")
+            public void field6(String field6) {
+            }
+
+            @jakarta.ws.rs.QueryParam("field-7")
+            String field7;
+
+            @jakarta.ws.rs.HeaderParam("field-8")
+            String field8;
+
+            @jakarta.ws.rs.PathParam("field-9")
+            String field9;
         }
 
         test(dynamicConfig(SmallRyeOASConfig.SMALLRYE_SORTED_PARAMETERS_ENABLE, Boolean.FALSE),
-                "params.unsorted-scan-order.json", Resource.class);
+                "params.unsorted-scan-order.json", Resource.class, ListOptions.class);
     }
 
     @Test

@@ -34,8 +34,7 @@ public class ResourceParameters {
         Comparator<Parameter> primaryComparator;
 
         if (preferredOrder != null) {
-            Comparator<Parameter> preferredComparator = (p1, p2) -> Integer.compare(position(preferredOrder, p1),
-                    position(preferredOrder, p2));
+            Comparator<Parameter> preferredComparator = Comparator.comparingInt(p -> position(preferredOrder, p));
 
             primaryComparator = preferredComparator
                     .thenComparing(Parameter::getRef, Comparator.nullsFirst(Comparator.naturalOrder()));
@@ -47,6 +46,11 @@ public class ResourceParameters {
         return primaryComparator
                 .thenComparing(Parameter::getIn, Comparator.nullsLast(Comparator.naturalOrder()))
                 .thenComparing(Parameter::getName, Comparator.nullsLast(Comparator.naturalOrder()));
+    }
+
+    public static Comparator<Parameter> parameterInComparator() {
+
+        return Comparator.comparing(Parameter::getIn, Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
     static final Pattern TEMPLATE_PARAM_PATTERN = Pattern.compile("\\{(\\w[\\w\\.-]*)\\}");

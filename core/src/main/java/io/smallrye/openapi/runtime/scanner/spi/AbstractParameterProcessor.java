@@ -418,6 +418,8 @@ public abstract class AbstractParameterProcessor {
         // Re-sort (names of matrix parameters may have changed)
         if (scannerContext.getConfig().sortedParametersEnable()) {
             parameters.sort(ResourceParameters.parameterComparator(preferredOrder));
+        } else {
+            parameters.sort(ResourceParameters.parameterInComparator());
         }
 
         parameters.setFormBodyContent(getFormBodyContent());
