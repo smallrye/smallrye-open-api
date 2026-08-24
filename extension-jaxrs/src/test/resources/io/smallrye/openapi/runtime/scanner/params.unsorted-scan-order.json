@@ -1,43 +1,204 @@
 {
   "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "UUID" : {
+        "type" : "string",
+        "format" : "uuid",
+        "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+      }
+    }
+  },
   "paths" : {
-    "/status/{resourceId}" : {
+    "/status/{method-1-p1}/{field-3}/{method-6}/{field-9}/{beanparam-field-3}/{beanparam-method-6}/{beanparam-field-9}/{beanparam-constructor-a-12}" : {
+      "parameters" : [ {
+        "name" : "field-1",
+        "in" : "query",
+        "schema" : {
+          "$ref" : "#/components/schemas/UUID"
+        }
+      }, {
+        "name" : "field-2",
+        "in" : "header",
+        "schema" : {
+          "$ref" : "#/components/schemas/UUID"
+        }
+      }, {
+        "name" : "field-3",
+        "in" : "path",
+        "required" : true,
+        "schema" : {
+          "$ref" : "#/components/schemas/UUID"
+        }
+      }, {
+        "name" : "field-7",
+        "in" : "query",
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "name" : "field-8",
+        "in" : "header",
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "name" : "field-9",
+        "in" : "path",
+        "required" : true,
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "name" : "method-4",
+        "in" : "query",
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "name" : "method-5",
+        "in" : "header",
+        "schema" : {
+          "type" : "string"
+        }
+      }, {
+        "name" : "method-6",
+        "in" : "path",
+        "required" : true,
+        "schema" : {
+          "type" : "string"
+        }
+      } ],
       "get" : {
         "parameters" : [ {
-          "name" : "q7",
+          "name" : "method-1-q1",
           "in" : "query",
           "schema" : {
             "type" : "integer",
             "format" : "int32"
           }
         }, {
-          "name" : "q9",
+          "name" : "method-1-q2",
           "in" : "query",
           "schema" : {
             "type" : "integer",
             "format" : "int32"
           }
         }, {
-          "name" : "h6",
+          "name" : "method-1-h1",
           "in" : "header",
           "schema" : {
             "type" : "integer",
             "format" : "int32"
           }
         }, {
-          "name" : "resourceId",
+          "name" : "beanparam-field-1",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "beanparam-field-2",
+          "in" : "header",
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "beanparam-field-3",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "beanparam-field-7",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "beanparam-field-8",
+          "in" : "header",
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "beanparam-field-9",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "beanparam-method-4",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "beanparam-method-5",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "beanparam-method-6",
           "in" : "path",
           "required" : true,
           "schema" : {
             "type" : "string"
           }
         }, {
-          "name" : "q8",
+          "name" : "beanparam-constructor-c-10",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "beanparam-constructor-d-11",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "beanparam-constructor-a-12",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "beanparam-method-41",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "beanparam-method-42",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "method-1-p1",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "method-1-q4",
           "in" : "query",
           "schema" : {
             "type" : "integer",
             "format" : "int32"
           }
+        }, {
+          "in" : "query",
+          "name" : "method-additional-1"
+        }, {
+          "in" : "header",
+          "name" : "method-additional-2"
         } ],
         "responses" : {
           "200" : {

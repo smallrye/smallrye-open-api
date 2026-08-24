@@ -302,14 +302,11 @@ public class JaxRsParameterProcessor extends AbstractParameterProcessor {
     }
 
     private boolean hasMethodHTTPMethodAnnotation(MethodInfo method) {
-        for (AnnotationInstance a : method.declaredAnnotations()) {
-            for (AnnotationInstance httpMethod : JaxRsConstants.HTTP_METHOD_INSTANCES) {
-                if (a.equivalentTo(httpMethod)) {
-                    return true;
-                }
+        for (AnnotationInstance a : method.annotations()) {
+            if (a.target().kind() == AnnotationTarget.Kind.METHOD && JaxRsConstants.HTTP_METHODS.contains(a.name())) {
+                return true;
             }
         }
-
         return false;
     }
 
