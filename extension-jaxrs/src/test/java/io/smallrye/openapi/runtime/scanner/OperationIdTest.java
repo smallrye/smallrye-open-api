@@ -1,8 +1,15 @@
 package io.smallrye.openapi.runtime.scanner;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.Operation;
+import org.eclipse.microprofile.openapi.models.PathItem;
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -49,6 +56,42 @@ class OperationIdTest extends JaxRsDataObjectScannerTestBase {
             assertJsonEquals(expectedResultResourceName, result);
         } finally {
             System.clearProperty(SmallRyeOASConfig.OPERATION_ID_STRAGEGY);
+        }
+    }
+
+    @Test
+    void testAppendNumberOnDuplicateOperationIds() throws Exception {
+        Map<String, String> config = new HashMap<>();
+        config.put(SmallRyeOASConfig.OPERATION_ID_STRAGEGY, "METHOD");
+        config.put(SmallRyeOASConfig.DUPLICATE_OPERATION_ID_BEHAVIOR,
+                OpenApiConfig.DuplicateOperationIdBehavior.APPEND_NUMBER.name());
+
+        Index index = indexOf(AppendNumberTestResource.class);
+        OpenAPI result = OpenApiProcessor.bootstrap(dynamicConfig(config), index);
+        printToConsole(result);
+
+        List<String> operationIds = result.getPaths().getPathItems().values().stream()
+                .map(PathItem::getOperations)
+                .flatMap(ops -> ops.values().stream())
+                .map(Operation::getOperationId)
+                .sorted()
+                .collect(Collectors.toList());
+
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("create", "create_1"), operationIds);
+    }
+
+    @jakarta.ws.rs.Path("/append-number-test")
+    static class AppendNumberTestResource {
+        @jakarta.ws.rs.GET
+        @jakarta.ws.rs.Path("/one")
+        public String create() {
+            return "one";
+        }
+
+        @jakarta.ws.rs.GET
+        @jakarta.ws.rs.Path("/two")
+        public String create(@jakarta.ws.rs.QueryParam("q") String param) {
+            return "two";
         }
     }
 

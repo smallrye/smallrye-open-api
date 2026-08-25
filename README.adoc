@@ -113,7 +113,7 @@ Configures handling of schema inheritance. Allowed values include `NONE` (defaul
 ----
 mp.openapi.extensions.smallrye.duplicateOperationIdBehavior
 ----
-Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log warnings when the build encounters duplicate operationIds. Default value is `WARN`.
+Set to `FAIL` to abort in case of duplicate operationIds, set to `WARN` to log warnings, or set to `APPEND_NUMBER` to resolve duplicates by automatically appending numeric suffixes (e.g. `_1`, `_2`). Default value is `WARN`.
 
 [#maximumStaticFileSize]
 ==== Maximum Static File Size
