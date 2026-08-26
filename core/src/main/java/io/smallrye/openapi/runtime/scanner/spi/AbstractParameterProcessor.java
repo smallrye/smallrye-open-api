@@ -549,12 +549,17 @@ public abstract class AbstractParameterProcessor {
             Parameter param = mapParameter(resourceMethod, context);
 
             if (param != null) {
-                if (paramKeys.add(Arrays.asList(param.getName(), param.getIn(), param.getStyle()))) {
+                List<?> paramKey = param.getRef() != null
+                        ? Collections.singletonList(param.getRef())
+                        : Arrays.asList(param.getName(), param.getIn(), param.getStyle());
+
+                if (paramKeys.add(paramKey)) {
                     parameters.add(param);
                 } else {
                     /*
-                     * Parameters are unique by name and location - filter out any
-                     * duplicates seen earlier in the stream. We also consider the parameter's
+                     * Referenced parameters are unique by reference. Inline parameters are
+                     * unique by name and location - filter out any duplicates seen earlier in
+                     * the stream. We also consider the parameter's
                      * style to account for matrix parameters having the same name as an
                      * associated path parameter. The matrix parameter name will be
                      * post-processed later and renamed with a "Matrix" suffix, if needed.

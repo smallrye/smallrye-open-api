@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
+import org.eclipse.microprofile.openapi.OASFactory;
+import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
@@ -26,6 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -547,6 +550,52 @@ class ParameterScanTests extends IndexScannerTestBase {
         test("params.parameter-ref-property.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterRefTestApplication.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterRefTestResource.class);
+    }
+
+    @Test
+    void testMultipleUnresolvedParameterRefs() {
+        @jakarta.ws.rs.Path("/parameters")
+        class Resource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/repeatable")
+            @Parameter(ref = "#/components/parameters/XHeader2")
+            @Parameter(ref = "#/components/parameters/XHeader1")
+            public void repeatable() {
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/container")
+            @Parameters({
+                    @Parameter(ref = "#/components/parameters/XHeader2"),
+                    @Parameter(ref = "#/components/parameters/XHeader1")
+            })
+            public void container() {
+            }
+        }
+
+        OpenAPI result = scan(Resource.class);
+        new OASFilter() {
+            @Override
+            public void filterOpenAPI(OpenAPI openAPI) {
+                openAPI.setComponents(OASFactory.createComponents()
+                        .addParameter("XHeader1", OASFactory.createParameter()
+                                .name("XHeader1")
+                                .in(org.eclipse.microprofile.openapi.models.parameters.Parameter.In.HEADER))
+                        .addParameter("XHeader2", OASFactory.createParameter()
+                                .name("XHeader2")
+                                .in(org.eclipse.microprofile.openapi.models.parameters.Parameter.In.HEADER)));
+            }
+        }.filterOpenAPI(result);
+
+        for (String path : List.of("/parameters/repeatable", "/parameters/container")) {
+            List<org.eclipse.microprofile.openapi.models.parameters.Parameter> parameters = result.getPaths()
+                    .getPathItem(path)
+                    .getGET()
+                    .getParameters();
+            Assertions.assertEquals(2, parameters.size());
+            Assertions.assertEquals("#/components/parameters/XHeader2", parameters.get(0).getRef());
+            Assertions.assertEquals("#/components/parameters/XHeader1", parameters.get(1).getRef());
+        }
     }
 
     @Test
