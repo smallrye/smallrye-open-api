@@ -565,7 +565,7 @@ public abstract class AbstractParameterProcessor {
                      * post-processed later and renamed with a "Matrix" suffix, if needed.
                      *
                      * https://spec.openapis.org/oas/v3.1.0.html#parameter-object
-                    */
+                     */
                     if (param.getRef() != null) {
                         ScannerSPILogging.log.duplicateParameterReference(
                                 param.getRef(),
