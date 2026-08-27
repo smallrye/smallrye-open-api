@@ -26,6 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -547,6 +548,42 @@ class ParameterScanTests extends IndexScannerTestBase {
         test("params.parameter-ref-property.json",
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterRefTestApplication.class,
                 test.io.smallrye.openapi.runtime.scanner.jakarta.ParameterRefTestResource.class);
+    }
+
+    @Test
+    void testMultipleUnresolvedParameterRefs() {
+        @jakarta.ws.rs.Path("/parameters")
+        class Resource {
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/repeatable")
+            @Parameter(ref = "#/components/parameters/XHeader2")
+            @Parameter(ref = "#/components/parameters/XHeader1")
+            public void repeatable() {
+                // No-op endpoint used for annotation scanning
+            }
+
+            @jakarta.ws.rs.GET
+            @jakarta.ws.rs.Path("/container")
+            @SuppressWarnings("java:S1710") // The explicit container form is under test
+            @Parameters({
+                    @Parameter(ref = "#/components/parameters/XHeader2"),
+                    @Parameter(ref = "#/components/parameters/XHeader1")
+            })
+            public void container() {
+                // No-op endpoint used for annotation scanning
+            }
+        }
+
+        OpenAPI result = scan(Resource.class);
+        for (String path : List.of("/parameters/repeatable", "/parameters/container")) {
+            List<org.eclipse.microprofile.openapi.models.parameters.Parameter> parameters = result.getPaths()
+                    .getPathItem(path)
+                    .getGET()
+                    .getParameters();
+            Assertions.assertEquals(2, parameters.size());
+            Assertions.assertEquals("#/components/parameters/XHeader2", parameters.get(0).getRef());
+            Assertions.assertEquals("#/components/parameters/XHeader1", parameters.get(1).getRef());
+        }
     }
 
     @Test
