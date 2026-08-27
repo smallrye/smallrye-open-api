@@ -19,8 +19,6 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
-import org.eclipse.microprofile.openapi.OASFactory;
-import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.Explode;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterStyle;
@@ -561,32 +559,22 @@ class ParameterScanTests extends IndexScannerTestBase {
             @Parameter(ref = "#/components/parameters/XHeader2")
             @Parameter(ref = "#/components/parameters/XHeader1")
             public void repeatable() {
+                // No-op endpoint used for annotation scanning
             }
 
             @jakarta.ws.rs.GET
             @jakarta.ws.rs.Path("/container")
+            @SuppressWarnings("java:S1710") // The explicit container form is under test
             @Parameters({
                     @Parameter(ref = "#/components/parameters/XHeader2"),
                     @Parameter(ref = "#/components/parameters/XHeader1")
             })
             public void container() {
+                // No-op endpoint used for annotation scanning
             }
         }
 
         OpenAPI result = scan(Resource.class);
-        new OASFilter() {
-            @Override
-            public void filterOpenAPI(OpenAPI openAPI) {
-                openAPI.setComponents(OASFactory.createComponents()
-                        .addParameter("XHeader1", OASFactory.createParameter()
-                                .name("XHeader1")
-                                .in(org.eclipse.microprofile.openapi.models.parameters.Parameter.In.HEADER))
-                        .addParameter("XHeader2", OASFactory.createParameter()
-                                .name("XHeader2")
-                                .in(org.eclipse.microprofile.openapi.models.parameters.Parameter.In.HEADER)));
-            }
-        }.filterOpenAPI(result);
-
         for (String path : List.of("/parameters/repeatable", "/parameters/container")) {
             List<org.eclipse.microprofile.openapi.models.parameters.Parameter> parameters = result.getPaths()
                     .getPathItem(path)
