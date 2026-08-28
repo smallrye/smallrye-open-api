@@ -52,8 +52,8 @@
         </sonar.coverage.exclusions>
         <!-- Ignore duplication in Jackson IO classes. Nearly identical besides packages. -->
         <sonar.cpd.exclusions>
-          core/src/main/java/io/smallrye/openapi/runtime/io/Jackson2JsonIO.java,
-          core/src/main/java/io/smallrye/openapi/runtime/io/Jackson3JsonIO.java
+          **/Jackson2JsonIO.java,
+          **/Jackson3JsonIO.java
         </sonar.cpd.exclusions>
         <!--
           Ignore rule java:S119 the checks type parameter names. The generic types in the
