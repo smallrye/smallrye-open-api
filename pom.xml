@@ -50,11 +50,6 @@
           testsuite/data/**/*.java,
           tools/model-apt/**/*.java
         </sonar.coverage.exclusions>
-        <!-- Ignore duplication in Jackson IO classes. Nearly identical besides packages. -->
-        <sonar.cpd.exclusions>
-          **/Jackson2JsonIO.java,
-          **/Jackson3JsonIO.java
-        </sonar.cpd.exclusions>
         <!--
           Ignore rule java:S119 the checks type parameter names. The generic types in the
           io.smallrye.openapi.runtime.io package use two-character type parameter names for the

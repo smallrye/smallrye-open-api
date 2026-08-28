@@ -13,8 +13,15 @@
     <name>SmallRye: OpenAPI Core</name>
 
     <properties>
-        <!-- Excluded model classes for duplication checks (getters/setters treated as duplicates by Sonar) -->
-        <sonar.cpd.exclusions>src/main/java/io/smallrye/openapi/api/models/**/*.java</sonar.cpd.exclusions>
+        <!--
+          * Excluded model classes for duplication checks (getters/setters treated as duplicates by Sonar)
+          * Ignore duplication in Jackson IO classes. Nearly identical besides packages
+        -->
+        <sonar.cpd.exclusions>
+            src/main/java/io/smallrye/openapi/api/models/**/*.java,
+            src/main/java/io/smallrye/openapi/runtime/io/Jackson2JsonIO.java,
+            src/main/java/io/smallrye/openapi/runtime/io/Jackson3JsonIO.java
+        </sonar.cpd.exclusions>
     </properties>
 
     <dependencies>
