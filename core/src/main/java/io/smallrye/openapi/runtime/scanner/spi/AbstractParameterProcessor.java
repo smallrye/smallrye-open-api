@@ -43,7 +43,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.FieldInfo;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
-import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType.Primitive;
 import org.jboss.jandex.Type;
 
@@ -138,6 +137,20 @@ public abstract class AbstractParameterProcessor {
     }
 
     private final Comparator<AnnotationInstance> frameworkParametersFirst = new FrameworkParamsFirstComparator();
+
+    /**
+     * Jandex sorts method arguments alphabetically. This comparator ensures they are sorted by their declaration order instead.
+     */
+    private static final Comparator<AnnotationInstance> COMPARATOR_METHOD_PARAMETER_ORDER = Comparator
+            .comparingInt(an -> {
+                AnnotationTarget target = an.target();
+                if (target.kind() != Kind.METHOD_PARAMETER) {
+                    // order method level parameters before method argument level parameters
+                    return -1;
+                }
+
+                return target.asMethodParameter().position();
+            });
 
     protected AbstractParameterProcessor(AnnotationScannerContext scannerContext,
             String contextPath,
@@ -1596,73 +1609,51 @@ public abstract class AbstractParameterProcessor {
     protected void readParameters(ClassInfo clazz, AnnotationInstance beanParamAnnotation, boolean overriddenParametersOnly) {
         List<AnnotationInstance> paramAnnotations = new ArrayList<>();
 
-        for (Map.Entry<DotName, List<AnnotationInstance>> entry : clazz.annotationsMap().entrySet()) {
-            DotName name = entry.getKey();
-
-            if (Names.PARAMETER.equals(name) || isParameter(name)) {
-                for (AnnotationInstance annotation : entry.getValue()) {
-                    if (isBeanPropertyParam(annotation)) {
-                        paramAnnotations.add(annotation);
-                    }
+        for (FieldInfo fieldInfo : clazz.fieldsInDeclarationOrder()) {
+            for (AnnotationInstance annotation : fieldInfo.annotations()) {
+                if (annotation.target().kind() == Kind.FIELD && isParameter(annotation.name())) {
+                    paramAnnotations.add(annotation);
                 }
             }
         }
 
-        Collections.sort(paramAnnotations, frameworkParametersFirst);
+        for (MethodInfo method : clazz.methodsInDeclarationOrder()) {
+            if (!isBeanPropertyMethod(method)) {
+                continue;
+            }
+
+            int methodOffset = paramAnnotations.size();
+
+            for (AnnotationInstance annotation : method.annotations()) {
+                AnnotationTarget target = annotation.target();
+                if (target.kind() == Kind.METHOD_PARAMETER) {
+                    if (isParameter(annotation.name())) {
+                        paramAnnotations.add(annotation);
+                    }
+                } else if (target.kind() == Kind.METHOD) {
+                    if (getType(target) != null && isParameter(annotation.name())) {
+                        paramAnnotations.add(annotation);
+                    }
+                }
+            }
+
+            if (paramAnnotations.size() - methodOffset > 1) {
+                paramAnnotations.subList(methodOffset, paramAnnotations.size()).sort(COMPARATOR_METHOD_PARAMETER_ORDER);
+            }
+        }
+
+        paramAnnotations.sort(frameworkParametersFirst);
 
         for (AnnotationInstance annotation : paramAnnotations) {
             readAnnotatedType(annotation, beanParamAnnotation, overriddenParametersOnly);
         }
     }
 
-    /**
-     * Determines if the annotation is a property parameter. Annotation targets
-     * must be annotated with a framework-specific parameter annotation or
-     * {@link org.eclipse.microprofile.openapi.annotations.parameters.Parameter @Parameter}.
-     *
-     * Method targets must not be annotated with one of the framework-specific HTTP method annotations and
-     * the method must have a single argument.
-     *
-     * @param annotation
-     * @return
-     */
-    boolean isBeanPropertyParam(AnnotationInstance annotation) {
-        AnnotationTarget target = annotation.target();
-        boolean relevant = false;
-
-        switch (target.kind()) {
-            case FIELD: {
-                FieldInfo field = target.asField();
-                relevant = hasParameters(field.annotations());
-                break;
-            }
-
-            case METHOD_PARAMETER: {
-                MethodParameterInfo param = target.asMethodParameter();
-                MethodInfo method = param.method();
-                relevant = nonSyntheticParameterMethod(method,
-                        scannerContext.annotations().getMethodParameterAnnotations(method, param.position()));
-                break;
-            }
-
-            case METHOD: {
-                MethodInfo method = target.asMethod();
-                relevant = nonSyntheticParameterMethod(method, method.annotations()) &&
-                        getType(target) != null;
-                break;
-            }
-
-            default:
-                break;
-        }
-
-        return relevant;
-    }
-
-    boolean nonSyntheticParameterMethod(MethodInfo method, Collection<AnnotationInstance> annotations) {
-        return !method.isSynthetic() &&
+    boolean isBeanPropertyMethod(MethodInfo method) {
+        // A method without parameters is neither a "setter" nor a source of parameters
+        return method.parametersCount() > 0 &&
+                !method.isSynthetic() &&
                 !isResourceMethod(method) &&
-                hasParameters(annotations) &&
                 !isSubResourceLocator(method);
     }
 
@@ -1684,18 +1675,6 @@ public abstract class AbstractParameterProcessor {
      * @return true if the method is annotated with a framework-specific HTTP method annotation, false otherwise
      */
     protected abstract boolean isResourceMethod(MethodInfo method);
-
-    /**
-     * Check for the existence relevant parameter annotations in the collection.
-     *
-     * @param annotations collection of annotations
-     * @return true if any of the annotations is a relevant parameter annotation.
-     */
-    protected boolean hasParameters(Collection<AnnotationInstance> annotations) {
-        return annotations.stream()
-                .map(AnnotationInstance::name)
-                .anyMatch(this::isParameter);
-    }
 
     protected abstract boolean isParameter(DotName annotationName);
 

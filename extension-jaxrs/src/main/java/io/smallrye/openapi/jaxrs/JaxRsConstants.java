@@ -12,8 +12,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.microprofile.openapi.models.PathItem;
 import org.eclipse.microprofile.openapi.models.PathItem.HttpMethod;
-import org.jboss.jandex.AnnotationInstance;
-import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.DotName;
 
 /**
@@ -124,12 +122,6 @@ public class JaxRsConstants {
 
     public static final Set<DotName> HTTP_METHODS = Collections
             .unmodifiableSet(methods);
-
-    private static final AnnotationValue[] EMPTY_VALUES = new AnnotationValue[0];
-    public static final Set<AnnotationInstance> HTTP_METHOD_INSTANCES = methods
-            .stream()
-            .map(name -> AnnotationInstance.create(name, null, EMPTY_VALUES))
-            .collect(Collectors.toUnmodifiableSet());
 
     public static final Map<PathItem.HttpMethod, Set<DotName>> HTTP_METHOD_ANNOTATIONS;
     static {
