@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.yaml.snakeyaml.LoaderOptions;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,23 +29,21 @@ import io.smallrye.openapi.api.OpenApiConfig;
 import io.smallrye.openapi.model.BaseModel;
 import io.smallrye.openapi.runtime.OpenApiRuntimeException;
 
-class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode, ObjectNode> {
+class Jackson2JsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode, ObjectNode> {
 
     private static final JsonNodeFactory factory = JsonNodeFactory.instance;
 
-    private final OpenApiConfig config;
     private final ObjectMapper jsonMapper;
     private final ObjectMapper yamlMapper;
     private final ObjectWriter jsonWriter;
     private final ObjectWriter yamlWriter;
 
-    public JacksonJsonIO(OpenApiConfig config, ObjectMapper objectMapper) {
-        this.config = config != null ? config : OpenApiConfig.fromConfig(ConfigProvider.getConfig());
+    public Jackson2JsonIO(OpenApiConfig config, ObjectMapper objectMapper) {
         this.jsonMapper = objectMapper;
         this.jsonWriter = objectMapper.writerWithDefaultPrettyPrinter();
 
         LoaderOptions loaderOptions = new LoaderOptions();
-        Optional.ofNullable(this.config.getMaximumStaticFileSize()).ifPresent(loaderOptions::setCodePointLimit);
+        Optional.ofNullable(config.getMaximumStaticFileSize()).ifPresent(loaderOptions::setCodePointLimit);
 
         YAMLFactory yamlFactory = new YAMLFactoryBuilder(new YAMLFactory())
                 .loaderOptions(loaderOptions)
@@ -60,7 +57,7 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
          * YAML to be in-lined as if the elements were repeated throughout a
          * source document.
          */
-        if (this.config.yamlAliasExpansionEnable()) {
+        if (config.yamlAliasExpansionEnable()) {
             yamlFactory = new YAMLAnchorReplayingFactory(yamlFactory, null);
         }
 
@@ -68,16 +65,8 @@ class JacksonJsonIO implements JsonIO<JsonNode, ArrayNode, ObjectNode, ArrayNode
         this.yamlWriter = yamlMapper.writer().with(yamlFactory);
     }
 
-    public JacksonJsonIO(OpenApiConfig config) {
+    public Jackson2JsonIO(OpenApiConfig config) {
         this(config, new ObjectMapper());
-    }
-
-    public JacksonJsonIO(ObjectMapper objectMapper) {
-        this(null, objectMapper);
-    }
-
-    public JacksonJsonIO() {
-        this(null, new ObjectMapper());
     }
 
     @Override
