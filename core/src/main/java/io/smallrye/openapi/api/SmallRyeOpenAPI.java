@@ -712,7 +712,11 @@ public class SmallRyeOpenAPI {
                         .orElseGet(() -> ConfigProvider.getConfig(this.appClassLoader)));
                 IOContext<V, A, O, AB, OB> io = IOContext.forJson(JsonIO.newInstance(this.buildConfig));
                 this.modelIO = new OpenAPIDefinitionIO<>(io);
-                this.filteredIndex = new FilteredIndexView(builder.index, this.buildConfig);
+                if (builder.index instanceof FilteredIndexView) {
+                    this.filteredIndex = (FilteredIndexView) builder.index;
+                } else {
+                    this.filteredIndex = new FilteredIndexView(builder.index, this.buildConfig);
+                }
                 this.initialModel = builder.initialModel;
                 this.defaultRequiredProperties = builder.defaultRequiredProperties;
                 this.intermediateModel = builder.intermediateModel;

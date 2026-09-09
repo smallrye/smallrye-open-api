@@ -77,8 +77,9 @@ public class AugmentedIndexView implements IndexView {
         for (Type type : klass.interfaceTypes()) {
             interfaces.add(type);
 
-            if (containsClass(type)) {
-                interfaces.addAll(interfaces(getClass(type)));
+            ClassInfo classInfo = getClass(type);
+            if (classInfo != null) {
+                interfaces.addAll(interfaces(classInfo));
             }
         }
 

@@ -537,8 +537,14 @@ public class TypeResolver {
             index.interfaces(currentClass)
                     .stream()
                     .filter(type -> type.kind() == Type.Kind.PARAMETERIZED_TYPE)
-                    .filter(index::containsClass)
-                    .map(type -> buildParamTypeResolutionMap(index.getClass(type), type))
+                    .map(type -> {
+                        ClassInfo klazz = index.getClass(type);
+                        if (klazz == null) {
+                            return null;
+                        }
+                        return buildParamTypeResolutionMap(klazz, type);
+                    })
+                    .filter(Objects::nonNull)
                     .forEach(stack::push);
 
             if (allOfMatch || (!currentType.equals(clazzType) && TypeUtil.isIncludedAllOf(context, clazz, currentType))) {
