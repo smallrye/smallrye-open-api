@@ -472,9 +472,9 @@ public class TypeUtil {
     }
 
     static ClassInfo getClassInfo(IndexView appIndex, DotName className) {
-        ClassInfo clazz = appIndex.getClassByName(className);
+        ClassInfo clazz = jdkIndex.getClassByName(className);
         if (clazz == null) {
-            clazz = jdkIndex.getClassByName(className);
+            clazz = appIndex.getClassByName(className);
         }
         return clazz;
     }

@@ -335,14 +335,16 @@ public class IgnoreResolver {
             // Primitive and non-indexed types will result in a null
             if (classType.kind() == Type.Kind.PRIMITIVE ||
                     classType.kind() == Type.Kind.VOID ||
-                    (classType.kind() == Type.Kind.ARRAY && classType.asArrayType().constituent().kind() == Type.Kind.PRIMITIVE)
-                    ||
-                    !index.containsClass(classType)) {
+                    (classType.kind() == Type.Kind.ARRAY
+                            && classType.asArrayType().constituent().kind() == Type.Kind.PRIMITIVE)) {
                 return Visibility.UNSET;
             }
 
             // Find the real class implementation where the @JsonIgnoreType annotation may be.
             ClassInfo classInfo = index.getClass(classType);
+            if (classInfo == null) {
+                return Visibility.UNSET;
+            }
 
             if (ignoredTypes.contains(classInfo.name())) {
                 DataObjectLogging.logger.ignoringType(classInfo.name());
