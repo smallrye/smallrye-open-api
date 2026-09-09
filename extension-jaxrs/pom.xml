@@ -137,6 +137,9 @@
                                 <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
                                 <classpathDependencyExclude>com.fasterxml.jackson.core:jackson-databind</classpathDependencyExclude>
                                 <classpathDependencyExclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</classpathDependencyExclude>
+                                <classpathDependencyExclude>tools.jackson.core:jackson-core</classpathDependencyExclude>
+                                <classpathDependencyExclude>tools.jackson.core:jackson-databind</classpathDependencyExclude>
+                                <classpathDependencyExclude>tools.jackson.dataformat:jackson-dataformat-yaml</classpathDependencyExclude>
                             </classpathDependencyExcludes>
                         </configuration>
                     </execution>

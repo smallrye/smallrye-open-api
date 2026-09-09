@@ -71,7 +71,7 @@ abstract class JsonIOTest<V, A extends V, O extends V, AB, OB> {
     @Test
     @Tag("property:" + SmallRyeOASConfig.SMALLRYE_YAML_ALIAS_EXPANSION_ENABLE + "=false")
     void testSimpleAliasExpansionDisabled() {
-        assumeTrue(getClass().equals(JacksonJsonIOTest.class), "Disabling alias expansion only supported for JacksonJsonIO");
+        assumeTrue(this instanceof JacksonJsonIOTest, "Disabling alias expansion only supported for Jackson");
 
         String input = ""
                 + "---\n"

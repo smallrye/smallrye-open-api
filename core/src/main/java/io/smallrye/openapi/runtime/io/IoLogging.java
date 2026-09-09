@@ -81,4 +81,8 @@ public interface IoLogging extends BasicLogger {
     @Message(id = 2017, value = "JSON/YAML value could not be read as type %s: %s")
     void invalidJsonType(String targetType, String nodeText);
 
+    @LogMessage(level = Logger.Level.DEBUG)
+    @Message(id = 2018, value = "Attempt to auto-load JSON provider %s failed: %s")
+    void jsonProviderAutoLoadFailure(String providerName, String exceptionMessage);
+
 }

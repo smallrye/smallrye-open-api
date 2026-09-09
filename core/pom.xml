@@ -13,8 +13,15 @@
     <name>SmallRye: OpenAPI Core</name>
 
     <properties>
-        <!-- Excluded model classes for duplication checks (getters/setters treated as duplicates by Sonar) -->
-        <sonar.cpd.exclusions>src/main/java/io/smallrye/openapi/api/models/**/*.java</sonar.cpd.exclusions>
+        <!--
+          * Excluded model classes for duplication checks (getters/setters treated as duplicates by Sonar)
+          * Ignore duplication in Jackson IO classes. Nearly identical besides packages
+        -->
+        <sonar.cpd.exclusions>
+            src/main/java/io/smallrye/openapi/api/models/**/*.java,
+            src/main/java/io/smallrye/openapi/runtime/io/Jackson2JsonIO.java,
+            src/main/java/io/smallrye/openapi/runtime/io/Jackson3JsonIO.java
+        </sonar.cpd.exclusions>
     </properties>
 
     <dependencies>
@@ -41,7 +48,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Third Party Libraries -->
+        <!-- Jackson 2 Libraries -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -54,6 +61,22 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
+
+        <!-- Jackson 3 Libraries -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+
+        <!-- Third Party Libraries -->
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>

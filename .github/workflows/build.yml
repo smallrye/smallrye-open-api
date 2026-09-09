@@ -61,6 +61,11 @@ jobs:
       - name: build with maven
         run: mvn -B formatter:validate impsort:check install javadoc:javadoc -Pcoverage -Pgradle-smoke-test
 
+        # Test Jackson 3 and collect coverage information only for analysis
+      - name: test Jackson 3 processing
+        if: ${{ matrix.java == '17' && matrix.os == 'ubuntu-latest' }}
+        run: mvn -B verify -Pcoverage,jackson3
+
       ## Store information about the build context for Sonar scan in separate job
       - name: Save Build Context
         run: echo "$GITHUB_CONTEXT" > target/build-context.json

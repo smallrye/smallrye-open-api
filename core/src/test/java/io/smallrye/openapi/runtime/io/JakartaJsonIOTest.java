@@ -6,13 +6,16 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.jupiter.api.BeforeEach;
+
+import io.smallrye.openapi.api.OpenApiConfig;
 
 class JakartaJsonIOTest extends JsonIOTest<JsonValue, JsonArray, JsonObject, JsonArrayBuilder, JsonObjectBuilder> {
 
     @BeforeEach
     void setup() {
-        super.target = new JakartaJsonIO();
+        super.target = new JakartaJsonIO(OpenApiConfig.fromConfig(ConfigProvider.getConfig()));
     }
 
 }
