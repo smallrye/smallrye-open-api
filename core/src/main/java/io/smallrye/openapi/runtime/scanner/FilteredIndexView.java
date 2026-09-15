@@ -327,6 +327,10 @@ public class FilteredIndexView implements IndexView {
         return filterInstances(this.delegate.getAnnotations(annotationName));
     }
 
+    public boolean containsAnnotation(DotName annotationName) {
+        return !this.delegate.getAnnotations(annotationName).isEmpty();
+    }
+
     /**
      * @see org.jboss.jandex.IndexView#getAnnotationsWithRepeatable(org.jboss.jandex.DotName, org.jboss.jandex.IndexView)
      */
