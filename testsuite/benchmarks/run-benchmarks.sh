@@ -65,4 +65,4 @@ done
 
 # this requires current smallrye-openapi workspace to be built and installed to local Maven repo (`mvn clean install -DskipTests`)
 RESULTS=$(find target -type f -name "results-*.json" -print0 | tr '\0' ',' | sed -e 's/,$//')
-mvn compile exec:java -Dexec.mainClass=io.smallrye.openapi.chart.ChartGenerator -Dexec.arguments="$RESULTS"
+mvn compile exec:java -Dexec.mainClass=io.smallrye.openapi.test.benchmarks.chart.ChartGenerator -Dexec.arguments="$RESULTS"

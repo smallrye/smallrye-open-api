@@ -150,15 +150,15 @@ class BaseModelSupport {
 
         if (other instanceof BaseModel) {
             BaseModel<O> otherImpl = (BaseModel<O>) other;
-            result.getModelProperties().putAll(BaseModelSupport.deepCopy(otherImpl.getModelProperties(), unmodifiable));
+            Map<String, Object> properties = BaseModelSupport.deepCopy(otherImpl.getModelProperties(), unmodifiable);
+            result.setModelProperties(properties);
 
             if (other instanceof BaseExtensibleModel) {
                 BaseExtensibleModel<?> otherExt = (BaseExtensibleModel<?>) other;
-                Map<String, Object> extensions = otherExt.getAllExtensions();
 
-                if (extensions != null) {
-                    BaseExtensibleModel<?> resultExt = (BaseExtensibleModel<?>) result;
-                    resultExt.setExtensions(BaseModelSupport.deepCopy(extensions, unmodifiable));
+                Set<String> names = otherExt.getExtensionNames();
+                if (!names.isEmpty()) {
+                    ((BaseExtensibleModel<?>) result).setExtensionNames(new LinkedHashSet<>(names));
                 }
             }
 
@@ -174,13 +174,11 @@ class BaseModelSupport {
     }
 
     private static <K, V> Map<K, V> deepCopy(Map<K, V> map, boolean unmodifiable) {
-        Map<K, V> clone = new LinkedHashMap<>(map.size());
+        Map<K, V> target = new LinkedHashMap<>((int) Math.ceil(map.size() / 0.75));
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            clone.put(entry.getKey(), deepCopy(entry.getValue(), unmodifiable));
-        }
+        map.forEach((key, value) -> target.put(key, deepCopy(value, unmodifiable)));
 
-        return unmodifiable ? Collections.unmodifiableMap(clone) : clone;
+        return target;
     }
 
     private static <T> List<T> deepCopy(List<T> list, boolean unmodifiable) {
@@ -190,52 +188,26 @@ class BaseModelSupport {
             clone.add(deepCopy(value, unmodifiable));
         }
 
-        return unmodifiable ? Collections.unmodifiableList(clone) : clone;
+        return clone;
     }
 
     @SuppressWarnings("unchecked")
     private static <T, N extends Constructible> T deepCopy(T value, boolean unmodifiable) {
         if (value instanceof Map) {
-            return (T) deepCopy((Map<?, ?>) value, unmodifiable);
+            Map<?, ?> result = deepCopy((Map<?, ?>) value, unmodifiable);
+            return unmodifiable ? (T) Collections.unmodifiableMap(result) : (T) result;
         } else if (value instanceof List) {
-            return (T) deepCopy((List<?>) value, unmodifiable);
+            List<?> result = deepCopy((List<?>) value, unmodifiable);
+            return unmodifiable ? (T) Collections.unmodifiableList(result) : (T) result;
         } else if (value instanceof BaseModel) {
-            N nested = (N) value;
-            Class<N> nestedType = (Class<N>) nested.getClass();
-            return (T) deepCopy(nested, findConstructible(nestedType), unmodifiable);
+            BaseModel<N> baseModel = (BaseModel<N>) value;
+            return (T) deepCopy(baseModel.constructible(), baseModel.getConstructibleClass(), unmodifiable);
         } else if (value instanceof Constructible) {
             // Maybe support non-BaseModel implementations in the future
             return value;
         } else {
             return value;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <C extends Constructible> Class<C> findConstructible(Class<?> type) {
-        for (Class<?> i : type.getInterfaces()) {
-            if (Constructible.class.equals(i)) {
-                return (Class<C>) type;
-            }
-
-            Class<C> result = findConstructible(i);
-
-            if (result != null) {
-                return result;
-            }
-        }
-
-        Class<?> parent = type.getSuperclass();
-
-        if (parent == null && type.isInterface()) {
-            return null;
-        }
-
-        if (parent == null || Object.class.equals(parent)) {
-            throw new IllegalStateException("Failed to find direct Constructible interface: " + type);
-        }
-
-        return findConstructible(parent);
     }
 
     //// Support methods for BaseModel#merge

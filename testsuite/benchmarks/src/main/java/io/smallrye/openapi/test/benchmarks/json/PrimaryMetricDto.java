@@ -1,4 +1,4 @@
-package io.smallrye.openapi.json;
+package io.smallrye.openapi.test.benchmarks.json;
 
 import java.math.BigDecimal;
 

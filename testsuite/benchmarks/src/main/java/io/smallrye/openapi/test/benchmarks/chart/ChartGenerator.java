@@ -1,4 +1,4 @@
-package io.smallrye.openapi.chart;
+package io.smallrye.openapi.test.benchmarks.chart;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -22,7 +22,7 @@ import org.openjdk.jmh.annotations.Mode;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.smallrye.openapi.json.BenchmarkDto;
+import io.smallrye.openapi.test.benchmarks.json.BenchmarkDto;
 
 public class ChartGenerator {
     private static final ObjectMapper MAPPER = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

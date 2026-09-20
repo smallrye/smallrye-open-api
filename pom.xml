@@ -91,7 +91,6 @@
         <module>testsuite</module>
         <module>ui</module>
         <module>tools</module>
-        <module>benchmarks</module>
     </modules>
 
     <dependencyManagement>

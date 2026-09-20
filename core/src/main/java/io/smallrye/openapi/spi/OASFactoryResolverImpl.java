@@ -95,7 +95,9 @@ public class OASFactoryResolverImpl extends OASFactoryResolver {
     @Override
     public <T extends Constructible> T createObject(Class<T> clazz) {
         Objects.requireNonNull(clazz, "clazz");
-        return (T) OASFactoryResolverRegistry.REGISTRY.getOrDefault(clazz, () -> this.unknownType(clazz)).get();
+
+        Supplier<? extends Constructible> supplier = OASFactoryResolverRegistry.REGISTRY.get(clazz);
+        return supplier != null ? (T) supplier.get() : unknownType(clazz);
     }
 
     <T extends Constructible> T unknownType(Class<T> clazz) {

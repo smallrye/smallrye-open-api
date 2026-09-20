@@ -1,9 +1,9 @@
-package io.smallrye.openapi.chart;
+package io.smallrye.openapi.test.benchmarks.chart;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.smallrye.openapi.json.BenchmarkDto;
+import io.smallrye.openapi.test.benchmarks.json.BenchmarkDto;
 
 public class BenchmarksForVersion {
     public final String version;

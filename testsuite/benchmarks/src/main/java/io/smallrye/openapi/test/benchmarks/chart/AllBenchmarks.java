@@ -1,4 +1,4 @@
-package io.smallrye.openapi.chart;
+package io.smallrye.openapi.test.benchmarks.chart;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.openjdk.jmh.annotations.Mode;
 
-import io.smallrye.openapi.json.BenchmarkDto;
+import io.smallrye.openapi.test.benchmarks.json.BenchmarkDto;
 
 public class AllBenchmarks {
     public final Map<Mode, List<BenchmarksForVersion>> map = new HashMap<>();

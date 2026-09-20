@@ -48,8 +48,19 @@ public abstract class BaseModel<C extends Constructible> {
         return modCount;
     }
 
+    /**
+     * The properties representing this model. This might return a modifiable map. However, no modifications should be made to
+     * it; to ensure the {@link #modCount} stays consistent, use {@link #setProperty(String, Object)} instead.
+     *
+     * @return the properties map, never null.
+     */
     Map<String, Object> getModelProperties() {
         return properties;
+    }
+
+    void setModelProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        incrementModCount();
     }
 
     void setUnmodifiable() {
@@ -94,6 +105,8 @@ public abstract class BaseModel<C extends Constructible> {
     public C constructible() {
         return (C) this;
     }
+
+    public abstract Class<C> getConstructibleClass();
 
     public abstract PropertyMetadata getPropertyMetadata();
 
