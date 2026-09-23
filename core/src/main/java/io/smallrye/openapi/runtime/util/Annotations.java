@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,11 @@ public final class Annotations {
      * initially searched for annotation name is not present in this set.
      */
     private final Set<DotName> composedSearchCandidates;
+
+    /**
+     * Whether any annotation with a given name is used in the index, determined once per name. Cached since the result of {@link io.smallrye.openapi.runtime.scanner.FilteredIndexView#containsAnnotation(DotName)} is expensive to compute when Composite Indexes are used.
+     */
+    private final Map<DotName, Boolean> annotationsInIndex = new HashMap<>();
 
     public Annotations(AnnotationScannerContext context) {
         this.context = context;
@@ -192,7 +198,24 @@ public final class Annotations {
     }
 
     private List<AnnotationInstance> getDeclaredAnnotation(AnnotationTarget target, DotName name) {
+        if (!annotationPresentInIndex(name)) {
+            return Collections.emptyList();
+        }
         return getDeclaredAnnotation(target, name, new HashSet<>());
+    }
+
+    /**
+     * Determine whether any annotation with the given name is used in the index.
+     */
+    private boolean annotationPresentInIndex(DotName annotationName) {
+        Boolean present = annotationsInIndex.get(annotationName);
+
+        if (present == null) {
+            present = context.getIndex().containsAnnotation(annotationName);
+            annotationsInIndex.put(annotationName, present);
+        }
+
+        return present;
     }
 
     public <T> T value(AnnotationInstance annotation) {
@@ -350,6 +373,10 @@ public final class Annotations {
             DotName singleAnnotationName,
             DotName repeatableAnnotationName) {
 
+        if (!annotationPresentInIndex(repeatableAnnotationName)) {
+            return new ArrayList<>(getDeclaredAnnotation(target, singleAnnotationName));
+        }
+
         List<AnnotationInstance> single = getDeclaredAnnotation(target, singleAnnotationName);
         Stream<AnnotationInstance> wrapped = getDeclaredAnnotation(target, repeatableAnnotationName)
                 .stream()
@@ -372,6 +399,10 @@ public final class Annotations {
      */
     public AnnotationInstance getMethodParameterAnnotation(MethodInfo method, int parameterIndex,
             DotName annotationName) {
+
+        if (!annotationPresentInIndex(annotationName)) {
+            return null;
+        }
 
         AnnotationTarget target = MethodParameterInfo.create(method, (short) parameterIndex);
         List<AnnotationInstance> found = getDeclaredAnnotation(target, annotationName);
@@ -422,8 +453,17 @@ public final class Annotations {
         return Objects.nonNull(getAnnotation(target, annotationNames));
     }
 
+    public boolean hasAnnotation(AnnotationTarget target, DotName annotationName) {
+        return Objects.nonNull(getAnnotation(target, annotationName));
+    }
+
     public boolean hasAnnotation(AnnotationTarget target, DotName... annotationNames) {
         return Objects.nonNull(getAnnotation(target, annotationNames));
+    }
+
+    public AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
+        List<AnnotationInstance> found = getDeclaredAnnotation(annotationTarget, annotationName);
+        return found.isEmpty() ? null : found.get(0);
     }
 
     public AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName... annotationName) {
@@ -454,6 +494,10 @@ public final class Annotations {
         return getAnnotationValue(target, Arrays.asList(annotationNames), VALUE, null);
     }
 
+    public <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName) {
+        return value(getAnnotation(target, annotationName));
+    }
+
     public <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames) {
         return getAnnotationValue(target, annotationNames, VALUE, null);
     }
@@ -469,7 +513,8 @@ public final class Annotations {
      * @return an unwrapped annotation parameter value
      */
     public <T> T getAnnotationValue(AnnotationTarget target, DotName annotationName, String propertyName) {
-        return getAnnotationValue(target, Arrays.asList(annotationName), propertyName);
+        AnnotationInstance annotation = getAnnotation(target, annotationName);
+        return annotation != null ? value(annotation, propertyName) : null;
     }
 
     public <T> T getAnnotationValue(AnnotationTarget target, List<DotName> annotationNames, String propertyName) {
