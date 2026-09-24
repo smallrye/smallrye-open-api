@@ -18,6 +18,7 @@
 
     <properties>
         <version.buildhelper.plugin>3.6.2</version.buildhelper.plugin>
+        <version.exec.plugin>3.6.4</version.exec.plugin>
         <version.jackson2>2.22.2</version.jackson2>
         <version.jackson3>3.2.2</version.jackson3>
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
@@ -39,7 +40,7 @@
         <version.weld.core>5.1.2.Final</version.weld.core>
 
         <!--
-          Ignore the deprecated models, test data classes, and APT processor (runs at compile
+          Ignore the deprecated models, test data classes, benchmarks, and APT processor (runs at compile
           time) in test coverage calculation. Also ignore SimpleTypeTarget which is a proxy to
           allow calls to Type#annotations via AnnotationTarget#annotations. The remainder of
           class has no use currently
@@ -48,6 +49,7 @@
           core/src/main/java/io/smallrye/openapi/api/models/**/*.java,
           core/src/main/java/io/smallrye/openapi/internal/support/SimpleTypeTarget.java,
           testsuite/data/**/*.java,
+          testsuite/benchmarks/**/*.java,
           tools/model-apt/**/*.java
         </sonar.coverage.exclusions>
         <!--
@@ -389,6 +391,11 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>${version.buildhelper.plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${version.exec.plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

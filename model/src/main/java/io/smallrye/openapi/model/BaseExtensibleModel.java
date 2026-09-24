@@ -29,6 +29,14 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
         }
     }
 
+    Set<String> getExtensionNames() {
+        return extensionNames;
+    }
+
+    void setExtensionNames(Set<String> names) {
+        this.extensionNames = names;
+    }
+
     private <P> boolean maybeSetExtension(String name, P value) {
         if (isExtension(name)) {
             addExtension(name, value);

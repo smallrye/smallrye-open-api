@@ -33,6 +33,7 @@
     <module>extra</module>
     <module>data</module>
     <module>coverage</module>
+    <module>benchmarks</module>
   </modules>
 
   <properties>

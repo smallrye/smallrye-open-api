@@ -281,6 +281,13 @@ public class SmallRyeModelProcessor extends AbstractProcessor {
 
         writer.write("\n");
 
+        writeCodeLn(writer, 1, "@Override");
+        writeCodeLn(writer, 1, "public Class<", constructible.getName(), "> getConstructibleClass() {");
+        writeCodeLn(writer, 2, "return ", constructible.getName(), CLASS, ";");
+        writeCodeLn(writer, 1, "}");
+
+        writer.write("\n");
+
         try {
             String simpleName = constructible.getSimpleName();
             Method filterMethod = OASFilter.class.getMethod("filter" + simpleName, constructible);

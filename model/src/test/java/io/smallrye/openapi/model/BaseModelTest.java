@@ -17,6 +17,11 @@ class BaseModelTest {
     static class TestMapModel extends BaseModel<Constructible> {
 
         @Override
+        public Class<Constructible> getConstructibleClass() {
+            return Constructible.class;
+        }
+
+        @Override
         public PropertyMetadata getPropertyMetadata() {
             return null;
         }
