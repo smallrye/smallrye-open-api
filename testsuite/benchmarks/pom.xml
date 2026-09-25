@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-open-api-testsuite</artifactId>
-        <version>4.4.0-SNAPSHOT</version>
+        <version>4.4.0-alpha3</version>
         <relativePath>../</relativePath>
     </parent>
 
@@ -12,7 +12,7 @@
 
     <properties>
         <groupId.smallrye-openapi>${project.groupId}</groupId.smallrye-openapi>
-        <version.smallrye-openapi>4.4.0-SNAPSHOT</version.smallrye-openapi>
+        <version.smallrye-openapi>4.4.0-alpha3</version.smallrye-openapi>
         <version.jmh>1.37</version.jmh>
         <version.jmh-maven-plugin>0.2.2</version.jmh-maven-plugin>
         <version.xchart>4.0.4</version.xchart>
