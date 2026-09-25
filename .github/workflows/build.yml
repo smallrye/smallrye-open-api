@@ -168,4 +168,5 @@ jobs:
         name: tck-report
         with:
           name: "tck-report-${{ matrix.tck-version }}-jdk${{ matrix.java }}"
-          path: "testsuite/tck/target/surefire-reports/microprofile-openapi-tck-report.html"
+          path: "testsuite/tck/test-output/microprofile-openapi-tck-report.html"
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
