@@ -14,7 +14,6 @@
 
     <properties>
         <groupId.smallrye-openapi>${project.groupId}</groupId.smallrye-openapi>
-
         <version.smallrye-openapi>${project.version}</version.smallrye-openapi>
         <version.jmh>1.37</version.jmh>
         <version.jmh-maven-plugin>0.2.2</version.jmh-maven-plugin>
@@ -23,14 +22,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>${groupId.smallrye-openapi}</groupId>
+            <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-core</artifactId>
-            <version>${version.smallrye-openapi}</version>
         </dependency>
         <dependency>
-            <groupId>${groupId.smallrye-openapi}</groupId>
+            <groupId>io.smallrye</groupId>
             <artifactId>smallrye-open-api-model</artifactId>
-            <version>${version.smallrye-openapi}</version>
         </dependency>
         <dependency>
             <groupId>io.smallrye.config</groupId>
