@@ -109,6 +109,8 @@ public class TypeUtil {
     private static final Map<DotName, TypeWithFormat> TYPE_MAP = new LinkedHashMap<>();
     public static final IndexView jdkIndex;
     private static final Set<DotName> wrapperTypes = new HashSet<>();
+    private static final List<DotName> DEPRECATED_ANNOTATIONS = List.of(JDKConstants.DOTNAME_DEPRECATED,
+            KotlinConstants.DEPRECATED);
 
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypeFormat
     static {
@@ -793,9 +795,7 @@ public class TypeUtil {
             return;
         }
 
-        AnnotationInstance deprecated = context.annotations().getAnnotation(
-                target,
-                Arrays.asList(JDKConstants.DOTNAME_DEPRECATED, KotlinConstants.DEPRECATED));
+        AnnotationInstance deprecated = context.annotations().getAnnotation(target, DEPRECATED_ANNOTATIONS);
 
         if (deprecated != null && JandexUtil.equals(deprecated.target(), target)) {
             setDeprecated.accept(Boolean.TRUE);
