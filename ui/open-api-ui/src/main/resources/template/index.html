@@ -21,10 +21,9 @@
             
             window.onload = function() {
                 
-                // If Url is relative, append the host and port
                 var oar = "${oauth2RedirectUrl}";
-                if(oar.startsWith("/")){
-                    oar = window.location.protocol + "//" + window.location.host + oar;   
+                if (oar !== "-") {
+                    oar = new URL(oar, window.location.href).href;
                 }
                 
                 var ui = SwaggerUIBundle({
