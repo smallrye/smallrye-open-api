@@ -391,7 +391,9 @@ public class TypeUtil {
 
     /**
      * Check if the default schema type that applies to the provided classType
-     * differs from any value specified by the user via schemaAnnotation.
+     * differs from any value specified by the user via schemaAnnotation. If the
+     * classType does not itself define a {@code type}, the index will be
+     * checked to determine if the type's class itself defines the {@code type}.
      *
      * @param classType class type to find a default schema type
      * @param schemaAnnotation schema annotation (possibly null) which may have an overridden type value
@@ -400,7 +402,22 @@ public class TypeUtil {
      */
     public static boolean isTypeOverridden(AnnotationScannerContext context, Type classType,
             AnnotationInstance schemaAnnotation) {
-        SchemaType providedType = context.annotations().enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+
+        Annotations annotations = context.annotations();
+        SchemaType providedType = annotations.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
+
+        if (providedType == null) {
+            ClassInfo clazz = context.getAugmentedIndex().getClass(classType);
+
+            if (clazz != null) {
+                var classSchema = clazz.declaredAnnotation(SchemaConstant.DOTNAME_SCHEMA);
+
+                if (classSchema != null) {
+                    providedType = annotations.enumValue(classSchema, SchemaConstant.PROP_TYPE, SchemaType.class);
+                }
+            }
+        }
+
         TypeWithFormat typeFormat = getTypeFormat(classType);
         return providedType != null && !typeFormat.isSchemaType(providedType);
     }
