@@ -881,14 +881,24 @@ public class TypeResolver {
         final Type fieldType = resolveType(field.type(), stack);
         final ClassInfo fieldClass = context.getAugmentedIndex().getClass(fieldType);
         final boolean unwrapped;
-        final TypeResolver resolver;
 
         if (field.hasAnnotation(JacksonConstants.JSON_UNWRAPPED) && fieldClass != null) {
             unwrapped = true;
             properties.putAll(unwrapProperties(context, field, fieldType, fieldClass));
+
+            if (properties.containsKey(propertyName)) {
+                /*
+                 * One of the unwrapped properties has the same name as the composite
+                 * property. Since the field will be ignored, we can safely return without
+                 * any additional processing here.
+                 */
+                return;
+            }
         } else {
             unwrapped = false;
         }
+
+        final TypeResolver resolver;
 
         // Consider only using fields that are public?
         if (properties.containsKey(propertyName)) {
