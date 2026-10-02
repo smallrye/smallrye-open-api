@@ -1,0 +1,30 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Alpha" : {
+        "type" : "object",
+        "properties" : {
+          "zeta" : {
+            "description" : "a zeta",
+            "$ref" : "#/components/schemas/Zeta"
+          },
+          "beta" : {
+            "$ref" : "#/components/schemas/Beta"
+          }
+        }
+      },
+      "Beta" : {
+        "type" : "object",
+        "properties" : {
+          "zeta" : {
+            "$ref" : "#/components/schemas/Zeta"
+          }
+        }
+      },
+      "Zeta" : {
+        "type" : "string"
+      }
+    }
+  }
+}
