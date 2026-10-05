@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import io.smallrye.openapi.api.SmallRyeOASConfig;
 import test.io.smallrye.openapi.runtime.scanner.dataobject.SingleAnnotatedConstructorArgument;
@@ -1144,5 +1145,29 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         }
 
         assertJsonEquals("components.schemas.type-use-field-constraint.json", Example.class);
+    }
+
+    @Test
+    @SuppressWarnings("unused")
+    void testSchemaTypeRetainedFromClassAnnotation() throws IOException, JSONException {
+        @Schema(type = SchemaType.STRING, name = "Zeta")
+        class Zeta {
+            @JsonValue
+            String value;
+        }
+
+        @Schema(name = "Beta")
+        class Beta {
+            Zeta zeta;
+        }
+
+        @Schema(name = "Alpha")
+        class Alpha {
+            @Schema(description = "a zeta")
+            Zeta zeta;
+            Beta beta;
+        }
+
+        assertJsonEquals("components.schemas.type-retained-from-class-annotation.json", Zeta.class, Beta.class, Alpha.class);
     }
 }
