@@ -37,8 +37,15 @@
       // End Swagger UI call region
 
       window.ui = ui
-      
-      document.getElementsByClassName("link")[0].innerHTML = "<img src='logo.png' alt='SmallRye OpenAPI' height='44' align='middle'>";
+
+      // The top bar is rendered after SwaggerUIBundle() returns, so wait for it (as template/index.html does)
+      var checkInterval = setInterval(function() {
+        var linkElement = document.getElementsByClassName("link")[0];
+        if (linkElement !== undefined) {
+          clearInterval(checkInterval);
+          linkElement.innerHTML = "<img src='logo.png' alt='SmallRye OpenAPI' height='44' align='middle'>";
+        }
+      }, 100);
     }
   </script>
   </body>
