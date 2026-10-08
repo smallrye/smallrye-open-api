@@ -22,8 +22,13 @@
             window.onload = function() {
                 
                 var oar = "${oauth2RedirectUrl}";
+                // Resolve against the page URL ("-" means not configured, see IndexHtmlCreator)
                 if (oar !== "-") {
-                    oar = new URL(oar, window.location.href).href;
+                    try {
+                        oar = new URL(oar, window.location.href).href;
+                    } catch (e) {
+                        // Keep the configured value when it cannot be parsed
+                    }
                 }
                 
                 var ui = SwaggerUIBundle({
