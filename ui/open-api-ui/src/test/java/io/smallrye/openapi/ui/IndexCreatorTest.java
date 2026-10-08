@@ -232,6 +232,16 @@ class IndexCreatorTest {
     }
 
     @Test
+    void testDefaultOauth2RedirectReplacement() throws IOException {
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml();
+
+        String html = new String(indexHtml);
+
+        assertTrue(html.contains("var oar = \"-\";"));
+        assertTrue(html.contains("if (oar !== \"-\")"));
+    }
+
+    @Test
     void testCreateWithSyntaxHighlightBoolean() throws IOException {
         Map<Option, String> options = new HashMap<>();
         options.put(Option.syntaxHighlight, "false");
