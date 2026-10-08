@@ -221,14 +221,24 @@ class IndexCreatorTest {
 
     @Test
     void testOauth2RedirectReplacement() throws IOException {
-        String title = "Test Title";
         Map<Option, String> options = new HashMap<>();
-        options.put(Option.title, title);
+        options.put(Option.oauth2RedirectUrl, "oauth2-redirect.html");
         byte[] indexHtml = IndexHtmlCreator.createIndexHtml(options);
 
         String html = new String(indexHtml);
 
-        assertTrue(html.contains("var oar"), "Missing declaration of 'oar'");
+        assertTrue(html.contains("var oar = \"oauth2-redirect.html\";"));
+        assertTrue(html.contains("oar = new URL(oar, window.location.href).href;"));
+    }
+
+    @Test
+    void testDefaultOauth2RedirectReplacement() throws IOException {
+        byte[] indexHtml = IndexHtmlCreator.createIndexHtml();
+
+        String html = new String(indexHtml);
+
+        assertTrue(html.contains("var oar = \"-\";"));
+        assertTrue(html.contains("if (oar !== \"-\")"));
     }
 
     @Test

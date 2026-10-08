@@ -21,10 +21,14 @@
             
             window.onload = function() {
                 
-                // If Url is relative, append the host and port
                 var oar = "${oauth2RedirectUrl}";
-                if(oar.startsWith("/")){
-                    oar = window.location.protocol + "//" + window.location.host + oar;   
+                // Resolve against the page URL ("-" means not configured, see IndexHtmlCreator)
+                if (oar !== "-") {
+                    try {
+                        oar = new URL(oar, window.location.href).href;
+                    } catch (e) {
+                        // Keep the configured value when it cannot be parsed
+                    }
                 }
                 
                 var ui = SwaggerUIBundle({
