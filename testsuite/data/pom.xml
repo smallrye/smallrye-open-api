@@ -12,8 +12,21 @@
     <version>4.4.0-SNAPSHOT</version>
     <name>SmallRye: OpenAPI Test Data</name>
 
+    <repositories>
+        <repository>
+            <id>eclipse-staging-mp-openapi</id>
+            <url>https://repo.eclipse.org/repository/microprofile-open-api-maven2-staging/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <properties>
-        <eclipse.microprofile.openapi.version>4.2-RC4</eclipse.microprofile.openapi.version>
+        <eclipse.microprofile.openapi.version>4.2</eclipse.microprofile.openapi.version>
         <kotlin.version>2.4.0</kotlin.version>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -21,7 +34,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.39.4</quarkus.platform.version>
+        <quarkus.platform.version>3.40.1</quarkus.platform.version>
     </properties>
 
     <dependencyManagement>
