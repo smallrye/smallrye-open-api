@@ -46,8 +46,6 @@ public class ArchiveUtil {
     public static OpenApiConfig archiveToConfig(Archive<?> archive) {
         try (ShrinkWrapClassLoader cl = new ShrinkWrapClassLoader(archive)) {
             return OpenApiConfig.fromConfig(ConfigProvider.getConfig(cl));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
