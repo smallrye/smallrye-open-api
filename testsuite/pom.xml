@@ -51,6 +51,13 @@
           <scope>test</scope>
         </dependency>
         <dependency>
+          <groupId>org.jboss.shrinkwrap</groupId>
+          <artifactId>shrinkwrap-bom</artifactId>
+          <version>${version.shrinkwrap_core}</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+        <dependency>
           <groupId>org.jboss.arquillian</groupId>
           <artifactId>arquillian-bom</artifactId>
           <version>${version.org.jboss.arquillian}</version>
