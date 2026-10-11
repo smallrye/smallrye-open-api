@@ -1146,11 +1146,11 @@ class StandaloneSchemaScanTest extends IndexScannerTestBase {
         assertJsonEquals("components.schemas.type-use-field-constraint.json", Example.class);
     }
 
-    @Test
-    @SuppressWarnings("unused")
     /**
      * Issue https://github.com/smallrye/smallrye-open-api/issues/2687
      */
+    @Test
+    @SuppressWarnings("unused")
     void testJsonUnwrappedRetainsAllProperties() throws IOException, JSONException {
         class Inner {
             String foo;

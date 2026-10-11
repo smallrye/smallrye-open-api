@@ -889,8 +889,8 @@ public class TypeResolver {
             if (properties.containsKey(propertyName)) {
                 /*
                  * One of the unwrapped properties has the same name as the composite
-                 * property. Since the field will be ignored, we can safely return without
-                 * any additional processing here.
+                 * property. The wrapper property is overridden/ignored and we can safely
+                 * return without any additional processing here.
                  */
                 return;
             }
