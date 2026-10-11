@@ -230,7 +230,8 @@ public class AnnotationTargetProcessor implements RequirementHandler {
 
                 if (typeList == null || !typeList.contains(SchemaType.ARRAY)) {
                     // Only register a reference to the type schema. The full schema will be added by subsequent
-                    // items on the stack (if not already present in the registry).
+                    // items on the stack (if not already present in the registry). This will only be done when
+                    // the schema's type is not array.
                     registeredTypeSchema = schemaRegistry.registerReference(registrationType, context.getJsonViews(),
                             typeResolver, typeSchema);
                 } else {

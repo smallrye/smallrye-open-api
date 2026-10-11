@@ -32,6 +32,7 @@ import org.jboss.jandex.Indexer;
 import org.jboss.jandex.MethodParameterInfo;
 import org.jboss.jandex.PrimitiveType;
 import org.jboss.jandex.Type;
+import org.jboss.jandex.Type.Kind;
 import org.jboss.jandex.WildcardType;
 
 import io.smallrye.openapi.api.constants.JDKConstants;
@@ -390,27 +391,30 @@ public class TypeUtil {
     }
 
     /**
-     * Check if the default schema type that applies to the provided classType
+     * Check if the default schema type that applies to the provided targetType
      * differs from any value specified by the user via schemaAnnotation. If the
-     * classType does not itself define a {@code type}, the index will be
+     * schemaAnnotation does not itself define a {@code type}, the index will be
      * checked to determine if the type's class itself defines the {@code type}.
      *
-     * @param classType class type to find a default schema type
-     * @param schemaAnnotation schema annotation (possibly null) which may have an overridden type value
-     * @return true if the annotation has a type specified that is different from the default type for classType, otherwise
-     *         false
+     * @param targetType
+     *        class type to find a default schema type
+     * @param schemaAnnotation
+     *        schema annotation (possibly null) which may have an overridden
+     *        type value
+     * @return true if the annotation has a type specified that is different
+     *         from the default type for targetType, otherwise false
      */
-    public static boolean isTypeOverridden(AnnotationScannerContext context, Type classType,
+    public static boolean isTypeOverridden(AnnotationScannerContext context, Type targetType,
             AnnotationInstance schemaAnnotation) {
 
         Annotations annotations = context.annotations();
         SchemaType providedType = annotations.enumValue(schemaAnnotation, SchemaConstant.PROP_TYPE, SchemaType.class);
 
-        if (providedType == null) {
-            ClassInfo clazz = context.getAugmentedIndex().getClass(classType);
+        if (providedType == null && (targetType.kind() == Kind.CLASS || targetType.kind() == Kind.PARAMETERIZED_TYPE)) {
+            ClassInfo clazz = context.getAugmentedIndex().getClass(targetType);
 
             if (clazz != null) {
-                var classSchema = clazz.declaredAnnotation(SchemaConstant.DOTNAME_SCHEMA);
+                var classSchema = annotations.getAnnotation(clazz, SchemaConstant.DOTNAME_SCHEMA);
 
                 if (classSchema != null) {
                     providedType = annotations.enumValue(classSchema, SchemaConstant.PROP_TYPE, SchemaType.class);
@@ -418,7 +422,7 @@ public class TypeUtil {
             }
         }
 
-        TypeWithFormat typeFormat = getTypeFormat(classType);
+        TypeWithFormat typeFormat = getTypeFormat(targetType);
         return providedType != null && !typeFormat.isSchemaType(providedType);
     }
 
