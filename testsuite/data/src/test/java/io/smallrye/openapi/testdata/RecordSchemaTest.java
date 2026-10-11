@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
@@ -71,6 +73,28 @@ class RecordSchemaTest {
 
         LOG.debug(result);
         assertJsonEquals("components.schemas.record.json", result);
+    }
+
+    @Test
+    void testJsonUnwrappedRetainsAllProperties() throws IOException, JSONException {
+
+        record Inner(String foo, String bar) {
+        }
+
+        @Schema(name = "Colliding")
+        record Colliding(@JsonUnwrapped Inner foo) {
+        }
+
+        Index index = Index.of(Inner.class, Colliding.class);
+
+        String result = SmallRyeOpenAPI.builder()
+                .defaultRequiredProperties(false)
+                .withIndex(index)
+                .build()
+                .toJSON();
+
+        LOG.debug(result);
+        assertJsonEquals("components.schemas.json-unwrapped-retains-all-properties.json", result);
     }
 
     private void assertJsonEquals(String expectedResource, String result) throws IOException, JSONException {
