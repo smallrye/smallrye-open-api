@@ -219,6 +219,21 @@
                     Then call the "smoke test Gradle build", so it has the "same" artifacts as a release.
                     -->
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <!-- Need the artifacts installed for the Gradle plugin smoke test -->
+                        <!-- Downside: install happens twice :( -->
+                        <executions>
+                            <execution>
+                                <id>gradle-smoketest-install</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>install</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
@@ -244,27 +259,6 @@
                                     <skip>${skip.gradle.build}</skip>
                                 </configuration>
                             </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-install-plugin</artifactId>
-                        <!-- Need the artifacts installed for the Gradle plugin smoke test -->
-                        <!-- Downside: install happens twice :( -->
-                        <executions>
-                            <execution>
-                                <id>gradle-smoketest-install</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>install</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <executions>
                             <execution>
                                 <id>gradle-smoketest</id>
                                 <phase>integration-test</phase>
