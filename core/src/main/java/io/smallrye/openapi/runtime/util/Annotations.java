@@ -441,6 +441,14 @@ public final class Annotations {
         return null;
     }
 
+    public AnnotationInstance getAnnotation(AnnotationTarget annotationTarget, DotName annotationName) {
+        List<AnnotationInstance> found = getDeclaredAnnotation(annotationTarget, annotationName);
+        if (!found.isEmpty()) {
+            return found.get(0);
+        }
+        return null;
+    }
+
     /**
      * Convenience method to retrieve the "value" parameter from an annotation bound to the target.
      * The value will be unwrapped from its containing {@link AnnotationValue}.
