@@ -30,6 +30,11 @@ import io.smallrye.openapi.runtime.util.TypeUtil;
  */
 public class IgnoreResolver {
 
+    private static final List<DotName> SCHEMA_ANNOTATIONS = List.of(SchemaConstant.DOTNAME_SCHEMA);
+    private static final List<DotName> JSON_IGNORE_PROPERTIES_ANNOTATIONS = List.of(JacksonConstants.JSON_IGNORE_PROPERTIES);
+    private static final List<DotName> JSON_IGNORE_ANNOTATIONS = List.of(JacksonConstants.JSON_IGNORE);
+    private static final List<DotName> JSON_IGNORE_TYPE_ANNOTATIONS = List.of(JacksonConstants.JSON_IGNORE_TYPE);
+
     private final AnnotationScannerContext context;
     private final AugmentedIndexView index;
     private final IgnoreAnnotationHandler[] ignoreHandlers;
@@ -152,7 +157,7 @@ public class IgnoreResolver {
 
         @Override
         public List<DotName> getNames() {
-            return Arrays.asList(SchemaConstant.DOTNAME_SCHEMA);
+            return SCHEMA_ANNOTATIONS;
         }
     }
 
@@ -262,7 +267,7 @@ public class IgnoreResolver {
 
         @Override
         public List<DotName> getNames() {
-            return Arrays.asList(JacksonConstants.JSON_IGNORE_PROPERTIES);
+            return JSON_IGNORE_PROPERTIES_ANNOTATIONS;
         }
 
         @Override
@@ -295,7 +300,7 @@ public class IgnoreResolver {
 
         @Override
         public List<DotName> getNames() {
-            return Arrays.asList(JacksonConstants.JSON_IGNORE);
+            return JSON_IGNORE_ANNOTATIONS;
         }
     }
 
@@ -363,7 +368,7 @@ public class IgnoreResolver {
 
         @Override
         public List<DotName> getNames() {
-            return Arrays.asList(JacksonConstants.JSON_IGNORE_TYPE);
+            return JSON_IGNORE_TYPE_ANNOTATIONS;
         }
     }
 
