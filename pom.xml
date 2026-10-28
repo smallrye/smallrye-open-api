@@ -16,19 +16,6 @@
     <name>SmallRye: OpenAPI Parent</name>
     <url>http://smallrye.io</url>
 
-    <repositories>
-        <repository>
-            <id>eclipse-staging-mp-openapi</id>
-            <url>https://repo.eclipse.org/repository/microprofile-open-api-maven2-staging/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <properties>
         <version.buildhelper.plugin>3.6.2</version.buildhelper.plugin>
         <version.exec.plugin>3.6.4</version.exec.plugin>
