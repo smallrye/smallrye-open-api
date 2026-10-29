@@ -23,7 +23,7 @@
         <version.jackson3>3.2.4</version.jackson3>
         <version.eclipse.microprofile.config>3.0.3</version.eclipse.microprofile.config>
         <version.io.smallrye.jandex>3.6.0</version.io.smallrye.jandex>
-        <version.io.smallrye.smallrye-config>4.0.0</version.io.smallrye.smallrye-config>
+        <version.io.smallrye.smallrye-config>4.1.0</version.io.smallrye.smallrye-config>
         <version.io.smallrye.smallrye-common-classloader>2.21.1</version.io.smallrye.smallrye-common-classloader>
         <version.eclipse.microprofile.openapi>4.2</version.eclipse.microprofile.openapi>
         <version.kotlin>2.4.21</version.kotlin>
