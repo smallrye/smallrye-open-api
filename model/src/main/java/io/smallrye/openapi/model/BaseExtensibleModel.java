@@ -250,7 +250,7 @@ public abstract class BaseExtensibleModel<C extends Extensible<C> & Constructibl
         for (Entry<String, Object> property : other.getModelProperties().entrySet()) {
             String name = property.getKey();
 
-            if (other.isExtension(name) && !hasExtension(name)) {
+            if (Extensions.hasExtension(other, name) && !hasExtension(name)) {
                 addExtension(name, property.getValue());
             }
         }

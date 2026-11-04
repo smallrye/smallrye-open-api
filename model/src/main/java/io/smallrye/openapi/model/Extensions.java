@@ -83,6 +83,21 @@ public final class Extensions {
         }
     }
 
+    // General
+
+    /**
+     * Check whether the given model is Extensible and has an extension with the
+     * given name.
+     */
+    public static <C extends BaseModel<?>> boolean hasExtension(C model, String name) {
+        if (model instanceof BaseExtensibleModel) {
+            BaseExtensibleModel<?> extModel = (BaseExtensibleModel<?>) model;
+            return extModel.hasExtension(name);
+        }
+
+        return false;
+    }
+
     // Profiles
 
     public static Set<String> getProfiles(Extensible<?> extensible) {
