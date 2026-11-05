@@ -28,7 +28,6 @@ import org.jboss.resteasy.spi.Registry;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 
 import io.smallrye.config.PropertiesConfigSource;
-import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.openapi.api.SmallRyeOpenAPI;
 
@@ -42,14 +41,33 @@ import io.smallrye.openapi.api.SmallRyeOpenAPI;
 public class OpenApiRegistration extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static Logger LOGGER = Logger.getLogger(OpenApiRegistration.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(OpenApiRegistration.class.getName());
+    private static final String JSON_KEY = "OpenAPI.JSON";
+    private static final String YAML_KEY = "OpenAPI.YAML";
 
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         ServletContext servletContext = config.getServletContext();
         registerEndpoint(servletContext);
-        generateOpenAPI(servletContext);
+        try {
+            generateOpenAPI(servletContext);
+        } catch (Throwable t) {
+            /*
+             * When an error occurs during generation, make sure the context has correctly-formatted
+             * empty OpenAPI documents to avoid additional test errors that will mask the root cause
+             * that occurred here.
+             */
+            if (servletContext.getAttribute(JSON_KEY) == null) {
+                servletContext.setAttribute(JSON_KEY, "{ \"openapi\": \"3.0.0\" }");
+            }
+
+            if (servletContext.getAttribute(YAML_KEY) == null) {
+                servletContext.setAttribute(YAML_KEY, "openapi: 3.0.0");
+            }
+
+            LOGGER.log(Level.WARNING, "Error generating OpenAPI", t);
+        }
     }
 
     private void registerEndpoint(ServletContext servletContext) {
@@ -96,12 +114,12 @@ public class OpenApiRegistration extends HttpServlet {
                 () -> String.format("Generated OpenAPI model in %s", Duration.between(t1, Instant.now())));
 
         Instant t2 = Instant.now();
-        servletContext.setAttribute("OpenAPI.JSON", result.toJSON().getBytes(UTF_8));
+        servletContext.setAttribute(JSON_KEY, result.toJSON().getBytes(UTF_8));
         LOGGER.log(Level.INFO,
                 () -> String.format("Serialized OpenAPI model to JSON in %s", Duration.between(t2, Instant.now())));
 
         Instant t3 = Instant.now();
-        servletContext.setAttribute("OpenAPI.YAML", result.toYAML().getBytes(UTF_8));
+        servletContext.setAttribute(YAML_KEY, result.toYAML().getBytes(UTF_8));
         LOGGER.log(Level.INFO,
                 () -> String.format("Serialized OpenAPI model to YAML in %s", Duration.between(t3, Instant.now())));
     }
@@ -126,13 +144,11 @@ public class OpenApiRegistration extends HttpServlet {
             e.printStackTrace();
         }
 
-        SmallRyeConfig config = new SmallRyeConfigBuilder()
+        return new SmallRyeConfigBuilder()
                 .addDefaultSources()
                 .addDefaultInterceptors()
                 .withSources(new PropertiesConfigSource(properties, "microprofile-config.properties"))
                 .build();
-
-        return config;
     }
 
 }
