@@ -17,7 +17,7 @@
     <url>http://smallrye.io</url>
 
     <properties>
-        <version.buildhelper.plugin>3.6.2</version.buildhelper.plugin>
+        <version.buildhelper.plugin>3.7.0</version.buildhelper.plugin>
         <version.exec.plugin>3.6.4</version.exec.plugin>
         <version.jackson2>2.22.4</version.jackson2>
         <version.jackson3>3.2.4</version.jackson3>
